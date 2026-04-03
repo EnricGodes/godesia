@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godesia - Árbol Genealógico Godes</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <header>
+            <h1>Godesia</h1>
+            <nav>
+                <a href="/" class="nav-link active">Chat</a>
+                <a href="/tree.html" class="nav-link">Arbre</a>
+            </nav>
+        </header>
+
+        <div class="birthday-widget" id="birthday-widget" style="display:none;">
+            <h3>Aniversaris d'aquesta setmana</h3>
+            <div class="birthday-list" id="birthday-list"></div>
+        </div>
+
+        <div class="chat-container" id="chat">
+            <div class="message assistant">
+                <div class="message-content">
+                    <p>Hola! Soy Godesia, tu asistente genealógico de la familia Godes.</p>
+                    <p class="hint">Consultas directas (gratis): "madre/padre/hijos de...", "cuando nació...", "busca...", "estadísticas"</p>
+                    <p class="hint">Consultas complejas (IA, con coste): te pediré confirmación antes de usar la API.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <form id="query-form">
+                <input type="text" id="question" placeholder="Escribe tu pregunta sobre la familia Godes..." autocomplete="off" autofocus>
+                <button type="submit" id="send-btn">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

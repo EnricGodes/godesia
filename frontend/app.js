@@ -1,0 +1,203 @@
+const chat = document.getElementById("chat");
+const form = document.getElementById("query-form");
+const input = document.getElementById("question");
+const sendBtn = document.getElementById("send-btn");
+
+let conversationHistory = [];
+
+// --- Birthday widget ---
+async function loadBirthdays() {
+  try {
+    const res = await fetch("/api/birthdays");
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.birthdays || data.birthdays.length === 0) return;
+
+    const widget = document.getElementById("birthday-widget");
+    const list = document.getElementById("birthday-list");
+    widget.style.display = "block";
+
+    list.innerHTML = data.birthdays
+      .map((b) => {
+        const photoHtml = b.photo
+          ? `<img src="/photos/${b.photo}" alt="${b.name}" onerror="this.style.display='none'">`
+          : `<div class="no-photo">${b.name.charAt(0)}</div>`;
+        const ageText = b.age ? `${b.age} anys` : "";
+        const aliveTag = b.is_alive ? '<span class="alive-tag">viu/a</span>' : "";
+        const todayClass = b.is_today ? "today" : "";
+        return `
+        <div class="birthday-card ${todayClass}">
+          ${photoHtml}
+          <div class="birthday-name">${b.name}</div>
+          <div class="birthday-date">${b.date_label} ${ageText}</div>
+          ${aliveTag}
+        </div>`;
+      })
+      .join("");
+  } catch (e) {
+    // silently fail
+  }
+}
+
+// --- Chat ---
+function addMessage(content, role, photosHtml = "", sourceTag = "") {
+  const div = document.createElement("div");
+  div.className = `message ${role}`;
+  div.innerHTML = `
+    <div class="message-content">
+      ${sourceTag}
+      <p>${content.replace(/\n/g, "<br>")}</p>
+      ${photosHtml}
+    </div>
+  `;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addLLMConfirmation(message, question, history) {
+  const div = document.createElement("div");
+  div.className = "message assistant";
+  div.innerHTML = `
+    <div class="message-content llm-confirm">
+      <p class="cost-warning">${message}</p>
+      <div class="confirm-buttons">
+        <button class="btn-confirm" onclick="confirmLLM(this, '${btoa(encodeURIComponent(question))}')">Si, consultar</button>
+        <button class="btn-cancel" onclick="cancelLLM(this)">No, cancel-lar</button>
+      </div>
+    </div>
+  `;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function confirmLLM(btn, encodedQuestion) {
+  const question = decodeURIComponent(atob(encodedQuestion));
+  const container = btn.closest(".llm-confirm");
+  container.querySelector(".confirm-buttons").remove();
+  container.innerHTML += '<div class="loading"><span></span><span></span><span></span></div>';
+
+  try {
+    const res = await fetch("/api/query/confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, history: conversationHistory }),
+    });
+
+    container.querySelector(".loading").remove();
+
+    if (!res.ok) {
+      container.innerHTML += "<p>Error al consultar la IA.</p>";
+      sendBtn.disabled = false;
+      return;
+    }
+
+    const data = await res.json();
+    const photosHtml = buildPhotosHtml(data.people_with_photos);
+    const sourceTag = '<span class="source-tag llm">IA</span>';
+    container.innerHTML = `${sourceTag}<p>${data.answer.replace(/\n/g, "<br>")}</p>${photosHtml}`;
+
+    conversationHistory.push({ role: "user", content: question });
+    conversationHistory.push({ role: "assistant", content: data.answer });
+    if (conversationHistory.length > 20) {
+      conversationHistory = conversationHistory.slice(-20);
+    }
+  } catch (e) {
+    container.innerHTML += "<p>Error de connexió.</p>";
+  }
+
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+function cancelLLM(btn) {
+  const container = btn.closest(".llm-confirm");
+  container.querySelector(".confirm-buttons").remove();
+  container.innerHTML += "<p class='hint'>Consulta cancel-lada. Cap cost generat.</p>";
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+function addLoading() {
+  const div = document.createElement("div");
+  div.className = "message assistant";
+  div.id = "loading-msg";
+  div.innerHTML = `<div class="message-content"><div class="loading"><span></span><span></span><span></span></div></div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeLoading() {
+  const el = document.getElementById("loading-msg");
+  if (el) el.remove();
+}
+
+function buildPhotosHtml(people) {
+  if (!people || people.length === 0) return "";
+  const cards = people
+    .filter((p) => p.photo)
+    .map(
+      (p) => `
+    <div class="photo-card">
+      <img src="/photos/${p.photo}" alt="${p.name}" onerror="this.style.display='none'">
+      <div class="photo-name">${p.name}</div>
+    </div>`
+    )
+    .join("");
+  if (!cards) return "";
+  return `<div class="photos-strip">${cards}</div>`;
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const question = input.value.trim();
+  if (!question) return;
+
+  addMessage(question, "user");
+  input.value = "";
+  sendBtn.disabled = true;
+  addLoading();
+
+  try {
+    const res = await fetch("/api/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, history: conversationHistory }),
+    });
+
+    removeLoading();
+
+    if (!res.ok) {
+      addMessage("Error al consultar. Inténtalo de nuevo.", "assistant");
+      sendBtn.disabled = false;
+      return;
+    }
+
+    const data = await res.json();
+
+    // LLM confirmation required?
+    if (data.requires_llm) {
+      addLLMConfirmation(data.message, question, conversationHistory);
+      return;
+    }
+
+    // Direct DB answer
+    const photosHtml = buildPhotosHtml(data.people_with_photos);
+    const sourceTag = data.source === "db" ? '<span class="source-tag db">Directa</span>' : "";
+    addMessage(data.answer, "assistant", photosHtml, sourceTag);
+
+    conversationHistory.push({ role: "user", content: question });
+    conversationHistory.push({ role: "assistant", content: data.answer });
+    if (conversationHistory.length > 20) {
+      conversationHistory = conversationHistory.slice(-20);
+    }
+  } catch (err) {
+    removeLoading();
+    addMessage("Error de connexió. Està el servidor actiu?", "assistant");
+  }
+
+  sendBtn.disabled = false;
+  input.focus();
+});
+
+// Load birthdays on page load
+loadBirthdays();
