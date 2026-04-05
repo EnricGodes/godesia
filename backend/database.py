@@ -69,18 +69,21 @@ CREATE TABLE IF NOT EXISTS residences (
     date TEXT
 );
 
--- NOTA: La tabla photos es gestionada por scripts/sync_photo_catalog.py
--- Mantenga esta tabla vieja solo como referencia. El script crea el nuevo esquema:
+-- NOTA: Las tablas photos, photo_tags, albums son gestionadas por scripts/sync_catalog.py
+-- El script crea el nuevo esquema (actual):
 -- CREATE TABLE photos (
 --     id INTEGER PRIMARY KEY AUTOINCREMENT,
 --     filename TEXT NOT NULL UNIQUE,
 --     url TEXT, filesize INTEGER, title TEXT, date TEXT, place TEXT,
 --     photo_rin TEXT, album_id TEXT,
 --     is_cutout INTEGER DEFAULT 0, is_parent_photo INTEGER DEFAULT 0,
+--     is_personal_photo INTEGER DEFAULT 0, is_prim_cutout INTEGER DEFAULT 0,
 --     parent_photo_id INTEGER, position TEXT, is_downloaded INTEGER DEFAULT 0,
 --     inserted_at TEXT, updated_at TEXT
 -- );
--- CREATE TABLE photo_tags (photo_id, person_id, is_primary, source, PRIMARY KEY);
+-- CREATE TABLE photo_tags (
+--     photo_id, person_id, is_primary, is_prim_cutout, position, source, PRIMARY KEY (photo_id, person_id)
+-- );
 -- CREATE TABLE albums (gedcom_id PRIMARY KEY, title TEXT);
 
 CREATE TABLE IF NOT EXISTS notes (
@@ -96,7 +99,8 @@ CREATE INDEX IF NOT EXISTS idx_people_father ON people(father_id);
 CREATE INDEX IF NOT EXISTS idx_people_mother ON people(mother_id);
 CREATE INDEX IF NOT EXISTS idx_children_parent ON children(parent_id);
 CREATE INDEX IF NOT EXISTS idx_children_child ON children(child_id);
-CREATE INDEX IF NOT EXISTS idx_photos_person ON photos(person_id);
+CREATE INDEX IF NOT EXISTS idx_photo_tags_person ON photo_tags(person_id);
+CREATE INDEX IF NOT EXISTS idx_photo_tags_photo ON photo_tags(photo_id);
 CREATE INDEX IF NOT EXISTS idx_occupations_person ON occupations(person_id);
 CREATE INDEX IF NOT EXISTS idx_residences_person ON residences(person_id);
 CREATE INDEX IF NOT EXISTS idx_notes_person ON notes(person_id);
@@ -157,10 +161,13 @@ def get_person(conn, person_id):
 
 def search_people(conn, query, limit=20):
     """Search people by name fragment."""
+    import re
+    # Normalize spaces in query (single spaces, allow multiple in DB)
+    normalized_query = re.sub(r'\s+', '%', query.strip())
     return conn.execute(
         "SELECT id, name, birth_year, death_year, photo_file, is_alive "
         "FROM people WHERE name LIKE ? COLLATE NOCASE ORDER BY name LIMIT ?",
-        (f"%{query}%", limit)
+        (f"%{normalized_query}%", limit)
     ).fetchall()
 
 
@@ -470,16 +477,41 @@ def get_dashboard_data(conn):
     total_people = conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
     total_families = conn.execute("SELECT COUNT(*) FROM marriages").fetchone()[0]
     alive_count = conn.execute("SELECT COUNT(*) FROM people WHERE is_alive = 1").fetchone()[0]
-    cities = conn.execute(
-        "SELECT COUNT(DISTINCT city) FROM residences WHERE city IS NOT NULL AND city != ''"
-    ).fetchone()[0]
 
-    # Family branches (top surnames with counts)
-    branches = conn.execute(
-        "SELECT surname, COUNT(*) as cnt FROM people "
-        "WHERE surname IS NOT NULL AND surname != '' "
-        "GROUP BY surname COLLATE NOCASE ORDER BY cnt DESC LIMIT 10"
-    ).fetchall()
+    # Photo stats
+    photos_count = conn.execute("SELECT COUNT(*) FROM photos").fetchone()[0]
+
+    # Last updated (from photos table)
+    last_updated_str = conn.execute("SELECT MAX(updated_at) FROM photos").fetchone()[0]
+    if last_updated_str:
+        try:
+            from datetime import datetime
+            dt = datetime.fromisoformat(last_updated_str.replace('Z', '+00:00'))
+            last_updated = dt.strftime("%b %Y")
+        except:
+            last_updated = "--"
+    else:
+        last_updated = "--"
+
+    # Years span
+    min_year = conn.execute("SELECT MIN(birth_year) FROM people WHERE birth_year IS NOT NULL").fetchone()[0]
+    max_year = conn.execute("SELECT MAX(birth_year) FROM people WHERE birth_year IS NOT NULL").fetchone()[0]
+    if min_year and max_year:
+        years_span = f"{min_year}–{max_year}"
+    else:
+        years_span = "--"
+
+    # Family branches (specific surnames only)
+    target_surnames = ["Godes", "Godes Diago", "Godes Güell", "Godes Hospital",
+                       "Godes Molina", "Godes Schmid", "Godes Terrats", "Pujol Godes"]
+    branches = []
+    for surname in target_surnames:
+        count = conn.execute(
+            "SELECT COUNT(*) FROM people WHERE surname = ? COLLATE NOCASE",
+            (surname,)
+        ).fetchone()[0]
+        if count > 0:
+            branches.append({"surname": surname, "count": count})
 
     # Birthdays this week
     birthdays = get_birthdays_this_week(conn)
@@ -495,21 +527,26 @@ def get_dashboard_data(conn):
         ORDER BY RANDOM() LIMIT 6
     """).fetchall()
 
-    # Recently "added" — people with most data (photos + notes), as a proxy
+    # Recently "added" — people with most recent birth years (latest additions to tree)
     featured = conn.execute(
         "SELECT id, name, birth_year, death_year, photo_file, is_alive, birth_place "
-        "FROM people WHERE photo_file IS NOT NULL "
-        "ORDER BY RANDOM() LIMIT 4"
+        "FROM people WHERE photo_file IS NOT NULL AND birth_year IS NOT NULL "
+        "ORDER BY birth_year DESC LIMIT 4"
     ).fetchall()
+
+    # Documents from archive
+    documents = get_documents(conn, limit=8)
 
     return {
         "stats": {
             "total_people": total_people,
             "total_families": total_families,
             "alive": alive_count,
-            "cities": cities,
+            "photos_count": photos_count,
+            "last_updated": last_updated,
+            "years_span": years_span,
         },
-        "branches": [{"surname": b["surname"], "count": b["cnt"]} for b in branches],
+        "branches": [{"surname": b["surname"], "count": b["count"]} for b in branches],
         "birthdays": birthdays,
         "photos": [
             {
@@ -525,7 +562,18 @@ def get_dashboard_data(conn):
             for p in photo_people
         ],
         "featured": [dict(p) for p in featured],
+        "documents": [dict(d) for d in documents],
     }
+
+
+def get_documents(conn, limit=8):
+    """Return documents (non-photo records) for the home Arxiu section."""
+    return conn.execute("""
+        SELECT id, filename, title, doc_type, transcription, date, place
+        FROM photos
+        WHERE is_document = 1
+        ORDER BY RANDOM() LIMIT ?
+    """, (limit,)).fetchall()
 
 
 def _person_to_node(person):

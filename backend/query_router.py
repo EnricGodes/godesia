@@ -103,7 +103,7 @@ class QueryRouter:
         return None
 
     def _try_name_fallback(self, question):
-        """If the question is just a name or contains a recognizable name, show info."""
+        """If the question is just a name or contains a recognizable name, show info or list."""
         # Don't fallback if the question contains comparison/complex reasoning words
         q_lower = question.lower()
         complex_words = [
@@ -119,19 +119,48 @@ class QueryRouter:
         q = question.strip().rstrip("?.,!")
         # Try the whole question as a name
         matches = find_person_by_name(self.conn, q)
-        if matches:
+        if not matches:
+            # Try capitalized words
+            capitalized = re.findall(
+                r"[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+)*",
+                question
+            )
+            for name in capitalized:
+                if len(name) > 4:  # Skip short words like "Hola"
+                    matches = find_person_by_name(self.conn, name)
+                    if matches:
+                        break
+
+        if not matches:
+            return None
+
+        # If exact match (full name found), show info
+        if len(matches) == 1:
             return self._build_info_response(matches[0])
-        # Try capitalized words
-        capitalized = re.findall(
-            r"[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+)*",
-            question
+
+        # If multiple matches, show list (like handle_search)
+        parts = []
+        photos = []
+        for m in matches[:10]:
+            full = get_person(self.conn, m["id"])
+            info = _format_person(full)
+            if full["father_name"]:
+                info += ", fill/a de %s" % full["father_name"]
+                if full["mother_name"]:
+                    info += " i %s" % full["mother_name"]
+            parts.append(info)
+            photos.append(_person_card(m))
+
+        answer = "He trobat %d resultat%s:\n%s" % (
+            len(parts), "s" if len(parts) != 1 else "",
+            "\n".join("- %s" % p for p in parts)
         )
-        for name in capitalized:
-            if len(name) > 4:  # Skip short words like "Hola"
-                matches = find_person_by_name(self.conn, name)
-                if matches:
-                    return self._build_info_response(matches[0])
-        return None
+
+        return {
+            "answer": answer,
+            "people_mentioned": [m["id"] for m in matches[:10]],
+            "people_with_photos": photos,
+        }
 
     def _find_person_in_question(self, question, prefixes):
         """Extract name from question and find matching person(s)."""

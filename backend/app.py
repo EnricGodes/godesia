@@ -1,6 +1,8 @@
 """FastAPI server para Godesia - consulta genealógica en lenguaje natural."""
 
 import os
+import json
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -11,7 +13,7 @@ from pydantic import BaseModel
 
 from database import (
     get_connection, get_tree_data, get_birthdays_this_week, search_people,
-    get_dashboard_data,
+    get_dashboard_data, get_documents,
 )
 from query_router import QueryRouter
 from query_engine import QueryEngine
@@ -64,9 +66,25 @@ class ConfirmRequest(BaseModel):
     history: list = []
 
 
+def log_unresolved_query(question):
+    """Log a query that could not be resolved."""
+    unresolved_file = DATA_DIR / "unresolved_queries.jsonl"
+    now = datetime.now()
+    entry = {
+        "date": now.strftime("%Y-%m-%d"),
+        "time": now.strftime("%H:%M:%S"),
+        "question": question
+    }
+    try:
+        with open(unresolved_file, "a") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except Exception as e:
+        print(f"Error logging unresolved query: {e}")
+
+
 @app.post("/api/query")
 async def query(req: QueryRequest):
-    """Intenta responder desde SQLite. Si no puede, pide confirmación para usar LLM."""
+    """Intenta responder desde SQLite. Si no puede, anota la consulta."""
     if not router:
         raise HTTPException(status_code=503, detail="Motor no inicializado")
 
@@ -75,12 +93,12 @@ async def query(req: QueryRequest):
     if result:
         return result
 
-    # Can't answer from DB — ask user to confirm LLM use
-    estimated_cost = 0.3  # céntimos de euro (aproximado)
+    # Can't answer from DB — log and return friendly message
+    log_unresolved_query(req.question)
     return {
-        "requires_llm": True,
-        "estimated_cost": estimated_cost,
-        "message": "Esta consulta necesita inteligencia artificial. Coste estimado: %.1f céntimos. ¿Quieres proceder?" % estimated_cost,
+        "answer": "No he sabut respondre aquesta pregunta. L'he anotada per millorar-la.",
+        "people_mentioned": [],
+        "people_with_photos": [],
     }
 
 

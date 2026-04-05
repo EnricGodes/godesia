@@ -12,6 +12,7 @@ async function loadDashboard() {
         renderBirthdays(data.birthdays);
         renderPhotos(data.photos);
         renderFeatured(data.featured);
+        renderDocuments(data.documents);
     } catch (e) {
         console.error('Error loading dashboard:', e);
     }
@@ -21,7 +22,9 @@ function renderStats(stats) {
     document.getElementById('stat-people').textContent = stats.total_people;
     document.getElementById('stat-families').textContent = stats.total_families;
     document.getElementById('stat-alive').textContent = stats.alive;
-    document.getElementById('stat-cities').textContent = stats.cities;
+    document.getElementById('stat-photos').textContent = stats.photos_count;
+    document.getElementById('stat-years').textContent = stats.years_span;
+    document.getElementById('stat-updated').textContent = stats.last_updated;
 }
 
 function renderBranches(branches) {
@@ -38,11 +41,12 @@ function renderBranches(branches) {
 
 function renderBirthdays(birthdays) {
     const container = document.getElementById('birthdays-list');
-    if (!birthdays.length) {
+    const alive_birthdays = birthdays.filter(b => b.is_alive);
+    if (!alive_birthdays.length) {
         container.innerHTML = '<p class="no-data">Cap aniversari aquesta setmana</p>';
         return;
     }
-    container.innerHTML = birthdays.slice(0, 5).map(b => {
+    container.innerHTML = alive_birthdays.slice(0, 5).map(b => {
         const monthLabel = MONTHS_CA[b.birth_month] || '';
         const isToday = b.is_today;
         return `
@@ -53,7 +57,6 @@ function renderBirthdays(birthdays) {
             </div>
             <div class="anniversary-info">
                 <p class="anniversary-name">${b.name}${b.age ? ' (' + b.age + ' anys)' : ''}</p>
-                ${b.is_alive ? '<span class="alive-badge">Viu</span>' : ''}
             </div>
             ${b.photo ? `<img class="anniversary-photo" src="/photos/${b.photo}" alt="${b.name}">` : ''}
         </div>`;
@@ -66,22 +69,26 @@ function renderPhotos(photos) {
         container.innerHTML = '<p class="no-data">Cap fotografia disponible</p>';
         return;
     }
-    const rotations = [-1, 2, -2, 1, -1.5, 2.5];
-    container.innerHTML = photos.map((p, i) => {
-        const years = p.birth_year ? `circa ${p.birth_year}` : '';
-        const place = p.birth_place || '';
-        const caption = [years, place].filter(Boolean).join(' \u2022 ');
+    container.innerHTML = photos.map((p) => {
+        const years = p.birth_year ? `${p.birth_year}` : '';
+        const place = p.birth_place ? p.birth_place : '';
+        const meta = [years, place].filter(Boolean).join(' • ');
         return `
-        <div class="photo-card-dash" style="--rotate: ${rotations[i % rotations.length]}deg">
-            <div class="photo-card-inner">
-                <div class="photo-card-img">
-                    <img src="/photos/${p.photo}" alt="${p.name}" loading="lazy">
-                </div>
-                <h5 class="photo-card-name">${p.name}</h5>
-                <p class="photo-card-meta">${caption}</p>
+        <div class="photo-card-full">
+            <img src="/photos/${p.photo}" alt="${p.name}" loading="lazy">
+            <div class="photo-card-info">
+                <h4>${p.name}</h4>
+                ${meta ? `<p class="photo-meta">${meta}</p>` : ''}
+                ${p.title ? `<p class="photo-title">${p.title}</p>` : ''}
             </div>
         </div>`;
     }).join('');
+
+    // Add link to see all photos
+    const link = document.createElement('div');
+    link.className = 'photos-see-all';
+    link.innerHTML = '<a href="/tree.html">Ver totes les fotografies →</a>';
+    container.parentElement.appendChild(link);
 }
 
 function renderFeatured(featured) {
@@ -103,6 +110,57 @@ function renderFeatured(featured) {
             </div>
         </a>`;
     }).join('');
+}
+
+function renderDocuments(documents) {
+    const container = document.getElementById('documents-gallery');
+    if (!documents || !documents.length) {
+        container.innerHTML = '<p class="no-data">Cap document disponible</p>';
+        return;
+    }
+
+    const docLabels = {
+        'bautisme': 'Bautisme',
+        'matrimoni': 'Matrimoni',
+        'defuncio': 'Defunció',
+        'naixement': 'Naixement',
+        'certificat': 'Certificat',
+        'padro': 'Padró',
+        'testament': 'Testament',
+        'arbre': 'Arbre',
+        'transcripcio': 'Transcripció',
+        'poema': 'Poema',
+        'invitacio': 'Invitació',
+        'carta': 'Carta',
+        'dibuix': 'Dibuix',
+        'biografia': 'Biografia',
+        'document': 'Document'
+    };
+
+    container.innerHTML = documents.map(d => {
+        const caption = d.title || 'Document';
+        const typeLabel = docLabels[d.doc_type] || d.doc_type;
+        return `
+        <div class="document-row">
+            <div class="document-image">
+                <img src="/photos/${d.filename}" alt="${caption}" loading="lazy">
+            </div>
+            <div class="document-content">
+                <h4 class="document-title">${caption}</h4>
+                <div class="document-meta">
+                    ${d.doc_type ? `<span class="doc-badge">${typeLabel}</span>` : ''}
+                    ${d.date ? `<span class="doc-date">${d.date}</span>` : ''}
+                </div>
+                ${d.transcription ? `<p class="document-transcription">${d.transcription}</p>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+
+    // Add link to see all documents
+    const link = document.createElement('div');
+    link.className = 'documents-see-all';
+    link.innerHTML = '<a href="/arxiu.html">Ver tots els documents →</a>';
+    container.parentElement.appendChild(link);
 }
 
 // Hero search: redirect to chat with query
