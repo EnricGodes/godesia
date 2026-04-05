@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 from database import (
     get_connection, get_tree_data, get_birthdays_this_week, search_people,
-    get_dashboard_data, get_documents,
+    get_dashboard_data, get_documents, get_person_dossier,
 )
 from query_router import QueryRouter
 from query_engine import QueryEngine
@@ -161,6 +161,20 @@ async def dashboard():
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
     return get_dashboard_data(db_conn)
+
+
+@app.get("/api/dossier/{person_id}")
+async def dossier(person_id: str):
+    """Complete dossier data for a person."""
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    # Decode person_id: frontend sends I16 instead of @I16@
+    if not person_id.startswith("@"):
+        person_id = "@%s@" % person_id
+    dossier_data = get_person_dossier(db_conn, person_id)
+    if not dossier_data:
+        raise HTTPException(status_code=404, detail="Persona no encontrada")
+    return dossier_data
 
 
 # Serve photos

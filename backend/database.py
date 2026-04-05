@@ -623,6 +623,117 @@ def get_dashboard_data(conn):
     }
 
 
+def get_person_dossier(conn, person_id):
+    """Return complete dossier data for a person."""
+    # Main person
+    person = conn.execute("SELECT * FROM people WHERE id = ?", (person_id,)).fetchone()
+    if not person:
+        return None
+
+    person_dict = dict(person)
+
+    # Parents
+    father = None
+    mother = None
+    if person["father_id"]:
+        father_row = conn.execute("SELECT * FROM people WHERE id = ?", (person["father_id"],)).fetchone()
+        father = dict(father_row) if father_row else None
+    if person["mother_id"]:
+        mother_row = conn.execute("SELECT * FROM people WHERE id = ?", (person["mother_id"],)).fetchone()
+        mother = dict(mother_row) if mother_row else None
+
+    # Siblings (by both parents)
+    siblings = []
+    sibling_ids = set()
+    if person["father_id"]:
+        sibs = conn.execute(
+            "SELECT * FROM people WHERE father_id = ? AND id != ? ORDER BY birth_year",
+            (person["father_id"], person_id)
+        ).fetchall()
+        for s in sibs:
+            sibling_ids.add(s["id"])
+            siblings.append(dict(s))
+    if person["mother_id"]:
+        sibs = conn.execute(
+            "SELECT * FROM people WHERE mother_id = ? AND id != ? ORDER BY birth_year",
+            (person["mother_id"], person_id)
+        ).fetchall()
+        for s in sibs:
+            if s["id"] not in sibling_ids:
+                sibling_ids.add(s["id"])
+                siblings.append(dict(s))
+
+    # Sort by birth year
+    siblings.sort(key=lambda x: x["birth_year"] or 0)
+
+    # Spouse
+    spouse = None
+    spouse_row = conn.execute(
+        "SELECT person2_id FROM marriages WHERE person1_id = ?",
+        (person_id,)
+    ).fetchone()
+    if not spouse_row:
+        spouse_row = conn.execute(
+            "SELECT person1_id FROM marriages WHERE person2_id = ?",
+            (person_id,)
+        ).fetchone()
+    if spouse_row:
+        spouse_id = spouse_row[0]
+        spouse = dict(conn.execute("SELECT * FROM people WHERE id = ?", (spouse_id,)).fetchone())
+
+    # Children
+    children = conn.execute(
+        "SELECT * FROM people WHERE father_id = ? OR mother_id = ? ORDER BY birth_year",
+        (person_id, person_id)
+    ).fetchall()
+    children_list = [dict(c) for c in children]
+
+    # Residences
+    residences = conn.execute(
+        "SELECT address, address2, city, country, date FROM residences WHERE person_id = ? ORDER BY date",
+        (person_id,)
+    ).fetchall()
+    residences_list = [dict(r) for r in residences]
+
+    # Occupations
+    occupations = conn.execute(
+        "SELECT title, date, place FROM occupations WHERE person_id = ? ORDER BY date",
+        (person_id,)
+    ).fetchall()
+    occupations_list = [dict(o) for o in occupations]
+
+    # Notes
+    notes = conn.execute(
+        "SELECT content FROM notes WHERE person_id = ?",
+        (person_id,)
+    ).fetchall()
+    notes_list = [n[0] for n in notes]
+
+    # Photos
+    photos = conn.execute("""
+        SELECT ph.filename, ph.title, ph.date, ph.place
+        FROM photos ph
+        JOIN photo_tags pt ON pt.photo_id = ph.id
+        WHERE pt.person_id = ? AND ph.is_document = 0
+        ORDER BY ph.date DESC
+        LIMIT 10
+    """, (person_id,)).fetchall()
+    photos_list = [dict(p) for p in photos]
+
+    return {
+        "person": person_dict,
+        "father": father,
+        "mother": mother,
+        "siblings": siblings,
+        "spouse": spouse,
+        "children": children_list,
+        "residences": residences_list,
+        "occupations": occupations_list,
+        "notes": notes_list,
+        "photos": photos_list,
+    }
+
+
 def get_documents(conn, limit=1):
     """Return documents (non-photo records) for the home Arxiu section."""
     return conn.execute("""

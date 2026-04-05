@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dossier Genealógico - Familia Godes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .dossier-header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        .dossier-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem 4rem;
+        }
+
+        .person-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 1px solid var(--primary);
+            transition: opacity 0.2s;
+        }
+
+        .person-link:hover {
+            opacity: 0.8;
+        }
+
+        .dossier-section {
+            margin-bottom: 4rem;
+        }
+
+        .dossier-section h3 {
+            font-family: 'Noto Serif', serif;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .family-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .family-card {
+            padding: 1.5rem;
+            background: var(--surface-container-lowest);
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 8px rgba(28, 28, 23, 0.04);
+        }
+
+        .family-card h4 {
+            font-family: 'Noto Serif', serif;
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+        }
+
+        .family-card p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            color: var(--on-surface-variant);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline-item {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-left: 1px solid var(--outline-variant);
+        }
+
+        .timeline-item:last-child {
+            border-left: none;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -9px;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid var(--background);
+        }
+
+        .timeline-date {
+            font-size: 0.8rem;
+            color: var(--on-surface-variant);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-title {
+            font-family: 'Noto Serif', serif;
+            font-size: 1rem;
+            color: var(--on-surface);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-description {
+            font-size: 0.9rem;
+            color: var(--on-surface-variant);
+            line-height: 1.6;
+        }
+
+        .photos-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .photo-item {
+            aspect-ratio: 3 / 4;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            background: var(--surface-container-high);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-caption {
+            padding: 1rem;
+            font-size: 0.8rem;
+            color: var(--on-surface-variant);
+            line-height: 1.4;
+        }
+
+        .no-data {
+            font-size: 0.9rem;
+            color: var(--on-surface-variant);
+            font-style: italic;
+            padding: 2rem;
+            background: var(--surface-container-low);
+            border-radius: 0.5rem;
+        }
+
+        .breadcrumb {
+            padding: 1rem 1.5rem;
+            font-size: 0.9rem;
+            color: var(--on-surface-variant);
+        }
+
+        .breadcrumb a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            font-size: 1.1rem;
+            color: var(--on-surface-variant);
+        }
+
+        .error {
+            padding: 2rem;
+            background: var(--error-container);
+            color: var(--on-error-container);
+            border-radius: 0.5rem;
+            margin: 2rem 1.5rem;
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+
+<!-- Top Navigation -->
+<nav class="dash-nav">
+    <div class="dash-nav-left">
+        <span class="dash-logo">Godesia</span>
+        <div class="dash-nav-links">
+            <a href="/" class="dash-nav-link">Inici</a>
+            <a href="/chat.html" class="dash-nav-link">Consulta</a>
+            <a href="/tree.html" class="dash-nav-link">Arbre</a>
+        </div>
+    </div>
+</nav>
+
+<div class="breadcrumb">
+    <a href="/">Inici</a> / <span id="person-name-breadcrumb">...</span>
+</div>
+
+<div id="loading" class="loading">Carregant dossier...</div>
+<div id="error" class="error" style="display:none;"></div>
+<div id="content" style="display:none;">
+
+<!-- HEADER -->
+<div class="dossier-header">
+    <div style="background: var(--primary-container); padding: 2rem; border-radius: 0.5rem; margin-bottom: 3rem;">
+        <h1 id="person-name" style="font-family: 'Noto Serif', serif; font-size: 3rem; color: var(--primary); margin: 0 0 1rem 0; font-weight: 700;"></h1>
+        <div id="vital-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;"></div>
+    </div>
+</div>
+
+<!-- CONTENT -->
+<div class="dossier-content">
+    <!-- Family Relations -->
+    <div id="family-section" class="dossier-section" style="display:none;">
+        <h3>Relacions Familiars</h3>
+
+        <div id="parents-container"></div>
+        <div id="siblings-container"></div>
+        <div id="spouse-container"></div>
+        <div id="children-container"></div>
+    </div>
+
+    <!-- Residences -->
+    <div id="residences-section" class="dossier-section" style="display:none;">
+        <h3>Residències</h3>
+        <div id="residences-timeline" class="timeline"></div>
+    </div>
+
+    <!-- Occupations -->
+    <div id="occupations-section" class="dossier-section" style="display:none;">
+        <h3>Ocupacions i Carrera</h3>
+        <div id="occupations-timeline" class="timeline"></div>
+    </div>
+
+    <!-- Photos -->
+    <div id="photos-section" class="dossier-section" style="display:none;">
+        <h3>Fotografies de l'Arxiu</h3>
+        <div id="photos-gallery" class="photos-gallery"></div>
+    </div>
+
+    <!-- Notes -->
+    <div id="notes-section" class="dossier-section" style="display:none;">
+        <h3>Context Històric i Notes</h3>
+        <div id="notes-content" style="font-size: 0.95rem; line-height: 1.8; color: var(--on-surface);"></div>
+    </div>
+</div>
+
+</div>
+
+<script src="dossier.js"></script>
+</body>
+</html>
