@@ -10,6 +10,11 @@ MONTHS = {
     "JUL": 7, "AUG": 8, "SEP": 9, "OCT": 10, "NOV": 11, "DEC": 12,
 }
 
+MONTHS_SPANISH = {
+    1: "ene.", 2: "feb.", 3: "mar.", 4: "abr.", 5: "may.", 6: "jun.",
+    7: "jul.", 8: "ago.", 9: "sept.", 10: "oct.", 11: "nov.", 12: "dic.",
+}
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS people (
     id TEXT PRIMARY KEY,
@@ -69,6 +74,14 @@ CREATE TABLE IF NOT EXISTS residences (
     date TEXT
 );
 
+CREATE TABLE IF NOT EXISTS burial (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    person_id TEXT,
+    place_detail TEXT,
+    date TEXT,
+    place TEXT
+);
+
 -- NOTA: Las tablas photos, photo_tags, albums son gestionadas por scripts/sync_catalog.py
 -- El script crea el nuevo esquema (actual):
 -- CREATE TABLE photos (
@@ -99,11 +112,13 @@ CREATE INDEX IF NOT EXISTS idx_people_father ON people(father_id);
 CREATE INDEX IF NOT EXISTS idx_people_mother ON people(mother_id);
 CREATE INDEX IF NOT EXISTS idx_children_parent ON children(parent_id);
 CREATE INDEX IF NOT EXISTS idx_children_child ON children(child_id);
-CREATE INDEX IF NOT EXISTS idx_photo_tags_person ON photo_tags(person_id);
-CREATE INDEX IF NOT EXISTS idx_photo_tags_photo ON photo_tags(photo_id);
+-- photo_tags indices created by scripts/sync_catalog.py:
+-- CREATE INDEX IF NOT EXISTS idx_photo_tags_person ON photo_tags(person_id);
+-- CREATE INDEX IF NOT EXISTS idx_photo_tags_photo ON photo_tags(photo_id);
 CREATE INDEX IF NOT EXISTS idx_occupations_person ON occupations(person_id);
 CREATE INDEX IF NOT EXISTS idx_residences_person ON residences(person_id);
 CREATE INDEX IF NOT EXISTS idx_notes_person ON notes(person_id);
+CREATE INDEX IF NOT EXISTS idx_burial_person ON burial(person_id);
 """
 
 
@@ -136,6 +151,64 @@ def parse_gedcom_date(date_str):
     elif len(parts) == 1 and parts[0].isdigit():  # "1824"
         return None, None, int(parts[0])
     return None, None, None
+
+
+def convert_date_to_spanish(date_str):
+    """Convert GEDCOM/date string to Spanish format: '19 ago. 1917'"""
+    if not date_str:
+        return ""
+
+    original = date_str
+
+    # Handle ranges: "FROM APR 1925 TO 1935" or "BET 1860 AND 1865"
+    if "FROM" in date_str and "TO" in date_str:
+        # "FROM APR 1925 TO 1935" → convert "APR 1925"
+        start = date_str.split("FROM")[1].split("TO")[0].strip()
+        end = date_str.split("TO")[1].strip()
+        start_spanish = convert_date_to_spanish(start)
+        end_spanish = convert_date_to_spanish(end)
+        return f"{start_spanish} - {end_spanish}"
+    elif "BET" in date_str and "AND" in date_str:
+        # "BET 1860 AND 1865" → convert both
+        start = date_str.split("BET")[1].split("AND")[0].strip()
+        end = date_str.split("AND")[1].strip()
+        start_spanish = convert_date_to_spanish(start)
+        end_spanish = convert_date_to_spanish(end)
+        return f"{start_spanish} - {end_spanish}"
+
+    # Strip prefixes (ABT, BEF, AFT, etc.)
+    for prefix in ("ABT", "BEF", "AFT", "EST", "CAL"):
+        if date_str.startswith(prefix):
+            date_str = date_str[len(prefix):].strip()
+            break
+
+    parts = date_str.split()
+
+    if len(parts) == 3:  # "5 APR 1824"
+        try:
+            day = int(parts[0])
+            month = MONTHS.get(parts[1].upper())
+            year = int(parts[2])
+            if month:
+                return f"{day} {MONTHS_SPANISH[month]} {year}"
+        except (ValueError, KeyError):
+            pass
+    elif len(parts) == 2:  # "APR 1824" o "1824"
+        if parts[0].isdigit():  # "1824"
+            return parts[0]
+        else:  # "APR 1824"
+            month = MONTHS.get(parts[0].upper())
+            try:
+                year = int(parts[1])
+                if month:
+                    return f"{MONTHS_SPANISH[month]} {year}"
+            except ValueError:
+                pass
+    elif len(parts) == 1 and parts[0].isdigit():  # "1824"
+        return parts[0]
+
+    # Si no puede parsear, retorna el original
+    return original
 
 
 def get_connection(db_path):
@@ -702,6 +775,13 @@ def get_person_dossier(conn, person_id):
     ).fetchall()
     occupations_list = [dict(o) for o in occupations]
 
+    # Burial
+    burial = conn.execute(
+        "SELECT place_detail, date, place FROM burial WHERE person_id = ? ORDER BY date",
+        (person_id,)
+    ).fetchall()
+    burial_list = [dict(b) for b in burial]
+
     # Notes
     notes = conn.execute(
         "SELECT content FROM notes WHERE person_id = ?",
@@ -729,6 +809,7 @@ def get_person_dossier(conn, person_id):
         "children": children_list,
         "residences": residences_list,
         "occupations": occupations_list,
+        "burial": burial_list,
         "notes": notes_list,
         "photos": photos_list,
     }

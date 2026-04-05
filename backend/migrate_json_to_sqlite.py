@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from database import get_connection, init_db, parse_gedcom_date
+from database import get_connection, init_db, parse_gedcom_date, convert_date_to_spanish
 
 
 def migrate(json_path, db_path):
@@ -17,24 +17,27 @@ def migrate(json_path, db_path):
 
     # Drop and recreate
     conn = get_connection(db_path)
-    for table in ["notes", "photos", "residences", "occupations", "children", "marriages", "people"]:
+    # Don't drop photos, photo_tags, albums - they're managed by sync_catalog.py
+    for table in ["notes", "residences", "occupations", "children", "marriages", "people", "burial"]:
         conn.execute(f"DROP TABLE IF EXISTS {table}")
     init_db(conn)
 
     print("Insertando personas...")
     for person in data["people"]:
         # Parse birth date
-        birth_date = person.get("birth", {}).get("date", "")
-        b_day, b_month, b_year = parse_gedcom_date(birth_date)
+        birth_date_raw = person.get("birth", {}).get("date", "")
+        birth_date = convert_date_to_spanish(birth_date_raw)
+        b_day, b_month, b_year = parse_gedcom_date(birth_date_raw)
 
         # Parse death date
         death = person.get("death", {})
-        death_date = death.get("date", "")
-        _, _, d_year = parse_gedcom_date(death_date)
+        death_date_raw = death.get("date", "")
+        death_date = convert_date_to_spanish(death_date_raw)
+        _, _, d_year = parse_gedcom_date(death_date_raw)
 
         # Determine if alive: has birth, no death, born after 1900
         is_alive = 0
-        if b_year and b_year > 1900 and not death_date:
+        if b_year and b_year > 1900 and not death_date_raw:
             is_alive = 1
 
         # Primary photo
@@ -88,25 +91,36 @@ def migrate(json_path, db_path):
             ).fetchone()
             if not existing:
                 marriage = spouse.get("marriage", {})
+                marriage_date = convert_date_to_spanish(marriage.get("date", ""))
                 conn.execute(
                     "INSERT INTO marriages (person1_id, person2_id, date, place) VALUES (?,?,?,?)",
-                    (p1, p2, marriage.get("date", ""), marriage.get("place", ""))
+                    (p1, p2, marriage_date, marriage.get("place", ""))
                 )
 
         # Occupations
         for occ in person.get("occupations", []):
+            occ_date = convert_date_to_spanish(occ.get("date", ""))
             conn.execute(
                 "INSERT INTO occupations (person_id, title, date, place) VALUES (?,?,?,?)",
-                (person["id"], occ.get("title", ""), occ.get("date", ""), occ.get("place", ""))
+                (person["id"], occ.get("title", ""), occ_date, occ.get("place", ""))
             )
 
         # Residences
         for res in person.get("residences", []):
+            res_date = convert_date_to_spanish(res.get("date", ""))
             conn.execute(
                 "INSERT INTO residences (person_id, address, address2, city, country, date) "
                 "VALUES (?,?,?,?,?,?)",
                 (person["id"], res.get("address", ""), res.get("address2", ""),
-                 res.get("city", ""), res.get("country", ""), res.get("date", ""))
+                 res.get("city", ""), res.get("country", ""), res_date)
+            )
+
+        # Burial
+        for buri in person.get("burial", []):
+            buri_date = convert_date_to_spanish(buri.get("date", ""))
+            conn.execute(
+                "INSERT INTO burial (person_id, place_detail, date, place) VALUES (?,?,?,?)",
+                (person["id"], buri.get("place_detail", ""), buri_date, buri.get("place", ""))
             )
 
         # Photos: Ahora gestionadas por scripts/sync_photo_catalog.py
