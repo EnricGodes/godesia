@@ -1,0 +1,40 @@
+✅ Implementado: Catálogo de Fotos 
+
+
+Sin descargar fotos: python3 scripts/sync_catalog.py --gedcom docs/8wdba6_33723598d6e12an90dj00d_A.ged --skip-download
+Descargando fotos: Run: python3 scripts/sync_catalog.py --gedcom docs/8wdba6_33723598d6e12an90dj00d_A.ged 
+                                                                                                                                                                        
+  Script creado: scripts/sync_photo_catalog.py                                                                                                                          
+                                                                                                                                                                        
+  Cómo usarlo:                                                                                                                                                          
+  # Parsear GEDCOM, renombrar archivos hash a GEDCOM names, y llenar BD                                                                                               
+  python3 scripts/sync_photo_catalog.py                                
+                                                                                                                                                                        
+  # Ver qué haría sin escribir en BD (test)                                                                                                                             
+  python3 scripts/sync_photo_catalog.py --dry-run                                                                                                                       
+                                                                                                                                                                        
+  # Actualizar BD sin descargar fotos nuevas                                                                                                                            
+  python3 scripts/sync_photo_catalog.py --skip-download                                                                                                                 
+  
+  Lo que hace:                                                                                                                                                          
+                                                                                                                                                                      
+  1. Parsea GEDCOM directamente — extrae todos los tags de foto: FILE, TITL, _DATE, _PLACE, _ALBUM, _FILESIZE, _PRIM, _CUTOUT, _PARENTPHOTO, _PHOTO_RIN, _POSITION, etc.
+  2. Resuelve padre-hijo — detecta que una foto "madre" (grupo) tiene recortes (cutouts) para cada persona
+  3. Propaga metadata — cutouts heredan title/date/place del padre; padres heredan tagged_people de cutouts                                                             
+  4. Renombra archivos — de hash MD5 (2096b32dd628.jpg) a nombres GEDCOM (500272_xxx.jpg)                                                                               
+  5. Descarga nuevas — solo las que faltan (incremental, threadpool de 10 workers)                                                                                      
+  6. Crea esquema nuevo:                                                                                                                                                
+    - photos: 1073 fotos únicas con metadatos completos                                                                                                                 
+    - photo_tags: 1264 relaciones persona-foto                                                                                                                          
+    - albums: 10 álbumes                                                                                                                                                
+  7. Resuelve relaciones: 207 cutouts linkeados a 141 fotos madre                                                                                                     
+                                                                                                                                                                        
+  BD actualizada:                                                                                                                                                       
+  - Tabla photos nueva con place, date, album_id, coordinates, relaciones padre-hijo                                                                                    
+  - Tabla photo_tags para etiquetado múltiple                                                                                                                           
+  - Todas las queries del backend actualizadas (database.py: get_all_photos(), get_dashboard_data())                                                                  
+                                                                                                                                                                        
+  Próximo paso (cuando quieras): Crear un sistema de catálogo filtrable (por lugar, fecha, álbum, personas) con endpoints API                                           
+  /api/photos?place=Barcelona&date_from=1880...                                                                                                                         
+                                                                                                                                                                        
+  El script es idempotente — puedes correrlo múltiples veces sin problemas. 🚀   

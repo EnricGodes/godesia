@@ -471,6 +471,48 @@ def get_born_in(conn, place, limit=30):
     ).fetchall()
 
 
+def count_descendants(conn, person_id, memo=None):
+    """Recursively count all descendants of a person."""
+    if memo is None:
+        memo = set()
+
+    if person_id in memo:
+        return 0
+    memo.add(person_id)
+
+    count = 1
+    children = conn.execute(
+        "SELECT child_id FROM children WHERE parent_id = ?",
+        (person_id,)
+    ).fetchall()
+
+    for child in children:
+        count += count_descendants(conn, child[0], memo)
+
+    return count
+
+
+def get_branch_descendants(conn, person_ids):
+    """Count all descendants of a list of founding ancestors."""
+    all_descendants = set()
+
+    for person_id in person_ids:
+        # Get all descendants from this ancestor
+        to_visit = [person_id]
+        while to_visit:
+            current = to_visit.pop(0)
+            all_descendants.add(current)
+            children = conn.execute(
+                "SELECT child_id FROM children WHERE parent_id = ?",
+                (current,)
+            ).fetchall()
+            for child in children:
+                if child[0] not in all_descendants:
+                    to_visit.append(child[0])
+
+    return len(all_descendants)
+
+
 def get_dashboard_data(conn):
     """Return all data needed for the dashboard page in a single call."""
     # Stats
@@ -501,17 +543,31 @@ def get_dashboard_data(conn):
     else:
         years_span = "--"
 
-    # Family branches (specific surnames only)
-    target_surnames = ["Godes", "Godes Diago", "Godes Güell", "Godes Hospital",
-                       "Godes Molina", "Godes Schmid", "Godes Terrats", "Pujol Godes"]
+    # Family branches with specific lineage counts
+    branches_config = [
+        {"surname": "Godes", "ancestors": None},  # All with surname Godes
+        {"surname": "Godes Diago", "ancestors": ["@I10@"]},  # Emili Godes Hurtado
+        {"surname": "Godes Hospital", "ancestors": ["@I21@"]},  # Ignacia Hospital (Ramón's spouse)
+        {"surname": "Godes Molina", "ancestors": ["@I11@"]},  # Ernest Godes Hurtado
+        {"surname": "Godes Schmid", "ancestors": ["@I16@"]},  # Artur Godes Hurtado
+        {"surname": "Godes Terrats", "ancestors": ["@I7@"]},  # Pau Godes Caballeria
+        {"surname": "Pujol Godes", "ancestors": ["@I12@"]},  # Rosa Godes Hurtado
+    ]
+
     branches = []
-    for surname in target_surnames:
-        count = conn.execute(
-            "SELECT COUNT(*) FROM people WHERE surname = ? COLLATE NOCASE",
-            (surname,)
-        ).fetchone()[0]
+    for config in branches_config:
+        if config["ancestors"] is None:
+            # Count all with this surname
+            count = conn.execute(
+                "SELECT COUNT(*) FROM people WHERE surname = ? COLLATE NOCASE",
+                (config["surname"],)
+            ).fetchone()[0]
+        else:
+            # Count all descendants
+            count = get_branch_descendants(conn, config["ancestors"])
+
         if count > 0:
-            branches.append({"surname": surname, "count": count})
+            branches.append({"surname": config["surname"], "count": count})
 
     # Birthdays this week
     birthdays = get_birthdays_this_week(conn)
@@ -524,7 +580,7 @@ def get_dashboard_data(conn):
         JOIN photo_tags pt ON pt.person_id = p.id
         JOIN photos ph ON ph.id = pt.photo_id
         WHERE ph.filename IS NOT NULL
-        ORDER BY RANDOM() LIMIT 6
+        ORDER BY RANDOM() LIMIT 8
     """).fetchall()
 
     # Recently "added" — people with most recent birth years (latest additions to tree)
@@ -535,7 +591,7 @@ def get_dashboard_data(conn):
     ).fetchall()
 
     # Documents from archive
-    documents = get_documents(conn, limit=8)
+    documents = get_documents(conn, limit=1)
 
     return {
         "stats": {
@@ -566,7 +622,7 @@ def get_dashboard_data(conn):
     }
 
 
-def get_documents(conn, limit=8):
+def get_documents(conn, limit=1):
     """Return documents (non-photo records) for the home Arxiu section."""
     return conn.execute("""
         SELECT id, filename, title, doc_type, transcription, date, place

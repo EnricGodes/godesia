@@ -29,10 +29,9 @@ function renderStats(stats) {
 
 function renderBranches(branches) {
     const container = document.getElementById('sidebar-branches');
-    const icons = ['account_tree', 'family_history', 'diversity_3', 'history', 'groups'];
     container.innerHTML = branches.map((b, i) => `
         <a href="/tree.html" class="branch-link${i === 0 ? ' active' : ''}">
-            <span class="material-symbols-outlined branch-icon">${icons[i % icons.length]}</span>
+            <span class="material-symbols-outlined branch-icon">family_history</span>
             <span class="branch-name">${b.surname}</span>
             <span class="branch-count">${b.count}</span>
         </a>
@@ -70,16 +69,15 @@ function renderPhotos(photos) {
         return;
     }
     container.innerHTML = photos.map((p) => {
-        const years = p.birth_year ? `${p.birth_year}` : '';
-        const place = p.birth_place ? p.birth_place : '';
-        const meta = [years, place].filter(Boolean).join(' • ');
+        const title = p.title || p.name || 'Fotografia';
+        const year = p.birth_year || '';
+        const place = p.birth_place || '';
         return `
         <div class="photo-card-full">
-            <img src="/photos/${p.photo}" alt="${p.name}" loading="lazy">
+            <img src="/photos/${p.photo}" alt="${title}" loading="lazy">
             <div class="photo-card-info">
-                <h4>${p.name}</h4>
-                ${meta ? `<p class="photo-meta">${meta}</p>` : ''}
-                ${p.title ? `<p class="photo-title">${p.title}</p>` : ''}
+                <h4>${title}</h4>
+                <p class="photo-meta">${[year, place].filter(Boolean).join(' • ')}</p>
             </div>
         </div>`;
     }).join('');
@@ -94,9 +92,9 @@ function renderPhotos(photos) {
 function renderFeatured(featured) {
     const container = document.getElementById('featured-list');
     container.innerHTML = featured.map(p => {
-        const years = p.is_alive
-            ? `${p.birth_year || '?'} - Viu`
-            : `${p.birth_year || '?'} - ${p.death_year || '?'}`;
+        const birth = p.birth_year || '';
+        const death = p.death_year || '';
+        const years = [birth, death].filter(Boolean).join(' - ') || '?';
         const pid = p.id.replace(/@/g, '');
         return `
         <a href="/tree.html#${pid}" class="featured-member">
@@ -137,15 +135,16 @@ function renderDocuments(documents) {
         'document': 'Document'
     };
 
-    container.innerHTML = documents.map(d => {
-        const caption = d.title || 'Document';
-        const typeLabel = docLabels[d.doc_type] || d.doc_type;
-        return `
-        <div class="document-row">
-            <div class="document-image">
+    const d = documents[0];
+    const caption = d.title || 'Document';
+    const typeLabel = docLabels[d.doc_type] || d.doc_type;
+
+    container.innerHTML = `
+        <div class="document-single">
+            <div class="document-image-half">
                 <img src="/photos/${d.filename}" alt="${caption}" loading="lazy">
             </div>
-            <div class="document-content">
+            <div class="document-content-full">
                 <h4 class="document-title">${caption}</h4>
                 <div class="document-meta">
                     ${d.doc_type ? `<span class="doc-badge">${typeLabel}</span>` : ''}
@@ -154,7 +153,6 @@ function renderDocuments(documents) {
                 ${d.transcription ? `<p class="document-transcription">${d.transcription}</p>` : ''}
             </div>
         </div>`;
-    }).join('');
 
     // Add link to see all documents
     const link = document.createElement('div');
