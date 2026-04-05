@@ -109,15 +109,9 @@ def migrate(json_path, db_path):
                  res.get("city", ""), res.get("country", ""), res.get("date", ""))
             )
 
-        # Photos
-        for photo in photos:
-            conn.execute(
-                "INSERT INTO photos (person_id, local_file, url, title, is_primary, date) "
-                "VALUES (?,?,?,?,?,?)",
-                (person["id"], photo.get("local_file", ""), photo.get("url", ""),
-                 photo.get("title", ""), 1 if photo.get("primary") else 0,
-                 photo.get("date", ""))
-            )
+        # Photos: Ahora gestionadas por scripts/sync_photo_catalog.py
+        # No insertar fotos aquí — el script de sync crea el esquema correcto
+        # con metadatos completos, relaciones padre-hijo, y etiquetado múltiple
 
         # Notes
         for note in person.get("notes", []):

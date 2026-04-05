@@ -69,15 +69,19 @@ CREATE TABLE IF NOT EXISTS residences (
     date TEXT
 );
 
-CREATE TABLE IF NOT EXISTS photos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    person_id TEXT,
-    local_file TEXT,
-    url TEXT,
-    title TEXT,
-    is_primary INTEGER DEFAULT 0,
-    date TEXT
-);
+-- NOTA: La tabla photos es gestionada por scripts/sync_photo_catalog.py
+-- Mantenga esta tabla vieja solo como referencia. El script crea el nuevo esquema:
+-- CREATE TABLE photos (
+--     id INTEGER PRIMARY KEY AUTOINCREMENT,
+--     filename TEXT NOT NULL UNIQUE,
+--     url TEXT, filesize INTEGER, title TEXT, date TEXT, place TEXT,
+--     photo_rin TEXT, album_id TEXT,
+--     is_cutout INTEGER DEFAULT 0, is_parent_photo INTEGER DEFAULT 0,
+--     parent_photo_id INTEGER, position TEXT, is_downloaded INTEGER DEFAULT 0,
+--     inserted_at TEXT, updated_at TEXT
+-- );
+-- CREATE TABLE photo_tags (photo_id, person_id, is_primary, source, PRIMARY KEY);
+-- CREATE TABLE albums (gedcom_id PRIMARY KEY, title TEXT);
 
 CREATE TABLE IF NOT EXISTS notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -433,11 +437,14 @@ def get_notes(conn, person_id):
 
 
 def get_all_photos(conn, person_id):
-    """Get all photos for a person."""
-    return conn.execute(
-        "SELECT local_file, title, date, is_primary FROM photos WHERE person_id = ?",
-        (person_id,)
-    ).fetchall()
+    """Get all photos for a person (from new schema with photo_tags)."""
+    return conn.execute("""
+        SELECT p.filename as local_file, p.title, p.date, pt.is_primary
+        FROM photos p
+        JOIN photo_tags pt ON pt.photo_id = p.id
+        WHERE pt.person_id = ?
+        ORDER BY pt.is_primary DESC, p.id ASC
+    """, (person_id,)).fetchall()
 
 
 def get_alive_people(conn):
@@ -478,13 +485,15 @@ def get_dashboard_data(conn):
     birthdays = get_birthdays_this_week(conn)
 
     # People with photos (random selection for gallery)
-    photo_people = conn.execute(
-        "SELECT p.id, p.name, p.birth_year, p.death_year, p.birth_place, "
-        "ph.local_file, ph.title, ph.date "
-        "FROM photos ph JOIN people p ON ph.person_id = p.id "
-        "WHERE ph.local_file IS NOT NULL "
-        "ORDER BY RANDOM() LIMIT 6"
-    ).fetchall()
+    photo_people = conn.execute("""
+        SELECT DISTINCT p.id, p.name, p.birth_year, p.death_year, p.birth_place,
+               ph.filename as local_file, ph.title, ph.date
+        FROM people p
+        JOIN photo_tags pt ON pt.person_id = p.id
+        JOIN photos ph ON ph.id = pt.photo_id
+        WHERE ph.filename IS NOT NULL
+        ORDER BY RANDOM() LIMIT 6
+    """).fetchall()
 
     # Recently "added" — people with most data (photos + notes), as a proxy
     featured = conn.execute(
