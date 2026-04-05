@@ -546,12 +546,12 @@ def get_dashboard_data(conn):
     # Family branches with specific lineage counts
     branches_config = [
         {"surname": "Godes", "ancestors": None},  # All with surname Godes
-        {"surname": "Godes Diago", "ancestors": ["@I10@"]},  # Emili Godes Hurtado
-        {"surname": "Godes Hospital", "ancestors": ["@I21@"]},  # Ignacia Hospital (Ramón's spouse)
-        {"surname": "Godes Molina", "ancestors": ["@I11@"]},  # Ernest Godes Hurtado
-        {"surname": "Godes Schmid", "ancestors": ["@I16@"]},  # Artur Godes Hurtado
-        {"surname": "Godes Terrats", "ancestors": ["@I7@"]},  # Pau Godes Caballeria
-        {"surname": "Pujol Godes", "ancestors": ["@I12@"]},  # Rosa Godes Hurtado
+        {"surname": "Godes Diago", "ancestors": ["@I10@", "@I17@"]},  # Emili Godes Hurtado & Antònia Diago Almuzara
+        {"surname": "Godes Hospital", "ancestors": ["@I15@", "@I21@"]},  # Ramón Godes Hurtado & Ignacia Hospital Ruaix
+        {"surname": "Godes Molina", "ancestors": ["@I11@", "@I18@"]},  # Ernest Godes Hurtado & Dolores Molina Beca
+        {"surname": "Godes Schmid", "ancestors": ["@I16@", "@I22@"]},  # Artur Godes Hurtado & Carmen Schmid Tarrida
+        {"surname": "Godes Terrats", "ancestors": ["@I7@", "@I9@"]},  # Pau Godes Caballeria & Anna Terrats Bertrán
+        {"surname": "Pujol Godes", "ancestors": ["@I12@", "@I19@"]},  # Rosa Godes Hurtado & Joan Pujol Pont
     ]
 
     branches = []
@@ -563,7 +563,7 @@ def get_dashboard_data(conn):
                 (config["surname"],)
             ).fetchone()[0]
         else:
-            # Count all descendants
+            # Count all descendants (including spouses and their children)
             count = get_branch_descendants(conn, config["ancestors"])
 
         if count > 0:
@@ -572,14 +572,17 @@ def get_dashboard_data(conn):
     # Birthdays this week
     birthdays = get_birthdays_this_week(conn)
 
-    # People with photos (random selection for gallery)
+    # Family photos (random selection for gallery)
     photo_people = conn.execute("""
         SELECT DISTINCT p.id, p.name, p.birth_year, p.death_year, p.birth_place,
-               ph.filename as local_file, ph.title, ph.date
+               ph.filename as local_file, ph.title, ph.date, ph.place
         FROM people p
         JOIN photo_tags pt ON pt.person_id = p.id
         JOIN photos ph ON ph.id = pt.photo_id
         WHERE ph.filename IS NOT NULL
+        AND ph.is_document = 0
+        AND ph.is_personal_photo = 0
+        AND ph.is_cutout = 0
         ORDER BY RANDOM() LIMIT 8
     """).fetchall()
 
@@ -608,12 +611,10 @@ def get_dashboard_data(conn):
             {
                 "id": p["id"],
                 "name": p["name"],
-                "birth_year": p["birth_year"],
-                "death_year": p["death_year"],
-                "birth_place": p["birth_place"],
                 "photo": p["local_file"],
                 "title": p["title"],
                 "date": p["date"],
+                "place": p["place"],
             }
             for p in photo_people
         ],

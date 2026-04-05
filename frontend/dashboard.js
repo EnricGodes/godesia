@@ -69,9 +69,9 @@ function renderPhotos(photos) {
         return;
     }
     container.innerHTML = photos.map((p) => {
-        const title = p.title || p.name || 'Fotografia';
-        const year = p.birth_year || '';
-        const place = p.birth_place || '';
+        const title = p.title || 'Fotografia';
+        const year = p.date || '';
+        const place = p.place || '';
         return `
         <div class="photo-card-full">
             <img src="/photos/${p.photo}" alt="${title}" loading="lazy">
