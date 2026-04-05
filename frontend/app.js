@@ -201,3 +201,11 @@ form.addEventListener("submit", async (e) => {
 
 // Load birthdays on page load
 loadBirthdays();
+
+// Auto-submit query from URL param (e.g. ?q=who+is...)
+const urlQ = new URLSearchParams(window.location.search).get('q');
+if (urlQ) {
+  input.value = urlQ;
+  form.dispatchEvent(new Event('submit'));
+  window.history.replaceState({}, '', window.location.pathname);
+}

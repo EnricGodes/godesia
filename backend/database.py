@@ -457,6 +457,68 @@ def get_born_in(conn, place, limit=30):
     ).fetchall()
 
 
+def get_dashboard_data(conn):
+    """Return all data needed for the dashboard page in a single call."""
+    # Stats
+    total_people = conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
+    total_families = conn.execute("SELECT COUNT(*) FROM marriages").fetchone()[0]
+    alive_count = conn.execute("SELECT COUNT(*) FROM people WHERE is_alive = 1").fetchone()[0]
+    cities = conn.execute(
+        "SELECT COUNT(DISTINCT city) FROM residences WHERE city IS NOT NULL AND city != ''"
+    ).fetchone()[0]
+
+    # Family branches (top surnames with counts)
+    branches = conn.execute(
+        "SELECT surname, COUNT(*) as cnt FROM people "
+        "WHERE surname IS NOT NULL AND surname != '' "
+        "GROUP BY surname COLLATE NOCASE ORDER BY cnt DESC LIMIT 10"
+    ).fetchall()
+
+    # Birthdays this week
+    birthdays = get_birthdays_this_week(conn)
+
+    # People with photos (random selection for gallery)
+    photo_people = conn.execute(
+        "SELECT p.id, p.name, p.birth_year, p.death_year, p.birth_place, "
+        "ph.local_file, ph.title, ph.date "
+        "FROM photos ph JOIN people p ON ph.person_id = p.id "
+        "WHERE ph.local_file IS NOT NULL "
+        "ORDER BY RANDOM() LIMIT 6"
+    ).fetchall()
+
+    # Recently "added" — people with most data (photos + notes), as a proxy
+    featured = conn.execute(
+        "SELECT id, name, birth_year, death_year, photo_file, is_alive, birth_place "
+        "FROM people WHERE photo_file IS NOT NULL "
+        "ORDER BY RANDOM() LIMIT 4"
+    ).fetchall()
+
+    return {
+        "stats": {
+            "total_people": total_people,
+            "total_families": total_families,
+            "alive": alive_count,
+            "cities": cities,
+        },
+        "branches": [{"surname": b["surname"], "count": b["cnt"]} for b in branches],
+        "birthdays": birthdays,
+        "photos": [
+            {
+                "id": p["id"],
+                "name": p["name"],
+                "birth_year": p["birth_year"],
+                "death_year": p["death_year"],
+                "birth_place": p["birth_place"],
+                "photo": p["local_file"],
+                "title": p["title"],
+                "date": p["date"],
+            }
+            for p in photo_people
+        ],
+        "featured": [dict(p) for p in featured],
+    }
+
+
 def _person_to_node(person):
     """Convert a DB row to a tree node dict."""
     p = dict(person) if not isinstance(person, dict) else person

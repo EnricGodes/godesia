@@ -1,47 +1,127 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Godesia - Árbol Genealógico Godes</title>
+    <title>Godesia - Familia Godes</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="app">
-        <header>
-            <h1>Godesia</h1>
-            <nav>
-                <a href="/" class="nav-link active">Chat</a>
-                <a href="/tree.html" class="nav-link">Arbre</a>
-            </nav>
-        </header>
+<body class="dashboard-body">
 
-        <div class="birthday-widget" id="birthday-widget" style="display:none;">
-            <h3>Aniversaris d'aquesta setmana</h3>
-            <div class="birthday-list" id="birthday-list"></div>
+<!-- Top Navigation -->
+<nav class="dash-nav">
+    <div class="dash-nav-left">
+        <span class="dash-logo">Godesia</span>
+        <div class="dash-nav-links">
+            <a href="/" class="dash-nav-link active">Inici</a>
+            <a href="/chat.html" class="dash-nav-link">Consulta</a>
+            <a href="/tree.html" class="dash-nav-link">Arbre</a>
         </div>
+    </div>
+</nav>
 
-        <div class="chat-container" id="chat">
-            <div class="message assistant">
-                <div class="message-content">
-                    <p>Hola! Soy Godesia, tu asistente genealógico de la familia Godes.</p>
-                    <p class="hint">Consultas directas (gratis): "madre/padre/hijos de...", "cuando nació...", "busca...", "estadísticas"</p>
-                    <p class="hint">Consultas complejas (IA, con coste): te pediré confirmación antes de usar la API.</p>
+<!-- Sidebar: Family Branches -->
+<aside class="dash-sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-icon">
+            <span class="material-symbols-outlined">diversity_3</span>
+        </div>
+        <div>
+            <h3 class="sidebar-title">Branques Familiars</h3>
+            <p class="sidebar-subtitle">Explora el teu llinatge</p>
+        </div>
+    </div>
+    <nav class="sidebar-branches" id="sidebar-branches">
+        <!-- Filled by JS -->
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="dash-main">
+
+    <!-- Hero Section -->
+    <section class="dash-hero">
+        <div class="hero-text">
+            <h1>Benvingut al llegat de la <em>Familia Godes</em>.</h1>
+            <p>El teu llinatge es una historia viva. Descobreix les connexions, els documents i manten vius els records per a les generacions futures.</p>
+        </div>
+        <div class="hero-search">
+            <div class="hero-search-box">
+                <span class="material-symbols-outlined hero-search-icon">auto_awesome</span>
+                <input type="text" id="hero-query" placeholder="Pregunta'm sobre la familia Godes..." autocomplete="off">
+                <button id="hero-send">Consultar</button>
+            </div>
+            <div class="hero-chips">
+                <span class="hero-chips-label">Consultes rapides:</span>
+                <button class="hero-chip" data-q="quants membres te la familia godes?">Estadistiques</button>
+                <button class="hero-chip" data-q="qui esta viu?">Membres vius</button>
+                <button class="hero-chip" data-q="aniversaris aquesta setmana">Aniversaris</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bento Grid -->
+    <section class="dash-grid">
+
+        <!-- Stats Card -->
+        <div class="dash-card dash-stats">
+            <h4 class="dash-card-label">Pols del Llegat</h4>
+            <div class="stats-list">
+                <div class="stat-row">
+                    <span class="stat-label">Membres Documentats</span>
+                    <span class="stat-value" id="stat-people">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Families</span>
+                    <span class="stat-value" id="stat-families">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Membres Vius</span>
+                    <span class="stat-value" id="stat-alive">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Ciutats</span>
+                    <span class="stat-value" id="stat-cities">--</span>
                 </div>
             </div>
         </div>
 
-        <div class="input-area">
-            <form id="query-form">
-                <input type="text" id="question" placeholder="Escribe tu pregunta sobre la familia Godes..." autocomplete="off" autofocus>
-                <button type="submit" id="send-btn">Enviar</button>
-            </form>
+        <!-- Birthdays / Anniversaries -->
+        <div class="dash-card dash-anniversaries">
+            <h4 class="dash-card-title">Aniversaris Propers</h4>
+            <div id="birthdays-list" class="anniversaries-list">
+                <!-- Filled by JS -->
+            </div>
         </div>
-    </div>
 
-    <script src="app.js"></script>
+        <!-- Photo Gallery -->
+        <div class="dash-card dash-photos-section">
+            <div class="photos-header">
+                <div>
+                    <h2 class="dash-card-title-lg">Galeria Fotografica</h2>
+                    <p class="photos-subtitle">Fotografies de l'arxiu familiar</p>
+                </div>
+            </div>
+            <div class="photos-strip-dash" id="photos-gallery">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+        <!-- Featured Members -->
+        <div class="dash-card dash-featured">
+            <h4 class="dash-card-title">Membres Destacats</h4>
+            <div class="featured-grid" id="featured-list">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<script src="dashboard.js"></script>
 </body>
 </html>

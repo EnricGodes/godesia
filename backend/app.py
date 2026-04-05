@@ -9,7 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from database import get_connection, get_tree_data, get_birthdays_this_week, search_people
+from database import (
+    get_connection, get_tree_data, get_birthdays_this_week, search_people,
+    get_dashboard_data,
+)
 from query_router import QueryRouter
 from query_engine import QueryEngine
 
@@ -132,6 +135,14 @@ async def stats():
     total = db_conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
     families = db_conn.execute("SELECT COUNT(*) FROM marriages").fetchone()[0]
     return {"total_people": total, "total_families": families}
+
+
+@app.get("/api/dashboard")
+async def dashboard():
+    """All data needed for the dashboard landing page."""
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    return get_dashboard_data(db_conn)
 
 
 # Serve photos
