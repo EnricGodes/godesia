@@ -160,7 +160,7 @@ function renderPerfil(data) {
                     <div>
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Causa</dt>
                         <dd class="text-sm">
-                            <span class="font-bold block">${person.death_cause || 'Natural'}</span>
+                            <span class="font-bold block">${person.death_cause || '—'}</span>
                         </dd>
                     </div>
                 </div>
