@@ -254,9 +254,9 @@ function renderFamilyTree(data) {
 
     // Main subject
     html += `
-        <div class="relative w-full mb-8 flex items-center" style="height: auto;">
-            <div class="absolute left-1/2 -translate-x-1/2 z-10">
-                <div class="flex flex-col items-center main-node p-4 bg-primary/5 rounded-xl heritage-border border-primary/30 shadow-inner">
+        <div class="relative w-full mb-8">
+            <div class="flex items-center gap-16 justify-center mx-auto" style="width: fit-content;">
+                <div class="flex flex-col items-center main-node p-4 bg-primary/5 rounded-xl heritage-border border-primary/30 shadow-inner z-10">
                     <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-primary mb-3 shadow-lg bg-surface-container-high flex items-center justify-center">
                         ${person.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${person.photo_file}" alt="${person.name}">` : '<span class="material-symbols-outlined text-2xl">person</span>'}
                     </div>
@@ -264,13 +264,11 @@ function renderFamilyTree(data) {
                     <span class="text-xs opacity-60 italic text-center">${person.birth_year || '?'} - ${person.death_year || '?'}</span>
                     <div class="mt-2 text-[8px] uppercase tracking-widest font-extrabold bg-primary text-on-primary px-2 py-0.5 rounded">Sujeto Central</div>
                 </div>
-            </div>
     `;
 
-    // Spouse - positioned gap-16 to the right of center
+    // Spouse
     if (data.spouse) {
         html += `
-            <div class="absolute left-1/2 z-10" style="margin-left: 9.5rem;">
                 <div class="flex flex-col items-center node-card">
                     <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-secondary/20 mb-2 bg-surface-container-high flex items-center justify-center">
                         ${data.spouse.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${data.spouse.photo_file}" alt="${data.spouse.name}">` : '<span class="material-symbols-outlined">person</span>'}
@@ -278,11 +276,11 @@ function renderFamilyTree(data) {
                     <h4 class="text-[11px] font-bold text-center">${data.spouse.name}</h4>
                     <span class="text-[10px] opacity-60 text-center">${data.spouse.birth_year || '?'} - ${data.spouse.death_year || '?'}</span>
                 </div>
-            </div>
         `;
     }
 
     html += `
+            </div>
             <div class="absolute left-1/2 -top-12 w-px h-12 bg-outline-variant -translate-x-1/2"></div>
         </div>
     `;
