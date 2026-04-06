@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 from database import (
     get_connection, get_tree_data, get_birthdays_this_week, search_people,
-    get_dashboard_data, get_documents, get_person_dossier,
+    get_dashboard_data, get_documents, get_person_dossier, convert_date_to_spanish,
 )
 from query_router import QueryRouter
 from query_engine import QueryEngine
@@ -36,17 +36,32 @@ app.add_middleware(
 db_conn = None
 router = None
 engine = None
+gedcom_export_date = None
 
 
 @app.on_event("startup")
 async def startup():
-    global db_conn, router, engine
+    global db_conn, router, engine, gedcom_export_date
     if not DB_PATH.exists():
         raise RuntimeError(f"No se encuentra {DB_PATH}. Ejecuta primero migrate_json_to_sqlite.py")
     db_conn = get_connection(str(DB_PATH))
     router = QueryRouter(db_conn)
     count = db_conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
     print(f"SQLite cargado: {count} personas")
+
+    # Read GEDCOM export date from header
+    gedcom_path = BASE_DIR / "docs" / "site380341641-tree5-20260324_signed.ged"
+    if gedcom_path.exists():
+        try:
+            with open(gedcom_path, encoding="utf-8", errors="replace") as f:
+                for line in f:
+                    if line.startswith("1 DATE"):
+                        raw = line.strip().replace("1 DATE", "").strip()
+                        gedcom_export_date = convert_date_to_spanish(raw)
+                        print(f"Fecha GEDCOM: {gedcom_export_date}")
+                        break
+        except Exception as e:
+            print(f"  Error leyendo fecha GEDCOM: {e}")
 
     # LLM engine (optional, only if API key is set)
     if os.environ.get("ANTHROPIC_API_KEY"):
@@ -174,6 +189,7 @@ async def dossier(person_id: str):
     dossier_data = get_person_dossier(db_conn, person_id)
     if not dossier_data:
         raise HTTPException(status_code=404, detail="Persona no encontrada")
+    dossier_data["gedcom_date"] = gedcom_export_date or ""
     return dossier_data
 
 

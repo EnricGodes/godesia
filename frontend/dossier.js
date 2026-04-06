@@ -54,7 +54,7 @@ function renderDossier(data) {
         </div>
         <div class="bg-surface-container px-4 py-2 rounded-lg border border-outline-variant/30 text-xs">
             <span class="block text-outline font-bold uppercase tracking-tighter mb-1">Última Act.</span>
-            <span class="font-bold">Hoy</span>
+            <span class="font-bold">${data.gedcom_date || '—'}</span>
         </div>
     `;
 
