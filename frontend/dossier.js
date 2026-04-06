@@ -111,7 +111,7 @@ function renderPerfil(data) {
                 <span class="material-symbols-outlined">fingerprint</span>
                 Perfil de Registro
             </h2>
-            <div class="bg-surface-container-low p-8 rounded-xl heritage-border space-y-6">
+            <div class="bg-surface-container-low p-8 rounded-xl heritage-border space-y-6 min-h-[380px]">
                 <div class="grid grid-cols-2 gap-8">
                     <div>
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Nombre Completo</dt>
@@ -151,7 +151,7 @@ function renderPerfil(data) {
                 <span class="material-symbols-outlined">account_balance</span>
                 Defunción y Sepelio
             </h2>
-            <div class="bg-surface-container-highest/30 p-8 rounded-xl heritage-border space-y-6">
+            <div class="bg-surface-container-highest/30 p-8 rounded-xl heritage-border space-y-6 min-h-[380px]">
                 <div class="grid grid-cols-2 gap-8">
                     <div>
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Fallecimiento</dt>
