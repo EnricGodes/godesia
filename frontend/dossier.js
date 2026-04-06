@@ -225,8 +225,8 @@ function renderFamilyTree(data) {
                     <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
                         ${p.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${p.photo_file}" alt="${p.name}">` : '<span class="material-symbols-outlined">person</span>'}
                     </div>
-                    <h4 class="text-[9px] font-bold text-center leading-tight">${p.name}</h4>
-                    <span class="text-[8px] opacity-60">${p.birth_year || '?'} - ${p.death_year || '?'}</span>
+                    <h4 class="text-[11px] font-bold text-center leading-tight">${p.name}</h4>
+                    <span class="text-[10px] opacity-60">${p.birth_year || '?'} - ${p.death_year || '?'}</span>
                 </div>
             `;
         });
@@ -244,8 +244,8 @@ function renderFamilyTree(data) {
                     <div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant/30 mb-1 bg-surface-container-high flex items-center justify-center">
                         ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${s.name}">` : '<span class="material-symbols-outlined text-sm">person</span>'}
                     </div>
-                    <h4 class="text-[9px] font-bold text-center">${s.name}</h4>
-                    <span class="text-[8px] opacity-40">${s.birth_year || '?'} - ${s.death_year || '?'}</span>
+                    <h4 class="text-[11px] font-bold text-center">${s.name}</h4>
+                    <span class="text-[10px] opacity-40">${s.birth_year || '?'} - ${s.death_year || '?'}</span>
                 </div>
             `;
         });
@@ -272,8 +272,8 @@ function renderFamilyTree(data) {
                 <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-secondary/20 mb-2 bg-surface-container-high flex items-center justify-center">
                     ${data.spouse.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${data.spouse.photo_file}" alt="${data.spouse.name}">` : '<span class="material-symbols-outlined">person</span>'}
                 </div>
-                <h4 class="text-[9px] font-bold text-center">${data.spouse.name}</h4>
-                <span class="text-[8px] opacity-60 text-center">${data.spouse.birth_year || '?'} - ${data.spouse.death_year || '?'}</span>
+                <h4 class="text-[11px] font-bold text-center">${data.spouse.name}</h4>
+                <span class="text-[10px] opacity-60 text-center">${data.spouse.birth_year || '?'} - ${data.spouse.death_year || '?'}</span>
             </div>
         `;
     }
@@ -291,8 +291,8 @@ function renderFamilyTree(data) {
                     <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
                         ${c.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${c.photo_file}" alt="${c.name}">` : '<span class="material-symbols-outlined">person</span>'}
                     </div>
-                    <h4 class="text-[9px] font-bold text-center">${c.name}</h4>
-                    <span class="text-[8px] opacity-50">${childYears}</span>
+                    <h4 class="text-[11px] font-bold text-center">${c.name}</h4>
+                    <span class="text-[10px] opacity-50">${childYears}</span>
                 </div>
             `;
         });
