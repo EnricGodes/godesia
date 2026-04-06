@@ -158,41 +158,29 @@ def migrate(json_path, db_path):
                 WHERE pt.person_id = ?
             """, (person_id,)).fetchone()["cnt"]
 
-            # Find profile photo: prefer single-person photos over group photos
+            # Find profile photo: use official MyHeritage profile photo (personal cutout)
             photo_file = None
             if photo_count > 0:
-                # First priority: photos without commas in title (single person, not group)
-                # that are personal photos or primary cutouts
+                # First priority: personal cutout (official MyHeritage profile photo)
                 photo_row = conn.execute("""
                     SELECT ph.filename FROM photos ph
                     JOIN photo_tags pt ON pt.photo_id = ph.id
                     WHERE pt.person_id = ? AND ph.is_document = 0
-                    AND (ph.title IS NULL OR ph.title NOT LIKE '%,%')
-                    AND (ph.is_personal_photo = 1 OR ph.is_prim_cutout = 1)
-                    ORDER BY ph.is_personal_photo DESC, ph.id LIMIT 1
+                    AND ph.is_cutout = 1 AND ph.is_personal_photo = 1
+                    ORDER BY ph.id LIMIT 1
                 """, (person_id,)).fetchone()
 
-                # Second priority: any photo without commas in title (single person)
+                # Second priority: any personal photo that's not a cutout
                 if not photo_row:
                     photo_row = conn.execute("""
                         SELECT ph.filename FROM photos ph
                         JOIN photo_tags pt ON pt.photo_id = ph.id
                         WHERE pt.person_id = ? AND ph.is_document = 0
-                        AND (ph.title IS NULL OR ph.title NOT LIKE '%,%')
+                        AND ph.is_personal_photo = 1 AND ph.is_cutout = 0
                         ORDER BY ph.id LIMIT 1
                     """, (person_id,)).fetchone()
 
-                # Third priority: personal photo that's not a cutout (fallback)
-                if not photo_row:
-                    photo_row = conn.execute("""
-                        SELECT ph.filename FROM photos ph
-                        JOIN photo_tags pt ON pt.photo_id = ph.id
-                        WHERE pt.person_id = ? AND ph.is_personal_photo = 1
-                        AND ph.is_document = 0 AND ph.is_cutout = 0
-                        ORDER BY ph.id LIMIT 1
-                    """, (person_id,)).fetchone()
-
-                # Fourth priority: any photo except documents
+                # Third priority: any non-document photo
                 if not photo_row:
                     photo_row = conn.execute("""
                         SELECT ph.filename FROM photos ph
