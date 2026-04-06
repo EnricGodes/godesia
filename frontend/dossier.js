@@ -218,7 +218,7 @@ function renderFamilyTree(data) {
 
     // Parents
     if (parents.length > 0) {
-        html += `<div class="flex gap-24 items-end mb-6 relative">`;
+        html += `<div class="flex gap-24 items-start mb-6 relative">`;
         parents.forEach(p => {
             html += `
                 <div class="flex flex-col items-center node-card">
