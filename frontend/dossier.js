@@ -86,10 +86,11 @@ function renderDossier(data) {
 function renderPerfil(data) {
     const person = data.person;
 
-    // Extract baptism data from notes
+    // Extract baptism data from notes for baptism names
     let baptismNames = '';
-    let baptismDate = '';
-    let baptismPlace = '';
+    let baptismDate = person.baptism_date || '';
+    let baptismPlace = person.baptism_place || '';
+    let godparents = person.godparents || '';
 
     if (data.notes && data.notes.length > 0) {
         const notesText = data.notes.join(' ');
@@ -98,17 +99,6 @@ function renderPerfil(data) {
         const namesMatch = notesText.match(/amb els noms[s]? d[\'e]([^.]+)/);
         if (namesMatch) {
             baptismNames = namesMatch[1].trim();
-        }
-
-        // Extract baptism date
-        const dateMatch = notesText.match(/Batejat[^,]* (\d{1,2} de \w+ de \d{4})/);
-        if (dateMatch) {
-            baptismDate = dateMatch[1];
-        }
-
-        // Extract baptism place (Bonanova, etc)
-        if (notesText.includes('Bonanova')) {
-            baptismPlace = 'Iglesia de la Bonanova';
         }
     }
 
@@ -147,6 +137,7 @@ function renderPerfil(data) {
                         <dd class="text-sm">
                             <span class="font-bold block">${baptismDate || '—'}</span>
                             ${baptismPlace ? `<span class="italic opacity-80 text-xs">${baptismPlace}</span>` : '<span class="italic opacity-80 text-xs">No registrado</span>'}
+                            ${godparents ? `<span class="italic opacity-80 text-xs block mt-1">Padrinos: ${godparents}</span>` : ''}
                         </dd>
                     </div>
                 </div>

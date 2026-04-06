@@ -53,13 +53,20 @@ def migrate(json_path, db_path):
                     primary_photo = p["local_file"]
                     break
 
+        # Parse baptism data
+        baptism = person.get("baptism", {})
+        baptism_date_raw = baptism.get("date", "")
+        baptism_date = convert_date_to_spanish(baptism_date_raw)
+        baptism_place = baptism.get("place", "")
+        godparents = baptism.get("godparents", "")
+
         conn.execute(
             "INSERT INTO people (id, name, given_name, surname, sex, "
             "birth_date, birth_day, birth_month, birth_year, birth_place, "
             "death_date, death_year, death_place, death_cause, death_note, death_age, "
             "is_alive, father_id, mother_id, father_name, mother_name, "
-            "photo_file, photo_count) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "photo_file, photo_count, baptism_date, baptism_place, godparents) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (
                 person["id"], person.get("name", ""), person.get("given_name", ""),
                 person.get("surname", ""), person.get("sex", ""),
@@ -71,6 +78,7 @@ def migrate(json_path, db_path):
                 person.get("father_id", ""), person.get("mother_id", ""),
                 person.get("father", ""), person.get("mother", ""),
                 primary_photo, len(photos),
+                baptism_date, baptism_place, godparents,
             )
         )
 

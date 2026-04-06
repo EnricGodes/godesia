@@ -39,7 +39,10 @@ CREATE TABLE IF NOT EXISTS people (
     father_name TEXT,
     mother_name TEXT,
     photo_file TEXT,
-    photo_count INTEGER DEFAULT 0
+    photo_count INTEGER DEFAULT 0,
+    baptism_date TEXT,
+    baptism_place TEXT,
+    godparents TEXT
 );
 
 CREATE TABLE IF NOT EXISTS marriages (

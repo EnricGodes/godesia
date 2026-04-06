@@ -97,6 +97,10 @@ def parse_gedcom(filepath: str) -> dict:
                     current_level1 = "BAPM"
                     if value:
                         indi["baptism"]["note"] = value
+                elif tag == "CHR":
+                    current_level1 = "CHR"
+                    if value:
+                        indi["baptism"]["note"] = value
                 elif tag == "BURI":
                     indi["burial"].append({"place_detail": value} if value else {})
                     current_level1 = "BURI"
@@ -153,6 +157,18 @@ def parse_gedcom(filepath: str) -> dict:
                         indi["baptism"]["place"] = value
                     elif tag == "NOTE":
                         indi["baptism"]["note"] = value
+                elif current_level1 == "CHR":
+                    if tag == "DATE":
+                        indi["baptism"]["date"] = value
+                    elif tag == "PLAC":
+                        indi["baptism"]["place"] = value
+                    elif tag == "NOTE":
+                        indi["baptism"]["note"] = value
+                        # Extract godparents from NOTE if present
+                        if "Godparents:" in value:
+                            godparents_text = value.split("Godparents:")[-1].strip()
+                            if godparents_text:
+                                indi["baptism"]["godparents"] = godparents_text
                 elif current_level1 == "BURI" and indi["burial"]:
                     buri = indi["burial"][-1]
                     if tag == "DATE":
