@@ -144,6 +144,31 @@ def migrate(json_path, db_path):
 
     conn.commit()
 
+    # Update photo_count from photos table (if it exists)
+    try:
+        people = conn.execute("SELECT id FROM people").fetchall()
+        updated_photos = 0
+        for person_row in people:
+            person_id = person_row["id"]
+            photo_count = conn.execute("""
+                SELECT COUNT(*) as cnt FROM photos ph
+                JOIN photo_tags pt ON pt.photo_id = ph.id
+                WHERE pt.person_id = ?
+            """, (person_id,)).fetchone()["cnt"]
+
+            if photo_count > 0:
+                conn.execute(
+                    "UPDATE people SET photo_count = ? WHERE id = ?",
+                    (photo_count, person_id)
+                )
+                updated_photos += 1
+        conn.commit()
+        if updated_photos > 0:
+            print(f"\nActualizadas fotos para {updated_photos} personas")
+    except Exception:
+        # photos table might not exist if sync_catalog hasn't run yet
+        pass
+
     # Verify
     count = conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
     alive = conn.execute("SELECT COUNT(*) FROM people WHERE is_alive = 1").fetchone()[0]
