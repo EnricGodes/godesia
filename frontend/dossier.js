@@ -122,13 +122,15 @@ function renderPerfil(data) {
                 <div class="grid grid-cols-2 gap-8">
                     <div>
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Nombre Completo</dt>
-                        <dd class="font-headline text-xl">${person.name}</dd>
-                        ${baptismNames ? `<p class="text-[10px] italic text-outline mt-1">Nombres de bautismo: ${baptismNames}</p>` : ''}
+                        <dd class="text-sm">
+                            <span class="font-bold block">${person.name}</span>
+                            ${baptismNames ? `<span class="italic opacity-80 text-xs mt-1">${baptismNames}</span>` : ''}
+                        </dd>
                     </div>
                     <div>
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Género</dt>
-                        <dd class="flex items-center gap-2">
-                            <span class="font-bold">${person.sex === 'M' ? 'Masculino' : 'Femenino'}</span>
+                        <dd class="text-sm">
+                            <span class="font-bold block">${person.sex === 'M' ? 'Masculino' : 'Femenino'}</span>
                         </dd>
                     </div>
                 </div>
@@ -166,7 +168,9 @@ function renderPerfil(data) {
                     </div>
                     <div>
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Causa</dt>
-                        <dd class="text-xs font-bold text-on-surface">${person.death_cause || 'Natural'}</dd>
+                        <dd class="text-sm">
+                            <span class="font-bold block">${person.death_cause || 'Natural'}</span>
+                        </dd>
                     </div>
                 </div>
                 ${data.burial && data.burial.length > 0 ? `
