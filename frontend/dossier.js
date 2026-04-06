@@ -181,7 +181,7 @@ function renderPerfil(data) {
                             ${b.place ? `
                             <div class="p-3 bg-white/50 rounded">
                                 <span class="block text-outline font-bold mb-1">Cementerio</span>
-                                <span class="font-headline italic">${b.place}</span>
+                                <span class="text-xs">${b.place}</span>
                             </div>
                             ` : ''}
                             ${b.place_detail ? `
