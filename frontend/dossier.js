@@ -178,16 +178,16 @@ function renderPerfil(data) {
                     <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-4">Localización Exacta Sepultura</dt>
                     <dd class="grid grid-cols-2 gap-4 text-xs">
                         ${data.burial.map((b, i) => `
-                            ${b.place_detail ? `
-                            <div class="p-3 bg-white/50 rounded">
-                                <span class="block text-outline font-bold mb-1">Referencia</span>
-                                <span class="font-bold text-xs">${b.place_detail}</span>
-                            </div>
-                            ` : ''}
                             ${b.place ? `
                             <div class="p-3 bg-white/50 rounded">
                                 <span class="block text-outline font-bold mb-1">Cementerio</span>
                                 <span class="font-headline italic">${b.place}</span>
+                            </div>
+                            ` : ''}
+                            ${b.place_detail ? `
+                            <div class="p-3 bg-white/50 rounded">
+                                <span class="block text-outline font-bold mb-1">Referencia</span>
+                                <span class="text-xs">${b.place_detail}</span>
                             </div>
                             ` : ''}
                         `).join('')}
