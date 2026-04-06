@@ -254,7 +254,8 @@ function renderFamilyTree(data) {
 
     // Main subject
     html += `
-        <div class="flex items-center justify-center gap-16 mb-8 relative w-full">
+        <div class="flex items-center gap-16 mb-8 relative w-full">
+            <div class="flex-1"></div>
             <div class="flex flex-col items-center main-node p-4 bg-primary/5 rounded-xl heritage-border border-primary/30 shadow-inner z-10">
                 <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-primary mb-3 shadow-lg bg-surface-container-high flex items-center justify-center">
                     ${person.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${person.photo_file}" alt="${person.name}">` : '<span class="material-symbols-outlined text-2xl">person</span>'}
@@ -276,9 +277,14 @@ function renderFamilyTree(data) {
                 <span class="text-[10px] opacity-60 text-center">${data.spouse.birth_year || '?'} - ${data.spouse.death_year || '?'}</span>
             </div>
         `;
+    } else {
+        html += `<div class="flex-1"></div>`;
     }
 
-    html += `<div class="absolute left-1/2 -top-12 w-px h-12 bg-outline-variant -translate-x-1/2"></div></div>`;
+    html += `
+        <div class="absolute left-1/2 -top-12 w-px h-12 bg-outline-variant -translate-x-1/2"></div>
+        </div>
+    `;
 
     // Children
     if (children.length > 0) {
