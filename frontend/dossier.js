@@ -39,7 +39,10 @@ function renderDossier(data) {
     const birthYear = person.birth_year || '?';
     const deathYear = person.death_year || '?';
     const birthPlace = person.birth_place || 'Barcelona, España';
-    document.getElementById('vital-dates').innerHTML = `
+    const vitalDatesEl = document.getElementById('vital-dates');
+    vitalDatesEl.classList.remove('flex-wrap', 'items-center', 'gap-6');
+    vitalDatesEl.classList.add('flex-col', 'gap-2');
+    vitalDatesEl.innerHTML = `
         <span>${person.birth_date || birthYear} — ${person.death_date || deathYear}</span>
         <span class="text-lg opacity-70">${birthPlace}</span>
     `;
