@@ -41,7 +41,6 @@ function renderDossier(data) {
     const birthPlace = person.birth_place || 'Barcelona, España';
     document.getElementById('vital-dates').innerHTML = `
         <span>${person.birth_date || birthYear} — ${person.death_date || deathYear}</span>
-        <span class="h-[1px] w-12 bg-outline-variant"></span>
         <span class="text-lg opacity-70">${birthPlace}</span>
     `;
 
