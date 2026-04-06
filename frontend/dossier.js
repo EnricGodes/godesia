@@ -252,11 +252,11 @@ function renderFamilyTree(data) {
         html += `</div>`;
     }
 
-    // Main subject
+    // Main subject - positioned at 50% with spouse to the right
     html += `
-        <div class="relative w-full mb-8">
-            <div class="flex items-center gap-16 justify-center mx-auto" style="width: fit-content;">
-                <div class="flex flex-col items-center main-node p-4 bg-primary/5 rounded-xl heritage-border border-primary/30 shadow-inner z-10">
+        <div class="relative w-full mb-32">
+            <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-16 z-10">
+                <div class="flex flex-col items-center main-node p-4 bg-primary/5 rounded-xl heritage-border border-primary/30 shadow-inner">
                     <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-primary mb-3 shadow-lg bg-surface-container-high flex items-center justify-center">
                         ${person.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${person.photo_file}" alt="${person.name}">` : '<span class="material-symbols-outlined text-2xl">person</span>'}
                     </div>
