@@ -124,7 +124,7 @@ function renderPerfil(data) {
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Nombre Completo</dt>
                         <dd class="text-sm">
                             <span class="font-bold block">${person.name}</span>
-                            ${baptismNames ? `<span class="italic opacity-80 text-xs mt-1">${baptismNames}</span>` : ''}
+                            ${baptismNames ? `<span class="italic opacity-80 text-xs mt-1">Nombres de bautismo: ${baptismNames}</span>` : ''}
                         </dd>
                     </div>
                     <div>
