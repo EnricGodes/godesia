@@ -301,6 +301,10 @@ def resolve_relationships(data: dict) -> list:
             person["residences"] = indi["residences"]
         if indi["military"]:
             person["military"] = indi["military"]
+        if indi["anecdotes"]:
+            person["anecdotes"] = indi["anecdotes"]
+        if indi["events"]:
+            person["events"] = indi["events"]
         if indi["immigration"]:
             person["immigration"] = indi["immigration"]
         if indi["notes"]:
