@@ -771,12 +771,40 @@ def get_person_dossier(conn, person_id):
         if not spouse:  # First spouse for backward compatibility
             spouse = spouse_data
 
-    # Children
+    # Children (with their marriages)
     children = conn.execute(
         "SELECT * FROM people WHERE father_id = ? OR mother_id = ? ORDER BY birth_year",
         (person_id, person_id)
     ).fetchall()
-    children_list = [dict(c) for c in children]
+    children_list = []
+    for c in children:
+        child_dict = dict(c)
+        # Get child's marriages
+        marriages = conn.execute("""
+            SELECT person2_id, date, place FROM marriages WHERE person1_id = ?
+            UNION ALL
+            SELECT person1_id, date, place FROM marriages WHERE person2_id = ?
+            ORDER BY date
+        """, (c["id"], c["id"])).fetchall()
+
+        child_marriages = []
+        for m in marriages:
+            spouse_id = m[0]
+            marriage_date = m[1]
+            marriage_place = m[2]
+            spouse = conn.execute("SELECT name, photo_file FROM people WHERE id = ?", (spouse_id,)).fetchone()
+            if spouse:
+                child_marriages.append({
+                    "spouse_name": spouse["name"],
+                    "spouse_photo": spouse["photo_file"],
+                    "marriage_date": marriage_date,
+                    "marriage_place": marriage_place
+                })
+
+        if child_marriages:
+            child_dict["marriages"] = child_marriages
+
+        children_list.append(child_dict)
 
     # Residences
     residences = conn.execute(

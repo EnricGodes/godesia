@@ -583,6 +583,24 @@ function renderTimeline(data) {
         return age !== null ? `Edad ${age}` : '';
     }
 
+    function ageRangeText(startYear, endYear) {
+        if (!startYear || !endYear) return '';
+        const ageStart = calculateAge(startYear);
+        const ageEnd = calculateAge(endYear);
+        if (ageStart === null || ageEnd === null) return '';
+        return `Edades: ${ageStart} - ${ageEnd}`;
+    }
+
+    function formatDateRange(dateStr) {
+        if (!dateStr) return '';
+        // Check if it's a range like "19 de agosto 1917 - 1919"
+        if (dateStr.includes(' - ')) {
+            const [start, end] = dateStr.split(' - ').map(s => s.trim());
+            return `desde ${start} hasta ${end}`;
+        }
+        return dateStr;
+    }
+
     // Nacimiento
     if (person.birth_year) {
         events.push({
@@ -637,15 +655,16 @@ function renderTimeline(data) {
         });
     }
 
-    // Hijos
+    // Hijos (with gender-specific text)
     if (data.children) {
         data.children.forEach(c => {
             const year = extractYear(c.birth_year);
             if (year) {
+                const typeText = c.sex === 'F' ? 'Nacimiento de la hija:' : 'Nacimiento del hijo:';
                 events.push({
                     year: year,
                     age: ageText(year),
-                    type: 'Nacimiento del hijo:',
+                    type: typeText,
                     lines: [
                         c.name || '',
                         c.birth_date || `${c.birth_year}`,
@@ -653,6 +672,27 @@ function renderTimeline(data) {
                     ].filter(Boolean),
                     photo: c.photo_file,
                     name: c.name
+                });
+            }
+
+            // Children's marriages
+            if (c.marriages && c.marriages.length > 0) {
+                c.marriages.forEach(m => {
+                    const mYear = extractYear(m.marriage_date);
+                    if (mYear) {
+                        events.push({
+                            year: mYear,
+                            age: ageText(mYear),
+                            type: `Matrimonio de ${c.sex === 'F' ? 'la hija' : 'el hijo'}:`,
+                            lines: [
+                                m.spouse_name || '',
+                                m.marriage_date ? `${m.marriage_date}` : '',
+                                m.marriage_place ? `${m.marriage_place}` : ''
+                            ].filter(Boolean),
+                            photo: m.spouse_photo,
+                            name: m.spouse_name
+                        });
+                    }
                 });
             }
         });
@@ -684,12 +724,13 @@ function renderTimeline(data) {
         data.residences.forEach(r => {
             const year = extractYear(r.date);
             if (year) {
+                const ageRange = ageRangeText(year, year); // Will improve with range dates
                 events.push({
                     year: year,
-                    age: ageText(year),
+                    age: ageRange || ageText(year),
                     type: 'Residencia',
                     lines: [
-                        r.date ? `Desde ${r.date}` : '',
+                        formatDateRange(r.date) || '',
                         r.address || '',
                         [r.city, r.country].filter(Boolean).join(', ') || ''
                     ].filter(Boolean),
@@ -721,7 +762,22 @@ function renderTimeline(data) {
         });
     }
 
-    // Entierro
+    // Defunción
+    if (person.death_year) {
+        events.push({
+            year: person.death_year,
+            age: ageText(person.death_year),
+            type: 'Defunción',
+            lines: [
+                person.death_date || `${person.death_year}`,
+                person.death_place || ''
+            ].filter(Boolean),
+            photo: null,
+            name: person.name
+        });
+    }
+
+    // Entierro (after death)
     if (data.burial && data.burial.length > 0) {
         data.burial.forEach(b => {
             const year = extractYear(b.date);
@@ -738,21 +794,6 @@ function renderTimeline(data) {
                     name: person.name
                 });
             }
-        });
-    }
-
-    // Defunción
-    if (person.death_year) {
-        events.push({
-            year: person.death_year,
-            age: ageText(person.death_year),
-            type: 'Defunción',
-            lines: [
-                person.death_date || `${person.death_year}`,
-                person.death_place || ''
-            ].filter(Boolean),
-            photo: null,
-            name: person.name
         });
     }
 
