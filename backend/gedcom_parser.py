@@ -397,6 +397,9 @@ def build_family_tree_json(gedcom_path: str, output_path: str):
 
 if __name__ == "__main__":
     base = Path(__file__).parent.parent
-    gedcom = base / "docs" / "site380341641-tree5-20260324_signed.ged"
+    # Use the most recent GEDCOM file
+    docs_dir = base / "docs"
+    ged_files = sorted(docs_dir.glob("*.ged"), key=lambda x: x.stat().st_mtime, reverse=True)
+    gedcom = ged_files[0] if ged_files else base / "docs" / "site380341641-tree5-20260324_signed.ged"
     output = base / "data" / "family_tree.json"
     build_family_tree_json(str(gedcom), str(output))

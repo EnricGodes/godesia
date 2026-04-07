@@ -319,7 +319,10 @@ def main():
     args = parser.parse_args()
 
     base = Path(__file__).parent.parent
-    gedcom_path = base / "docs" / "site380341641-tree5-20260324_signed.ged"
+    # Use the most recent GEDCOM file
+    docs_dir = base / "docs"
+    ged_files = sorted(docs_dir.glob("*.ged"), key=lambda x: x.stat().st_mtime, reverse=True)
+    gedcom_path = ged_files[0] if ged_files else base / "docs" / "site380341641-tree5-20260324_signed.ged"
     db_path = base / "data" / "godesia.db"
     photos_dir = base / "data" / "photos"
     photos_dir.mkdir(parents=True, exist_ok=True)
