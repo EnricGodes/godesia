@@ -102,6 +102,23 @@ The `sync_photo_catalog.py` script extracts these flags from GEDCOM and stores t
 
 These columns must always exist in the `photos` table schema.
 
+## Face Detection Boxes (Green Overlays)
+
+When viewing the photo gallery (Memoria Visual), green rectangles appear over the central person's face in photos where they're detected. These are called **face boxes**.
+
+**How it works:**
+- Each person tagged in a photo has a `_POSITION` coordinate in GEDCOM: `x1 y1 x2 y2` (pixel boundaries of their face)
+- This position is stored **per-person** in the `photo_tags` table (NOT globally in photos)
+- The frontend JavaScript function `applyFaceBox()` renders the green overlay box when the image loads
+- Each person only sees their own face boxes, not other people's positions in group photos
+
+**Example:**
+- Photo `500012_545576g614boe6078m35n3_R.jpg` is a group photo
+- I16 (Artur) in that photo has position `483 370 566 481` → green box at those coordinates for I16
+- Other people in the same photo have different positions → their face boxes only appear when viewing their own dossier
+
+**Critical:** Position data is stored in `photo_tags.position` (linked to person_id), not in `photos.position`. If face boxes show random people or wrong positions, verify that the query in `database.py` uses `photo_tags.position` not `photos.position`.
+
 ## Git Workflow
 
 This project uses GitHub (EnricGodes/godesia) for version control. As work is completed, commit changes with clean, descriptive commit messages and push to GitHub.
