@@ -588,7 +588,14 @@ function renderTimeline(data) {
         const ageStart = calculateAge(startYear);
         const ageEnd = calculateAge(endYear);
         if (ageStart === null || ageEnd === null) return '';
-        return `Edades: ${ageStart} - ${ageEnd}`;
+        return `Edades: ${ageStart} -`;  // Will be displayed inline with endYear on same line
+    }
+
+    function ageRangeEndText(endYear) {
+        if (!endYear) return '';
+        const ageEnd = calculateAge(endYear);
+        if (ageEnd === null) return '';
+        return `${ageEnd}`;
     }
 
     function formatDateRange(dateStr) {
@@ -685,12 +692,14 @@ function renderTimeline(data) {
                             age: ageText(mYear),
                             type: `Matrimonio de ${c.sex === 'F' ? 'la hija' : 'el hijo'}:`,
                             lines: [
-                                m.spouse_name || '',
-                                m.marriage_date ? `${m.marriage_date}` : '',
+                                m.marriage_date ? `${m.marriage_date}` : 'Approx. ' + mYear,
                                 m.marriage_place ? `${m.marriage_place}` : ''
                             ].filter(Boolean),
                             photo: m.spouse_photo,
-                            name: m.spouse_name
+                            name: m.spouse_name,
+                            childPhoto: c.photo_file,
+                            childName: c.name,
+                            isChildMarriage: true
                         });
                     }
                 });
@@ -719,15 +728,27 @@ function renderTimeline(data) {
         });
     }
 
-    // Residencias
+    // Residencias (with date range support)
     if (data.residences) {
         data.residences.forEach(r => {
             const year = extractYear(r.date);
             if (year) {
-                const ageRange = ageRangeText(year, year); // Will improve with range dates
+                let ageDisplay = '';
+                // Check if date contains a range
+                if (r.date && r.date.includes(' - ')) {
+                    const parts = r.date.split(' - ');
+                    const endYear = extractYear(parts[1]);
+                    if (endYear) {
+                        const ageStart = calculateAge(year);
+                        const ageEnd = calculateAge(endYear);
+                        if (ageStart !== null && ageEnd !== null) {
+                            ageDisplay = `Edades: ${ageStart} - ${ageEnd}`;
+                        }
+                    }
+                }
                 events.push({
                     year: year,
-                    age: ageRange || ageText(year),
+                    age: ageDisplay || ageText(year),
                     type: 'Residencia',
                     lines: [
                         formatDateRange(r.date) || '',
@@ -782,14 +803,18 @@ function renderTimeline(data) {
         data.burial.forEach(b => {
             const year = extractYear(b.date);
             if (year) {
+                const lines = [b.date || ''];
+                if (b.place) lines.push(b.place);
+                if (b.place_detail) {
+                    // place_detail might contain cemetery info and location details
+                    const details = b.place_detail.split('\n').filter(d => d.trim());
+                    lines.push(...details);
+                }
                 events.push({
                     year: year,
                     age: ageText(year),
                     type: 'Entierro',
-                    lines: [
-                        b.date || '',
-                        b.place || ''
-                    ].filter(Boolean),
+                    lines: lines.filter(Boolean),
                     photo: null,
                     name: person.name
                 });
@@ -807,22 +832,40 @@ function renderTimeline(data) {
 
     document.getElementById('timeline-section').style.display = 'block';
 
-    const timelineHtml = events.map((e, idx) => `
+    const timelineHtml = events.map((e, idx) => {
+        let photosHtml = '';
+        if (e.isChildMarriage) {
+            // Show two photos side by side for child's marriage
+            photosHtml = `
+                <div class="flex items-center gap-2 mb-3">
+                    ${e.childPhoto ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${e.childPhoto}" alt="${e.childName}">` : ''}
+                    <span class="text-sm font-bold">${e.childName}</span>
+                    <span class="text-xs text-outline mx-1">y</span>
+                    ${e.photo ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${e.photo}" alt="${e.name}">` : ''}
+                    <span class="text-sm font-bold">${e.name}</span>
+                </div>
+            `;
+        } else if (e.photo) {
+            photosHtml = `<div class="flex items-center gap-3 mb-2"><img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${e.photo}" alt="${e.name}"><span class="text-sm font-bold">${e.name}</span></div>`;
+        }
+
+        return `
         <div class="flex gap-8 mb-12 relative">
             <div class="w-20 text-right flex-shrink-0">
                 <div class="text-2xl font-bold text-primary">${e.year}</div>
-                ${e.age ? `<div class="text-xs text-outline mt-1">${e.age}</div>` : ''}
+                ${e.age ? `<div class="text-xs text-outline mt-1 whitespace-nowrap">${e.age}</div>` : ''}
             </div>
             <div class="flex-grow pb-8 border-l-2 border-outline-variant pl-8 relative">
                 <div class="absolute -left-[9px] top-2 w-4 h-4 rounded-full bg-primary"></div>
                 <div class="font-bold text-sm mb-3">${e.type}</div>
                 <div class="space-y-1">
-                    ${e.photo ? `<div class="flex items-center gap-3 mb-2"><img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${e.photo}" alt="${e.name}"><span class="text-sm font-bold">${e.name}</span></div>` : ''}
+                    ${photosHtml}
                     ${e.lines.map(line => `<div class="text-sm text-outline">${line}</div>`).join('')}
                 </div>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 
     const html = `
         <h2 class="font-headline text-3xl text-primary flex items-center gap-4 mb-8">
