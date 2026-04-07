@@ -26,6 +26,57 @@ function showError(message) {
     document.getElementById('error').textContent = 'Error: ' + message;
 }
 
+// Global state for photo sorting
+let _photosOriginal = [];
+let _sortActive = null;
+
+function extractYear(dateStr) {
+    if (!dateStr) return null;
+    const m = dateStr.match(/\d{4}/);
+    return m ? parseInt(m[0]) : null;
+}
+
+window.sortPhotos = function(criterion) {
+    if (_sortActive === criterion) {
+        _sortActive = null;
+        renderBentoGrid(_photosOriginal);
+    } else {
+        _sortActive = criterion;
+        const sorted = [..._photosOriginal];
+        if (criterion === 'oldest') {
+            sorted.sort((a, b) => {
+                const yA = extractYear(a.date) ?? Infinity;
+                const yB = extractYear(b.date) ?? Infinity;
+                return yA - yB;
+            });
+        } else if (criterion === 'newest') {
+            sorted.sort((a, b) => {
+                const yA = extractYear(a.date) ?? -Infinity;
+                const yB = extractYear(b.date) ?? -Infinity;
+                return yB - yA;
+            });
+        } else if (criterion === 'added') {
+            sorted.sort((a, b) => a.id - b.id);
+        }
+        renderUniformGrid(sorted);
+    }
+    updateSortButtons();
+};
+
+function updateSortButtons() {
+    ['oldest', 'newest', 'added'].forEach(c => {
+        const btn = document.getElementById('sort-' + c);
+        if (!btn) return;
+        if (_sortActive === c) {
+            btn.classList.add('bg-primary', 'text-on-primary');
+            btn.classList.remove('border', 'border-primary', 'text-primary');
+        } else {
+            btn.classList.remove('bg-primary', 'text-on-primary');
+            btn.classList.add('border', 'border-primary', 'text-primary');
+        }
+    });
+}
+
 function renderDossier(data) {
     const person = data.person;
     document.title = `${person.name} | Familia Godes`;
@@ -37,13 +88,20 @@ function renderDossier(data) {
     document.getElementById('hero-name').textContent = person.name;
 
     const birthYear = person.birth_year || '?';
-    const deathYear = person.death_year || '?';
     const birthPlace = person.birth_place || 'Barcelona, España';
     const vitalDatesEl = document.getElementById('vital-dates');
     vitalDatesEl.classList.remove('flex-wrap', 'items-center', 'gap-6');
     vitalDatesEl.classList.add('flex-col', 'gap-2');
+
+    // Only show death date if it exists or death_year is set
+    let deathDisplay = '';
+    if (person.death_date || person.death_year) {
+        const deathYear = person.death_year || '?';
+        deathDisplay = ` — ${person.death_date || deathYear}`;
+    }
+
     vitalDatesEl.innerHTML = `
-        <span>${person.birth_date || birthYear} — ${person.death_date || deathYear}</span>
+        <span>${person.birth_date || birthYear}${deathDisplay}</span>
         <span class="text-lg opacity-70">${birthPlace}</span>
     `;
 
@@ -56,6 +114,12 @@ function renderDossier(data) {
             <span class="block text-outline font-bold uppercase tracking-tighter mb-1">Última Act.</span>
             <span class="font-bold">${data.gedcom_date || '—'}</span>
         </div>
+        ${person.death_year && person.death_year >= 2021 && !person.is_alive ? `
+        <div class="bg-surface-container px-4 py-2 rounded-lg border border-outline-variant/30 text-xs">
+            <span class="block text-outline font-bold uppercase tracking-tighter mb-1">Estado</span>
+            <span class="font-bold text-secondary">† RECIENTE</span>
+        </div>
+        ` : ''}
     `;
 
     // 2. PERFIL BÁSICO
@@ -117,7 +181,7 @@ function renderPerfil(data) {
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Nombre Completo</dt>
                         <dd class="text-sm">
                             <span class="font-bold block">${person.name}</span>
-                            ${baptismNames ? `<span class="italic opacity-80 text-xs mt-1">Nombres de bautismo: ${baptismNames}</span>` : ''}
+                            ${baptismNames ? `<span class="italic opacity-80 text-xs mt-1 block">Nombres de bautismo: ${baptismNames}</span>` : ''}
                         </dd>
                     </div>
                     <div>
@@ -146,6 +210,7 @@ function renderPerfil(data) {
                 </div>
             </div>
         </div>
+        ${person.death_date || person.death_year ? `
         <div class="space-y-8">
             <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                 <span class="material-symbols-outlined">account_balance</span>
@@ -195,8 +260,15 @@ function renderPerfil(data) {
                 `}
             </div>
         </div>
+        ` : ''}
     `;
     document.getElementById('perfil-section').innerHTML = html;
+}
+
+function recentDeathTag(p) {
+    if (!p.death_year || p.is_alive) return '';
+    if (p.death_year < 2021) return '';
+    return `<div class="mt-1 text-[9px] uppercase tracking-widest font-extrabold bg-secondary text-on-secondary px-2 py-0.5 rounded">† RECIENTE</div>`;
 }
 
 function renderFamilyTree(data) {
@@ -211,6 +283,19 @@ function renderFamilyTree(data) {
     if (data.siblings) siblings.push(...data.siblings);
     if (data.children) children.push(...data.children);
 
+    // Helper functions
+    function dossierId(id) { return id ? id.replace(/@/g, '') : ''; }
+    function formatYears(birth_year, death_year) {
+        // If birth_year AND death_year: "birth_year - death_year"
+        if (birth_year && death_year) return `${birth_year} - ${death_year}`;
+        // If birth_year but NO death_year: "birth_year" (no " - ?")
+        if (birth_year) return birth_year;
+        // If NO birth_year but death_year: "? - death_year"
+        if (death_year) return `? - ${death_year}`;
+        // If neither: "? - ?"
+        return '? - ?';
+    }
+
     let html = `
         <h2 class="font-headline text-3xl text-primary border-b border-outline-variant pb-4 italic text-center">Árbol Familiar Inmediato</h2>
         <div class="flex flex-col items-center">
@@ -221,13 +306,16 @@ function renderFamilyTree(data) {
         html += `<div class="flex gap-24 items-start mb-6 relative">`;
         parents.forEach(p => {
             html += `
-                <div class="flex flex-col items-center node-card">
-                    <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
-                        ${p.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${p.photo_file}" alt="${p.name}">` : '<span class="material-symbols-outlined">person</span>'}
+                <a href="/dossier.html?id=${dossierId(p.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
+                    <div class="flex flex-col items-center node-card">
+                        <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
+                            ${p.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${p.photo_file}" alt="${p.name}">` : '<span class="material-symbols-outlined">person</span>'}
+                        </div>
+                        <h4 class="text-[11px] font-bold text-center leading-tight">${p.name}</h4>
+                        <span class="text-[10px] opacity-60">${formatYears(p.birth_year, p.death_year)}</span>
+                        ${recentDeathTag(p)}
                     </div>
-                    <h4 class="text-[11px] font-bold text-center leading-tight">${p.name}</h4>
-                    <span class="text-[10px] opacity-60">${p.birth_year || '?'} - ${p.death_year || '?'}</span>
-                </div>
+                </a>
             `;
         });
         html += `<div class="absolute left-1/2 -bottom-6 w-px h-6 bg-outline-variant -translate-x-1/2"></div></div>`;
@@ -235,53 +323,76 @@ function renderFamilyTree(data) {
 
     // Siblings
     if (siblings.length > 0) {
+        // If only one sibling, align to the left so the parent line doesn't appear to come from the sibling
+        const siblingsAlign = siblings.length === 1 ? 'justify-start pl-[22%]' : 'justify-center';
         html += `
-            <div class="flex justify-center gap-6 mb-12 max-w-5xl w-full px-4 border-t border-outline-variant pt-6 flex-wrap">
+            <div class="flex ${siblingsAlign} gap-6 mb-12 max-w-5xl w-full px-4 border-t border-outline-variant pt-6 flex-wrap">
         `;
         siblings.forEach(s => {
             html += `
-                <div class="flex flex-col items-center node-card opacity-80 shrink-0">
-                    <div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant/30 mb-1 bg-surface-container-high flex items-center justify-center">
-                        ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${s.name}">` : '<span class="material-symbols-outlined text-sm">person</span>'}
+                <a href="/dossier.html?id=${dossierId(s.id)}" class="cursor-pointer hover:opacity-90 transition-opacity">
+                    <div class="flex flex-col items-center node-card opacity-80 shrink-0">
+                        <div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant/30 mb-1 bg-surface-container-high flex items-center justify-center">
+                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${s.name}">` : '<span class="material-symbols-outlined text-sm">person</span>'}
+                        </div>
+                        <h4 class="text-[11px] font-bold text-center">${s.name}</h4>
+                        <span class="text-[10px] opacity-40">${formatYears(s.birth_year, s.death_year)}</span>
+                        ${recentDeathTag(s)}
                     </div>
-                    <h4 class="text-[11px] font-bold text-center">${s.name}</h4>
-                    <span class="text-[10px] opacity-40">${s.birth_year || '?'} - ${s.death_year || '?'}</span>
-                </div>
+                </a>
             `;
         });
         html += `</div>`;
     }
 
-    // Main subject - positioned at 50% with spouse to the right
+    // Connector line from parents/siblings down to the main subject
+    html += `<div class="w-px h-12 bg-outline-variant"></div>`;
+
+    // Main subject - centered at 50% with spouse to the right.
+    // Uses an invisible spacer (same size as spouse) on the LEFT so that
+    // flex justify-center mathematically centers the main-node at 50%.
     html += `
-        <div class="relative w-full mb-32">
-            <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-16 z-10">
-                <div class="flex flex-col items-center main-node p-4 bg-primary/5 rounded-xl heritage-border border-primary/30 shadow-inner">
-                    <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-primary mb-3 shadow-lg bg-surface-container-high flex items-center justify-center">
-                        ${person.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${person.photo_file}" alt="${person.name}">` : '<span class="material-symbols-outlined text-2xl">person</span>'}
-                    </div>
-                    <h3 class="font-headline font-bold text-primary text-center text-sm">${person.name}</h3>
-                    <span class="text-xs opacity-60 italic text-center">${person.birth_year || '?'} - ${person.death_year || '?'}</span>
-                    <div class="mt-2 text-[8px] uppercase tracking-widest font-extrabold bg-primary text-on-primary px-2 py-0.5 rounded">Sujeto Central</div>
-                </div>
+        <div class="relative w-full flex justify-center items-center gap-16 my-6">
     `;
 
-    // Spouse
     if (data.spouse) {
         html += `
-                <div class="flex flex-col items-center node-card">
-                    <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-secondary/20 mb-2 bg-surface-container-high flex items-center justify-center">
-                        ${data.spouse.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${data.spouse.photo_file}" alt="${data.spouse.name}">` : '<span class="material-symbols-outlined">person</span>'}
-                    </div>
-                    <h4 class="text-[11px] font-bold text-center">${data.spouse.name}</h4>
-                    <span class="text-[10px] opacity-60 text-center">${data.spouse.birth_year || '?'} - ${data.spouse.death_year || '?'}</span>
+                <div class="flex flex-col items-center node-card invisible" aria-hidden="true">
+                    <div class="w-20 h-20 mb-2"></div>
+                    <h4 class="text-[11px]">.</h4>
+                    <span class="text-[10px]">.</span>
                 </div>
         `;
     }
 
     html += `
-            </div>
-            <div class="absolute left-1/2 -top-12 w-px h-12 bg-outline-variant -translate-x-1/2"></div>
+                <div class="flex flex-col items-center main-node p-4 bg-primary/5 rounded-xl heritage-border border-primary/30 shadow-inner">
+                    <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-primary mb-3 shadow-lg bg-surface-container-high flex items-center justify-center">
+                        ${person.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${person.photo_file}" alt="${person.name}">` : '<span class="material-symbols-outlined text-2xl">person</span>'}
+                    </div>
+                    <h3 class="font-headline font-bold text-primary text-center text-sm">${person.name}</h3>
+                    <span class="text-xs opacity-60 italic text-center">${formatYears(person.birth_year, person.death_year)}</span>
+                    <div class="mt-2 text-[8px] uppercase tracking-widest font-extrabold bg-primary text-on-primary px-2 py-0.5 rounded">Sujeto Central</div>
+                    ${recentDeathTag(person)}
+                </div>
+    `;
+
+    if (data.spouse) {
+        html += `
+                <a href="/dossier.html?id=${dossierId(data.spouse.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
+                    <div class="flex flex-col items-center node-card">
+                        <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-secondary/20 mb-2 bg-surface-container-high flex items-center justify-center">
+                            ${data.spouse.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${data.spouse.photo_file}" alt="${data.spouse.name}">` : '<span class="material-symbols-outlined">person</span>'}
+                        </div>
+                        <h4 class="text-[11px] font-bold text-center">${data.spouse.name}</h4>
+                        <span class="text-[10px] opacity-60 text-center">${formatYears(data.spouse.birth_year, data.spouse.death_year)}</span>
+                        ${recentDeathTag(data.spouse)}
+                    </div>
+                </a>
+        `;
+    }
+
+    html += `
         </div>
     `;
 
@@ -290,22 +401,85 @@ function renderFamilyTree(data) {
         html += `<div class="tree-connector"></div>
         <div class="flex justify-center gap-16 border-t border-outline-variant pt-6 w-full flex-wrap">`;
         children.forEach(c => {
-            const childYears = c.is_alive ? c.birth_year : `${c.birth_year || '?'} - ${c.death_year || '?'}`;
+            const childYears = c.is_alive ? c.birth_year : formatYears(c.birth_year, c.death_year);
             html += `
-                <div class="flex flex-col items-center node-card">
-                    <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
-                        ${c.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${c.photo_file}" alt="${c.name}">` : '<span class="material-symbols-outlined">person</span>'}
+                <a href="/dossier.html?id=${dossierId(c.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
+                    <div class="flex flex-col items-center node-card">
+                        <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
+                            ${c.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${c.photo_file}" alt="${c.name}">` : '<span class="material-symbols-outlined">person</span>'}
+                        </div>
+                        <h4 class="text-[11px] font-bold text-center">${c.name}</h4>
+                        <span class="text-[10px] opacity-50">${childYears}</span>
+                        ${recentDeathTag(c)}
                     </div>
-                    <h4 class="text-[11px] font-bold text-center">${c.name}</h4>
-                    <span class="text-[10px] opacity-50">${childYears}</span>
-                </div>
+                </a>
             `;
         });
         html += `</div>`;
     }
 
-    html += `</div>`;
+    html += `
+        <div class="mt-12 text-center">
+            <a href="/tree.html?id=${dossierId(person.id)}" class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-lg hover:opacity-90 transition-opacity font-bold text-sm">
+                <span class="material-symbols-outlined text-lg">account_tree</span>
+                Ver árbol completo
+            </a>
+        </div>
+    </div>`;
     document.getElementById('family-tree-section').innerHTML = html;
+}
+
+function renderBentoGrid(photos) {
+    const gridHtml = `
+        <div class="bento-grid">
+            ${photos.map((p, i) => {
+                const classMap = ['bento-med', 'bento-small', 'bento-xsmall', 'bento-small', 'bento-med', 'bento-xsmall', 'bento-small', 'bento-med', 'bento-xsmall', 'bento-small', 'bento-xsmall', 'bento-med', 'bento-small', 'bento-xsmall', 'bento-med', 'bento-small', 'bento-small', 'bento-hero', 'bento-xsmall', 'bento-small'];
+                const cls = classMap[i % classMap.length];
+                const lineClamps = {
+                    'bento-hero': 'line-clamp-4',
+                    'bento-med': 'line-clamp-2',
+                    'bento-small': 'line-clamp-1',
+                    'bento-xsmall': 'line-clamp-1'
+                };
+                const lineClamp = lineClamps[cls] || 'line-clamp-2';
+                return `
+                    <div class="${cls} heritage-border bg-white overflow-hidden group relative">
+                        <img src="/photos/${p.filename}" alt="${p.title || 'Foto'}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" ${p.position ? `onload="applyFaceBox(this, '${p.position}')"` : ''}>
+                        ${p.position ? `<div class="face-box absolute border-2 pointer-events-none hidden" style="border-color: #2D4B33;"></div>` : ''}
+                        ${p.title ? `
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <p class="text-white text-[14px] font-bold ${lineClamp}">${p.title}</p>
+                                ${p.date ? `<span class="text-white/60 text-[13px]">${p.date}</span>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+    document.getElementById('photos-grid-container').innerHTML = gridHtml;
+}
+
+function renderUniformGrid(photos) {
+    const gridHtml = `
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            ${photos.map((p) => {
+                return `
+                    <div class="heritage-border bg-white overflow-hidden group relative aspect-square">
+                        <img src="/photos/${p.filename}" alt="${p.title || 'Foto'}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" ${p.position ? `onload="applyFaceBox(this, '${p.position}')"` : ''}>
+                        ${p.position ? `<div class="face-box absolute border-2 pointer-events-none hidden" style="border-color: #2D4B33;"></div>` : ''}
+                        ${p.title ? `
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <p class="text-white text-[12px] font-bold line-clamp-2">${p.title}</p>
+                                ${p.date ? `<span class="text-white/60 text-[11px]">${p.date}</span>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+    document.getElementById('photos-grid-container').innerHTML = gridHtml;
 }
 
 function renderPhotosGrid(photos) {
@@ -316,6 +490,28 @@ function renderPhotosGrid(photos) {
 
     document.getElementById('photos-section').style.display = 'block';
 
+    // Function to apply face box overlay when image loads
+    window.applyFaceBox = function(img, pos) {
+        if (!pos) return;
+        const box = img.nextElementSibling;
+        if (!box || box.className.indexOf('face-box') === -1) return;
+        const container = img.parentElement;
+        const [x1, y1, x2, y2] = pos.split(' ').map(Number);
+        const cW = container.offsetWidth, cH = container.offsetHeight;
+        const iW = img.naturalWidth, iH = img.naturalHeight;
+        const scale = Math.max(cW / iW, cH / iH);
+        const offX = (cW - iW * scale) / 2;
+        const offY = (cH - iH * scale) / 2;
+        box.style.left = (offX + x1 * scale) + 'px';
+        box.style.top = (offY + y1 * scale) + 'px';
+        box.style.width = ((x2 - x1) * scale) + 'px';
+        box.style.height = ((y2 - y1) * scale) + 'px';
+        box.classList.remove('hidden');
+    };
+
+    _photosOriginal = photos;
+    _sortActive = null;
+
     const html = `
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-outline-variant pb-6 gap-6">
             <div class="space-y-2">
@@ -325,27 +521,17 @@ function renderPhotosGrid(photos) {
                 </h2>
                 <p class="text-xs text-outline font-bold uppercase tracking-widest">Archivo Histórico (${photos.length} medios registrados)</p>
             </div>
+            <div class="flex gap-2 flex-wrap">
+                <button onclick="sortPhotos('oldest')" id="sort-oldest" class="sort-btn px-3 py-1 text-[11px] font-bold uppercase border border-primary text-primary rounded-full hover:bg-primary/10 transition-colors">Más antigua</button>
+                <button onclick="sortPhotos('newest')" id="sort-newest" class="sort-btn px-3 py-1 text-[11px] font-bold uppercase border border-primary text-primary rounded-full hover:bg-primary/10 transition-colors">Más nueva</button>
+                <button onclick="sortPhotos('added')" id="sort-added" class="sort-btn px-3 py-1 text-[11px] font-bold uppercase border border-primary text-primary rounded-full hover:bg-primary/10 transition-colors">Fecha incorporación</button>
+            </div>
         </div>
-        <div class="bento-grid">
-            ${photos.slice(0, 9).map((p, i) => {
-                const classMap = ['bento-hero', 'bento-med', 'bento-small', 'bento-xsmall', 'bento-xsmall', 'bento-med', 'bento-med'];
-                const cls = classMap[i] || 'bento-small';
-                return `
-                    <div class="${cls} heritage-border bg-white overflow-hidden group relative">
-                        <img src="/photos/${p.filename}" alt="${p.title || 'Foto'}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                        ${p.title ? `
-                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <p class="text-white text-[10px] font-bold">${p.title}</p>
-                                ${p.date ? `<span class="text-white/60 text-[9px]">${p.date}</span>` : ''}
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            }).join('')}
-        </div>
+        <div id="photos-grid-container"></div>
     `;
 
     document.getElementById('photos-section').innerHTML = html;
+    renderBentoGrid(photos);
 }
 
 function renderDocuments(data) {
@@ -461,12 +647,20 @@ function renderCareer(occupations) {
 }
 
 function renderMilitary(data) {
-    if (!data.person.death_note && !data.notes) {
+    if (!data.military || data.military.length === 0) {
         document.getElementById('military-section').style.display = 'none';
         return;
     }
 
     document.getElementById('military-section').style.display = 'block';
+
+    const events = data.military.map(m => `
+        <div class="border-b border-outline-variant/30 pb-4 last:border-0 last:pb-0">
+            ${m.description ? `<p class="font-bold text-sm mb-2">${m.description}</p>` : ''}
+            ${m.date ? `<span class="text-xs text-outline">${m.date}</span>` : ''}
+            ${m.place ? `<p class="text-sm mt-2 italic text-on-surface/80">${m.place}</p>` : ''}
+        </div>
+    `).join('');
 
     const html = `
         <h3 class="font-headline text-2xl text-primary flex items-center gap-3 mb-6">
@@ -477,10 +671,9 @@ function renderMilitary(data) {
             <div class="absolute -right-8 -bottom-8 opacity-5">
                 <span class="material-symbols-outlined text-9xl">swords</span>
             </div>
-            <div class="flex justify-between items-start mb-4">
-                <span class="font-bold uppercase tracking-widest text-xs">Expediente Militar</span>
+            <div class="space-y-4">
+                ${events}
             </div>
-            <p class="text-sm leading-relaxed italic text-on-surface/80">Sin información registrada</p>
         </div>
     `;
     document.getElementById('military-section').innerHTML = html;

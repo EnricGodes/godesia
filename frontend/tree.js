@@ -1,23 +1,28 @@
+console.log("tree.js loaded");
+
 // --- Search ---
 const searchInput = document.getElementById("tree-search");
 const searchResults = document.getElementById("search-results");
 let searchTimeout = null;
 
-searchInput.addEventListener("input", () => {
-  clearTimeout(searchTimeout);
-  const q = searchInput.value.trim();
-  if (q.length < 2) {
-    searchResults.classList.remove("active");
-    return;
-  }
-  searchTimeout = setTimeout(() => doSearch(q), 300);
-});
+if (searchInput && searchResults) {
+  searchInput.addEventListener("input", () => {
+    clearTimeout(searchTimeout);
+    const q = searchInput.value.trim();
+    if (q.length < 2) {
+      searchResults.classList.remove("active");
+      return;
+    }
+    searchTimeout = setTimeout(() => doSearch(q), 300);
+  });
 
-searchInput.addEventListener("blur", () => {
-  setTimeout(() => searchResults.classList.remove("active"), 200);
-});
+  searchInput.addEventListener("blur", () => {
+    setTimeout(() => searchResults.classList.remove("active"), 200);
+  });
+}
 
 async function doSearch(q) {
+  if (!searchResults) return;
   try {
     const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
     const data = await res.json();
@@ -48,6 +53,18 @@ let g; // main group for zoom
 let zoomBehavior;
 let currentData = null;
 
+// Check if a person ID is passed in the URL and load their tree automatically
+function autoLoadTree() {
+  console.log("autoLoadTree() called");
+  const params = new URLSearchParams(window.location.search);
+  const personId = params.get('id');
+  console.log("URL params - personId:", personId);
+  if (personId) {
+    console.log("Calling loadTree with:", personId);
+    loadTree(personId);
+  }
+}
+
 const NODE_W = 160;
 const NODE_H = 50;
 const MARGIN = { top: 40, right: 40, bottom: 40, left: 40 };
@@ -67,24 +84,28 @@ function initSvg() {
 }
 
 async function loadTree(personId) {
-  searchResults.classList.remove("active");
-  searchInput.value = "";
+  if (searchResults) searchResults.classList.remove("active");
+  if (searchInput) searchInput.value = "";
   document.getElementById("tree-info").textContent = "Carregant...";
 
   // Clean personId for URL (remove @ symbols)
   const cleanId = personId.replace(/@/g, "");
+  console.log("Loading tree for person:", cleanId);
 
   try {
     const res = await fetch(
       `/api/tree/${cleanId}?generations_up=3&generations_down=2`
     );
+    console.log("Response status:", res.status);
     if (!res.ok) throw new Error("Not found");
     currentData = await res.json();
+    console.log("Tree data received:", currentData);
     renderTree(currentData);
     document.getElementById("tree-info").textContent = currentData.name;
   } catch (e) {
+    console.error("Error loading tree:", e);
     document.getElementById("tree-info").textContent =
-      "Error carregant l'arbre";
+      "Error carregant l'arbre: " + e.message;
   }
 }
 
@@ -336,3 +357,6 @@ function resetZoom() {
 
 // Initialize
 initSvg();
+
+// Check if a person ID is in the URL and load their tree automatically
+autoLoadTree();
