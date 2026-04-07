@@ -577,8 +577,9 @@ function renderTimeline(data) {
         return year - person.birth_year;
     }
 
-    function ageText(year) {
+    function ageText(year, hideIfZero = false) {
         const age = calculateAge(year);
+        if (age === 0 && hideIfZero) return '';
         return age !== null ? `Edad ${age}` : '';
     }
 
@@ -586,10 +587,13 @@ function renderTimeline(data) {
     if (person.birth_year) {
         events.push({
             year: person.birth_year,
-            age: ageText(person.birth_year),
+            age: ageText(person.birth_year, true),
             type: 'Nacimiento',
-            detail: person.birth_place || '',
-            photo: person.photo_file,
+            lines: [
+                person.birth_date || `${person.birth_year}`,
+                person.birth_place || ''
+            ].filter(Boolean),
+            photo: null,
             name: person.name
         });
     }
@@ -602,8 +606,11 @@ function renderTimeline(data) {
                 year: year,
                 age: ageText(year),
                 type: 'Bautismo',
-                detail: `${data.baptism_date}${data.baptism_place ? `, ${data.baptism_place}` : ''}`,
-                photo: person.photo_file,
+                lines: [
+                    data.baptism_date || '',
+                    data.baptism_place || ''
+                ].filter(Boolean),
+                photo: null,
                 name: person.name
             });
         }
@@ -618,7 +625,11 @@ function renderTimeline(data) {
                     year: year,
                     age: ageText(year),
                     type: 'Matrimonio con:',
-                    detail: s.name,
+                    lines: [
+                        s.name || '',
+                        s.marriage_date ? `${s.marriage_date}` : '',
+                        s.marriage_place ? `${s.marriage_place}` : ''
+                    ].filter(Boolean),
                     photo: s.photo_file,
                     name: s.name
                 });
@@ -635,7 +646,11 @@ function renderTimeline(data) {
                     year: year,
                     age: ageText(year),
                     type: 'Nacimiento del hijo:',
-                    detail: c.name,
+                    lines: [
+                        c.name || '',
+                        c.birth_date || `${c.birth_year}`,
+                        c.birth_place || ''
+                    ].filter(Boolean),
                     photo: c.photo_file,
                     name: c.name
                 });
@@ -652,8 +667,12 @@ function renderTimeline(data) {
                     year: year,
                     age: ageText(year),
                     type: 'Ocupación',
-                    detail: `${o.title}${o.date ? ` (${o.date})` : ''}${o.place ? `, ${o.place}` : ''}`,
-                    photo: person.photo_file,
+                    lines: [
+                        o.title || '',
+                        o.date || '',
+                        o.place || ''
+                    ].filter(Boolean),
+                    photo: null,
                     name: person.name
                 });
             }
@@ -669,8 +688,12 @@ function renderTimeline(data) {
                     year: year,
                     age: ageText(year),
                     type: 'Residencia',
-                    detail: `${r.date ? `Desde ${r.date} ` : ''}${r.address || ''}`,
-                    photo: person.photo_file,
+                    lines: [
+                        r.date ? `Desde ${r.date}` : '',
+                        r.address || '',
+                        [r.city, r.country].filter(Boolean).join(', ') || ''
+                    ].filter(Boolean),
+                    photo: null,
                     name: person.name
                 });
             }
@@ -686,8 +709,12 @@ function renderTimeline(data) {
                     year: year,
                     age: ageText(year),
                     type: 'Alistamiento Militar',
-                    detail: `${m.description || ''}${m.date ? ` (${m.date})` : ''}${m.place ? `, ${m.place}` : ''}`,
-                    photo: person.photo_file,
+                    lines: [
+                        m.description || '',
+                        m.date || '',
+                        m.place || ''
+                    ].filter(Boolean),
+                    photo: null,
                     name: person.name
                 });
             }
@@ -703,8 +730,11 @@ function renderTimeline(data) {
                     year: year,
                     age: ageText(year),
                     type: 'Entierro',
-                    detail: `${b.date || ''}${b.place ? `, ${b.place}` : ''}`,
-                    photo: person.photo_file,
+                    lines: [
+                        b.date || '',
+                        b.place || ''
+                    ].filter(Boolean),
+                    photo: null,
                     name: person.name
                 });
             }
@@ -717,8 +747,11 @@ function renderTimeline(data) {
             year: person.death_year,
             age: ageText(person.death_year),
             type: 'Defunción',
-            detail: `${person.death_date || person.death_year}${person.death_place ? `, ${person.death_place}` : ''}`,
-            photo: person.photo_file,
+            lines: [
+                person.death_date || `${person.death_year}`,
+                person.death_place || ''
+            ].filter(Boolean),
+            photo: null,
             name: person.name
         });
     }
@@ -741,10 +774,10 @@ function renderTimeline(data) {
             </div>
             <div class="flex-grow pb-8 border-l-2 border-outline-variant pl-8 relative">
                 <div class="absolute -left-[9px] top-2 w-4 h-4 rounded-full bg-primary"></div>
-                <div class="font-bold text-sm mb-2">${e.type}</div>
-                <div class="flex items-center gap-4">
-                    ${e.photo ? `<img class="w-10 h-10 rounded-full object-cover border border-outline-variant/30 flex-shrink-0" src="/photos/${e.photo}" alt="${e.name}">` : ''}
-                    <div class="text-sm text-outline">${e.detail}</div>
+                <div class="font-bold text-sm mb-3">${e.type}</div>
+                <div class="space-y-1">
+                    ${e.photo ? `<div class="flex items-center gap-3 mb-2"><img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${e.photo}" alt="${e.name}"><span class="text-sm font-bold">${e.name}</span></div>` : ''}
+                    ${e.lines.map(line => `<div class="text-sm text-outline">${line}</div>`).join('')}
                 </div>
             </div>
         </div>

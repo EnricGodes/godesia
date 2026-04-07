@@ -750,21 +750,23 @@ def get_person_dossier(conn, person_id):
     # Sort by birth year
     siblings.sort(key=lambda x: x["birth_year"] or 0)
 
-    # Spouses (all marriages with dates)
+    # Spouses (all marriages with dates and places)
     spouse = None
     spouses_list = []
     spouse_rows = conn.execute("""
-        SELECT person2_id, date FROM marriages WHERE person1_id = ?
+        SELECT person2_id, date, place FROM marriages WHERE person1_id = ?
         UNION ALL
-        SELECT person1_id, date FROM marriages WHERE person2_id = ?
+        SELECT person1_id, date, place FROM marriages WHERE person2_id = ?
         ORDER BY date
     """, (person_id, person_id)).fetchall()
 
     for row in spouse_rows:
         spouse_id = row[0]
         marriage_date = row[1]
+        marriage_place = row[2]
         spouse_data = dict(conn.execute("SELECT * FROM people WHERE id = ?", (spouse_id,)).fetchone())
         spouse_data["marriage_date"] = marriage_date
+        spouse_data["marriage_place"] = marriage_place
         spouses_list.append(spouse_data)
         if not spouse:  # First spouse for backward compatibility
             spouse = spouse_data
