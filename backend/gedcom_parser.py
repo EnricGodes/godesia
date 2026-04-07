@@ -100,10 +100,14 @@ def parse_gedcom(filepath: str) -> dict:
                     current_level1 = "BAPM"
                     if value:
                         indi["baptism"]["note"] = value
+                    # También crear un evento para el cronograma
+                    indi["_bapm_tmp"] = {"type": "Bautismo", "description": value or ""}
                 elif tag == "CHR":
                     current_level1 = "CHR"
                     if value:
                         indi["baptism"]["note"] = value
+                    # También crear un evento para el cronograma
+                    indi["_chr_tmp"] = {"type": "Bautismo", "description": value or ""}
                 elif tag == "BURI":
                     indi["burial"].append({"place_detail": value} if value else {})
                     current_level1 = "BURI"
@@ -117,6 +121,8 @@ def parse_gedcom(filepath: str) -> dict:
                     current_level1 = "IMMI"
                     if value:
                         indi["immigration"]["event"] = value
+                    # También crear un evento para el cronograma
+                    indi["_immi_tmp"] = {"type": "Emigración", "description": value or ""}
                 elif tag == "EVEN":
                     indi["_even_tmp"] = {"description": value}
                     current_level1 = "EVEN"
@@ -162,17 +168,29 @@ def parse_gedcom(filepath: str) -> dict:
                 elif current_level1 == "BAPM":
                     if tag == "DATE":
                         indi["baptism"]["date"] = value
+                        if "_bapm_tmp" in indi:
+                            indi["_bapm_tmp"]["date"] = value
                     elif tag == "PLAC":
                         indi["baptism"]["place"] = value
+                        if "_bapm_tmp" in indi:
+                            indi["_bapm_tmp"]["place"] = value
                     elif tag == "NOTE":
                         indi["baptism"]["note"] = value
+                        if "_bapm_tmp" in indi:
+                            indi["_bapm_tmp"]["description"] = value
                 elif current_level1 == "CHR":
                     if tag == "DATE":
                         indi["baptism"]["date"] = value
+                        if "_chr_tmp" in indi:
+                            indi["_chr_tmp"]["date"] = value
                     elif tag == "PLAC":
                         indi["baptism"]["place"] = value
+                        if "_chr_tmp" in indi:
+                            indi["_chr_tmp"]["place"] = value
                     elif tag == "NOTE":
                         indi["baptism"]["note"] = value
+                        if "_chr_tmp" in indi:
+                            indi["_chr_tmp"]["description"] = value
                         # Extract godparents from NOTE if present
                         if "Godparents:" in value:
                             godparents_text = value.split("Godparents:")[-1].strip()
@@ -199,8 +217,12 @@ def parse_gedcom(filepath: str) -> dict:
                 elif current_level1 == "IMMI":
                     if tag == "DATE":
                         indi["immigration"]["date"] = value
+                        if "_immi_tmp" in indi:
+                            indi["_immi_tmp"]["date"] = value
                     elif tag == "PLAC":
                         indi["immigration"]["place"] = value
+                        if "_immi_tmp" in indi:
+                            indi["_immi_tmp"]["place"] = value
                 elif current_level1 == "EVEN" and "_even_tmp" in indi:
                     if tag == "TYPE":
                         indi["_even_tmp"]["type"] = value
@@ -306,8 +328,18 @@ def resolve_relationships(data: dict) -> list:
             person["military"] = indi["military"]
         if indi["anecdotes"]:
             person["anecdotes"] = indi["anecdotes"]
-        if indi["events"]:
-            person["events"] = indi["events"]
+
+        # Agregar eventos de BAPM, CHR, IMMI a la lista general de eventos
+        all_events = list(indi["events"])
+        if "_bapm_tmp" in indi and indi["_bapm_tmp"]:
+            all_events.append(indi["_bapm_tmp"])
+        if "_chr_tmp" in indi and indi["_chr_tmp"]:
+            all_events.append(indi["_chr_tmp"])
+        if "_immi_tmp" in indi and indi["_immi_tmp"]:
+            all_events.append(indi["_immi_tmp"])
+        if all_events:
+            person["events"] = all_events
+
         if indi["immigration"]:
             person["immigration"] = indi["immigration"]
         if indi["notes"]:
