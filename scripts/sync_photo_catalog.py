@@ -319,10 +319,14 @@ def main():
     args = parser.parse_args()
 
     base = Path(__file__).parent.parent
-    # Use the most recent GEDCOM file
+    # Use the most recent GEDCOM file (excluding site380341641-tree5-20260324_signed.ged which is outdated)
     docs_dir = base / "docs"
-    ged_files = sorted(docs_dir.glob("*.ged"), key=lambda x: x.stat().st_mtime, reverse=True)
-    gedcom_path = ged_files[0] if ged_files else base / "docs" / "site380341641-tree5-20260324_signed.ged"
+    ged_files = [f for f in sorted(docs_dir.glob("*.ged"), key=lambda x: x.stat().st_mtime, reverse=True)
+                 if not f.name.startswith("site380341641-tree5-20260324")]
+    if not ged_files:
+        print("ERROR: No GEDCOM file found (site380341641-tree5-20260324_signed.ged is too old, use a recent export)")
+        sys.exit(1)
+    gedcom_path = ged_files[0]
     db_path = base / "data" / "godesia.db"
     photos_dir = base / "data" / "photos"
     photos_dir.mkdir(parents=True, exist_ok=True)

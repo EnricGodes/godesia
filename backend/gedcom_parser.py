@@ -397,9 +397,13 @@ def build_family_tree_json(gedcom_path: str, output_path: str):
 
 if __name__ == "__main__":
     base = Path(__file__).parent.parent
-    # Use the most recent GEDCOM file
+    # Use the most recent GEDCOM file (excluding site380341641-tree5-20260324_signed.ged which is outdated)
     docs_dir = base / "docs"
-    ged_files = sorted(docs_dir.glob("*.ged"), key=lambda x: x.stat().st_mtime, reverse=True)
-    gedcom = ged_files[0] if ged_files else base / "docs" / "site380341641-tree5-20260324_signed.ged"
+    ged_files = [f for f in sorted(docs_dir.glob("*.ged"), key=lambda x: x.stat().st_mtime, reverse=True)
+                 if not f.name.startswith("site380341641-tree5-20260324")]
+    if not ged_files:
+        print("ERROR: No GEDCOM file found (site380341641-tree5-20260324_signed.ged is too old, use a recent export)")
+        sys.exit(1)
+    gedcom = ged_files[0]
     output = base / "data" / "family_tree.json"
     build_family_tree_json(str(gedcom), str(output))
