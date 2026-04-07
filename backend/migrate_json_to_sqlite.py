@@ -183,34 +183,24 @@ def migrate(json_path, db_path):
                 WHERE pt.person_id = ?
             """, (person_id,)).fetchone()["cnt"]
 
-            # Find profile photo: use official MyHeritage profile photo (personal cutout)
+            # Find profile photo: prioritize cutouts (profile photos)
             photo_file = None
             if photo_count > 0:
-                # First priority: personal cutout (official MyHeritage profile photo)
+                # First priority: cutout photo (official profile photo)
                 photo_row = conn.execute("""
                     SELECT ph.filename FROM photos ph
                     JOIN photo_tags pt ON pt.photo_id = ph.id
-                    WHERE pt.person_id = ? AND ph.is_document = 0
-                    AND ph.is_cutout = 1 AND ph.is_personal_photo = 1
+                    WHERE pt.person_id = ? AND ph.is_cutout = 1
+                    AND ph.filename NOT LIKE '%.pdf'
                     ORDER BY ph.id LIMIT 1
                 """, (person_id,)).fetchone()
 
-                # Second priority: any personal photo that's not a cutout
+                # Second priority: any non-PDF photo
                 if not photo_row:
                     photo_row = conn.execute("""
                         SELECT ph.filename FROM photos ph
                         JOIN photo_tags pt ON pt.photo_id = ph.id
-                        WHERE pt.person_id = ? AND ph.is_document = 0
-                        AND ph.is_personal_photo = 1 AND ph.is_cutout = 0
-                        ORDER BY ph.id LIMIT 1
-                    """, (person_id,)).fetchone()
-
-                # Third priority: any non-document photo
-                if not photo_row:
-                    photo_row = conn.execute("""
-                        SELECT ph.filename FROM photos ph
-                        JOIN photo_tags pt ON pt.photo_id = ph.id
-                        WHERE pt.person_id = ? AND ph.is_document = 0
+                        WHERE pt.person_id = ? AND ph.filename NOT LIKE '%.pdf'
                         ORDER BY ph.id LIMIT 1
                     """, (person_id,)).fetchone()
 

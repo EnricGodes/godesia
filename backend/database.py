@@ -873,12 +873,12 @@ def get_person_dossier(conn, person_id):
     ).fetchall()
     notes_list = [n[0] for n in notes]
 
-    # Photos (all, no limit) — include id (for sorting) and date fields
+    # Photos (all, no limit) — include id (for sorting), date fields, and position for face detection
     photos = conn.execute("""
-        SELECT ph.id, ph.filename, ph.title, ph.date, ph.place
+        SELECT ph.id, ph.filename, ph.title, ph.date, ph.place, ph.position
         FROM photos ph
         JOIN photo_tags pt ON pt.photo_id = ph.id
-        WHERE pt.person_id = ?
+        WHERE pt.person_id = ? AND ph.filename NOT LIKE '%.pdf'
         ORDER BY ph.date DESC
     """, (person_id,)).fetchall()
     photos_list = [dict(p) for p in photos]
