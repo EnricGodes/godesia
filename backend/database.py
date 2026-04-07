@@ -874,8 +874,9 @@ def get_person_dossier(conn, person_id):
     notes_list = [n[0] for n in notes]
 
     # Photos (all, no limit) — include id (for sorting), date fields, and position for face detection
+    # Position is stored per person in photo_tags, not globally in photos
     photos = conn.execute("""
-        SELECT ph.id, ph.filename, ph.title, ph.date, ph.place, ph.position
+        SELECT ph.id, ph.filename, ph.title, ph.date, ph.place, pt.position
         FROM photos ph
         JOIN photo_tags pt ON pt.photo_id = ph.id
         WHERE pt.person_id = ? AND ph.filename NOT LIKE '%.pdf'

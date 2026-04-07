@@ -49,11 +49,12 @@ class PhotoRecord:
         self.parent_photo_id = None  # Will be set after resolving relationships
         self.tagged_people = {}  # person_id -> {is_primary, is_prim_cutout, source}
 
-    def add_tag(self, person_id, is_primary=False, is_prim_cutout=False, source="direct"):
+    def add_tag(self, person_id, is_primary=False, is_prim_cutout=False, position=None, source="direct"):
         if person_id not in self.tagged_people:
             self.tagged_people[person_id] = {
                 "is_primary": is_primary,
                 "is_prim_cutout": is_prim_cutout,
+                "position": position,
                 "source": source
             }
 
@@ -216,7 +217,7 @@ def parse_gedcom_photos(lines):
             photo.is_prim_cutout = photo.is_prim_cutout or obje["is_prim_cutout"]
 
             # Añadir tag
-            photo.add_tag(indi_id, is_primary=obje["is_prim"], is_prim_cutout=obje["is_prim_cutout"], source="direct")
+            photo.add_tag(indi_id, is_primary=obje["is_prim"], is_prim_cutout=obje["is_prim_cutout"], position=obje["position"], source="direct")
 
     return photos, indi_obje_blocks
 
@@ -439,6 +440,7 @@ def main():
                 photo_id INTEGER NOT NULL,
                 person_id TEXT NOT NULL,
                 is_primary INTEGER DEFAULT 0,
+                position TEXT,
                 source TEXT,
                 PRIMARY KEY (photo_id, person_id),
                 FOREIGN KEY (photo_id) REFERENCES photos(id)
@@ -483,9 +485,9 @@ def main():
             photo_id = parent_id_map[filename]
             for person_id, tag_info in photo.tagged_people.items():
                 cursor.execute("""
-                    INSERT INTO photo_tags (photo_id, person_id, is_primary, source)
-                    VALUES (?, ?, ?, ?)
-                """, (photo_id, person_id, tag_info["is_primary"], tag_info["source"]))
+                    INSERT INTO photo_tags (photo_id, person_id, is_primary, position, source)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (photo_id, person_id, tag_info["is_primary"], tag_info.get("position"), tag_info["source"]))
 
         # Insertar álbumes
         for album_id, album_info in albums.items():
