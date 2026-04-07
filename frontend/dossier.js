@@ -718,6 +718,7 @@ function renderTimeline(data) {
                     formatDateWithQualifier(data.baptism_date) || '',
                     data.baptism_place || ''
                 ].filter(Boolean),
+                note: data.baptism ? (data.baptism.note || '') : '',
                 photo: null,
                 name: person.name
             });
@@ -917,10 +918,10 @@ function renderTimeline(data) {
                     age: ageText(year),
                     type: e.type || 'Evento',
                     lines: [
-                        e.description || '',
                         formatDateWithQualifier(e.date) || '',
                         e.place || ''
                     ].filter(Boolean),
+                    note: e.description || '',  // Store note separately for italic rendering
                     photo: null,
                     name: person.name
                 });
@@ -1006,6 +1007,7 @@ function renderTimeline(data) {
                 <div class="space-y-1">
                     ${photosHtml}
                     ${e.lines.map(line => `<div class="text-sm text-outline">${line}</div>`).join('')}
+                    ${e.note ? `<div class="text-sm text-outline italic mt-2">${e.note}</div>` : ''}
                 </div>
             </div>
         </div>
