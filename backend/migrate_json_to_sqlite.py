@@ -183,14 +183,14 @@ def migrate(json_path, db_path):
                 WHERE pt.person_id = ?
             """, (person_id,)).fetchone()["cnt"]
 
-            # Find profile photo: use the official primary cutout photo
+            # Find profile photo: official MyHeritage profile photos
             photo_file = None
             if photo_count > 0:
-                # First priority: official profile photo (is_primary + is_cutout)
+                # First priority: official profile photo (is_primary=1 OR is_prim_cutout=1)
                 photo_row = conn.execute("""
                     SELECT ph.filename FROM photos ph
                     JOIN photo_tags pt ON pt.photo_id = ph.id
-                    WHERE pt.person_id = ? AND pt.is_primary = 1 AND ph.is_cutout = 1
+                    WHERE pt.person_id = ? AND (pt.is_primary = 1 OR ph.is_prim_cutout = 1)
                     ORDER BY ph.id LIMIT 1
                 """, (person_id,)).fetchone()
 

@@ -423,6 +423,7 @@ def main():
                 photo_rin TEXT,
                 album_id TEXT,
                 is_cutout INTEGER DEFAULT 0,
+                is_prim_cutout INTEGER DEFAULT 0,
                 is_parent_photo INTEGER DEFAULT 0,
                 parent_photo_id INTEGER,
                 position TEXT,
@@ -457,12 +458,12 @@ def main():
             cursor.execute("""
                 INSERT INTO photos
                 (filename, url, filesize, title, date, place, photo_rin, album_id,
-                 is_cutout, is_parent_photo, position, is_downloaded)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 is_cutout, is_prim_cutout, is_parent_photo, position, is_downloaded)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 filename, photo.url, photo.filesize, photo.title, photo.date,
                 photo.place, photo.photo_rin, photo.album_id, photo.is_cutout,
-                photo.is_parent_photo, photo.position, is_downloaded
+                photo.is_prim_cutout, photo.is_parent_photo, photo.position, is_downloaded
             ))
             parent_id_map[filename] = cursor.lastrowid
 
