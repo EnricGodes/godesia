@@ -718,11 +718,12 @@ function renderTimeline(data) {
                 });
             }
 
-            // Children's marriages
+            // Children's marriages (but only if before parent's death)
             if (c.marriages && c.marriages.length > 0) {
                 c.marriages.forEach(m => {
                     const mYear = extractYear(m.marriage_date);
-                    if (mYear) {
+                    // Only show marriage if it happened before parent's death
+                    if (mYear && (!person.death_year || mYear <= person.death_year)) {
                         const lines = [
                             m.marriage_date ? formatDateWithQualifier(m.marriage_date) : 'Approx. ' + mYear,
                             m.marriage_place ? `${m.marriage_place}` : ''
@@ -825,8 +826,29 @@ function renderTimeline(data) {
                     type: 'Alistamiento Militar',
                     lines: [
                         m.description || '',
-                        m.date || '',
+                        formatDateWithQualifier(m.date) || '',
                         m.place || ''
+                    ].filter(Boolean),
+                    photo: null,
+                    name: person.name
+                });
+            }
+        });
+    }
+
+    // Anécdotas
+    if (data.anecdotes) {
+        data.anecdotes.forEach(a => {
+            const year = extractYear(a.date);
+            if (year) {
+                events.push({
+                    year: year,
+                    age: ageText(year),
+                    type: 'Anécdota',
+                    lines: [
+                        a.description || '',
+                        formatDateWithQualifier(a.date) || '',
+                        a.place || ''
                     ].filter(Boolean),
                     photo: null,
                     name: person.name

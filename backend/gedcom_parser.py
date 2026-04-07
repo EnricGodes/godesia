@@ -60,6 +60,7 @@ def parse_gedcom(filepath: str) -> dict:
                     "occupations": [],
                     "residences": [],
                     "military": [],
+                    "anecdotes": [],
                     "notes": [],
                     "photos": [],
                     "family_spouse": [],
@@ -200,6 +201,8 @@ def parse_gedcom(filepath: str) -> dict:
                     if tag == "TYPE":
                         if value == "Military Enlistment":
                             indi["military"].append(indi["_even_tmp"])
+                        elif value == "Anécdota":
+                            indi["anecdotes"].append(indi["_even_tmp"])
                     elif tag == "DATE":
                         indi["_even_tmp"]["date"] = value
                     elif tag == "PLAC":

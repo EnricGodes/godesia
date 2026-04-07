@@ -93,6 +93,14 @@ CREATE TABLE IF NOT EXISTS military (
     place TEXT
 );
 
+CREATE TABLE IF NOT EXISTS anecdotes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    person_id TEXT,
+    description TEXT,
+    date TEXT,
+    place TEXT
+);
+
 -- NOTA: Las tablas photos, photo_tags, albums son gestionadas por scripts/sync_catalog.py
 -- El script crea el nuevo esquema (actual):
 -- CREATE TABLE photos (
@@ -827,6 +835,13 @@ def get_person_dossier(conn, person_id):
     ).fetchall()
     military_list = [dict(m) for m in military]
 
+    # Anecdotes
+    anecdotes = conn.execute(
+        "SELECT description, date, place FROM anecdotes WHERE person_id = ? ORDER BY date",
+        (person_id,)
+    ).fetchall()
+    anecdotes_list = [dict(a) for a in anecdotes]
+
     # Burial
     burial = conn.execute(
         "SELECT place_detail, date, place FROM burial WHERE person_id = ? ORDER BY date",
@@ -862,6 +877,7 @@ def get_person_dossier(conn, person_id):
         "residences": residences_list,
         "occupations": occupations_list,
         "military": military_list,
+        "anecdotes": anecdotes_list,
         "burial": burial_list,
         "notes": notes_list,
         "photos": photos_list,
