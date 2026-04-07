@@ -85,6 +85,14 @@ CREATE TABLE IF NOT EXISTS burial (
     place TEXT
 );
 
+CREATE TABLE IF NOT EXISTS military (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    person_id TEXT,
+    description TEXT,
+    date TEXT,
+    place TEXT
+);
+
 -- NOTA: Las tablas photos, photo_tags, albums son gestionadas por scripts/sync_catalog.py
 -- El script crea el nuevo esquema (actual):
 -- CREATE TABLE photos (
@@ -778,6 +786,13 @@ def get_person_dossier(conn, person_id):
     ).fetchall()
     occupations_list = [dict(o) for o in occupations]
 
+    # Military
+    military = conn.execute(
+        "SELECT description, date, place FROM military WHERE person_id = ? ORDER BY date",
+        (person_id,)
+    ).fetchall()
+    military_list = [dict(m) for m in military]
+
     # Burial
     burial = conn.execute(
         "SELECT place_detail, date, place FROM burial WHERE person_id = ? ORDER BY date",
@@ -792,14 +807,13 @@ def get_person_dossier(conn, person_id):
     ).fetchall()
     notes_list = [n[0] for n in notes]
 
-    # Photos
+    # Photos (all, no limit) — include id (for sorting), position, and date fields
     photos = conn.execute("""
-        SELECT ph.filename, ph.title, ph.date, ph.place
+        SELECT ph.id, ph.filename, ph.title, ph.date, ph.place, pt.position
         FROM photos ph
         JOIN photo_tags pt ON pt.photo_id = ph.id
         WHERE pt.person_id = ? AND ph.is_document = 0
         ORDER BY ph.date DESC
-        LIMIT 10
     """, (person_id,)).fetchall()
     photos_list = [dict(p) for p in photos]
 
@@ -812,6 +826,7 @@ def get_person_dossier(conn, person_id):
         "children": children_list,
         "residences": residences_list,
         "occupations": occupations_list,
+        "military": military_list,
         "burial": burial_list,
         "notes": notes_list,
         "photos": photos_list,

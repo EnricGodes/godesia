@@ -59,6 +59,7 @@ def parse_gedcom(filepath: str) -> dict:
                     "burial": [],
                     "occupations": [],
                     "residences": [],
+                    "military": [],
                     "notes": [],
                     "photos": [],
                     "family_spouse": [],
@@ -114,6 +115,9 @@ def parse_gedcom(filepath: str) -> dict:
                     current_level1 = "IMMI"
                     if value:
                         indi["immigration"]["event"] = value
+                elif tag == "EVEN":
+                    indi["_even_tmp"] = {"description": value}
+                    current_level1 = "EVEN"
                 elif tag == "FAMS":
                     indi["family_spouse"].append(value)
                 elif tag == "FAMC":
@@ -192,6 +196,14 @@ def parse_gedcom(filepath: str) -> dict:
                         indi["immigration"]["date"] = value
                     elif tag == "PLAC":
                         indi["immigration"]["place"] = value
+                elif current_level1 == "EVEN" and "_even_tmp" in indi:
+                    if tag == "TYPE":
+                        if value == "Military Enlistment":
+                            indi["military"].append(indi["_even_tmp"])
+                    elif tag == "DATE":
+                        indi["_even_tmp"]["date"] = value
+                    elif tag == "PLAC":
+                        indi["_even_tmp"]["place"] = value
                 elif current_level1 == "OBJE" and indi["photos"]:
                     photo = indi["photos"][-1]
                     if tag == "FILE":
@@ -279,6 +291,8 @@ def resolve_relationships(data: dict) -> list:
             person["occupations"] = indi["occupations"]
         if indi["residences"]:
             person["residences"] = indi["residences"]
+        if indi["military"]:
+            person["military"] = indi["military"]
         if indi["immigration"]:
             person["immigration"] = indi["immigration"]
         if indi["notes"]:

@@ -18,7 +18,7 @@ def migrate(json_path, db_path):
     # Drop and recreate
     conn = get_connection(db_path)
     # Don't drop photos, photo_tags, albums - they're managed by sync_catalog.py
-    for table in ["notes", "residences", "occupations", "children", "marriages", "people", "burial"]:
+    for table in ["notes", "residences", "occupations", "military", "children", "marriages", "people", "burial"]:
         conn.execute(f"DROP TABLE IF EXISTS {table}")
     init_db(conn)
 
@@ -111,6 +111,14 @@ def migrate(json_path, db_path):
             conn.execute(
                 "INSERT INTO occupations (person_id, title, date, place) VALUES (?,?,?,?)",
                 (person["id"], occ.get("title", ""), occ_date, occ.get("place", ""))
+            )
+
+        # Military
+        for mil in person.get("military", []):
+            mil_date = convert_date_to_spanish(mil.get("date", ""))
+            conn.execute(
+                "INSERT INTO military (person_id, description, date, place) VALUES (?,?,?,?)",
+                (person["id"], mil.get("description", ""), mil_date, mil.get("place", ""))
             )
 
         # Residences
