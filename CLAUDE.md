@@ -77,6 +77,31 @@ python3 migrate_json_to_sqlite.py
 - People born after 1900 with no death record are marked as `is_alive`
 - The LLM engine builds reduced context (only relevant people + 2 generations of relatives) to keep costs low
 
+## Profile Photo Selection Algorithm
+
+Each person's profile photo is selected from GEDCOM `OBJE` records based on these flags:
+- `_PRIM Y`: Official MyHeritage primary photo (marked as primary in MyHeritage)
+- `_PRIM_CUTOUT Y`: Official MyHeritage primary cutout/profile photo  
+- `_PERSONALPHOTO Y`: Personal photo (marked as belonging to the individual)
+
+**Selection priority** (in `backend/migrate_json_to_sqlite.py`):
+1. `photo_tags.is_primary = 1` (highest priority)
+2. `photos.is_prim_cutout = 1 AND photos.is_personal_photo = 1` (personal primary cutout)
+3. `photos.is_prim_cutout = 1` (any primary cutout)
+4. `photos.is_cutout = 1` (any cutout)
+5. Any non-PDF photo (fallback)
+
+**Examples:**
+- **I16** (Artur Godes Hurtado): `000132_9993585rac49e6n59h867t_V.jpg` (has `_PRIM_CUTOUT Y` + `_PERSONALPHOTO Y`)
+- **I118** (Enric Godes Maté): `500437_181219rgo60418u59d7hk6_A.jpg` (has `_PRIM Y` + `_CUTOUT Y`)
+- **I11** (Ernest Godes Hurtado): `000065_7080186cj59ek8u954c93m_V.jpg` (has `_PRIM_CUTOUT Y` + `_PERSONALPHOTO Y`, not `500017` which only has `_PRIM_CUTOUT Y`)
+
+The `sync_photo_catalog.py` script extracts these flags from GEDCOM and stores them in the `photos` table:
+- `is_prim_cutout INTEGER` (from `_PRIM_CUTOUT Y`)
+- `is_personal_photo INTEGER` (from `_PERSONALPHOTO Y`)
+
+These columns must always exist in the `photos` table schema.
+
 ## Git Workflow
 
 This project uses GitHub (EnricGodes/godesia) for version control. As work is completed, commit changes with clean, descriptive commit messages and push to GitHub.
