@@ -567,7 +567,8 @@ function renderTimeline(data) {
 
     function extractYear(dateStr) {
         if (!dateStr) return null;
-        const match = dateStr.match(/\d{4}/);
+        const str = String(dateStr);
+        const match = str.match(/\d{4}/);
         return match ? parseInt(match[0]) : null;
     }
 
