@@ -676,9 +676,10 @@ function renderTimeline(data) {
         }
     }
 
-    // Matrimonios
-    if (data.spouses) {
-        data.spouses.forEach(s => {
+    // Matrimonios (use spouses array, with fallback to single spouse)
+    const spousesList = (data.spouses && data.spouses.length > 0) ? data.spouses : (data.spouse ? [data.spouse] : []);
+    if (spousesList && spousesList.length > 0) {
+        spousesList.forEach(s => {
             const year = extractYear(s.marriage_date);
             if (year) {
                 events.push({
@@ -744,18 +745,32 @@ function renderTimeline(data) {
         });
     }
 
-    // Ocupaciones
+    // Ocupaciones (with date range support)
     if (data.occupations) {
         data.occupations.forEach(o => {
             const year = extractYear(o.date);
             if (year) {
+                let ageDisplay = '';
+                // Check if date contains a range like "1893 - 1923"
+                if (o.date && o.date.includes(' - ')) {
+                    const parts = o.date.split(' - ');
+                    const endYear = extractYear(parts[1]);
+                    if (endYear && endYear > year) {
+                        const ageStart = calculateAge(year);
+                        const ageEnd = calculateAge(endYear);
+                        if (ageStart !== null && ageEnd !== null) {
+                            ageDisplay = `Edades: ${ageStart} - ${ageEnd}`;
+                        }
+                    }
+                }
+
                 events.push({
                     year: year,
-                    age: ageText(year),
+                    age: ageDisplay || ageText(year),
                     type: 'Ocupación',
                     lines: [
                         o.title || '',
-                        o.date || '',
+                        formatDateRange(o.date) || '',
                         o.place || ''
                     ].filter(Boolean),
                     photo: null,
