@@ -186,15 +186,33 @@ def migrate(json_path, db_path):
             # Find profile photo: official MyHeritage profile photos
             photo_file = None
             if photo_count > 0:
-                # First priority: official profile photo (is_primary=1 takes precedence over is_prim_cutout=1)
+                # First priority: is_primary=1 (official primary photo)
                 photo_row = conn.execute("""
                     SELECT ph.filename FROM photos ph
                     JOIN photo_tags pt ON pt.photo_id = ph.id
-                    WHERE pt.person_id = ? AND (pt.is_primary = 1 OR ph.is_prim_cutout = 1)
-                    ORDER BY pt.is_primary DESC, ph.id LIMIT 1
+                    WHERE pt.person_id = ? AND pt.is_primary = 1
+                    ORDER BY ph.id LIMIT 1
                 """, (person_id,)).fetchone()
 
-                # Second priority: any cutout for this person
+                # Second priority: is_prim_cutout=1 AND is_personal_photo=1 (personal primary cutout)
+                if not photo_row:
+                    photo_row = conn.execute("""
+                        SELECT ph.filename FROM photos ph
+                        JOIN photo_tags pt ON pt.photo_id = ph.id
+                        WHERE pt.person_id = ? AND ph.is_prim_cutout = 1 AND ph.is_personal_photo = 1
+                        ORDER BY ph.id LIMIT 1
+                    """, (person_id,)).fetchone()
+
+                # Third priority: any is_prim_cutout=1
+                if not photo_row:
+                    photo_row = conn.execute("""
+                        SELECT ph.filename FROM photos ph
+                        JOIN photo_tags pt ON pt.photo_id = ph.id
+                        WHERE pt.person_id = ? AND ph.is_prim_cutout = 1
+                        ORDER BY ph.id LIMIT 1
+                    """, (person_id,)).fetchone()
+
+                # Fourth priority: any cutout
                 if not photo_row:
                     photo_row = conn.execute("""
                         SELECT ph.filename FROM photos ph
@@ -203,7 +221,7 @@ def migrate(json_path, db_path):
                         ORDER BY ph.id LIMIT 1
                     """, (person_id,)).fetchone()
 
-                # Third priority: any non-PDF photo
+                # Fifth priority: any non-PDF photo
                 if not photo_row:
                     photo_row = conn.execute("""
                         SELECT ph.filename FROM photos ph
