@@ -565,11 +565,39 @@ function renderTimeline(data) {
     const person = data.person;
     const events = [];
 
+    // Extract baptism names from notes
+    let baptismNames = '';
+    if (data.notes && data.notes.length > 0) {
+        const notesText = data.notes.join(' ');
+        const namesMatch = notesText.match(/amb els noms[s]? d[\'e]([^.]+)/);
+        if (namesMatch) {
+            baptismNames = namesMatch[1].trim();
+        }
+    }
+
     function extractYear(dateStr) {
         if (!dateStr) return null;
         const str = String(dateStr);
         const match = str.match(/\d{4}/);
         return match ? parseInt(match[0]) : null;
+    }
+
+    function formatDateWithQualifier(dateStr) {
+        if (!dateStr) return '';
+        const str = String(dateStr);
+        // Handle GEDCOM date qualifiers
+        if (str.startsWith('ABT ')) return 'Aprox. ' + str.substring(4);
+        if (str.startsWith('AFT ')) return 'Después de ' + str.substring(4);
+        if (str.startsWith('BEF ')) return 'Antes de ' + str.substring(4);
+        if (str.startsWith('FROM ') && str.includes(' TO ')) {
+            const parts = str.split(' TO ');
+            return 'Desde ' + parts[0].substring(5) + ' hasta ' + parts[1];
+        }
+        if (str.startsWith('BET ') && str.includes(' AND ')) {
+            const parts = str.split(' AND ');
+            return 'Entre ' + parts[0].substring(4) + ' y ' + parts[1];
+        }
+        return str;
     }
 
     function calculateAge(year) {
@@ -610,14 +638,21 @@ function renderTimeline(data) {
 
     // Nacimiento
     if (person.birth_year) {
+        const lines = [
+            formatDateWithQualifier(person.birth_date) || `${person.birth_year}`,
+            person.birth_place || ''
+        ].filter(Boolean);
+
+        // Add baptism names if available
+        if (baptismNames) {
+            lines.push(baptismNames);
+        }
+
         events.push({
             year: person.birth_year,
             age: ageText(person.birth_year, true),
             type: 'Nacimiento',
-            lines: [
-                person.birth_date || `${person.birth_year}`,
-                person.birth_place || ''
-            ].filter(Boolean),
+            lines: lines,
             photo: null,
             name: person.name
         });
@@ -632,7 +667,7 @@ function renderTimeline(data) {
                 age: ageText(year),
                 type: 'Bautismo',
                 lines: [
-                    data.baptism_date || '',
+                    formatDateWithQualifier(data.baptism_date) || '',
                     data.baptism_place || ''
                 ].filter(Boolean),
                 photo: null,
@@ -652,7 +687,7 @@ function renderTimeline(data) {
                     type: 'Matrimonio con:',
                     lines: [
                         s.name || '',
-                        s.marriage_date ? `${s.marriage_date}` : '',
+                        s.marriage_date ? formatDateWithQualifier(s.marriage_date) : '',
                         s.marriage_place ? `${s.marriage_place}` : ''
                     ].filter(Boolean),
                     photo: s.photo_file,
@@ -674,7 +709,7 @@ function renderTimeline(data) {
                     type: typeText,
                     lines: [
                         c.name || '',
-                        c.birth_date || `${c.birth_year}`,
+                        formatDateWithQualifier(c.birth_date) || `${c.birth_year}`,
                         c.birth_place || ''
                     ].filter(Boolean),
                     photo: c.photo_file,
@@ -687,14 +722,16 @@ function renderTimeline(data) {
                 c.marriages.forEach(m => {
                     const mYear = extractYear(m.marriage_date);
                     if (mYear) {
+                        const lines = [
+                            m.marriage_date ? formatDateWithQualifier(m.marriage_date) : 'Approx. ' + mYear,
+                            m.marriage_place ? `${m.marriage_place}` : ''
+                        ].filter(Boolean);
+
                         events.push({
                             year: mYear,
                             age: ageText(mYear),
                             type: `Matrimonio de ${c.sex === 'F' ? 'la hija' : 'el hijo'}:`,
-                            lines: [
-                                m.marriage_date ? `${m.marriage_date}` : 'Approx. ' + mYear,
-                                m.marriage_place ? `${m.marriage_place}` : ''
-                            ].filter(Boolean),
+                            lines: lines,
                             photo: m.spouse_photo,
                             name: m.spouse_name,
                             childPhoto: c.photo_file,
@@ -790,7 +827,7 @@ function renderTimeline(data) {
             age: ageText(person.death_year),
             type: 'Defunción',
             lines: [
-                person.death_date || `${person.death_year}`,
+                formatDateWithQualifier(person.death_date) || `${person.death_year}`,
                 person.death_place || ''
             ].filter(Boolean),
             photo: null,
@@ -803,7 +840,7 @@ function renderTimeline(data) {
         data.burial.forEach(b => {
             const year = extractYear(b.date);
             if (year) {
-                const lines = [b.date || ''];
+                const lines = [formatDateWithQualifier(b.date) || ''];
                 if (b.place) lines.push(b.place);
                 if (b.place_detail) {
                     // place_detail might contain cemetery info and location details
