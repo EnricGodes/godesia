@@ -902,6 +902,27 @@ function renderTimeline(data) {
         });
     }
 
+    // Generic events (Award, Illness, Funeral, Membership, etc.)
+    if (data.events) {
+        data.events.forEach(e => {
+            const year = extractYear(e.date);
+            if (year) {
+                events.push({
+                    year: year,
+                    age: ageText(year),
+                    type: e.type || 'Evento',
+                    lines: [
+                        e.description || '',
+                        formatDateWithQualifier(e.date) || '',
+                        e.place || ''
+                    ].filter(Boolean),
+                    photo: null,
+                    name: person.name
+                });
+            }
+        });
+    }
+
     // Defunción
     if (person.death_year) {
         events.push({

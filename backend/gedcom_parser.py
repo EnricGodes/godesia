@@ -61,6 +61,7 @@ def parse_gedcom(filepath: str) -> dict:
                     "residences": [],
                     "military": [],
                     "anecdotes": [],
+                    "events": [],  # Generic events (Award, Illness, Funeral, etc.)
                     "notes": [],
                     "photos": [],
                     "family_spouse": [],
@@ -199,10 +200,14 @@ def parse_gedcom(filepath: str) -> dict:
                         indi["immigration"]["place"] = value
                 elif current_level1 == "EVEN" and "_even_tmp" in indi:
                     if tag == "TYPE":
+                        indi["_even_tmp"]["type"] = value
                         if value == "Military Enlistment":
                             indi["military"].append(indi["_even_tmp"])
                         elif value == "Anécdota":
                             indi["anecdotes"].append(indi["_even_tmp"])
+                        else:
+                            # Generic events: Award, Illness, Funeral, Membership, etc.
+                            indi["events"].append(indi["_even_tmp"])
                     elif tag == "DATE":
                         indi["_even_tmp"]["date"] = value
                     elif tag == "PLAC":

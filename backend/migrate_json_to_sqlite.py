@@ -18,7 +18,7 @@ def migrate(json_path, db_path):
     # Drop and recreate
     conn = get_connection(db_path)
     # Don't drop photos, photo_tags, albums - they're managed by sync_catalog.py
-    for table in ["notes", "residences", "occupations", "military", "children", "marriages", "people", "burial"]:
+    for table in ["notes", "residences", "occupations", "military", "anecdotes", "events", "children", "marriages", "people", "burial"]:
         conn.execute(f"DROP TABLE IF EXISTS {table}")
     init_db(conn)
 
@@ -119,6 +119,22 @@ def migrate(json_path, db_path):
             conn.execute(
                 "INSERT INTO military (person_id, description, date, place) VALUES (?,?,?,?)",
                 (person["id"], mil.get("description", ""), mil_date, mil.get("place", ""))
+            )
+
+        # Anecdotes
+        for anec in person.get("anecdotes", []):
+            anec_date = convert_date_to_spanish(anec.get("date", ""))
+            conn.execute(
+                "INSERT INTO anecdotes (person_id, description, date, place) VALUES (?,?,?,?)",
+                (person["id"], anec.get("description", ""), anec_date, anec.get("place", ""))
+            )
+
+        # Generic events (Award, Illness, Funeral, etc.)
+        for evt in person.get("events", []):
+            evt_date = convert_date_to_spanish(evt.get("date", ""))
+            conn.execute(
+                "INSERT INTO events (person_id, type, description, date, place) VALUES (?,?,?,?,?)",
+                (person["id"], evt.get("type", ""), evt.get("description", ""), evt_date, evt.get("place", ""))
             )
 
         # Residences
