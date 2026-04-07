@@ -562,26 +562,164 @@ function renderDocuments(data) {
 }
 
 function renderTimeline(data) {
+    const person = data.person;
     const events = [];
 
-    if (data.person.birth_year) {
-        events.push({ date: data.person.birth_year, type: 'Naixement', detail: data.person.birth_place || '' });
+    function extractYear(dateStr) {
+        if (!dateStr) return null;
+        const match = dateStr.match(/\d{4}/);
+        return match ? parseInt(match[0]) : null;
     }
 
-    if (data.residences) {
-        data.residences.forEach(r => {
-            events.push({ date: r.date || '', type: 'Residència', detail: r.address || '' });
+    function calculateAge(year) {
+        if (!year || !person.birth_year) return null;
+        return year - person.birth_year;
+    }
+
+    function ageText(year) {
+        const age = calculateAge(year);
+        return age !== null ? `Edad ${age}` : '';
+    }
+
+    // Nacimiento
+    if (person.birth_year) {
+        events.push({
+            year: person.birth_year,
+            age: ageText(person.birth_year),
+            type: 'Nacimiento',
+            detail: person.birth_place || '',
+            photo: person.photo_file,
+            name: person.name
         });
     }
 
+    // Bautismo
+    if (data.baptism_date) {
+        const year = extractYear(data.baptism_date);
+        if (year) {
+            events.push({
+                year: year,
+                age: ageText(year),
+                type: 'Bautismo',
+                detail: `${data.baptism_date}${data.baptism_place ? `, ${data.baptism_place}` : ''}`,
+                photo: person.photo_file,
+                name: person.name
+            });
+        }
+    }
+
+    // Matrimonios
+    if (data.spouses) {
+        data.spouses.forEach(s => {
+            const year = extractYear(s.marriage_date);
+            if (year) {
+                events.push({
+                    year: year,
+                    age: ageText(year),
+                    type: 'Matrimonio con:',
+                    detail: s.name,
+                    photo: s.photo_file,
+                    name: s.name
+                });
+            }
+        });
+    }
+
+    // Hijos
+    if (data.children) {
+        data.children.forEach(c => {
+            const year = extractYear(c.birth_year);
+            if (year) {
+                events.push({
+                    year: year,
+                    age: ageText(year),
+                    type: 'Nacimiento del hijo:',
+                    detail: c.name,
+                    photo: c.photo_file,
+                    name: c.name
+                });
+            }
+        });
+    }
+
+    // Ocupaciones
     if (data.occupations) {
         data.occupations.forEach(o => {
-            events.push({ date: o.date || '', type: 'Treball', detail: o.title || '' });
+            const year = extractYear(o.date);
+            if (year) {
+                events.push({
+                    year: year,
+                    age: ageText(year),
+                    type: 'Ocupación',
+                    detail: `${o.title}${o.date ? ` (${o.date})` : ''}${o.place ? `, ${o.place}` : ''}`,
+                    photo: person.photo_file,
+                    name: person.name
+                });
+            }
         });
     }
 
-    if (data.person.death_year) {
-        events.push({ date: data.person.death_year, type: 'Defunció', detail: data.person.death_place || '' });
+    // Residencias
+    if (data.residences) {
+        data.residences.forEach(r => {
+            const year = extractYear(r.date);
+            if (year) {
+                events.push({
+                    year: year,
+                    age: ageText(year),
+                    type: 'Residencia',
+                    detail: `${r.date ? `Desde ${r.date} ` : ''}${r.address || ''}`,
+                    photo: person.photo_file,
+                    name: person.name
+                });
+            }
+        });
+    }
+
+    // Alistamiento militar
+    if (data.military) {
+        data.military.forEach(m => {
+            const year = extractYear(m.date);
+            if (year) {
+                events.push({
+                    year: year,
+                    age: ageText(year),
+                    type: 'Alistamiento Militar',
+                    detail: `${m.description || ''}${m.date ? ` (${m.date})` : ''}${m.place ? `, ${m.place}` : ''}`,
+                    photo: person.photo_file,
+                    name: person.name
+                });
+            }
+        });
+    }
+
+    // Entierro
+    if (data.burial && data.burial.length > 0) {
+        data.burial.forEach(b => {
+            const year = extractYear(b.date);
+            if (year) {
+                events.push({
+                    year: year,
+                    age: ageText(year),
+                    type: 'Entierro',
+                    detail: `${b.date || ''}${b.place ? `, ${b.place}` : ''}`,
+                    photo: person.photo_file,
+                    name: person.name
+                });
+            }
+        });
+    }
+
+    // Defunción
+    if (person.death_year) {
+        events.push({
+            year: person.death_year,
+            age: ageText(person.death_year),
+            type: 'Defunción',
+            detail: `${person.death_date || person.death_year}${person.death_place ? `, ${person.death_place}` : ''}`,
+            photo: person.photo_file,
+            name: person.name
+        });
     }
 
     if (events.length === 0) {
@@ -589,32 +727,35 @@ function renderTimeline(data) {
         return;
     }
 
+    // Sort by year
+    events.sort((a, b) => a.year - b.year);
+
     document.getElementById('timeline-section').style.display = 'block';
 
-    const rows = events.map(e => `
-        <tr>
-            <td class="px-6 py-4 font-bold text-primary">${e.date}</td>
-            <td class="px-6 py-4 italic text-xs">${e.type}</td>
-            <td class="px-6 py-4">${e.detail}</td>
-        </tr>
+    const timelineHtml = events.map((e, idx) => `
+        <div class="flex gap-8 mb-12 relative">
+            <div class="w-20 text-right flex-shrink-0">
+                <div class="text-2xl font-bold text-primary">${e.year}</div>
+                ${e.age ? `<div class="text-xs text-outline mt-1">${e.age}</div>` : ''}
+            </div>
+            <div class="flex-grow pb-8 border-l-2 border-outline-variant pl-8 relative">
+                <div class="absolute -left-[9px] top-2 w-4 h-4 rounded-full bg-primary"></div>
+                <div class="font-bold text-sm mb-2">${e.type}</div>
+                <div class="flex items-center gap-4">
+                    ${e.photo ? `<img class="w-10 h-10 rounded-full object-cover border border-outline-variant/30 flex-shrink-0" src="/photos/${e.photo}" alt="${e.name}">` : ''}
+                    <div class="text-sm text-outline">${e.detail}</div>
+                </div>
+            </div>
+        </div>
     `).join('');
 
     const html = `
-        <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
+        <h2 class="font-headline text-3xl text-primary flex items-center gap-4 mb-8">
             <span class="material-symbols-outlined">event_note</span>
             Cronograma Biográfico
         </h2>
-        <div class="overflow-x-auto shadow-sm heritage-border rounded-xl">
-            <table class="w-full text-left border-collapse bg-white">
-                <thead class="bg-surface-container-high text-on-surface uppercase text-[10px] tracking-widest font-bold">
-                    <tr>
-                        <th class="px-6 py-4 border-b border-outline-variant/30">Fecha</th>
-                        <th class="px-6 py-4 border-b border-outline-variant/30">Tipo</th>
-                        <th class="px-6 py-4 border-b border-outline-variant/30">Detalles</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-outline-variant/20 text-sm">${rows}</tbody>
-            </table>
+        <div class="space-y-2">
+            ${timelineHtml}
         </div>
     `;
     document.getElementById('timeline-section').innerHTML = html;

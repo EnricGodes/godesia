@@ -750,20 +750,24 @@ def get_person_dossier(conn, person_id):
     # Sort by birth year
     siblings.sort(key=lambda x: x["birth_year"] or 0)
 
-    # Spouse
+    # Spouses (all marriages with dates)
     spouse = None
-    spouse_row = conn.execute(
-        "SELECT person2_id FROM marriages WHERE person1_id = ?",
-        (person_id,)
-    ).fetchone()
-    if not spouse_row:
-        spouse_row = conn.execute(
-            "SELECT person1_id FROM marriages WHERE person2_id = ?",
-            (person_id,)
-        ).fetchone()
-    if spouse_row:
-        spouse_id = spouse_row[0]
-        spouse = dict(conn.execute("SELECT * FROM people WHERE id = ?", (spouse_id,)).fetchone())
+    spouses_list = []
+    spouse_rows = conn.execute("""
+        SELECT person2_id, date FROM marriages WHERE person1_id = ?
+        UNION ALL
+        SELECT person1_id, date FROM marriages WHERE person2_id = ?
+        ORDER BY date
+    """, (person_id, person_id)).fetchall()
+
+    for row in spouse_rows:
+        spouse_id = row[0]
+        marriage_date = row[1]
+        spouse_data = dict(conn.execute("SELECT * FROM people WHERE id = ?", (spouse_id,)).fetchone())
+        spouse_data["marriage_date"] = marriage_date
+        spouses_list.append(spouse_data)
+        if not spouse:  # First spouse for backward compatibility
+            spouse = spouse_data
 
     # Children
     children = conn.execute(
@@ -823,6 +827,7 @@ def get_person_dossier(conn, person_id):
         "mother": mother,
         "siblings": siblings,
         "spouse": spouse,
+        "spouses": spouses_list,
         "children": children_list,
         "residences": residences_list,
         "occupations": occupations_list,
