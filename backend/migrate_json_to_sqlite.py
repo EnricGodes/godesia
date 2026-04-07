@@ -62,16 +62,17 @@ def migrate(json_path, db_path):
 
         conn.execute(
             "INSERT INTO people (id, name, given_name, surname, sex, "
-            "birth_date, birth_day, birth_month, birth_year, birth_place, "
+            "birth_date, birth_day, birth_month, birth_year, birth_place, birth_note, "
             "death_date, death_year, death_place, death_cause, death_note, death_age, "
             "is_alive, father_id, mother_id, father_name, mother_name, "
             "photo_file, photo_count, baptism_date, baptism_place, godparents) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (
                 person["id"], person.get("name", ""), person.get("given_name", ""),
                 person.get("surname", ""), person.get("sex", ""),
                 birth_date, b_day, b_month, b_year,
                 person.get("birth", {}).get("place", ""),
+                person.get("birth", {}).get("note", ""),
                 death_date, d_year, death.get("place", ""),
                 death.get("cause", ""), death.get("note", ""), death.get("age", ""),
                 is_alive,

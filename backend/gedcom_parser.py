@@ -144,6 +144,9 @@ def parse_gedcom(filepath: str) -> dict:
                         indi["birth"]["date"] = value
                     elif tag == "PLAC":
                         indi["birth"]["place"] = value
+                    elif tag == "NOTE":
+                        clean = clean_html(value)
+                        indi["birth"]["note"] = clean
                 elif current_level1 == "DEAT":
                     if tag == "DATE":
                         indi["death"]["date"] = value

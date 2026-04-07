@@ -686,6 +686,11 @@ function renderTimeline(data) {
             person.birth_place || ''
         ].filter(Boolean);
 
+        // Add birth note if available
+        if (person.birth_note) {
+            lines.push(person.birth_note);
+        }
+
         // Add baptism names if available
         if (baptismNames) {
             lines.push(baptismNames);

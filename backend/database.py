@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS people (
     birth_month INTEGER,
     birth_year INTEGER,
     birth_place TEXT,
+    birth_note TEXT,
     death_date TEXT,
     death_year INTEGER,
     death_place TEXT,
@@ -873,14 +874,19 @@ def get_person_dossier(conn, person_id):
     notes_list = [n[0] for n in notes]
 
     # Photos (all, no limit) — include id (for sorting), position, and date fields
-    photos = conn.execute("""
-        SELECT ph.id, ph.filename, ph.title, ph.date, ph.place, pt.position
-        FROM photos ph
-        JOIN photo_tags pt ON pt.photo_id = ph.id
-        WHERE pt.person_id = ? AND ph.is_document = 0
-        ORDER BY ph.date DESC
-    """, (person_id,)).fetchall()
-    photos_list = [dict(p) for p in photos]
+    photos_list = []
+    try:
+        photos = conn.execute("""
+            SELECT ph.id, ph.filename, ph.title, ph.date, ph.place, pt.position
+            FROM photos ph
+            JOIN photo_tags pt ON pt.photo_id = ph.id
+            WHERE pt.person_id = ? AND ph.is_document = 0
+            ORDER BY ph.date DESC
+        """, (person_id,)).fetchall()
+        photos_list = [dict(p) for p in photos]
+    except Exception:
+        # photos table might not exist yet
+        pass
 
     return {
         "person": person_dict,
