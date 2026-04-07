@@ -183,19 +183,27 @@ def migrate(json_path, db_path):
                 WHERE pt.person_id = ?
             """, (person_id,)).fetchone()["cnt"]
 
-            # Find profile photo: prioritize cutouts (profile photos)
+            # Find profile photo: use the official primary cutout photo
             photo_file = None
             if photo_count > 0:
-                # First priority: cutout photo (official profile photo)
+                # First priority: official profile photo (is_primary + is_cutout)
                 photo_row = conn.execute("""
                     SELECT ph.filename FROM photos ph
                     JOIN photo_tags pt ON pt.photo_id = ph.id
-                    WHERE pt.person_id = ? AND ph.is_cutout = 1
-                    AND ph.filename NOT LIKE '%.pdf'
+                    WHERE pt.person_id = ? AND pt.is_primary = 1 AND ph.is_cutout = 1
                     ORDER BY ph.id LIMIT 1
                 """, (person_id,)).fetchone()
 
-                # Second priority: any non-PDF photo
+                # Second priority: any cutout for this person
+                if not photo_row:
+                    photo_row = conn.execute("""
+                        SELECT ph.filename FROM photos ph
+                        JOIN photo_tags pt ON pt.photo_id = ph.id
+                        WHERE pt.person_id = ? AND ph.is_cutout = 1
+                        ORDER BY ph.id LIMIT 1
+                    """, (person_id,)).fetchone()
+
+                # Third priority: any non-PDF photo
                 if not photo_row:
                     photo_row = conn.execute("""
                         SELECT ph.filename FROM photos ph
