@@ -1,5 +1,3 @@
-console.log("tree.js loaded");
-
 // --- Search ---
 const searchInput = document.getElementById("tree-search");
 const searchResults = document.getElementById("search-results");
@@ -22,7 +20,6 @@ if (searchInput && searchResults) {
 }
 
 async function doSearch(q) {
-  if (!searchResults) return;
   try {
     const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
     const data = await res.json();
@@ -53,18 +50,6 @@ let g; // main group for zoom
 let zoomBehavior;
 let currentData = null;
 
-// Check if a person ID is passed in the URL and load their tree automatically
-function autoLoadTree() {
-  console.log("autoLoadTree() called");
-  const params = new URLSearchParams(window.location.search);
-  const personId = params.get('id');
-  console.log("URL params - personId:", personId);
-  if (personId) {
-    console.log("Calling loadTree with:", personId);
-    loadTree(personId);
-  }
-}
-
 const NODE_W = 160;
 const NODE_H = 50;
 const MARGIN = { top: 40, right: 40, bottom: 40, left: 40 };
@@ -90,22 +75,18 @@ async function loadTree(personId) {
 
   // Clean personId for URL (remove @ symbols)
   const cleanId = personId.replace(/@/g, "");
-  console.log("Loading tree for person:", cleanId);
 
   try {
     const res = await fetch(
       `/api/tree/${cleanId}?generations_up=3&generations_down=2`
     );
-    console.log("Response status:", res.status);
     if (!res.ok) throw new Error("Not found");
     currentData = await res.json();
-    console.log("Tree data received:", currentData);
     renderTree(currentData);
     document.getElementById("tree-info").textContent = currentData.name;
   } catch (e) {
-    console.error("Error loading tree:", e);
     document.getElementById("tree-info").textContent =
-      "Error carregant l'arbre: " + e.message;
+      "Error carregant l'arbre";
   }
 }
 
@@ -357,6 +338,3 @@ function resetZoom() {
 
 // Initialize
 initSvg();
-
-// Check if a person ID is in the URL and load their tree automatically
-autoLoadTree();
