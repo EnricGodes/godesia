@@ -810,11 +810,11 @@ def get_person_dossier(conn, person_id):
             spouse_id = m[0]
             marriage_date = m[1]
             marriage_place = m[2]
-            spouse = conn.execute("SELECT name, photo_file FROM people WHERE id = ?", (spouse_id,)).fetchone()
-            if spouse:
+            child_spouse_row = conn.execute("SELECT name, photo_file FROM people WHERE id = ?", (spouse_id,)).fetchone()
+            if child_spouse_row:
                 child_marriages.append({
-                    "spouse_name": spouse["name"],
-                    "spouse_photo": spouse["photo_file"],
+                    "spouse_name": child_spouse_row["name"],
+                    "spouse_photo": child_spouse_row["photo_file"],
                     "marriage_date": marriage_date,
                     "marriage_place": marriage_place
                 })
