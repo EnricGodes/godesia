@@ -582,6 +582,49 @@ function renderTimeline(data) {
         return match ? parseInt(match[0]) : null;
     }
 
+    function dateToComparable(dateStr) {
+        // Convert date string to comparable format YYYY-MM-DD
+        // Handles formats like "9 mar. 1925", "10 sept. 1925", "22 may. 1920"
+        if (!dateStr) return '9999-12-31'; // Return max date if no date
+
+        const str = String(dateStr).toLowerCase();
+        const months = {
+            'ene': '01', 'enero': '01', 'january': '01', 'jan': '01',
+            'feb': '02', 'febrero': '02', 'february': '02',
+            'mar': '03', 'marzo': '03', 'march': '03',
+            'abr': '04', 'abril': '04', 'april': '04', 'apr': '04',
+            'may': '05', 'mayo': '05',
+            'jun': '06', 'junio': '06', 'june': '06',
+            'jul': '07', 'julio': '07', 'july': '07',
+            'ago': '08', 'agosto': '08', 'august': '08', 'aug': '08',
+            'sept': '09', 'setembre': '09', 'september': '09', 'sep': '09',
+            'oct': '10', 'octubre': '10', 'october': '10',
+            'nov': '11', 'noviembre': '11', 'november': '11',
+            'dic': '12', 'diciembre': '12', 'december': '12', 'dec': '12'
+        };
+
+        const yearMatch = str.match(/\d{4}/);
+        if (!yearMatch) return '9999-12-31';
+
+        const year = yearMatch[0];
+        let month = '01';
+        let day = '01';
+
+        // Extract day
+        const dayMatch = str.match(/^(\d+)\s/);
+        if (dayMatch) day = dayMatch[1].padStart(2, '0');
+
+        // Extract month
+        for (const [monthName, monthNum] of Object.entries(months)) {
+            if (str.includes(monthName)) {
+                month = monthNum;
+                break;
+            }
+        }
+
+        return `${year}-${month}-${day}`;
+    }
+
     function formatDateWithQualifier(dateStr) {
         if (!dateStr) return '';
         const str = String(dateStr);
@@ -722,8 +765,10 @@ function renderTimeline(data) {
             if (c.marriages && c.marriages.length > 0) {
                 c.marriages.forEach(m => {
                     const mYear = extractYear(m.marriage_date);
-                    // Only show marriage if it happened before parent's death
-                    if (mYear && (!person.death_year || mYear <= person.death_year)) {
+                    // Only show marriage if it happened before or on the day of parent's death
+                    const marriageDate = dateToComparable(m.marriage_date);
+                    const deathDate = dateToComparable(person.death_date || person.death_year);
+                    if (mYear && marriageDate <= deathDate) {
                         const lines = [
                             m.marriage_date ? formatDateWithQualifier(m.marriage_date) : 'Approx. ' + mYear,
                             m.marriage_place ? `${m.marriage_place}` : ''
