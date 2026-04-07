@@ -105,10 +105,17 @@ CREATE TABLE IF NOT EXISTS anecdotes (
 CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     person_id TEXT,
+    tag TEXT,
     type TEXT,
     description TEXT,
     date TEXT,
-    place TEXT
+    place TEXT,
+    age TEXT,
+    note TEXT,
+    cause TEXT,
+    address TEXT,
+    email TEXT,
+    www TEXT
 );
 
 -- NOTA: Las tablas photos, photo_tags, albums son gestionadas por scripts/sync_catalog.py
@@ -852,9 +859,9 @@ def get_person_dossier(conn, person_id):
     ).fetchall()
     anecdotes_list = [dict(a) for a in anecdotes]
 
-    # Generic events (Award, Illness, Funeral, Membership, etc.)
+    # ALL events (Bautismo, Emigración, Educación, Ocupación, Residencia, Censo, etc.)
     events = conn.execute(
-        "SELECT type, description, date, place FROM events WHERE person_id = ? ORDER BY date",
+        "SELECT tag, type, description, date, place, age, note, cause, address, email, www FROM events WHERE person_id = ? ORDER BY date",
         (person_id,)
     ).fetchall()
     events_list = [dict(e) for e in events]

@@ -61,7 +61,7 @@ def parse_gedcom(filepath: str) -> dict:
                     "residences": [],
                     "military": [],
                     "anecdotes": [],
-                    "events": [],  # Generic events (Award, Illness, Funeral, etc.)
+                    "events": [],
                     "notes": [],
                     "photos": [],
                     "family_spouse": [],
@@ -88,6 +88,7 @@ def parse_gedcom(filepath: str) -> dict:
             if level == 1:
                 current_level1 = tag
                 current_level2 = None
+
                 if tag == "NAME":
                     indi["name"] = value.replace("/", "").strip()
                 elif tag == "SEX":
@@ -96,35 +97,31 @@ def parse_gedcom(filepath: str) -> dict:
                     current_level1 = "BIRT"
                 elif tag == "DEAT":
                     current_level1 = "DEAT"
-                elif tag == "BAPM":
-                    current_level1 = "BAPM"
-                    if value:
-                        indi["baptism"]["note"] = value
-                    # También crear un evento para el cronograma
-                    indi["_bapm_tmp"] = {"type": "Bautismo", "description": value or ""}
-                elif tag == "CHR":
-                    current_level1 = "CHR"
-                    if value:
-                        indi["baptism"]["note"] = value
-                    # También crear un evento para el cronograma
-                    indi["_chr_tmp"] = {"type": "Bautismo", "description": value or ""}
                 elif tag == "BURI":
                     indi["burial"].append({"place_detail": value} if value else {})
                     current_level1 = "BURI"
-                elif tag == "OCCU":
-                    indi["occupations"].append({"title": value})
-                    current_level1 = "OCCU"
                 elif tag == "RESI":
                     indi["residences"].append({})
                     current_level1 = "RESI"
+                elif tag == "OCCU":
+                    indi["occupations"].append({"title": value})
+                    current_level1 = "OCCU"
+                # Capture ALL event tags as events with their type
+                elif tag in ("CENS", "EDUC", "BAPM", "CHR", "CONF", "FCOM", "EMIG", "IMMI", "NATI", "RELI", "DSCR"):
+                    event_type_map = {
+                        "CENS": "Censo", "EDUC": "Educación", "BAPM": "Bautismo", "CHR": "Bautizo",
+                        "CONF": "Confirmación", "FCOM": "Primera Comunión", "EMIG": "Emigración",
+                        "IMMI": "Inmigración", "NATI": "Nacionalidad", "RELI": "Religión", "DSCR": "Descripción"
+                    }
+                    indi["events"].append({"tag": tag, "type": event_type_map.get(tag, tag), "description": value})
+                    current_level1 = tag
                 elif tag == "IMMI":
-                    current_level1 = "IMMI"
                     if value:
                         indi["immigration"]["event"] = value
-                    # También crear un evento para el cronograma
-                    indi["_immi_tmp"] = {"type": "Emigración", "description": value or ""}
+                    indi["events"].append({"tag": "IMMI", "type": "Inmigración", "description": value})
+                    current_level1 = "IMMI"
                 elif tag == "EVEN":
-                    indi["_even_tmp"] = {"description": value}
+                    indi["events"].append({"tag": "EVEN", "description": value})
                     current_level1 = "EVEN"
                 elif tag == "FAMS":
                     indi["family_spouse"].append(value)
@@ -168,29 +165,17 @@ def parse_gedcom(filepath: str) -> dict:
                 elif current_level1 == "BAPM":
                     if tag == "DATE":
                         indi["baptism"]["date"] = value
-                        if "_bapm_tmp" in indi:
-                            indi["_bapm_tmp"]["date"] = value
                     elif tag == "PLAC":
                         indi["baptism"]["place"] = value
-                        if "_bapm_tmp" in indi:
-                            indi["_bapm_tmp"]["place"] = value
                     elif tag == "NOTE":
                         indi["baptism"]["note"] = value
-                        if "_bapm_tmp" in indi:
-                            indi["_bapm_tmp"]["description"] = value
                 elif current_level1 == "CHR":
                     if tag == "DATE":
                         indi["baptism"]["date"] = value
-                        if "_chr_tmp" in indi:
-                            indi["_chr_tmp"]["date"] = value
                     elif tag == "PLAC":
                         indi["baptism"]["place"] = value
-                        if "_chr_tmp" in indi:
-                            indi["_chr_tmp"]["place"] = value
                     elif tag == "NOTE":
                         indi["baptism"]["note"] = value
-                        if "_chr_tmp" in indi:
-                            indi["_chr_tmp"]["description"] = value
                         # Extract godparents from NOTE if present
                         if "Godparents:" in value:
                             godparents_text = value.split("Godparents:")[-1].strip()
@@ -217,41 +202,31 @@ def parse_gedcom(filepath: str) -> dict:
                 elif current_level1 == "IMMI":
                     if tag == "DATE":
                         indi["immigration"]["date"] = value
-                        if "_immi_tmp" in indi:
-                            indi["_immi_tmp"]["date"] = value
                     elif tag == "PLAC":
                         indi["immigration"]["place"] = value
-                        if "_immi_tmp" in indi:
-                            indi["_immi_tmp"]["place"] = value
-                elif current_level1 == "EVEN" and "_even_tmp" in indi:
-                    if tag == "TYPE":
-                        indi["_even_tmp"]["type"] = value
-                        if value == "Military Enlistment":
-                            indi["military"].append(indi["_even_tmp"])
-                        elif value == "Anécdota":
-                            indi["anecdotes"].append(indi["_even_tmp"])
-                        else:
-                            # Generic events: Award, Illness, Funeral, Membership, etc.
-                            indi["events"].append(indi["_even_tmp"])
-                    elif tag == "DATE":
-                        indi["_even_tmp"]["date"] = value
-                    elif tag == "PLAC":
-                        indi["_even_tmp"]["place"] = value
-                elif current_level1 == "OBJE" and indi["photos"]:
-                    photo = indi["photos"][-1]
-                    if tag == "FILE":
-                        if value.startswith("http"):
-                            photo["url"] = value
-                    elif tag == "FORM":
-                        photo["format"] = value
-                    elif tag == "TITL":
-                        photo["title"] = value
-                    elif tag == "_PRIM" and value == "Y":
-                        photo["primary"] = True
-                    elif tag == "_PERSONALPHOTO" and value == "Y":
-                        photo["personal"] = True
-                    elif tag == "_DATE":
-                        photo["date"] = value
+                # Capture fields for ALL event tags
+                elif current_level1 in ("CENS", "EDUC", "BAPM", "CHR", "CONF", "FCOM", "EMIG", "NATI", "RELI", "DSCR", "EVEN"):
+                    if indi["events"] and indi["events"][-1].get("tag") == current_level1 or (current_level1 == "EVEN" and indi["events"][-1].get("tag") == "EVEN"):
+                        evt = indi["events"][-1]
+                        if tag == "DATE":
+                            evt["date"] = value
+                        elif tag == "PLAC":
+                            evt["place"] = value
+                        elif tag == "AGE":
+                            evt["age"] = value
+                        elif tag == "NOTE":
+                            evt["note"] = value
+                        elif tag == "CAUS":
+                            evt["cause"] = value
+                        elif tag == "ADDR":
+                            evt["address"] = value
+                        elif tag == "EMAIL":
+                            evt["email"] = value
+                        elif tag == "WWW":
+                            evt["www"] = value
+                        elif tag == "TYPE":
+                            # For EVEN events, capture the TYPE as the event type
+                            evt["type"] = value
                 elif current_level1 == "NOTE":
                     if tag == "CONC":
                         clean = clean_html(value)
@@ -328,18 +303,8 @@ def resolve_relationships(data: dict) -> list:
             person["military"] = indi["military"]
         if indi["anecdotes"]:
             person["anecdotes"] = indi["anecdotes"]
-
-        # Agregar eventos de BAPM, CHR, IMMI a la lista general de eventos
-        all_events = list(indi["events"])
-        if "_bapm_tmp" in indi and indi["_bapm_tmp"]:
-            all_events.append(indi["_bapm_tmp"])
-        if "_chr_tmp" in indi and indi["_chr_tmp"]:
-            all_events.append(indi["_chr_tmp"])
-        if "_immi_tmp" in indi and indi["_immi_tmp"]:
-            all_events.append(indi["_immi_tmp"])
-        if all_events:
-            person["events"] = all_events
-
+        if indi["events"]:
+            person["events"] = indi["events"]
         if indi["immigration"]:
             person["immigration"] = indi["immigration"]
         if indi["notes"]:

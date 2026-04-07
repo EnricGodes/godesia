@@ -130,12 +130,26 @@ def migrate(json_path, db_path):
                 (person["id"], anec.get("description", ""), anec_date, anec.get("place", ""))
             )
 
-        # Generic events (Award, Illness, Funeral, etc.)
+        # ALL events (Bautismo, Emigración, Educación, Ocupación, Residencia, Censo, etc.)
         for evt in person.get("events", []):
             evt_date = convert_date_to_spanish(evt.get("date", ""))
             conn.execute(
-                "INSERT INTO events (person_id, type, description, date, place) VALUES (?,?,?,?,?)",
-                (person["id"], evt.get("type", ""), evt.get("description", ""), evt_date, evt.get("place", ""))
+                "INSERT INTO events (person_id, tag, type, description, date, place, age, note, cause, address, email, www) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                (
+                    person["id"],
+                    evt.get("tag", ""),
+                    evt.get("type", ""),
+                    evt.get("description", ""),
+                    evt_date,
+                    evt.get("place", ""),
+                    evt.get("age", ""),
+                    evt.get("note", ""),
+                    evt.get("cause", ""),
+                    evt.get("address", ""),
+                    evt.get("email", ""),
+                    evt.get("www", "")
+                )
             )
 
         # Residences
