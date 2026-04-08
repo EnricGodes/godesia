@@ -764,6 +764,26 @@ function renderTimeline(data) {
                     });
                 }
             }
+
+            // Pareja (partnership - only show if no marriage_date)
+            if (s.partnership_date) {
+                const partYear = extractYear(s.partnership_date);
+                // Only show partnership event if there's no marriage date
+                const hasMarriage = s.marriage_date && extractYear(s.marriage_date);
+                if (partYear && !hasMarriage) {
+                    events.push({
+                        year: partYear,
+                        age: ageText(partYear),
+                        type: 'Pareja:',
+                        lines: [
+                            formatDateWithQualifier(s.partnership_date) || ''
+                        ].filter(Boolean),
+                        note: s.name || '',
+                        photo: s.photo_file,
+                        name: s.name
+                    });
+                }
+            }
         });
     }
 

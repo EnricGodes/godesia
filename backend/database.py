@@ -790,13 +790,13 @@ def get_person_dossier(conn, person_id):
     # Sort by birth year
     siblings.sort(key=lambda x: x["birth_year"] or 0)
 
-    # Spouses (all marriages with dates and places)
+    # Spouses (all marriages with dates and places - exclude empty marriages)
     spouse = None
     spouses_list = []
     spouse_rows = conn.execute("""
-        SELECT person2_id, date, place, divorce_date, divorce_place, divorce_note FROM marriages WHERE person1_id = ?
+        SELECT person2_id, date, place, divorce_date, divorce_place, divorce_note FROM marriages WHERE person1_id = ? AND date IS NOT NULL
         UNION ALL
-        SELECT person1_id, date, place, divorce_date, divorce_place, divorce_note FROM marriages WHERE person2_id = ?
+        SELECT person1_id, date, place, divorce_date, divorce_place, divorce_note FROM marriages WHERE person2_id = ? AND date IS NOT NULL
         ORDER BY date
     """, (person_id, person_id)).fetchall()
 
@@ -820,6 +820,21 @@ def get_person_dossier(conn, person_id):
         if not spouse:  # First spouse for backward compatibility
             spouse = spouse_data
 
+    # Partnerships (non-marriage relationships)
+    partnership_rows = conn.execute("""
+        SELECT person2_id, date FROM partnerships WHERE person1_id = ?
+        UNION ALL
+        SELECT person1_id, date FROM partnerships WHERE person2_id = ?
+        ORDER BY date
+    """, (person_id, person_id)).fetchall()
+
+    for row in partnership_rows:
+        partner_id = row[0]
+        partnership_date = row[1]
+        partner_data = dict(conn.execute("SELECT * FROM people WHERE id = ?", (partner_id,)).fetchone())
+        partner_data["partnership_date"] = partnership_date
+        spouses_list.append(partner_data)
+
     # Children (with their marriages)
     children = conn.execute(
         "SELECT * FROM people WHERE father_id = ? OR mother_id = ? ORDER BY birth_year",
@@ -828,11 +843,11 @@ def get_person_dossier(conn, person_id):
     children_list = []
     for c in children:
         child_dict = dict(c)
-        # Get child's marriages
+        # Get child's marriages (only with dates)
         marriages = conn.execute("""
-            SELECT person2_id, date, place FROM marriages WHERE person1_id = ?
+            SELECT person2_id, date, place FROM marriages WHERE person1_id = ? AND date IS NOT NULL
             UNION ALL
-            SELECT person1_id, date, place FROM marriages WHERE person2_id = ?
+            SELECT person1_id, date, place FROM marriages WHERE person2_id = ? AND date IS NOT NULL
             ORDER BY date
         """, (c["id"], c["id"])).fetchall()
 
