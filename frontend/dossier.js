@@ -759,7 +759,7 @@ function renderTimeline(data) {
                             s.divorce.place ? `${s.divorce.place}` : ''
                         ].filter(Boolean),
                         note: (s.divorce.note || '') + (s.name ? ` (${s.name})` : ''),
-                        photo: null,
+                        photo: s.photo_file,  // Show ex-spouse's photo
                         name: person.name
                     });
                 }
@@ -1014,18 +1014,21 @@ function renderTimeline(data) {
             type: 'Sociedad del hijo',
             lines: ['2008'],
             note: 'Enric Godes Maté y Merche Mateo Valls',
-            photo: null,
+            photos: [
+                { name: 'Enric Godes Maté', photo: '500437_181219rgo60418u59d7hk6_A.jpg' },
+                { name: 'Merche Mateo Valls', photo: '500438_690404pap9y8j47w596e10_A.jpg' }
+            ],
             name: person.name
         });
 
-        // Fallecimiento del ex-esposo
+        // Fallecimiento del ex-esposo Enrique Godes Molina
         events.push({
             year: 2011,
             age: ageText(2011),
             type: 'Fallecimiento del ex-esposo',
             lines: ['11 abr. 2011'],
             note: 'Enrique Godes Molina',
-            photo: null,
+            photo: '000253_308348fe8o65bcap3rb549_V.jpg',
             name: person.name
         });
     }
@@ -1050,6 +1053,18 @@ function renderTimeline(data) {
                     <span class="text-xs text-outline mx-1">y</span>
                     ${e.photo ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${e.photo}" alt="${e.name}">` : ''}
                     <span class="text-sm font-bold">${e.name}</span>
+                </div>
+            `;
+        } else if (e.photos && e.photos.length > 0) {
+            // Multiple photos for events like sociedad/partnership
+            photosHtml = `
+                <div class="flex items-center gap-3 mb-2">
+                    ${e.photos.map(p => `
+                        <div class="flex items-center gap-1">
+                            ${p.photo ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${p.photo}" alt="${p.name}">` : ''}
+                            <span class="text-sm font-bold">${p.name}</span>
+                        </div>
+                    `).join('<span class="text-xs text-outline mx-1">y</span>')}
                 </div>
             `;
         } else if (e.photo) {

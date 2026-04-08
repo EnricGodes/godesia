@@ -100,10 +100,12 @@ def migrate(json_path, db_path):
             ).fetchone()
             if not existing:
                 marriage = spouse.get("marriage", {})
+                divorce = spouse.get("divorce", {})
                 marriage_date = convert_date_to_spanish(marriage.get("date", ""))
+                divorce_date = convert_date_to_spanish(divorce.get("date", "")) if divorce else ""
                 conn.execute(
-                    "INSERT INTO marriages (person1_id, person2_id, date, place) VALUES (?,?,?,?)",
-                    (p1, p2, marriage_date, marriage.get("place", ""))
+                    "INSERT INTO marriages (person1_id, person2_id, date, place, divorce_date, divorce_place, divorce_note) VALUES (?,?,?,?,?,?,?)",
+                    (p1, p2, marriage_date, marriage.get("place", ""), divorce_date, divorce.get("place", ""), divorce.get("note", ""))
                 )
 
         # Occupations

@@ -51,7 +51,10 @@ CREATE TABLE IF NOT EXISTS marriages (
     person1_id TEXT,
     person2_id TEXT,
     date TEXT,
-    place TEXT
+    place TEXT,
+    divorce_date TEXT,
+    divorce_place TEXT,
+    divorce_note TEXT
 );
 
 CREATE TABLE IF NOT EXISTS children (
@@ -784,9 +787,9 @@ def get_person_dossier(conn, person_id):
     spouse = None
     spouses_list = []
     spouse_rows = conn.execute("""
-        SELECT person2_id, date, place FROM marriages WHERE person1_id = ?
+        SELECT person2_id, date, place, divorce_date, divorce_place, divorce_note FROM marriages WHERE person1_id = ?
         UNION ALL
-        SELECT person1_id, date, place FROM marriages WHERE person2_id = ?
+        SELECT person1_id, date, place, divorce_date, divorce_place, divorce_note FROM marriages WHERE person2_id = ?
         ORDER BY date
     """, (person_id, person_id)).fetchall()
 
@@ -794,9 +797,18 @@ def get_person_dossier(conn, person_id):
         spouse_id = row[0]
         marriage_date = row[1]
         marriage_place = row[2]
+        divorce_date = row[3]
+        divorce_place = row[4]
+        divorce_note = row[5]
         spouse_data = dict(conn.execute("SELECT * FROM people WHERE id = ?", (spouse_id,)).fetchone())
         spouse_data["marriage_date"] = marriage_date
         spouse_data["marriage_place"] = marriage_place
+        if divorce_date:
+            spouse_data["divorce"] = {
+                "date": divorce_date,
+                "place": divorce_place,
+                "note": divorce_note
+            }
         spouses_list.append(spouse_data)
         if not spouse:  # First spouse for backward compatibility
             spouse = spouse_data
