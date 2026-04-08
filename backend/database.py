@@ -57,6 +57,13 @@ CREATE TABLE IF NOT EXISTS marriages (
     divorce_note TEXT
 );
 
+CREATE TABLE IF NOT EXISTS partnerships (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    person1_id TEXT,
+    person2_id TEXT,
+    date TEXT
+);
+
 CREATE TABLE IF NOT EXISTS children (
     parent_id TEXT,
     child_id TEXT,
@@ -845,6 +852,29 @@ def get_person_dossier(conn, person_id):
 
         if child_marriages:
             child_dict["marriages"] = child_marriages
+
+        # Get child's partnerships
+        partnerships = conn.execute("""
+            SELECT person2_id, date FROM partnerships WHERE person1_id = ?
+            UNION ALL
+            SELECT person1_id, date FROM partnerships WHERE person2_id = ?
+            ORDER BY date
+        """, (c["id"], c["id"])).fetchall()
+
+        child_partnerships = []
+        for p in partnerships:
+            partner_id = p[0]
+            partnership_date = p[1]
+            partner_row = conn.execute("SELECT name, photo_file FROM people WHERE id = ?", (partner_id,)).fetchone()
+            if partner_row:
+                child_partnerships.append({
+                    "partner_name": partner_row["name"],
+                    "partner_photo": partner_row["photo_file"],
+                    "partnership_date": partnership_date
+                })
+
+        if child_partnerships:
+            child_dict["partnerships"] = child_partnerships
 
         children_list.append(child_dict)
 

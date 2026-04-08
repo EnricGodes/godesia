@@ -1031,29 +1031,33 @@ function renderTimeline(data) {
         }
     });
 
-    // Sociedad del hijo (dynamic: search for society events in children)
-    // For now, this is manually configured per person
-    const societyEvents = {
-        '@I107@': {
-            year: 2008,
-            note: 'Enric Godes Maté y Merche Mateo Valls',
-            photos: [
-                { name: 'Enric Godes Maté', photo: '500437_181219rgo60418u59d7hk6_A.jpg' },
-                { name: 'Merche Mateo Valls', photo: '500438_690404pap9y8j47w596e10_A.jpg' }
-            ]
-        }
-    };
+    // Sociedad del hijo - Dynamic from child partnerships
+    if (data.children) {
+        data.children.forEach(child => {
+            if (child.partnerships && child.partnerships.length > 0) {
+                child.partnerships.forEach(partnership => {
+                    const year = extractYear(partnership.partnership_date);
+                    if (year) {
+                        const photos = [];
+                        if (child.photo_file) {
+                            photos.push({ name: child.name, photo: child.photo_file });
+                        }
+                        if (partnership.partner_photo) {
+                            photos.push({ name: partnership.partner_name, photo: partnership.partner_photo });
+                        }
 
-    if (societyEvents[person.id]) {
-        const se = societyEvents[person.id];
-        events.push({
-            year: se.year,
-            age: ageText(se.year),
-            type: 'Sociedad del hijo',
-            lines: [se.year.toString()],
-            note: se.note || '',
-            photos: se.photos || null,
-            name: person.name
+                        events.push({
+                            year: year,
+                            age: ageText(year),
+                            type: 'Sociedad del hijo',
+                            lines: [formatDateWithQualifier(partnership.partnership_date) || ''],
+                            note: `${child.name} y ${partnership.partner_name}`,
+                            photos: photos.length > 0 ? photos : null,
+                            name: person.name
+                        });
+                    }
+                });
+            }
         });
     }
 

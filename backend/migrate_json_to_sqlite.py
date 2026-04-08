@@ -18,7 +18,7 @@ def migrate(json_path, db_path):
     # Drop and recreate
     conn = get_connection(db_path)
     # Don't drop photos, photo_tags, albums - they're managed by sync_catalog.py
-    for table in ["notes", "residences", "occupations", "military", "anecdotes", "events", "children", "marriages", "people", "burial"]:
+    for table in ["notes", "residences", "occupations", "military", "anecdotes", "events", "children", "marriages", "partnerships", "people", "burial"]:
         conn.execute(f"DROP TABLE IF EXISTS {table}")
     init_db(conn)
 
@@ -107,6 +107,21 @@ def migrate(json_path, db_path):
                     "INSERT INTO marriages (person1_id, person2_id, date, place, divorce_date, divorce_place, divorce_note) VALUES (?,?,?,?,?,?,?)",
                     (p1, p2, marriage_date, marriage.get("place", ""), divorce_date, divorce.get("place", ""), divorce.get("note", ""))
                 )
+
+            # Partnerships (non-marriage relationships)
+            partnership = spouse.get("partnership", {})
+            if partnership:
+                p1, p2 = sorted([person["id"], spouse["id"]])
+                existing = conn.execute(
+                    "SELECT id FROM partnerships WHERE person1_id = ? AND person2_id = ?",
+                    (p1, p2)
+                ).fetchone()
+                if not existing:
+                    partnership_date = convert_date_to_spanish(partnership.get("date", ""))
+                    conn.execute(
+                        "INSERT INTO partnerships (person1_id, person2_id, date) VALUES (?,?,?)",
+                        (p1, p2, partnership_date)
+                    )
 
         # Occupations
         for occ in person.get("occupations", []):
