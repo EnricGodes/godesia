@@ -758,9 +758,9 @@ function renderTimeline(data) {
                             formatDateWithQualifier(s.divorce.date) || '',
                             s.divorce.place ? `${s.divorce.place}` : ''
                         ].filter(Boolean),
-                        note: (s.divorce.note || '') + (s.name ? ` (${s.name})` : ''),
+                        note: s.divorce.note || '',
                         photo: s.photo_file,  // Show ex-spouse's photo
-                        name: person.name
+                        name: s.name  // Show ex-spouse's name with their photo
                     });
                 }
             }
