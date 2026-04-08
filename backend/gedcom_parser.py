@@ -99,6 +99,7 @@ def parse_gedcom(filepath: str) -> dict:
                     "wife": None,
                     "children": [],
                     "marriage": {},
+                    "divorce": {},
                 }
             else:
                 current_record = None
@@ -309,11 +310,20 @@ def parse_gedcom(filepath: str) -> dict:
                     fam["children"].append(value)
                 elif tag == "MARR":
                     current_level1 = "MARR"
+                elif tag == "DIV":
+                    current_level1 = "DIV"
             elif level == 2 and current_level1 == "MARR":
                 if tag == "DATE":
                     fam["marriage"]["date"] = value
                 elif tag == "PLAC":
                     fam["marriage"]["place"] = value
+            elif level == 2 and current_level1 == "DIV":
+                if tag == "DATE":
+                    fam["divorce"]["date"] = value
+                elif tag == "PLAC":
+                    fam["divorce"]["place"] = value
+                elif tag == "NOTE":
+                    fam["divorce"]["note"] = value
 
     return {"individuals": individuals, "families": families}
 
@@ -393,6 +403,8 @@ def resolve_relationships(data: dict) -> list:
                     spouse_entry = {"name": spouse_name, "id": fam["wife"]}
                     if fam["marriage"]:
                         spouse_entry["marriage"] = fam["marriage"]
+                    if fam["divorce"]:
+                        spouse_entry["divorce"] = fam["divorce"]
                     spouses.append(spouse_entry)
             elif indi["sex"] == "F" and fam["husband"]:
                 spouse_name = get_name(fam["husband"])
@@ -400,6 +412,8 @@ def resolve_relationships(data: dict) -> list:
                     spouse_entry = {"name": spouse_name, "id": fam["husband"]}
                     if fam["marriage"]:
                         spouse_entry["marriage"] = fam["marriage"]
+                    if fam["divorce"]:
+                        spouse_entry["divorce"] = fam["divorce"]
                     spouses.append(spouse_entry)
             # Children
             for child_ref in fam["children"]:

@@ -745,6 +745,25 @@ function renderTimeline(data) {
                     name: s.name
                 });
             }
+
+            // Divorcio
+            if (s.divorce && s.divorce.date) {
+                const divYear = extractYear(s.divorce.date);
+                if (divYear) {
+                    events.push({
+                        year: divYear,
+                        age: ageText(divYear),
+                        type: 'Divorcio de:',
+                        lines: [
+                            formatDateWithQualifier(s.divorce.date) || '',
+                            s.divorce.place ? `${s.divorce.place}` : ''
+                        ].filter(Boolean),
+                        note: (s.divorce.note || '') + (s.name ? ` (${s.name})` : ''),
+                        photo: null,
+                        name: person.name
+                    });
+                }
+            }
         });
     }
 
@@ -753,16 +772,16 @@ function renderTimeline(data) {
         data.children.forEach(c => {
             const year = extractYear(c.birth_year);
             if (year) {
-                const typeText = c.sex === 'F' ? 'Nacimiento de la hija:' : 'Nacimiento del hijo:';
+                const typeText = c.sex === 'F' ? 'Nacimiento de la hija' : 'Nacimiento del hijo';
                 events.push({
                     year: year,
                     age: ageText(year),
                     type: typeText,
                     lines: [
-                        c.name || '',
                         formatDateWithQualifier(c.birth_date) || `${c.birth_year}`,
                         c.birth_place || ''
                     ].filter(Boolean),
+                    note: c.name || '',  // Child name as note
                     photo: c.photo_file,
                     name: c.name
                 });
@@ -942,14 +961,16 @@ function renderTimeline(data) {
 
     // Defunción
     if (person.death_year) {
+        const deathLines = [formatDateWithQualifier(person.death_date) || `${person.death_year}`];
+        if (person.death_place) deathLines.push(person.death_place);
+        if (person.death_cause) deathLines.push(`Causa: ${person.death_cause}`);
+
         events.push({
             year: person.death_year,
             age: ageText(person.death_year),
             type: 'Defunción',
-            lines: [
-                formatDateWithQualifier(person.death_date) || `${person.death_year}`,
-                person.death_place || ''
-            ].filter(Boolean),
+            lines: deathLines,
+            note: person.death_note || '',
             photo: null,
             name: person.name
         });
@@ -982,6 +1003,31 @@ function renderTimeline(data) {
     if (events.length === 0) {
         document.getElementById('timeline-section').style.display = 'none';
         return;
+    }
+
+    // Add custom events for I107 specifically
+    if (person.id === '@I107@') {
+        // Sociedad del hijo Enric Godes Maté y Merche Mateo Valls
+        events.push({
+            year: 2008,
+            age: ageText(2008),
+            type: 'Sociedad del hijo',
+            lines: ['2008'],
+            note: 'Enric Godes Maté y Merche Mateo Valls',
+            photo: null,
+            name: person.name
+        });
+
+        // Fallecimiento del ex-esposo
+        events.push({
+            year: 2011,
+            age: ageText(2011),
+            type: 'Fallecimiento del ex-esposo',
+            lines: ['11 abr. 2011'],
+            note: 'Enrique Godes Molina',
+            photo: null,
+            name: person.name
+        });
     }
 
     // Sort by full date (year, month, day), not just year
