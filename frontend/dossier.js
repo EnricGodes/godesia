@@ -737,10 +737,10 @@ function renderTimeline(data) {
                     age: ageText(year),
                     type: 'Matrimonio con:',
                     lines: [
-                        s.name || '',
                         s.marriage_date ? formatDateWithQualifier(s.marriage_date) : '',
                         s.marriage_place ? `${s.marriage_place}` : ''
                     ].filter(Boolean),
+                    note: s.name || '',  // Spouse name as note
                     photo: s.photo_file,
                     name: s.name
                 });
