@@ -973,8 +973,12 @@ function renderTimeline(data) {
         return;
     }
 
-    // Sort by year
-    events.sort((a, b) => a.year - b.year);
+    // Sort by full date (year, month, day), not just year
+    events.sort((a, b) => {
+        const dateA = dateToComparable(a.lines[0] || '');  // First line is the date
+        const dateB = dateToComparable(b.lines[0] || '');
+        return dateA.localeCompare(dateB);
+    });
 
     document.getElementById('timeline-section').style.display = 'block';
 
