@@ -1005,9 +1005,32 @@ function renderTimeline(data) {
         return;
     }
 
-    // Add custom events for I107 specifically
+    // Fallecimiento de ex-cónyuge (si el cónyuge falleció)
+    const spousesList2 = (data.spouses && data.spouses.length > 0) ? data.spouses : (data.spouse ? [data.spouse] : []);
+    spousesList2.forEach(s => {
+        if (s.death_year && s.divorce && s.divorce.date) {
+            const divYear = extractYear(s.divorce.date);
+            const deathYear = s.death_year;
+            // Only show if death was after divorce
+            if (deathYear >= divYear) {
+                events.push({
+                    year: deathYear,
+                    age: ageText(deathYear),
+                    type: 'Fallecimiento del ex-cónyuge',
+                    lines: [
+                        s.death_date ? formatDateWithQualifier(s.death_date) : `${deathYear}`,
+                        s.death_place ? `${s.death_place}` : ''
+                    ].filter(Boolean),
+                    note: '',
+                    photo: s.photo_file,
+                    name: s.name
+                });
+            }
+        }
+    });
+
+    // Custom event for I107 specifically: Sociedad del hijo
     if (person.id === '@I107@') {
-        // Sociedad del hijo Enric Godes Maté y Merche Mateo Valls
         events.push({
             year: 2008,
             age: ageText(2008),
@@ -1019,17 +1042,6 @@ function renderTimeline(data) {
                 { name: 'Merche Mateo Valls', photo: '500438_690404pap9y8j47w596e10_A.jpg' }
             ],
             name: person.name
-        });
-
-        // Fallecimiento del ex-esposo Enrique Godes Molina
-        events.push({
-            year: 2011,
-            age: ageText(2011),
-            type: 'Fallecimiento del ex-esposo',
-            lines: ['11 abr. 2011'],
-            note: '',
-            photo: '000253_308348fe8o65bcap3rb549_V.jpg',
-            name: 'Enrique Godes Molina'
         });
     }
 
