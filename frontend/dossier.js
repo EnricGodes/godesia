@@ -659,7 +659,7 @@ function renderTimeline(data) {
         const ageStart = calculateAge(startYear);
         const ageEnd = calculateAge(endYear);
         if (ageStart === null || ageEnd === null) return '';
-        return `Edades: ${ageStart} -`;  // Will be displayed inline with endYear on same line
+        return `Edades: ${ageStart} - ${ageEnd}`;
     }
 
     function ageRangeEndText(endYear) {
@@ -913,9 +913,19 @@ function renderTimeline(data) {
         data.events.forEach(e => {
             const year = extractYear(e.date);
             if (year) {
+                let ageDisplay = '';
+                // Check if date contains a range like "1957 - 1960" or "FROM ... TO ..."
+                if (e.date && (e.date.includes(' - ') || e.date.includes(' TO '))) {
+                    const parts = e.date.split(/\s-\s|\s+TO\s+/);
+                    const startYear = extractYear(parts[0]);
+                    const endYear = extractYear(parts[1]);
+                    if (startYear && endYear) {
+                        ageDisplay = ageRangeText(startYear, endYear);
+                    }
+                }
                 events.push({
                     year: year,
-                    age: ageText(year),
+                    age: ageDisplay || ageText(year),
                     type: e.type || 'Evento',
                     lines: [
                         formatDateWithQualifier(e.date) || '',
