@@ -632,6 +632,7 @@ function renderTimeline(data) {
         if (str.startsWith('ABT ')) return 'Aprox. ' + str.substring(4);
         if (str.startsWith('AFT ')) return 'Después de ' + str.substring(4);
         if (str.startsWith('BEF ')) return 'Antes de ' + str.substring(4);
+        if (str.startsWith('TO ')) return 'hasta ' + str.substring(3);
         if (str.startsWith('FROM ') && str.includes(' TO ')) {
             const parts = str.split(' TO ');
             return 'Desde ' + parts[0].substring(5) + ' hasta ' + parts[1];

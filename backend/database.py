@@ -196,7 +196,7 @@ def convert_date_to_spanish(date_str):
 
     original = date_str
 
-    # Handle ranges: "FROM APR 1925 TO 1935" or "BET 1860 AND 1865"
+    # Handle ranges: "FROM APR 1925 TO 1935" or "BET 1860 AND 1865" or "TO 13 JUN 1958"
     if "FROM" in date_str and "TO" in date_str:
         # "FROM APR 1925 TO 1935" → convert "APR 1925"
         start = date_str.split("FROM")[1].split("TO")[0].strip()
@@ -204,6 +204,11 @@ def convert_date_to_spanish(date_str):
         start_spanish = convert_date_to_spanish(start)
         end_spanish = convert_date_to_spanish(end)
         return f"{start_spanish} - {end_spanish}"
+    elif date_str.startswith("TO "):
+        # "TO 13 JUN 1958" → convert "13 JUN 1958" and add prefix
+        end_date = date_str[3:].strip()
+        end_spanish = convert_date_to_spanish(end_date)
+        return f"hasta {end_spanish}"
     elif "BET" in date_str and "AND" in date_str:
         # "BET 1860 AND 1865" → convert both
         start = date_str.split("BET")[1].split("AND")[0].strip()
