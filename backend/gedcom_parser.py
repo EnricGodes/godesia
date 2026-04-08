@@ -14,6 +14,28 @@ def clean_html(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def translate_event_type(event_type: str) -> str:
+    """Translate event type names from English to Spanish."""
+    translation_map = {
+        "Employer": "Trabajo",
+        "Award": "Premio",
+        "Illness": "Enfermedad",
+        "Funeral": "Funeral",
+        "Membership": "Afiliación",
+        "Military Enlistment": "Alistamiento Militar",
+        "Military Service": "Servicio Militar",
+        "Move": "Mudanza",
+        "Family Reunion": "Reunión Familiar",
+        "Obituary": "Obituario",
+        "Event-Misc": "Evento",
+        "Custom event": "Evento Personalizado",
+        "Language spoken": "Idioma",
+        "Reference Number": "Número de Referencia",
+        "Anecdote": "Anécdota",
+    }
+    return translation_map.get(event_type, event_type)
+
+
 def parse_gedcom(filepath: str) -> dict:
     """Parsea un archivo GEDCOM y devuelve un dict con personas y familias."""
     with open(filepath, "r", encoding="utf-8", errors="replace") as f:
@@ -256,7 +278,7 @@ def parse_gedcom(filepath: str) -> dict:
                             evt["www"] = value
                         elif tag == "TYPE":
                             # For EVEN events, capture the TYPE as the event type
-                            evt["type"] = value
+                            evt["type"] = translate_event_type(value)
                 elif current_level1 == "NOTE":
                     if tag == "CONC":
                         clean = clean_html(value)
