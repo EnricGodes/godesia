@@ -165,17 +165,47 @@ def parse_gedcom(filepath: str) -> dict:
                 elif current_level1 == "BAPM":
                     if tag == "DATE":
                         indi["baptism"]["date"] = value
+                        # Also update the BAPM event
+                        for evt in reversed(indi["events"]):
+                            if evt.get("tag") == "BAPM":
+                                evt["date"] = value
+                                break
                     elif tag == "PLAC":
                         indi["baptism"]["place"] = value
+                        # Also update the BAPM event
+                        for evt in reversed(indi["events"]):
+                            if evt.get("tag") == "BAPM":
+                                evt["place"] = value
+                                break
                     elif tag == "NOTE":
                         indi["baptism"]["note"] = value
+                        # Also update the BAPM event
+                        for evt in reversed(indi["events"]):
+                            if evt.get("tag") == "BAPM":
+                                evt["note"] = value
+                                break
                 elif current_level1 == "CHR":
                     if tag == "DATE":
                         indi["baptism"]["date"] = value
+                        # Also update the CHR event
+                        for evt in reversed(indi["events"]):
+                            if evt.get("tag") == "CHR":
+                                evt["date"] = value
+                                break
                     elif tag == "PLAC":
                         indi["baptism"]["place"] = value
+                        # Also update the CHR event
+                        for evt in reversed(indi["events"]):
+                            if evt.get("tag") == "CHR":
+                                evt["place"] = value
+                                break
                     elif tag == "NOTE":
                         indi["baptism"]["note"] = value
+                        # Also update the CHR event
+                        for evt in reversed(indi["events"]):
+                            if evt.get("tag") == "CHR":
+                                evt["note"] = value
+                                break
                         # Extract godparents from NOTE if present
                         if "Godparents:" in value:
                             godparents_text = value.split("Godparents:")[-1].strip()
