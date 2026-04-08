@@ -845,8 +845,8 @@ function renderTimeline(data) {
                     age: ageDisplay || ageText(year),
                     type: 'Ocupación',
                     lines: [
-                        o.title || '',
                         formatDateRange(o.date) || '',
+                        o.title || '',
                         o.place || ''
                     ].filter(Boolean),
                     photo: null,
@@ -900,8 +900,8 @@ function renderTimeline(data) {
                     age: ageText(year),
                     type: 'Alistamiento Militar',
                     lines: [
-                        m.description || '',
                         formatDateWithQualifier(m.date) || '',
+                        m.description || '',
                         m.place || ''
                     ].filter(Boolean),
                     photo: null,
@@ -921,8 +921,8 @@ function renderTimeline(data) {
                     age: ageText(year),
                     type: 'Anécdota',
                     lines: [
-                        a.description || '',
                         formatDateWithQualifier(a.date) || '',
+                        a.description || '',
                         a.place || ''
                     ].filter(Boolean),
                     photo: null,
