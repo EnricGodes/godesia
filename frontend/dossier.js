@@ -821,10 +821,8 @@ function renderTimeline(data) {
     if (data.occupations) {
         data.occupations.forEach(o => {
             let year = extractYear(o.date);
-            // If no year found but we have a title, use birth_year as fallback
-            if (!year && o.title && o.date === '') {
-                year = person.birth_year;
-            }
+            // Only include occupations with actual dates in the timeline
+            // Occupations without dates appear in the Career section
             if (year) {
                 let ageDisplay = '';
                 // Check if date contains a range like "1893 - 1923"
