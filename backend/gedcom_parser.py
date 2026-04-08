@@ -361,6 +361,17 @@ def resolve_relationships(data: dict) -> list:
             person["occupations"] = indi["occupations"]
         if indi["residences"]:
             person["residences"] = indi["residences"]
+
+        # Extract military events from generic events
+        for evt in indi["events"]:
+            if evt.get("type") in ("Alistamiento Militar", "Servicio Militar"):
+                mil_entry = {
+                    "description": evt.get("description", ""),
+                    "date": evt.get("date", ""),
+                    "place": evt.get("place", "")
+                }
+                indi["military"].append(mil_entry)
+
         if indi["military"]:
             person["military"] = indi["military"]
         if indi["anecdotes"]:

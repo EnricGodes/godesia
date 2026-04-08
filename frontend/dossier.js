@@ -820,7 +820,11 @@ function renderTimeline(data) {
     // Ocupaciones (with date range support)
     if (data.occupations) {
         data.occupations.forEach(o => {
-            const year = extractYear(o.date);
+            let year = extractYear(o.date);
+            // If no year found but we have a title, use birth_year as fallback
+            if (!year && o.title && o.date === '') {
+                year = person.birth_year;
+            }
             if (year) {
                 let ageDisplay = '';
                 // Check if date contains a range like "1893 - 1923"
@@ -1029,18 +1033,28 @@ function renderTimeline(data) {
         }
     });
 
-    // Custom event for I107 specifically: Sociedad del hijo
-    if (person.id === '@I107@') {
-        events.push({
+    // Sociedad del hijo (dynamic: search for society events in children)
+    // For now, this is manually configured per person
+    const societyEvents = {
+        '@I107@': {
             year: 2008,
-            age: ageText(2008),
-            type: 'Sociedad del hijo',
-            lines: ['2008'],
             note: 'Enric Godes Maté y Merche Mateo Valls',
             photos: [
                 { name: 'Enric Godes Maté', photo: '500437_181219rgo60418u59d7hk6_A.jpg' },
                 { name: 'Merche Mateo Valls', photo: '500438_690404pap9y8j47w596e10_A.jpg' }
-            ],
+            ]
+        }
+    };
+
+    if (societyEvents[person.id]) {
+        const se = societyEvents[person.id];
+        events.push({
+            year: se.year,
+            age: ageText(se.year),
+            type: 'Sociedad del hijo',
+            lines: [se.year.toString()],
+            note: se.note || '',
+            photos: se.photos || null,
             name: person.name
         });
     }
