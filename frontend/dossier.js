@@ -1027,9 +1027,9 @@ function renderTimeline(data) {
             age: ageText(2011),
             type: 'Fallecimiento del ex-esposo',
             lines: ['11 abr. 2011'],
-            note: 'Enrique Godes Molina',
+            note: '',
             photo: '000253_308348fe8o65bcap3rb549_V.jpg',
-            name: person.name
+            name: 'Enrique Godes Molina'
         });
     }
 
