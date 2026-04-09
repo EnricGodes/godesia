@@ -420,9 +420,8 @@ function renderFamilyTree(data) {
 
     html += `
         <div class="mt-12 text-center">
-            <a href="/tree.html?id=${dossierId(person.id)}" class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-lg hover:opacity-90 transition-opacity font-bold text-sm">
-                <span class="material-symbols-outlined text-lg">account_tree</span>
-                Ver árbol completo
+            <a href="/tree.html?id=${dossierId(person.id)}" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s; display: inline-block;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                Ver árbol completo →
             </a>
         </div>
     </div>`;
