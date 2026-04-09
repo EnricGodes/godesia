@@ -907,9 +907,9 @@ def get_person_dossier(conn, person_id):
     ).fetchall()
     occupations_list = [dict(o) for o in occupations]
 
-    # Work events (events with type = "Employer") — shown as "Trabajo" in Trayectoria Profesional
+    # Work events (events with type = "Trabajo") — displayed in Trayectoria Profesional
     work_events = conn.execute(
-        "SELECT description as title, date, place, 'Trabajo' as event_type FROM events WHERE person_id = ? AND type = 'Employer' ORDER BY date",
+        "SELECT description as title, date, place, 'Trabajo' as event_type FROM events WHERE person_id = ? AND type = 'Trabajo' ORDER BY date",
         (person_id,)
     ).fetchall()
     work_list = [dict(w) for w in work_events]
