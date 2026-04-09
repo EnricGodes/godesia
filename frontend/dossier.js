@@ -597,7 +597,17 @@ function renderDocuments(data) {
     document.getElementById('docs-section').innerHTML = html;
 }
 
+// Timeline state variables
+let timelineEvents = [];
+let timelineMode = sessionStorage.getItem('timelineMode') || 'graphic'; // 'graphic' | 'list'
+let timelineFilter = null;
+
 function renderTimeline(data) {
+    buildEvents(data);
+    renderTimelineSection();
+}
+
+function buildEvents(data) {
     const person = data.person;
     const events = [];
 
@@ -1059,7 +1069,7 @@ function renderTimeline(data) {
     }
 
     if (events.length === 0) {
-        document.getElementById('timeline-section').style.display = 'none';
+        timelineEvents = [];
         return;
     }
 
@@ -1124,9 +1134,66 @@ function renderTimeline(data) {
         return dateA.localeCompare(dateB);
     });
 
+    timelineEvents = events;
+}
+
+function renderTimelineSection() {
+    if (timelineEvents.length === 0) {
+        document.getElementById('timeline-section').style.display = 'none';
+        return;
+    }
+
     document.getElementById('timeline-section').style.display = 'block';
 
-    const timelineHtml = events.map((e, idx) => {
+    // Get unique event types for filters
+    const uniqueTypes = [...new Set(timelineEvents.map(e => e.type))];
+
+    // Filter events
+    const filteredEvents = timelineFilter
+        ? timelineEvents.filter(e => e.type === timelineFilter)
+        : timelineEvents;
+
+    // Generate content based on mode
+    let contentHtml = '';
+    if (timelineMode === 'list') {
+        contentHtml = renderListMode(filteredEvents);
+    } else {
+        contentHtml = renderGraphicMode(filteredEvents);
+    }
+
+    // Generate filter buttons
+    const filterButtonsHtml = `
+        <button onclick="setTimelineFilter(null)" class="px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors ${timelineFilter === null ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">Todos</button>
+        ${uniqueTypes.map(type => `
+            <button onclick="setTimelineFilter('${type}')" class="px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors ${timelineFilter === type ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">
+                ${type}
+            </button>
+        `).join('')}
+    `;
+
+    const html = `
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
+                <span class="material-symbols-outlined">event_note</span>
+                Cronograma Biográfico
+            </h2>
+            <div class="flex gap-2">
+                <button onclick="setTimelineMode('graphic')" class="px-4 py-2 text-xs font-bold uppercase rounded-lg transition-colors ${timelineMode === 'graphic' ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">Gráfico</button>
+                <button onclick="setTimelineMode('list')" class="px-4 py-2 text-xs font-bold uppercase rounded-lg transition-colors ${timelineMode === 'list' ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">Lista</button>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-2 mb-6" id="timeline-filters">
+            ${filterButtonsHtml}
+        </div>
+        <div id="timeline-content">
+            ${contentHtml}
+        </div>
+    `;
+    document.getElementById('timeline-section').innerHTML = html;
+}
+
+function renderGraphicMode(events) {
+    const graphicHtml = events.map((e, idx) => {
         let photosHtml = '';
         if (e.isChildMarriage) {
             // Show two photos side by side for child's marriage
@@ -1174,16 +1241,51 @@ function renderTimeline(data) {
     `;
     }).join('');
 
-    const html = `
-        <h2 class="font-headline text-3xl text-primary flex items-center gap-4 mb-8">
-            <span class="material-symbols-outlined">event_note</span>
-            Cronograma Biográfico
-        </h2>
-        <div class="space-y-2">
-            ${timelineHtml}
+    return `<div class="space-y-2">${graphicHtml}</div>`;
+}
+
+function renderListMode(events) {
+    const listHtml = `
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-outline-variant/30">
+                        <th class="text-left text-xs font-bold uppercase text-outline px-4 py-3">Fecha</th>
+                        <th class="text-left text-xs font-bold uppercase text-outline px-4 py-3">Evento</th>
+                        <th class="text-left text-xs font-bold uppercase text-outline px-4 py-3">Descripción</th>
+                        <th class="text-left text-xs font-bold uppercase text-outline px-4 py-3">Notas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${events.map(e => {
+                        const fecha = e.lines[0] || '';
+                        const descripcion = e.lines.slice(1).join(' • ') || '';
+                        const notas = e.note || '';
+                        return `
+                            <tr class="border-b border-outline-variant/20 hover:bg-outline-variant/5 transition-colors" data-type="${e.type}">
+                                <td class="px-4 py-3 text-xs whitespace-nowrap font-semibold text-primary">${e.year}</td>
+                                <td class="px-4 py-3 font-semibold text-sm">${e.type}</td>
+                                <td class="px-4 py-3 text-outline">${descripcion}</td>
+                                <td class="px-4 py-3 text-outline italic">${notas}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
         </div>
     `;
-    document.getElementById('timeline-section').innerHTML = html;
+    return listHtml;
+}
+
+function setTimelineMode(mode) {
+    timelineMode = mode;
+    sessionStorage.setItem('timelineMode', mode);
+    renderTimelineSection();
+}
+
+function setTimelineFilter(type) {
+    timelineFilter = type;
+    renderTimelineSection();
 }
 
 function renderCareer(occupations) {
