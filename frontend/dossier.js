@@ -68,11 +68,11 @@ function updateSortButtons() {
         const btn = document.getElementById('sort-' + c);
         if (!btn) return;
         if (_sortActive === c) {
-            btn.classList.add('bg-primary', 'text-on-primary');
-            btn.classList.remove('border', 'border-primary', 'text-primary');
+            btn.classList.add('bg-primary', 'text-white');
+            btn.classList.remove('border', 'border-outline-variant', 'text-outline-variant', 'hover:bg-outline-variant/10');
         } else {
-            btn.classList.remove('bg-primary', 'text-on-primary');
-            btn.classList.add('border', 'border-primary', 'text-primary');
+            btn.classList.remove('bg-primary', 'text-white');
+            btn.classList.add('border', 'border-outline-variant', 'text-outline-variant', 'hover:bg-outline-variant/10');
         }
     });
 }
@@ -522,9 +522,9 @@ function renderPhotosGrid(photos) {
                 <p class="text-xs text-outline font-bold uppercase tracking-widest">Archivo Histórico (${photos.length} medios registrados)</p>
             </div>
             <div class="flex gap-2 flex-wrap">
-                <button onclick="sortPhotos('oldest')" id="sort-oldest" class="sort-btn px-3 py-1 text-[11px] font-bold uppercase border border-primary text-primary rounded-full hover:bg-primary/10 transition-colors">Más antigua</button>
-                <button onclick="sortPhotos('newest')" id="sort-newest" class="sort-btn px-3 py-1 text-[11px] font-bold uppercase border border-primary text-primary rounded-full hover:bg-primary/10 transition-colors">Más nueva</button>
-                <button onclick="sortPhotos('added')" id="sort-added" class="sort-btn px-3 py-1 text-[11px] font-bold uppercase border border-primary text-primary rounded-full hover:bg-primary/10 transition-colors">Fecha incorporación</button>
+                <button onclick="sortPhotos('oldest')" id="sort-oldest" class="sort-btn px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors border border-outline-variant text-outline-variant hover:bg-outline-variant/10">Más antigua</button>
+                <button onclick="sortPhotos('newest')" id="sort-newest" class="sort-btn px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors border border-outline-variant text-outline-variant hover:bg-outline-variant/10">Más nueva</button>
+                <button onclick="sortPhotos('added')" id="sort-added" class="sort-btn px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors border border-outline-variant text-outline-variant hover:bg-outline-variant/10">Fecha incorporación</button>
             </div>
         </div>
         <div id="photos-grid-container"></div>
