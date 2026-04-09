@@ -1018,6 +1018,42 @@ def get_documents(conn, limit=1):
     """, (limit,)).fetchall()
 
 
+def get_photo_details(conn, photo_id):
+    """Return complete details for a photo including tagged people, notes, and album."""
+    photo = conn.execute("""
+        SELECT id, filename, title, date, place, album_id
+        FROM photos
+        WHERE id = ?
+    """, (photo_id,)).fetchone()
+
+    if not photo:
+        return None
+
+    photo_dict = dict(photo)
+
+    # Tagged people in this photo
+    tagged_people = conn.execute("""
+        SELECT pt.person_id, p.name, p.photo_file, pt.position
+        FROM photo_tags pt
+        JOIN people p ON p.id = pt.person_id
+        WHERE pt.photo_id = ?
+        ORDER BY p.name
+    """, (photo_id,)).fetchall()
+
+    photo_dict["tagged_people"] = [dict(tp) for tp in tagged_people]
+
+    # Album title if album_id exists
+    if photo_dict.get("album_id"):
+        album = conn.execute("""
+            SELECT title FROM albums WHERE gedcom_id = ?
+        """, (photo_dict["album_id"],)).fetchone()
+        photo_dict["album_title"] = album["title"] if album else None
+    else:
+        photo_dict["album_title"] = None
+
+    return photo_dict
+
+
 def update_all_photo_files(conn):
     """
     Regenerate photo_file for all people using the 5-level selection algorithm.

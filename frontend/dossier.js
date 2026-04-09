@@ -442,7 +442,7 @@ function renderBentoGrid(photos) {
                 };
                 const lineClamp = lineClamps[cls] || 'line-clamp-2';
                 return `
-                    <div class="${cls} heritage-border bg-white overflow-hidden group relative">
+                    <div class="${cls} heritage-border bg-white overflow-hidden group relative cursor-pointer" onclick="openPhotoModal(${p.id})">
                         <img src="/photos/${p.filename}" alt="${p.title || 'Foto'}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" ${p.position ? `onload="applyFaceBox(this, '${p.position}')"` : ''}>
                         ${p.position ? `<div class="face-box absolute border-2 pointer-events-none hidden" style="border-color: #2D4B33;"></div>` : ''}
                         ${p.title ? `
@@ -464,7 +464,7 @@ function renderUniformGrid(photos) {
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             ${photos.map((p) => {
                 return `
-                    <div class="heritage-border bg-white overflow-hidden group relative aspect-square">
+                    <div class="heritage-border bg-white overflow-hidden group relative aspect-square cursor-pointer" onclick="openPhotoModal(${p.id})">
                         <img src="/photos/${p.filename}" alt="${p.title || 'Foto'}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" ${p.position ? `onload="applyFaceBox(this, '${p.position}')"` : ''}>
                         ${p.position ? `<div class="face-box absolute border-2 pointer-events-none hidden" style="border-color: #2D4B33;"></div>` : ''}
                         ${p.title ? `
@@ -1131,7 +1131,13 @@ function buildEvents(data) {
     }
 
     // Sort by full date (year, month, day), not just year
+    // Birth (Nacimiento) always comes first
     events.sort((a, b) => {
+        // Birth events always come first
+        if (a.type === 'Nacimiento' && b.type !== 'Nacimiento') return -1;
+        if (a.type !== 'Nacimiento' && b.type === 'Nacimiento') return 1;
+
+        // For other events, sort by date
         const dateA = dateToComparable(a.lines[0] || '');  // First line is the date
         const dateB = dateToComparable(b.lines[0] || '');
         return dateA.localeCompare(dateB);

@@ -14,7 +14,7 @@ from pydantic import BaseModel
 from database import (
     get_connection, get_tree_data, get_birthdays_this_week, search_people,
     get_dashboard_data, get_documents, get_person_dossier, convert_date_to_spanish,
-    update_all_photo_files,
+    update_all_photo_files, get_photo_details,
 )
 from query_router import QueryRouter
 from query_engine import QueryEngine
@@ -208,6 +208,17 @@ async def dossier(person_id: str):
         raise HTTPException(status_code=404, detail="Persona no encontrada")
     dossier_data["gedcom_date"] = gedcom_export_date or ""
     return dossier_data
+
+
+@app.get("/api/photo/{photo_id}")
+async def photo_details(photo_id: int):
+    """Get complete details for a photo (title, date, place, tagged people, notes, album)."""
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    photo_data = get_photo_details(db_conn, photo_id)
+    if not photo_data:
+        raise HTTPException(status_code=404, detail="Foto no encontrada")
+    return photo_data
 
 
 @app.post("/api/admin/sync-photos")
