@@ -50,6 +50,22 @@ async def startup():
     count = db_conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
     print(f"SQLite cargado: {count} personas")
 
+    # AUTO-HEAL: If any person has photos tagged but no photo_file set,
+    # regenerate photo_file for everyone. This protects against photo loss
+    # from any script that updates the people table without preserving photo_file.
+    try:
+        missing = db_conn.execute("""
+            SELECT COUNT(DISTINCT p.id) FROM people p
+            JOIN photo_tags pt ON pt.person_id = p.id
+            WHERE (p.photo_file IS NULL OR p.photo_file = '')
+        """).fetchone()[0]
+        if missing > 0:
+            print(f"⚠ Detectadas {missing} personas con fotos sin photo_file. Auto-reparando...")
+            updated = update_all_photo_files(db_conn)
+            print(f"✓ Fotos de perfil restauradas para {updated} personas")
+    except Exception as e:
+        print(f"  Auto-heal de fotos falló: {e}")
+
     # Read GEDCOM export date from header
     gedcom_path = BASE_DIR / "docs" / "site380341641-tree5-20260324_signed.ged"
     if gedcom_path.exists():

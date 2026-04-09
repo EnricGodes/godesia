@@ -101,18 +101,16 @@ Each person's profile photo is selected from the `photos` table using a 5-level 
 
 ### Ensuring Profile Photos Are Never Lost
 
-**Critical architecture:** `people.photo_file` is derived from photo metadata and MUST be regenerated whenever the `photos` or `photo_tags` tables are updated. Three ways this happens:
+**Root cause of past photo loss:** `scripts/sync_catalog.py` used `INSERT OR REPLACE INTO people` which DELETES the existing row and re-inserts only 19 columns — wiping `photo_file`, `photo_count`, and other columns not in the INSERT list. Fixed by switching to `INSERT ... ON CONFLICT DO UPDATE` that only updates the specific columns and preserves everything else.
 
-1. **After full GEDCOM import:** `python3 migrate_json_to_sqlite.py` automatically calls `update_all_photo_files()`
-2. **Manual resync:** `python3 sync_photos.py` (standalone script, no arguments needed)
-3. **Via API:** `POST /api/admin/sync-photos` (programmatic access)
+**Multi-layer protection now in place:**
 
-**If profile photos ever disappear:**
-- Run `python3 backend/sync_photos.py` from the project root
-- This regenerates `people.photo_file` for all 362+ people with photos
-- The dossier page will immediately show correct photos again
+1. **sync_catalog.py preserves photo_file** — Uses `ON CONFLICT DO UPDATE` instead of `INSERT OR REPLACE`, and calls `update_all_photo_files()` at the end as belt-and-suspenders.
+2. **migrate_json_to_sqlite.py syncs automatically** — Calls `update_all_photo_files()` after importing.
+3. **Server startup auto-heals** — On every server start, app.py detects people with photo tags but NULL `photo_file` and runs `update_all_photo_files()` automatically. This is the final safety net: even if someone manually edits the DB or runs a broken script, restarting the server fixes it.
+4. **Manual resync available** — `python3 backend/sync_photos.py` or `POST /api/admin/sync-photos`.
 
-**Never run just photo metadata updates without syncing.** Always follow with one of the three options above to ensure `people.photo_file` is regenerated.
+**If profile photos ever disappear:** just restart the server. The startup auto-heal will detect and fix it automatically. No more manual intervention needed.
 
 ## Face Detection Boxes (Green Overlays)
 

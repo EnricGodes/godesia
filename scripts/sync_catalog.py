@@ -21,6 +21,7 @@ import hashlib
 import re
 import shutil
 import sqlite3
+import sys
 import urllib.request
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -592,14 +593,33 @@ def main():
         print("\nFase 7: Escribiendo en base de datos...")
         cursor = db_conn.cursor()
 
-        # UPSERT personas
+        # UPSERT personas — preserves photo_file and photo_count (managed by sync_photos)
         for person_id, person in people.items():
             cursor.execute("""
-                INSERT OR REPLACE INTO people
+                INSERT INTO people
                 (id, name, given_name, surname, sex, birth_date, birth_day, birth_month,
                  birth_year, birth_place, death_date, death_year, death_place, death_cause,
                  death_note, death_age, is_alive, father_id, mother_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    name=excluded.name,
+                    given_name=excluded.given_name,
+                    surname=excluded.surname,
+                    sex=excluded.sex,
+                    birth_date=excluded.birth_date,
+                    birth_day=excluded.birth_day,
+                    birth_month=excluded.birth_month,
+                    birth_year=excluded.birth_year,
+                    birth_place=excluded.birth_place,
+                    death_date=excluded.death_date,
+                    death_year=excluded.death_year,
+                    death_place=excluded.death_place,
+                    death_cause=excluded.death_cause,
+                    death_note=excluded.death_note,
+                    death_age=excluded.death_age,
+                    is_alive=excluded.is_alive,
+                    father_id=excluded.father_id,
+                    mother_id=excluded.mother_id
             """, (person_id, person["name"], person["given_name"], person["surname"], person["sex"],
                   person["birth_date"], person["birth_day"], person["birth_month"], person["birth_year"],
                   person["birth_place"], person["death_date"], person["death_year"], person["death_place"],
@@ -785,6 +805,15 @@ def main():
 
         db_conn.commit()
         print("  Base de datos actualizada")
+
+        # CRITICAL: Regenerate people.photo_file using the centralized 5-level
+        # selection algorithm. This MUST run after any photos/photo_tags update
+        # to prevent profile photos from disappearing.
+        print("\nFase 8: Sincronizando fotos de perfil...")
+        sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
+        from database import update_all_photo_files
+        updated = update_all_photo_files(db_conn)
+        print(f"  Fotos de perfil actualizadas: {updated} personas")
 
     db_conn.close()
 
