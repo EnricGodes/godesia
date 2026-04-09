@@ -1301,16 +1301,11 @@ function renderCareer(careerList) {
     document.getElementById('career-section').style.display = 'block';
 
     const cards = careerList.map((c, i) => {
-        const isOccupation = c.event_type === 'Ocupación';
-        const borderColor = isOccupation ? 'primary' : 'secondary';
         return `
-            <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 border-${borderColor}">
-                <div class="flex items-start justify-between gap-3 mb-2">
-                    <h4 class="font-bold text-${borderColor} text-sm uppercase flex-1">${c.title}</h4>
-                    <span class="text-[9px] font-bold uppercase opacity-60 text-${borderColor} whitespace-nowrap">${c.event_type}</span>
-                </div>
-                <p class="text-[10px] text-outline">${c.date || 'Período desconocido'}</p>
-                ${c.place ? `<p class="text-xs font-bold mt-3">${c.place}</p>` : ''}
+            <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 border-primary">
+                <p class="text-[10px] text-outline font-medium mb-2">${c.date || 'Período desconocido'}</p>
+                ${c.place ? `<p class="text-xs text-outline mb-3">${c.place}</p>` : ''}
+                <h4 class="font-bold text-primary text-sm">${c.title}</h4>
             </div>
         `;
     }).join('');
