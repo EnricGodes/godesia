@@ -1043,14 +1043,28 @@ def get_photo_details(conn, photo_id):
 
     photo_dict["tagged_people"] = [dict(tp) for tp in tagged_people]
 
-    # Album title if album_id exists
+    # Album title and cover if album_id exists
     if photo_dict.get("album_id"):
         album = conn.execute("""
             SELECT title FROM albums WHERE gedcom_id = ?
         """, (photo_dict["album_id"],)).fetchone()
         photo_dict["album_title"] = album["title"] if album else None
+
+        # Pick an album cover: prefer a cutout photo, fallback to first non-pdf photo
+        album_cover = conn.execute("""
+            SELECT filename FROM photos
+            WHERE album_id = ? AND filename NOT LIKE '%.pdf'
+            ORDER BY
+                CASE WHEN is_prim_cutout = 1 THEN 0
+                     WHEN is_cutout = 1 THEN 1
+                     ELSE 2 END,
+                id
+            LIMIT 1
+        """, (photo_dict["album_id"],)).fetchone()
+        photo_dict["album_cover"] = album_cover["filename"] if album_cover else None
     else:
         photo_dict["album_title"] = None
+        photo_dict["album_cover"] = None
 
     return photo_dict
 
