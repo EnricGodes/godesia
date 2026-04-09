@@ -137,8 +137,8 @@ function renderDossier(data) {
     // 6. CRONOGRAMA
     renderTimeline(data);
 
-    // 7. CARRERA
-    renderCareer(data.occupations);
+    // 7. TRAYECTORIA PROFESIONAL (Ocupación + Trabajo)
+    renderCareer(data.career || data.occupations);
 
     // 8. MILITAR
     renderMilitary(data);
@@ -1292,21 +1292,28 @@ function setTimelineFilter(type) {
     renderTimelineSection();
 }
 
-function renderCareer(occupations) {
-    if (!occupations || occupations.length === 0) {
+function renderCareer(careerList) {
+    if (!careerList || careerList.length === 0) {
         document.getElementById('career-section').style.display = 'none';
         return;
     }
 
     document.getElementById('career-section').style.display = 'block';
 
-    const cards = occupations.map((o, i) => `
-        <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 border-${i % 2 === 0 ? 'primary' : 'secondary'}">
-            <h4 class="font-bold text-${i % 2 === 0 ? 'primary' : 'secondary'} text-sm uppercase">${o.title}</h4>
-            <p class="text-[10px] text-outline mt-1">${o.date || 'Período desconocido'}</p>
-            ${o.place ? `<p class="text-xs font-bold mt-3">${o.place}</p>` : ''}
-        </div>
-    `).join('');
+    const cards = careerList.map((c, i) => {
+        const isOccupation = c.event_type === 'Ocupación';
+        const borderColor = isOccupation ? 'primary' : 'secondary';
+        return `
+            <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 border-${borderColor}">
+                <div class="flex items-start justify-between gap-3 mb-2">
+                    <h4 class="font-bold text-${borderColor} text-sm uppercase flex-1">${c.title}</h4>
+                    <span class="text-[9px] font-bold uppercase opacity-60 text-${borderColor} whitespace-nowrap">${c.event_type}</span>
+                </div>
+                <p class="text-[10px] text-outline">${c.date || 'Período desconocido'}</p>
+                ${c.place ? `<p class="text-xs font-bold mt-3">${c.place}</p>` : ''}
+            </div>
+        `;
+    }).join('');
 
     const html = `
         <h2 class="font-headline text-3xl text-primary flex items-center gap-4">

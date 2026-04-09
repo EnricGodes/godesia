@@ -902,10 +902,21 @@ def get_person_dossier(conn, person_id):
 
     # Occupations
     occupations = conn.execute(
-        "SELECT title, date, place FROM occupations WHERE person_id = ? ORDER BY date",
+        "SELECT title, date, place, 'Ocupación' as event_type FROM occupations WHERE person_id = ? ORDER BY date",
         (person_id,)
     ).fetchall()
     occupations_list = [dict(o) for o in occupations]
+
+    # Work events (events with type = "Employer") — shown as "Trabajo" in Trayectoria Profesional
+    work_events = conn.execute(
+        "SELECT description as title, date, place, 'Trabajo' as event_type FROM events WHERE person_id = ? AND type = 'Employer' ORDER BY date",
+        (person_id,)
+    ).fetchall()
+    work_list = [dict(w) for w in work_events]
+
+    # Combine occupations and work events for career section
+    career_list = occupations_list + work_list
+    career_list.sort(key=lambda x: x.get('date') or '')
 
     # Military
     military = conn.execute(
@@ -986,6 +997,7 @@ def get_person_dossier(conn, person_id):
         "children": children_list,
         "residences": residences_list,
         "occupations": occupations_list,
+        "career": career_list,
         "military": military_list,
         "anecdotes": anecdotes_list,
         "events": events_list,
