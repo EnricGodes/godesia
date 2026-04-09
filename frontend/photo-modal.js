@@ -4,6 +4,7 @@
  */
 
 let _currentPhotoData = null;
+let _sidebarVisible = true;
 
 /**
  * Open photo modal with details
@@ -18,6 +19,7 @@ window.openPhotoModal = async function(photoId) {
         }
 
         _currentPhotoData = await res.json();
+        _sidebarVisible = true;
         renderPhotoModal();
         const overlay = document.getElementById('photo-modal-overlay');
         overlay.style.display = 'flex';
@@ -38,65 +40,92 @@ window.closePhotoModal = function() {
 };
 
 /**
+ * Toggle sidebar visibility
+ */
+window.togglePhotoSidebar = function() {
+    _sidebarVisible = !_sidebarVisible;
+    renderPhotoModal();
+};
+
+/**
+ * Navigate to person's dossier
+ */
+window.gotoPersonDossier = function(personId) {
+    personId = personId.replace(/@/g, '');
+    window.location.href = `/dossier.html?id=${personId}`;
+};
+
+/**
  * Render the modal content
  */
 function renderPhotoModal() {
     if (!_currentPhotoData) return;
 
     const p = _currentPhotoData;
+    const sidebarWidth = _sidebarVisible ? 300 : 0;
 
-    // Build info sections
-    const infoSections = [];
+    // Build sidebar content
+    let sidebarHtml = '';
 
-    if (p.date || p.place) {
-        let datePlace = [];
-        if (p.date) datePlace.push(p.date);
-        if (p.place) datePlace.push(p.place);
-        infoSections.push(`<div style="margin-bottom: 20px;"><div style="font-size: 13px; color: #727971;">${datePlace.join(' • ')}</div></div>`);
+    if (_sidebarVisible) {
+        // Title, date, place
+        let infoHtml = '';
+        if (p.title) {
+            infoHtml += `<h2 style="font-size: 20px; font-weight: bold; color: #2D4B33; font-family: 'Noto Serif', serif; margin: 0 0 12px 0;">${p.title}</h2>`;
+        }
+        if (p.date || p.place) {
+            let datePlace = [];
+            if (p.date) datePlace.push(p.date);
+            if (p.place) datePlace.push(p.place);
+            infoHtml += `<div style="font-size: 13px; color: #727971; margin-bottom: 24px;">${datePlace.join(' • ')}</div>`;
+        }
+
+        // Personas etiquetadas
+        const tagsHtml = p.tagged_people && p.tagged_people.length > 0
+            ? `<div style="margin-bottom: 24px;">
+                 <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.03em; margin: 0 0 12px 0;">Personas Etiquetadas</h3>
+                 <div style="display: flex; flex-direction: column; gap: 10px;">
+                   ${p.tagged_people.map(person => `
+                     <div style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px; border-radius: 6px; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(45, 75, 51, 0.1)'" onmouseout="this.style.backgroundColor='transparent'" onclick="gotoPersonDossier('${person.person_id}')">
+                       ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${person.name}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(114, 121, 113, 0.3); flex-shrink: 0;">` : `<div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f1eee5; flex-shrink: 0;"></div>`}
+                       <span style="font-size: 13px; color: #1c1c17; flex: 1;">${person.name}</span>
+                     </div>
+                   `).join('')}
+                 </div>
+               </div>`
+            : '';
+
+        // Álbum
+        const albumHtml = p.album_title
+            ? `<div style="margin-bottom: 24px;">
+                 <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.03em; margin: 0 0 8px 0;">Álbum</h3>
+                 <div style="font-size: 13px; color: #1c1c17;">${p.album_title}</div>
+               </div>`
+            : '';
+
+        sidebarHtml = `
+            <div style="width: 300px; padding: 24px; border-left: 1px solid rgba(114, 121, 113, 0.2); overflow-y: auto; background-color: #fcf9f0;">
+                ${infoHtml}
+                ${tagsHtml}
+                ${albumHtml}
+            </div>
+        `;
     }
 
-    // Personas etiquetadas
-    const tagsHtml = p.tagged_people && p.tagged_people.length > 0
-        ? `<div style="margin-bottom: 24px;">
-             <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.03em; margin: 0 0 12px 0;">Personas Etiquetadas</h3>
-             <div style="display: flex; flex-direction: column; gap: 8px;">
-               ${p.tagged_people.map(person => `
-                 <div style="display: flex; align-items: center; gap: 8px;">
-                   ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${person.name}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(114, 121, 113, 0.3); flex-shrink: 0;">` : `<div style="width: 28px; height: 28px; border-radius: 50%; background-color: #f1eee5; flex-shrink: 0;"></div>`}
-                   <span style="font-size: 13px; color: #1c1c17;">${person.name}</span>
-                 </div>
-               `).join('')}
-             </div>
-           </div>`
-        : '';
-
-    // Álbum
-    const albumHtml = p.album_title
-        ? `<div style="margin-bottom: 24px;">
-             <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.03em; margin: 0 0 8px 0;">Álbum</h3>
-             <div style="font-size: 13px; color: #1c1c17;">${p.album_title}</div>
-           </div>`
-        : '';
-
     const modalHtml = `
-        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #fcf9f0; display: flex; flex-direction: column;">
-            <!-- Header -->
-            <div style="padding: 24px; border-bottom: 1px solid rgba(114, 121, 113, 0.2); flex-shrink: 0;">
-                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
-                    <div style="flex: 1;">
-                        <h1 style="font-size: 32px; font-weight: bold; color: #2D4B33; font-family: 'Noto Serif', serif; margin: 0 0 12px 0;">
-                            ${p.title || 'Foto sin título'}
-                        </h1>
-                        <div style="font-size: 13px; color: #727971;">${p.date ? p.date : ''}${p.place ? (p.date ? ' • ' : '') + p.place : ''}</div>
-                    </div>
-                    <button onclick="closePhotoModal()" style="padding: 8px 12px; background: none; border: none; cursor: pointer; color: #2D4B33; font-size: 28px; line-height: 1;">✕</button>
-                </div>
-            </div>
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #fcf9f0; display: flex; flex-direction: row;">
+            <!-- Photo area -->
+            <div style="flex: 1; display: flex; flex-direction: column; position: relative;">
+                <!-- Toggle button -->
+                <button onclick="togglePhotoSidebar()" style="position: absolute; top: 16px; right: 16px; z-index: 50; padding: 8px 12px; background-color: rgba(45, 75, 51, 0.9); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; text-transform: uppercase;">
+                    ${_sidebarVisible ? '✕' : '☰'}
+                </button>
 
-            <!-- Main content -->
-            <div style="flex: 1; display: flex; gap: 24px; padding: 24px; overflow: hidden;">
+                <!-- Close button -->
+                <button onclick="closePhotoModal()" style="position: absolute; top: 16px; left: 16px; z-index: 50; padding: 8px 12px; background-color: rgba(45, 75, 51, 0.9); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">✕</button>
+
                 <!-- Photo container -->
-                <div style="flex: 1; display: flex; align-items: center; justify-content: center; background-color: #e5e2da; border-radius: 8px; border: 1px solid rgba(114, 121, 113, 0.2); position: relative; min-width: 0;">
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center; background-color: #e5e2da; position: relative; overflow: hidden;">
                     <img
                         src="/photos/${p.filename}"
                         alt="${p.title || 'Foto'}"
@@ -104,15 +133,12 @@ function renderPhotoModal() {
                         id="modal-photo"
                         onload="attachFaceBoxes()"
                     >
-                    <div id="face-boxes-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
-                </div>
-
-                <!-- Right sidebar -->
-                <div style="width: 280px; display: flex; flex-direction: column; gap: 0; overflow-y: auto;">
-                    ${tagsHtml}
-                    ${albumHtml}
+                    <div id="face-boxes-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
                 </div>
             </div>
+
+            <!-- Sidebar -->
+            ${sidebarHtml}
         </div>
     `;
 
@@ -137,13 +163,17 @@ function attachFaceBoxes() {
     img.src = imgElement.src;
 
     img.onload = function() {
-        const imgWidth = imgElement.offsetWidth;
-        const imgHeight = imgElement.offsetHeight;
-        const imgRect = imgElement.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
+        // Get actual displayed image dimensions
+        const imgDisplayWidth = imgElement.offsetWidth;
+        const imgDisplayHeight = imgElement.offsetHeight;
 
-        const naturalWidth = img.naturalWidth;
-        const naturalHeight = img.naturalHeight;
+        // Get natural image dimensions
+        const imgNaturalWidth = img.naturalWidth;
+        const imgNaturalHeight = img.naturalHeight;
+
+        // Calculate scale factors
+        const scaleX = imgDisplayWidth / imgNaturalWidth;
+        const scaleY = imgDisplayHeight / imgNaturalHeight;
 
         _currentPhotoData.tagged_people.forEach(person => {
             if (!person.position) return;
@@ -153,14 +183,16 @@ function attachFaceBoxes() {
 
             const [x1, y1, x2, y2] = coords;
 
-            // Scale to displayed image size
-            const scaleX = imgWidth / naturalWidth;
-            const scaleY = imgHeight / naturalHeight;
+            // Scale coordinates to displayed size
+            const displayX1 = x1 * scaleX;
+            const displayY1 = y1 * scaleY;
+            const displayX2 = x2 * scaleX;
+            const displayY2 = y2 * scaleY;
 
-            const left = x1 * scaleX;
-            const top = y1 * scaleY;
-            const width = (x2 - x1) * scaleX;
-            const height = (y2 - y1) * scaleY;
+            const left = displayX1;
+            const top = displayY1;
+            const width = displayX2 - displayX1;
+            const height = displayY2 - displayY1;
 
             // Create box element
             const box = document.createElement('div');
@@ -178,10 +210,10 @@ function attachFaceBoxes() {
             tooltip.textContent = person.name;
             tooltip.style.cssText = `
                 position: absolute;
-                bottom: 100%;
+                top: 100%;
                 left: 50%;
                 transform: translateX(-50%);
-                margin-bottom: 8px;
+                margin-top: 6px;
                 background-color: #2D4B33;
                 color: #ffffff;
                 padding: 6px 12px;
