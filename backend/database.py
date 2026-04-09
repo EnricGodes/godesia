@@ -704,7 +704,7 @@ def get_dashboard_data(conn):
         JOIN photo_tags pt ON pt.person_id = p.id
         JOIN photos ph ON ph.id = pt.photo_id
         WHERE ph.filename IS NOT NULL
-        AND ph.is_document = 0
+        AND ph.filename NOT LIKE '%.pdf'
         AND ph.is_personal_photo = 0
         AND ph.is_cutout = 0
         ORDER BY RANDOM() LIMIT 8
@@ -1009,11 +1009,11 @@ def get_person_dossier(conn, person_id):
 
 
 def get_documents(conn, limit=1):
-    """Return documents (non-photo records) for the home Arxiu section."""
+    """Return documents (PDFs or tagged photos) for the home Arxiu section."""
     return conn.execute("""
-        SELECT id, filename, title, doc_type, transcription, date, place
+        SELECT id, filename, title, date, place
         FROM photos
-        WHERE is_document = 1
+        WHERE filename LIKE '%.pdf' OR title LIKE '%[%]%'
         ORDER BY RANDOM() LIMIT ?
     """, (limit,)).fetchall()
 
