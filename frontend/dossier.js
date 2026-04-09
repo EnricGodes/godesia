@@ -1304,8 +1304,8 @@ function renderCareer(careerList) {
         return `
             <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 border-primary">
                 <p class="text-[10px] text-outline font-medium mb-2">${c.date || 'Período desconocido'}</p>
-                ${c.place ? `<p class="text-xs text-outline mb-3">${c.place}</p>` : ''}
-                <h4 class="font-bold text-primary text-sm">${c.title}</h4>
+                ${c.place ? `<p class="text-sm font-bold text-on-surface mb-3">${c.place}</p>` : ''}
+                <p class="text-xs text-outline">${c.title}</p>
             </div>
         `;
     }).join('');
