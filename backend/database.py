@@ -699,7 +699,7 @@ def get_dashboard_data(conn):
     # Family photos (random selection for gallery)
     photo_people = conn.execute("""
         SELECT DISTINCT p.id, p.name, p.birth_year, p.death_year, p.birth_place,
-               ph.filename as local_file, ph.title, ph.date, ph.place
+               ph.id as photo_id, ph.filename as local_file, ph.title, ph.date, ph.place
         FROM people p
         JOIN photo_tags pt ON pt.person_id = p.id
         JOIN photos ph ON ph.id = pt.photo_id
@@ -733,7 +733,8 @@ def get_dashboard_data(conn):
         "birthdays": birthdays,
         "photos": [
             {
-                "id": p["id"],
+                "photo_id": p["photo_id"],
+                "person_id": p["id"],
                 "name": p["name"],
                 "photo": p["local_file"],
                 "title": p["title"],

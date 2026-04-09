@@ -73,7 +73,7 @@ function renderPhotos(photos) {
         const year = p.date || '';
         const place = p.place || '';
         return `
-        <div class="photo-card-full">
+        <div class="photo-card-full" onclick="openPhotoModal(${p.photo_id})" style="cursor: pointer;">
             <img src="/photos/${p.photo}" alt="${title}" loading="lazy">
             <div class="photo-card-info">
                 <h4>${title}</h4>
