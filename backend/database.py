@@ -1006,6 +1006,93 @@ def get_documents(conn, limit=1):
     """, (limit,)).fetchall()
 
 
+def update_all_photo_files(conn):
+    """
+    Regenerate photo_file for all people using the 5-level selection algorithm.
+
+    This should be called after photos table is updated to ensure profile photos are always correct.
+    Selection priority (same as migrate_json_to_sqlite.py):
+    1. is_primary = 1 (official primary photo)
+    2. is_prim_cutout = 1 AND is_personal_photo = 1 (personal primary cutout)
+    3. is_prim_cutout = 1 (any primary cutout)
+    4. is_cutout = 1 (any cutout)
+    5. Any non-PDF photo (fallback)
+    """
+    people = conn.execute("SELECT id FROM people").fetchall()
+    updated = 0
+
+    for person_row in people:
+        person_id = person_row["id"]
+
+        # Count all photos for this person
+        photo_count = conn.execute("""
+            SELECT COUNT(*) as cnt FROM photos ph
+            JOIN photo_tags pt ON pt.photo_id = ph.id
+            WHERE pt.person_id = ?
+        """, (person_id,)).fetchone()["cnt"]
+
+        # Find profile photo using 5-level selection algorithm
+        photo_file = None
+        if photo_count > 0:
+            # Priority 1: is_primary=1
+            photo_row = conn.execute("""
+                SELECT ph.filename FROM photos ph
+                JOIN photo_tags pt ON pt.photo_id = ph.id
+                WHERE pt.person_id = ? AND pt.is_primary = 1
+                ORDER BY ph.id LIMIT 1
+            """, (person_id,)).fetchone()
+
+            # Priority 2: is_prim_cutout=1 AND is_personal_photo=1
+            if not photo_row:
+                photo_row = conn.execute("""
+                    SELECT ph.filename FROM photos ph
+                    JOIN photo_tags pt ON pt.photo_id = ph.id
+                    WHERE pt.person_id = ? AND ph.is_prim_cutout = 1 AND ph.is_personal_photo = 1
+                    ORDER BY ph.id LIMIT 1
+                """, (person_id,)).fetchone()
+
+            # Priority 3: is_prim_cutout=1
+            if not photo_row:
+                photo_row = conn.execute("""
+                    SELECT ph.filename FROM photos ph
+                    JOIN photo_tags pt ON pt.photo_id = ph.id
+                    WHERE pt.person_id = ? AND ph.is_prim_cutout = 1
+                    ORDER BY ph.id LIMIT 1
+                """, (person_id,)).fetchone()
+
+            # Priority 4: is_cutout=1
+            if not photo_row:
+                photo_row = conn.execute("""
+                    SELECT ph.filename FROM photos ph
+                    JOIN photo_tags pt ON pt.photo_id = ph.id
+                    WHERE pt.person_id = ? AND ph.is_cutout = 1
+                    ORDER BY ph.id LIMIT 1
+                """, (person_id,)).fetchone()
+
+            # Priority 5: any non-PDF photo
+            if not photo_row:
+                photo_row = conn.execute("""
+                    SELECT ph.filename FROM photos ph
+                    JOIN photo_tags pt ON pt.photo_id = ph.id
+                    WHERE pt.person_id = ? AND ph.filename NOT LIKE '%.pdf'
+                    ORDER BY ph.id LIMIT 1
+                """, (person_id,)).fetchone()
+
+            if photo_row:
+                photo_file = photo_row["filename"]
+
+        # Update person's photo info
+        if photo_count > 0 or photo_file:
+            conn.execute(
+                "UPDATE people SET photo_count = ?, photo_file = ? WHERE id = ?",
+                (photo_count, photo_file, person_id)
+            )
+            updated += 1
+
+    conn.commit()
+    return updated
+
+
 def _person_to_node(person):
     """Convert a DB row to a tree node dict."""
     p = dict(person) if not isinstance(person, dict) else person

@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from database import get_connection, init_db, parse_gedcom_date, convert_date_to_spanish
+from database import get_connection, init_db, parse_gedcom_date, convert_date_to_spanish, update_all_photo_files
 
 
 def migrate(json_path, db_path):
@@ -200,81 +200,13 @@ def migrate(json_path, db_path):
 
     conn.commit()
 
-    # Update photo_count and photo_file from photos table (if it exists)
+    # Update photo_count and photo_file using the centralized selection algorithm
     try:
-        people = conn.execute("SELECT id FROM people").fetchall()
-        updated_photos = 0
-        for person_row in people:
-            person_id = person_row["id"]
-
-            # Count all photos (photos + documents)
-            photo_count = conn.execute("""
-                SELECT COUNT(*) as cnt FROM photos ph
-                JOIN photo_tags pt ON pt.photo_id = ph.id
-                WHERE pt.person_id = ?
-            """, (person_id,)).fetchone()["cnt"]
-
-            # Find profile photo: official MyHeritage profile photos
-            photo_file = None
-            if photo_count > 0:
-                # First priority: is_primary=1 (official primary photo)
-                photo_row = conn.execute("""
-                    SELECT ph.filename FROM photos ph
-                    JOIN photo_tags pt ON pt.photo_id = ph.id
-                    WHERE pt.person_id = ? AND pt.is_primary = 1
-                    ORDER BY ph.id LIMIT 1
-                """, (person_id,)).fetchone()
-
-                # Second priority: is_prim_cutout=1 AND is_personal_photo=1 (personal primary cutout)
-                if not photo_row:
-                    photo_row = conn.execute("""
-                        SELECT ph.filename FROM photos ph
-                        JOIN photo_tags pt ON pt.photo_id = ph.id
-                        WHERE pt.person_id = ? AND ph.is_prim_cutout = 1 AND ph.is_personal_photo = 1
-                        ORDER BY ph.id LIMIT 1
-                    """, (person_id,)).fetchone()
-
-                # Third priority: any is_prim_cutout=1
-                if not photo_row:
-                    photo_row = conn.execute("""
-                        SELECT ph.filename FROM photos ph
-                        JOIN photo_tags pt ON pt.photo_id = ph.id
-                        WHERE pt.person_id = ? AND ph.is_prim_cutout = 1
-                        ORDER BY ph.id LIMIT 1
-                    """, (person_id,)).fetchone()
-
-                # Fourth priority: any cutout
-                if not photo_row:
-                    photo_row = conn.execute("""
-                        SELECT ph.filename FROM photos ph
-                        JOIN photo_tags pt ON pt.photo_id = ph.id
-                        WHERE pt.person_id = ? AND ph.is_cutout = 1
-                        ORDER BY ph.id LIMIT 1
-                    """, (person_id,)).fetchone()
-
-                # Fifth priority: any non-PDF photo
-                if not photo_row:
-                    photo_row = conn.execute("""
-                        SELECT ph.filename FROM photos ph
-                        JOIN photo_tags pt ON pt.photo_id = ph.id
-                        WHERE pt.person_id = ? AND ph.filename NOT LIKE '%.pdf'
-                        ORDER BY ph.id LIMIT 1
-                    """, (person_id,)).fetchone()
-
-                if photo_row:
-                    photo_file = photo_row["filename"]
-
-            if photo_count > 0:
-                conn.execute(
-                    "UPDATE people SET photo_count = ?, photo_file = ? WHERE id = ?",
-                    (photo_count, photo_file, person_id)
-                )
-                updated_photos += 1
-        conn.commit()
+        updated_photos = update_all_photo_files(conn)
         if updated_photos > 0:
             print(f"\nActualizadas fotos para {updated_photos} personas")
     except Exception as e:
-        # photos table might not exist if sync_catalog hasn't run yet
+        # photos table might not exist if it hasn't been populated yet
         print(f"  (Saltando actualización de fotos: {e})")
 
     # Verify

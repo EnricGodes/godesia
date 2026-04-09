@@ -14,6 +14,7 @@ from pydantic import BaseModel
 from database import (
     get_connection, get_tree_data, get_birthdays_this_week, search_people,
     get_dashboard_data, get_documents, get_person_dossier, convert_date_to_spanish,
+    update_all_photo_files,
 )
 from query_router import QueryRouter
 from query_engine import QueryEngine
@@ -191,6 +192,27 @@ async def dossier(person_id: str):
         raise HTTPException(status_code=404, detail="Persona no encontrada")
     dossier_data["gedcom_date"] = gedcom_export_date or ""
     return dossier_data
+
+
+@app.post("/api/admin/sync-photos")
+async def sync_photos_endpoint():
+    """
+    Regenerate photo_file for all people using the 5-level selection algorithm.
+
+    This ensures profile photos are correctly set after any photo table updates.
+    Should be called after importing new GEDCOM or updating photo metadata.
+    """
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    try:
+        updated = update_all_photo_files(db_conn)
+        return {
+            "status": "ok",
+            "message": f"Fotos sincronizadas para {updated} personas",
+            "updated_count": updated
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error sincronizando fotos: {str(e)}")
 
 
 # Serve photos

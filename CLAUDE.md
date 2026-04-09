@@ -21,6 +21,7 @@ The app uses a two-tier query system:
 │   ├── query_engine.py           — LLM query engine with context reduction
 │   ├── gedcom_parser.py          — GEDCOM file parser
 │   ├── migrate_json_to_sqlite.py — JSON → SQLite migration script
+│   ├── sync_photos.py            — Regenerate profile photos from photo metadata
 │   └── requirements.txt
 ├── frontend/
 │   ├── index.html                — Chat interface
@@ -79,28 +80,39 @@ python3 migrate_json_to_sqlite.py
 
 ## Profile Photo Selection Algorithm
 
-Each person's profile photo is selected from GEDCOM `OBJE` records based on these flags:
-- `_PRIM Y`: Official MyHeritage primary photo (marked as primary in MyHeritage)
-- `_PRIM_CUTOUT Y`: Official MyHeritage primary cutout/profile photo  
-- `_PERSONALPHOTO Y`: Personal photo (marked as belonging to the individual)
+Each person's profile photo is selected from the `photos` table using a 5-level priority algorithm. This is implemented in `database.py:update_all_photo_files()` and ensures photos are consistently assigned.
 
-**Selection priority** (in `backend/migrate_json_to_sqlite.py`):
-1. `photo_tags.is_primary = 1` (highest priority)
+**Selection priority:**
+1. `photo_tags.is_primary = 1` (highest priority — official MyHeritage primary)
 2. `photos.is_prim_cutout = 1 AND photos.is_personal_photo = 1` (personal primary cutout)
 3. `photos.is_prim_cutout = 1` (any primary cutout)
 4. `photos.is_cutout = 1` (any cutout)
 5. Any non-PDF photo (fallback)
 
+**GEDCOM source flags:**
+- `_PRIM Y`: Official MyHeritage primary photo (→ `photo_tags.is_primary`)
+- `_PRIM_CUTOUT Y`: Official MyHeritage primary cutout (→ `photos.is_prim_cutout`)
+- `_PERSONALPHOTO Y`: Personal photo (→ `photos.is_personal_photo`)
+
 **Examples:**
 - **I16** (Artur Godes Hurtado): `000132_9993585rac49e6n59h867t_V.jpg` (has `_PRIM_CUTOUT Y` + `_PERSONALPHOTO Y`)
-- **I118** (Enric Godes Maté): `500437_181219rgo60418u59d7hk6_A.jpg` (has `_PRIM Y` + `_CUTOUT Y`)
-- **I11** (Ernest Godes Hurtado): `000065_7080186cj59ek8u954c93m_V.jpg` (has `_PRIM_CUTOUT Y` + `_PERSONALPHOTO Y`, not `500017` which only has `_PRIM_CUTOUT Y`)
+- **I118** (Enric Godes Maté): `500437_181219rgo60418u59d7hk6_A.jpg` (has `_PRIM Y`)
+- **I11** (Ernest Godes Hurtado): `000065_7080186cj59ek8u954c93m_V.jpg` (has `_PRIM_CUTOUT Y` + `_PERSONALPHOTO Y`)
 
-The `sync_photo_catalog.py` script extracts these flags from GEDCOM and stores them in the `photos` table:
-- `is_prim_cutout INTEGER` (from `_PRIM_CUTOUT Y`)
-- `is_personal_photo INTEGER` (from `_PERSONALPHOTO Y`)
+### Ensuring Profile Photos Are Never Lost
 
-These columns must always exist in the `photos` table schema.
+**Critical architecture:** `people.photo_file` is derived from photo metadata and MUST be regenerated whenever the `photos` or `photo_tags` tables are updated. Three ways this happens:
+
+1. **After full GEDCOM import:** `python3 migrate_json_to_sqlite.py` automatically calls `update_all_photo_files()`
+2. **Manual resync:** `python3 sync_photos.py` (standalone script, no arguments needed)
+3. **Via API:** `POST /api/admin/sync-photos` (programmatic access)
+
+**If profile photos ever disappear:**
+- Run `python3 backend/sync_photos.py` from the project root
+- This regenerates `people.photo_file` for all 362+ people with photos
+- The dossier page will immediately show correct photos again
+
+**Never run just photo metadata updates without syncing.** Always follow with one of the three options above to ensure `people.photo_file` is regenerated.
 
 ## Face Detection Boxes (Green Overlays)
 
