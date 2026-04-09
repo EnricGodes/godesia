@@ -550,6 +550,8 @@ function getIconForTag(tag) {
         'Foto': '/icons/foto.svg',
         'Biografia': '/icons/biografia.svg',
         'Acta': '/icons/carta.svg',
+        'Carta': '/icons/carta.svg',
+        'Cementerio': '/icons/cementerio.svg',
         'Documentación': '/icons/documentacion.svg',
         'Obituario': '/icons/obituario.svg',
         'Padrón': '/icons/padron.svg',
