@@ -1,10 +1,10 @@
 /**
  * Photo Modal Module
  * Global modal for viewing photos in detail across the entire application
+ * Works with both Tailwind and standard CSS
  */
 
 let _currentPhotoData = null;
-let _tooltipTimeout = null;
 
 /**
  * Open photo modal with details
@@ -20,7 +20,8 @@ window.openPhotoModal = async function(photoId) {
 
         _currentPhotoData = await res.json();
         renderPhotoModal();
-        document.getElementById('photo-modal-overlay').style.display = 'flex';
+        const overlay = document.getElementById('photo-modal-overlay');
+        overlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     } catch (e) {
         console.error('Error loading photo:', e);
@@ -31,7 +32,8 @@ window.openPhotoModal = async function(photoId) {
  * Close photo modal
  */
 window.closePhotoModal = function() {
-    document.getElementById('photo-modal-overlay').style.display = 'none';
+    const overlay = document.getElementById('photo-modal-overlay');
+    overlay.style.display = 'none';
     document.body.style.overflow = 'auto';
     _currentPhotoData = null;
 };
@@ -44,61 +46,63 @@ function renderPhotoModal() {
 
     const p = _currentPhotoData;
     const tagsHtml = p.tagged_people && p.tagged_people.length > 0
-        ? `<div class="space-y-2">
+        ? `<div style="display: flex; flex-direction: column; gap: 8px;">
              ${p.tagged_people.map(person => `
-               <div class="flex items-center gap-2">
-                 ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${person.name}" class="w-6 h-6 rounded-full object-cover border border-outline-variant/30">` : '<div class="w-6 h-6 rounded-full bg-surface-container"></div>'}
-                 <span class="text-sm">${person.name}</span>
+               <div style="display: flex; align-items: center; gap: 8px;">
+                 ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${person.name}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(114, 121, 113, 0.3);">` : `<div style="width: 24px; height: 24px; border-radius: 50%; background-color: #f1eee5;"></div>`}
+                 <span style="font-size: 14px;">${person.name}</span>
                </div>
              `).join('')}
            </div>`
-        : '<span class="text-sm text-outline">Sin personas etiquetadas</span>';
+        : '<span style="font-size: 14px; color: #727971;">Sin personas etiquetadas</span>';
 
     const infoHtml = [
-        p.date ? `<div><span class="text-xs uppercase tracking-widest font-bold text-outline">Fecha</span><div class="text-sm">${p.date}</div></div>` : '',
-        p.place ? `<div><span class="text-xs uppercase tracking-widest font-bold text-outline">Lugar</span><div class="text-sm">${p.place}</div></div>` : '',
-        p.album_title ? `<div><span class="text-xs uppercase tracking-widest font-bold text-outline">Álbum</span><div class="text-sm">${p.album_title}</div></div>` : ''
+        p.date ? `<div style="border-bottom: 1px solid rgba(114, 121, 113, 0.2); padding-bottom: 12px;"><span style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.03em;">Fecha</span><div style="font-size: 14px; margin-top: 4px;">${p.date}</div></div>` : '',
+        p.place ? `<div style="border-bottom: 1px solid rgba(114, 121, 113, 0.2); padding-bottom: 12px;"><span style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.03em;">Lugar</span><div style="font-size: 14px; margin-top: 4px;">${p.place}</div></div>` : '',
+        p.album_title ? `<div><span style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.03em;">Álbum</span><div style="font-size: 14px; margin-top: 4px;">${p.album_title}</div></div>` : ''
     ].filter(Boolean).join('');
 
     const modalHtml = `
-        <div class="bg-surface rounded-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl">
+        <div style="background-color: #fcf9f0; border-radius: 12px; max-width: 1200px; width: 100%; margin: 0 16px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
             <!-- Header with close button -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant/20 flex-shrink-0">
-                <h2 class="font-headline text-2xl font-bold text-primary flex-1">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 24px; border-bottom: 1px solid rgba(114, 121, 113, 0.2); flex-shrink: 0;">
+                <h2 style="font-size: 24px; font-weight: bold; color: #2D4B33; flex: 1; font-family: 'Noto Serif', serif; margin: 0;">
                     ${p.title || 'Foto sin título'}
                 </h2>
-                <button onclick="closePhotoModal()" class="p-2 hover:bg-surface-container rounded-full transition-colors">
-                    <span class="material-symbols-outlined text-primary">close</span>
+                <button onclick="closePhotoModal()" style="padding: 8px; background: none; border: none; cursor: pointer; color: #2D4B33; font-size: 24px;">
+                    ✕
                 </button>
             </div>
 
             <!-- Main content -->
-            <div class="flex-1 overflow-y-auto p-6">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div style="flex: 1; overflow-y: auto; padding: 24px;">
+                <div style="display: grid; grid-template-columns: 1fr; gap: 32px; margin-bottom: 24px;">
                     <!-- Large photo -->
-                    <div class="lg:col-span-2">
-                        <div class="relative bg-surface-container-highest overflow-hidden rounded-lg heritage-border aspect-auto max-h-[60vh] flex items-center justify-center">
+                    <div style="grid-column: 1 / -1;">
+                        <div style="position: relative; background-color: #e5e2da; overflow: hidden; border-radius: 8px; border: 1px solid rgba(114, 121, 113, 0.2); display: flex; align-items: center; justify-content: center; max-height: 60vh;">
                             <img
                                 src="/photos/${p.filename}"
                                 alt="${p.title || 'Foto'}"
-                                class="max-w-full max-h-full object-contain"
+                                style="max-width: 100%; max-height: 100%; object-fit: contain;"
                                 id="modal-photo"
                                 onload="attachFaceBoxesTool()"
                             >
-                            <div id="face-boxes-container" class="absolute inset-0 pointer-events-none"></div>
+                            <div id="face-boxes-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Right sidebar with info -->
-                    <div class="space-y-6">
-                        <!-- Info boxes -->
-                        ${infoHtml ? `<div class="space-y-4">${infoHtml}</div>` : ''}
+                <!-- Info and people -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding-top: 24px; border-top: 1px solid rgba(114, 121, 113, 0.2);">
+                    <!-- Info boxes -->
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        ${infoHtml ? infoHtml : ''}
+                    </div>
 
-                        <!-- Tagged people -->
-                        <div>
-                            <h3 class="text-sm font-bold uppercase tracking-widest text-outline mb-3">Personas etiquetadas</h3>
-                            ${tagsHtml}
-                        </div>
+                    <!-- Tagged people -->
+                    <div>
+                        <h3 style="font-size: 12px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 12px; margin-top: 0;">Personas etiquetadas</h3>
+                        ${tagsHtml}
                     </div>
                 </div>
             </div>
@@ -148,21 +152,51 @@ function attachFaceBoxesTool() {
             const width = (x2 - x1) * scaleX;
             const height = (y2 - y1) * scaleY;
 
-            // Create box element
+            // Create box element with tooltip
             const box = document.createElement('div');
-            box.className = 'absolute border-2 border-primary rounded opacity-0 hover:opacity-100 transition-opacity group cursor-pointer';
-            box.style.left = left + 'px';
-            box.style.top = top + 'px';
-            box.style.width = width + 'px';
-            box.style.height = height + 'px';
+            box.style.cssText = `
+                position: absolute;
+                left: ${left}px;
+                top: ${top}px;
+                width: ${width}px;
+                height: ${height}px;
+                border: 2px solid #2D4B33;
+                border-radius: 4px;
+                cursor: pointer;
+            `;
 
             // Create tooltip
             const tooltip = document.createElement('div');
-            tooltip.className = 'absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-primary text-on-primary px-2 py-1 rounded text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10';
             tooltip.textContent = person.name;
-            tooltip.style.transform = 'translate(-50%, 0)';
+            tooltip.style.cssText = `
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                margin-bottom: 8px;
+                background-color: #2D4B33;
+                color: #ffffff;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: bold;
+                white-space: nowrap;
+                opacity: 0;
+                transition: opacity 0.2s;
+                pointer-events: none;
+                z-index: 10;
+            `;
 
             box.appendChild(tooltip);
+
+            // Show tooltip on hover
+            box.addEventListener('mouseenter', () => {
+                tooltip.style.opacity = '1';
+            });
+            box.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+            });
+
             container.appendChild(box);
         });
     };
@@ -175,7 +209,19 @@ window.initPhotoModal = function() {
     // Create modal HTML if it doesn't exist
     if (!document.getElementById('photo-modal-overlay')) {
         const modalHtml = `
-            <div id="photo-modal-overlay" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden overflow-y-auto" onclick="if(event.target === this) closePhotoModal()">
+            <div id="photo-modal-overlay" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                overflow-y: auto;
+            " onclick="if(event.target === this) closePhotoModal()">
                 <div id="photo-modal-content"></div>
             </div>
         `;
@@ -184,7 +230,6 @@ window.initPhotoModal = function() {
 };
 
 // Auto-initialize when script loads
-document.addEventListener('DOMContentLoaded', initPhotoModal);
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPhotoModal);
 } else {
