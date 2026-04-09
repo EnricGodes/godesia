@@ -535,27 +535,58 @@ function renderPhotosGrid(photos) {
 }
 
 function renderDocuments(data) {
-    if (!data.person.photo_file) {
+    if (!data.documents || data.documents.length === 0) {
         document.getElementById('docs-section').style.display = 'none';
         return;
     }
 
     document.getElementById('docs-section').style.display = 'block';
+
+    // Group documents by tag
+    const docsByTag = {};
+    data.documents.forEach(doc => {
+        const tag = doc.tag || 'Otros';
+        if (!docsByTag[tag]) docsByTag[tag] = [];
+        docsByTag[tag].push(doc);
+    });
+
+    const docsList = Object.entries(docsByTag).map(([tag, docs]) => `
+        <div class="space-y-4">
+            <h3 class="font-headline text-lg font-bold text-primary flex items-center gap-3">
+                <span class="material-symbols-outlined text-2xl">folder</span>
+                ${tag}
+            </h3>
+            <div class="space-y-3">
+                ${docs.map(doc => `
+                    <div class="border border-outline-variant/30 rounded-lg p-4 hover:bg-surface-container-low transition-colors">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined">description</span>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-sm mb-1">${doc.title_clean}</h4>
+                                <div class="flex flex-wrap items-center gap-3 text-xs text-outline">
+                                    ${doc.date ? `<span>${doc.date}</span>` : ''}
+                                    ${doc.place ? `<span class="italic">${doc.place}</span>` : ''}
+                                </div>
+                            </div>
+                            <a href="/photos/${doc.filename}" target="_blank" class="text-primary hover:text-primary/80 shrink-0">
+                                <span class="material-symbols-outlined">open_in_new</span>
+                            </a>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('<div class="mt-8"></div>');
+
     const html = `
-        <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
+        <h2 class="font-headline text-3xl text-primary flex items-center gap-4 mb-8">
             <span class="material-symbols-outlined">folder_open</span>
             Repositorio Documental
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="p-4 bg-white heritage-border rounded-lg flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer group">
-                <div class="w-12 h-12 bg-red-50 text-red-700 rounded-lg flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined">picture_as_pdf</span>
-                </div>
-                <div>
-                    <h4 class="text-sm font-bold group-hover:text-primary transition-colors">Documentos Vitales</h4>
-                    <p class="text-[10px] text-outline uppercase tracking-tight">Registros disponibles</p>
-                </div>
-            </div>
+        <div class="space-y-10">
+            ${docsList}
         </div>
     `;
     document.getElementById('docs-section').innerHTML = html;

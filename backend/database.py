@@ -942,13 +942,36 @@ def get_person_dossier(conn, person_id):
     ).fetchall()
     notes_list = [n[0] for n in notes]
 
-    # Photos (all, no limit) — include id (for sorting), date fields, and position for face detection
+    # Documents (fotos con título que contiene tags entre corchetes: [Defunción], [Nacimiento], etc.)
+    documents = conn.execute("""
+        SELECT ph.id, ph.filename, ph.title, ph.date, ph.place
+        FROM photos ph
+        JOIN photo_tags pt ON pt.photo_id = ph.id
+        WHERE pt.person_id = ? AND ph.title IS NOT NULL AND ph.title LIKE '%[%]%'
+        ORDER BY ph.date, ph.id
+    """, (person_id,)).fetchall()
+    documents_list = []
+    for doc in documents:
+        doc_dict = dict(doc)
+        # Extract tag from title: "Title here [Tag]" -> tag = "Tag", title = "Title here"
+        if '[' in doc_dict['title']:
+            import re
+            match = re.search(r'\[([^\]]+)\]$', doc_dict['title'])
+            if match:
+                doc_dict['tag'] = match.group(1)
+                doc_dict['title_clean'] = doc_dict['title'][:match.start()].strip()
+            else:
+                doc_dict['tag'] = ''
+                doc_dict['title_clean'] = doc_dict['title']
+        documents_list.append(doc_dict)
+
+    # Photos (all, no limit, excluding documents) — include id (for sorting), date fields, and position for face detection
     # Position is stored per person in photo_tags, not globally in photos
     photos = conn.execute("""
         SELECT ph.id, ph.filename, ph.title, ph.date, ph.place, pt.position
         FROM photos ph
         JOIN photo_tags pt ON pt.photo_id = ph.id
-        WHERE pt.person_id = ? AND ph.filename NOT LIKE '%.pdf'
+        WHERE pt.person_id = ? AND ph.filename NOT LIKE '%.pdf' AND (ph.title IS NULL OR ph.title NOT LIKE '%[%]%')
         ORDER BY ph.date DESC
     """, (person_id,)).fetchall()
     photos_list = [dict(p) for p in photos]
@@ -968,6 +991,7 @@ def get_person_dossier(conn, person_id):
         "events": events_list,
         "burial": burial_list,
         "notes": notes_list,
+        "documents": documents_list,
         "photos": photos_list,
     }
 
