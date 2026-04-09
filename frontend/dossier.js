@@ -534,6 +534,25 @@ function renderPhotosGrid(photos) {
     renderBentoGrid(photos);
 }
 
+// Map tags to Material Symbols icons and colors
+function getIconForTag(tag) {
+    const iconMap = {
+        'Defunción': { icon: 'event_busy', color: 'bg-red-100 text-red-700' },
+        'Nacimiento': { icon: 'child_care', color: 'bg-blue-100 text-blue-700' },
+        'Bautismo': { icon: 'water_drop', color: 'bg-blue-100 text-blue-700' },
+        'Acta de Matrimonio': { icon: 'favorite', color: 'bg-pink-100 text-pink-700' },
+        'Matrimonio': { icon: 'favorite', color: 'bg-pink-100 text-pink-700' },
+        'Certificado': { icon: 'verified', color: 'bg-green-100 text-green-700' },
+        'Certificado Militar': { icon: 'military_tech', color: 'bg-green-100 text-green-700' },
+        'Militar': { icon: 'military_tech', color: 'bg-green-100 text-green-700' },
+        'Fotografia': { icon: 'photo_camera', color: 'bg-purple-100 text-purple-700' },
+        'Foto': { icon: 'photo_camera', color: 'bg-purple-100 text-purple-700' },
+        'Biografia': { icon: 'person_4', color: 'bg-amber-100 text-amber-700' },
+        'Acta': { icon: 'description', color: 'bg-slate-100 text-slate-700' },
+    };
+    return iconMap[tag] || { icon: 'document_scanner', color: 'bg-gray-100 text-gray-700' };
+}
+
 function renderDocuments(data) {
     if (!data.documents || data.documents.length === 0) {
         document.getElementById('docs-section').style.display = 'none';
@@ -542,51 +561,34 @@ function renderDocuments(data) {
 
     document.getElementById('docs-section').style.display = 'block';
 
-    // Group documents by tag
-    const docsByTag = {};
-    data.documents.forEach(doc => {
-        const tag = doc.tag || 'Otros';
-        if (!docsByTag[tag]) docsByTag[tag] = [];
-        docsByTag[tag].push(doc);
-    });
-
-    const docsList = Object.entries(docsByTag).map(([tag, docs]) => `
-        <div class="space-y-4">
-            <h3 class="font-headline text-lg font-bold text-primary flex items-center gap-3">
-                <span class="material-symbols-outlined text-2xl">folder</span>
-                ${tag}
-            </h3>
-            <div class="space-y-3">
-                ${docs.map(doc => `
-                    <div class="border border-outline-variant/30 rounded-lg p-4 hover:bg-surface-container-low transition-colors">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center shrink-0">
-                                <span class="material-symbols-outlined">description</span>
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="font-bold text-sm mb-1">${doc.title_clean}</h4>
-                                <div class="flex flex-wrap items-center gap-3 text-xs text-outline">
-                                    ${doc.date ? `<span>${doc.date}</span>` : ''}
-                                    ${doc.place ? `<span class="italic">${doc.place}</span>` : ''}
-                                </div>
-                            </div>
-                            <a href="/photos/${doc.filename}" target="_blank" class="text-primary hover:text-primary/80 shrink-0">
-                                <span class="material-symbols-outlined">open_in_new</span>
-                            </a>
-                        </div>
+    // Create grid of all documents with icons
+    const documentCards = data.documents.map(doc => {
+        const iconInfo = getIconForTag(doc.tag);
+        return `
+            <a href="/photos/${doc.filename}" target="_blank"
+               class="border border-outline-variant/20 rounded-xl p-6 hover:shadow-md hover:border-primary/30 transition-all duration-200 group cursor-pointer">
+                <div class="flex items-start gap-4">
+                    <div class="${iconInfo.color} w-12 h-12 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined">${iconInfo.icon}</span>
                     </div>
-                `).join('')}
-            </div>
-        </div>
-    `).join('<div class="mt-8"></div>');
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-sm text-on-surface mb-1 group-hover:text-primary transition-colors">${doc.tag}</h4>
+                        <p class="text-xs text-outline-variant truncate">${doc.title_clean}</p>
+                        ${doc.date ? `<p class="text-xs text-outline mt-2 font-medium">${doc.date}</p>` : ''}
+                        ${doc.place ? `<p class="text-xs text-outline-variant mt-1">${doc.place}</p>` : ''}
+                    </div>
+                </div>
+            </a>
+        `;
+    }).join('');
 
     const html = `
         <h2 class="font-headline text-3xl text-primary flex items-center gap-4 mb-8">
             <span class="material-symbols-outlined">folder_open</span>
             Repositorio Documental
         </h2>
-        <div class="space-y-10">
-            ${docsList}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            ${documentCards}
         </div>
     `;
     document.getElementById('docs-section').innerHTML = html;
