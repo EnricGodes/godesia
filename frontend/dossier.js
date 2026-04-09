@@ -535,25 +535,27 @@ function renderPhotosGrid(photos) {
 }
 
 // Map tags to SVG icons
+// Map tags to icon SVG files in frontend/icons/
 function getIconForTag(tag) {
     const iconMap = {
-        'Defunción': '<?xml version="1.0" encoding="UTF-8"?><svg id="Capa_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 24 24"><defs><style>.st0 { fill: none; stroke: #2e4b33; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5px; }</style></defs><path class="st0" d="M20.78,17.73v-8c0-1.89,0-2.83-.59-3.41-.59-.59-1.53-.59-3.41-.59H4.78v12c0,1.89,0,2.83.59,3.41.59.59,1.53.59,3.41.59h8c1.89,0,2.83,0,3.41-.59s.59-1.53.59-3.41Z"/><path class="st0" d="M12.78,9.73v8"/><path class="st0" d="M4.78,5.73l7.38-3.09c1.65-.69,2.47-1.04,3.13-.86.43.11.8.37,1.07.72.41.54.41,1.44.41,3.24"/><path class="st0" d="M10.29,12.73h4.97"/></svg>',
-        'Nacimiento': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6" /><path d="M16.874 12C17.5826 13.037 18 14.3093 18 15.6842C18 16.5017 17.8524 17.2829 17.5838 18M7.12605 12C6.41738 13.037 6 14.3093 6 15.6842C6 19.1723 8.68629 22 12 22C14.5371 22 16.7064 20.3424 17.5838 18M17.5838 18C14.8509 16.8 12.0559 14.8333 11 14" /><path d="M11.9992 2C11.0051 2 10.1992 2.7835 10.1992 3.75C10.1992 4.7165 11.0051 5.5 11.9992 5.5C12.4602 5.5 12.8808 5.3315 13.1992 5.0544" /><path d="M9.65 8.4993H9.6M14.4492 8.49844H14.3992M9.7 8.4993C9.7 8.55453 9.65523 8.5993 9.6 8.5993C9.54477 8.5993 9.5 8.55453 9.5 8.4993C9.5 8.44407 9.54477 8.3993 9.6 8.3993C9.65523 8.3993 9.7 8.44407 9.7 8.4993ZM14.4992 8.49844C14.4992 8.55367 14.4544 8.59844 14.3992 8.59844C14.344 8.59844 14.2992 8.55367 14.2992 8.49844C14.2992 8.44321 14.344 8.39844 14.3992 8.39844C14.4544 8.39844 14.4992 8.44321 14.4992 8.49844Z" /></svg>',
-        'Bautismo': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5"><path d="M3.5 13.678C3.5 9.49387 7.08079 5.35907 9.59413 2.97222C10.9591 1.67593 13.0409 1.67593 14.4059 2.97222C16.9192 5.35907 20.5 9.49387 20.5 13.678C20.5 17.7804 17.2812 22 12 22C6.71878 22 3.5 17.7804 3.5 13.678Z" /><path d="M16 14C16 16.2091 14.2091 18 12 18" /></svg>',
-        'Acta de Matrimonio': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="16.5" r="5.5" /><circle cx="15.5" cy="16.5" r="5.5" /><path d="M12 9C12 9 16 7.14706 16 4.13889C16 2.95761 15.1579 2 14 2C13.0526 2 12.4211 2.41176 12 3.23529C11.5789 2.41176 10.9474 2 10 2C8.84211 2 8 2.95761 8 4.13889C8 7.14706 12 9 12 9Z" /></svg>',
-        'Matrimonio': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="16.5" r="5.5" /><circle cx="15.5" cy="16.5" r="5.5" /><path d="M12 9C12 9 16 7.14706 16 4.13889C16 2.95761 15.1579 2 14 2C13.0526 2 12.4211 2.41176 12 3.23529C11.5789 2.41176 10.9474 2 10 2C8.84211 2 8 2.95761 8 4.13889C8 7.14706 12 9 12 9Z" /></svg>',
-        'Certificado': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 10.002L7 4.00195M7 4.00195L11.311 8.70485C11.8967 9.34385 12.1896 9.66335 12.5745 9.83265C12.9593 10.002 13.3928 10.002 14.2596 10.002H22.5L18.189 5.29905C17.6033 4.66006 17.3104 4.34056 16.9255 4.17126C16.5407 4.00195 16.1072 4.00195 15.2404 4.00195H7Z" /><path d="M11 8.50028V19.9997H7C5.11438 19.9997 4.17157 19.9997 3.58579 19.4139C3 18.8281 3 17.8853 3 15.9997V8.5" /><path d="M11 19.9997H17C18.8856 19.9997 19.8284 19.9997 20.4142 19.4139C21 18.8281 21 17.8853 21 15.9997V10" /><path d="M4 7V4" /><path d="M7.125 11.25H7M7.25 11.25C7.25 11.3881 7.13807 11.5 7 11.5C6.86193 11.5 6.75 11.3881 6.75 11.25C6.75 11.1119 6.86193 11 7 11C7.13807 11 7.25 11.1119 7.25 11.25Z" /><path d="M7 20V16" /><path d="M15 14L17 14" /></svg>',
-        'Certificado Militar': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.5 8.5H22L17.5 13L19 20L12 16L5 20L6.5 13L2 8.5H8.5L12 2Z" /><path d="M12 16v6" /><path d="M9 22h6" /></svg>',
-        'Militar': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.5 8.5H22L17.5 13L19 20L12 16L5 20L6.5 13L2 8.5H8.5L12 2Z" /><path d="M12 16v6" /><path d="M9 22h6" /></svg>',
-        'Fotografia': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5-8 8-2-2-5 5" /></svg>',
-        'Foto': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5-8 8-2-2-5 5" /></svg>',
-        'Biografia': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C2 8.22876 2 6.34315 3.17157 5.17157C4.34315 4 6.22876 4 10 4H14C17.7712 4 19.6569 4 20.8284 5.17157C22 6.34315 22 8.22876 22 12C22 15.7712 22 17.6569 20.8284 18.8284C19.6569 20 17.7712 20 14 20H10C6.22876 20 4.34315 20 3.17157 18.8284C2 17.6569 2 15.7712 2 12Z" /><path d="M9 12.5C7.61929 12.5 6.5 11.3807 6.5 10C6.5 8.61929 7.61929 7.5 9 7.5C10.3807 7.5 11.5 8.61929 11.5 10C11.5 11.3807 10.3807 12.5 9 12.5ZM9 12.5C11.2091 12.5 13 14.2909 13 16.5M9 12.5C6.79086 12.5 5 14.2909 5 16.5" /><path d="M15 9H19" /><path d="M15 12H19" /></svg>',
-        'Acta': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15V9C18 6.17157 18 4.75736 17.1213 3.87868C16.2426 3 14.8284 3 12 3H8C5.17157 3 3.75736 3 2.87868 3.87868C2 4.75736 2 6.17157 2 9V15C2 17.8284 2 19.2426 2.87868 20.1213C3.75736 21 5.17157 21 8 21H20" /><path d="M6 8L14 8" /><path d="M6 12L14 12" /><path d="M6 16L10 16" /><path d="M18 8H19C20.4142 8 21.1213 8 21.5607 8.43934C22 8.87868 22 9.58579 22 11V19C22 20.1046 21.1046 21 20 21C18.8954 21 18 20.1046 18 19V8Z" /></svg>',
-        'Documentación': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15V9C18 6.17157 18 4.75736 17.1213 3.87868C16.2426 3 14.8284 3 12 3H8C5.17157 3 3.75736 3 2.87868 3.87868C2 4.75736 2 6.17157 2 9V15C2 17.8284 2 19.2426 2.87868 20.1213C3.75736 21 5.17157 21 8 21H20" /><path d="M6 8L14 8" /><path d="M6 12L14 12" /><path d="M6 16L10 16" /><path d="M18 8H19C20.4142 8 21.1213 8 21.5607 8.43934C22 8.87868 22 9.58579 22 11V19C22 20.1046 21.1046 21 20 21C18.8954 21 18 20.1046 18 19V8Z" /></svg>',
-        'Obituario': '<?xml version="1.0" encoding="UTF-8"?><svg id="Capa_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 24 24"><defs><style>.st0 { fill: none; stroke: #2e4b33; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5px; }</style></defs><path class="st0" d="M11.88,1.5h0c4.45,0,8.06,3.61,8.06,8.06v12.01H3.82v-12.01C3.82,5.12,7.43,1.5,11.88,1.5Z"/><path class="st0" d="M11.88,7.54v8"/><path class="st0" d="M9.4,10.48h4.97"/><line class="st0" x1="1.21" y1="21.58" x2="22.56" y2="21.58"/></svg>',
-        'Diversos': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15V9C18 6.17157 18 4.75736 17.1213 3.87868C16.2426 3 14.8284 3 12 3H8C5.17157 3 3.75736 3 2.87868 3.87868C2 4.75736 2 6.17157 2 9V15C2 17.8284 2 19.2426 2.87868 20.1213C3.75736 21 5.17157 21 8 21H20" /><path d="M6 8L14 8" /><path d="M6 12L14 12" /><path d="M6 16L10 16" /><path d="M18 8H19C20.4142 8 21.1213 8 21.5607 8.43934C22 8.87868 22 9.58579 22 11V19C22 20.1046 21.1046 21 20 21C18.8954 21 18 20.1046 18 19V8Z" /></svg>',
+        'Defunción': '/icons/defuncion.svg',
+        'Nacimiento': '/icons/nacimiento.svg',
+        'Bautismo': '/icons/bautismo.svg',
+        'Acta de Matrimonio': '/icons/matrimonio.svg',
+        'Matrimonio': '/icons/matrimonio.svg',
+        'Certificado': '/icons/documentacion.svg',
+        'Certificado Militar': '/icons/militar.svg',
+        'Militar': '/icons/militar.svg',
+        'Fotografia': '/icons/foto.svg',
+        'Foto': '/icons/foto.svg',
+        'Biografia': '/icons/biografia.svg',
+        'Acta': '/icons/carta.svg',
+        'Documentación': '/icons/documentacion.svg',
+        'Obituario': '/icons/obituario.svg',
+        'Padrón': '/icons/padron.svg',
+        'Diversos': '/icons/diversos.svg',
     };
-    return iconMap[tag] || '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#2d4b33" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15V9C18 6.17157 18 4.75736 17.1213 3.87868C16.2426 3 14.8284 3 12 3H8C5.17157 3 3.75736 3 2.87868 3.87868C2 4.75736 2 6.17157 2 9V15C2 17.8284 2 19.2426 2.87868 20.1213C3.75736 21 5.17157 21 8 21H20" /><path d="M6 8L14 8" /><path d="M6 12L14 12" /><path d="M6 16L10 16" /><path d="M18 8H19C20.4142 8 21.1213 8 21.5607 8.43934C22 8.87868 22 9.58579 22 11V19C22 20.1046 21.1046 21 20 21C18.8954 21 18 20.1046 18 19V8Z" /></svg>';
+    return iconMap[tag] || '/icons/documentacion.svg';
 }
 
 function renderDocuments(data) {
@@ -566,13 +568,13 @@ function renderDocuments(data) {
 
     // Create grid of all documents with icons
     const documentCards = data.documents.map(doc => {
-        const iconSvg = getIconForTag(doc.tag);
+        const iconPath = getIconForTag(doc.tag);
         return `
             <a href="/photos/${doc.filename}" target="_blank"
                class="border border-outline-variant/20 rounded-xl p-6 hover:shadow-md hover:border-primary/30 transition-all duration-200 group cursor-pointer">
                 <div class="flex items-start gap-4">
-                    <div class="bg-green-50 w-12 h-12 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                        ${iconSvg}
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <img src="${iconPath}" alt="${doc.tag}" class="w-8 h-8" style="filter: drop-shadow(0 0 0); opacity: 1;">
                     </div>
                     <div class="flex-1 min-w-0">
                         <h4 class="font-bold text-sm text-on-surface mb-1 group-hover:text-primary transition-colors">${doc.tag}</h4>
