@@ -40,11 +40,28 @@ window.closePhotoModal = function() {
 };
 
 /**
- * Toggle sidebar visibility
+ * Toggle sidebar visibility with smooth animation
  */
 window.togglePhotoSidebar = function() {
     _sidebarVisible = !_sidebarVisible;
-    renderPhotoModal();
+    const sidebar = document.getElementById('photo-sidebar');
+    const photoArea = document.getElementById('photo-area');
+
+    if (!sidebar || !photoArea) return;
+
+    if (_sidebarVisible) {
+        // Show sidebar
+        sidebar.style.width = '320px';
+        sidebar.style.opacity = '1';
+        sidebar.style.visibility = 'visible';
+        photoArea.style.flex = '1';
+    } else {
+        // Hide sidebar
+        sidebar.style.width = '0px';
+        sidebar.style.opacity = '0';
+        sidebar.style.visibility = 'hidden';
+        photoArea.style.flex = '1';
+    }
 };
 
 /**
@@ -75,73 +92,101 @@ function renderPhotoModal() {
     const p = _currentPhotoData;
 
     // Build sidebar content
-    let sidebarHtml = '';
+    let sidebarContent = '';
 
-    if (_sidebarVisible) {
-        // Title, date, place
-        let infoHtml = '';
-        if (p.title) {
-            infoHtml += `<h2 style="font-size: 22px; font-weight: bold; color: #2D4B33; font-family: 'Noto Serif', serif; margin: 0 0 12px 0; line-height: 1.3;">${p.title}</h2>`;
-        }
-        if (p.date || p.place) {
-            let datePlace = [];
-            if (p.date) datePlace.push(p.date);
-            if (p.place) datePlace.push(p.place);
-            infoHtml += `<div style="font-size: 13px; color: #727971; margin-bottom: 28px;">${datePlace.join(' • ')}</div>`;
-        }
-
-        // Personas etiquetadas
-        const tagsHtml = p.tagged_people && p.tagged_people.length > 0
-            ? `<div style="margin-bottom: 28px;">
-                 <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">Personas Etiquetadas</h3>
-                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                   ${p.tagged_people.map(person => {
-                     const cleanId = person.person_id.replace(/@/g, '');
-                     return `
-                     <div style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px; border-radius: 6px; transition: background-color 0.2s;"
-                          onmouseover="this.style.backgroundColor='rgba(45, 75, 51, 0.1)'; highlightFaceBox('${person.person_id}', true)"
-                          onmouseout="this.style.backgroundColor='transparent'; highlightFaceBox('${person.person_id}', false)"
-                          onclick="gotoPersonDossier('${person.person_id}')">
-                       ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${person.name}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(114, 121, 113, 0.3); flex-shrink: 0;">` : `<div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f1eee5; flex-shrink: 0;"></div>`}
-                       <span style="font-size: 13px; color: #1c1c17; flex: 1;">${person.name}</span>
-                     </div>
-                   `}).join('')}
-                 </div>
-               </div>`
-            : '';
-
-        // Álbum con foto de portada
-        const albumHtml = p.album_title
-            ? `<div style="margin-bottom: 24px;">
-                 <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">Álbum</h3>
-                 ${p.album_cover ? `<div style="width: 100%; height: 140px; border-radius: 6px; overflow: hidden; margin-bottom: 10px; border: 1px solid rgba(114, 121, 113, 0.2);"><img src="/photos/${p.album_cover}" alt="${p.album_title}" style="width: 100%; height: 100%; object-fit: cover; display: block;"></div>` : ''}
-                 <div style="font-size: 13px; color: #1c1c17; font-weight: 600;">${p.album_title}</div>
-               </div>`
-            : '';
-
-        sidebarHtml = `
-            <div style="width: 320px; padding: 32px 24px 24px 24px; border-right: 1px solid rgba(114, 121, 113, 0.2); overflow-y: auto; background-color: #fcf9f0; flex-shrink: 0;">
-                ${infoHtml}
-                ${tagsHtml}
-                ${albumHtml}
-            </div>
-        `;
+    // Title, date, place
+    let infoHtml = '';
+    if (p.title) {
+        infoHtml += `<h2 style="font-size: 22px; font-weight: bold; color: #2D4B33; font-family: 'Noto Serif', serif; margin: 0 0 12px 0; line-height: 1.3;">${p.title}</h2>`;
+    }
+    if (p.date || p.place) {
+        let datePlace = [];
+        if (p.date) datePlace.push(p.date);
+        if (p.place) datePlace.push(p.place);
+        infoHtml += `<div style="font-size: 13px; color: #727971; margin-bottom: 28px;">${datePlace.join(' • ')}</div>`;
     }
 
+    // Personas etiquetadas
+    const tagsHtml = p.tagged_people && p.tagged_people.length > 0
+        ? `<div style="margin-bottom: 28px;">
+             <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">Personas Etiquetadas</h3>
+             <div style="display: flex; flex-direction: column; gap: 4px;">
+               ${p.tagged_people.map(person => {
+                 const cleanId = person.person_id.replace(/@/g, '');
+                 return `
+                 <div style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px; border-radius: 6px; transition: background-color 0.2s;"
+                      onmouseover="this.style.backgroundColor='rgba(45, 75, 51, 0.1)'; highlightFaceBox('${person.person_id}', true)"
+                      onmouseout="this.style.backgroundColor='transparent'; highlightFaceBox('${person.person_id}', false)"
+                      onclick="gotoPersonDossier('${person.person_id}')">
+                   ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${person.name}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(114, 121, 113, 0.3); flex-shrink: 0;">` : `<div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f1eee5; flex-shrink: 0;"></div>`}
+                   <span style="font-size: 13px; color: #1c1c17; flex: 1;">${person.name}</span>
+                 </div>
+               `}).join('')}
+             </div>
+           </div>`
+        : '';
+
+    // Álbum con foto de portada
+    const albumHtml = p.album_title
+        ? `<div style="margin-bottom: 24px;">
+             <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">Álbum</h3>
+             ${p.album_cover ? `<div style="width: 100%; height: 140px; border-radius: 6px; overflow: hidden; margin-bottom: 10px; border: 1px solid rgba(114, 121, 113, 0.2);"><img src="/photos/${p.album_cover}" alt="${p.album_title}" style="width: 100%; height: 100%; object-fit: cover; display: block;"></div>` : ''}
+             <div style="font-size: 13px; color: #1c1c17; font-weight: 600;">${p.album_title}</div>
+           </div>`
+        : '';
+
+    sidebarContent = `${infoHtml}${tagsHtml}${albumHtml}`;
+
     const modalHtml = `
+        <style>
+            @keyframes slideOutLeft {
+                from {
+                    width: 320px;
+                    opacity: 1;
+                }
+                to {
+                    width: 0px;
+                    opacity: 0;
+                }
+            }
+
+            @keyframes slideInRight {
+                from {
+                    width: 0px;
+                    opacity: 0;
+                }
+                to {
+                    width: 320px;
+                    opacity: 1;
+                }
+            }
+
+            #photo-sidebar {
+                transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                            opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                            visibility 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            }
+
+            #photo-area {
+                transition: flex 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            }
+        </style>
+
         <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #fcf9f0; display: flex; flex-direction: row;">
             <!-- Sidebar (left) -->
-            ${sidebarHtml}
+            <div id="photo-sidebar" style="width: 320px; padding: 32px 24px 24px 24px; border-right: 1px solid rgba(114, 121, 113, 0.2); overflow-y: auto; background-color: #fcf9f0; flex-shrink: 0; opacity: 1; visibility: visible;">
+                ${sidebarContent}
+            </div>
 
             <!-- Photo area -->
-            <div style="flex: 1; display: flex; flex-direction: column; position: relative; min-width: 0;">
+            <div id="photo-area" style="flex: 1; display: flex; flex-direction: column; position: relative; min-width: 0;">
                 <!-- Toggle sidebar button -->
-                <button onclick="togglePhotoSidebar()" title="${_sidebarVisible ? 'Ocultar panel' : 'Mostrar panel'}" style="position: absolute; top: 16px; left: 16px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                <button onclick="togglePhotoSidebar()" title="${_sidebarVisible ? 'Ocultar panel' : 'Mostrar panel'}" style="position: absolute; top: 16px; left: 16px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;">
                     ${_sidebarVisible ? '←' : '→'}
                 </button>
 
                 <!-- Close button (top right) -->
-                <button onclick="closePhotoModal()" title="Cerrar" style="position: absolute; top: 16px; right: 16px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                <button onclick="closePhotoModal()" title="Cerrar" style="position: absolute; top: 16px; right: 16px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;">
                     ✕
                 </button>
 
