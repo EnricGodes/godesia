@@ -85,87 +85,22 @@ class QueryRouter:
     def route(self, question):
         """Try to answer from SQLite. Returns response dict or None if LLM needed."""
         q = question.lower().strip()
-        executed_sql = []
 
-        def _trace(stmt):
-            stmt = (stmt or '').strip()
-            if stmt:
-                executed_sql.append(stmt)
+        for pattern, handler_name in self.patterns:
+            if re.search(pattern, q, re.IGNORECASE):
+                handler = getattr(self, handler_name)
+                result = handler(question)
+                if result:
+                    result["source"] = "db"
+                    return result
 
-        matched_handler = None
-        try:
-            self.conn.set_trace_callback(_trace)
-        except Exception:
-            pass
+        # Fallback: if the question looks like a person name, show their info
+        result = self._try_name_fallback(question)
+        if result:
+            result["source"] = "db"
+            return result
 
-        try:
-            for pattern, handler_name in self.patterns:
-                if re.search(pattern, q, re.IGNORECASE):
-                    matched_handler = handler_name
-                    handler = getattr(self, handler_name)
-                    result = handler(question)
-                    if result:
-                        result["source"] = "db"
-                        result["debug"] = {
-                            "matched_handler": matched_handler,
-                            "question": question,
-                            "sql": executed_sql,
-                        }
-                        result["answer"] = self._append_debug_to_answer(
-                            result.get("answer", ""),
-                            matched_handler=matched_handler,
-                            executed_sql=executed_sql,
-                        )
-                        return result
-
-            # Fallback: if the question looks like a person name, show their info
-            matched_handler = "name_fallback"
-            result = self._try_name_fallback(question)
-            if result:
-                result["source"] = "db"
-                result["debug"] = {
-                    "matched_handler": matched_handler,
-                    "question": question,
-                    "sql": executed_sql,
-                }
-                result["answer"] = self._append_debug_to_answer(
-                    result.get("answer", ""),
-                    matched_handler=matched_handler,
-                    executed_sql=executed_sql,
-                )
-                return result
-
-            return {
-                "answer": self._append_debug_to_answer(
-                    "No he encontrado resultados.",
-                    matched_handler=matched_handler or "none",
-                    executed_sql=executed_sql,
-                ),
-                "people_mentioned": [],
-                "people_with_photos": [],
-                "source": "db",
-                "debug": {
-                    "matched_handler": matched_handler or "none",
-                    "question": question,
-                    "sql": executed_sql,
-                },
-            }
-        finally:
-            try:
-                self.conn.set_trace_callback(None)
-            except Exception:
-                pass
-
-
-    def _append_debug_to_answer(self, answer, matched_handler, executed_sql):
-        lines = ["", "--- DEBUG ---", f"handler: {matched_handler}"]
-        if executed_sql:
-            lines.append("sql:")
-            for i, stmt in enumerate(executed_sql[-12:], start=1):
-                lines.append(f"{i}. {stmt}")
-        else:
-            lines.append("sql: (sin consultas SQLite capturadas)")
-        return (answer or "") + "\n" + "\n".join(lines)
+        return None
 
     def _try_name_fallback(self, question):
         """If the question is just a name or contains a recognizable name, show info or list."""
@@ -256,6 +191,35 @@ class QueryRouter:
                     if matches:
                         break
         return matches
+
+    def _extract_two_person_names(self, question):
+        """Extract two likely person names from a relationship/comparison question."""
+        # Prefer explicit 'entre X y Y' / 'between X and Y' patterns
+        m = re.search(r"(?:entre|between)\s+(.+?)\s+(?:y|i|and)\s+(.+?)(?:\?|$)", question, re.IGNORECASE)
+        if m:
+            a = m.group(1).strip(" ?.,!;:")
+            b = m.group(2).strip(" ?.,!;:")
+            return a, b
+
+        # Fallback to capitalized spans
+        names = re.findall(
+            r"[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+){0,4}",
+            question
+        )
+        names = [n.strip() for n in names if len(n.strip()) > 3]
+        unique = []
+        seen = set()
+        for n in names:
+            if n not in seen:
+                seen.add(n)
+                unique.append(n)
+        if len(unique) >= 2:
+            return unique[0], unique[1]
+        return None, None
+
+    def _shared_grandparent_ids(self, person_id):
+        gps = get_grandparents(self.conn, person_id)
+        return {gp["person"]["id"] for gp in gps if gp.get("person")}
 
     def handle_mother(self, question):
         prefixes = [
@@ -438,6 +402,130 @@ class QueryRouter:
             "answer": answer,
             "people_mentioned": [person["id"]],
             "people_with_photos": [_person_card(person)],
+        }
+
+    def handle_relationship(self, question):
+        name1, name2 = self._extract_two_person_names(question)
+        if not name1 or not name2:
+            return None
+
+        matches1 = find_person_by_name(self.conn, name1)
+        matches2 = find_person_by_name(self.conn, name2)
+        if not matches1 or not matches2:
+            return None
+
+        p1 = get_person(self.conn, matches1[0]["id"])
+        p2 = get_person(self.conn, matches2[0]["id"])
+        if not p1 or not p2:
+            return None
+
+        relation = None
+        # Same person
+        if p1["id"] == p2["id"]:
+            relation = "son la misma persona"
+        # Parent/child
+        elif p2["father_id"] == p1["id"] or p2["mother_id"] == p1["id"]:
+            relation = f"{p1['name']} es progenitor/a de {p2['name']}"
+        elif p1["father_id"] == p2["id"] or p1["mother_id"] == p2["id"]:
+            relation = f"{p2['name']} es progenitor/a de {p1['name']}"
+        # Siblings
+        elif ((p1["father_id"] and p1["father_id"] == p2["father_id"]) or
+              (p1["mother_id"] and p1["mother_id"] == p2["mother_id"])):
+            relation = "son hermanos/as"
+        # Spouses
+        else:
+            spouse_ids_1 = {s["person"]["id"] for s in get_spouses(self.conn, p1["id"])}
+            if p2["id"] in spouse_ids_1:
+                relation = "fueron cónyuges"
+
+        # Grandparent / grandchild
+        if not relation:
+            gp_ids_2 = {gp["person"]["id"] for gp in get_grandparents(self.conn, p2["id"]) if gp.get("person")}
+            gp_ids_1 = {gp["person"]["id"] for gp in get_grandparents(self.conn, p1["id"]) if gp.get("person")}
+            if p1["id"] in gp_ids_2:
+                relation = f"{p1['name']} es abuelo/a de {p2['name']}"
+            elif p2["id"] in gp_ids_1:
+                relation = f"{p2['name']} es abuelo/a de {p1['name']}"
+            else:
+                shared_gp = gp_ids_1 & gp_ids_2
+                if shared_gp:
+                    relation = "son primos/as hermanos/as"
+
+        if not relation:
+            relation = "no he podido determinar el parentesco exacto con las reglas actuales"
+
+        return {
+            "answer": f"Entre {p1['name']} y {p2['name']}, {relation}.",
+            "people_mentioned": [p1["id"], p2["id"]],
+            "people_with_photos": [_person_card(dict(p1)), _person_card(dict(p2))],
+        }
+
+    def handle_birth_date_search(self, question):
+        m = re.search(r"(\d{1,2})/(\d{1,2})/(\d{4})", question)
+        if not m:
+            return None
+        day, month, year = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        rows = self.conn.execute(
+            "SELECT id, name, birth_year, death_year, photo_file, is_alive, birth_place "
+            "FROM people WHERE birth_day = ? AND birth_month = ? AND birth_year = ? ORDER BY name",
+            (day, month, year)
+        ).fetchall()
+        if not rows:
+            return {
+                "answer": f"No he encontrado a nadie nacido el {day:02d}/{month:02d}/{year}.",
+                "people_mentioned": [],
+                "people_with_photos": [],
+            }
+
+        if len(rows) == 1:
+            row = dict(rows[0])
+            place = f" en {row['birth_place']}" if row.get('birth_place') else ""
+            return {
+                "answer": f"La persona nacida el {day:02d}/{month:02d}/{year} es {row['name']}{place}.",
+                "people_mentioned": [row["id"]],
+                "people_with_photos": [_person_card(row)],
+            }
+
+        return {
+            "answer": "He encontrado %d personas nacidas el %02d/%02d/%04d:\n%s" % (
+                len(rows), day, month, year, "\n".join("- %s" % _format_person(dict(r)) for r in rows)
+            ),
+            "people_mentioned": [r["id"] for r in rows],
+            "people_with_photos": [_person_card(dict(r)) for r in rows[:8]],
+        }
+
+    def handle_first_surname(self, question):
+        m = re.search(r"(?:primer\s+apellido|primer\s+cognom|first\s+surname).*?([A-ZÁÉÍÓÚÀÈÌÒÙÑÇa-záéíóúàèìòùñç'\-]+)", question, re.IGNORECASE)
+        surname = None
+        if m:
+            surname = m.group(1).strip()
+        if not surname:
+            m = re.search(r"tienen?\s+([A-ZÁÉÍÓÚÀÈÌÒÙÑÇa-záéíóúàèìòùñç'\-]+)\s+como\s+primer\s+apellido", question, re.IGNORECASE)
+            if m:
+                surname = m.group(1).strip()
+        if not surname:
+            return None
+
+        rows = self.conn.execute(
+            "SELECT id, name, birth_year, death_year, photo_file, is_alive, birth_place, surname "
+            "FROM people WHERE surname = ? COLLATE NOCASE OR surname LIKE ? COLLATE NOCASE "
+            "ORDER BY birth_year, name LIMIT 100",
+            (surname, f"{surname} %")
+        ).fetchall()
+
+        if not rows:
+            return {
+                "answer": f"No he encontrado personas con {surname} como primer apellido.",
+                "people_mentioned": [],
+                "people_with_photos": [],
+            }
+
+        return {
+            "answer": "He encontrado %d personas con %s como primer apellido:\n%s" % (
+                len(rows), surname, "\n".join("- %s" % _format_person(dict(r)) for r in rows[:25])
+            ),
+            "people_mentioned": [r["id"] for r in rows],
+            "people_with_photos": [_person_card(dict(r)) for r in rows[:8]],
         }
 
     def handle_birthdays(self, question):
