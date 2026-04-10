@@ -1,474 +1,387 @@
-"""Query Router: clasifica preguntas y responde directamente desde SQLite cuando es posible."""
+"""Query Router para Godesia: routing determinista multilingüe con debug visible."""
+
+from __future__ import annotations
 
 import re
 import sqlite3
+import unicodedata
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
+
 from database import (
-    find_person_by_name, get_person, get_parents, get_children,
-    get_spouses, search_people, get_birthdays_this_week,
-    get_related_person_ids, get_people_by_ids,
-    get_siblings, get_grandparents, get_grandchildren,
-    get_occupations, get_residences, get_notes, get_all_photos,
-    get_alive_people, get_born_in,
+    get_alive_people,
+    get_all_photos,
+    get_birthdays_this_week,
+    get_children,
+    get_grandchildren,
+    get_grandparents,
+    get_notes,
+    get_occupations,
+    get_parents,
+    get_person,
+    get_residences,
+    get_siblings,
+    get_spouses,
 )
 
 
-def _person_card(person):
-    """Build a response entry for a person (for people_with_photos)."""
+# ---------------------------------------------------------------------------
+# Utilidades
+# ---------------------------------------------------------------------------
+
+
+def _strip_accents(text: str) -> str:
+    text = unicodedata.normalize("NFD", text or "")
+    return "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+
+
+
+def _norm(text: str) -> str:
+    text = _strip_accents(text or "").lower()
+    text = re.sub(r"[\"'“”‘’]", " ", text)
+    text = re.sub(r"[^\w/\-]+", " ", text, flags=re.UNICODE)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+
+def _person_card(person: Dict[str, Any]) -> Dict[str, Any]:
     return {
-        "id": person["id"] if isinstance(person, dict) else person[0],
-        "name": person["name"] if isinstance(person, dict) else person[1],
-        "photo": person.get("photo_file") if isinstance(person, dict) else None,
+        "id": person.get("id"),
+        "name": person.get("name"),
+        "photo": person.get("photo_file") or person.get("photo"),
     }
 
 
-def _format_person(p):
-    """Format a person dict/row as readable text."""
-    if isinstance(p, sqlite3.Row):
-        p = dict(p)
-    parts = [p["name"]]
-    if p.get("birth_year"):
-        parts.append("(%s%s)" % (
-            p["birth_year"],
-            "-%s" % p.get("death_year", "") if p.get("death_year") else (
-                "" if p.get("is_alive") else "-?"
-            )
-        ))
-    if p.get("birth_place"):
-        parts.append("de %s" % p["birth_place"])
+
+def _format_person(person: Dict[str, Any]) -> str:
+    parts = [person.get("name", "?")]
+    birth_year = person.get("birth_year")
+    death_year = person.get("death_year")
+    if birth_year:
+        if death_year:
+            parts.append(f"({birth_year}-{death_year})")
+        else:
+            parts.append(f"({birth_year})")
+    if person.get("birth_place"):
+        parts.append(f"de {person['birth_place']}")
     return " ".join(parts)
 
 
-def _extract_name(question, prefixes):
-    """Extract person name from question after given prefixes."""
-    q = question.strip()
-    for prefix in prefixes:
-        match = re.search(prefix, q, re.IGNORECASE)
-        if match:
-            name = q[match.end():].strip().rstrip("?.,!").strip()
-            # Remove articles
-            name = re.sub(r"^(el|la|l\'|en|na|de|del|los|las|els|les)\s+", "", name, flags=re.IGNORECASE)
-            return name
-    return None
+
+def _rows_to_dicts(rows: Iterable[sqlite3.Row]) -> List[Dict[str, Any]]:
+    return [dict(r) if isinstance(r, sqlite3.Row) else r for r in rows]
+
+
+
+def _split_two_names(fragment: str) -> Tuple[Optional[str], Optional[str]]:
+    m = re.search(r"(.+?)\s+(?:y|i|and)\s+(.+)", fragment, re.IGNORECASE)
+    if not m:
+        return None, None
+    return m.group(1).strip(" ?.,!;:"), m.group(2).strip(" ?.,!;:")
+
+
+
+def _parse_ddmmyyyy(question: str) -> Optional[Tuple[int, int, int]]:
+    m = re.search(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", question)
+    if not m:
+        return None
+    day, month, year = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    if not (1 <= day <= 31 and 1 <= month <= 12):
+        return None
+    return day, month, year
+
+
+
+def _parse_decade(question: str) -> Optional[Tuple[int, int]]:
+    q = _norm(question)
+    # "década de 1920", "decada del 1920", "1920s"
+    m = re.search(r"(?:decada|decade)(?: de| del)?\s+(\d{4})", q)
+    if not m:
+        m = re.search(r"\b(\d{4})s\b", q)
+    if not m:
+        return None
+    start = int(m.group(1))
+    return start, start + 9
+
+
+
+def _language_of(question: str) -> str:
+    q = _norm(question)
+    if re.search(r"\b(qui|quines|quants|naixer|morir|parella|germans|avis|nets|caso|casar|cognom|residencia|adreca|qualsevol)\b", q):
+        return "ca"
+    if re.search(r"\b(who|which|born|died|children|spouse|married|residence|address|surname|relationship|decade)\b", q):
+        return "en"
+    return "es"
+
+
+
+@dataclass
+class PersonMatch:
+    row: Dict[str, Any]
+    score: int
 
 
 class QueryRouter:
-    def __init__(self, conn):
+    def __init__(self, conn: sqlite3.Connection):
         self.conn = conn
-        self.patterns = [
-            # (regex pattern, handler method name)
-            # Family relationships
-            (r"(mare|madre|mother)\b", "handle_mother"),
-            (r"(pare|padre|father)\b", "handle_father"),
-            (r"(fills?|hijos?|children|descendents?|descendientes?)\b", "handle_children"),
-            (r"(germans?|hermanos?|siblings?)\b", "handle_siblings"),
-            (r"(es\s+va\s+casar|se\s+cas[oó]|esposa|marit|marido|mujer|dona|spouse|married|amb\s+qui)", "handle_spouse"),
-            (r"(avi[s]?\b|abuelo[s]?|grandfather|grandmother|[àa]via|abuela|padrins?|abuelos)", "handle_grandparents"),
-            (r"(n[eé]t[s]?\b|nieto[s]?|grandchild|grandchildren|nieta[s]?)", "handle_grandchildren"),
-            # Life events
-            (r"(quan\s+va\s+n[aà]ixer|cuando\s+naci[oó]|born|data\s+de\s+naixement|fecha\s+de\s+nacimiento|nascut|nacido|nació)", "handle_birth"),
-            (r"(quan\s+va\s+morir|cuando\s+muri[oó]|died|mort\b|muri[oó]|falleci[oó]|muerte|defunci[oó])", "handle_death"),
-            (r"(on\s+va\s+viure|d[oó]nde\s+vivi[oó]|where.*live|resid[eè]nci|domicili|direcci[oó]|adre[çc]a|viv[ií]a)", "handle_residence"),
-            (r"(ofici|profesi[oó]|ocupaci[oó]|trabaj|feina|treball|occupation|job|dedicava|dedicaba|treballa)", "handle_occupation"),
-            # Content
-            (r"(fotos?|imatge|imagen|picture|photo|mostra.*foto|ense[ñn]a.*foto)\b", "handle_photos"),
-            (r"(notes?\b|notas?\b|documents?|observaci|anotaci)", "handle_notes"),
-            # Aggregations
-            (r"(cumple|birthday|aniversari|fa\s+anys|neix\s+avui|nacen\s+hoy)", "handle_birthdays"),
-            (r"(estad[ií]stic|quant[ae]s?\s+person|cu[aá]nt[oa]s?\s+person|stats|resum|resumen)", "handle_stats"),
-            (r"(viu[s]?\b|viva?[os]?\b|alive|living|qui\s+est[àa]\s+viu|qui[eé]n\s+est[aá]\s+vivo)", "handle_alive"),
-            (r"(nascuts?\s+a|nacidos?\s+en|born\s+in|origen|natural\s+de)", "handle_born_in"),
-            # Search / info
-            (r"(informaci[oó]|info\b|parla.m|h[aá]blame|cu[eé]ntame|tell\s+me|dades|datos|fitxa|ficha|perfil|sobre)\b", "handle_info"),
-            (r"(busca|cerca|search|trobar|encontrar|qui\s+[eé]s|quien\s+es)\b", "handle_search"),
+
+    # ------------------------------------------------------------------
+    # Respuesta pública
+    # ------------------------------------------------------------------
+    def route(self, question: str) -> Optional[Dict[str, Any]]:
+        sql_trace: List[str] = []
+
+        def tracer(statement: str) -> None:
+            st = statement.strip()
+            if st and not st.upper().startswith(("BEGIN", "COMMIT", "ROLLBACK", "PRAGMA")):
+                sql_trace.append(st)
+
+        try:
+            self.conn.set_trace_callback(tracer)
+        except Exception:
+            tracer = None  # noqa: F841
+
+        handler_name = "no_match"
+        try:
+            handler_name, result = self._dispatch(question)
+            if not result:
+                result = {
+                    "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+                    "people_mentioned": [],
+                    "people_with_photos": [],
+                }
+            result["source"] = "db"
+            result["debug"] = {
+                "handler": handler_name,
+                "sql": sql_trace,
+            }
+            result["answer"] = self._append_debug(result.get("answer", ""), handler_name, sql_trace)
+            return result
+        finally:
+            try:
+                self.conn.set_trace_callback(None)
+            except Exception:
+                pass
+
+    def _append_debug(self, answer: str, handler_name: str, sql_trace: Sequence[str]) -> str:
+        lines = [answer, "", "--- DEBUG ---", f"handler: {handler_name}"]
+        if sql_trace:
+            lines.append("sql:")
+            for idx, st in enumerate(sql_trace, start=1):
+                lines.append(f"{idx}. {st}")
+        else:
+            lines.append("sql: (sin consultas SQLite capturadas)")
+        return "\n".join(lines)
+
+    # ------------------------------------------------------------------
+    # Dispatcher
+    # ------------------------------------------------------------------
+    def _dispatch(self, question: str) -> Tuple[str, Optional[Dict[str, Any]]]:
+        q = _norm(question)
+
+        routes: List[Tuple[str, Callable[[str], Optional[Dict[str, Any]]]]] = [
+            ("handle_relationship", self.handle_relationship),
+            ("handle_birth_date_search", self.handle_birth_date_search),
+            ("handle_first_surname", self.handle_first_surname),
+            ("handle_death_place_year", self.handle_death_place_year),
+            ("handle_birth_place_people", self.handle_birth_place_people),
+            ("handle_residence", self.handle_residence),
+            ("handle_spouse_disambiguated", self.handle_spouse_disambiguated),
+            ("handle_children_born_in", self.handle_children_born_in),
+            ("handle_births_by_decade", self.handle_births_by_decade),
+            ("handle_age_at_marriage", self.handle_age_at_marriage),
+            ("handle_mother", self.handle_mother),
+            ("handle_father", self.handle_father),
+            ("handle_parents", self.handle_parents),
+            ("handle_children", self.handle_children),
+            ("handle_siblings", self.handle_siblings),
+            ("handle_spouse", self.handle_spouse),
+            ("handle_grandparents", self.handle_grandparents),
+            ("handle_grandchildren", self.handle_grandchildren),
+            ("handle_birth", self.handle_birth),
+            ("handle_death", self.handle_death),
+            ("handle_occupation", self.handle_occupation),
+            ("handle_notes", self.handle_notes),
+            ("handle_photos", self.handle_photos),
+            ("handle_birthdays", self.handle_birthdays),
+            ("handle_alive", self.handle_alive),
+            ("handle_stats", self.handle_stats),
+            ("handle_search", self.handle_search),
+            ("name_fallback", self._try_name_fallback),
         ]
 
-    def route(self, question):
-        """Try to answer from SQLite. Returns response dict or None if LLM needed."""
-        q = question.lower().strip()
+        gating: Dict[str, Callable[[str], bool]] = {
+            "handle_relationship": lambda s: bool(re.search(r"\b(parentesco|relacion|relationship)\b", _norm(s))) and bool(re.search(r"\b(entre|between)\b", _norm(s))),
+            "handle_birth_date_search": lambda s: bool(_parse_ddmmyyyy(s)) and bool(re.search(r"\b(quien|qui|who)\b", _norm(s))) and bool(re.search(r"\b(nacio|nacio|nascut|born)\b", _norm(s))),
+            "handle_first_surname": lambda s: bool(re.search(r"\b(primer apellido|primer cognom|first surname)\b", _norm(s))),
+            "handle_death_place_year": lambda s: bool(re.search(r"\b(quien|qui|who)\b", _norm(s))) and bool(re.search(r"\b(murio|morir|died)\b", _norm(s))) and bool(re.search(r"\ben\s+.+\b(18|19|20)\d{2}\b", _norm(s))),
+            "handle_birth_place_people": lambda s: bool(re.search(r"\b(que personas|quines persones|which people|who)\b", _norm(s))) and bool(re.search(r"\b(nacieron|nascudes|nascuts|born)\b", _norm(s))) and bool(re.search(r"\ben\b", _norm(s))),
+            "handle_residence": lambda s: bool(re.search(r"\b(residencia|direccion|adreca|domicili|address|residence)\b", _norm(s))),
+            "handle_spouse_disambiguated": lambda s: bool(re.search(r"\b(con quien se caso|amb qui es va casar|who did .* marry)\b", _norm(s))) and bool(re.search(r"\b(nacida en|nacido en|born in|llamada|llamado|named)\b", _norm(s))),
+            "handle_children_born_in": lambda s: bool(re.search(r"\b(que hijos de|quins fills de|which children of)\b", _norm(s))) and bool(re.search(r"\b(nacieron en|nascuts a|born in)\b", _norm(s))),
+            "handle_births_by_decade": lambda s: bool(re.search(r"\b(cuantos|quants|how many)\b", _norm(s))) and bool(re.search(r"\b(nacimientos|naixements|births)\b", _norm(s))) and _parse_decade(s) is not None,
+            "handle_age_at_marriage": lambda s: bool(re.search(r"\b(que edad tenia|quina edat tenia|how old was)\b", _norm(s))) and bool(re.search(r"\b(cuando se caso|quan es va casar|when .* married|when .* got married)\b", _norm(s))),
+            "handle_mother": lambda s: bool(re.search(r"\b(madre|mare|mother)\b", _norm(s))),
+            "handle_father": lambda s: bool(re.search(r"\b(padre|pare|father)\b", _norm(s))),
+            "handle_parents": lambda s: bool(re.search(r"\b(padres|pares|parents)\b", _norm(s))),
+            "handle_children": lambda s: bool(re.search(r"\b(hijos|fills|children)\b", _norm(s))),
+            "handle_siblings": lambda s: bool(re.search(r"\b(hermanos|germans|siblings)\b", _norm(s))),
+            "handle_spouse": lambda s: bool(re.search(r"\b(conyuge|conyuge|spouse|espos[ao]|marido|mujer|caso|casar|marry)\b", _norm(s))),
+            "handle_grandparents": lambda s: bool(re.search(r"\b(abuelos|avis|grandparents|abuelo|abuela|avia)\b", _norm(s))),
+            "handle_grandchildren": lambda s: bool(re.search(r"\b(nietos|nets|grandchildren|nieto|nieta)\b", _norm(s))),
+            "handle_birth": lambda s: bool(re.search(r"\b(nacio|nascut|born|fecha de nacimiento|data de naixement)\b", _norm(s))),
+            "handle_death": lambda s: bool(re.search(r"\b(murio|morir|died|defuncion|muerte)\b", _norm(s))),
+            "handle_occupation": lambda s: bool(re.search(r"\b(oficio|ocupacion|profesion|occupation|job|treball|feina)\b", _norm(s))),
+            "handle_notes": lambda s: bool(re.search(r"\b(notas|notes|observaciones|documents?)\b", _norm(s))),
+            "handle_photos": lambda s: bool(re.search(r"\b(fotos|foto|photos?|images?)\b", _norm(s))),
+            "handle_birthdays": lambda s: bool(re.search(r"\b(cumpleanos|aniversari|birthday)\b", _norm(s))),
+            "handle_alive": lambda s: bool(re.search(r"\b(vivos|vius|alive|living)\b", _norm(s))),
+            "handle_stats": lambda s: bool(re.search(r"\b(estadisticas|estadistiques|stats|resumen|resum)\b", _norm(s))),
+            "handle_search": lambda s: bool(re.search(r"\b(busca|cerca|search|quien es|qui es|who is)\b", _norm(s))),
+            "name_fallback": lambda s: True,
+        }
 
-        for pattern, handler_name in self.patterns:
-            if re.search(pattern, q, re.IGNORECASE):
-                handler = getattr(self, handler_name)
-                result = handler(question)
+        for name, fn in routes:
+            if gating[name](question):
+                result = fn(question)
                 if result:
-                    result["source"] = "db"
-                    return result
+                    return name, result
+        return "no_match", None
 
-        # Fallback: if the question looks like a person name, show their info
-        result = self._try_name_fallback(question)
-        if result:
-            result["source"] = "db"
-            return result
+    # ------------------------------------------------------------------
+    # Resolución de personas
+    # ------------------------------------------------------------------
+    def _search_people(self, text: str, limit: int = 20) -> List[Dict[str, Any]]:
+        cleaned = re.sub(r"\s+", "%", text.strip())
+        rows = self.conn.execute(
+            "SELECT id, name, given_name, surname, birth_year, death_year, birth_place, photo_file, is_alive, father_id, mother_id, father_name, mother_name "
+            "FROM people WHERE name LIKE ? COLLATE NOCASE ORDER BY name LIMIT ?",
+            (f"%{cleaned}%", limit),
+        ).fetchall()
+        return _rows_to_dicts(rows)
 
+    def _rank_person_candidates(
+        self,
+        candidates: Sequence[Dict[str, Any]],
+        raw_name: str,
+        birth_place: Optional[str] = None,
+        birth_year: Optional[int] = None,
+    ) -> List[PersonMatch]:
+        target = _norm(raw_name)
+        target_tokens = set(target.split())
+        ranked: List[PersonMatch] = []
+        for row in candidates:
+            score = 0
+            name_norm = _norm(row.get("name", ""))
+            cand_tokens = set(name_norm.split())
+            if name_norm == target:
+                score += 1000
+            if name_norm.startswith(target):
+                score += 200
+            score += 30 * len(target_tokens & cand_tokens)
+            if birth_place and row.get("birth_place") and _norm(birth_place) in _norm(row["birth_place"]):
+                score += 150
+            if birth_year and row.get("birth_year") == birth_year:
+                score += 150
+            # Penalizar candidatos con poca cobertura respecto al nombre pedido
+            missing = len(target_tokens - cand_tokens)
+            score -= 20 * missing
+            ranked.append(PersonMatch(row=row, score=score))
+        ranked.sort(key=lambda x: (-x.score, x.row.get("birth_year") or 9999, x.row.get("name") or ""))
+        return ranked
+
+    def _resolve_person(
+        self,
+        raw_name: str,
+        birth_place: Optional[str] = None,
+        birth_year: Optional[int] = None,
+    ) -> Optional[Dict[str, Any]]:
+        if not raw_name:
+            return None
+        candidates = self._search_people(raw_name, limit=25)
+        if not candidates:
+            return None
+        ranked = self._rank_person_candidates(candidates, raw_name, birth_place=birth_place, birth_year=birth_year)
+        best = ranked[0]
+        # exigir un mínimo razonable para evitar disparates tipo Artur -> Soledad
+        if best.score < 40:
+            return None
+        return dict(best.row)
+
+    def _extract_name_after(self, question: str, patterns: Sequence[str]) -> Optional[str]:
+        for pat in patterns:
+            m = re.search(pat, question, re.IGNORECASE)
+            if m:
+                text = m.group(1).strip(" ?.,!;:")
+                text = re.sub(r"^(de|d['’]|of)\s+", "", text, flags=re.IGNORECASE)
+                return text.strip()
         return None
 
-    def _try_name_fallback(self, question):
-        """If the question is just a name or contains a recognizable name, show info or list."""
-        # Don't fallback if the question contains comparison/complex reasoning words
-        q_lower = question.lower()
-        complex_words = [
-            "compara", "diferencia", "relaci[oó]", "semblant", "parecid",
-            "millor", "mejor", "pitjor", "peor", "entre", "versus", "vs",
-            "per qu[eè]", "por qu[eé]", "why", "com [eé]s que", "cómo es que",
-            "explica.*relaci", "qu[eè] va passar", "qué pasó", "what happened",
-        ]
-        for word in complex_words:
-            if re.search(word, q_lower):
-                return None
+    def _extract_capitalized_name(self, question: str) -> Optional[str]:
+        names = re.findall(r"[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][\wÁÉÍÓÚÀÈÌÒÙÑÇáéíóúàèìòùñç'\-]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][\wÁÉÍÓÚÀÈÌÒÙÑÇáéíóúàèìòùñç'\-]+){1,5}", question)
+        if not names:
+            return None
+        # devolver la más larga
+        names.sort(key=lambda s: (-len(s.split()), -len(s)))
+        return names[0].strip()
 
+    # ------------------------------------------------------------------
+    # Handlers principales
+    # ------------------------------------------------------------------
+    def handle_relationship(self, question: str) -> Optional[Dict[str, Any]]:
         q = question.strip().rstrip("?.,!")
-        # Try the whole question as a name
-        matches = find_person_by_name(self.conn, q)
-        if not matches:
-            # Try capitalized words
-            capitalized = re.findall(
-                r"[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+)*",
-                question
-            )
-            for name in capitalized:
-                if len(name) > 4:  # Skip short words like "Hola"
-                    matches = find_person_by_name(self.conn, name)
-                    if matches:
-                        break
-
-        if not matches:
+        m = re.search(r"(?:entre|between)\s+(.+)$", q, re.IGNORECASE)
+        if not m:
             return None
-
-        # If exact match (full name found), show info
-        if len(matches) == 1:
-            return self._build_info_response(matches[0])
-
-        # If multiple matches, show list (like handle_search)
-        parts = []
-        photos = []
-        for m in matches[:10]:
-            full = get_person(self.conn, m["id"])
-            info = _format_person(full)
-            if full["father_name"]:
-                info += ", fill/a de %s" % full["father_name"]
-                if full["mother_name"]:
-                    info += " i %s" % full["mother_name"]
-            parts.append(info)
-            photos.append(_person_card(m))
-
-        answer = "He trobat %d resultat%s:\n%s" % (
-            len(parts), "s" if len(parts) != 1 else "",
-            "\n".join("- %s" % p for p in parts)
-        )
-
-        return {
-            "answer": answer,
-            "people_mentioned": [m["id"] for m in matches[:10]],
-            "people_with_photos": photos,
-        }
-
-    def _find_person_in_question(self, question, prefixes):
-        """Extract name from question and find matching person(s)."""
-        name = _extract_name(question, prefixes)
-        if not name:
-            # Try to find any name-like text in the question
-            # Remove common words and try the rest
-            cleaned = re.sub(
-                r"\b(qui|que|quin|quina|quien|cual|como|com|es|és|la|el|de|del|d\'|va|ser|"
-                r"mare|madre|mother|pare|padre|father|fills?|hijos?|children|"
-                r"nascut|nacido|born|mort|muerto|died|casar|esposa|marit|"
-                r"quan|cuando|on|donde|where)\b",
-                "", question.lower(), flags=re.IGNORECASE
-            ).strip().rstrip("?.,!")
-            if len(cleaned) > 2:
-                name = cleaned
-
-        if not name:
+        a, b = _split_two_names(m.group(1))
+        if not a or not b:
             return None
-
-        matches = find_person_by_name(self.conn, name)
-        if not matches:
-            # Try partial words
-            words = name.split()
-            for word in words:
-                if len(word) > 3:
-                    matches = find_person_by_name(self.conn, word)
-                    if matches:
-                        break
-        return matches
-
-    def _extract_two_person_names(self, question):
-        """Extract two likely person names from a relationship/comparison question."""
-        # Prefer explicit 'entre X y Y' / 'between X and Y' patterns
-        m = re.search(r"(?:entre|between)\s+(.+?)\s+(?:y|i|and)\s+(.+?)(?:\?|$)", question, re.IGNORECASE)
-        if m:
-            a = m.group(1).strip(" ?.,!;:")
-            b = m.group(2).strip(" ?.,!;:")
-            return a, b
-
-        # Fallback to capitalized spans
-        names = re.findall(
-            r"[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+){0,4}",
-            question
-        )
-        names = [n.strip() for n in names if len(n.strip()) > 3]
-        unique = []
-        seen = set()
-        for n in names:
-            if n not in seen:
-                seen.add(n)
-                unique.append(n)
-        if len(unique) >= 2:
-            return unique[0], unique[1]
-        return None, None
-
-    def _shared_grandparent_ids(self, person_id):
-        gps = get_grandparents(self.conn, person_id)
-        return {gp["person"]["id"] for gp in gps if gp.get("person")}
-
-    def handle_mother(self, question):
-        prefixes = [
-            r"(?:mare|madre|mother)\s+(?:de|d\'|of)\s+",
-            r"(?:qui|quien|who)\s+.*(?:mare|madre|mother)",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
-            return None
-
-        person = matches[0]
-        full = get_person(self.conn, person["id"])
-        if not full or not full["mother_id"]:
-            return {
-                "answer": "No tengo información sobre la madre de %s." % person["name"],
-                "people_mentioned": [person["id"]],
-                "people_with_photos": [_person_card(person)],
-            }
-
-        mother = get_person(self.conn, full["mother_id"])
-        return {
-            "answer": "La madre de %s es %s." % (person["name"], _format_person(mother)),
-            "people_mentioned": [person["id"], mother["id"]],
-            "people_with_photos": [_person_card(dict(mother)), _person_card(person)],
-        }
-
-    def handle_father(self, question):
-        prefixes = [
-            r"(?:pare|padre|father)\s+(?:de|d\'|of)\s+",
-            r"(?:qui|quien|who)\s+.*(?:pare|padre|father)",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
-            return None
-
-        person = matches[0]
-        full = get_person(self.conn, person["id"])
-        if not full or not full["father_id"]:
-            return {
-                "answer": "No tengo información sobre el padre de %s." % person["name"],
-                "people_mentioned": [person["id"]],
-                "people_with_photos": [_person_card(person)],
-            }
-
-        father = get_person(self.conn, full["father_id"])
-        return {
-            "answer": "El padre de %s es %s." % (person["name"], _format_person(father)),
-            "people_mentioned": [person["id"], father["id"]],
-            "people_with_photos": [_person_card(dict(father)), _person_card(person)],
-        }
-
-    def handle_children(self, question):
-        prefixes = [
-            r"(?:fills?|hijos?|children|descendents?|descendientes?)\s+(?:de|d\'|of)\s+",
-            r"(?:quants?|cu[aá]ntos?)\s+(?:fills?|hijos?)",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
-            return None
-
-        person = matches[0]
-        children = get_children(self.conn, person["id"])
-        if not children:
-            return {
-                "answer": "No tengo constancia de hijos de %s." % person["name"],
-                "people_mentioned": [person["id"]],
-                "people_with_photos": [_person_card(person)],
-            }
-
-        kids_text = ", ".join(_format_person(c) for c in children)
-        answer = "%s tuvo %d hijo%s: %s." % (
-            person["name"], len(children),
-            "s" if len(children) != 1 else "", kids_text
-        )
-        people_ids = [person["id"]] + [c["id"] for c in children]
-        photos = [_person_card(person)] + [_person_card(dict(c)) for c in children]
-        return {
-            "answer": answer,
-            "people_mentioned": people_ids,
-            "people_with_photos": photos,
-        }
-
-    def handle_spouse(self, question):
-        prefixes = [
-            r"(?:esposa|marit|marido|mujer|dona|spouse)\s+(?:de|d\'|of)\s+",
-            r"(?:amb\s+qui|con\s+qui[eé]n|who\s+did)\s+.*(?:casar|marry)",
-            r"(?:es\s+va\s+casar|se\s+cas[oó])\s+",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
-            return None
-
-        person = matches[0]
-        spouses = get_spouses(self.conn, person["id"])
-        if not spouses:
-            return {
-                "answer": "No tengo información sobre el/la cónyuge de %s." % person["name"],
-                "people_mentioned": [person["id"]],
-                "people_with_photos": [_person_card(person)],
-            }
-
-        parts = []
-        people_ids = [person["id"]]
-        photos = [_person_card(person)]
-        for s in spouses:
-            sp = s["person"]
-            text = _format_person(sp)
-            if s["marriage_date"]:
-                text += ", casados el %s" % s["marriage_date"]
-            if s["marriage_place"]:
-                text += " en %s" % s["marriage_place"]
-            parts.append(text)
-            people_ids.append(sp["id"])
-            photos.append(_person_card(sp))
-
-        answer = "%s se casó con: %s." % (person["name"], "; ".join(parts))
-        return {
-            "answer": answer,
-            "people_mentioned": people_ids,
-            "people_with_photos": photos,
-        }
-
-    def handle_birth(self, question):
-        prefixes = [
-            r"(?:quan|cuando|when)\s+.*(?:n[aà]ixer|naci[oó]|born)\s+",
-            r"(?:nascut|nacido|born)\s+",
-            r"(?:data|fecha|date)\s+.*(?:naixement|nacimiento|birth)\s+(?:de|d\'|of)\s+",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
-            return None
-
-        person = matches[0]
-        full = get_person(self.conn, person["id"])
-        parts = []
-        if full["birth_date"]:
-            parts.append("nació el %s" % full["birth_date"])
-        if full["birth_place"]:
-            parts.append("en %s" % full["birth_place"])
-
-        if not parts:
-            answer = "No tengo la fecha de nacimiento de %s." % full["name"]
-        else:
-            answer = "%s %s." % (full["name"], " ".join(parts))
-
-        return {
-            "answer": answer,
-            "people_mentioned": [person["id"]],
-            "people_with_photos": [_person_card(person)],
-        }
-
-    def handle_death(self, question):
-        prefixes = [
-            r"(?:quan|cuando|when)\s+.*(?:morir|muri[oó]|died)\s+",
-            r"(?:mort|muerto|fallecido|died)\s+",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
-            return None
-
-        person = matches[0]
-        full = get_person(self.conn, person["id"])
-        parts = []
-        if full["death_date"]:
-            parts.append("murió el %s" % full["death_date"])
-        if full["death_place"]:
-            parts.append("en %s" % full["death_place"])
-        if full["death_cause"]:
-            parts.append("(%s)" % full["death_cause"])
-
-        if not parts:
-            if full["is_alive"]:
-                answer = "%s está vivo/a (no consta defunción)." % full["name"]
-            else:
-                answer = "No tengo la fecha de defunción de %s." % full["name"]
-        else:
-            answer = "%s %s." % (full["name"], " ".join(parts))
-
-        return {
-            "answer": answer,
-            "people_mentioned": [person["id"]],
-            "people_with_photos": [_person_card(person)],
-        }
-
-    def handle_relationship(self, question):
-        name1, name2 = self._extract_two_person_names(question)
-        if not name1 or not name2:
-            return None
-
-        matches1 = find_person_by_name(self.conn, name1)
-        matches2 = find_person_by_name(self.conn, name2)
-        if not matches1 or not matches2:
-            return None
-
-        p1 = get_person(self.conn, matches1[0]["id"])
-        p2 = get_person(self.conn, matches2[0]["id"])
+        p1 = self._resolve_person(a)
+        p2 = self._resolve_person(b)
         if not p1 or not p2:
             return None
 
-        relation = None
-        # Same person
+        rel = None
         if p1["id"] == p2["id"]:
-            relation = "son la misma persona"
-        # Parent/child
-        elif p2["father_id"] == p1["id"] or p2["mother_id"] == p1["id"]:
-            relation = f"{p1['name']} es progenitor/a de {p2['name']}"
-        elif p1["father_id"] == p2["id"] or p1["mother_id"] == p2["id"]:
-            relation = f"{p2['name']} es progenitor/a de {p1['name']}"
-        # Siblings
-        elif ((p1["father_id"] and p1["father_id"] == p2["father_id"]) or
-              (p1["mother_id"] and p1["mother_id"] == p2["mother_id"])):
-            relation = "son hermanos/as"
-        # Spouses
+            rel = "son la misma persona"
+        elif p2.get("father_id") == p1["id"] or p2.get("mother_id") == p1["id"]:
+            rel = f"{p1['name']} es progenitor/a de {p2['name']}"
+        elif p1.get("father_id") == p2["id"] or p1.get("mother_id") == p2["id"]:
+            rel = f"{p2['name']} es progenitor/a de {p1['name']}"
+        elif ((p1.get("father_id") and p1.get("father_id") == p2.get("father_id")) or
+              (p1.get("mother_id") and p1.get("mother_id") == p2.get("mother_id"))):
+            rel = "son hermanos/as"
         else:
-            spouse_ids_1 = {s["person"]["id"] for s in get_spouses(self.conn, p1["id"])}
-            if p2["id"] in spouse_ids_1:
-                relation = "fueron cónyuges"
-
-        # Grandparent / grandchild
-        if not relation:
-            gp_ids_2 = {gp["person"]["id"] for gp in get_grandparents(self.conn, p2["id"]) if gp.get("person")}
-            gp_ids_1 = {gp["person"]["id"] for gp in get_grandparents(self.conn, p1["id"]) if gp.get("person")}
-            if p1["id"] in gp_ids_2:
-                relation = f"{p1['name']} es abuelo/a de {p2['name']}"
-            elif p2["id"] in gp_ids_1:
-                relation = f"{p2['name']} es abuelo/a de {p1['name']}"
-            else:
-                shared_gp = gp_ids_1 & gp_ids_2
-                if shared_gp:
-                    relation = "son primos/as hermanos/as"
-
-        if not relation:
-            relation = "no he podido determinar el parentesco exacto con las reglas actuales"
-
+            spouse_ids = {s["person"]["id"] for s in get_spouses(self.conn, p1["id"])}
+            if p2["id"] in spouse_ids:
+                rel = "fueron cónyuges"
+        if not rel:
+            gp1 = {gp["person"]["id"] for gp in get_grandparents(self.conn, p1["id"]) if gp.get("person")}
+            gp2 = {gp["person"]["id"] for gp in get_grandparents(self.conn, p2["id"]) if gp.get("person")}
+            if p1["id"] in gp2:
+                rel = f"{p1['name']} es abuelo/a de {p2['name']}"
+            elif p2["id"] in gp1:
+                rel = f"{p2['name']} es abuelo/a de {p1['name']}"
+            elif gp1 & gp2:
+                rel = "son primos/as hermanos/as"
+        if not rel:
+            rel = "no he podido determinar el parentesco exacto con las reglas actuales"
         return {
-            "answer": f"Entre {p1['name']} y {p2['name']}, {relation}.",
+            "answer": f"Entre {p1['name']} y {p2['name']}, {rel}.",
             "people_mentioned": [p1["id"], p2["id"]],
-            "people_with_photos": [_person_card(dict(p1)), _person_card(dict(p2))],
+            "people_with_photos": [_person_card(p1), _person_card(p2)],
         }
 
-    def handle_birth_date_search(self, question):
-        m = re.search(r"(\d{1,2})/(\d{1,2})/(\d{4})", question)
-        if not m:
+    def handle_birth_date_search(self, question: str) -> Optional[Dict[str, Any]]:
+        parsed = _parse_ddmmyyyy(question)
+        if not parsed:
             return None
-        day, month, year = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        day, month, year = parsed
         rows = self.conn.execute(
-            "SELECT id, name, birth_year, death_year, photo_file, is_alive, birth_place "
+            "SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive "
             "FROM people WHERE birth_day = ? AND birth_month = ? AND birth_year = ? ORDER BY name",
-            (day, month, year)
+            (day, month, year),
         ).fetchall()
         if not rows:
             return {
@@ -476,562 +389,676 @@ class QueryRouter:
                 "people_mentioned": [],
                 "people_with_photos": [],
             }
-
-        if len(rows) == 1:
-            row = dict(rows[0])
-            place = f" en {row['birth_place']}" if row.get('birth_place') else ""
+        people = _rows_to_dicts(rows)
+        if len(people) == 1:
+            p = people[0]
+            place = f" en {p['birth_place']}" if p.get("birth_place") else ""
             return {
-                "answer": f"La persona nacida el {day:02d}/{month:02d}/{year} es {row['name']}{place}.",
-                "people_mentioned": [row["id"]],
-                "people_with_photos": [_person_card(row)],
+                "answer": f"La persona nacida el {day:02d}/{month:02d}/{year} es {p['name']}{place}.",
+                "people_mentioned": [p["id"]],
+                "people_with_photos": [_person_card(p)],
             }
-
         return {
             "answer": "He encontrado %d personas nacidas el %02d/%02d/%04d:\n%s" % (
-                len(rows), day, month, year, "\n".join("- %s" % _format_person(dict(r)) for r in rows)
+                len(people), day, month, year, "\n".join(f"- {_format_person(p)}" for p in people)
             ),
-            "people_mentioned": [r["id"] for r in rows],
-            "people_with_photos": [_person_card(dict(r)) for r in rows[:8]],
+            "people_mentioned": [p["id"] for p in people],
+            "people_with_photos": [_person_card(p) for p in people[:8]],
         }
 
-    def handle_first_surname(self, question):
-        m = re.search(r"(?:primer\s+apellido|primer\s+cognom|first\s+surname).*?([A-ZÁÉÍÓÚÀÈÌÒÙÑÇa-záéíóúàèìòùñç'\-]+)", question, re.IGNORECASE)
-        surname = None
-        if m:
-            surname = m.group(1).strip()
-        if not surname:
-            m = re.search(r"tienen?\s+([A-ZÁÉÍÓÚÀÈÌÒÙÑÇa-záéíóúàèìòùñç'\-]+)\s+como\s+primer\s+apellido", question, re.IGNORECASE)
-            if m:
-                surname = m.group(1).strip()
-        if not surname:
+    def handle_first_surname(self, question: str) -> Optional[Dict[str, Any]]:
+        m = re.search(r"([A-ZÁÉÍÓÚÀÈÌÒÙÑÇa-záéíóúàèìòùñç'\-]+)\s+como\s+primer\s+apellido", question, re.IGNORECASE)
+        if not m:
+            m = re.search(r"([A-ZÁÉÍÓÚÀÈÌÒÙÑÇa-záéíóúàèìòùñç'\-]+)\s+com\s+a\s+primer\s+cognom", question, re.IGNORECASE)
+        if not m:
+            m = re.search(r"first\s+surname\s+.*?([A-ZÁÉÍÓÚÀÈÌÒÙÑÇa-záéíóúàèìòùñç'\-]+)", question, re.IGNORECASE)
+        if not m:
             return None
-
+        surname = m.group(1).strip()
         rows = self.conn.execute(
-            "SELECT id, name, birth_year, death_year, photo_file, is_alive, birth_place, surname "
+            "SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive "
             "FROM people WHERE surname = ? COLLATE NOCASE OR surname LIKE ? COLLATE NOCASE "
-            "ORDER BY birth_year, name LIMIT 100",
-            (surname, f"{surname} %")
+            "ORDER BY birth_year, name LIMIT 200",
+            (surname, f"{surname} %"),
         ).fetchall()
-
-        if not rows:
+        people = _rows_to_dicts(rows)
+        if not people:
             return {
                 "answer": f"No he encontrado personas con {surname} como primer apellido.",
                 "people_mentioned": [],
                 "people_with_photos": [],
             }
-
         return {
             "answer": "He encontrado %d personas con %s como primer apellido:\n%s" % (
-                len(rows), surname, "\n".join("- %s" % _format_person(dict(r)) for r in rows[:25])
+                len(people), surname, "\n".join(f"- {_format_person(p)}" for p in people[:25])
             ),
-            "people_mentioned": [r["id"] for r in rows],
-            "people_with_photos": [_person_card(dict(r)) for r in rows[:8]],
+            "people_mentioned": [p["id"] for p in people],
+            "people_with_photos": [_person_card(p) for p in people[:8]],
         }
 
-    def handle_birthdays(self, question):
-        birthdays = get_birthdays_this_week(self.conn)
-        if not birthdays:
+    def handle_birth_place_people(self, question: str) -> Optional[Dict[str, Any]]:
+        m = re.search(r"(?:nacieron|nascuts?|born)\s+en\s+(.+)$", question, re.IGNORECASE)
+        if not m:
+            return None
+        place = m.group(1).strip(" ?.,!;:")
+        rows = self.conn.execute(
+            "SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive "
+            "FROM people WHERE birth_place LIKE ? COLLATE NOCASE ORDER BY birth_year, name LIMIT 100",
+            (f"%{place}%",),
+        ).fetchall()
+        people = _rows_to_dicts(rows)
+        if not people:
             return {
-                "answer": "No hay cumpleaños esta semana en el árbol familiar.",
+                "answer": f"No he encontrado personas nacidas en {place}.",
                 "people_mentioned": [],
                 "people_with_photos": [],
             }
-
-        today_bdays = [b for b in birthdays if b["is_today"]]
-        week_bdays = [b for b in birthdays if not b["is_today"]]
-
-        parts = []
-        if today_bdays:
-            names = ", ".join(
-                "%s (%s años)" % (b["name"], b["age"]) if b["age"] else b["name"]
-                for b in today_bdays
-            )
-            parts.append("Hoy cumplen años: %s." % names)
-        if week_bdays:
-            names = ", ".join(
-                "%s (%s, %s años)" % (b["name"], b["date_label"], b["age"]) if b["age"]
-                else "%s (%s)" % (b["name"], b["date_label"])
-                for b in week_bdays
-            )
-            parts.append("Esta semana: %s." % names)
-
         return {
-            "answer": " ".join(parts),
-            "people_mentioned": [b["id"] for b in birthdays],
-            "people_with_photos": [
-                {"id": b["id"], "name": b["name"], "photo": b["photo"]}
-                for b in birthdays
-            ],
+            "answer": "Personas nacidas en %s (%d):\n%s" % (
+                place, len(people), "\n".join(f"- {_format_person(p)}" for p in people[:25])
+            ),
+            "people_mentioned": [p["id"] for p in people],
+            "people_with_photos": [_person_card(p) for p in people[:8]],
         }
 
-    def handle_stats(self, question):
-        total = self.conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
-        alive = self.conn.execute("SELECT COUNT(*) FROM people WHERE is_alive = 1").fetchone()[0]
-        marriages = self.conn.execute("SELECT COUNT(*) FROM marriages").fetchone()[0]
-        with_photos = self.conn.execute("SELECT COUNT(*) FROM people WHERE photo_count > 0").fetchone()[0]
-        oldest = self.conn.execute(
-            "SELECT name, birth_year FROM people WHERE birth_year IS NOT NULL ORDER BY birth_year LIMIT 1"
-        ).fetchone()
-
-        answer = (
-            "El árbol genealógico Godes tiene %d personas, de las cuales %d están vivas (estimado). "
-            "Hay %d matrimonios registrados y %d personas con fotos. "
-            "La persona más antigua es %s (%d)."
-        ) % (total, alive, marriages, with_photos, oldest["name"], oldest["birth_year"])
-
+    def handle_death_place_year(self, question: str) -> Optional[Dict[str, Any]]:
+        m = re.search(r"(?:murio|morir|died)\s+en\s+(.+?)\s+en\s+(\d{4})\b", question, re.IGNORECASE)
+        if not m:
+            return None
+        place = m.group(1).strip(" ?.,!;:")
+        year = int(m.group(2))
+        rows = self.conn.execute(
+            "SELECT id, name, death_date, death_year, death_place, birth_year, photo_file, is_alive "
+            "FROM people WHERE death_year = ? AND death_place LIKE ? COLLATE NOCASE ORDER BY name LIMIT 50",
+            (year, f"%{place}%"),
+        ).fetchall()
+        people = _rows_to_dicts(rows)
+        if not people:
+            return {
+                "answer": f"No he encontrado a nadie que muriera en {place} en {year}.",
+                "people_mentioned": [],
+                "people_with_photos": [],
+            }
+        if len(people) == 1:
+            p = people[0]
+            when = p.get("death_date") or str(year)
+            return {
+                "answer": f"{p['name']} murió el {when}.",
+                "people_mentioned": [p["id"]],
+                "people_with_photos": [_person_card(p)],
+            }
         return {
-            "answer": answer,
+            "answer": "He encontrado %d personas que murieron en %s en %d:\n%s" % (
+                len(people), place, year, "\n".join(f"- {p['name']} ({p.get('death_date') or p.get('death_year')})" for p in people)
+            ),
+            "people_mentioned": [p["id"] for p in people],
+            "people_with_photos": [_person_card(p) for p in people[:8]],
+        }
+
+    def handle_residence(self, question: str) -> Optional[Dict[str, Any]]:
+        name = self._extract_name_after(
+            question,
+            [
+                r"aparece\s+documentad[oa]\s+(.+)$",
+                r"documentado\s+(.+)$",
+                r"documentada\s+(.+)$",
+                r"residencia\s+de\s+(.+)$",
+                r"direccion\s+de\s+(.+)$",
+                r"adreca\s+de\s+(.+)$",
+            ],
+        )
+        if not name:
+            return None
+        person = self._resolve_person(name)
+        if not person:
+            return None
+        residences = _rows_to_dicts(get_residences(self.conn, person["id"]))
+        if not residences:
+            return {
+                "answer": f"No tengo información sobre residencias o direcciones de {person['name']}.",
+                "people_mentioned": [person["id"]],
+                "people_with_photos": [_person_card(person)],
+            }
+        parts = []
+        for r in residences:
+            line = r.get("address") or ""
+            if r.get("address2"):
+                line += f" {r['address2']}"
+            if r.get("city"):
+                line += f", {r['city']}"
+            if r.get("country"):
+                line += f", {r['country']}"
+            if r.get("date"):
+                line += f" ({r['date']})"
+            parts.append(line.strip(", "))
+        return {
+            "answer": f"Residencias o direcciones de {person['name']}:\n" + "\n".join(f"- {p}" for p in parts),
+            "people_mentioned": [person["id"]],
+            "people_with_photos": [_person_card(person)],
+        }
+
+    def handle_spouse_disambiguated(self, question: str) -> Optional[Dict[str, Any]]:
+        name = self._extract_name_after(question, [r"llamad[oa]\s+(.+)$", r"named\s+(.+)$"])
+        place_match = re.search(r"(?:nacida|nacido|born)\s+en\s+(.+?)\s+(?:llamad[oa]|named)\s+", question, re.IGNORECASE)
+        birth_place = place_match.group(1).strip(" ?.,!;:") if place_match else None
+        if not name:
+            return None
+        person = self._resolve_person(name, birth_place=birth_place)
+        if not person:
+            return None
+        return self._spouse_response(person)
+
+    def handle_children_born_in(self, question: str) -> Optional[Dict[str, Any]]:
+        m = re.search(r"(?:que\s+hijos\s+de|quins\s+fills\s+de|which\s+children\s+of)\s+(.+?)\s+(?:nacieron\s+en|nascuts?\s+a|born\s+in)\s+(.+)$", question, re.IGNORECASE)
+        if not m:
+            return None
+        raw_name = m.group(1).strip(" ?.,!;:")
+        place = m.group(2).strip(" ?.,!;:")
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
+        children = _rows_to_dicts(get_children(self.conn, person["id"]))
+        filtered = [c for c in children if c.get("birth_place") and _norm(place) in _norm(c["birth_place"])]
+        if not filtered:
+            return {
+                "answer": f"No he encontrado hijos de {person['name']} nacidos en {place}.",
+                "people_mentioned": [person["id"]],
+                "people_with_photos": [_person_card(person)],
+            }
+        return {
+            "answer": f"Hijos de {person['name']} nacidos en {place}:\n" + "\n".join(f"- {_format_person(c)}" for c in filtered),
+            "people_mentioned": [person["id"]] + [c["id"] for c in filtered],
+            "people_with_photos": [_person_card(person)] + [_person_card(c) for c in filtered[:7]],
+        }
+
+    def handle_births_by_decade(self, question: str) -> Optional[Dict[str, Any]]:
+        decade = _parse_decade(question)
+        if not decade:
+            return None
+        start, end = decade
+        count = self.conn.execute(
+            "SELECT COUNT(*) FROM people WHERE birth_year BETWEEN ? AND ?",
+            (start, end),
+        ).fetchone()[0]
+        return {
+            "answer": f"Hay {count} nacimientos registrados en la década de {start}.",
             "people_mentioned": [],
             "people_with_photos": [],
         }
 
-    def handle_search(self, question):
-        prefixes = [
-            r"(?:busca|cerca|search|trobar|encontrar)\s+(?:a\s+)?",
-            r"(?:qui|quien|who)\s+[eé]s\s+",
-        ]
-        name = _extract_name(question, prefixes)
-        if not name or len(name) < 2:
+    def handle_age_at_marriage(self, question: str) -> Optional[Dict[str, Any]]:
+        m = re.search(r"(?:que\s+edad\s+tenia|quina\s+edat\s+tenia|how\s+old\s+was)\s+(.+?)\s+(?:cuando\s+se\s+caso|quan\s+es\s+va\s+casar|when\s+.*?married)", question, re.IGNORECASE)
+        if not m:
             return None
-
-        matches = find_person_by_name(self.conn, name)
-        if not matches:
-            return {"answer": "No he encontrado a nadie con el nombre '%s'." % name,
-                    "people_mentioned": [], "people_with_photos": []}
-
-        parts = []
-        photos = []
-        for m in matches[:10]:
-            full = get_person(self.conn, m["id"])
-            info = _format_person(full)
-            if full["father_name"]:
-                info += ", hijo/a de %s" % full["father_name"]
-                if full["mother_name"]:
-                    info += " y %s" % full["mother_name"]
-            parts.append(info)
-            photos.append(_person_card(m))
-
-        answer = "He encontrado %d resultado%s:\n%s" % (
-            len(parts), "s" if len(parts) != 1 else "",
-            "\n".join("- %s" % p for p in parts)
-        )
-
-        return {
-            "answer": answer,
-            "people_mentioned": [m["id"] for m in matches[:10]],
-            "people_with_photos": photos,
-        }
-
-    # --- NEW HANDLERS ---
-
-    def _build_info_response(self, person_match):
-        """Build a complete profile/info response for a person."""
-        full = get_person(self.conn, person_match["id"])
-        if not full:
+        raw_name = m.group(1).strip(" ?.,!;:")
+        person = self._resolve_person(raw_name)
+        if not person:
             return None
-        full = dict(full)
-        pid = full["id"]
-
-        sections = []
-        people_ids = [pid]
-        photos_list = [_person_card(full)]
-
-        # Name and basic info
-        header = full["name"]
-        if full.get("sex"):
-            header += " (%s)" % ("Home" if full["sex"] == "M" else "Dona")
-        sections.append(header)
-
-        # Birth
-        if full.get("birth_date") or full.get("birth_place"):
-            birth = "Naixement: %s" % (full.get("birth_date", "?"))
-            if full.get("birth_place"):
-                birth += ", %s" % full["birth_place"]
-            sections.append(birth)
-
-        # Death
-        if full.get("death_date") or full.get("death_place"):
-            death = "Defunció: %s" % (full.get("death_date", "?"))
-            if full.get("death_place"):
-                death += ", %s" % full["death_place"]
-            if full.get("death_cause"):
-                death += " (%s)" % full["death_cause"]
-            sections.append(death)
-        elif full.get("is_alive"):
-            sections.append("Estat: Viu/a")
-
-        # Parents
-        if full.get("father_name") or full.get("mother_name"):
-            parents = "Pares: "
-            parts = []
-            if full.get("father_name"):
-                parts.append(full["father_name"])
-                if full.get("father_id"):
-                    people_ids.append(full["father_id"])
-            if full.get("mother_name"):
-                parts.append(full["mother_name"])
-                if full.get("mother_id"):
-                    people_ids.append(full["mother_id"])
-            sections.append(parents + " i ".join(parts))
-
-        # Spouses
-        spouses = get_spouses(self.conn, pid)
-        if spouses:
-            for s in spouses:
-                sp = s["person"]
-                text = "Cònjuge: %s" % sp["name"]
-                if s.get("marriage_date"):
-                    text += " (casats %s" % s["marriage_date"]
-                    if s.get("marriage_place"):
-                        text += ", %s" % s["marriage_place"]
-                    text += ")"
-                sections.append(text)
-                people_ids.append(sp["id"])
-                photos_list.append(_person_card(sp))
-
-        # Children
-        children = get_children(self.conn, pid)
-        if children:
-            kids = ", ".join(c["name"] for c in children)
-            sections.append("Fills (%d): %s" % (len(children), kids))
-            for c in children:
-                people_ids.append(c["id"])
-
-        # Siblings
-        siblings = get_siblings(self.conn, pid)
-        if siblings:
-            sibs = ", ".join(s["name"] for s in siblings)
-            sections.append("Germans (%d): %s" % (len(siblings), sibs))
-
-        # Occupations
-        occupations = get_occupations(self.conn, pid)
-        if occupations:
-            occs = []
-            for o in occupations:
-                text = o["title"]
-                if o["date"]:
-                    text += " (%s)" % o["date"]
-                if o["place"]:
-                    text += " a %s" % o["place"]
-                occs.append(text)
-            sections.append("Oficis: %s" % "; ".join(occs))
-
-        # Residences
-        residences = get_residences(self.conn, pid)
-        if residences:
-            addrs = []
-            for r in residences:
-                text = r["address"] or ""
-                if r["city"]:
-                    text += ", %s" % r["city"]
-                if r["date"]:
-                    text += " (%s)" % r["date"]
-                if text.strip(", "):
-                    addrs.append(text.strip(", "))
-            if addrs:
-                sections.append("Residències: %s" % "; ".join(addrs))
-
-        # Notes (first 2, truncated)
-        notes = get_notes(self.conn, pid)
-        if notes:
-            for n in notes[:2]:
-                content = n["content"]
-                if len(content) > 200:
-                    content = content[:200] + "..."
-                sections.append("Nota: %s" % content)
-
-        # Photo count
-        all_photos = get_all_photos(self.conn, pid)
-        if all_photos:
-            sections.append("Fotos: %d" % len(all_photos))
-            for p in all_photos:
-                if p["local_file"]:
-                    photos_list.append({
-                        "id": pid, "name": full["name"], "photo": p["local_file"]
-                    })
-
-        return {
-            "answer": "\n".join(sections),
-            "people_mentioned": people_ids,
-            "people_with_photos": photos_list[:8],  # Limit photos shown
-        }
-
-    def handle_info(self, question):
-        prefixes = [
-            r"(?:informaci[oó]|info|parla.m|h[aá]blame|cu[eé]ntame|tell\s+me|dades|datos|fitxa|ficha|perfil)\s+(?:de|d\'|sobre|of)\s+",
-            r"sobre\s+",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
-            return None
-        return self._build_info_response(matches[0])
-
-    def handle_siblings(self, question):
-        prefixes = [
-            r"(?:germans?|hermanos?|siblings?)\s+(?:de|d\'|of)\s+",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
-            return None
-
-        person = matches[0]
-        siblings = get_siblings(self.conn, person["id"])
-        if not siblings:
+        birth_year = person.get("birth_year")
+        spouses = get_spouses(self.conn, person["id"])
+        dated = [s for s in spouses if s.get("marriage_date")]
+        if not birth_year or not dated:
             return {
-                "answer": "No he trobat germans de %s." % person["name"],
+                "answer": f"No tengo datos suficientes para calcular la edad al casarse de {person['name']}.",
                 "people_mentioned": [person["id"]],
                 "people_with_photos": [_person_card(person)],
             }
-
-        sibs_text = ", ".join(_format_person(s) for s in siblings)
+        # extraer primer año de matrimonio disponible
+        marriage_years = []
+        for s in dated:
+            m2 = re.search(r"(\d{4})", s["marriage_date"])
+            if m2:
+                marriage_years.append((int(m2.group(1)), s))
+        if not marriage_years:
+            return {
+                "answer": f"No tengo datos suficientes para calcular la edad al casarse de {person['name']}.",
+                "people_mentioned": [person["id"]],
+                "people_with_photos": [_person_card(person)],
+            }
+        marriage_year, spouse_info = sorted(marriage_years, key=lambda t: t[0])[0]
+        age = marriage_year - birth_year
+        spouse = spouse_info["person"]
         return {
-            "answer": "%s té %d germà/ns: %s." % (person["name"], len(siblings), sibs_text),
-            "people_mentioned": [person["id"]] + [s["id"] for s in siblings],
-            "people_with_photos": [_person_card(person)] + [_person_card(dict(s)) for s in siblings],
+            "answer": f"{person['name']} tenía aproximadamente {age} años cuando se casó con {spouse['name']} ({spouse_info['marriage_date']}).",
+            "people_mentioned": [person["id"], spouse["id"]],
+            "people_with_photos": [_person_card(person), _person_card(spouse)],
         }
 
-    def handle_grandparents(self, question):
-        prefixes = [
-            r"(?:avis?|abuelos?|grandparents?|àvia|abuela|grandfather|grandmother|padrins?)\s+(?:de|d\'|of)\s+",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
+    # ------------------------------------------------------------------
+    # Handlers básicos reutilizados
+    # ------------------------------------------------------------------
+    def handle_mother(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(question, [r"madre\s+de\s+(.+)$", r"mare\s+de\s+(.+)$", r"mother\s+of\s+(.+)$"])
+        if not raw_name:
             return None
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
+        if not person.get("mother_id"):
+            return {
+                "answer": f"No tengo información sobre la madre de {person['name']}.",
+                "people_mentioned": [person["id"]],
+                "people_with_photos": [_person_card(person)],
+            }
+        mother = dict(get_person(self.conn, person["mother_id"]))
+        return {
+            "answer": f"La madre de {person['name']} es {_format_person(mother)}.",
+            "people_mentioned": [person["id"], mother["id"]],
+            "people_with_photos": [_person_card(person), _person_card(mother)],
+        }
 
-        person = matches[0]
+    def handle_father(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(question, [r"padre\s+de\s+(.+)$", r"pare\s+de\s+(.+)$", r"father\s+of\s+(.+)$"])
+        if not raw_name:
+            return None
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
+        if not person.get("father_id"):
+            return {
+                "answer": f"No tengo información sobre el padre de {person['name']}.",
+                "people_mentioned": [person["id"]],
+                "people_with_photos": [_person_card(person)],
+            }
+        father = dict(get_person(self.conn, person["father_id"]))
+        return {
+            "answer": f"El padre de {person['name']} es {_format_person(father)}.",
+            "people_mentioned": [person["id"], father["id"]],
+            "people_with_photos": [_person_card(person), _person_card(father)],
+        }
+
+    def handle_parents(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(question, [r"padres\s+de\s+(.+)$", r"pares\s+de\s+(.+)$", r"parents\s+of\s+(.+)$"])
+        if not raw_name:
+            return None
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
+        father, mother = get_parents(self.conn, person["id"])
+        parts = []
+        photos = [_person_card(person)]
+        ids = [person["id"]]
+        if father:
+            fd = dict(father)
+            parts.append(f"padre: {_format_person(fd)}")
+            photos.append(_person_card(fd))
+            ids.append(fd["id"])
+        if mother:
+            md = dict(mother)
+            parts.append(f"madre: {_format_person(md)}")
+            photos.append(_person_card(md))
+            ids.append(md["id"])
+        if not parts:
+            return {
+                "answer": f"No tengo información sobre los padres de {person['name']}.",
+                "people_mentioned": [person["id"]],
+                "people_with_photos": [_person_card(person)],
+            }
+        return {
+            "answer": f"Padres de {person['name']}: " + "; ".join(parts) + ".",
+            "people_mentioned": ids,
+            "people_with_photos": photos,
+        }
+
+    def handle_children(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(question, [r"hijos\s+de\s+(.+)$", r"fills\s+de\s+(.+)$", r"children\s+of\s+(.+)$"])
+        if not raw_name:
+            return None
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
+        children = _rows_to_dicts(get_children(self.conn, person["id"]))
+        if not children:
+            return {
+                "answer": f"No tengo constancia de hijos de {person['name']}.",
+                "people_mentioned": [person["id"]],
+                "people_with_photos": [_person_card(person)],
+            }
+        return {
+            "answer": f"{person['name']} tuvo {len(children)} hijo/s: " + ", ".join(c["name"] for c in children) + ".",
+            "people_mentioned": [person["id"]] + [c["id"] for c in children],
+            "people_with_photos": [_person_card(person)] + [_person_card(c) for c in children[:7]],
+        }
+
+    def _spouse_response(self, person: Dict[str, Any]) -> Dict[str, Any]:
+        spouses = get_spouses(self.conn, person["id"])
+        if not spouses:
+            return {
+                "answer": f"No tengo información sobre el/la cónyuge de {person['name']}.",
+                "people_mentioned": [person["id"]],
+                "people_with_photos": [_person_card(person)],
+            }
+        parts = []
+        photos = [_person_card(person)]
+        ids = [person["id"]]
+        for s in spouses:
+            sp = dict(s["person"])
+            text = sp["name"]
+            if s.get("marriage_date"):
+                text += f", casados el {s['marriage_date']}"
+            if s.get("marriage_place"):
+                text += f" en {s['marriage_place']}"
+            parts.append(text)
+            photos.append(_person_card(sp))
+            ids.append(sp["id"])
+        return {
+            "answer": f"{person['name']} se casó con: " + "; ".join(parts) + ".",
+            "people_mentioned": ids,
+            "people_with_photos": photos,
+        }
+
+    def handle_spouse(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(
+            question,
+            [
+                r"conyuge\s+de\s+(.+)$",
+                r"c[oó]nyuge\s+de\s+(.+)$",
+                r"esposa\s+de\s+(.+)$",
+                r"marido\s+de\s+(.+)$",
+                r"con\s+quien\s+se\s+cas[oó]\s+(.+)$",
+                r"amb\s+qui\s+es\s+va\s+casar\s+(.+)$",
+                r"spouse\s+of\s+(.+)$",
+            ],
+        )
+        if not raw_name:
+            return None
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
+        return self._spouse_response(person)
+
+    def handle_siblings(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(question, [r"hermanos\s+de\s+(.+)$", r"germans\s+de\s+(.+)$", r"siblings\s+of\s+(.+)$"])
+        if not raw_name:
+            return None
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
+        siblings = _rows_to_dicts(get_siblings(self.conn, person["id"]))
+        if not siblings:
+            return {
+                "answer": f"No he encontrado hermanos de {person['name']}.",
+                "people_mentioned": [person["id"]],
+                "people_with_photos": [_person_card(person)],
+            }
+        return {
+            "answer": f"Hermanos de {person['name']}: " + ", ".join(s["name"] for s in siblings) + ".",
+            "people_mentioned": [person["id"]] + [s["id"] for s in siblings],
+            "people_with_photos": [_person_card(person)] + [_person_card(s) for s in siblings[:7]],
+        }
+
+    def handle_grandparents(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(question, [r"abuelos\s+de\s+(.+)$", r"avis\s+de\s+(.+)$", r"grandparents\s+of\s+(.+)$"])
+        if not raw_name:
+            return None
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
         grandparents = get_grandparents(self.conn, person["id"])
         if not grandparents:
             return {
-                "answer": "No tinc informació sobre els avis de %s." % person["name"],
+                "answer": f"No tengo información sobre los abuelos de {person['name']}.",
                 "people_mentioned": [person["id"]],
                 "people_with_photos": [_person_card(person)],
             }
-
         parts = []
-        people_ids = [person["id"]]
+        ids = [person["id"]]
         photos = [_person_card(person)]
         for gp in grandparents:
-            p = gp["person"]
-            parts.append("%s (via %s)" % (_format_person(p), gp["via"]))
-            people_ids.append(p["id"])
-            photos.append(_person_card(dict(p)))
-
+            gp_person = dict(gp["person"])
+            parts.append(f"{gp_person['name']} (vía {gp['via']})")
+            ids.append(gp_person["id"])
+            photos.append(_person_card(gp_person))
         return {
-            "answer": "Avis de %s: %s." % (person["name"], "; ".join(parts)),
-            "people_mentioned": people_ids,
-            "people_with_photos": photos,
+            "answer": f"Abuelos de {person['name']}: " + "; ".join(parts) + ".",
+            "people_mentioned": ids,
+            "people_with_photos": photos[:8],
         }
 
-    def handle_grandchildren(self, question):
-        prefixes = [
-            r"(?:n[eé]ts?|nietos?|grandchild|grandchildren|nietas?)\s+(?:de|d\'|of)\s+",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
+    def handle_grandchildren(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(question, [r"nietos\s+de\s+(.+)$", r"nets\s+de\s+(.+)$", r"grandchildren\s+of\s+(.+)$"])
+        if not raw_name:
             return None
-
-        person = matches[0]
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
         grandchildren = get_grandchildren(self.conn, person["id"])
         if not grandchildren:
             return {
-                "answer": "No tinc informació sobre néts de %s." % person["name"],
+                "answer": f"No tengo información sobre nietos de {person['name']}.",
                 "people_mentioned": [person["id"]],
                 "people_with_photos": [_person_card(person)],
             }
-
-        parts = []
-        people_ids = [person["id"]]
+        ids = [person["id"]]
         photos = [_person_card(person)]
+        parts = []
         for gc in grandchildren:
-            p = gc["person"]
-            parts.append("%s (fill/a de %s)" % (_format_person(p), gc["via"]))
-            people_ids.append(p["id"])
-            photos.append(_person_card(dict(p)))
-
+            child = dict(gc["person"])
+            ids.append(child["id"])
+            photos.append(_person_card(child))
+            parts.append(f"{child['name']} (hijo/a de {gc['via']})")
         return {
-            "answer": "Néts de %s (%d): %s." % (person["name"], len(grandchildren), "; ".join(parts)),
-            "people_mentioned": people_ids,
+            "answer": f"Nietos de {person['name']}: " + "; ".join(parts) + ".",
+            "people_mentioned": ids,
             "people_with_photos": photos[:8],
         }
 
-    def handle_residence(self, question):
-        prefixes = [
-            r"(?:on\s+va\s+viure|d[oó]nde\s+vivi[oó]|where.*live|resid[eè]nci|domicili|direcci[oó]|adre[çc]a|viv[ií]a)\s*(?:de|d\'|of)?\s*",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
+    def handle_birth(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(
+            question,
+            [
+                r"cuando\s+naci[oó]\s+(.+)$",
+                r"quan\s+va\s+naixer\s+(.+)$",
+                r"birth\s+of\s+(.+)$",
+                r"fecha\s+de\s+nacimiento\s+de\s+(.+)$",
+                r"data\s+de\s+naixement\s+de\s+(.+)$",
+            ],
+        )
+        if not raw_name:
             return None
-
-        person = matches[0]
-        residences = get_residences(self.conn, person["id"])
-        if not residences:
-            return {
-                "answer": "No tinc informació sobre on va viure %s." % person["name"],
-                "people_mentioned": [person["id"]],
-                "people_with_photos": [_person_card(person)],
-            }
-
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
+        full = dict(get_person(self.conn, person["id"]))
         parts = []
-        for r in residences:
-            text = r["address"] or ""
-            if r["address2"]:
-                text += " %s" % r["address2"]
-            if r["city"]:
-                text += ", %s" % r["city"]
-            if r["date"]:
-                text += " (%s)" % r["date"]
-            parts.append(text.strip(", "))
-
+        if full.get("birth_date"):
+            parts.append(f"nació el {full['birth_date']}")
+        if full.get("birth_place"):
+            parts.append(f"en {full['birth_place']}")
+        answer = f"{full['name']} " + (" ".join(parts) if parts else "no tiene fecha de nacimiento registrada") + "."
         return {
-            "answer": "Residències de %s:\n%s" % (person["name"], "\n".join("- %s" % p for p in parts)),
-            "people_mentioned": [person["id"]],
-            "people_with_photos": [_person_card(person)],
+            "answer": answer,
+            "people_mentioned": [full["id"]],
+            "people_with_photos": [_person_card(full)],
         }
 
-    def handle_occupation(self, question):
-        prefixes = [
-            r"(?:ofici|profesi[oó]|ocupaci[oó]|trabaj|feina|treball|occupation|job|dedicava|dedicaba|treballa)\s*(?:de|d\'|of)?\s*",
-            r"(?:a\s+qu[eè]\s+(?:es\s+)?dedicava|a\s+qu[eé]\s+se\s+dedicaba)\s+",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
+    def handle_death(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(
+            question,
+            [
+                r"cuando\s+muri[oó]\s+(.+)$",
+                r"quan\s+va\s+morir\s+(.+)$",
+                r"death\s+of\s+(.+)$",
+            ],
+        )
+        if not raw_name:
             return None
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
+        full = dict(get_person(self.conn, person["id"]))
+        parts = []
+        if full.get("death_date"):
+            parts.append(f"murió el {full['death_date']}")
+        if full.get("death_place"):
+            parts.append(f"en {full['death_place']}")
+        answer = f"{full['name']} " + (" ".join(parts) if parts else "no tiene defunción registrada") + "."
+        return {
+            "answer": answer,
+            "people_mentioned": [full["id"]],
+            "people_with_photos": [_person_card(full)],
+        }
 
-        person = matches[0]
-        occupations = get_occupations(self.conn, person["id"])
+    def handle_occupation(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(
+            question,
+            [r"registrada\s+para\s+(.+)$", r"de\s+(.+)$", r"for\s+(.+)$"],
+        )
+        if not raw_name:
+            return None
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
+        occupations = _rows_to_dicts(get_occupations(self.conn, person["id"]))
         if not occupations:
             return {
-                "answer": "No tinc informació sobre l'ofici de %s." % person["name"],
+                "answer": f"No tengo información sobre la ocupación de {person['name']}.",
                 "people_mentioned": [person["id"]],
                 "people_with_photos": [_person_card(person)],
             }
-
         parts = []
         for o in occupations:
-            text = o["title"]
-            if o["date"]:
-                text += " (%s)" % o["date"]
-            if o["place"]:
-                text += " a %s" % o["place"]
-            parts.append(text)
-
+            line = o.get("title") or "(sin título)"
+            if o.get("date"):
+                line += f" ({o['date']})"
+            if o.get("place"):
+                line += f" en {o['place']}"
+            parts.append(line)
         return {
-            "answer": "Oficis de %s: %s." % (person["name"], "; ".join(parts)),
+            "answer": f"Ocupaciones de {person['name']}: " + "; ".join(parts) + ".",
             "people_mentioned": [person["id"]],
             "people_with_photos": [_person_card(person)],
         }
 
-    def handle_photos(self, question):
-        prefixes = [
-            r"(?:fotos?|imatge|imagen|picture|photo)\s+(?:de|d\'|of)\s+",
-            r"(?:mostra|ense[ñn]a|show).*(?:fotos?|imatge|imagen)\s+(?:de|d\'|of)\s+",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
+    def handle_notes(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(question, [r"asociadas?\s+a\s+(.+)$", r"de\s+(.+)$", r"about\s+(.+)$"])
+        if not raw_name:
             return None
-
-        person = matches[0]
-        photos = get_all_photos(self.conn, person["id"])
-        if not photos:
-            return {
-                "answer": "No tinc fotos de %s." % person["name"],
-                "people_mentioned": [person["id"]],
-                "people_with_photos": [],
-            }
-
-        photo_cards = []
-        for p in photos:
-            if p["local_file"]:
-                card = {"id": person["id"], "name": person["name"], "photo": p["local_file"]}
-                if p["title"]:
-                    card["name"] = p["title"]
-                photo_cards.append(card)
-
-        return {
-            "answer": "Fotos de %s (%d):" % (person["name"], len(photo_cards)),
-            "people_mentioned": [person["id"]],
-            "people_with_photos": photo_cards,
-        }
-
-    def handle_notes(self, question):
-        prefixes = [
-            r"(?:notes?|notas?|documents?|observaci|anotaci)\s+(?:de|d\'|of|sobre)\s+",
-        ]
-        matches = self._find_person_in_question(question, prefixes)
-        if not matches:
+        person = self._resolve_person(raw_name)
+        if not person:
             return None
-
-        person = matches[0]
-        notes = get_notes(self.conn, person["id"])
+        notes = _rows_to_dicts(get_notes(self.conn, person["id"]))
         if not notes:
             return {
-                "answer": "No tinc notes sobre %s." % person["name"],
+                "answer": f"No tengo notas sobre {person['name']}.",
                 "people_mentioned": [person["id"]],
                 "people_with_photos": [_person_card(person)],
             }
-
         parts = []
-        for n in notes:
-            content = n["content"]
+        for n in notes[:5]:
+            content = n.get("content", "")
             if len(content) > 300:
                 content = content[:300] + "..."
             parts.append(content)
-
         return {
-            "answer": "Notes de %s:\n%s" % (person["name"], "\n---\n".join(parts)),
+            "answer": f"Notas de {person['name']}:\n" + "\n---\n".join(parts),
             "people_mentioned": [person["id"]],
             "people_with_photos": [_person_card(person)],
         }
 
-    def handle_alive(self, question):
-        people = get_alive_people(self.conn)
-        if not people:
+    def handle_photos(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(question, [r"fotos?\s+de\s+(.+)$", r"photos?\s+of\s+(.+)$"])
+        if not raw_name:
+            return None
+        person = self._resolve_person(raw_name)
+        if not person:
+            return None
+        photos = _rows_to_dicts(get_all_photos(self.conn, person["id"]))
+        if not photos:
             return {
-                "answer": "No hi ha persones marcades com a vives.",
-                "people_mentioned": [],
+                "answer": f"No tengo fotos de {person['name']}.",
+                "people_mentioned": [person["id"]],
                 "people_with_photos": [],
             }
-
-        parts = []
-        photos = []
-        for p in people:
-            text = "%s (%s)" % (p["name"], p["birth_year"]) if p["birth_year"] else p["name"]
-            if p["birth_place"]:
-                text += " de %s" % p["birth_place"]
-            parts.append(text)
-            photos.append(_person_card(dict(p)))
-
+        cards = []
+        for p in photos:
+            if p.get("local_file"):
+                cards.append({"id": person["id"], "name": p.get("title") or person["name"], "photo": p["local_file"]})
         return {
-            "answer": "Persones vives (%d):\n%s" % (len(parts), "\n".join("- %s" % p for p in parts)),
-            "people_mentioned": [p["id"] for p in people],
-            "people_with_photos": photos[:8],
+            "answer": f"Fotos de {person['name']} ({len(cards)}).",
+            "people_mentioned": [person["id"]],
+            "people_with_photos": cards[:8],
         }
 
-    def handle_born_in(self, question):
-        prefixes = [
-            r"(?:nascuts?\s+a|nacidos?\s+en|born\s+in|origen|natural\s+de)\s+",
-        ]
-        place = _extract_name(question, prefixes)
-        if not place or len(place) < 2:
+    def handle_birthdays(self, question: str) -> Optional[Dict[str, Any]]:
+        birthdays = get_birthdays_this_week(self.conn)
+        if birthdays is None:
             return None
-
-        people = get_born_in(self.conn, place)
-        if not people:
+        birthdays = list(birthdays)
+        if not birthdays:
             return {
-                "answer": "No he trobat ningú nascut a '%s'." % place,
+                "answer": "No hay cumpleaños esta semana en el árbol.",
                 "people_mentioned": [],
                 "people_with_photos": [],
             }
-
-        parts = []
-        photos = []
-        for p in people:
-            text = "%s (%s)" % (p["name"], p["birth_year"]) if p["birth_year"] else p["name"]
-            parts.append(text)
-            photos.append(_person_card(dict(p)))
-
+        names = ", ".join(f"{b['name']} ({b['date_label']})" for b in birthdays[:12])
         return {
-            "answer": "Persones nascudes a %s (%d):\n%s" % (place, len(parts), "\n".join("- %s" % p for p in parts)),
+            "answer": f"Cumpleaños de esta semana: {names}.",
+            "people_mentioned": [b["id"] for b in birthdays],
+            "people_with_photos": [{"id": b["id"], "name": b["name"], "photo": b.get("photo")} for b in birthdays[:8]],
+        }
+
+    def handle_alive(self, question: str) -> Optional[Dict[str, Any]]:
+        people = _rows_to_dicts(get_alive_people(self.conn))
+        if people is None:
+            return None
+        return {
+            "answer": f"Personas marcadas como vivas: {len(people)}.",
             "people_mentioned": [p["id"] for p in people],
-            "people_with_photos": photos[:8],
+            "people_with_photos": [_person_card(p) for p in people[:8]],
+        }
+
+    def handle_stats(self, question: str) -> Optional[Dict[str, Any]]:
+        total = self.conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
+        marriages = self.conn.execute("SELECT COUNT(*) FROM marriages").fetchone()[0]
+        return {
+            "answer": f"El árbol tiene {total} personas y {marriages} matrimonios registrados.",
+            "people_mentioned": [],
+            "people_with_photos": [],
+        }
+
+    def handle_search(self, question: str) -> Optional[Dict[str, Any]]:
+        raw_name = self._extract_name_after(question, [r"busca\s+(.+)$", r"cerca\s+(.+)$", r"search\s+(.+)$", r"quien\s+es\s+(.+)$", r"qui\s+es\s+(.+)$", r"who\s+is\s+(.+)$"])
+        if not raw_name:
+            return None
+        matches = self._search_people(raw_name, limit=10)
+        if not matches:
+            return {
+                "answer": f"No he encontrado a nadie con el nombre '{raw_name}'.",
+                "people_mentioned": [],
+                "people_with_photos": [],
+            }
+        return {
+            "answer": "He encontrado %d resultado(s):\n%s" % (len(matches), "\n".join(f"- {_format_person(m)}" for m in matches)),
+            "people_mentioned": [m["id"] for m in matches],
+            "people_with_photos": [_person_card(m) for m in matches[:8]],
+        }
+
+    def _try_name_fallback(self, question: str) -> Optional[Dict[str, Any]]:
+        # Solo caer aquí si la pregunta parece básicamente un nombre o una ficha abierta.
+        if re.search(r"\b(cuando|cuando|cuando|que|qué|quien|quién|quines|what|which|where|where|how many|cuantos|quants|entre|y|and)\b", _norm(question)):
+            return None
+        guessed = self._extract_capitalized_name(question) or question.strip().rstrip("?.,!")
+        person = self._resolve_person(guessed)
+        if not person:
+            return None
+        return self._build_info_response(person)
+
+    def _build_info_response(self, person: Dict[str, Any]) -> Dict[str, Any]:
+        full = dict(get_person(self.conn, person["id"]))
+        lines = [full["name"]]
+        if full.get("birth_date") or full.get("birth_place"):
+            line = "Nacimiento: " + (full.get("birth_date") or "?")
+            if full.get("birth_place"):
+                line += f", {full['birth_place']}"
+            lines.append(line)
+        if full.get("death_date") or full.get("death_place"):
+            line = "Defunción: " + (full.get("death_date") or "?")
+            if full.get("death_place"):
+                line += f", {full['death_place']}"
+            lines.append(line)
+        return {
+            "answer": "\n".join(lines),
+            "people_mentioned": [full["id"]],
+            "people_with_photos": [_person_card(full)],
         }
