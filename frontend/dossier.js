@@ -34,16 +34,18 @@ let _sortActive = null;
  * Format person name with nickname if available
  * Example: "Josep Maria Godes Hurtado" + nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
  */
-function formatNameWithNickname(name, nickname) {
+function formatNameWithNickname(name, nickname, given_name, surname) {
     if (!nickname) return name;
-    // Insert nickname after given name(s) and before surname
-    // Simple approach: split by last space to find surname, insert nickname before it
+    // If we have given_name and surname, use them
+    if (given_name && surname) {
+        return `${given_name} "${nickname}" ${surname}`;
+    }
+    // Fallback to splitting name
     const parts = name.trim().split(' ');
-    if (parts.length < 2) return name; // Just return name if no surname pattern
-
-    const surname = parts.pop();
+    if (parts.length < 2) return name;
+    const surnameFromName = parts.pop();
     const givenNames = parts.join(' ');
-    return `${givenNames} "${nickname}" ${surname}`;
+    return `${givenNames} "${nickname}" ${surnameFromName}`;
 }
 
 function extractYear(dateStr) {
@@ -96,7 +98,7 @@ function updateSortButtons() {
 function renderDossier(data) {
     const person = data.person;
     const nickname = data.nickname;
-    const displayName = formatNameWithNickname(person.name, nickname);
+    const displayName = formatNameWithNickname(person.name, nickname, person.given_name, person.surname);
 
     document.title = `${displayName} | Familia Godes`;
 
@@ -315,7 +317,7 @@ function renderFamilyTree(data) {
         return '? - ?';
     }
     function getDisplayName(person) {
-        return formatNameWithNickname(person.name, person.nickname);
+        return formatNameWithNickname(person.name, person.nickname, person.given_name, person.surname);
     }
 
     let html = `

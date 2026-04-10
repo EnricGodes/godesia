@@ -5,15 +5,20 @@ const MONTHS_CA = [
 
 /**
  * Format person name with nickname if available
- * Example: "Josep Maria Godes Hurtado" + nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
+ * Example: given_name "Josep Maria", surname "Godes Hurtado", nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
  */
-function formatNameWithNickname(name, nickname) {
+function formatNameWithNickname(name, nickname, given_name, surname) {
     if (!nickname) return name;
+    // If we have given_name and surname, use them
+    if (given_name && surname) {
+        return `${given_name} "${nickname}" ${surname}`;
+    }
+    // Fallback to splitting name
     const parts = name.trim().split(' ');
     if (parts.length < 2) return name;
-    const surname = parts.pop();
+    const surnameFromName = parts.pop();
     const givenNames = parts.join(' ');
-    return `${givenNames} "${nickname}" ${surname}`;
+    return `${givenNames} "${nickname}" ${surnameFromName}`;
 }
 
 async function loadDashboard() {
@@ -61,7 +66,7 @@ function renderBirthdays(birthdays) {
     container.innerHTML = alive_birthdays.slice(0, 5).map(b => {
         const monthLabel = MONTHS_CA[b.birth_month] || '';
         const isToday = b.is_today;
-        const displayName = formatNameWithNickname(b.name, b.nickname);
+        const displayName = formatNameWithNickname(b.name, b.nickname, b.given_name, b.surname);
         return `
         <div class="anniversary-row">
             <div class="anniversary-date${isToday ? ' today' : ''}">
@@ -110,7 +115,7 @@ function renderFeatured(featured) {
         const death = p.death_year || '';
         const years = [birth, death].filter(Boolean).join(' - ') || '?';
         const pid = p.id.replace(/@/g, '');
-        const displayName = formatNameWithNickname(p.name, p.nickname);
+        const displayName = formatNameWithNickname(p.name, p.nickname, p.given_name, p.surname);
         return `
         <a href="/tree.html#${pid}" class="featured-member">
             ${p.photo_file

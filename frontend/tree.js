@@ -1,15 +1,20 @@
 // --- Utilities ---
 /**
  * Format person name with nickname if available
- * Example: "Josep Maria Godes Hurtado" + nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
+ * Example: given_name "Josep Maria", surname "Godes Hurtado", nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
  */
-function formatNameWithNickname(name, nickname) {
+function formatNameWithNickname(name, nickname, given_name, surname) {
     if (!nickname) return name;
+    // If we have given_name and surname, use them
+    if (given_name && surname) {
+        return `${given_name} "${nickname}" ${surname}`;
+    }
+    // Fallback to splitting name
     const parts = name.trim().split(' ');
     if (parts.length < 2) return name;
-    const surname = parts.pop();
+    const surnameFromName = parts.pop();
     const givenNames = parts.join(' ');
-    return `${givenNames} "${nickname}" ${surname}`;
+    return `${givenNames} "${nickname}" ${surnameFromName}`;
 }
 
 // --- Search ---
@@ -44,7 +49,7 @@ async function doSearch(q) {
       searchResults.innerHTML = data.results
         .map(
           (r) => {
-            const displayName = formatNameWithNickname(r.name, r.nickname);
+            const displayName = formatNameWithNickname(r.name, r.nickname, r.given_name, r.surname);
             return `
         <div class="search-result-item" onclick="loadTree('${r.id}')">
           ${displayName}
@@ -100,7 +105,7 @@ async function loadTree(personId) {
     if (!res.ok) throw new Error("Not found");
     currentData = await res.json();
     renderTree(currentData);
-    const displayName = formatNameWithNickname(currentData.name, currentData.nickname);
+    const displayName = formatNameWithNickname(currentData.name, currentData.nickname, currentData.given_name, currentData.surname);
     document.getElementById("tree-info").textContent = displayName;
   } catch (e) {
     document.getElementById("tree-info").textContent =
@@ -231,7 +236,7 @@ function renderTree(data) {
     .attr("x", (d) => (d.data.photo ? 38 : 8))
     .attr("y", 20)
     .text((d) => {
-      const displayName = formatNameWithNickname(d.data.name || "?", d.data.nickname);
+      const displayName = formatNameWithNickname(d.data.name || "?", d.data.nickname, d.data.given_name, d.data.surname);
       return displayName.length > 18 ? displayName.substring(0, 17) + "..." : displayName;
     });
 
@@ -283,7 +288,7 @@ function renderTree(data) {
       .attr("x", spouse.photo ? 38 : 8)
       .attr("y", 20)
       .text(() => {
-        const spouseName = formatNameWithNickname(spouse.name, spouse.nickname);
+        const spouseName = formatNameWithNickname(spouse.name, spouse.nickname, spouse.given_name, spouse.surname);
         return spouseName.length > 18
           ? spouseName.substring(0, 17) + "..."
           : spouseName;

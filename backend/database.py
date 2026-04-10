@@ -289,7 +289,7 @@ def search_people(conn, query, limit=20):
     # Normalize spaces in query (single spaces, allow multiple in DB)
     normalized_query = re.sub(r'\s+', '%', query.strip())
     return conn.execute(
-        "SELECT id, name, nickname, birth_year, death_year, photo_file, is_alive "
+        "SELECT id, name, given_name, surname, nickname, birth_year, death_year, photo_file, is_alive "
         "FROM people WHERE name LIKE ? COLLATE NOCASE ORDER BY name LIMIT ?",
         (f"%{normalized_query}%", limit)
     ).fetchall()
@@ -349,7 +349,7 @@ def get_birthdays_this_week(conn):
     for delta in range(7):
         d = today + timedelta(days=delta)
         rows = conn.execute(
-            "SELECT id, name, nickname, birth_day, birth_month, birth_year, "
+            "SELECT id, name, given_name, surname, nickname, birth_day, birth_month, birth_year, "
             "photo_file, is_alive FROM people "
             "WHERE birth_month = ? AND birth_day = ? ORDER BY name",
             (d.month, d.day)
@@ -359,6 +359,8 @@ def get_birthdays_this_week(conn):
             results.append({
                 "id": row["id"],
                 "name": row["name"],
+                "given_name": row["given_name"],
+                "surname": row["surname"],
                 "nickname": row["nickname"],
                 "birth_day": row["birth_day"],
                 "birth_month": row["birth_month"],
@@ -421,6 +423,8 @@ def get_tree_data(conn, person_id, generations_up=3, generations_down=2):
                 root["spouses"].append({
                     "id": s["person"]["id"],
                     "name": s["person"]["name"],
+                    "given_name": s["person"].get("given_name"),
+                    "surname": s["person"].get("surname"),
                     "nickname": s["person"].get("nickname"),
                     "birth_year": s["person"]["birth_year"],
                     "death_year": s["person"].get("death_year"),
@@ -714,7 +718,7 @@ def get_dashboard_data(conn):
 
     # Recently "added" — people with most recent birth years (latest additions to tree)
     featured = conn.execute(
-        "SELECT id, name, nickname, birth_year, death_year, photo_file, is_alive, birth_place "
+        "SELECT id, name, given_name, surname, nickname, birth_year, death_year, photo_file, is_alive, birth_place "
         "FROM people WHERE photo_file IS NOT NULL AND birth_year IS NOT NULL "
         "ORDER BY birth_year DESC LIMIT 4"
     ).fetchall()
@@ -1040,7 +1044,7 @@ def get_photo_details(conn, photo_id):
 
     # Tagged people in this photo (with nicknames)
     tagged_people = conn.execute("""
-        SELECT pt.person_id, p.name, p.nickname, p.photo_file, pt.position
+        SELECT pt.person_id, p.name, p.given_name, p.surname, p.nickname, p.photo_file, pt.position
         FROM photo_tags pt
         JOIN people p ON p.id = pt.person_id
         WHERE pt.photo_id = ?
@@ -1168,6 +1172,8 @@ def _person_to_node(person):
     return {
         "id": p["id"],
         "name": p["name"],
+        "given_name": p.get("given_name"),
+        "surname": p.get("surname"),
         "nickname": p.get("nickname"),
         "sex": p.get("sex"),
         "birth_year": p.get("birth_year"),

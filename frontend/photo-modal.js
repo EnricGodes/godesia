@@ -8,15 +8,20 @@ let _sidebarVisible = true;
 
 /**
  * Format person name with nickname if available
- * Example: "Josep Maria Godes Hurtado" + nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
+ * Example: given_name "Josep Maria", surname "Godes Hurtado", nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
  */
-function formatNameWithNickname(name, nickname) {
+function formatNameWithNickname(name, nickname, given_name, surname) {
     if (!nickname) return name;
+    // If we have given_name and surname, use them
+    if (given_name && surname) {
+        return `${given_name} "${nickname}" ${surname}`;
+    }
+    // Fallback to splitting name
     const parts = name.trim().split(' ');
     if (parts.length < 2) return name;
-    const surname = parts.pop();
+    const surnameFromName = parts.pop();
     const givenNames = parts.join(' ');
-    return `${givenNames} "${nickname}" ${surname}`;
+    return `${givenNames} "${nickname}" ${surnameFromName}`;
 }
 
 /**
@@ -139,7 +144,7 @@ function renderPhotoModal() {
              <div style="display: flex; flex-direction: column; gap: 4px;">
                ${p.tagged_people.map(person => {
                  const cleanId = person.person_id.replace(/@/g, '');
-                 const displayName = formatNameWithNickname(person.name, person.nickname);
+                 const displayName = formatNameWithNickname(person.name, person.nickname, person.given_name, person.surname);
                  return `
                  <div style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px; border-radius: 6px; transition: background-color 0.2s;"
                       onmouseover="this.style.backgroundColor='rgba(45, 75, 51, 0.1)'; highlightFaceBox('${person.person_id}', true)"
