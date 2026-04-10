@@ -954,15 +954,8 @@ def get_person_dossier(conn, person_id):
     ).fetchall()
     notes_list = [n[0] for n in notes]
 
-    # Extract nickname/apodo from notes (pattern: "En [Apodo] ...")
-    nickname = None
-    if notes_list and len(notes_list) > 0:
-        first_note = notes_list[0]
-        # Look for pattern "En [word] " at the beginning
-        import re
-        match = re.match(r'^En\s+(\w+)\s', first_note)
-        if match:
-            nickname = match.group(1)
+    # Get nickname from people table (imported from GEDCOM NICK/_AKA fields)
+    nickname = person_dict.get('nickname')
 
     # Documents (fotos con título que contiene tags entre corchetes: [Defunción], [Nacimiento], etc.)
     documents = conn.execute("""
