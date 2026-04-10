@@ -60,7 +60,6 @@ window.togglePhotoSidebar = function() {
         setTimeout(() => {
             sidebarContent.style.opacity = '1';
             sidebar.style.overflow = 'auto';
-            attachFaceBoxes();
         }, 650);
         toggleBtn.innerHTML = '←';
         toggleBtn.title = 'Ocultar panel';
@@ -73,10 +72,6 @@ window.togglePhotoSidebar = function() {
             sidebar.style.padding = '0';
             sidebar.style.borderRight = 'none';
         }, 150);
-        // After width animation finishes, re-fit photo to new space
-        setTimeout(() => {
-            attachFaceBoxes();
-        }, 800);
         toggleBtn.innerHTML = '→';
         toggleBtn.title = 'Mostrar panel';
     }
@@ -195,8 +190,8 @@ function renderPhotoModal() {
                 </button>
 
                 <!-- Photo container -->
-                <div style="flex: 1; display: flex; align-items: center; justify-content: center; background-color: #e5e2da; position: relative; overflow: hidden; padding: 24px;">
-                    <div id="photo-wrapper" style="position: relative; max-width: 100%; max-height: 100%; display: inline-block;">
+                <div id="photo-container" style="flex: 1; display: flex; align-items: center; justify-content: center; background-color: #e5e2da; position: relative; overflow: hidden; padding: 24px;">
+                    <div id="photo-wrapper" style="position: relative; display: inline-block;">
                         <img
                             src="/photos/${p.filename}"
                             alt="${p.title || 'Foto'}"
@@ -215,43 +210,24 @@ function renderPhotoModal() {
 }
 
 /**
- * Attach face box tooltips to the modal photo
+ * Attach face box tooltips to the modal photo using percentage-based positioning.
+ * Percentages scale automatically when the image resizes, so no recalculation needed.
  */
 function attachFaceBoxes() {
     if (!_currentPhotoData || !_currentPhotoData.tagged_people) return;
 
     const imgElement = document.getElementById('modal-photo');
-    const wrapper = document.getElementById('photo-wrapper');
     const container = document.getElementById('face-boxes-container');
 
-    if (!imgElement || !container || !wrapper) return;
+    if (!imgElement || !container) return;
 
-    // Wait a moment for the image to fully render
+    // Wait for the image to fully render
     setTimeout(() => {
-        // Clear existing boxes
         container.innerHTML = '';
 
-        // Reset wrapper to let image size naturally to its container
-        wrapper.style.width = '';
-        wrapper.style.height = '';
-
-        // Get actual displayed image dimensions
-        const imgDisplayWidth = imgElement.clientWidth;
-        const imgDisplayHeight = imgElement.clientHeight;
-
-        // Now lock the wrapper to match image exactly (for face box positioning)
-        wrapper.style.width = imgDisplayWidth + 'px';
-        wrapper.style.height = imgDisplayHeight + 'px';
-
-        // Get natural image dimensions
-        const imgNaturalWidth = imgElement.naturalWidth;
-        const imgNaturalHeight = imgElement.naturalHeight;
-
-        if (!imgNaturalWidth || !imgNaturalHeight) return;
-
-        // Calculate scale factors
-        const scaleX = imgDisplayWidth / imgNaturalWidth;
-        const scaleY = imgDisplayHeight / imgNaturalHeight;
+        const natW = imgElement.naturalWidth;
+        const natH = imgElement.naturalHeight;
+        if (!natW || !natH) return;
 
         _currentPhotoData.tagged_people.forEach(person => {
             if (!person.position) return;
@@ -261,31 +237,28 @@ function attachFaceBoxes() {
 
             const [x1, y1, x2, y2] = coords;
 
-            // Scale coordinates to displayed size
-            const left = x1 * scaleX;
-            const top = y1 * scaleY;
-            const width = (x2 - x1) * scaleX;
-            const height = (y2 - y1) * scaleY;
+            // Convert to percentages of the natural image dimensions
+            const leftPct = (x1 / natW * 100).toFixed(4);
+            const topPct = (y1 / natH * 100).toFixed(4);
+            const widthPct = ((x2 - x1) / natW * 100).toFixed(4);
+            const heightPct = ((y2 - y1) / natH * 100).toFixed(4);
 
-            // Create box element
             const box = document.createElement('div');
             box.setAttribute('data-person-box', person.person_id);
             box.style.cssText = `
                 position: absolute;
-                left: ${left}px;
-                top: ${top}px;
-                width: ${width}px;
-                height: ${height}px;
+                left: ${leftPct}%;
+                top: ${topPct}%;
+                width: ${widthPct}%;
+                height: ${heightPct}%;
                 cursor: pointer;
                 box-sizing: border-box;
                 border-radius: 4px;
                 transition: border 0.2s, box-shadow 0.2s;
             `;
 
-            // Create tooltip
             const tooltip = document.createElement('div');
             tooltip.textContent = person.name;
-            tooltip.className = 'face-tooltip';
             tooltip.style.cssText = `
                 position: absolute;
                 top: calc(100% + 6px);
@@ -306,7 +279,6 @@ function attachFaceBoxes() {
 
             box.appendChild(tooltip);
 
-            // Show tooltip and highlight box on hover
             box.addEventListener('mouseenter', () => {
                 tooltip.style.opacity = '1';
                 box.style.border = '3px solid #2D4B33';
@@ -318,7 +290,6 @@ function attachFaceBoxes() {
                 box.style.boxShadow = 'none';
             });
 
-            // Click to navigate
             box.addEventListener('click', () => {
                 gotoPersonDossier(person.person_id);
             });
@@ -327,13 +298,6 @@ function attachFaceBoxes() {
         });
     }, 50);
 }
-
-// Re-attach face boxes on window resize
-window.addEventListener('resize', () => {
-    if (_currentPhotoData) {
-        attachFaceBoxes();
-    }
-});
 
 /**
  * Initialize modal HTML in page (must be called once on page load)
