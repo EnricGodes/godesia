@@ -47,14 +47,19 @@ window.togglePhotoSidebar = function() {
     const sidebar = document.getElementById('photo-sidebar');
     const sidebarContent = document.getElementById('photo-sidebar-content');
     const toggleBtn = document.getElementById('toggle-sidebar-btn');
+    const photoArea = document.getElementById('photo-area');
 
-    if (!sidebar || !sidebarContent || !toggleBtn) return;
+    if (!sidebar || !sidebarContent || !toggleBtn || !photoArea) return;
 
     if (_sidebarVisible) {
         // Show sidebar
+        photoArea.style.overflow = 'hidden';
         sidebar.style.width = '320px';
+        sidebar.style.padding = '32px 24px 24px 24px';
+        sidebar.style.borderRight = '1px solid rgba(114, 121, 113, 0.2)';
         setTimeout(() => {
             sidebarContent.style.opacity = '1';
+            photoArea.style.overflow = 'visible';
         }, 50);
         toggleBtn.innerHTML = '←';
         toggleBtn.title = 'Ocultar panel';
@@ -63,6 +68,8 @@ window.togglePhotoSidebar = function() {
         sidebarContent.style.opacity = '0';
         setTimeout(() => {
             sidebar.style.width = '0';
+            sidebar.style.padding = '0';
+            sidebar.style.borderRight = 'none';
         }, 100);
         toggleBtn.innerHTML = '→';
         toggleBtn.title = 'Mostrar panel';
@@ -146,8 +153,8 @@ function renderPhotoModal() {
         <style>
             #photo-sidebar {
                 transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                            border-right 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                            padding 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                            padding 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                            border-right 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
                 overflow: hidden;
             }
 
@@ -170,7 +177,7 @@ function renderPhotoModal() {
             </div>
 
             <!-- Photo area -->
-            <div id="photo-area" style="flex: 1; display: flex; flex-direction: column; position: relative; min-width: 0;">
+            <div id="photo-area" style="flex: 1; display: flex; flex-direction: column; position: relative; min-width: 0; overflow: visible;">
                 <!-- Toggle sidebar button -->
                 <button id="toggle-sidebar-btn" onclick="togglePhotoSidebar()" title="Ocultar panel" style="position: absolute; top: 16px; left: 16px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;">
                     ←
