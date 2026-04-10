@@ -45,22 +45,27 @@ window.closePhotoModal = function() {
 window.togglePhotoSidebar = function() {
     _sidebarVisible = !_sidebarVisible;
     const sidebar = document.getElementById('photo-sidebar');
-    const photoArea = document.getElementById('photo-area');
+    const sidebarContent = document.getElementById('photo-sidebar-content');
+    const toggleBtn = document.getElementById('toggle-sidebar-btn');
 
-    if (!sidebar || !photoArea) return;
+    if (!sidebar || !sidebarContent || !toggleBtn) return;
 
     if (_sidebarVisible) {
         // Show sidebar
         sidebar.style.width = '320px';
-        sidebar.style.opacity = '1';
-        sidebar.style.visibility = 'visible';
-        photoArea.style.flex = '1';
+        setTimeout(() => {
+            sidebarContent.style.opacity = '1';
+        }, 50);
+        toggleBtn.innerHTML = '←';
+        toggleBtn.title = 'Ocultar panel';
     } else {
         // Hide sidebar
-        sidebar.style.width = '0px';
-        sidebar.style.opacity = '0';
-        sidebar.style.visibility = 'hidden';
-        photoArea.style.flex = '1';
+        sidebarContent.style.opacity = '0';
+        setTimeout(() => {
+            sidebar.style.width = '0';
+        }, 100);
+        toggleBtn.innerHTML = '→';
+        toggleBtn.title = 'Mostrar panel';
     }
 };
 
@@ -139,32 +144,16 @@ function renderPhotoModal() {
 
     const modalHtml = `
         <style>
-            @keyframes slideOutLeft {
-                from {
-                    width: 320px;
-                    opacity: 1;
-                }
-                to {
-                    width: 0px;
-                    opacity: 0;
-                }
-            }
-
-            @keyframes slideInRight {
-                from {
-                    width: 0px;
-                    opacity: 0;
-                }
-                to {
-                    width: 320px;
-                    opacity: 1;
-                }
-            }
-
             #photo-sidebar {
                 transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                            opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                            visibility 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                            border-right 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                            padding 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                overflow: hidden;
+            }
+
+            #photo-sidebar-content {
+                transition: opacity 0.3s ease-out;
+                opacity: 1;
             }
 
             #photo-area {
@@ -174,15 +163,17 @@ function renderPhotoModal() {
 
         <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #fcf9f0; display: flex; flex-direction: row;">
             <!-- Sidebar (left) -->
-            <div id="photo-sidebar" style="width: 320px; padding: 32px 24px 24px 24px; border-right: 1px solid rgba(114, 121, 113, 0.2); overflow-y: auto; background-color: #fcf9f0; flex-shrink: 0; opacity: 1; visibility: visible;">
-                ${sidebarContent}
+            <div id="photo-sidebar" style="width: 320px; padding: 32px 24px 24px 24px; border-right: 1px solid rgba(114, 121, 113, 0.2); overflow-y: auto; background-color: #fcf9f0; flex-shrink: 0;">
+                <div id="photo-sidebar-content" style="opacity: 1;">
+                    ${sidebarContent}
+                </div>
             </div>
 
             <!-- Photo area -->
             <div id="photo-area" style="flex: 1; display: flex; flex-direction: column; position: relative; min-width: 0;">
                 <!-- Toggle sidebar button -->
-                <button onclick="togglePhotoSidebar()" title="${_sidebarVisible ? 'Ocultar panel' : 'Mostrar panel'}" style="position: absolute; top: 16px; left: 16px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;">
-                    ${_sidebarVisible ? '←' : '→'}
+                <button id="toggle-sidebar-btn" onclick="togglePhotoSidebar()" title="Ocultar panel" style="position: absolute; top: 16px; left: 16px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;">
+                    ←
                 </button>
 
                 <!-- Close button (top right) -->
