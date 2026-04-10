@@ -1,3 +1,17 @@
+// --- Utilities ---
+/**
+ * Format person name with nickname if available
+ * Example: "Josep Maria Godes Hurtado" + nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
+ */
+function formatNameWithNickname(name, nickname) {
+    if (!nickname) return name;
+    const parts = name.trim().split(' ');
+    if (parts.length < 2) return name;
+    const surname = parts.pop();
+    const givenNames = parts.join(' ');
+    return `${givenNames} "${nickname}" ${surname}`;
+}
+
 // --- Search ---
 const searchInput = document.getElementById("tree-search");
 const searchResults = document.getElementById("search-results");
@@ -29,11 +43,14 @@ async function doSearch(q) {
     } else {
       searchResults.innerHTML = data.results
         .map(
-          (r) => `
+          (r) => {
+            const displayName = formatNameWithNickname(r.name, r.nickname);
+            return `
         <div class="search-result-item" onclick="loadTree('${r.id}')">
-          ${r.name}
+          ${displayName}
           <span class="years">${r.birth_year || "?"} - ${r.death_year || (r.is_alive ? "viu/a" : "?")}</span>
-        </div>`
+        </div>`;
+          }
         )
         .join("");
     }
@@ -83,7 +100,8 @@ async function loadTree(personId) {
     if (!res.ok) throw new Error("Not found");
     currentData = await res.json();
     renderTree(currentData);
-    document.getElementById("tree-info").textContent = currentData.name;
+    const displayName = formatNameWithNickname(currentData.name, currentData.nickname);
+    document.getElementById("tree-info").textContent = displayName;
   } catch (e) {
     document.getElementById("tree-info").textContent =
       "Error carregant l'arbre";
@@ -213,8 +231,8 @@ function renderTree(data) {
     .attr("x", (d) => (d.data.photo ? 38 : 8))
     .attr("y", 20)
     .text((d) => {
-      const name = d.data.name || "?";
-      return name.length > 18 ? name.substring(0, 17) + "..." : name;
+      const displayName = formatNameWithNickname(d.data.name || "?", d.data.nickname);
+      return displayName.length > 18 ? displayName.substring(0, 17) + "..." : displayName;
     });
 
   // Years
@@ -264,11 +282,12 @@ function renderTree(data) {
     sg.append("text")
       .attr("x", spouse.photo ? 38 : 8)
       .attr("y", 20)
-      .text(
-        spouse.name.length > 18
-          ? spouse.name.substring(0, 17) + "..."
-          : spouse.name
-      );
+      .text(() => {
+        const spouseName = formatNameWithNickname(spouse.name, spouse.nickname);
+        return spouseName.length > 18
+          ? spouseName.substring(0, 17) + "..."
+          : spouseName;
+      });
 
     sg.append("text")
       .attr("class", "years-text")
@@ -286,6 +305,7 @@ function buildAncestorHierarchy(data) {
   const node = {
     id: data.id,
     name: data.name,
+    nickname: data.nickname,
     birth_year: data.birth_year,
     death_year: data.death_year,
     photo: data.photo,
@@ -307,6 +327,7 @@ function buildDescendantHierarchy(data) {
   const node = {
     id: data.id,
     name: data.name,
+    nickname: data.nickname,
     birth_year: data.birth_year,
     death_year: data.death_year,
     photo: data.photo,

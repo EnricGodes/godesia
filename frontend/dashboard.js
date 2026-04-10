@@ -3,6 +3,19 @@ const MONTHS_CA = [
     'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Des'
 ];
 
+/**
+ * Format person name with nickname if available
+ * Example: "Josep Maria Godes Hurtado" + nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
+ */
+function formatNameWithNickname(name, nickname) {
+    if (!nickname) return name;
+    const parts = name.trim().split(' ');
+    if (parts.length < 2) return name;
+    const surname = parts.pop();
+    const givenNames = parts.join(' ');
+    return `${givenNames} "${nickname}" ${surname}`;
+}
+
 async function loadDashboard() {
     try {
         const res = await fetch('/api/dashboard');
@@ -48,6 +61,7 @@ function renderBirthdays(birthdays) {
     container.innerHTML = alive_birthdays.slice(0, 5).map(b => {
         const monthLabel = MONTHS_CA[b.birth_month] || '';
         const isToday = b.is_today;
+        const displayName = formatNameWithNickname(b.name, b.nickname);
         return `
         <div class="anniversary-row">
             <div class="anniversary-date${isToday ? ' today' : ''}">
@@ -55,9 +69,9 @@ function renderBirthdays(birthdays) {
                 <span class="anniversary-day">${b.birth_day}</span>
             </div>
             <div class="anniversary-info">
-                <p class="anniversary-name">${b.name}${b.age ? ' (' + b.age + ' anys)' : ''}</p>
+                <p class="anniversary-name">${displayName}${b.age ? ' (' + b.age + ' anys)' : ''}</p>
             </div>
-            ${b.photo ? `<img class="anniversary-photo" src="/photos/${b.photo}" alt="${b.name}">` : ''}
+            ${b.photo ? `<img class="anniversary-photo" src="/photos/${b.photo}" alt="${displayName}">` : ''}
         </div>`;
     }).join('');
 }
@@ -96,14 +110,15 @@ function renderFeatured(featured) {
         const death = p.death_year || '';
         const years = [birth, death].filter(Boolean).join(' - ') || '?';
         const pid = p.id.replace(/@/g, '');
+        const displayName = formatNameWithNickname(p.name, p.nickname);
         return `
         <a href="/tree.html#${pid}" class="featured-member">
             ${p.photo_file
-                ? `<img class="featured-photo" src="/photos/${p.photo_file}" alt="${p.name}">`
+                ? `<img class="featured-photo" src="/photos/${p.photo_file}" alt="${displayName}">`
                 : `<div class="featured-no-photo"><span class="material-symbols-outlined">person</span></div>`
             }
             <div class="featured-info">
-                <p class="featured-name">${p.name}</p>
+                <p class="featured-name">${displayName}</p>
                 <p class="featured-years">${years}</p>
             </div>
         </a>`;

@@ -7,6 +7,19 @@ let _currentPhotoData = null;
 let _sidebarVisible = true;
 
 /**
+ * Format person name with nickname if available
+ * Example: "Josep Maria Godes Hurtado" + nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
+ */
+function formatNameWithNickname(name, nickname) {
+    if (!nickname) return name;
+    const parts = name.trim().split(' ');
+    if (parts.length < 2) return name;
+    const surname = parts.pop();
+    const givenNames = parts.join(' ');
+    return `${givenNames} "${nickname}" ${surname}`;
+}
+
+/**
  * Open photo modal with details
  * @param {number} photoId - Photo ID to display
  */
@@ -126,13 +139,14 @@ function renderPhotoModal() {
              <div style="display: flex; flex-direction: column; gap: 4px;">
                ${p.tagged_people.map(person => {
                  const cleanId = person.person_id.replace(/@/g, '');
+                 const displayName = formatNameWithNickname(person.name, person.nickname);
                  return `
                  <div style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px; border-radius: 6px; transition: background-color 0.2s;"
                       onmouseover="this.style.backgroundColor='rgba(45, 75, 51, 0.1)'; highlightFaceBox('${person.person_id}', true)"
                       onmouseout="this.style.backgroundColor='transparent'; highlightFaceBox('${person.person_id}', false)"
                       onclick="gotoPersonDossier('${person.person_id}')">
-                   ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${person.name}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(114, 121, 113, 0.3); flex-shrink: 0;">` : `<div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f1eee5; flex-shrink: 0;"></div>`}
-                   <span style="font-size: 13px; color: #1c1c17; flex: 1;">${person.name}</span>
+                   ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(114, 121, 113, 0.3); flex-shrink: 0;">` : `<div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f1eee5; flex-shrink: 0;"></div>`}
+                   <span style="font-size: 13px; color: #1c1c17; flex: 1;">${displayName}</span>
                  </div>
                `}).join('')}
              </div>

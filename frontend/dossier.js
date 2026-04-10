@@ -314,6 +314,9 @@ function renderFamilyTree(data) {
         // If neither: "? - ?"
         return '? - ?';
     }
+    function getDisplayName(person) {
+        return formatNameWithNickname(person.name, person.nickname);
+    }
 
     let html = `
         <h2 class="font-headline text-3xl text-primary border-b border-outline-variant pb-4 italic text-center">Árbol Familiar Inmediato</h2>
@@ -324,13 +327,14 @@ function renderFamilyTree(data) {
     if (parents.length > 0) {
         html += `<div class="flex gap-24 items-start mb-6 relative">`;
         parents.forEach(p => {
+            const pDisplayName = getDisplayName(p);
             html += `
                 <a href="/dossier.html?id=${dossierId(p.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${p.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${p.photo_file}" alt="${p.name}">` : '<span class="material-symbols-outlined">person</span>'}
+                            ${p.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${p.photo_file}" alt="${pDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
                         </div>
-                        <h4 class="text-[11px] font-bold text-center leading-tight">${p.name}</h4>
+                        <h4 class="text-[11px] font-bold text-center leading-tight">${pDisplayName}</h4>
                         <span class="text-[10px] opacity-60">${formatYears(p.birth_year, p.death_year)}</span>
                         ${recentDeathTag(p)}
                     </div>
@@ -348,13 +352,14 @@ function renderFamilyTree(data) {
             <div class="flex ${siblingsAlign} gap-6 mb-12 max-w-5xl w-full px-4 border-t border-outline-variant pt-6 flex-wrap">
         `;
         siblings.forEach(s => {
+            const sDisplayName = getDisplayName(s);
             html += `
                 <a href="/dossier.html?id=${dossierId(s.id)}" class="cursor-pointer hover:opacity-90 transition-opacity">
                     <div class="flex flex-col items-center node-card opacity-80 shrink-0">
                         <div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant/30 mb-1 bg-surface-container-high flex items-center justify-center">
-                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${s.name}">` : '<span class="material-symbols-outlined text-sm">person</span>'}
+                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${sDisplayName}">` : '<span class="material-symbols-outlined text-sm">person</span>'}
                         </div>
-                        <h4 class="text-[11px] font-bold text-center">${s.name}</h4>
+                        <h4 class="text-[11px] font-bold text-center">${sDisplayName}</h4>
                         <span class="text-[10px] opacity-40">${formatYears(s.birth_year, s.death_year)}</span>
                         ${recentDeathTag(s)}
                     </div>
@@ -384,12 +389,13 @@ function renderFamilyTree(data) {
         `;
     }
 
+    const personDisplayName = getDisplayName(person);
     html += `
                 <div class="flex flex-col items-center main-node p-4 bg-primary/5 rounded-xl heritage-border border-primary/30 shadow-inner">
                     <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-primary mb-3 shadow-lg bg-surface-container-high flex items-center justify-center">
-                        ${person.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${person.photo_file}" alt="${person.name}">` : '<span class="material-symbols-outlined text-2xl">person</span>'}
+                        ${person.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${person.photo_file}" alt="${personDisplayName}">` : '<span class="material-symbols-outlined text-2xl">person</span>'}
                     </div>
-                    <h3 class="font-headline font-bold text-primary text-center text-sm">${person.name}</h3>
+                    <h3 class="font-headline font-bold text-primary text-center text-sm">${personDisplayName}</h3>
                     <span class="text-xs opacity-60 italic text-center">${formatYears(person.birth_year, person.death_year)}</span>
                     <div class="mt-2 text-[8px] uppercase tracking-widest font-extrabold bg-primary text-on-primary px-2 py-0.5 rounded">Sujeto Central</div>
                     ${recentDeathTag(person)}
@@ -397,13 +403,14 @@ function renderFamilyTree(data) {
     `;
 
     if (data.spouse) {
+        const spouseDisplayName = getDisplayName(data.spouse);
         html += `
                 <a href="/dossier.html?id=${dossierId(data.spouse.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-secondary/20 mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${data.spouse.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${data.spouse.photo_file}" alt="${data.spouse.name}">` : '<span class="material-symbols-outlined">person</span>'}
+                            ${data.spouse.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${data.spouse.photo_file}" alt="${spouseDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
                         </div>
-                        <h4 class="text-[11px] font-bold text-center">${data.spouse.name}</h4>
+                        <h4 class="text-[11px] font-bold text-center">${spouseDisplayName}</h4>
                         <span class="text-[10px] opacity-60 text-center">${formatYears(data.spouse.birth_year, data.spouse.death_year)}</span>
                         ${recentDeathTag(data.spouse)}
                     </div>
@@ -420,14 +427,15 @@ function renderFamilyTree(data) {
         html += `<div class="tree-connector"></div>
         <div class="flex justify-center gap-16 border-t border-outline-variant pt-6 w-full flex-wrap">`;
         children.forEach(c => {
+            const cDisplayName = getDisplayName(c);
             const childYears = c.is_alive ? c.birth_year : formatYears(c.birth_year, c.death_year);
             html += `
                 <a href="/dossier.html?id=${dossierId(c.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${c.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${c.photo_file}" alt="${c.name}">` : '<span class="material-symbols-outlined">person</span>'}
+                            ${c.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${c.photo_file}" alt="${cDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
                         </div>
-                        <h4 class="text-[11px] font-bold text-center">${c.name}</h4>
+                        <h4 class="text-[11px] font-bold text-center">${cDisplayName}</h4>
                         <span class="text-[10px] opacity-50">${childYears}</span>
                         ${recentDeathTag(c)}
                     </div>
