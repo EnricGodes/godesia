@@ -1050,15 +1050,15 @@ def get_photo_details(conn, photo_id):
         """, (photo_dict["album_id"],)).fetchone()
         photo_dict["album_title"] = album["title"] if album else None
 
-        # Pick an album cover: prefer a cutout photo, fallback to first non-pdf photo
+        # Pick an album cover: photo with most tagged people (representative group photo)
+        # If tied, prefer earlier photo (by date or ID)
         album_cover = conn.execute("""
-            SELECT filename FROM photos
-            WHERE album_id = ? AND filename NOT LIKE '%.pdf'
-            ORDER BY
-                CASE WHEN is_prim_cutout = 1 THEN 0
-                     WHEN is_cutout = 1 THEN 1
-                     ELSE 2 END,
-                id
+            SELECT ph.filename
+            FROM photos ph
+            LEFT JOIN photo_tags pt ON pt.photo_id = ph.id
+            WHERE ph.album_id = ? AND ph.filename NOT LIKE '%.pdf'
+            GROUP BY ph.id
+            ORDER BY COUNT(pt.person_id) DESC, ph.id ASC
             LIMIT 1
         """, (photo_dict["album_id"],)).fetchone()
         photo_dict["album_cover"] = album_cover["filename"] if album_cover else None
