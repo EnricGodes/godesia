@@ -52,25 +52,31 @@ window.togglePhotoSidebar = function() {
     if (!sidebar || !sidebarContent || !toggleBtn || !photoArea) return;
 
     if (_sidebarVisible) {
-        // Show sidebar
-        photoArea.style.overflow = 'hidden';
+        // Show sidebar — keep overflow hidden until animation finishes
+        sidebar.style.overflow = 'hidden';
         sidebar.style.width = '320px';
         sidebar.style.padding = '32px 24px 24px 24px';
         sidebar.style.borderRight = '1px solid rgba(114, 121, 113, 0.2)';
         setTimeout(() => {
             sidebarContent.style.opacity = '1';
-            photoArea.style.overflow = 'visible';
-        }, 50);
+            sidebar.style.overflow = 'auto';
+            attachFaceBoxes();
+        }, 650);
         toggleBtn.innerHTML = '←';
         toggleBtn.title = 'Ocultar panel';
     } else {
-        // Hide sidebar
+        // Hide sidebar — fade content first, then collapse
         sidebarContent.style.opacity = '0';
+        sidebar.style.overflow = 'hidden';
         setTimeout(() => {
             sidebar.style.width = '0';
             sidebar.style.padding = '0';
             sidebar.style.borderRight = 'none';
-        }, 100);
+        }, 150);
+        // After width animation finishes, re-fit photo to new space
+        setTimeout(() => {
+            attachFaceBoxes();
+        }, 800);
         toggleBtn.innerHTML = '→';
         toggleBtn.title = 'Mostrar panel';
     }
@@ -225,11 +231,15 @@ function attachFaceBoxes() {
         // Clear existing boxes
         container.innerHTML = '';
 
+        // Reset wrapper to let image size naturally to its container
+        wrapper.style.width = '';
+        wrapper.style.height = '';
+
         // Get actual displayed image dimensions
         const imgDisplayWidth = imgElement.clientWidth;
         const imgDisplayHeight = imgElement.clientHeight;
 
-        // Resize wrapper to match image exactly
+        // Now lock the wrapper to match image exactly (for face box positioning)
         wrapper.style.width = imgDisplayWidth + 'px';
         wrapper.style.height = imgDisplayHeight + 'px';
 
