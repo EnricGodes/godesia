@@ -142,7 +142,7 @@ function renderDossier(data) {
     `;
 
     // 2. PERFIL BÁSICO
-    renderPerfil(data);
+    renderPerfil(data, displayName);
 
     // 3. RED FAMILIAR
     renderFamilyTree(data);
@@ -169,7 +169,7 @@ function renderDossier(data) {
     document.getElementById('content').style.display = 'block';
 }
 
-function renderPerfil(data) {
+function renderPerfil(data, displayName) {
     const person = data.person;
 
     // Extract baptism data from notes for baptism names
