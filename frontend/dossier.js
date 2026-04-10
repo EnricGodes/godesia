@@ -30,6 +30,22 @@ function showError(message) {
 let _photosOriginal = [];
 let _sortActive = null;
 
+/**
+ * Format person name with nickname if available
+ * Example: "Josep Maria Godes Hurtado" + nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
+ */
+function formatNameWithNickname(name, nickname) {
+    if (!nickname) return name;
+    // Insert nickname after given name(s) and before surname
+    // Simple approach: split by last space to find surname, insert nickname before it
+    const parts = name.trim().split(' ');
+    if (parts.length < 2) return name; // Just return name if no surname pattern
+
+    const surname = parts.pop();
+    const givenNames = parts.join(' ');
+    return `${givenNames} "${nickname}" ${surname}`;
+}
+
 function extractYear(dateStr) {
     if (!dateStr) return null;
     const m = dateStr.match(/\d{4}/);
@@ -79,13 +95,16 @@ function updateSortButtons() {
 
 function renderDossier(data) {
     const person = data.person;
-    document.title = `${person.name} | Familia Godes`;
+    const nickname = data.nickname;
+    const displayName = formatNameWithNickname(person.name, nickname);
+
+    document.title = `${displayName} | Familia Godes`;
 
     // 1. HEADER
     if (person.photo_file && person.photo_file.trim()) {
         document.querySelector('#hero-photo img').src = `/photos/${person.photo_file}`;
     }
-    document.getElementById('hero-name').textContent = person.name;
+    document.getElementById('hero-name').textContent = displayName;
 
     const birthYear = person.birth_year || '?';
     const birthPlace = person.birth_place || 'Barcelona, España';
@@ -180,7 +199,7 @@ function renderPerfil(data) {
                     <div>
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Nombre Completo</dt>
                         <dd class="text-sm">
-                            <span class="font-bold block">${person.name}</span>
+                            <span class="font-bold block">${displayName}</span>
                             ${baptismNames ? `<span class="italic opacity-80 text-xs mt-1 block">Nombres de bautismo: ${baptismNames}</span>` : ''}
                         </dd>
                     </div>
