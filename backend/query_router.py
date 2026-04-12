@@ -17,6 +17,9 @@ from database import (
     get_birthdays_this_week,
     get_alive_people,
     get_born_in,
+    get_military,
+    get_burial,
+    get_events,
 )
 
 
@@ -280,6 +283,19 @@ class QueryRouter:
             (r"(?:hay\s+alguna\s+.+\s+con\s+descendencia\s+documentada)", "handle_has_descendance_named"),
             (r"(?:personas\s+que\s+no\s+tienen\s+fecha\s+de\s+nacimiento\s+conocida)", "handle_unknown_birth_date_people"),
             (r"(?:nombres\s+compuestos\s+m[aá]s\s+repetidos)", "handle_repeated_compound_names"),
+            # Military
+            (r"(?:(?:qu[eé]\s+)?actividad\s+militar\s+tuvo\s+.+|servicio\s+militar\s+de\s+.+|datos?\s+militar(?:es)?\s+de\s+.+)", "handle_military"),
+            (r"(?:qui[eé]nes\s+participaron\s+en\s+(?:la\s+)?guerra|qui[eé]nes\s+fueron\s+a\s+la\s+guerra|combatientes\s+del\s+[aá]rbol)", "handle_military_all"),
+            # Burial
+            (r"(?:d[oó]nde\s+(?:fue\s+enterrad[oa]|est[aá]\s+(?:enterrad[oa]|sepultad[oa]))\s+.+|sepultura\s+de\s+.+|tumba\s+de\s+.+)", "handle_burial"),
+            (r"(?:qui[eé]nes\s+(?:fueron\s+enterrados|est[aá]n\s+enterrados|est[aá]n\s+sepultados)\s+en\s+.+|enterramientos\s+en\s+.+)", "handle_burial_place"),
+            # Baptism
+            (r"(?:cu[aá]ndo\s+(?:fue\s+)?bautizad[oa]\s+.+|(?:fecha|d[ií]a)\s+(?:del?\s+)?bautismo\s+de\s+.+|bautismo\s+de\s+.+)", "handle_baptism"),
+            (r"(?:d[oó]nde\s+(?:se\s+)?bautiz[oó]\s+.+|(?:lugar|iglesia)\s+(?:del?\s+)?bautismo\s+de\s+.+)", "handle_baptism_place"),
+            (r"(?:qui[eé]nes\s+fueron\s+los\s+padrinos\s+de\s+.+|padrinos\s+de\s+.+)", "handle_godparents"),
+            # Events
+            (r"(?:(?:qu[eé]\s+)?eventos?\s+(?:hay\s+)?registrados?\s+(?:para|de)\s+.+|eventos?\s+de\s+.+)", "handle_events"),
+            (r"(?:(?:hay\s+)?datos?\s+de\s+(?:estudios|educaci[oó]n)\s+de\s+.+|estudios\s+de\s+.+|educaci[oó]n\s+de\s+.+)", "handle_education"),
         ]
 
     def route(self, question):
@@ -381,7 +397,8 @@ class QueryRouter:
         like = "%" + re.sub(r"\s+", "%", name_fragment) + "%"
         rows = self.conn.execute(
             "SELECT id, name, given_name, surname, birth_year, death_year, birth_place, photo_file, "
-            "is_alive, father_id, mother_id, father_name, mother_name, sex "
+            "is_alive, father_id, mother_id, father_name, mother_name, sex, "
+            "baptism_date, baptism_place, godparents "
             "FROM people WHERE name LIKE ? COLLATE NOCASE ORDER BY name LIMIT ?",
             (like, max(limit * 4, 80)),
         ).fetchall()
@@ -2556,6 +2573,206 @@ class QueryRouter:
                 death += f", {full['death_place']}"
             lines.append(death)
         return {"answer": "\n".join(lines), "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
+
+    # --- Military handlers ---
+
+    def handle_military(self, question):
+        q = _clean_question(question)
+        m = re.search(r"(?:actividad\s+militar\s+(?:tuvo|de)\s+|servicio\s+militar\s+de\s+|datos?\s+militar(?:es)?\s+de\s+)(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        records = [_as_dict(r) for r in get_military(self.conn, person['id'])]
+        if not records:
+            return {"answer": f"No constan datos militares de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        parts = []
+        for r in records:
+            frag = r.get('description') or ''
+            if r.get('date'):
+                frag += f" ({r['date']})"
+            if r.get('place'):
+                frag += f" — {r['place']}"
+            parts.append(frag.strip())
+        ans = f"Datos militares de {_person_link(person)}: " + "; ".join(parts) + "."
+        return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    def handle_military_all(self, question):
+        rows = []
+        for r in self.conn.execute(
+            "SELECT DISTINCT p.id, p.name, p.birth_year, p.death_year, p.birth_place, p.photo_file, p.is_alive, m.description "
+            "FROM military m JOIN people p ON p.id = m.person_id ORDER BY p.birth_year, p.name"
+        ).fetchall():
+            rows.append(_as_dict(r))
+        if not rows:
+            return {"answer": "No constan registros militares en el árbol.", "people_mentioned": [], "people_with_photos": []}
+        # Group by person (one person may have multiple records)
+        seen = {}
+        for r in rows:
+            pid = r['id']
+            if pid not in seen:
+                seen[pid] = {'person': r, 'descriptions': []}
+            if r.get('description'):
+                seen[pid]['descriptions'].append(r['description'])
+        parts = []
+        people = []
+        for pid, info in seen.items():
+            p = info['person']
+            people.append(p)
+            desc = ", ".join(info['descriptions']) if info['descriptions'] else "servicio militar"
+            parts.append(f"- {_person_brief(p)}: {desc}")
+        ans = f"Personas con registros militares en el árbol ({len(people)}):\n" + "\n".join(parts)
+        return {"answer": ans, "people_mentioned": [p['id'] for p in people], "people_with_photos": self._people_payload(people[:25])}
+
+    # --- Burial handlers ---
+
+    def handle_burial(self, question):
+        q = _clean_question(question)
+        m = re.search(r"(?:enterrad[oa]|sepultad[oa]|sepultura\s+de|tumba\s+de)\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        records = [_as_dict(r) for r in get_burial(self.conn, person['id'])]
+        if not records:
+            return {"answer": f"No constan datos de sepultura de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        parts = []
+        for r in records:
+            frag = r.get('place') or ''
+            if r.get('place_detail'):
+                frag += f" — {r['place_detail']}"
+            if r.get('date'):
+                frag += f" ({r['date']})"
+            parts.append(frag.strip())
+        ans = f"Sepultura de {_person_link(person)}: " + "; ".join(parts) + "."
+        return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    def handle_burial_place(self, question):
+        q = _clean_question(question)
+        m = re.search(r"(?:enterrados|sepultados|enterramientos)\s+en\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        place = m.group(1).strip()
+        rows = []
+        for r in self.conn.execute(
+            "SELECT p.id, p.name, p.birth_year, p.death_year, p.birth_place, p.photo_file, p.is_alive, b.place, b.date "
+            "FROM burial b JOIN people p ON p.id = b.person_id "
+            "WHERE b.place LIKE ? COLLATE NOCASE ORDER BY b.date, p.name",
+            ('%' + place + '%',)
+        ).fetchall():
+            rows.append(_as_dict(r))
+        if not rows:
+            return {"answer": f"No constan enterramientos en {place}.", "people_mentioned": [], "people_with_photos": []}
+        # Deduplicate by person
+        seen = set()
+        unique = []
+        for r in rows:
+            if r['id'] not in seen:
+                seen.add(r['id'])
+                unique.append(r)
+        return {"answer": self._list_people_answer(f"Las personas enterradas en {place} son", unique), "people_mentioned": [r['id'] for r in unique], "people_with_photos": self._people_payload(unique[:25])}
+
+    # --- Baptism handlers ---
+
+    def handle_baptism(self, question):
+        q = _clean_question(question)
+        m = re.search(r"(?:bautizad[oa]|bautismo\s+de)\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        bdate = person.get('baptism_date') or ''
+        bplace = person.get('baptism_place') or ''
+        if not bdate and not bplace:
+            return {"answer": f"No constan datos de bautismo de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        parts = []
+        if bdate:
+            parts.append(f"fecha: {bdate}")
+        if bplace:
+            parts.append(f"lugar: {bplace}")
+        ans = f"Bautismo de {_person_link(person)}: " + ", ".join(parts) + "."
+        return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    def handle_baptism_place(self, question):
+        q = _clean_question(question)
+        m = re.search(r"(?:bautiz[oó]|(?:lugar|iglesia)\s+(?:del?\s+)?bautismo\s+de)\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        bplace = person.get('baptism_place') or ''
+        if not bplace:
+            return {"answer": f"No consta el lugar de bautismo de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        ans = f"{_person_link(person)} fue bautizado/a en {bplace}."
+        return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    def handle_godparents(self, question):
+        q = _clean_question(question)
+        m = re.search(r"padrinos\s+de\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        godparents = person.get('godparents') or ''
+        if not godparents:
+            return {"answer": f"No constan los padrinos de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        ans = f"Los padrinos de {_person_link(person)} fueron: {godparents}."
+        return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    # --- Events handlers ---
+
+    def handle_events(self, question):
+        q = _clean_question(question)
+        m = re.search(r"eventos?\s+(?:hay\s+)?(?:registrados?\s+)?(?:para|de)\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        records = [_as_dict(r) for r in get_events(self.conn, person['id'])]
+        if not records:
+            return {"answer": f"No constan eventos registrados para {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        parts = []
+        for r in records:
+            frag = r.get('type') or r.get('tag') or ''
+            if r.get('description'):
+                frag += f": {r['description']}"
+            if r.get('date'):
+                frag += f" ({r['date']})"
+            if r.get('place'):
+                frag += f" — {r['place']}"
+            parts.append("- " + frag.strip())
+        ans = f"Eventos registrados para {_person_link(person)} ({len(records)}):\n" + "\n".join(parts)
+        return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    def handle_education(self, question):
+        q = _clean_question(question)
+        m = re.search(r"(?:estudios|educaci[oó]n)\s+de\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            m = re.search(r"datos?\s+de\s+(?:estudios|educaci[oó]n)\s+de\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        records = [_as_dict(r) for r in get_events(self.conn, person['id'], 'Educación')]
+        if not records:
+            return {"answer": f"No constan datos de estudios o educación de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        parts = []
+        for r in records:
+            frag = r.get('description') or 'Educación'
+            if r.get('date'):
+                frag += f" ({r['date']})"
+            if r.get('place'):
+                frag += f" — {r['place']}"
+            parts.append("- " + frag.strip())
+        ans = f"Datos de educación de {_person_link(person)}:\n" + "\n".join(parts)
+        return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_mother(self, question):
         q = _clean_question(question)

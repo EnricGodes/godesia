@@ -573,6 +573,37 @@ def get_notes(conn, person_id):
     ).fetchall()
 
 
+def get_military(conn, person_id):
+    """Get military records for a person."""
+    return conn.execute(
+        "SELECT description, date, place FROM military WHERE person_id = ?",
+        (person_id,)
+    ).fetchall()
+
+
+def get_burial(conn, person_id):
+    """Get burial records for a person."""
+    return conn.execute(
+        "SELECT place, place_detail, date FROM burial WHERE person_id = ?",
+        (person_id,)
+    ).fetchall()
+
+
+def get_events(conn, person_id, event_type=None):
+    """Get events for a person, optionally filtered by type."""
+    if event_type:
+        return conn.execute(
+            "SELECT tag, type, description, date, place, note FROM events "
+            "WHERE person_id = ? AND type LIKE ? COLLATE NOCASE ORDER BY date",
+            (person_id, '%' + event_type + '%')
+        ).fetchall()
+    return conn.execute(
+        "SELECT tag, type, description, date, place, note FROM events "
+        "WHERE person_id = ? ORDER BY date",
+        (person_id,)
+    ).fetchall()
+
+
 def get_all_photos(conn, person_id):
     """Get all photos for a person (from new schema with photo_tags)."""
     return conn.execute("""
