@@ -1415,11 +1415,13 @@ nav {
 .mention-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
+    gap: 6px;
+    padding: 6px 8px;
     cursor: pointer;
     transition: background-color 0.15s;
     border-bottom: 1px solid var(--surface-container-low);
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .mention-item:last-child {
@@ -1432,8 +1434,8 @@ nav {
 }
 
 .mention-photo {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
@@ -1441,8 +1443,8 @@ nav {
 }
 
 .mention-photo-placeholder {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background-color: var(--surface-dim);
     display: flex;
@@ -1452,14 +1454,7 @@ nav {
     font-weight: 600;
     color: var(--on-surface);
     border: 1px solid var(--outline-variant);
-}
-
-.mention-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
+    font-size: 12px;
 }
 
 .mention-name {
@@ -1476,10 +1471,9 @@ nav {
 }
 
 .mention-years {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--on-surface-variant);
-    overflow: hidden;
-    text-overflow: ellipsis;
+    flex-shrink: 0;
     white-space: nowrap;
 }
 

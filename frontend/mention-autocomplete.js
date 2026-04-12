@@ -140,15 +140,13 @@ class MentionAutocomplete {
         } else if (person.death_year) {
           yearText = `†${person.death_year}`;
         } else if (person.birth_year) {
-          yearText = `${person.birth_year}–`;
+          yearText = `${person.birth_year}`;
         }
         return `
           <div class="mention-item" data-mention-item data-name="${person.name}">
             ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${person.name}" class="mention-photo">` : `<div class="mention-photo-placeholder">${person.name.charAt(0)}</div>`}
-            <div class="mention-info">
-              <span class="mention-name">${this.highlightQuery(person.name)}</span>
-              ${yearText ? `<span class="mention-years">${yearText}</span>` : ''}
-            </div>
+            <span class="mention-name">${this.highlightQuery(person.name)}</span>
+            ${yearText ? `<span class="mention-years">${yearText}</span>` : ''}
           </div>
         `;
       })
