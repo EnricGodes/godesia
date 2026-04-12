@@ -61,6 +61,7 @@
 
     .result-card { border: 1px solid var(--soft); border-radius: 14px; padding: 16px; margin-top: 10px; background: #fff; }
     .result-card.regression { border-color: var(--err-border); background: #fffafa; }
+    .result-card.improvement { border-color: #86efac; background: #f0fdf4; }
     .result-card.pending { border-color: var(--warn-border); background: #fffdf7; }
     .result-card.stable { border-color: var(--ok-border); }
     .result-card .q { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
@@ -116,6 +117,7 @@
     <h2>Resultados</h2>
     <div class="filters">
       <label><input type="checkbox" id="fRegression" checked onchange="renderResults()" /> Regresiones</label>
+      <label><input type="checkbox" id="fImprovement" checked onchange="renderResults()" /> ✓ Mejoras</label>
       <label><input type="checkbox" id="fPending" checked onchange="renderResults()" /> Pendientes</label>
       <label><input type="checkbox" id="fStable" checked onchange="renderResults()" /> Aprobadas</label>
       <label><input type="checkbox" id="fRejected" onchange="renderResults()" /> Rechazadas</label>
@@ -160,7 +162,7 @@ async function loadBank() {
 
 function renderStats() {
   const cases = bankData.cases || [];
-  const counts = { total: cases.length, stable: 0, regression: 0, pending: 0, rejected: 0, new: 0, no_answer: 0 };
+  const counts = { total: cases.length, stable: 0, regression: 0, improvement: 0, pending: 0, rejected: 0, new: 0, no_answer: 0 };
   cases.forEach(c => { counts[c._classification] = (counts[c._classification] || 0) + 1; });
 
   const grid = document.getElementById('statsGrid');
@@ -168,9 +170,9 @@ function renderStats() {
     { k: 'Total', v: counts.total, cls: '' },
     { k: 'Estables', v: counts.stable, cls: 'ok' },
     { k: 'Regresiones', v: counts.regression, cls: counts.regression > 0 ? 'highlight' : '' },
+    { k: '✓ Mejoras', v: counts.improvement, cls: counts.improvement > 0 ? 'ok' : '' },
     { k: 'Pendientes', v: counts.pending, cls: '' },
     { k: 'Nuevas', v: counts.new, cls: '' },
-    { k: 'Sin Respuesta', v: counts.no_answer, cls: counts.no_answer > 0 ? 'highlight' : '' },
   ].map(s => `<div class="stat ${s.cls}"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
 }
 
@@ -178,6 +180,7 @@ function renderResults() {
   const search = document.getElementById('searchBox').value.toLowerCase();
   const show = {
     regression: document.getElementById('fRegression').checked,
+    improvement: document.getElementById('fImprovement')?.checked !== false,
     pending: document.getElementById('fPending').checked,
     stable: document.getElementById('fStable').checked,
     rejected: document.getElementById('fRejected').checked,
@@ -186,7 +189,7 @@ function renderResults() {
 
   const filtered = (bankData.cases || []).filter(c => {
     // no_answer cases are shown when 'rejected' filter is checked
-    const classification = c._classification === 'no_answer' ? 'rejected' : c._classification;
+    let classification = c._classification === 'no_answer' ? 'rejected' : c._classification;
     if (!show[classification]) return false;
     if (search) {
       const haystack = (c.question + ' ' + (c.last_run?.answer || '')).toLowerCase();
@@ -195,9 +198,9 @@ function renderResults() {
     return true;
   });
 
-  // Sort: regressions first, then pending, new, stable, rejected, no_answer (last)
-  const order = { regression: 0, pending: 1, new: 2, stable: 3, rejected: 4, no_answer: 999 };
-  filtered.sort((a, b) => (order[a._classification] ?? 5) - (order[b._classification] ?? 5));
+  // Sort: regresiones primero, luego mejoras, pending, new, stable, rejected, no_answer (last)
+  const order = { regression: 0, improvement: 1, pending: 2, new: 3, stable: 4, rejected: 5, no_answer: 999 };
+  filtered.sort((a, b) => (order[a._classification] ?? 6) - (order[b._classification] ?? 6));
 
   const area = document.getElementById('resultsArea');
   if (filtered.length === 0) {
@@ -213,6 +216,7 @@ function renderCase(c) {
   const pills = [];
 
   if (cls === 'regression') pills.push('<span class="pill err">REGRESION</span>');
+  else if (cls === 'improvement') pills.push('<span class="pill ok">✓ MEJORA</span>');
   else if (cls === 'stable') pills.push('<span class="pill ok">ESTABLE</span>');
   else if (cls === 'pending') pills.push('<span class="pill warn">PENDIENTE</span>');
   else if (cls === 'new') pills.push('<span class="pill info">NUEVA</span>');

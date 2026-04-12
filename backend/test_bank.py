@@ -66,12 +66,16 @@ def _normalize_answer(text: str) -> str:
 
 
 def _classify_case(case: dict) -> str:
-    """Classify a test case into: regression, stable, pending, rejected, new."""
+    """Classify a test case into: regression, stable, pending, rejected, new, improvement."""
     verdict = case.get("verdict", "pending")
     last_run = case.get("last_run")
     snapshot = case.get("approved_snapshot")
 
-    if verdict == "rejected":
+    # Detect improvements: rejected cases that now return valid answer (not "No he sabido responder")
+    if verdict == "rejected" and last_run:
+        answer = last_run.get("answer", "")
+        if answer and "No he sabido responder" not in answer:
+            return "improvement"  # Rejected case that now works!
         return "rejected"
 
     if verdict == "approved" and snapshot and last_run:
