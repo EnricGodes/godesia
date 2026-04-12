@@ -173,8 +173,8 @@ class QueryRouter:
         self._sql_trace: List[str] = []
 
         self.patterns: List[Tuple[str, str]] = [
-            (r"(?:cu[aá]l\s+es\s+la\s+persona\s+con\s+m[aá]s\s+hijos\s+registrados)", "handle_max_children_person"),
-            (r"(?:qui[eé]n\s+es\s+la\s+persona\s+m[aá]s\s+longeva\s+del\s+[aá]rbol|cu[aá]l\s+es\s+la\s+persona\s+m[aá]s\s+longeva\s+del\s+[aá]rbol)", "handle_max_longevity_person"),
+            (r"(?:qu[eé]\s+persona\s+(?:tuvo|tenia)\s+m[aá]s\s+hijos|cu[aá]l\s+es\s+la\s+persona\s+con\s+m[aá]s\s+hijos\s+registrados)", "handle_max_children_person"),
+            (r"(?:qui[eé]n\s+(?:vivio|vivi[oó]|fue)\s+m[aá]s\s+a[nñ]os|qui[eé]n\s+es\s+la\s+persona\s+m[aá]s\s+longeva\s+del\s+[aá]rbol|cu[aá]l\s+es\s+la\s+persona\s+m[aá]s\s+longeva\s+del\s+[aá]rbol)", "handle_max_longevity_person"),
             (r"(?:cu[aá]l\s+es\s+la\s+media\s+de\s+hijos|cu[aá]l\s+es\s+la\s+media\s+de\s+hijos\?)", "handle_average_children"),
             (r"(?:hay\s+m[aá]s\s+hombres\s+o\s+mujeres|hay\s+mas\s+hombres\s+o\s+mujeres)", "handle_sex_balance"),
             (r"(?:qui[eé]n\s+es\s+la\s+persona\s+m[aá]s\s+joven|cual\s+es\s+la\s+persona\s+m[aá]s\s+joven|qui[eé]n\s+es\s+la\s+persona\s+mas\s+joven)", "handle_youngest_person"),
@@ -212,7 +212,7 @@ class QueryRouter:
             (r"(?:qui[eé]n\s+era\s+mayor\s+cuando\s+se\s+casaron:\s*.+\s+o\s+.+)", "handle_who_older_when_married"),
             (r"(?:d[oó]nde\s+naci[oó]\s+.+\s+y\s+qu[eé]\s+ocupaci[oó]n\s+consta\s+en\s+su\s+ficha)", "handle_birth_place_and_occupation"),
             (r"(?:cu[aá]ntos?\s+hijos\s+sobrevivieron\s+a\s+.+)", "handle_surviving_children_count"),
-            (r"(?:qui[eé]n\s+naci[oó]\s+en\s+el\s+a[nñ]o|who\s+was\s+born\s+in\s+the\s+year)", "handle_birth_year_search"),
+            (r"(?:qui[eé]n\s+naci[oó]\s+en\s+(?:el\s+)?a[nñ]o|who\s+was\s+born\s+in\s+the\s+year|qui[eé]n\s+naci[oó]\s+en\s+\d{4})", "handle_birth_year_search"),
             (r"(?:qu[eé]\s+personas\s+murieron\s+en|which\s+people\s+died\s+in)", "handle_death_place_people"),
             (r"(?:qu[eé]\s+parejas\s+se\s+casaron\s+en|which\s+couples\s+married\s+in)", "handle_marriages_place"),
             (r"(?:nombre\s+de\s+pila\s+que\s+empieza\s+por|given\s+name\s+starts\s+with)", "handle_given_name_initial"),
@@ -245,7 +245,7 @@ class QueryRouter:
             (r"(?:que\s+hermanos?\s+ten[ií]a\s+.+|hermanos?\s+de\s+.+)", "handle_siblings"),
             (r"(?:eran\s+primos|were\s+.*cousins)", "handle_are_cousins"),
             (r"(?:era\s+.+\s+abuelo\s+o\s+abuela\s+de|was\s+.+\s+grandparent\s+of)", "handle_is_grandparent_of"),
-            (r"(?:ten[ií]a\s+descendencia|had\s+descendants)", "handle_has_descendants"),
+            (r"(?:(?:ten[ií]a|tiene)\s+descendencia|had\s+descendants)", "handle_has_descendants"),
             (r"(?:suegra\s+o\s+el\s+suegro|suegra\s+o\s+suegro|father-in-law|mother-in-law)", "handle_parents_in_law"),
             (r"(?:qu[eé]\s+relaci[oó]n\s+ten[ií]a|qu[eé]\s+parentesco\s+(?:hab[ií]a|hay)|what\s+relationship)", "handle_relationship"),
             (r"(?:padres\s+de|pares\s+de|parents\s+of)", "handle_parents"),
@@ -275,7 +275,7 @@ class QueryRouter:
             (r"(?:bisabuelos\s+de\s+.+)", "handle_great_grandparents"),
             (r"(?:(?:qui[eé]n|quiénes)\s+era(?:n)?\s+(?:la\s+)?madre\s+de\s+.+|dime\s+c[oó]mo\s+se\s+llamaba\s+la\s+madre\s+de\s+.+)", "handle_mother"),
             (r"(?:qui[eé]n\s+fue\s+el\s+hijo\s+mayor\s+de\s+.+|dime\s+cu[aá]l\s+fue\s+la\s+primera\s+hija\s+de\s+.+)", "handle_child_extremes"),
-            (r"(?:cu[aá]ntas\s+personas\s+del\s+[aá]rbol\s+se\s+llaman\s+.+)", "handle_given_name_count"),
+            (r"(?:cu[aá]ntas\s+personas\s+(?:del\s+[aá]rbol\s+)?se\s+llaman\s+.+)", "handle_given_name_count"),
             (r"(?:dos\s+apellidos\s+iguales)", "handle_same_surname_twice"),
             (r"(?:qu[eé]\s+[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+\s+nacieron\s+en\s+.+)", "handle_surname_born_in_place"),
             (r"(?:acab[oó]\s+cas[aá]ndose|con\s+qui[eé]n\s+acab[oó]\s+cas[aá]ndose)", "handle_last_spouse"),
@@ -537,7 +537,7 @@ class QueryRouter:
             r"hermanos?\s+ten[ií]a\s+(.+?)(?:\?|$)",
             r"hermanos\s+de\s+(.+?)(?:\?|$)",
             r"germans\s+de\s+(.+?)(?:\?|$)",
-            r"(?:que\s+)?hijos?\s+tuvo\s+(.+?)(?:\?|$)",
+            r"(?:que\s+)?hijos?\s+(?:documentados?\s+)?tuvo\s+(.+?)(?:\?|$)",
             r"hijos\s+de\s+(.+?)(?:\?|$)",
             r"fills\s+de\s+(.+?)(?:\?|$)",
             r"t[ií]os\s+de\s+(.+?)(?:\?|$)",
@@ -545,7 +545,7 @@ class QueryRouter:
             r"primos\s+hermanos\s+de\s+(.+?)(?:\?|$)",
             r"cosins?\s+germans?\s+de\s+(.+?)(?:\?|$)",
             r"c[oó]nyuge\s+de\s+(.+?)(?:\?|$)",
-            r"ten[ií]a\s+descendencia\s+(.+?)(?:\?|$)",
+            r"(?:ten[ií]a|tiene)\s+descendencia\s+(?:documentada\s+)?(.+?)(?:\?|$)",
             r"suegra\s+o\s+el\s+suegro\s+de\s+(.+?)(?:\?|$)",
             r"suegra\s+o\s+suegro\s+de\s+(.+?)(?:\?|$)",
             r"nueras?\s+de\s+(.+?)(?:\?|$)",
@@ -1642,7 +1642,8 @@ class QueryRouter:
         return {"answer": answer, "people_mentioned": [parent['id']] + [c['id'] for c in survivors], "people_with_photos": self._people_payload([parent] + survivors)}
 
     def handle_birth_year_search(self, question):
-        m = re.search(r"(?:a[nñ]o|year)\s+(\d{4})", _clean_question(question), re.I)
+        q = _clean_question(question)
+        m = re.search(r"(?:en|el\s+a[nñ]o)\s+(\d{4})", q, re.I) or re.search(r"(?:a[nñ]o|year)\s+(\d{4})", q, re.I)
         if not m:
             return None
         year = int(m.group(1))
