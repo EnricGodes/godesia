@@ -233,11 +233,16 @@ class QueryRouter:
             (r"(?:cu[aá]ntos?\s+herman|quants?\s+germans?)", "handle_siblings_count"),
             (r"(?:abuelo\s+paterno|avi\s+patern)", "handle_paternal_grandfather"),
             (r"(?:abuela\s+materna|[àa]via\s+matern)", "handle_maternal_grandmother"),
+            (r"(?:t[ií]os?\s+(?:y\s+)?t[ií]as?\s+de|uncles\s+and\s+aunts\s+of)", "handle_uncles_and_aunts"),
             (r"(?:t[ií]os?|oncles?)\b", "handle_uncles"),
             (r"(?:n[oó]mbrame\s+los\s+primos\s+de\s+.+)", "handle_first_cousins"),
             (r"(?:primos\s+hermanos|cosins?\s+germans?|first\s+cousins)", "handle_first_cousins"),
             (r"(?:cas[oó]\s+o\s+emparej[oó]|casar\s+o\s+emparellar)", "handle_spouse_or_partner"),
+            (r"(?:(?:con\s+)?qu[eé]\s+(?:persona|hombre|mujer)\s+enlaz[oó]\s+.+\s+(?:por\s+)?matrimonio|with\s+whom\s+did\s+.+\s+marry)", "handle_spouse"),
+            (r"(?:cu[aá]ntos?\s+descendientes?\s+directos?\s+(?:tuvo|dej[oó])\s+.+|how\s+many\s+direct\s+descendants)", "handle_direct_descendants"),
+            (r"(?:qu[eé]\s+hijos\s+(?:documentados?\s+)?tuvo\s+.+|what\s+children\s+did\s+.+\s+have)", "handle_children"),
             (r"(?:cu[aá]ntos?\s+hijos\s+tuvo|quants?\s+fills\s+va\s+tenir)", "handle_children_count"),
+            (r"(?:que\s+hermanos?\s+ten[ií]a\s+.+|hermanos?\s+de\s+.+)", "handle_siblings"),
             (r"(?:eran\s+primos|were\s+.*cousins)", "handle_are_cousins"),
             (r"(?:era\s+.+\s+abuelo\s+o\s+abuela\s+de|was\s+.+\s+grandparent\s+of)", "handle_is_grandparent_of"),
             (r"(?:ten[ií]a\s+descendencia|had\s+descendants)", "handle_has_descendants"),
@@ -254,8 +259,8 @@ class QueryRouter:
             (r"(?:busco\s+a\s+las\s+personas\s+que\s+nacieron\s+en\s+.+\s+y\s+tamb[ié]n\s+murieron\s+all[ií])", "handle_birth_and_death_same_place_natural"),
             (r"(?:qu[ií]ero\s+ver\s+si\s+.+\s+ten[ií]a\s+consuegros\s+documentados|consuegros\s+de\s+.+)", "handle_consuegros"),
             (r"(?:primos\s+segundos\s+de\s+.+)", "handle_second_cousins"),
-            (r"(?:n[oó]mbrame\s+las\s+nueras\s+de\s+.+|tuvo\s+.+\s+alguna\s+nuera)", "handle_daughters_in_law"),
-            (r"(?:dime\s+c[oó]mo\s+se\s+llamaba\s+el\s+yerno\s+de\s+.+|hab[ií]a\s+alg[uú]n\s+yerno\s+en\s+la\s+familia\s+de\s+.+)", "handle_sons_in_law"),
+            (r"(?:n[oó]mbrame\s+(?:las\s+)?nueras\s+de\s+.+|nueras?\s+de\s+.+|tuvo\s+.+\s+alguna\s+nuera)", "handle_daughters_in_law"),
+            (r"(?:dime\s+c[oó]mo\s+se\s+llamaba\s+el\s+yerno\s+de\s+.+|yernos?\s+de\s+.+|hab[ií]a\s+alg[uú]n\s+yerno\s+en\s+la\s+familia\s+de\s+.+)", "handle_sons_in_law"),
             (r"(?:qu[eé]\s+relaci[oó]n\s+ten[ií]a\s+.+\s+con\s+los\s+padres\s+de\s+.+)", "handle_relationship_with_parents_of"),
             (r"(?:qui[eé]n\s+fue\s+la\s+cu[nñ]ada\s+de\s+.+)", "handle_sisters_in_law"),
             (r"(?:dime\s+si\s+.+\s+ten[ií]a\s+cu[nñ]ados\s+y\s+c[oó]mo\s+se\s+llamaban)", "handle_brothers_in_law"),
@@ -528,8 +533,10 @@ class QueryRouter:
             r"pares\s+de\s+(.+?)(?:\?|$)",
             r"padre\s+de\s+(.+?)(?:\?|$)",
             r"pare\s+de\s+(.+?)(?:\?|$)",
+            r"hermanos?\s+ten[ií]a\s+(.+?)(?:\?|$)",
             r"hermanos\s+de\s+(.+?)(?:\?|$)",
             r"germans\s+de\s+(.+?)(?:\?|$)",
+            r"(?:que\s+)?hijos?\s+tuvo\s+(.+?)(?:\?|$)",
             r"hijos\s+de\s+(.+?)(?:\?|$)",
             r"fills\s+de\s+(.+?)(?:\?|$)",
             r"t[ií]os\s+de\s+(.+?)(?:\?|$)",
@@ -540,6 +547,8 @@ class QueryRouter:
             r"ten[ií]a\s+descendencia\s+(.+?)(?:\?|$)",
             r"suegra\s+o\s+el\s+suegro\s+de\s+(.+?)(?:\?|$)",
             r"suegra\s+o\s+suegro\s+de\s+(.+?)(?:\?|$)",
+            r"nueras?\s+de\s+(.+?)(?:\?|$)",
+            r"yernos?\s+de\s+(.+?)(?:\?|$)",
             r"cu[aá]ntos?\s+hijos\s+tuvo\s+(.+?)(?:\?|$)",
             r"cu[aá]ntos?\s+hermanos.*ten[ií]a\s+(.+?)(?:\?|$)",
             r"abuelo\s+paterno\s+de\s+(.+?)(?:\?|$)",
@@ -906,6 +915,31 @@ class QueryRouter:
         answer = f"La abuela materna de {person['name']} fue { _person_brief(gm) }." if gm else f"No consta documentada la abuela materna de {person['name']}."
         return {"answer": answer, "people_mentioned": [x["id"] for x in [person, gm] if x], "people_with_photos": self._people_payload([person, gm])}
 
+    def handle_uncles_and_aunts(self, question):
+        """Handle 'tíos y tías de [person]' or similar."""
+        q = _clean_question(question)
+        m = re.search(r"t[ií]os?\s+(?:y\s+)?t[ií]as?\s+de\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        subject = m.group(1)
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        paternal, maternal = self._get_aunts_uncles(person)
+        paternal = _sort_people(paternal)
+        maternal = _sort_people(maternal)
+        sections = []
+        if paternal:
+            sections.append("por parte de padre: " + _join_names(paternal))
+        if maternal:
+            sections.append("por parte de madre: " + _join_names(maternal))
+        if not sections:
+            answer = f"No constan tíos o tías documentados de {_person_link(person)}."
+        else:
+            answer = f"Los tíos y tías de {_person_link(person)} fueron " + "; ".join(sections) + "."
+        people = [person] + paternal + maternal
+        return {"answer": answer, "people_mentioned": [p["id"] for p in people if p], "people_with_photos": self._people_payload(people)}
+
     def handle_uncles(self, question):
         subject = self._extract_subject_name(question)
         if not subject:
@@ -1177,6 +1211,24 @@ class QueryRouter:
             parts.append("no constan hijos documentados")
         people = [person, father, mother] + children
         return {"answer": f"De {person['name']}, " + "; ".join(parts) + ".", "people_mentioned": [p["id"] for p in people if p], "people_with_photos": self._people_payload([p for p in people if p])}
+
+    def handle_direct_descendants(self, question):
+        """Handle 'cuántos descendientes directos dejó [person]'."""
+        q = _clean_question(question)
+        m = re.search(r"cu[aá]ntos?\s+descendientes?\s+directos?\s+(?:tuvo|dej[oó])\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        subject = m.group(1)
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        # Direct descendants = children
+        children = _sort_people(list(get_children(self.conn, person["id"])))
+        if not children:
+            answer = f"{_person_link(person)} no tuvo descendientes directos documentados."
+        else:
+            answer = f"{_person_link(person)} tuvo {len(children)} descendiente(s) directo(s) documentado(s): {_join_names(children)}."
+        return {"answer": answer, "people_mentioned": [person["id"]] + [c["id"] for c in children], "people_with_photos": self._people_payload([person] + children)}
 
     def handle_has_descendants(self, question):
         subject = self._extract_subject_name(question)
@@ -2408,7 +2460,7 @@ class QueryRouter:
 
     def handle_daughters_in_law(self, question):
         q = _clean_question(question)
-        m = re.search(r"n[oó]mbrame\s+las\s+nueras\s+de\s+(.+?)(?:\?|$)", q, re.I) or re.search(r"tuvo\s+(.+?)\s+alguna\s+nuera(?:\?|$)", q, re.I)
+        m = re.search(r"n[oó]mbrame\s+(?:las\s+)?nueras\s+de\s+(.+?)(?:\?|$)", q, re.I) or re.search(r"nueras?\s+de\s+(.+?)(?:\?|$)", q, re.I) or re.search(r"tuvo\s+(.+?)\s+alguna\s+nuera(?:\?|$)", q, re.I)
         if not m:
             return None
         person,_ = self._resolve_person(m.group(1))
@@ -2421,7 +2473,7 @@ class QueryRouter:
 
     def handle_sons_in_law(self, question):
         q = _clean_question(question)
-        m = re.search(r"yerno\s+de\s+(.+?)(?:\?|$)", q, re.I) or re.search(r"yerno\s+en\s+la\s+familia\s+de\s+(.+?)(?:\?|$)", q, re.I)
+        m = re.search(r"yernos?\s+de\s+(.+?)(?:\?|$)", q, re.I) or re.search(r"yerno\s+en\s+la\s+familia\s+de\s+(.+?)(?:\?|$)", q, re.I)
         if not m:
             return None
         person, _ = self._resolve_person(m.group(1))
