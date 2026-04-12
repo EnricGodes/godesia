@@ -394,14 +394,44 @@ class QueryRouter:
         if not name_fragment:
             return []
 
-        like = "%" + re.sub(r"\s+", "%", name_fragment) + "%"
-        rows = self.conn.execute(
+        # Expand common abbreviations
+        abbrevs = {
+            'ma': 'maria', 'ma.': 'maria', 'mª': 'maria',
+            'fco': 'francisco', 'fco.': 'francisco',
+            'jse': 'jose', 'jse.': 'jose',
+            'anto': 'antonio', 'anto.': 'antonio',
+        }
+        expanded_tokens = []
+        for tok in name_fragment.split():
+            expanded_tokens.append(abbrevs.get(tok.lower(), tok))
+        expanded_fragment = " ".join(expanded_tokens)
+
+        like_expanded = "%" + re.sub(r"\s+", "%", expanded_fragment) + "%"
+        like_original = "%" + re.sub(r"\s+", "%", name_fragment) + "%"
+        select_cols = (
             "SELECT id, name, given_name, surname, birth_year, death_year, birth_place, photo_file, "
             "is_alive, father_id, mother_id, father_name, mother_name, sex, "
-            "baptism_date, baptism_place, godparents "
-            "FROM people WHERE name LIKE ? COLLATE NOCASE ORDER BY name LIMIT ?",
-            (like, max(limit * 4, 80)),
+            "baptism_date, baptism_place, godparents, nickname "
+        )
+        # Search with both original and expanded names to handle abbreviations like Mª
+        rows = self.conn.execute(
+            select_cols +
+            "FROM people WHERE (name LIKE ? COLLATE NOCASE OR name LIKE ? COLLATE NOCASE) "
+            "ORDER BY name LIMIT ?",
+            (like_original, like_expanded, max(limit * 4, 80)),
         ).fetchall()
+
+        # Also search by nickname
+        if len(rows) < limit:
+            nickname_rows = self.conn.execute(
+                select_cols +
+                "FROM people WHERE (nickname LIKE ? COLLATE NOCASE OR nickname LIKE ? COLLATE NOCASE) "
+                "AND id NOT IN "
+                "(SELECT id FROM people WHERE name LIKE ? COLLATE NOCASE OR name LIKE ? COLLATE NOCASE) "
+                "ORDER BY name LIMIT ?",
+                (like_original, like_expanded, like_original, like_expanded, max(limit * 2, 40)),
+            ).fetchall()
+            rows = list(rows) + list(nickname_rows)
 
         query_norm = _norm_cmp(name_fragment)
         query_tokens = set(_tokenize_name(name_fragment))
@@ -414,6 +444,10 @@ class QueryRouter:
             s = 0
             if name_norm == query_norm:
                 s += 1000
+            # Nickname exact match
+            nickname = rr.get("nickname") or ""
+            if nickname and _norm_cmp(nickname) == query_norm:
+                s += 900
             if query_tokens and query_tokens.issubset(tokens):
                 s += 200
             s += 15 * len(query_tokens.intersection(tokens))
@@ -422,6 +456,11 @@ class QueryRouter:
                 s += 500
             if query_token_list and query_token_list[-1] in tokens:
                 s += 20
+            # Nickname token match
+            if nickname:
+                nick_tokens = set(_tokenize_name(nickname))
+                if query_tokens and query_tokens.intersection(nick_tokens):
+                    s += 150
             return s
 
         rows = sorted(rows, key=lambda r: (-score(r), _norm_cmp(_as_dict(r)["name"])))
