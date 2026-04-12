@@ -272,7 +272,7 @@ class QueryRouter:
             (r"(?:acab[oó]\s+cas[aá]ndose|con\s+qui[eé]n\s+acab[oó]\s+cas[aá]ndose)", "handle_last_spouse"),
             (r"(?:misma\s+ciudad\s+en\s+la\s+que\s+naci[oó])", "handle_same_birth_death_city"),
             (r"(?:tengan\s+.+\s+como\s+primer\s+apellido)", "handle_first_surname_natural"),
-            (r"(?:qu[eé]\s+oficio\s+ten[ií]a\s+.+|en\s+qu[eé]\s+trabaja\s+.+|(?:qu[eé]\s+)?empleo\s+consta\s+de\s+.+|c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+.+)", "handle_occupation_natural"),
+            (r"(?:qu[eé]\s+oficio\s+ten[ií]a\s+.+|en\s+qu[eé]\s+trabaja(?:ba)?\s+.+|(?:qu[eé]\s+)?empleo\s+consta\s+de\s+.+|c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+.+)", "handle_occupation_natural"),
             (r"(?:d[oó]nde\s+viv[ií]a\s+.+\s+al\s+final\s+de\s+su\s+vida)", "handle_last_residence"),
             (r"(?:cu[aá]ntos\s+hijos\s+lleg[oó]\s+a\s+tener\s+.+)", "handle_children_total_natural"),
             (r"(?:dime\s+qu[eé]\s+personas\s+nacieron\s+en\s+.+\s+y\s+luego\s+murieron\s+fuera\s+de\s+.+)", "handle_born_in_and_died_outside"),
@@ -319,7 +319,7 @@ class QueryRouter:
             (r"^(?:cuando|cu[aá]ndo)\s+(?:murio|muri[oó]|fue\s+enterrad[oa])\s+.+$", "handle_death_date_of_person"),
             (r"^(?:ocupaci[oó]n|qu[eé]\s+oficio|trabajo)\s+de\s+.+$", "handle_occupation_natural"),
             (r"^(?:residencia|donde\s+(?:vivia|viv[ií]a|vive))\s+.+$", "handle_last_residence"),
-            (r"^(?:notas?|apuntes?)\s+de\s+.+$", "handle_notes_field"),
+            (r"^(?:notas?|apuntes?)\s+(?:biogr[aá]ficas?\s+)?de\s+.+$", "handle_notes_field"),
             (r"^(?:qu[eé]\s+)?descendencia\s+.+$", "handle_has_descendants"),
         ]
 
@@ -947,7 +947,7 @@ class QueryRouter:
         return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
 
     def handle_spouse_or_partner(self, question):
-        m = re.search(r"(?:con\s+qui[eé]n\s+se\s+cas[oó]\s+o\s+emparej[oó]|amb\s+qui\s+es\s+va\s+casar\s+o\s+emparellar)\s+(.+?)(?:\?|$)", _clean_question(question), re.I)
+        m = re.search(r"(?:con\s+qui[eé]n\s+se\s+cas[oó](?:\s+o\s+emparej[oó])?|amb\s+qui\s+es\s+va\s+casar\s+o\s+emparellar)\s+(.+?)(?:\?|$)", _clean_question(question), re.I)
         subject = m.group(1) if m else self._extract_subject_name(question)
         if not subject:
             return None
@@ -1637,7 +1637,8 @@ class QueryRouter:
 
     def handle_notes_field(self, question):
         q = _clean_question(question)
-        m = (re.search(r"asociadas\s+a\s+(.+?)(?:\?|$)", q, re.I) or
+        m = (re.search(r"(?:notas?|apuntes?)\s+(?:biogr[aá]ficas?\s+)?de\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"asociadas\s+a\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"(?:qu[eé]\s+)?notas?\s+(?:hay\s+)?(?:sobre|de)\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"observaciones?\s+(?:biogr[aá]ficas?\s+)?(?:de|sobre|aparecen\s+(?:en|para))\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"(?:qu[eé]\s+)?(?:anotaciones?|comentarios?|apuntes?|detalles?\s+biogr[aá]ficos?|informaci[oó]n\s+adicional|texto)\s+(?:hay\s+)?(?:sobre|de|para)\s+(.+?)(?:\?|$)", q, re.I))
@@ -2530,7 +2531,7 @@ class QueryRouter:
     def handle_occupation_natural(self, question):
         q = _clean_question(question)
         m = (re.search(r"qu[eé]\s+oficio\s+ten[ií]a\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"en\s+qu[eé]\s+trabaja\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"en\s+qu[eé]\s+trabaja(?:ba)?\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"(?:qu[eé]\s+)?empleo\s+consta\s+de\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+(.+?)(?:\?|$)", q, re.I))
         if not m:
@@ -2940,7 +2941,8 @@ class QueryRouter:
 
     def handle_last_residence(self, question):
         q = _clean_question(question)
-        m = re.search(r"d[oó]nde\s+viv[ií]a\s+(.+?)\s+al\s+final\s+de\s+su\s+vida(?:\?|$)", q, re.I)
+        m = (re.search(r"d[oó]nde\s+viv[ií]a\s+(.+?)\s+al\s+final\s+de\s+su\s+vida(?:\?|$)", q, re.I) or
+             re.search(r"(?:residencia|d[oó]nde\s+(?:vivia|viv[ií]a|vive))\s+(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person, _ = self._resolve_person(m.group(1))
