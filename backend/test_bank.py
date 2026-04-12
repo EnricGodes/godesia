@@ -71,13 +71,13 @@ def _classify_case(case: dict) -> str:
     last_run = case.get("last_run")
     snapshot = case.get("approved_snapshot")
 
-    # Detect improvements: rejected cases that now return valid answer (not "No he sabido responder")
-    # BUT only if not already reviewed and confirmed as "not a real improvement"
-    if verdict == "rejected" and last_run and not case.get("improvement_reviewed"):
-        answer = last_run.get("answer", "")
-        if answer and "No he sabido responder" not in answer:
-            return "improvement"  # Rejected case that now works!
-        return "rejected"
+    # Rejected cases: either "improvement" (if last_run shows valid answer) or "rejected"
+    if verdict == "rejected":
+        if last_run and not case.get("improvement_reviewed"):
+            answer = last_run.get("answer", "")
+            if answer and "No he sabido responder" not in answer:
+                return "improvement"  # Rejected case that now works!
+        return "rejected"  # Always rejected if not an improvement
 
     if verdict == "approved" and snapshot and last_run:
         old = _normalize_answer(snapshot.get("answer", ""))
