@@ -18,6 +18,7 @@ from database import (
 )
 from query_router import QueryRouter
 from query_engine import QueryEngine
+import test_bank
 
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -240,6 +241,74 @@ async def sync_photos_endpoint():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error sincronizando fotos: {str(e)}")
+
+
+# ---------------------------------------------------------------------------
+# Test bank endpoints
+# ---------------------------------------------------------------------------
+
+class AddQuestionsRequest(BaseModel):
+    questions: list
+    tags: list = []
+
+class RunTestsRequest(BaseModel):
+    mode: str = "all"  # all | new | regressions | selected
+    case_ids: list = []
+
+class VerdictRequest(BaseModel):
+    case_id: str
+    verdict: str  # approved | rejected | pending
+
+class DeleteCasesRequest(BaseModel):
+    case_ids: list
+
+class ImportBankRequest(BaseModel):
+    data: dict
+
+
+@app.get("/api/tests/bank")
+async def get_test_bank():
+    return test_bank.get_bank()
+
+@app.get("/api/tests/stats")
+async def get_test_stats():
+    return test_bank.get_stats()
+
+@app.post("/api/tests/bank/add")
+async def add_test_questions(req: AddQuestionsRequest):
+    return test_bank.add_questions(req.questions, req.tags)
+
+@app.post("/api/tests/bank/run")
+async def run_test_bank(req: RunTestsRequest):
+    if not router:
+        raise HTTPException(status_code=503, detail="Router no inicializado")
+    return test_bank.run_tests(router, req.mode, req.case_ids)
+
+@app.post("/api/tests/bank/verdict")
+async def set_test_verdict(req: VerdictRequest):
+    result = test_bank.set_verdict(req.case_id, req.verdict)
+    if not result:
+        raise HTTPException(status_code=404, detail="Caso no encontrado")
+    return result
+
+@app.post("/api/tests/bank/delete")
+async def delete_test_cases(req: DeleteCasesRequest):
+    deleted = test_bank.delete_cases(req.case_ids)
+    return {"deleted": deleted}
+
+@app.post("/api/tests/bank/bootstrap")
+async def bootstrap_test_bank():
+    if not router:
+        raise HTTPException(status_code=503, detail="Router no inicializado")
+    return test_bank.bootstrap_from_router(router)
+
+@app.get("/api/tests/bank/export")
+async def export_test_bank():
+    return test_bank.export_bank()
+
+@app.post("/api/tests/bank/import")
+async def import_test_bank(req: ImportBankRequest):
+    return test_bank.import_bank(req.data)
 
 
 # Serve photos

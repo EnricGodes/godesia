@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Godesia - Test Router</title>
+  <style>
+    :root {
+      --bg: #f6f7f9; --card: #fff; --text: #1f2937; --muted: #6b7280;
+      --border: #d1d5db; --soft: #e5e7eb;
+      --ok-bg: #ecfdf5; --ok-text: #065f46; --ok-border: #a7f3d0;
+      --warn-bg: #fffbeb; --warn-text: #92400e; --warn-border: #fcd34d;
+      --err-bg: #fef2f2; --err-text: #991b1b; --err-border: #fca5a5;
+      --info-bg: #eff6ff; --info-text: #1d4ed8;
+      --pill-bg: #eef2ff; --pill-text: #4338ca;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+    .wrap { max-width: 1400px; margin: 24px auto; padding: 0 16px 48px; }
+    .card { background: var(--card); border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,.06); padding: 20px; margin-bottom: 16px; }
+    h1 { margin: 0 0 6px; font-size: 26px; }
+    h2 { margin: 0 0 10px; font-size: 18px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 13px; }
+
+    label { display: block; font-weight: 600; margin: 10px 0 4px; }
+    textarea { width: 100%; font: inherit; border-radius: 10px; border: 1px solid var(--border); padding: 10px; min-height: 160px; resize: vertical; }
+    button { font: inherit; border-radius: 10px; border: none; padding: 10px 16px; cursor: pointer; font-weight: 600; }
+    .btn-primary { background: #111827; color: #fff; }
+    .btn-secondary { background: #fff; color: #111827; border: 1px solid var(--border); }
+    .btn-ghost { background: #f9fafb; color: #111827; border: 1px solid var(--soft); }
+    .btn-green { background: #065f46; color: #fff; }
+    .btn-red { background: #991b1b; color: #fff; }
+    .btn-yellow { background: #92400e; color: #fff; }
+    .btn-sm { padding: 6px 12px; font-size: 13px; }
+    button:disabled { opacity: .5; cursor: wait; }
+
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+    .pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; margin-right: 6px; }
+    .pill.ok { background: var(--ok-bg); color: var(--ok-text); }
+    .pill.warn { background: var(--warn-bg); color: var(--warn-text); }
+    .pill.err { background: var(--err-bg); color: var(--err-text); }
+    .pill.info { background: var(--info-bg); color: var(--info-text); }
+    .pill.neutral { background: var(--pill-bg); color: var(--pill-text); }
+
+    .stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 10px; }
+    .stat { border: 1px solid var(--soft); border-radius: 12px; padding: 12px; background: #fff; text-align: center; }
+    .stat .k { font-size: 11px; color: var(--muted); margin-bottom: 2px; text-transform: uppercase; }
+    .stat .v { font-size: 28px; font-weight: 800; }
+    .stat.highlight { border-color: var(--err-border); background: var(--err-bg); }
+
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 12px 0; }
+    .filters label { display: inline-flex; align-items: center; gap: 4px; font-weight: 500; margin: 0; font-size: 13px; }
+    .filters input[type="checkbox"] { width: auto; margin: 0; }
+    #searchBox { font: inherit; border-radius: 8px; border: 1px solid var(--border); padding: 6px 10px; width: 260px; }
+
+    .progress-bar { width: 100%; height: 8px; background: var(--soft); border-radius: 4px; margin: 8px 0; overflow: hidden; }
+    .progress-bar .fill { height: 100%; background: #111827; border-radius: 4px; transition: width .2s; }
+    #progressText { font-size: 13px; color: var(--muted); }
+
+    .result-card { border: 1px solid var(--soft); border-radius: 14px; padding: 16px; margin-top: 10px; background: #fff; }
+    .result-card.regression { border-color: var(--err-border); background: #fffafa; }
+    .result-card.pending { border-color: var(--warn-border); background: #fffdf7; }
+    .result-card.stable { border-color: var(--ok-border); }
+    .result-card .q { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+    .result-card .answer-box { white-space: pre-wrap; background: #f9fafb; border-radius: 8px; padding: 10px; border: 1px solid #f0f2f5; font-size: 14px; margin-top: 6px; line-height: 1.5; }
+    .result-card .meta { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .result-card .card-actions { display: flex; gap: 6px; margin-top: 10px; }
+
+    .diff-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .diff-side { border-radius: 8px; padding: 10px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+    .diff-old { background: #fef2f2; border: 1px solid #fecaca; }
+    .diff-new { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .diff-label { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+    .diff-added { background: #bbf7d0; padding: 0 2px; border-radius: 3px; }
+    .diff-removed { background: #fecaca; padding: 0 2px; border-radius: 3px; text-decoration: line-through; }
+
+    @media (max-width: 900px) {
+      .stats { grid-template-columns: repeat(3, 1fr); }
+      .diff-container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Test Router - Regression Testing</h1>
+    <p class="muted small">Banco de tests persistente en servidor. Detecta regresiones cuando las respuestas cambian respecto a snapshots aprobados.</p>
+
+    <label for="questions">Preguntas nuevas (una por linea)</label>
+    <textarea id="questions" placeholder="Escribe preguntas aqui, una por linea..."></textarea>
+
+    <div class="actions">
+      <button class="btn-secondary" onclick="addQuestions()">Anadir al banco</button>
+      <button class="btn-primary" onclick="addAndRun()">Anadir y ejecutar nuevas</button>
+      <button class="btn-primary" onclick="runAll()">Ejecutar todo</button>
+      <button class="btn-yellow" onclick="runRegressions()">Re-ejecutar regresiones</button>
+      <button class="btn-ghost" onclick="bootstrapBank()">Bootstrap desde patrones</button>
+      <button class="btn-secondary" onclick="exportBank()">Exportar JSON</button>
+      <button class="btn-secondary" onclick="document.getElementById('importFile').click()">Importar JSON</button>
+      <input id="importFile" type="file" accept="application/json" style="display:none" onchange="importBank(event)" />
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Estado del banco</h2>
+    <div id="statsGrid" class="stats"></div>
+    <div id="progressArea" style="display:none; margin-top:10px;">
+      <div class="progress-bar"><div class="fill" id="progressFill" style="width:0%"></div></div>
+      <span id="progressText"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Resultados</h2>
+    <div class="filters">
+      <label><input type="checkbox" id="fRegression" checked onchange="renderResults()" /> Regresiones</label>
+      <label><input type="checkbox" id="fPending" checked onchange="renderResults()" /> Pendientes</label>
+      <label><input type="checkbox" id="fStable" checked onchange="renderResults()" /> Aprobadas</label>
+      <label><input type="checkbox" id="fRejected" onchange="renderResults()" /> Rechazadas</label>
+      <label><input type="checkbox" id="fNew" checked onchange="renderResults()" /> Nuevas</label>
+      <input type="text" id="searchBox" placeholder="Buscar en preguntas/respuestas..." oninput="renderResults()" />
+      <button class="btn-ghost btn-sm" onclick="approveAllStable()">Aprobar todas las pendientes ejecutadas</button>
+    </div>
+    <div id="resultsArea"></div>
+  </div>
+</div>
+
+<script>
+let bankData = { cases: [] };
+
+async function api(path, opts = {}) {
+  const url = '/api/tests' + path;
+  const res = await fetch(url, {
+    method: opts.method || 'GET',
+    headers: opts.body ? { 'Content-Type': 'application/json' } : {},
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  return res.json();
+}
+
+async function loadBank() {
+  bankData = await api('/bank');
+  renderStats();
+  renderResults();
+}
+
+function renderStats() {
+  const cases = bankData.cases || [];
+  const counts = { total: cases.length, stable: 0, regression: 0, pending: 0, rejected: 0, new: 0 };
+  cases.forEach(c => { counts[c._classification] = (counts[c._classification] || 0) + 1; });
+
+  const grid = document.getElementById('statsGrid');
+  grid.innerHTML = [
+    { k: 'Total', v: counts.total, cls: '' },
+    { k: 'Estables', v: counts.stable, cls: 'ok' },
+    { k: 'Regresiones', v: counts.regression, cls: counts.regression > 0 ? 'highlight' : '' },
+    { k: 'Pendientes', v: counts.pending, cls: '' },
+    { k: 'Nuevas', v: counts.new, cls: '' },
+    { k: 'Rechazadas', v: counts.rejected, cls: '' },
+  ].map(s => `<div class="stat ${s.cls}"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
+}
+
+function renderResults() {
+  const search = document.getElementById('searchBox').value.toLowerCase();
+  const show = {
+    regression: document.getElementById('fRegression').checked,
+    pending: document.getElementById('fPending').checked,
+    stable: document.getElementById('fStable').checked,
+    rejected: document.getElementById('fRejected').checked,
+    new: document.getElementById('fNew').checked,
+  };
+
+  const filtered = (bankData.cases || []).filter(c => {
+    if (!show[c._classification]) return false;
+    if (search) {
+      const haystack = (c.question + ' ' + (c.last_run?.answer || '')).toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+
+  // Sort: regressions first, then pending, new, stable, rejected
+  const order = { regression: 0, pending: 1, new: 2, stable: 3, rejected: 4 };
+  filtered.sort((a, b) => (order[a._classification] ?? 5) - (order[b._classification] ?? 5));
+
+  const area = document.getElementById('resultsArea');
+  if (filtered.length === 0) {
+    area.innerHTML = '<p class="muted small" style="margin-top:10px">No hay casos que coincidan con los filtros.</p>';
+    return;
+  }
+
+  area.innerHTML = filtered.map(c => renderCase(c)).join('');
+}
+
+function renderCase(c) {
+  const cls = c._classification;
+  const pills = [];
+
+  if (cls === 'regression') pills.push('<span class="pill err">REGRESION</span>');
+  else if (cls === 'stable') pills.push('<span class="pill ok">ESTABLE</span>');
+  else if (cls === 'pending') pills.push('<span class="pill warn">PENDIENTE</span>');
+  else if (cls === 'new') pills.push('<span class="pill info">NUEVA</span>');
+  else if (cls === 'rejected') pills.push('<span class="pill neutral">RECHAZADA</span>');
+
+  if (c.last_run?.handler) pills.push(`<span class="pill neutral">${c.last_run.handler}</span>`);
+  if (c.tags?.length) c.tags.forEach(t => pills.push(`<span class="pill neutral">${t}</span>`));
+
+  let body = '';
+  if (cls === 'regression' && c.approved_snapshot && c.last_run) {
+    const oldWords = (c.approved_snapshot.answer || '').split(/(\s+)/);
+    const newWords = (c.last_run.answer || '').split(/(\s+)/);
+    body = `
+      <div class="diff-container">
+        <div class="diff-side diff-old">
+          <div class="diff-label" style="color:var(--err-text)">Respuesta aprobada (${c.approved_snapshot.approved_at?.substring(0,10) || '?'})</div>
+          ${escapeHtml(c.approved_snapshot.answer || '')}
+        </div>
+        <div class="diff-side diff-new">
+          <div class="diff-label" style="color:var(--info-text)">Respuesta actual (${c.last_run.ran_at?.substring(0,10) || '?'})</div>
+          ${escapeHtml(c.last_run.answer || '')}
+        </div>
+      </div>`;
+  } else if (c.last_run) {
+    body = `<div class="answer-box">${escapeHtml(c.last_run.answer || '')}</div>`;
+  } else {
+    body = '<p class="muted small">Sin ejecutar</p>';
+  }
+
+  const meta = c.last_run ? `<div class="meta">Ejecutada: ${c.last_run.ran_at?.substring(0,19) || '?'} | Run: ${c.last_run.run_id || '?'}</div>` : '';
+
+  return `
+    <div class="result-card ${cls}">
+      <div>${pills.join('')}</div>
+      <div class="q">${escapeHtml(c.question)}</div>
+      ${body}
+      ${meta}
+      <div class="card-actions">
+        <button class="btn-green btn-sm" onclick="setVerdict('${c.id}','approved')">Aprobar</button>
+        <button class="btn-red btn-sm" onclick="setVerdict('${c.id}','rejected')">Rechazar</button>
+        <button class="btn-ghost btn-sm" onclick="setVerdict('${c.id}','pending')">Pendiente</button>
+        <button class="btn-ghost btn-sm" onclick="deleteCase('${c.id}')">Eliminar</button>
+      </div>
+    </div>`;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// --- Actions ---
+
+async function addQuestions() {
+  const lines = document.getElementById('questions').value.split('\n').filter(l => l.trim());
+  if (!lines.length) return;
+  const result = await api('/bank/add', { method: 'POST', body: { questions: lines } });
+  alert(`Anadidas: ${result.added}, duplicadas: ${result.skipped}`);
+  document.getElementById('questions').value = '';
+  await loadBank();
+}
+
+async function addAndRun() {
+  const lines = document.getElementById('questions').value.split('\n').filter(l => l.trim());
+  if (!lines.length) return;
+  await api('/bank/add', { method: 'POST', body: { questions: lines } });
+  document.getElementById('questions').value = '';
+  showProgress();
+  const result = await api('/bank/run', { method: 'POST', body: { mode: 'new' } });
+  hideProgress();
+  await loadBank();
+  alert(`Ejecutadas: ${result.executed}, regresiones: ${result.regressions}`);
+}
+
+async function runAll() {
+  showProgress();
+  const result = await api('/bank/run', { method: 'POST', body: { mode: 'all' } });
+  hideProgress();
+  await loadBank();
+  alert(`Ejecutadas: ${result.executed}, regresiones: ${result.regressions}`);
+}
+
+async function runRegressions() {
+  showProgress();
+  const result = await api('/bank/run', { method: 'POST', body: { mode: 'regressions' } });
+  hideProgress();
+  await loadBank();
+  alert(`Re-ejecutadas: ${result.executed}, regresiones: ${result.regressions}`);
+}
+
+async function bootstrapBank() {
+  if (!confirm('Esto generara tests automaticamente desde los patrones del router. Continuar?')) return;
+  showProgress();
+  const result = await api('/bank/bootstrap', { method: 'POST' });
+  hideProgress();
+  await loadBank();
+  alert(`Bootstrap: ${result.added} tests anadidos, ${result.skipped || 0} duplicados`);
+}
+
+async function setVerdict(caseId, verdict) {
+  await api('/bank/verdict', { method: 'POST', body: { case_id: caseId, verdict } });
+  await loadBank();
+}
+
+async function deleteCase(caseId) {
+  if (!confirm('Eliminar este caso?')) return;
+  await api('/bank/delete', { method: 'POST', body: { case_ids: [caseId] } });
+  await loadBank();
+}
+
+async function approveAllStable() {
+  const pendingExecuted = (bankData.cases || []).filter(c =>
+    (c._classification === 'pending' || c._classification === 'new') && c.last_run
+  );
+  if (!pendingExecuted.length) { alert('No hay casos pendientes ejecutados para aprobar'); return; }
+  if (!confirm(`Aprobar ${pendingExecuted.length} casos pendientes/nuevos?`)) return;
+  for (const c of pendingExecuted) {
+    await api('/bank/verdict', { method: 'POST', body: { case_id: c.id, verdict: 'approved' } });
+  }
+  await loadBank();
+}
+
+async function exportBank() {
+  const data = await api('/bank/export');
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `test_bank_${new Date().toISOString().substring(0,10)}.json`;
+  a.click();
+}
+
+async function importBank(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  const data = JSON.parse(text);
+  const result = await api('/bank/import', { method: 'POST', body: { data } });
+  alert(`Importados: ${result.added}`);
+  event.target.value = '';
+  await loadBank();
+}
+
+function showProgress() {
+  document.getElementById('progressArea').style.display = 'block';
+  document.getElementById('progressFill').style.width = '30%';
+  document.getElementById('progressText').textContent = 'Ejecutando tests...';
+}
+function hideProgress() {
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = 'Completado';
+  setTimeout(() => { document.getElementById('progressArea').style.display = 'none'; }, 1500);
+}
+
+// Load on start
+loadBank();
+</script>
+</body>
+</html>

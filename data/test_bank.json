@@ -1,0 +1,1260 @@
+{
+  "cases": [
+    {
+      "id": "tc_cfb06c2c",
+      "question": "Quienes eran los padres de Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Los padres de <a href=\"/dossier.html?id=I500320\">Gertrudis Godes Llorens</a> fueron <a href=\"/dossier.html?id=I500301\">Josep Godes Pasqual</a> (1827) y <a href=\"/dossier.html?id=I500304\">Gertrudis Llorens Fortanet</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500320@",
+          "@I500301@",
+          "@I500304@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_c0b15faa",
+      "question": "Quien era el padre de Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "El padre de <a href=\"/dossier.html?id=I500320\">Gertrudis Godes Llorens</a> fue <a href=\"/dossier.html?id=I500301\">Josep Godes Pasqual</a> (1827).",
+        "handler": "",
+        "people_mentioned": [
+          "@I500320@",
+          "@I500301@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_f0b895af",
+      "question": "Quien era la madre de Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_e203ea2a",
+      "question": "Que hermanos tenia Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_9c9fa322",
+      "question": "Cuantos hermanos tenia Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "<a href=\"/dossier.html?id=I500320\">Gertrudis Godes Llorens</a> tenía 5 hermanos o hermanas documentados: <a href=\"/dossier.html?id=I500330\">Festiva Godes Llorens</a>, <a href=\"/dossier.html?id=I500329\">Lola Godes Llorens</a>, <a href=\"/dossier.html?id=I500328\">Pepe Godes Llorens</a>, <a href=\"/dossier.html?id=I500321\">Pepet Godes Llorens</a>, <a href=\"/dossier.html?id=I500303\">Ramon Godes Llorens</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500320@",
+          "@I500330@",
+          "@I500329@",
+          "@I500328@",
+          "@I500321@",
+          "@I500303@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_fb53bcf8",
+      "question": "Que hijos tuvo Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_d06fc874",
+      "question": "Cuantos hijos tuvo Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "<a href=\"/dossier.html?id=I500320\">Gertrudis Godes Llorens</a> tuvo 1 hijos o hijas documentados: <a href=\"/dossier.html?id=I500323\">Gertrudis Parés Godes</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500320@",
+          "@I500323@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_4c1237f8",
+      "question": "Con quien se caso Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_fb37de06",
+      "question": "Quienes eran los abuelos de Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Los abuelos de <a href=\"/dossier.html?id=I500320\">Gertrudis Godes Llorens</a> se llamaban <a href=\"/dossier.html?id=I500297\">Isabel Pasqual Enrig</a>, <a href=\"/dossier.html?id=I500296\">Ramon Godes Boix</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500320@",
+          "@I500297@",
+          "@I500296@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_94b1d030",
+      "question": "Quien era el abuelo paterno de Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "El abuelo paterno de <a href=\"/dossier.html?id=I500320\">Gertrudis Godes Llorens</a> fue <a href=\"/dossier.html?id=I500296\">Ramon Godes Boix</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500320@",
+          "@I500296@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_688a7ecb",
+      "question": "Quien era la abuela materna de Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No consta documentada la abuela materna de <a href=\"/dossier.html?id=I500320\">Gertrudis Godes Llorens</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500320@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_11314ada",
+      "question": "Quienes eran los bisabuelos de Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Los bisabuelos de <a href=\"/dossier.html?id=I500320\">Gertrudis Godes Llorens</a> son 4: <a href=\"/dossier.html?id=I500250\">Josef Godes Martí</a>, <a href=\"/dossier.html?id=I500284\">Gertrudis Boix Guardiola</a>, <a href=\"/dossier.html?id=I500298\">Josef Pasqual</a>, <a href=\"/dossier.html?id=I500299\">Paulina Enrig</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500320@",
+          "@I500250@",
+          "@I500284@",
+          "@I500298@",
+          "@I500299@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_36e15845",
+      "question": "Tios y tias de Gertrudis Godes Llorens",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_24b9bded",
+      "question": "Primos hermanos de Gertrudis Godes Llorens",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Los primos hermanos de <a href=\"/dossier.html?id=I500320\">Gertrudis Godes Llorens</a> fueron 1 en total: por parte paterna: <a href=\"/dossier.html?id=I500313\">Ramon Godes</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500320@",
+          "@I500313@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_d6627f90",
+      "question": "Suegros de Gertrudis Godes Llorens",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_5e202349",
+      "question": "Nueras de Gertrudis Godes Llorens",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_7f0b07a3",
+      "question": "Yernos de Gertrudis Godes Llorens",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_741eaa9a",
+      "question": "Cunados de Gertrudis Godes Llorens",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_fa4f2eb6",
+      "question": "Donde nacio Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_313c7b68",
+      "question": "Cuando murio Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_e3c3bf43",
+      "question": "Donde murio Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_7fa65e02",
+      "question": "En que trabajaba Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_bd761b4f",
+      "question": "Donde vivia Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_e172cecc",
+      "question": "Ultima residencia de Gertrudis Godes Llorens",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_5a4db7dd",
+      "question": "Notas biograficas de Gertrudis Godes Llorens",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_d1c2866f",
+      "question": "Que parentesco hay entre Gertrudis Godes Llorens y Asensio Guevara?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_cef06d83",
+      "question": "Quien es mayor, Gertrudis Godes Llorens o Asensio Guevara?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_7a92a4cd",
+      "question": "Que persona tuvo mas hijos?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_c60a78b1",
+      "question": "Quien vivio mas anos?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_a0a7f621",
+      "question": "Cual es la media de hijos?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "La media de hijos es de 2.5 por persona con descendencia documentada.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_7eb9cb5f",
+      "question": "Hay mas hombres o mujeres en el arbol?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Hay más mujeres que hombres: 460 mujeres frente a 454 hombres. Además, 8 personas no tienen el sexo informado.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_c8d56419",
+      "question": "Que personas nacieron en Castellón de la Plana?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Las personas con primer apellido personas nacidas en Castellón de la Plana son 0.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_58952b75",
+      "question": "Quien nacio en 1920?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_f04f9931",
+      "question": "Que personas tienen Abelló como primer apellido?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Las personas con Abelló como primer apellido son 1: <a href=\"/dossier.html?id=I500008\">María Abelló Monrós</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500008@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_bb789e65",
+      "question": "Cuantas personas se llaman Gertrudis?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_0858b837",
+      "question": "Cuantos hijos tuvieron Pasqual Godes Gomis y Rosa Caballeria Madiroles?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_306ce8b2",
+      "question": "A que edad se caso Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_55e34387",
+      "question": "A que edad tuvo su primer hijo Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_032e06dd",
+      "question": "Ranking de longevidad de Gertrudis Godes Llorens",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_6f458b84",
+      "question": "Tiene descendencia documentada Gertrudis Godes Llorens?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_7f9f25ee",
+      "question": "Ranking de descendencia de Gertrudis Godes Llorens",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_d210658f",
+      "question": "Hijos de PETRONILA SALINAS BAINAC",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No constan hijos documentados de <a href=\"/dossier.html?id=I500609\">Petronila Salinas Bainac</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500609@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_20a8d003",
+      "question": "Padres de PETRONILA SALINAS BAINAC",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Los padres de <a href=\"/dossier.html?id=I500609\">Petronila Salinas Bainac</a> fueron <a href=\"/dossier.html?id=I500602\">Joaquin Sebastian Salinas Sarrado</a> (1756-1836) de Benabarre (Huesca) y <a href=\"/dossier.html?id=I500603\">Joaquina Josefa Bainac Ferrer</a> (1753-1822) de Benabarre, Huesca, Aragón, España.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500609@",
+          "@I500602@",
+          "@I500603@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_a6115c76",
+      "question": "Donde nacio PETRONILA SALINAS BAINAC?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_37ba7783",
+      "question": "Hijos de Antonio Diago Almuzara",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Los hijos de <a href=\"/dossier.html?id=I500151\">Antonio Diago Almuzara</a> fueron <a href=\"/dossier.html?id=I500416\">Antonio Diago Navarro</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500151@",
+          "@I500416@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_13f6b481",
+      "question": "Padres de Antonio Diago Almuzara",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Los padres de <a href=\"/dossier.html?id=I500151\">Antonio Diago Almuzara</a> fueron <a href=\"/dossier.html?id=I500137\">Nicómedes Diago Marín</a> (1865-1944) de Santa Cruz de Yanguas, Soria y <a href=\"/dossier.html?id=I500138\">Dolores Almuzara Ardanuy</a> (1869-1924) de Lascuarre, Huesca.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500151@",
+          "@I500137@",
+          "@I500138@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_7c804fd7",
+      "question": "Donde nacio Antonio Diago Almuzara?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_7853f3f6",
+      "question": "Hijos de Narcis Puig Valls",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Los hijos de <a href=\"/dossier.html?id=I500720\">Narcis Puig Valls</a> fueron <a href=\"/dossier.html?id=I500478\">Felip Puig Rigau</a>, <a href=\"/dossier.html?id=I500722\">Carmen Puig Rigau</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500720@",
+          "@I500478@",
+          "@I500722@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_93bf4631",
+      "question": "Padres de Narcis Puig Valls",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No constan los padres de <a href=\"/dossier.html?id=I500720\">Narcis Puig Valls</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500720@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_c07e9de4",
+      "question": "Donde nacio Narcis Puig Valls?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_54b75513",
+      "question": "Hijos de Ignasi Duró Guitart",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Los hijos de <a href=\"/dossier.html?id=I500031\">Ignasi Duró Guitart</a> fueron <a href=\"/dossier.html?id=I500015\">María Duró Porta</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500031@",
+          "@I500015@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_fee0fbbe",
+      "question": "Padres de Ignasi Duró Guitart",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No constan los padres de <a href=\"/dossier.html?id=I500031\">Ignasi Duró Guitart</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500031@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_71b10e24",
+      "question": "Donde nacio Ignasi Duró Guitart?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_8f491393",
+      "question": "Hijos de Juana Diago Almuzara",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No constan hijos documentados de <a href=\"/dossier.html?id=I500143\">Juana Diago Almuzara</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500143@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_d44ac667",
+      "question": "Padres de Juana Diago Almuzara",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Los padres de <a href=\"/dossier.html?id=I500143\">Juana Diago Almuzara</a> fueron <a href=\"/dossier.html?id=I500137\">Nicómedes Diago Marín</a> (1865-1944) de Santa Cruz de Yanguas, Soria y <a href=\"/dossier.html?id=I500138\">Dolores Almuzara Ardanuy</a> (1869-1924) de Lascuarre, Huesca.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500143@",
+          "@I500137@",
+          "@I500138@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_bafa7fdf",
+      "question": "Donde nacio Juana Diago Almuzara?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_88e545c2",
+      "question": "Hijos de Josefa Figuerola Diago",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Los hijos de <a href=\"/dossier.html?id=I500413\">Josefa Figuerola Diago</a> fueron <a href=\"/dossier.html?id=I500466\">Rafael Andrade Figuerola</a>.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500413@",
+          "@I500466@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_86024877",
+      "question": "Padres de Josefa Figuerola Diago",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "Los padres de <a href=\"/dossier.html?id=I500413\">Josefa Figuerola Diago</a> fueron <a href=\"/dossier.html?id=I500147\">Ramón Figuerola Magriñà</a> (1889-1944) de Barcelona, Barcelona, Catalunya, España y <a href=\"/dossier.html?id=I500146\">Asunción Diago Almuzara</a> (1898-1990) de Barcelona, Barcelona, Catalunya, España.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500413@",
+          "@I500147@",
+          "@I500146@"
+        ],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    },
+    {
+      "id": "tc_5da4557d",
+      "question": "Donde nacio Josefa Figuerola Diago?",
+      "tags": [
+        "bootstrap"
+      ],
+      "verdict": "pending",
+      "created_at": "2026-04-12T15:57:46.527854",
+      "updated_at": "2026-04-12T15:57:46.529124",
+      "approved_snapshot": null,
+      "last_run": {
+        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "handler": "",
+        "people_mentioned": [],
+        "status": 200,
+        "ran_at": "2026-04-12T15:57:46.529124",
+        "run_id": "run_4d590eb0"
+      },
+      "history": []
+    }
+  ],
+  "last_run_id": "run_4d590eb0",
+  "last_run_at": "2026-04-12T15:57:46.529124"
+}
