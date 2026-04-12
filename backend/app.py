@@ -123,16 +123,12 @@ async def query(req: QueryRequest):
 
     # Try direct DB answer
     result = router.route(req.question)
-    if result:
-        return result
 
-    # Can't answer from DB — log and return friendly message
-    log_unresolved_query(req.question)
-    return {
-        "answer": "No he sabut respondre aquesta pregunta. L'he anotada per millorar-la.",
-        "people_mentioned": [],
-        "people_with_photos": [],
-    }
+    # Check if router couldn't resolve the question
+    if result and "No he sabido responder" in result.get("answer", ""):
+        log_unresolved_query(req.question)
+
+    return result
 
 
 @app.post("/api/query/confirm")
