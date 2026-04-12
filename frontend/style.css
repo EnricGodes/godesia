@@ -1394,3 +1394,76 @@ nav {
 .documents-see-all a:hover {
     opacity: 0.8;
 }
+
+/* ========================================================================== */
+/* @mention Autocomplete Dropdown */
+/* ========================================================================== */
+
+.mention-dropdown {
+    display: none;
+    position: fixed;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--outline-variant);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1001;
+    min-width: 240px;
+}
+
+.mention-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    border-bottom: 1px solid var(--surface-container-low);
+}
+
+.mention-item:last-child {
+    border-bottom: none;
+}
+
+.mention-item:hover,
+.mention-item.selected {
+    background-color: var(--surface-container);
+}
+
+.mention-photo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--outline-variant);
+}
+
+.mention-photo-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--surface-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 600;
+    color: var(--on-surface);
+    border: 1px solid var(--outline-variant);
+}
+
+.mention-name {
+    font-size: 13px;
+    color: var(--on-surface);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mention-name strong {
+    font-weight: 700;
+    color: var(--primary);
+}

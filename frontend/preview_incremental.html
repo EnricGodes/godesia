@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Godesia - Tester incremental query_router</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --soft: #e5e7eb;
+      --ok-bg: #ecfdf5;
+      --ok-text: #065f46;
+      --warn-bg: #fffbeb;
+      --warn-text: #92400e;
+      --err-bg: #fef2f2;
+      --err-text: #991b1b;
+      --info-bg: #eff6ff;
+      --info-text: #1d4ed8;
+      --pill-bg: #eef2ff;
+      --pill-text: #4338ca;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1320px;
+      margin: 24px auto;
+      padding: 0 16px 48px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    h2 { margin: 0 0 10px; font-size: 18px; }
+    p { margin: 0 0 10px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 13px; }
+
+    label { display:block; font-weight: 600; margin: 12px 0 6px; }
+    input, textarea, select, button {
+      width: 100%;
+      font: inherit;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      background: white;
+    }
+    textarea { min-height: 220px; resize: vertical; }
+    button {
+      background: #111827;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button.secondary {
+      background: white;
+      color: #111827;
+      border: 1px solid var(--border);
+    }
+    button.ghost {
+      background: #f9fafb;
+      color: #111827;
+      border: 1px solid var(--soft);
+    }
+    button.good {
+      background: #065f46;
+    }
+    button.bad {
+      background: #991b1b;
+    }
+    button.pending {
+      background: #92400e;
+    }
+    button:disabled { opacity: .55; cursor: wait; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 12px;
+    }
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .row4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .actions.actions-compact {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      font-size: 12px;
+      font-weight: 700;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    .pill.ok { background: var(--ok-bg); color: var(--ok-text); }
+    .pill.warn { background: var(--warn-bg); color: var(--warn-text); }
+    .pill.err { background: var(--err-bg); color: var(--err-text); }
+    .pill.info { background: var(--info-bg); color: var(--info-text); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .stat {
+      border: 1px solid var(--soft);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+    }
+    .stat .k { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .stat .v { font-size: 24px; font-weight: 800; }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .result {
+      border: 1px solid var(--soft);
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 12px;
+      background: #fff;
+    }
+    .result.regression {
+      border-color: #fca5a5;
+      box-shadow: inset 0 0 0 1px #fecaca;
+      background: #fffafa;
+    }
+    .result.pending-review {
+      border-color: #fcd34d;
+      box-shadow: inset 0 0 0 1px #fde68a;
+      background: #fffdf7;
+    }
+    .q { font-weight: 800; margin-bottom: 8px; font-size: 16px; }
+    .a {
+      white-space: pre-wrap;
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid #f0f2f5;
+      margin-top: 8px;
+    }
+    .meta {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    code {
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: .95em;
+    }
+    .result-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .inline-note {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid var(--soft);
+      font-size: 13px;
+    }
+    .checkbox-line {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .checkbox-line label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+      margin: 0;
+    }
+    .checkbox-line input[type="checkbox"] {
+      width: auto;
+      padding: 0;
+      margin: 0;
+    }
+
+
+    .compact-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .compact-item {
+      border: 1px solid var(--soft);
+      border-radius: 14px;
+      background: #fff;
+      padding: 14px;
+    }
+    .compact-item .q {
+      margin-bottom: 10px;
+    }
+    .compact-item .a {
+      margin-top: 0;
+    }
+
+    @media (max-width: 1100px) {
+      .stats { grid-template-columns: repeat(3, 1fr); }
+      .actions { grid-template-columns: 1fr 1fr; }
+      .actions.actions-compact { grid-template-columns: 1fr 1fr; }
+      .row, .row2, .row4, .result-actions { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .stats { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Tester incremental de Godesia</h1>
+      <p class="muted">
+        Este tester mantiene un <strong>banco acumulativo de preguntas</strong>, permite validar manualmente si cada respuesta es correcta,
+        y vuelve a ejecutar todo para detectar <strong>posibles regresiones</strong> en preguntas que antes habías dado por buenas.
+      </p>
+      <div id="detect-status" class="small muted">Detectando endpoint…</div>
+
+      <div class="row">
+        <div>
+          <label for="endpoint">Endpoint</label>
+          <input id="endpoint" value="/api/query" placeholder="/api/query" />
+        </div>
+        <div>
+          <label for="method">Método</label>
+          <select id="method">
+            <option value="POST" selected>POST</option>
+            <option value="GET">GET</option>
+          </select>
+        </div>
+        <div>
+          <label for="delay">Pausa (ms)</label>
+          <input id="delay" type="number" min="0" step="100" value="0" />
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label for="questionParam">Nombre del campo pregunta</label>
+          <input id="questionParam" value="question" />
+        </div>
+        <div>
+          <label for="extraParams">Campos extra JSON</label>
+          <input id="extraParams" value='["message","text","query","prompt"]' />
+        </div>
+      </div>
+
+      <label for="questions">Preguntas nuevas, una por línea</label>
+      <textarea id="questions">¿Quién nació el 13/10/1834?
+¿Qué personas nacieron en Morella?
+¿Qué personas tienen Godes como primer apellido?
+¿Qué parentesco había entre Emili Godes Hurtado y Rosa Godes Hurtado?</textarea>
+
+      <div class="actions">
+        <button id="addBtn" class="secondary" type="button">Añadir al banco</button>
+        <button id="runNewBtn" type="button">Añadir y ejecutar nuevas</button>
+        <button id="runAllBtn" type="button">Ejecutar todo el banco</button>
+        <button id="exportBtn" class="secondary" type="button">Exportar banco JSON</button>
+        <button id="importBtn" class="secondary" type="button">Importar banco JSON</button>
+      </div>
+      <input id="importFile" type="file" accept="application/json" style="display:none" />
+
+      <div class="actions actions-compact">
+        <button id="clearResultsBtn" class="ghost" type="button">Limpiar vista actual</button>
+        <button id="resetBankBtn" class="ghost" type="button">Borrar banco completo</button>
+        <button id="recheckSuspectsBtn" class="ghost" type="button">Reejecutar posibles regresiones</button>
+        <button id="reviewApprovedBtn" class="ghost" type="button">Reejecutar aprobadas</button>
+        <button id="showRejectedQaBtn" class="ghost" type="button">Ver sólo Q+A marcadas como mal</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Estado del banco</h2>
+      <div id="bankSummary" class="muted">Todavía no hay casos guardados.</div>
+      <div id="bankStats" class="stats"></div>
+      <div class="toolbar small muted" id="runMeta"></div>
+    </div>
+
+    <div class="card">
+      <h2>Resultados / revisión</h2>
+      <div class="checkbox-line">
+        <label><input type="checkbox" id="filterRegressions" checked /> Posibles regresiones</label>
+        <label><input type="checkbox" id="filterPending" checked /> Pendientes</label>
+        <label><input type="checkbox" id="filterApproved" checked /> Aprobadas</label>
+        <label><input type="checkbox" id="filterRejected" checked /> Marcadas como mal</label>
+        <label><input type="checkbox" id="showOnlyLastRun" /> Sólo casos ejecutados en la última corrida</label>
+      </div>
+      <div id="summary" class="muted" style="margin-top:10px;">Todavía no se ha lanzado ninguna prueba.</div>
+      <div id="results"></div>
+    </div>
+
+    <div class="card">
+      <h2>Vista rápida de casos marcados como mal</h2>
+      <p class="muted">Muestra únicamente la pregunta y la última respuesta registrada de los casos marcados como mal, sin metadatos ni botones.</p>
+      <div class="toolbar">
+        <button id="copyRejectedQaBtn" class="secondary" type="button">Copiar Q+A marcadas como mal</button>
+      </div>
+      <div id="rejectedQaSummary" class="muted" style="margin-top:10px;">Pulsa “Ver sólo Q+A marcadas como mal” para abrir esta vista compacta.</div>
+      <div id="rejectedQaResults"></div>
+    </div>
+  </div>
+
+<script>
+const STORAGE_KEY = 'godesia_incremental_tester_v2';
+const MAX_HISTORY = 25;
+
+const endpointInput = document.getElementById('endpoint');
+const methodInput = document.getElementById('method');
+const delayInput = document.getElementById('delay');
+const questionParamInput = document.getElementById('questionParam');
+const extraParamsInput = document.getElementById('extraParams');
+const questionsInput = document.getElementById('questions');
+const addBtn = document.getElementById('addBtn');
+const runNewBtn = document.getElementById('runNewBtn');
+const runAllBtn = document.getElementById('runAllBtn');
+const exportBtn = document.getElementById('exportBtn');
+const importBtn = document.getElementById('importBtn');
+const importFile = document.getElementById('importFile');
+const clearResultsBtn = document.getElementById('clearResultsBtn');
+const resetBankBtn = document.getElementById('resetBankBtn');
+const recheckSuspectsBtn = document.getElementById('recheckSuspectsBtn');
+const reviewApprovedBtn = document.getElementById('reviewApprovedBtn');
+const showRejectedQaBtn = document.getElementById('showRejectedQaBtn');
+const copyRejectedQaBtn = document.getElementById('copyRejectedQaBtn');
+const detectStatus = document.getElementById('detect-status');
+const summary = document.getElementById('summary');
+const results = document.getElementById('results');
+const rejectedQaSummary = document.getElementById('rejectedQaSummary');
+const rejectedQaResults = document.getElementById('rejectedQaResults');
+const bankSummary = document.getElementById('bankSummary');
+const bankStats = document.getElementById('bankStats');
+const runMeta = document.getElementById('runMeta');
+
+const filterRegressions = document.getElementById('filterRegressions');
+const filterPending = document.getElementById('filterPending');
+const filterApproved = document.getElementById('filterApproved');
+const filterRejected = document.getElementById('filterRejected');
+const showOnlyLastRun = document.getElementById('showOnlyLastRun');
+
+let state = loadState();
+
+function defaultState() {
+  return {
+    version: 1,
+    settings: {
+      endpoint: '/api/query',
+      method: 'POST',
+      delay: 0,
+      questionParam: 'question',
+      extraParams: '["message","text","query","prompt"]'
+    },
+    cases: [],
+    lastRunId: null,
+    lastRunAt: null,
+    lastRunQuestionIds: []
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return {
+      ...defaultState(),
+      ...parsed,
+      settings: { ...defaultState().settings, ...(parsed.settings || {}) },
+      cases: Array.isArray(parsed.cases) ? parsed.cases : []
+    };
+  } catch {
+    return defaultState();
+  }
+}
+
+function saveState() {
+  state.settings = {
+    endpoint: endpointInput.value.trim() || '/api/query',
+    method: methodInput.value,
+    delay: Number(delayInput.value || 0),
+    questionParam: questionParamInput.value.trim() || 'question',
+    extraParams: extraParamsInput.value.trim() || '["message","text","query","prompt"]'
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function hydrateSettings() {
+  endpointInput.value = state.settings.endpoint || '/api/query';
+  methodInput.value = state.settings.method || 'POST';
+  delayInput.value = String(state.settings.delay ?? 0);
+  questionParamInput.value = state.settings.questionParam || 'question';
+  extraParamsInput.value = state.settings.extraParams || '["message","text","query","prompt"]';
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function uid() {
+  return 'c_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
+
+function normalizeText(text) {
+  return String(text || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function normalizeQuestion(text) {
+  return normalizeText(text)
+    .replace(/[¿?¡!.,;:()\[\]"']/g, '')
+    .trim();
+}
+
+function parseExtraParams() {
+  try {
+    const value = JSON.parse(extraParamsInput.value.trim() || '[]');
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return ['message','text','query','prompt'];
+  }
+}
+
+function normalizeEndpoint(url) {
+  if (!url) return '';
+  const trimmed = String(url).trim().replace(/^['"`]|['"`]$/g, '');
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (trimmed.startsWith('/')) return trimmed;
+  return '/' + trimmed.replace(/^\.?\//, '');
+}
+
+function extractFetchCandidates(js) {
+  const candidates = new Set();
+
+  for (const m of js.matchAll(/fetch\s*\(\s*(['"`])([^'"`]+)\1/gi)) {
+    candidates.add(m[2]);
+  }
+
+  for (const m of js.matchAll(/axios\.(?:post|get)\s*\(\s*(['"`])([^'"`]+)\1/gi)) {
+    candidates.add(m[2]);
+  }
+
+  for (const m of js.matchAll(/\b(?:api|endpoint|url)[A-Z_\w]*\s*=\s*(['"`])([^'"`]+)\1/gi)) {
+    candidates.add(m[2]);
+  }
+
+  const commonHints = ['/api/query', '/api/chat', '/chat', '/ask', '/query', '/api/ask'];
+  for (const hint of commonHints) {
+    if (js.includes(hint)) candidates.add(hint);
+  }
+
+  return [...candidates].map(normalizeEndpoint);
+}
+
+async function detectEndpointFromAppJs() {
+  try {
+    const res = await fetch('./app.js', { cache: 'no-store' });
+    if (!res.ok) throw new Error('No se pudo leer app.js');
+    const js = await res.text();
+    const candidates = extractFetchCandidates(js)
+      .filter(Boolean)
+      .filter(x => !/\.html?$|\.css$|\.png$|\.jpg$|\.svg$/i.test(x));
+
+    if (candidates.length) {
+      const current = endpointInput.value.trim();
+      if (!current || current === '/api/query') {
+        endpointInput.value = candidates[0];
+      }
+      detectStatus.innerHTML =
+        '<span class="pill">Detectado</span> Posibles endpoints en <code>app.js</code>: ' +
+        candidates.map(x => `<code>${escapeHtml(x)}</code>`).join(', ');
+      saveState();
+      return;
+    }
+
+    detectStatus.innerHTML =
+      '<span class="pill warn">Sin detectar</span> He podido leer <code>app.js</code>, pero no he encontrado una ruta clara. Se mantiene <code>/api/query</code> por defecto.';
+  } catch {
+    detectStatus.innerHTML =
+      '<span class="pill warn">Sin detectar</span> No he podido leer <code>app.js</code> desde este HTML. Se mantiene <code>/api/query</code> por defecto.';
+  }
+}
+
+function extractAnswer(data) {
+  if (data == null) return '(respuesta vacía)';
+  if (typeof data === 'string') return data;
+
+  const candidates = [
+    data.answer,
+    data.response,
+    data.message,
+    data.text,
+    data.result,
+    data.reply
+  ];
+
+  for (const c of candidates) {
+    if (typeof c === 'string' && c.trim()) return c;
+  }
+
+  try {
+    return JSON.stringify(data, null, 2);
+  } catch {
+    return String(data);
+  }
+}
+
+async function askQuestion(question) {
+  const endpoint = endpointInput.value.trim();
+  const method = methodInput.value;
+  const qKey = questionParamInput.value.trim() || 'question';
+  const extraKeys = parseExtraParams();
+
+  if (!endpoint) throw new Error('Falta el endpoint');
+
+  if (method === 'GET') {
+    const url = new URL(endpoint, window.location.origin);
+    url.searchParams.set(qKey, question);
+    const res = await fetch(url.toString(), { method: 'GET' });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    return { status: res.status, data };
+  }
+
+  const payload = { [qKey]: question };
+  for (const k of extraKeys) {
+    if (k && !payload[k]) payload[k] = question;
+  }
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch { data = text; }
+  return { status: res.status, data };
+}
+
+function readQuestionsFromTextarea() {
+  return questionsInput.value
+    .split(/\r?\n/)
+    .map(x => x.trim())
+    .filter(Boolean);
+}
+
+function findCaseByNormalizedQuestion(normQ) {
+  return state.cases.find(c => c.normalizedQuestion === normQ) || null;
+}
+
+function addQuestionsToBank(questions) {
+  let added = 0;
+  let skipped = 0;
+  const addedCases = [];
+
+  for (const question of questions) {
+    const normalizedQuestion = normalizeQuestion(question);
+    if (!normalizedQuestion) continue;
+
+    const existing = findCaseByNormalizedQuestion(normalizedQuestion);
+    if (existing) {
+      skipped++;
+      continue;
+    }
+
+    const testCase = {
+      id: uid(),
+      question,
+      normalizedQuestion,
+      verdict: 'pending',
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+      approvedSnapshot: null,
+      lastRun: null,
+      history: []
+    };
+
+    state.cases.push(testCase);
+    addedCases.push(testCase);
+    added++;
+  }
+
+  saveState();
+  renderBank();
+  renderResults();
+  renderRejectedQa();
+  return { added, skipped, addedCases };
+}
+
+function classifyCase(testCase) {
+  const hasLastRun = !!testCase.lastRun;
+  const verdict = testCase.verdict || 'pending';
+  const approvedNorm = testCase.approvedSnapshot?.normalizedAnswer || '';
+  const currentNorm = testCase.lastRun?.normalizedAnswer || '';
+  const currentStatus = Number(testCase.lastRun?.status || 0);
+  const currentHttpOk = currentStatus >= 200 && currentStatus < 300;
+  const changedVsApproved = !!(approvedNorm && currentNorm && approvedNorm !== currentNorm);
+  const approvedButNoCurrentRun = verdict === 'approved' && !hasLastRun;
+  const regressionSuspect = verdict === 'approved' && hasLastRun && (!currentHttpOk || changedVsApproved);
+  const approvedStable = verdict === 'approved' && hasLastRun && currentHttpOk && !changedVsApproved;
+  const rejectedCurrent = verdict === 'rejected';
+  const pendingReview = verdict === 'pending' || approvedButNoCurrentRun;
+
+  return {
+    verdict,
+    currentHttpOk,
+    changedVsApproved,
+    regressionSuspect,
+    approvedStable,
+    rejectedCurrent,
+    pendingReview,
+    approvedButNoCurrentRun,
+    hasLastRun
+  };
+}
+
+function computeStats() {
+  const total = state.cases.length;
+  let approved = 0;
+  let rejected = 0;
+  let pending = 0;
+  let suspect = 0;
+  let executedLastRun = 0;
+  let noRunYet = 0;
+
+  for (const c of state.cases) {
+    const cls = classifyCase(c);
+    if (c.verdict === 'approved') approved++;
+    else if (c.verdict === 'rejected') rejected++;
+    else pending++;
+
+    if (cls.regressionSuspect) suspect++;
+    if (!c.lastRun) noRunYet++;
+    if (state.lastRunId && c.lastRun?.runId === state.lastRunId) executedLastRun++;
+  }
+
+  return { total, approved, rejected, pending, suspect, executedLastRun, noRunYet };
+}
+
+function renderBank() {
+  const { total, approved, rejected, pending, suspect, executedLastRun, noRunYet } = computeStats();
+
+  if (!total) {
+    bankSummary.textContent = 'Todavía no hay casos guardados. Añade preguntas para empezar un banco acumulativo.';
+    bankStats.innerHTML = '';
+    runMeta.innerHTML = '';
+    return;
+  }
+
+  bankSummary.innerHTML =
+    `Banco persistente con <strong>${total}</strong> caso(s). ` +
+    `Aprobadas manualmente: <strong>${approved}</strong>. ` +
+    `Pendientes: <strong>${pending}</strong>. ` +
+    `Marcadas como mal: <strong>${rejected}</strong>. ` +
+    `Posibles regresiones: <strong>${suspect}</strong>.`;
+
+  bankStats.innerHTML = [
+    ['Casos totales', total],
+    ['Aprobadas', approved],
+    ['Pendientes', pending],
+    ['Mal', rejected],
+    ['Posibles regresiones', suspect],
+    ['Sin ejecutar aún', noRunYet]
+  ].map(([k,v]) => `
+    <div class="stat">
+      <div class="k">${escapeHtml(k)}</div>
+      <div class="v">${escapeHtml(String(v))}</div>
+    </div>
+  `).join('');
+
+  runMeta.innerHTML = '';
+  if (state.lastRunId) {
+    const chunks = [];
+    chunks.push(`<span class="pill info">Última corrida: ${escapeHtml(formatDateTime(state.lastRunAt))}</span>`);
+    chunks.push(`<span class="pill">Ejecutadas en la última corrida: ${executedLastRun}</span>`);
+    runMeta.innerHTML = chunks.join('');
+  }
+}
+
+function sortCasesForDisplay(cases) {
+  const weight = (c) => {
+    const cls = classifyCase(c);
+    if (cls.regressionSuspect) return 0;
+    if (cls.pendingReview) return 1;
+    if (c.verdict === 'rejected') return 2;
+    return 3;
+  };
+
+  return [...cases].sort((a, b) => {
+    const diff = weight(a) - weight(b);
+    if (diff !== 0) return diff;
+    const aTime = a.lastRun?.ranAt || a.updatedAt || a.createdAt || '';
+    const bTime = b.lastRun?.ranAt || b.updatedAt || b.createdAt || '';
+    return String(bTime).localeCompare(String(aTime));
+  });
+}
+
+function caseVisible(testCase) {
+  const cls = classifyCase(testCase);
+  if (showOnlyLastRun.checked && testCase.lastRun?.runId !== state.lastRunId) return false;
+
+  // Los casos en posible regresión son un subconjunto de las aprobadas,
+  // pero en la UI deben filtrarse por su propio checkbox. Si no, al dejar
+  // sólo “Posibles regresiones” activado y desactivar “Aprobadas”, se ocultan.
+  if (cls.regressionSuspect) return filterRegressions.checked;
+
+  if (testCase.verdict === 'pending') return filterPending.checked;
+  if (testCase.verdict === 'approved') return filterApproved.checked;
+  if (testCase.verdict === 'rejected') return filterRejected.checked;
+  return true;
+}
+
+function renderResults() {
+  const visible = sortCasesForDisplay(state.cases).filter(caseVisible);
+
+  if (!state.cases.length) {
+    summary.textContent = 'No hay preguntas en el banco.';
+    results.innerHTML = '';
+    return;
+  }
+
+  const suspectCount = state.cases.filter(c => classifyCase(c).regressionSuspect).length;
+  const pendingCount = state.cases.filter(c => c.verdict === 'pending').length;
+  const visibleCount = visible.length;
+
+  summary.innerHTML =
+    `Banco: <strong>${state.cases.length}</strong> caso(s). ` +
+    `Visibles con los filtros actuales: <strong>${visibleCount}</strong>. ` +
+    `Pendientes: <strong>${pendingCount}</strong>. ` +
+    `Posibles regresiones: <strong>${suspectCount}</strong>.`;
+
+  if (!visible.length) {
+    results.innerHTML = '<div class="inline-note">No hay casos que cumplan los filtros actuales.</div>';
+    return;
+  }
+
+  results.innerHTML = visible.map((testCase, index) => renderCaseCard(testCase, index + 1)).join('');
+  bindCaseActions();
+}
+
+
+function getRejectedCases() {
+  return sortCasesForDisplay(state.cases.filter(c => c.verdict === 'rejected'));
+}
+
+function renderRejectedQa() {
+  const rejected = getRejectedCases();
+  if (!rejected.length) {
+    rejectedQaSummary.textContent = 'No hay casos marcados como mal.';
+    rejectedQaResults.innerHTML = '';
+    return;
+  }
+
+  rejectedQaSummary.innerHTML =
+    `Casos marcados como mal: <strong>${rejected.length}</strong>. ` +
+    `Se muestra la pregunta y la última respuesta registrada de cada uno.`;
+
+  rejectedQaResults.innerHTML = `
+    <div class="compact-list">
+      ${rejected.map((testCase, index) => `
+        <div class="compact-item">
+          <div class="q">${index + 1}. ${escapeHtml(testCase.question)}</div>
+          <div class="a">${escapeHtml(testCase.lastRun?.answer || '(sin respuesta registrada todavía)')}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function copyRejectedQa() {
+  const rejected = getRejectedCases();
+  if (!rejected.length) {
+    rejectedQaSummary.textContent = 'No hay casos marcados como mal para copiar.';
+    return;
+  }
+
+  const text = rejected.map((testCase, index) => {
+    const answer = testCase.lastRun?.answer || '(sin respuesta registrada todavía)';
+    return `${index + 1}. ${testCase.question}\n${answer}`;
+  }).join('\n\n---\n\n');
+
+  navigator.clipboard.writeText(text)
+    .then(() => {
+      rejectedQaSummary.innerHTML =
+        `Casos marcados como mal: <strong>${rejected.length}</strong>. Copiados al portapapeles.`;
+    })
+    .catch(() => {
+      rejectedQaSummary.innerHTML =
+        `Casos marcados como mal: <strong>${rejected.length}</strong>. No se pudo copiar automáticamente; revisa la vista compacta.`;
+    });
+}
+
+function verdictLabel(verdict) {
+  if (verdict === 'approved') return '<span class="pill ok">Aprobada manualmente</span>';
+  if (verdict === 'rejected') return '<span class="pill err">Marcada como mal</span>';
+  return '<span class="pill warn">Pendiente de validación</span>';
+}
+
+function renderCaseCard(testCase, index) {
+  const cls = classifyCase(testCase);
+  const cardClass = cls.regressionSuspect ? 'result regression' : (cls.pendingReview ? 'result pending-review' : 'result');
+
+  const pills = [verdictLabel(testCase.verdict)];
+  if (cls.regressionSuspect) pills.push('<span class="pill err">Posible regresión</span>');
+  if (cls.approvedStable) pills.push('<span class="pill ok">Sin cambios respecto a la aprobada</span>');
+  if (cls.pendingReview && testCase.verdict === 'approved' && !testCase.lastRun) pills.push('<span class="pill warn">Aprobada histórica sin reejecutar</span>');
+  if (testCase.lastRun?.status) {
+    pills.push(`<span class="pill ${Number(testCase.lastRun.status) >= 200 && Number(testCase.lastRun.status) < 300 ? 'info' : 'err'}">HTTP ${escapeHtml(String(testCase.lastRun.status))}</span>`);
+  }
+  if (testCase.lastRun?.runId === state.lastRunId) pills.push('<span class="pill">Última corrida</span>');
+
+  const approvedSnapshot = testCase.approvedSnapshot ? `
+    <div class="inline-note">
+      <strong>Última respuesta aprobada:</strong><br />
+      validada el ${escapeHtml(formatDateTime(testCase.approvedSnapshot.validatedAt))}<br />
+      ${testCase.approvedSnapshot.answer ? `<div class="a">${escapeHtml(testCase.approvedSnapshot.answer)}</div>` : ''}
+    </div>
+  ` : '';
+
+  const lastRunBlock = testCase.lastRun ? `
+    <div class="a">${escapeHtml(testCase.lastRun.answer || '(respuesta vacía)')}</div>
+    <div class="meta">
+      Ejecutada: ${escapeHtml(formatDateTime(testCase.lastRun.ranAt))}<br />
+      ${cls.changedVsApproved ? 'La respuesta actual difiere de la última aprobada. Revísala manualmente.<br />' : ''}
+      Historial guardado: ${escapeHtml(String(testCase.history?.length || 0))} ejecución(es)
+    </div>
+    <details class="meta">
+      <summary>Respuesta cruda</summary>
+      <pre class="a" style="margin-top:8px;">${escapeHtml(formatRaw(testCase.lastRun.raw))}</pre>
+    </details>
+  ` : `
+    <div class="inline-note">Este caso todavía no se ha ejecutado.</div>
+  `;
+
+  return `
+    <div class="${cardClass}" data-case-id="${escapeHtml(testCase.id)}">
+      <div class="q">${index}. ${escapeHtml(testCase.question)}</div>
+      <div>${pills.join(' ')}</div>
+      ${lastRunBlock}
+      ${approvedSnapshot}
+      <div class="meta">
+        Creada: ${escapeHtml(formatDateTime(testCase.createdAt))}<br />
+        Última actualización del caso: ${escapeHtml(formatDateTime(testCase.updatedAt))}
+      </div>
+      <div class="result-actions">
+        <button class="good mark-good" data-case-id="${escapeHtml(testCase.id)}">Dar por buena</button>
+        <button class="bad mark-bad" data-case-id="${escapeHtml(testCase.id)}">Marcar como mal</button>
+        <button class="pending mark-pending" data-case-id="${escapeHtml(testCase.id)}">Dejar pendiente</button>
+      </div>
+    </div>
+  `;
+}
+
+function formatRaw(raw) {
+  if (typeof raw === 'string') return raw;
+  try { return JSON.stringify(raw, null, 2); } catch { return String(raw); }
+}
+
+function formatDateTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return String(iso);
+  return new Intl.DateTimeFormat('es-ES', {
+    dateStyle: 'short',
+    timeStyle: 'medium'
+  }).format(d);
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+}
+
+function bindCaseActions() {
+  document.querySelectorAll('.mark-good').forEach(btn => {
+    btn.addEventListener('click', () => markVerdict(btn.dataset.caseId, 'approved'));
+  });
+  document.querySelectorAll('.mark-bad').forEach(btn => {
+    btn.addEventListener('click', () => markVerdict(btn.dataset.caseId, 'rejected'));
+  });
+  document.querySelectorAll('.mark-pending').forEach(btn => {
+    btn.addEventListener('click', () => markVerdict(btn.dataset.caseId, 'pending'));
+  });
+}
+
+function markVerdict(caseId, verdict) {
+  const testCase = state.cases.find(c => c.id === caseId);
+  if (!testCase) return;
+
+  testCase.verdict = verdict;
+  testCase.updatedAt = nowIso();
+
+  if (verdict === 'approved' && testCase.lastRun) {
+    testCase.approvedSnapshot = {
+      validatedAt: nowIso(),
+      status: testCase.lastRun.status,
+      answer: testCase.lastRun.answer,
+      normalizedAnswer: testCase.lastRun.normalizedAnswer,
+      runId: testCase.lastRun.runId
+    };
+  }
+
+  saveState();
+  renderBank();
+  renderResults();
+  renderRejectedQa();
+}
+
+async function runCases(casesToRun, label) {
+  if (!casesToRun.length) {
+    summary.textContent = 'No hay casos para ejecutar.';
+    return;
+  }
+
+  runNewBtn.disabled = true;
+  runAllBtn.disabled = true;
+  addBtn.disabled = true;
+  recheckSuspectsBtn.disabled = true;
+  reviewApprovedBtn.disabled = true;
+
+  const runId = 'run_' + Date.now();
+  state.lastRunId = runId;
+  state.lastRunAt = nowIso();
+  state.lastRunQuestionIds = casesToRun.map(c => c.id);
+  saveState();
+
+  const delay = Number(delayInput.value || 0);
+  let done = 0;
+  let requestErrors = 0;
+
+  summary.textContent = `Ejecutando ${casesToRun.length} caso(s): ${label}…`;
+  renderBank();
+
+  for (const testCase of casesToRun) {
+    try {
+      const { status, data } = await askQuestion(testCase.question);
+      const answer = extractAnswer(data);
+      testCase.lastRun = {
+        runId,
+        ranAt: nowIso(),
+        status,
+        answer,
+        normalizedAnswer: normalizeText(answer),
+        raw: data
+      };
+      testCase.history = [
+        {
+          runId,
+          ranAt: testCase.lastRun.ranAt,
+          status,
+          answer,
+          normalizedAnswer: testCase.lastRun.normalizedAnswer
+        },
+        ...(Array.isArray(testCase.history) ? testCase.history : [])
+      ].slice(0, MAX_HISTORY);
+      testCase.updatedAt = nowIso();
+      if (!(status >= 200 && status < 300)) requestErrors++;
+    } catch (err) {
+      testCase.lastRun = {
+        runId,
+        ranAt: nowIso(),
+        status: 0,
+        answer: `ERROR: ${err.message}`,
+        normalizedAnswer: normalizeText(`ERROR: ${err.message}`),
+        raw: String(err)
+      };
+      testCase.history = [
+        {
+          runId,
+          ranAt: testCase.lastRun.ranAt,
+          status: 0,
+          answer: testCase.lastRun.answer,
+          normalizedAnswer: testCase.lastRun.normalizedAnswer
+        },
+        ...(Array.isArray(testCase.history) ? testCase.history : [])
+      ].slice(0, MAX_HISTORY);
+      testCase.updatedAt = nowIso();
+      requestErrors++;
+    }
+
+    done++;
+    saveState();
+    summary.textContent = `Ejecutando ${casesToRun.length} caso(s): ${label}… ${done}/${casesToRun.length}`;
+    renderBank();
+    renderResults();
+
+    if (delay > 0 && done < casesToRun.length) {
+      await sleep(delay);
+    }
+  }
+
+  const suspectsThisRun = casesToRun.filter(c => classifyCase(c).regressionSuspect).length;
+  summary.innerHTML =
+    `Terminada la corrida <strong>${escapeHtml(label)}</strong>. ` +
+    `Ejecutados: <strong>${casesToRun.length}</strong>. ` +
+    `Errores de petición/HTTP no OK: <strong>${requestErrors}</strong>. ` +
+    `Posibles regresiones detectadas: <strong>${suspectsThisRun}</strong>. ` +
+    `Ahora revisa cada caso y márcalo como <strong>bueno</strong>, <strong>mal</strong> o <strong>pendiente</strong>.`;
+
+  runNewBtn.disabled = false;
+  runAllBtn.disabled = false;
+  addBtn.disabled = false;
+  recheckSuspectsBtn.disabled = false;
+  reviewApprovedBtn.disabled = false;
+
+  saveState();
+  renderBank();
+  renderResults();
+  renderRejectedQa();
+}
+
+function exportState() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  a.href = URL.createObjectURL(blob);
+  a.download = `godesia-test-bank-${stamp}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function importStateFromFile(file) {
+  const text = await file.text();
+  const parsed = JSON.parse(text);
+  if (!parsed || !Array.isArray(parsed.cases)) {
+    throw new Error('El JSON importado no tiene el formato esperado.');
+  }
+  state = {
+    ...defaultState(),
+    ...parsed,
+    settings: { ...defaultState().settings, ...(parsed.settings || {}) },
+    cases: parsed.cases
+  };
+  hydrateSettings();
+  saveState();
+  renderBank();
+  renderResults();
+  renderRejectedQa();
+}
+
+addBtn.addEventListener('click', () => {
+  const questions = readQuestionsFromTextarea();
+  if (!questions.length) {
+    summary.textContent = 'No hay preguntas nuevas para añadir.';
+    return;
+  }
+  const { added, skipped } = addQuestionsToBank(questions);
+  summary.innerHTML = `Añadidas <strong>${added}</strong> pregunta(s) nuevas al banco. Duplicadas omitidas: <strong>${skipped}</strong>.`;
+});
+
+runNewBtn.addEventListener('click', async () => {
+  const questions = readQuestionsFromTextarea();
+  if (!questions.length) {
+    summary.textContent = 'No hay preguntas nuevas para ejecutar.';
+    return;
+  }
+  const { addedCases } = addQuestionsToBank(questions);
+  const casesToRun = addedCases.length
+    ? addedCases
+    : questions
+        .map(q => findCaseByNormalizedQuestion(normalizeQuestion(q)))
+        .filter(Boolean);
+
+  await runCases(casesToRun, 'preguntas nuevas');
+});
+
+runAllBtn.addEventListener('click', async () => {
+  if (!state.cases.length) {
+    summary.textContent = 'No hay casos en el banco.';
+    return;
+  }
+  await runCases(state.cases, 'banco completo');
+});
+
+recheckSuspectsBtn.addEventListener('click', async () => {
+  const suspects = state.cases.filter(c => classifyCase(c).regressionSuspect);
+  if (!suspects.length) {
+    summary.textContent = 'No hay posibles regresiones para reejecutar.';
+    return;
+  }
+  await runCases(suspects, 'posibles regresiones');
+});
+
+reviewApprovedBtn.addEventListener('click', async () => {
+  const approved = state.cases.filter(c => c.verdict === 'approved');
+  if (!approved.length) {
+    summary.textContent = 'No hay casos aprobados para reejecutar.';
+    return;
+  }
+  await runCases(approved, 'casos aprobados');
+});
+
+exportBtn.addEventListener('click', exportState);
+importBtn.addEventListener('click', () => importFile.click());
+importFile.addEventListener('change', async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  try {
+    await importStateFromFile(file);
+    summary.textContent = 'Banco importado correctamente.';
+  } catch (err) {
+    summary.textContent = `Error al importar: ${err.message}`;
+  } finally {
+    importFile.value = '';
+  }
+});
+
+clearResultsBtn.addEventListener('click', () => {
+  summary.textContent = 'Vista actual limpiada. El banco persistente no se ha borrado.';
+  state.lastRunId = null;
+  state.lastRunAt = null;
+  state.lastRunQuestionIds = [];
+  saveState();
+  renderBank();
+  renderResults();
+  renderRejectedQa();
+});
+
+showRejectedQaBtn.addEventListener('click', () => {
+  filterRegressions.checked = false;
+  filterPending.checked = false;
+  filterApproved.checked = false;
+  filterRejected.checked = true;
+  showOnlyLastRun.checked = false;
+  renderResults();
+  renderRejectedQa();
+});
+
+copyRejectedQaBtn.addEventListener('click', copyRejectedQa);
+
+resetBankBtn.addEventListener('click', () => {
+  const ok = window.confirm('Esto borrará todo el banco de preguntas, validaciones e historial local. ¿Seguro?');
+  if (!ok) return;
+  state = defaultState();
+  hydrateSettings();
+  saveState();
+  renderBank();
+  renderResults();
+  renderRejectedQa();
+  summary.textContent = 'Banco completo borrado.';
+});
+
+[endpointInput, methodInput, delayInput, questionParamInput, extraParamsInput].forEach(el => {
+  el.addEventListener('change', saveState);
+  el.addEventListener('input', saveState);
+});
+
+[filterRegressions, filterPending, filterApproved, filterRejected, showOnlyLastRun].forEach(el => {
+  el.addEventListener('change', () => {
+    renderResults();
+    renderRejectedQa();
+  });
+});
+
+hydrateSettings();
+renderBank();
+renderResults();
+renderRejectedQa();
+detectEndpointFromAppJs();
+</script>
+</body>
+</html>
