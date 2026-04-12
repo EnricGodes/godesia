@@ -863,11 +863,14 @@ def get_person_dossier(conn, person_id):
             spouse_id = m[0]
             marriage_date = m[1]
             marriage_place = m[2]
-            child_spouse_row = conn.execute("SELECT name, photo_file FROM people WHERE id = ?", (spouse_id,)).fetchone()
+            child_spouse_row = conn.execute("SELECT name, photo_file, nickname, given_name, surname FROM people WHERE id = ?", (spouse_id,)).fetchone()
             if child_spouse_row:
                 child_marriages.append({
                     "spouse_name": child_spouse_row["name"],
                     "spouse_photo": child_spouse_row["photo_file"],
+                    "spouse_nickname": child_spouse_row["nickname"],
+                    "spouse_given_name": child_spouse_row["given_name"],
+                    "spouse_surname": child_spouse_row["surname"],
                     "marriage_date": marriage_date,
                     "marriage_place": marriage_place
                 })
@@ -887,11 +890,14 @@ def get_person_dossier(conn, person_id):
         for p in partnerships:
             partner_id = p[0]
             partnership_date = p[1]
-            partner_row = conn.execute("SELECT name, photo_file FROM people WHERE id = ?", (partner_id,)).fetchone()
+            partner_row = conn.execute("SELECT name, photo_file, nickname, given_name, surname FROM people WHERE id = ?", (partner_id,)).fetchone()
             if partner_row:
                 child_partnerships.append({
                     "partner_name": partner_row["name"],
                     "partner_photo": partner_row["photo_file"],
+                    "partner_nickname": partner_row["nickname"],
+                    "partner_given_name": partner_row["given_name"],
+                    "partner_surname": partner_row["surname"],
                     "partnership_date": partnership_date
                 })
 
