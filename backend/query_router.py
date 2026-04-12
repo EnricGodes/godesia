@@ -296,6 +296,31 @@ class QueryRouter:
             # Events
             (r"(?:(?:qu[eé]\s+)?eventos?\s+(?:hay\s+)?registrados?\s+(?:para|de)\s+.+|eventos?\s+de\s+.+)", "handle_events"),
             (r"(?:(?:hay\s+)?datos?\s+de\s+(?:estudios|educaci[oó]n)\s+de\s+.+|estudios\s+de\s+.+|educaci[oó]n\s+de\s+.+)", "handle_education"),
+            # Bare forms for common questions
+            (r"^(?:madre|father)\s+.+$", "handle_mother"),
+            (r"^(?:padre|father)\s+.+$", "handle_father"),
+            (r"^(?:hijos?|fills?)\s+.+$", "handle_children"),
+            (r"^(?:hermanos?|germans?)\s+.+$", "handle_siblings"),
+            (r"^(?:esposa?|spouse)\s+.+$", "handle_spouse"),
+            (r"^(?:con\s+qui[eé]n\s+se\s+cas[oó]|qui[eé]n\s+se\s+cas[oó]\s+con)\s+.+$", "handle_spouse_or_partner"),
+            (r"^(?:tíos?|oncles?)\s+.+$", "handle_uncles"),
+            (r"^(?:abuelos?|grands?par[eè]nts?)\s+.+$", "handle_grandparents_names"),
+            (r"^(?:bisabuelos?|great\s+grand[ps]ar[eè]nts?)\s+.+$", "handle_great_grandparents"),
+            (r"^(?:primos?\s+(?:hermanos?)?|cosins?\s+germans?|first\s+cousins?)\s+.+$", "handle_first_cousins"),
+            (r"^(?:primos?\s+segundos?|second\s+cousins?)\s+.+$", "handle_second_cousins"),
+            (r"^(?:suegros?|in.laws?)\s+.+$", "handle_parents_in_law"),
+            (r"^(?:nueras?|daughter[s-]in.law)\s+.+$", "handle_daughters_in_law"),
+            (r"^(?:yernos?|son[s-]in.law)\s+.+$", "handle_sons_in_law"),
+            (r"^(?:cu[nñ]adas?|sister[s-]in.law)\s+.+$", "handle_sisters_in_law"),
+            (r"^(?:cu[nñ]ados?|brother[s-]in.law)\s+.+$", "handle_brothers_in_law"),
+            (r"^(?:donde|d[oó]nde)\s+naci[oó]\s+.+$", "handle_birth_place_people"),
+            (r"^(?:donde|d[oó]nde)\s+(?:murio|muri[oó])\s+.+$", "handle_death_place_people"),
+            (r"^(?:cuando|cu[aá]ndo)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)\s+.+$", "handle_birth_year_search"),
+            (r"^(?:cuando|cu[aá]ndo)\s+(?:murio|muri[oó]|fue\s+enterrad[oa])\s+.+$", "handle_death_date_search"),
+            (r"^(?:ocupaci[oó]n|qu[eé]\s+oficio|trabajo)\s+de\s+.+$", "handle_occupation_natural"),
+            (r"^(?:residencia|donde\s+(?:vivia|viv[ií]a|vive))\s+.+$", "handle_last_residence"),
+            (r"^(?:notas?|apuntes?)\s+de\s+.+$", "handle_notes_field"),
+            (r"^(?:qu[eé]\s+)?descendencia\s+.+$", "handle_has_descendants"),
         ]
 
     def route(self, question):
@@ -995,7 +1020,10 @@ class QueryRouter:
         if not children:
             answer = f"No constan hijos documentados de {person['name']}."
         else:
-            answer = f"Los hijos de {person['name']} fueron { _join_names(children) }."
+            if len(children) == 1:
+                answer = f"El hijo de {person['name']} fue { _join_names(children) }."
+            else:
+                answer = f"Los hijos de {person['name']} fueron { _join_names(children) }."
         return {"answer": answer, "people_mentioned": [person["id"]] + [c["id"] for c in children], "people_with_photos": self._people_payload([person] + children)}
 
     def handle_children_count(self, question):
@@ -1007,7 +1035,8 @@ class QueryRouter:
             return None
         children = _sort_people(list(get_children(self.conn, person["id"])))
         if children:
-            answer = f"{person['name']} tuvo {len(children)} hijos o hijas documentados: { _join_names(children) }."
+            count_word = "hijo o hija" if len(children) == 1 else "hijos o hijas"
+            answer = f"{person['name']} tuvo {len(children)} {count_word} documentad{'o' if len(children) == 1 else 'os'}: { _join_names(children) }."
         else:
             answer = f"{person['name']} no tuvo hijos o hijas documentados."
         return {"answer": answer, "people_mentioned": [person["id"]] + [c["id"] for c in children], "people_with_photos": self._people_payload([person] + children)}
@@ -2287,10 +2316,12 @@ class QueryRouter:
         subject = self._extract_subject_name(question)
         if not subject:
             return None
-        person,_ = self._resolve_person(subject)
+        person, _ = self._resolve_person(subject)
         if not person:
             return None
         rows = self._second_cousins_for(person['id'])
+        if not rows:
+            return {"answer": f"No constan primos segundos documentados de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         return {"answer": self._list_people_answer(f"Los primos segundos de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_daughters_in_law(self, question):
@@ -2302,6 +2333,8 @@ class QueryRouter:
         if not person:
             return None
         rows = self._children_in_law_for(person['id'], sex='F')
+        if not rows:
+            return {"answer": f"No constan nueras documentadas de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         return {"answer": self._list_people_answer(f"Las nueras de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_sons_in_law(self, question):
@@ -2309,10 +2342,12 @@ class QueryRouter:
         m = re.search(r"yerno\s+de\s+(.+?)(?:\?|$)", q, re.I) or re.search(r"yerno\s+en\s+la\s+familia\s+de\s+(.+?)(?:\?|$)", q, re.I)
         if not m:
             return None
-        person,_ = self._resolve_person(m.group(1))
+        person, _ = self._resolve_person(m.group(1))
         if not person:
             return None
         rows = self._children_in_law_for(person['id'], sex='M')
+        if not rows:
+            return {"answer": f"No constan yernos documentados de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         return {"answer": self._list_people_answer(f"Los yernos de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_relationship_with_parents_of(self, question):
@@ -2346,6 +2381,8 @@ class QueryRouter:
         if not person:
             return None
         rows = [p for p in self._siblings_in_law_for(person['id']) if p.get('sex') == 'F']
+        if not rows:
+            return {"answer": f"No constan cuñadas documentadas de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         return {"answer": self._list_people_answer(f"Las cuñadas de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_brothers_in_law(self, question):
@@ -2357,6 +2394,8 @@ class QueryRouter:
         if not person:
             return None
         rows = self._siblings_in_law_for(person['id'])
+        if not rows:
+            return {"answer": f"No constan cuñados documentados de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         return {"answer": self._list_people_answer(f"Los cuñados de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_great_great_uncle(self, question):
