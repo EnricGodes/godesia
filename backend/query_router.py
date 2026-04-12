@@ -204,6 +204,7 @@ class QueryRouter:
             (r"(?:qui[eé]nes\s+eran\s+los\s+padres\s+de\s+.+\s+y\s+d[oó]nde\s+se\s+casaron)", "handle_parents_and_marriage_place"),
             (r"(?:qu[eé]\s+personas\s+nacieron\s+en\s+.+\s+y\s+murieron\s+en\s+.+)", "handle_birth_and_death_place_people"),
             (r"(?:qu[eé]\s+parentesco\s+ten[ií]a\s+.+\s+con\s+.+\s+y\s+cu[aá]l\s+de\s+los\s+dos\s+era\s+mayor)", "handle_relationship_and_older"),
+            (r"(?:con\s+qu[eé]\s+(?:mujer|persona|hombre)\s+(?:form[oó]|enlaz[oó])\s+familia\s+.+|con\s+qu[eé]\s+(?:mujer|persona|hombre)\s+casó\s+.+)", "handle_spouse_with_person_type"),
             (r"(?:con\s+qui[eé]n\s+se\s+cas[oó]\s+.+\s+y\s+en\s+qu[eé]\s+fecha\s+fue\s+la\s+boda)", "handle_spouse_and_wedding_date"),
             (r"(?:qui[eé]n\s+era\s+el\s+padre\s+de\s+la\s+madre\s+de\s+.+)", "handle_father_of_mother"),
             (r"(?:qu[eé]\s+hijos\s+de\s+.+\s+nacieron\s+en\s+.+)", "handle_children_born_in_place"),
@@ -245,7 +246,7 @@ class QueryRouter:
             (r"(?:padres\s+de|pares\s+de|parents\s+of)", "handle_parents"),
             (r"(?:(?:qui[eé]n|quiénes)\s+era(?:n)?\s+(?:el\s+)?padre\s+de\s+.+|padre\s+de|pare\s+de|father\s+of)", "handle_father"),
             (r"(?:hermanos\s+de|germans\s+de|siblings\s+of)", "handle_siblings"),
-            (r"(?:c[oó]nyuge\s+de|spouse\s+of)", "handle_spouse"),
+            (r"(?:c[oó]nyuge\s+de|spouse\s+of|compa[ñn]era\s+de\s+vida\s+de|pareja\s+de)", "handle_spouse"),
             (r"(?:hijos\s+de|fills\s+de|children\s+of)", "handle_children"),
             (r"(?:primer\s+hij[oa]\s+de\s+.+|first\s+child\s+of)", "handle_first_child"),
             (r"(?:hij[oa]\s+mayor\s+de\s+.+|oldest\s+son\s+of|oldest\s+daughter\s+of)", "handle_oldest_son"),
@@ -985,6 +986,34 @@ class QueryRouter:
             answer = f"No consta que {person['name']} se casara o tuviera una pareja documentada."
         else:
             answer = f"{person['name']} se casó o emparejó con { '; '.join(parts) }."
+        return {"answer": answer, "people_mentioned": [p["id"] for p in people if p], "people_with_photos": self._people_payload(people)}
+
+    def handle_spouse_with_person_type(self, question):
+        q = _clean_question(question)
+        m = re.search(r"(?:con\s+qu[eé]\s+(?:mujer|persona|hombre)\s+(?:form[oó]|enlaz[oó])\s+familia|con\s+qu[eé]\s+(?:mujer|persona|hombre)\s+casó)\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        subject = m.group(1)
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        spouses = get_spouses(self.conn, person["id"])
+        if not spouses:
+            answer = f"No consta que {_person_link(person)} se casara o formara pareja documentada."
+            people = [person]
+        else:
+            parts = []
+            people = [person]
+            for s in spouses:
+                sp = _as_dict(s["person"])
+                txt = sp["name"]
+                if s.get("marriage_date"):
+                    txt += f" el {s['marriage_date']}"
+                if s.get("marriage_place"):
+                    txt += f" en {s['marriage_place']}"
+                parts.append(txt)
+                people.append(sp)
+            answer = f"{_person_link(person)} formó pareja o matrimonio con { '; '.join(parts) }."
         return {"answer": answer, "people_mentioned": [p["id"] for p in people if p], "people_with_photos": self._people_payload(people)}
 
     def handle_spouse(self, question):
