@@ -247,6 +247,9 @@ class QueryRouter:
             (r"(?:hermanos\s+de|germans\s+de|siblings\s+of)", "handle_siblings"),
             (r"(?:c[oó]nyuge\s+de|spouse\s+of)", "handle_spouse"),
             (r"(?:hijos\s+de|fills\s+de|children\s+of)", "handle_children"),
+            (r"(?:primer\s+hij[oa]\s+de\s+.+|first\s+child\s+of)", "handle_first_child"),
+            (r"(?:hij[oa]\s+mayor\s+de\s+.+|oldest\s+son\s+of|oldest\s+daughter\s+of)", "handle_oldest_son"),
+            (r"(?:hija\s+mayor\s+de\s+.+|oldest\s+daughter\s+of)", "handle_oldest_daughter"),
             (r"(?:busco\s+a\s+las\s+personas\s+que\s+nacieron\s+en\s+.+\s+y\s+tamb[ié]n\s+murieron\s+all[ií])", "handle_birth_and_death_same_place_natural"),
             (r"(?:qu[ií]ero\s+ver\s+si\s+.+\s+ten[ií]a\s+consuegros\s+documentados|consuegros\s+de\s+.+)", "handle_consuegros"),
             (r"(?:primos\s+segundos\s+de\s+.+)", "handle_second_cousins"),
@@ -1041,6 +1044,50 @@ class QueryRouter:
         else:
             answer = f"{person['name']} no tuvo hijos o hijas documentados."
         return {"answer": answer, "people_mentioned": [person["id"]] + [c["id"] for c in children], "people_with_photos": self._people_payload([person] + children)}
+
+    def handle_first_child(self, question):
+        q = _clean_question(question)
+        m = re.search(r"(?:primer\s+hijo|primer\s+hija|first\s+child)\s+(?:de|of)\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        children = _sort_people(list(get_children(self.conn, person["id"])))
+        if not children:
+            return {"answer": f"No constan hijos documentados de {_person_link(person)}.", "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
+        first = children[0]
+        return {"answer": f"El primer hijo de {_person_link(person)} fue {_person_link(first)}.", "people_mentioned": [person["id"], first["id"]], "people_with_photos": self._people_payload([person, first])}
+
+    def handle_oldest_son(self, question):
+        q = _clean_question(question)
+        m = re.search(r"(?:hijo\s+mayor|oldest\s+son)\s+(?:de|of)\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        children = _sort_people(list(get_children(self.conn, person["id"])))
+        sons = [c for c in children if c.get("sex") == "M"]
+        if not sons:
+            return {"answer": f"No constan hijos varones documentados de {_person_link(person)}.", "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
+        oldest = sons[0]
+        return {"answer": f"El hijo mayor de {_person_link(person)} fue {_person_link(oldest)}.", "people_mentioned": [person["id"], oldest["id"]], "people_with_photos": self._people_payload([person, oldest])}
+
+    def handle_oldest_daughter(self, question):
+        q = _clean_question(question)
+        m = re.search(r"(?:hija\s+mayor|oldest\s+daughter)\s+(?:de|of)\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        children = _sort_people(list(get_children(self.conn, person["id"])))
+        daughters = [c for c in children if c.get("sex") == "F"]
+        if not daughters:
+            return {"answer": f"No constan hijas documentadas de {_person_link(person)}.", "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
+        oldest = daughters[0]
+        return {"answer": f"La hija mayor de {_person_link(person)} fue {_person_link(oldest)}.", "people_mentioned": [person["id"], oldest["id"]], "people_with_photos": self._people_payload([person, oldest])}
 
     def handle_are_cousins(self, question):
         names = self._extract_two_names(question)
