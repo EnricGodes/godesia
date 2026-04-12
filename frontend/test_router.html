@@ -142,13 +142,25 @@ async function api(path, opts = {}) {
 
 async function loadBank() {
   bankData = await api('/bank');
+
+  // Classify cases, with special handling for no-answer rejected cases
+  bankData.cases = (bankData.cases || []).map(c => {
+    const answer = c.last_run?.answer || '';
+    const isNoAnswer = answer.includes("No he sabido responder esta pregunta");
+
+    if (isNoAnswer && c.verdict === 'rejected') {
+      c._classification = 'no_answer';
+    }
+    return c;
+  });
+
   renderStats();
   renderResults();
 }
 
 function renderStats() {
   const cases = bankData.cases || [];
-  const counts = { total: cases.length, stable: 0, regression: 0, pending: 0, rejected: 0, new: 0 };
+  const counts = { total: cases.length, stable: 0, regression: 0, pending: 0, rejected: 0, new: 0, no_answer: 0 };
   cases.forEach(c => { counts[c._classification] = (counts[c._classification] || 0) + 1; });
 
   const grid = document.getElementById('statsGrid');
@@ -158,7 +170,7 @@ function renderStats() {
     { k: 'Regresiones', v: counts.regression, cls: counts.regression > 0 ? 'highlight' : '' },
     { k: 'Pendientes', v: counts.pending, cls: '' },
     { k: 'Nuevas', v: counts.new, cls: '' },
-    { k: 'Rechazadas', v: counts.rejected, cls: '' },
+    { k: 'Sin Respuesta', v: counts.no_answer, cls: counts.no_answer > 0 ? 'highlight' : '' },
   ].map(s => `<div class="stat ${s.cls}"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
 }
 
@@ -173,7 +185,9 @@ function renderResults() {
   };
 
   const filtered = (bankData.cases || []).filter(c => {
-    if (!show[c._classification]) return false;
+    // no_answer cases are shown when 'rejected' filter is checked
+    const classification = c._classification === 'no_answer' ? 'rejected' : c._classification;
+    if (!show[classification]) return false;
     if (search) {
       const haystack = (c.question + ' ' + (c.last_run?.answer || '')).toLowerCase();
       if (!haystack.includes(search)) return false;
@@ -181,8 +195,8 @@ function renderResults() {
     return true;
   });
 
-  // Sort: regressions first, then pending, new, stable, rejected
-  const order = { regression: 0, pending: 1, new: 2, stable: 3, rejected: 4 };
+  // Sort: regressions first, then pending, new, stable, rejected, no_answer (last)
+  const order = { regression: 0, pending: 1, new: 2, stable: 3, rejected: 4, no_answer: 999 };
   filtered.sort((a, b) => (order[a._classification] ?? 5) - (order[b._classification] ?? 5));
 
   const area = document.getElementById('resultsArea');
@@ -202,6 +216,7 @@ function renderCase(c) {
   else if (cls === 'stable') pills.push('<span class="pill ok">ESTABLE</span>');
   else if (cls === 'pending') pills.push('<span class="pill warn">PENDIENTE</span>');
   else if (cls === 'new') pills.push('<span class="pill info">NUEVA</span>');
+  else if (cls === 'no_answer') pills.push('<span class="pill err">SIN RESPUESTA</span>');
   else if (cls === 'rejected') pills.push('<span class="pill neutral">RECHAZADA</span>');
 
   if (c.last_run?.handler) pills.push(`<span class="pill neutral">${c.last_run.handler}</span>`);

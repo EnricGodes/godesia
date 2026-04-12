@@ -219,7 +219,7 @@ class QueryRouter:
             (r"(?:nacieron\s+y\s+murieron\s+en|were\s+born\s+and\s+died\s+in)", "handle_birth_and_death_place_people"),
             (r"(?:ocupaci[oó]n\s+o\s+actividad\s+figura\s+registrada\s+para|occupation\s+for)", "handle_occupation_field"),
             (r"(?:residencia\s+o\s+direcci[oó]n\s+aparece\s+documentado|where\s+is\s+documented\s+the\s+residence)", "handle_residence_field"),
-            (r"(?:notas\s+biogr[aá]ficas\s+hay\s+asociadas\s+a|biographical\s+notes\s+for)", "handle_notes_field"),
+            (r"(?:notas?\s+(?:biogr[aá]ficas?\s+)?hay\s+(?:sobre|de|para|asociadas\s+a)\s+.+|observaciones?\s+(?:biogr[aá]ficas?\s+)?(?:de|sobre|aparecen\s+(?:en|para))\s+.+|(?:qu[eé]\s+)?(?:anotaciones?|comentarios?|apuntes?|detalles?\s+biogr[aá]ficos?|informaci[oó]n\s+adicional|texto)\s+(?:hay\s+)?(?:sobre|de|para|acompa[nñ]a)\s+.+|biographical\s+notes\s+for)", "handle_notes_field"),
             (r"(?:qui[eé]n\s+naci[oó]\s+el\s+\d{1,2}/\d{1,2}/\d{4}|who\s+was\s+born\s+on\s+\d{1,2}/\d{1,2}/\d{4})", "handle_birth_date_search"),
             (r"(?:qui[eé]n\s+(?:falleci[oó]|muri[oó])\s+el\s+\d{1,2}/\d{1,2}/\d{4}|who\s+died\s+on\s+\d{1,2}/\d{1,2}/\d{4})", "handle_death_date_search"),
             (r"(?:qui[eé]n\s+naci[oó]\s+en\s+.+\s+en\s+\d{4}|who\s+was\s+born\s+in\s+.+\s+in\s+\d{4})", "handle_birth_place_year_search"),
@@ -243,7 +243,7 @@ class QueryRouter:
             (r"(?:suegra\s+o\s+el\s+suegro|suegra\s+o\s+suegro|father-in-law|mother-in-law)", "handle_parents_in_law"),
             (r"(?:qu[eé]\s+relaci[oó]n\s+ten[ií]a|qu[eé]\s+parentesco\s+hab[ií]a|what\s+relationship)", "handle_relationship"),
             (r"(?:padres\s+de|pares\s+de|parents\s+of)", "handle_parents"),
-            (r"(?:padre\s+de|pare\s+de|father\s+of)", "handle_father"),
+            (r"(?:(?:qui[eé]n|quiénes)\s+era(?:n)?\s+(?:el\s+)?padre\s+de\s+.+|padre\s+de|pare\s+de|father\s+of)", "handle_father"),
             (r"(?:hermanos\s+de|germans\s+de|siblings\s+of)", "handle_siblings"),
             (r"(?:c[oó]nyuge\s+de|spouse\s+of)", "handle_spouse"),
             (r"(?:hijos\s+de|fills\s+de|children\s+of)", "handle_children"),
@@ -264,7 +264,7 @@ class QueryRouter:
             (r"(?:tatarabuelos\s+de\s+.+)", "handle_great_great_grandparents"),
             (r"(?:bisabuela\s+materna\s+de\s+.+)", "handle_maternal_great_grandmother"),
             (r"(?:bisabuelos\s+de\s+.+)", "handle_great_grandparents"),
-            (r"(?:dime\s+c[oó]mo\s+se\s+llamaba\s+la\s+madre\s+de\s+.+)", "handle_mother"),
+            (r"(?:(?:qui[eé]n|quiénes)\s+era(?:n)?\s+(?:la\s+)?madre\s+de\s+.+|dime\s+c[oó]mo\s+se\s+llamaba\s+la\s+madre\s+de\s+.+)", "handle_mother"),
             (r"(?:qui[eé]n\s+fue\s+el\s+hijo\s+mayor\s+de\s+.+|dime\s+cu[aá]l\s+fue\s+la\s+primera\s+hija\s+de\s+.+)", "handle_child_extremes"),
             (r"(?:cu[aá]ntas\s+personas\s+del\s+[aá]rbol\s+se\s+llaman\s+.+)", "handle_given_name_count"),
             (r"(?:dos\s+apellidos\s+iguales)", "handle_same_surname_twice"),
@@ -272,7 +272,7 @@ class QueryRouter:
             (r"(?:acab[oó]\s+cas[aá]ndose|con\s+qui[eé]n\s+acab[oó]\s+cas[aá]ndose)", "handle_last_spouse"),
             (r"(?:misma\s+ciudad\s+en\s+la\s+que\s+naci[oó])", "handle_same_birth_death_city"),
             (r"(?:tengan\s+.+\s+como\s+primer\s+apellido)", "handle_first_surname_natural"),
-            (r"(?:qu[eé]\s+oficio\s+ten[ií]a\s+.+|en\s+qu[eé]\s+trabaja\s+.+)", "handle_occupation_natural"),
+            (r"(?:qu[eé]\s+oficio\s+ten[ií]a\s+.+|en\s+qu[eé]\s+trabaja\s+.+|(?:qu[eé]\s+)?empleo\s+consta\s+de\s+.+|c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+.+)", "handle_occupation_natural"),
             (r"(?:d[oó]nde\s+viv[ií]a\s+.+\s+al\s+final\s+de\s+su\s+vida)", "handle_last_residence"),
             (r"(?:cu[aá]ntos\s+hijos\s+lleg[oó]\s+a\s+tener\s+.+)", "handle_children_total_natural"),
             (r"(?:dime\s+qu[eé]\s+personas\s+nacieron\s+en\s+.+\s+y\s+luego\s+murieron\s+fuera\s+de\s+.+)", "handle_born_in_and_died_outside"),
@@ -313,10 +313,10 @@ class QueryRouter:
             (r"^(?:yernos?|son[s-]in.law)\s+.+$", "handle_sons_in_law"),
             (r"^(?:cu[nñ]adas?|sister[s-]in.law)\s+.+$", "handle_sisters_in_law"),
             (r"^(?:cu[nñ]ados?|brother[s-]in.law)\s+.+$", "handle_brothers_in_law"),
-            (r"^(?:donde|d[oó]nde)\s+naci[oó]\s+.+$", "handle_birth_place_people"),
-            (r"^(?:donde|d[oó]nde)\s+(?:murio|muri[oó])\s+.+$", "handle_death_place_people"),
-            (r"^(?:cuando|cu[aá]ndo)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)\s+.+$", "handle_birth_year_search"),
-            (r"^(?:cuando|cu[aá]ndo)\s+(?:murio|muri[oó]|fue\s+enterrad[oa])\s+.+$", "handle_death_date_search"),
+            (r"^(?:donde|d[oó]nde)\s+naci[oó]\s+.+$", "handle_birth_place_of_person"),
+            (r"^(?:donde|d[oó]nde)\s+(?:murio|muri[oó])\s+.+$", "handle_death_place_of_person"),
+            (r"^(?:cuando|cu[aá]ndo)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)\s+.+$", "handle_birth_date_of_person"),
+            (r"^(?:cuando|cu[aá]ndo)\s+(?:murio|muri[oó]|fue\s+enterrad[oa])\s+.+$", "handle_death_date_of_person"),
             (r"^(?:ocupaci[oó]n|qu[eé]\s+oficio|trabajo)\s+de\s+.+$", "handle_occupation_natural"),
             (r"^(?:residencia|donde\s+(?:vivia|viv[ií]a|vive))\s+.+$", "handle_last_residence"),
             (r"^(?:notas?|apuntes?)\s+de\s+.+$", "handle_notes_field"),
@@ -1636,7 +1636,11 @@ class QueryRouter:
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_notes_field(self, question):
-        m = re.search(r"asociadas\s+a\s+(.+?)(?:\?|$)", _clean_question(question), re.I)
+        q = _clean_question(question)
+        m = (re.search(r"asociadas\s+a\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"(?:qu[eé]\s+)?notas?\s+(?:hay\s+)?(?:sobre|de)\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"observaciones?\s+(?:biogr[aá]ficas?\s+)?(?:de|sobre|aparecen\s+(?:en|para))\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"(?:qu[eé]\s+)?(?:anotaciones?|comentarios?|apuntes?|detalles?\s+biogr[aá]ficos?|informaci[oó]n\s+adicional|texto)\s+(?:hay\s+)?(?:sobre|de|para)\s+(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person,_ = self._resolve_person(m.group(1))
@@ -2525,7 +2529,10 @@ class QueryRouter:
 
     def handle_occupation_natural(self, question):
         q = _clean_question(question)
-        m = re.search(r"qu[eé]\s+oficio\s+ten[ií]a\s+(.+?)(?:\?|$)", q, re.I) or re.search(r"en\s+qu[eé]\s+trabaja\s+(.+?)(?:\?|$)", q, re.I)
+        m = (re.search(r"qu[eé]\s+oficio\s+ten[ií]a\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"en\s+qu[eé]\s+trabaja\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"(?:qu[eé]\s+)?empleo\s+consta\s+de\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person,_ = self._resolve_person(m.group(1))
@@ -3009,6 +3016,69 @@ class QueryRouter:
         else:
             ans = f"{_person_link(a)} y {_person_link(b)} tenían la misma edad aproximada."
         return {"answer": ans, "people_mentioned": [a['id'], b['id']], "people_with_photos": self._people_payload([a, b])}
+
+    def handle_birth_place_of_person(self, question):
+        """Handle 'Donde nacio X?' - return X's birthplace"""
+        subject = self._extract_subject_name_from_pattern(question, r"(?:donde|d[oó]nde)\s+naci[oó]\s+(.+?)(?:\?|$)")
+        if not subject:
+            return None
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        if person.get('birth_place'):
+            answer = f"{person['name']} nació en {person['birth_place']}."
+        else:
+            answer = f"No consta el lugar de nacimiento de {person['name']}."
+        return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    def handle_death_place_of_person(self, question):
+        """Handle 'Donde murio X?' - return X's death place"""
+        subject = self._extract_subject_name_from_pattern(question, r"(?:donde|d[oó]nde)\s+(?:murio|muri[oó])\s+(.+?)(?:\?|$)")
+        if not subject:
+            return None
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        if person.get('death_place'):
+            answer = f"{person['name']} murió en {person['death_place']}."
+        else:
+            answer = f"No consta el lugar de muerte de {person['name']}."
+        return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    def handle_birth_date_of_person(self, question):
+        """Handle 'Cuando nacio X?' - return X's birth date"""
+        subject = self._extract_subject_name_from_pattern(question, r"(?:cuando|cu[aá]ndo)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)\s+(.+?)(?:\?|$)")
+        if not subject:
+            return None
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        if person.get('birth_year'):
+            answer = f"{person['name']} nació en {person['birth_year']}."
+        else:
+            answer = f"No consta la fecha de nacimiento de {person['name']}."
+        return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    def handle_death_date_of_person(self, question):
+        """Handle 'Cuando murio X?' - return X's death date"""
+        subject = self._extract_subject_name_from_pattern(question, r"(?:cuando|cu[aá]ndo)\s+(?:murio|muri[oó]|fue\s+enterrad[oa])\s+(.+?)(?:\?|$)")
+        if not subject:
+            return None
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        if person.get('death_year'):
+            answer = f"{person['name']} murió en {person['death_year']}."
+        else:
+            answer = f"No consta la fecha de muerte de {person['name']}."
+        return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    def _extract_subject_name_from_pattern(self, question: str, pattern: str) -> Optional[str]:
+        """Extract subject name from a specific pattern"""
+        m = re.search(pattern, _clean_question(question), re.I)
+        if m:
+            return m.group(1)
+        return None
 
     def _try_name_fallback(self, question):
         blockers = [
