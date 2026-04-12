@@ -439,9 +439,10 @@ class QueryRouter:
             "baptism_date, baptism_place, godparents, nickname "
         )
         # Search with both original and expanded names to handle abbreviations like Mª
+        # Use NORMALIZE() function for accent-insensitive search
         rows = self.conn.execute(
             select_cols +
-            "FROM people WHERE (name LIKE ? COLLATE NOCASE OR name LIKE ? COLLATE NOCASE) "
+            "FROM people WHERE (NORMALIZE(name) LIKE NORMALIZE(?) OR NORMALIZE(name) LIKE NORMALIZE(?)) "
             "ORDER BY name LIMIT ?",
             (like_original, like_expanded, max(limit * 4, 80)),
         ).fetchall()
@@ -450,9 +451,9 @@ class QueryRouter:
         if len(rows) < limit:
             nickname_rows = self.conn.execute(
                 select_cols +
-                "FROM people WHERE (nickname LIKE ? COLLATE NOCASE OR nickname LIKE ? COLLATE NOCASE) "
+                "FROM people WHERE (NORMALIZE(nickname) LIKE NORMALIZE(?) OR NORMALIZE(nickname) LIKE NORMALIZE(?)) "
                 "AND id NOT IN "
-                "(SELECT id FROM people WHERE name LIKE ? COLLATE NOCASE OR name LIKE ? COLLATE NOCASE) "
+                "(SELECT id FROM people WHERE NORMALIZE(name) LIKE NORMALIZE(?) OR NORMALIZE(name) LIKE NORMALIZE(?)) "
                 "ORDER BY name LIMIT ?",
                 (like_original, like_expanded, like_original, like_expanded, max(limit * 2, 40)),
             ).fetchall()
@@ -1526,8 +1527,8 @@ class QueryRouter:
         if not place:
             return None
         rows = [_as_dict(r) for r in self.conn.execute(
-            "SELECT id, name, birth_year, death_year, death_place, photo_file, is_alive FROM people WHERE death_place LIKE ? COLLATE NOCASE ORDER BY death_year, name LIMIT 100",
-            ("%" + place + "%",),
+            "SELECT id, name, birth_year, death_year, death_place, photo_file, is_alive FROM people WHERE NORMALIZE(death_place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY death_year, name LIMIT 100",
+            (place,),
         ).fetchall()]
         answer = self._list_people_answer(f"Las personas fallecidas en {place} fueron", rows)
         return {"answer": answer, "people_mentioned": [r["id"] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
@@ -1537,8 +1538,8 @@ class QueryRouter:
         if not place:
             return None
         rows = self.conn.execute(
-            "SELECT m.person1_id, m.person2_id, m.date, m.place FROM marriages m WHERE m.place LIKE ? COLLATE NOCASE ORDER BY m.date, m.id LIMIT 100",
-            ("%" + place + "%",),
+            "SELECT m.person1_id, m.person2_id, m.date, m.place FROM marriages m WHERE NORMALIZE(m.place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY m.date, m.id LIMIT 100",
+            (place,),
         ).fetchall()
         if not rows:
             return {"answer": f"No he encontrado parejas casadas en {place}.", "people_mentioned": [], "people_with_photos": []}
@@ -1575,8 +1576,8 @@ class QueryRouter:
             return None
         surname = _normalize_name_fragment(m.group(1))
         rows = [_as_dict(r) for r in self.conn.execute(
-            "SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE surname = ? COLLATE NOCASE OR surname LIKE ? COLLATE NOCASE ORDER BY birth_year, name LIMIT 200",
-            (surname, surname + " %"),
+            "SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE NORMALIZE(surname) = NORMALIZE(?) OR NORMALIZE(surname) LIKE NORMALIZE(?) || '%' ORDER BY birth_year, name LIMIT 200",
+            (surname, surname),
         ).fetchall()]
         answer = self._list_people_answer(f"Las personas con {surname} como primer apellido son", rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
@@ -1587,8 +1588,8 @@ class QueryRouter:
             return None
         place = m.group(1).strip()
         rows = [_as_dict(r) for r in self.conn.execute(
-            "SELECT id, name, birth_year, death_year, birth_place, death_place, photo_file, is_alive FROM people WHERE birth_place LIKE ? COLLATE NOCASE AND death_place LIKE ? COLLATE NOCASE ORDER BY birth_year, name LIMIT 100",
-            ("%"+place+"%", "%"+place+"%"),
+            "SELECT id, name, birth_year, death_year, birth_place, death_place, photo_file, is_alive FROM people WHERE NORMALIZE(birth_place) LIKE '%' || NORMALIZE(?) || '%' AND NORMALIZE(death_place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY birth_year, name LIMIT 100",
+            (place, place),
         ).fetchall()]
         answer = self._list_people_answer(f"Las personas nacidas y fallecidas en {place} fueron", rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
@@ -1704,8 +1705,8 @@ class QueryRouter:
             return None
         place = m.group(1).strip(); year = int(m.group(2))
         rows=[_as_dict(r) for r in self.conn.execute(
-            "SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE birth_year = ? AND birth_place LIKE ? COLLATE NOCASE ORDER BY name",
-            (year, '%' + place + '%'),
+            "SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE birth_year = ? AND NORMALIZE(birth_place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY name",
+            (year, place),
         ).fetchall()]
         if not rows:
             answer=f"No he encontrado ninguna persona nacida en {place} en {year}."
@@ -1721,8 +1722,8 @@ class QueryRouter:
             return None
         place = m.group(1).strip(); year = int(m.group(2))
         rows=[_as_dict(r) for r in self.conn.execute(
-            "SELECT id, name, death_year, death_place, photo_file, is_alive FROM people WHERE death_year = ? AND death_place LIKE ? COLLATE NOCASE ORDER BY name",
-            (year, '%' + place + '%'),
+            "SELECT id, name, death_year, death_place, photo_file, is_alive FROM people WHERE death_year = ? AND NORMALIZE(death_place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY name",
+            (year, place),
         ).fetchall()]
         if not rows:
             answer=f"No he encontrado ninguna persona fallecida en {place} en {year}."
@@ -1738,8 +1739,8 @@ class QueryRouter:
             return None
         name = m.group(1).strip()
         rows=[_as_dict(r) for r in self.conn.execute(
-            "SELECT id, name, given_name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE given_name LIKE ? COLLATE NOCASE ORDER BY birth_year, name LIMIT 100",
-            (name + '%',),
+            "SELECT id, name, given_name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE NORMALIZE(given_name) LIKE NORMALIZE(?) || '%' ORDER BY birth_year, name LIMIT 100",
+            (name,),
         ).fetchall()]
         answer=self._list_people_answer(f"Las personas con un nombre compuesto como {name} son", rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
@@ -1761,8 +1762,8 @@ class QueryRouter:
         if not place:
             return None
         rows=[_as_dict(r) for r in self.conn.execute(
-            "SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE birth_place LIKE ? COLLATE NOCASE ORDER BY birth_year, name LIMIT 100",
-            ('%' + place + '%',),
+            "SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE NORMALIZE(birth_place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY birth_year, name LIMIT 100",
+            (place,),
         ).fetchall()]
         answer=self._list_people_answer(f"Las personas nacidas en {place} fueron", rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
@@ -1965,7 +1966,7 @@ class QueryRouter:
             return None
         place = m.group(1).strip()
         total = self.conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
-        count = self.conn.execute("SELECT COUNT(*) FROM people WHERE birth_place LIKE ? COLLATE NOCASE", ('%' + place + '%',)).fetchone()[0]
+        count = self.conn.execute("SELECT COUNT(*) FROM people WHERE NORMALIZE(birth_place) LIKE '%' || NORMALIZE(?) || '%'", (place,)).fetchone()[0]
         pct = (count / total * 100) if total else 0
         return {"answer": f"{count} personas nacieron en {place}. Eso representa aproximadamente el {pct:.1f}% del árbol.", "people_mentioned": [], "people_with_photos": []}
 
@@ -1975,7 +1976,7 @@ class QueryRouter:
             return None
         place = m.group(1).strip()
         total = self.conn.execute("SELECT COUNT(*) FROM people WHERE death_place IS NOT NULL AND death_place != ''").fetchone()[0]
-        count = self.conn.execute("SELECT COUNT(*) FROM people WHERE death_place LIKE ? COLLATE NOCASE", ('%' + place + '%',)).fetchone()[0]
+        count = self.conn.execute("SELECT COUNT(*) FROM people WHERE NORMALIZE(death_place) LIKE '%' || NORMALIZE(?) || '%'", (place,)).fetchone()[0]
         pct = (count / total * 100) if total else 0
         return {"answer": f"{count} personas murieron en {place}. Sobre el conjunto de defunciones con lugar conocido, eso representa aproximadamente el {pct:.1f}%.", "people_mentioned": [], "people_with_photos": []}
 
@@ -2001,7 +2002,7 @@ class QueryRouter:
             return None
         surname = _normalize_name_fragment(m.group(1))
         total = self.conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
-        count = self.conn.execute("SELECT COUNT(*) FROM people WHERE surname = ? COLLATE NOCASE OR surname LIKE ? COLLATE NOCASE", (surname, surname + ' %')).fetchone()[0]
+        count = self.conn.execute("SELECT COUNT(*) FROM people WHERE NORMALIZE(surname) = NORMALIZE(?) OR NORMALIZE(surname) LIKE NORMALIZE(?) || '%'", (surname, surname)).fetchone()[0]
         pct = (count / total * 100) if total else 0
         return {"answer": f"Aproximadamente {count} personas tienen {surname} como primer apellido, lo que supone alrededor del {pct:.1f}% del árbol.", "people_mentioned": [], "people_with_photos": []}
 
@@ -2294,8 +2295,8 @@ class QueryRouter:
             return None
         place = m.group(1).strip()
         rows = [_as_dict(r) for r in self.conn.execute(
-            "SELECT id,name,birth_year,death_year,birth_place,death_place,photo_file,is_alive FROM people WHERE birth_place LIKE ? COLLATE NOCASE AND death_place LIKE ? COLLATE NOCASE ORDER BY birth_year,name LIMIT 200",
-            ('%'+place+'%', '%'+place+'%')
+            "SELECT id,name,birth_year,death_year,birth_place,death_place,photo_file,is_alive FROM people WHERE NORMALIZE(birth_place) LIKE '%' || NORMALIZE(?) || '%' AND NORMALIZE(death_place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY birth_year,name LIMIT 200",
+            (place, place)
         ).fetchall()]
         return {"answer": self._list_people_answer(f"Las personas nacidas en {place} y fallecidas allí fueron", rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
@@ -2523,8 +2524,8 @@ class QueryRouter:
             return None
         surname = _normalize_name_fragment(m.group(1))
         rows = [_as_dict(r) for r in self.conn.execute(
-            "SELECT id,name,birth_year,death_year,birth_place,photo_file,is_alive FROM people WHERE surname = ? COLLATE NOCASE OR surname LIKE ? COLLATE NOCASE ORDER BY birth_year,name LIMIT 200",
-            (surname, surname + ' %')
+            "SELECT id,name,birth_year,death_year,birth_place,photo_file,is_alive FROM people WHERE NORMALIZE(surname) = NORMALIZE(?) OR NORMALIZE(surname) LIKE NORMALIZE(?) || '%' ORDER BY birth_year,name LIMIT 200",
+            (surname, surname)
         ).fetchall()]
         return {"answer": self._list_people_answer(f"Las personas con {surname} como primer apellido son", rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
@@ -2745,8 +2746,8 @@ class QueryRouter:
         for r in self.conn.execute(
             "SELECT p.id, p.name, p.birth_year, p.death_year, p.birth_place, p.photo_file, p.is_alive, b.place, b.date "
             "FROM burial b JOIN people p ON p.id = b.person_id "
-            "WHERE b.place LIKE ? COLLATE NOCASE ORDER BY b.date, p.name",
-            ('%' + place + '%',)
+            "WHERE NORMALIZE(b.place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY b.date, p.name",
+            (place,)
         ).fetchall():
             rows.append(_as_dict(r))
         if not rows:
@@ -2932,7 +2933,7 @@ class QueryRouter:
         surname = m.group(1).strip()
         place = m.group(2).strip()
         rows = []
-        for r in self.conn.execute("SELECT id,name,surname,birth_year,death_year,birth_place,photo_file,is_alive FROM people WHERE birth_place LIKE ? COLLATE NOCASE ORDER BY birth_year,name", ('%'+place+'%',)).fetchall():
+        for r in self.conn.execute("SELECT id,name,surname,birth_year,death_year,birth_place,photo_file,is_alive FROM people WHERE NORMALIZE(birth_place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY birth_year,name", (place,)).fetchall():
             rr = _as_dict(r)
             sp = (rr.get('surname') or '').split()
             if sp and _norm_cmp(sp[0]) == _norm_cmp(surname):
@@ -2994,7 +2995,7 @@ class QueryRouter:
             birth_place = m.group(1).strip()
             death_excl = birth_place
         rows = []
-        for r in self.conn.execute("SELECT id,name,birth_year,death_year,birth_place,death_place,photo_file,is_alive FROM people WHERE birth_place LIKE ? COLLATE NOCASE AND death_place IS NOT NULL AND death_place != '' ORDER BY birth_year,name", ('%'+birth_place+'%',)).fetchall():
+        for r in self.conn.execute("SELECT id,name,birth_year,death_year,birth_place,death_place,photo_file,is_alive FROM people WHERE NORMALIZE(birth_place) LIKE '%' || NORMALIZE(?) || '%' AND death_place IS NOT NULL AND death_place != '' ORDER BY birth_year,name", (birth_place,)).fetchall():
             rr = _as_dict(r)
             if _norm_cmp(death_excl) not in _norm_cmp(rr.get('death_place', '')):
                 rows.append(rr)

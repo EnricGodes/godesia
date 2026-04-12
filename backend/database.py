@@ -2,8 +2,18 @@
 
 import re
 import sqlite3
+import unicodedata
 from datetime import date, timedelta
 from pathlib import Path
+
+def _normalize_accent(text: str) -> str:
+    """Normalize text by removing accents and lowercasing for accent-insensitive search."""
+    if not text:
+        return ""
+    # Strip accents using NFD normalization
+    normalized = "".join(c for c in unicodedata.normalize("NFD", text) if unicodedata.category(c) != "Mn")
+    return normalized.lower()
+
 
 MONTHS = {
     "JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6,
@@ -263,10 +273,12 @@ def convert_date_to_spanish(date_str):
 
 
 def get_connection(db_path):
-    """Create a SQLite connection with row factory."""
+    """Create a SQLite connection with row factory and custom functions."""
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
+    # Register custom function for accent-insensitive search
+    conn.create_function("NORMALIZE", 1, _normalize_accent)
     return conn
 
 
@@ -290,8 +302,8 @@ def search_people(conn, query, limit=20):
     normalized_query = re.sub(r'\s+', '%', query.strip())
     return conn.execute(
         "SELECT id, name, given_name, surname, nickname, birth_year, death_year, photo_file, is_alive "
-        "FROM people WHERE name LIKE ? COLLATE NOCASE ORDER BY name LIMIT ?",
-        (f"%{normalized_query}%", limit)
+        "FROM people WHERE NORMALIZE(name) LIKE '%' || NORMALIZE(?) || '%' ORDER BY name LIMIT ?",
+        (query.strip(), limit)
     ).fetchall()
 
 
