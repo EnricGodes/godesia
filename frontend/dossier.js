@@ -760,6 +760,7 @@ function buildEvents(data) {
 
     // Nacimiento
     if (person.birth_year) {
+        const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
         const lines = [
             formatDateWithQualifier(person.birth_date) || `${person.birth_year}`,
             person.birth_place || ''
@@ -781,7 +782,7 @@ function buildEvents(data) {
             type: 'Nacimiento',
             lines: lines,
             photo: null,
-            name: person.name
+            name: personName
         });
     }
 
@@ -789,6 +790,7 @@ function buildEvents(data) {
     if (data.baptism_date) {
         const year = extractYear(data.baptism_date);
         if (year) {
+            const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
             events.push({
                 year: year,
                 age: ageText(year),
@@ -799,7 +801,7 @@ function buildEvents(data) {
                 ].filter(Boolean),
                 note: data.baptism ? (data.baptism.note || '') : '',
                 photo: null,
-                name: person.name
+                name: personName
             });
         }
     }
@@ -810,6 +812,7 @@ function buildEvents(data) {
         spousesList.forEach(s => {
             const year = extractYear(s.marriage_date);
             if (year) {
+                const spouseName = formatNameWithNickname(s.name, s.nickname, s.given_name, s.surname) || s.name;
                 events.push({
                     year: year,
                     age: ageText(year),
@@ -818,9 +821,8 @@ function buildEvents(data) {
                         s.marriage_date ? formatDateWithQualifier(s.marriage_date) : '',
                         s.marriage_place ? `${s.marriage_place}` : ''
                     ].filter(Boolean),
-                    note: s.name || '',  // Spouse name as note
                     photo: s.photo_file,
-                    name: s.name
+                    name: spouseName
                 });
             }
 
@@ -828,6 +830,7 @@ function buildEvents(data) {
             if (s.divorce && s.divorce.date) {
                 const divYear = extractYear(s.divorce.date);
                 if (divYear) {
+                    const spouseName = formatNameWithNickname(s.name, s.nickname, s.given_name, s.surname) || s.name;
                     events.push({
                         year: divYear,
                         age: ageText(divYear),
@@ -838,7 +841,7 @@ function buildEvents(data) {
                         ].filter(Boolean),
                         note: s.divorce.note || '',
                         photo: s.photo_file,  // Show ex-spouse's photo
-                        name: s.name  // Show ex-spouse's name with their photo
+                        name: spouseName
                     });
                 }
             }
@@ -849,6 +852,7 @@ function buildEvents(data) {
                 // Only show partnership event if there's no marriage date
                 const hasMarriage = s.marriage_date && extractYear(s.marriage_date);
                 if (partYear && !hasMarriage) {
+                    const spouseName = formatNameWithNickname(s.name, s.nickname, s.given_name, s.surname) || s.name;
                     events.push({
                         year: partYear,
                         age: ageText(partYear),
@@ -856,9 +860,8 @@ function buildEvents(data) {
                         lines: [
                             formatDateWithQualifier(s.partnership_date) || ''
                         ].filter(Boolean),
-                        note: s.name || '',
                         photo: s.photo_file,
-                        name: s.name
+                        name: spouseName
                     });
                 }
             }
@@ -871,6 +874,7 @@ function buildEvents(data) {
             const year = extractYear(c.birth_year);
             if (year) {
                 const typeText = c.sex === 'F' ? 'Nacimiento de la hija' : 'Nacimiento del hijo';
+                const childName = formatNameWithNickname(c.name, c.nickname, c.given_name, c.surname) || c.name;
                 events.push({
                     year: year,
                     age: ageText(year),
@@ -879,9 +883,8 @@ function buildEvents(data) {
                         formatDateWithQualifier(c.birth_date) || `${c.birth_year}`,
                         c.birth_place || ''
                     ].filter(Boolean),
-                    note: c.name || '',  // Child name as note
                     photo: c.photo_file,
-                    name: c.name
+                    name: childName
                 });
             }
 
@@ -898,15 +901,18 @@ function buildEvents(data) {
                             m.marriage_place ? `${m.marriage_place}` : ''
                         ].filter(Boolean);
 
+                        const spouseName = formatNameWithNickname(m.spouse_name, m.spouse_nickname, m.spouse_given_name, m.spouse_surname) || m.spouse_name;
+                        const childName = formatNameWithNickname(c.name, c.nickname, c.given_name, c.surname) || c.name;
+
                         events.push({
                             year: mYear,
                             age: ageText(mYear),
                             type: `Matrimonio de ${c.sex === 'F' ? 'la hija' : 'el hijo'}:`,
                             lines: lines,
                             photo: m.spouse_photo,
-                            name: m.spouse_name,
+                            name: spouseName,
                             childPhoto: c.photo_file,
-                            childName: c.name,
+                            childName: childName,
                             isChildMarriage: true
                         });
                     }
@@ -917,6 +923,7 @@ function buildEvents(data) {
 
     // Ocupaciones (with date range support)
     if (data.occupations) {
+        const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
         data.occupations.forEach(o => {
             let year = extractYear(o.date);
             // Only include occupations with actual dates in the timeline
@@ -946,7 +953,7 @@ function buildEvents(data) {
                         o.place || ''
                     ].filter(Boolean),
                     photo: null,
-                    name: person.name
+                    name: personName
                 });
             }
         });
@@ -954,6 +961,7 @@ function buildEvents(data) {
 
     // Residencias (with date range support)
     if (data.residences) {
+        const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
         data.residences.forEach(r => {
             const year = extractYear(r.date);
             if (year) {
@@ -980,7 +988,7 @@ function buildEvents(data) {
                         [r.city, r.country].filter(Boolean).join(', ') || ''
                     ].filter(Boolean),
                     photo: null,
-                    name: person.name
+                    name: personName
                 });
             }
         });
@@ -988,6 +996,7 @@ function buildEvents(data) {
 
     // Alistamiento militar
     if (data.military) {
+        const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
         data.military.forEach(m => {
             const year = extractYear(m.date);
             if (year) {
@@ -1001,7 +1010,7 @@ function buildEvents(data) {
                         m.place || ''
                     ].filter(Boolean),
                     photo: null,
-                    name: person.name
+                    name: personName
                 });
             }
         });
@@ -1009,6 +1018,7 @@ function buildEvents(data) {
 
     // Anécdotas
     if (data.anecdotes) {
+        const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
         data.anecdotes.forEach(a => {
             const year = extractYear(a.date);
             if (year) {
@@ -1022,7 +1032,7 @@ function buildEvents(data) {
                         a.place || ''
                     ].filter(Boolean),
                     photo: null,
-                    name: person.name
+                    name: personName
                 });
             }
         });
@@ -1030,6 +1040,7 @@ function buildEvents(data) {
 
     // Generic events (Award, Illness, Funeral, Membership, etc.)
     if (data.events) {
+        const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
         data.events.forEach(e => {
             const year = extractYear(e.date);
             if (year) {
@@ -1053,7 +1064,7 @@ function buildEvents(data) {
                     ].filter(Boolean),
                     note: e.description || '',  // Store note separately for italic rendering
                     photo: null,
-                    name: person.name
+                    name: personName
                 });
             }
         });
@@ -1061,6 +1072,7 @@ function buildEvents(data) {
 
     // Defunción
     if (person.death_year) {
+        const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
         const deathLines = [formatDateWithQualifier(person.death_date) || `${person.death_year}`];
         if (person.death_place) deathLines.push(person.death_place);
         if (person.death_cause) deathLines.push(`Causa: ${person.death_cause}`);
@@ -1072,12 +1084,13 @@ function buildEvents(data) {
             lines: deathLines,
             note: person.death_note || '',
             photo: null,
-            name: person.name
+            name: personName
         });
     }
 
     // Entierro (after death)
     if (data.burial && data.burial.length > 0) {
+        const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
         data.burial.forEach(b => {
             const year = extractYear(b.date);
             if (year) {
@@ -1094,7 +1107,7 @@ function buildEvents(data) {
                     type: 'Entierro',
                     lines: lines.filter(Boolean),
                     photo: null,
-                    name: person.name
+                    name: personName
                 });
             }
         });
@@ -1113,6 +1126,7 @@ function buildEvents(data) {
             const deathYear = s.death_year;
             // Only show if death was after divorce
             if (deathYear >= divYear) {
+                const spouseName = formatNameWithNickname(s.name, s.nickname, s.given_name, s.surname) || s.name;
                 events.push({
                     year: deathYear,
                     age: ageText(deathYear),
@@ -1121,9 +1135,8 @@ function buildEvents(data) {
                         s.death_date ? formatDateWithQualifier(s.death_date) : `${deathYear}`,
                         s.death_place ? `${s.death_place}` : ''
                     ].filter(Boolean),
-                    note: '',
                     photo: s.photo_file,
-                    name: s.name
+                    name: spouseName
                 });
             }
         }
@@ -1136,12 +1149,15 @@ function buildEvents(data) {
                 child.partnerships.forEach(partnership => {
                     const year = extractYear(partnership.partnership_date);
                     if (year) {
+                        const childName = formatNameWithNickname(child.name, child.nickname, child.given_name, child.surname) || child.name;
+                        const partnerName = formatNameWithNickname(partnership.partner_name, partnership.partner_nickname, partnership.partner_given_name, partnership.partner_surname) || partnership.partner_name;
+
                         const photos = [];
                         if (child.photo_file) {
-                            photos.push({ name: child.name, photo: child.photo_file });
+                            photos.push({ name: childName, photo: child.photo_file });
                         }
                         if (partnership.partner_photo) {
-                            photos.push({ name: partnership.partner_name, photo: partnership.partner_photo });
+                            photos.push({ name: partnerName, photo: partnership.partner_photo });
                         }
 
                         events.push({
@@ -1149,7 +1165,6 @@ function buildEvents(data) {
                             age: ageText(year),
                             type: 'Sociedad del hijo',
                             lines: [formatDateWithQualifier(partnership.partnership_date) || ''],
-                            note: `${child.name} y ${partnership.partner_name}`,
                             photos: photos.length > 0 ? photos : null,
                             name: person.name
                         });
