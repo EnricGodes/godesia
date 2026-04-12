@@ -158,12 +158,36 @@ function renderPhotoModal() {
            </div>`
         : '';
 
-    // Álbum con foto de portada
+    // Álbum con portada personalizada
     const albumHtml = p.album_title
         ? `<div style="margin-bottom: 24px;">
              <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">Álbum</h3>
-             ${p.album_cover ? `<div style="width: 100%; height: 140px; border-radius: 6px; overflow: hidden; margin-bottom: 10px; border: 1px solid rgba(114, 121, 113, 0.2);"><img src="/photos/${p.album_cover}" alt="${p.album_title}" style="width: 100%; height: 100%; object-fit: cover; display: block;"></div>` : ''}
-             <div style="font-size: 13px; color: #1c1c17; font-weight: 600;">${p.album_title}</div>
+             <div style="
+               position: relative;
+               width: 100%;
+               aspect-ratio: 3 / 4;
+               border-radius: 6px;
+               overflow: hidden;
+               border: 1px solid rgba(114, 121, 113, 0.2);
+               background-image: url('/img/album_cover.png');
+               background-size: cover;
+               background-position: center;
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               padding: 20px;
+             ">
+               <h2 style="
+                 font-family: 'Noto Serif', serif;
+                 color: #2D4B33;
+                 text-align: center;
+                 font-size: clamp(14px, 5vw, 18px);
+                 font-weight: bold;
+                 line-height: 1.3;
+                 margin: 0;
+                 word-wrap: break-word;
+               ">${p.album_title}</h2>
+             </div>
            </div>`
         : '';
 
