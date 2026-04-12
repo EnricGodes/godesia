@@ -1409,14 +1409,14 @@ nav {
     max-height: 300px;
     overflow-y: auto;
     z-index: 1001;
-    min-width: 240px;
+    min-width: 180px;
 }
 
 .mention-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
+    gap: 8px;
+    padding: 8px 10px;
     cursor: pointer;
     transition: background-color 0.15s;
     border-bottom: 1px solid var(--surface-container-low);
@@ -1454,10 +1454,17 @@ nav {
     border: 1px solid var(--outline-variant);
 }
 
+.mention-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
 .mention-name {
     font-size: 13px;
     color: var(--on-surface);
-    flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1466,4 +1473,19 @@ nav {
 .mention-name strong {
     font-weight: 700;
     color: var(--primary);
+}
+
+.mention-years {
+    font-size: 11px;
+    color: var(--on-surface-variant);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Position dropdown above input in chat.html */
+.input-area .mention-dropdown {
+    bottom: 100%;
+    top: auto;
+    margin-bottom: 4px;
 }

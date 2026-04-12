@@ -133,12 +133,25 @@ class MentionAutocomplete {
     }
 
     const itemsHtml = results
-      .map(person => `
-        <div class="mention-item" data-mention-item data-name="${person.name}">
-          ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${person.name}" class="mention-photo">` : `<div class="mention-photo-placeholder">${person.name.charAt(0)}</div>`}
-          <span class="mention-name">${this.highlightQuery(person.name)}</span>
-        </div>
-      `)
+      .map(person => {
+        let yearText = '';
+        if (person.birth_year && person.death_year) {
+          yearText = `${person.birth_year}–${person.death_year}`;
+        } else if (person.death_year) {
+          yearText = `†${person.death_year}`;
+        } else if (person.birth_year) {
+          yearText = `${person.birth_year}–`;
+        }
+        return `
+          <div class="mention-item" data-mention-item data-name="${person.name}">
+            ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${person.name}" class="mention-photo">` : `<div class="mention-photo-placeholder">${person.name.charAt(0)}</div>`}
+            <div class="mention-info">
+              <span class="mention-name">${this.highlightQuery(person.name)}</span>
+              ${yearText ? `<span class="mention-years">${yearText}</span>` : ''}
+            </div>
+          </div>
+        `;
+      })
       .join('');
 
     this.dropdownContainer.innerHTML = itemsHtml;
@@ -196,13 +209,23 @@ class MentionAutocomplete {
     if (!this.dropdownContainer) return;
 
     const rect = this.input.getBoundingClientRect();
-    const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const isInInputArea = this.input.closest('.input-area') !== null;
 
     this.dropdownContainer.style.position = 'fixed';
     this.dropdownContainer.style.left = (rect.left) + 'px';
-    this.dropdownContainer.style.top = (rect.bottom + 4) + 'px';
     this.dropdownContainer.style.width = rect.width + 'px';
+
+    if (isInInputArea) {
+      // In chat.html: dropdown above the input
+      this.dropdownContainer.style.bottom = 'auto';
+      this.dropdownContainer.style.top = (rect.top - 4) + 'px';
+      this.dropdownContainer.style.transform = 'translateY(-100%)';
+    } else {
+      // In index.html: dropdown below the input
+      this.dropdownContainer.style.top = (rect.bottom + 4) + 'px';
+      this.dropdownContainer.style.bottom = 'auto';
+      this.dropdownContainer.style.transform = 'none';
+    }
   }
 }
 
