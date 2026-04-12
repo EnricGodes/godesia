@@ -161,7 +161,6 @@ function renderPhotoModal() {
     // Álbum con portada personalizada
     const albumHtml = p.album_title
         ? `<div style="margin-bottom: 24px;">
-             <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">Álbum</h3>
              <div style="
                position: relative;
                width: 100%;
@@ -176,17 +175,20 @@ function renderPhotoModal() {
                align-items: center;
                justify-content: center;
                padding: 20px;
+               max-width: 160px;
+               margin: 0 auto;
              ">
-               <h2 style="
+               <div style="
                  font-family: 'Noto Serif', serif;
                  color: #2D4B33;
                  text-align: center;
-                 font-size: clamp(14px, 5vw, 18px);
+                 font-size: 13px;
                  font-weight: bold;
-                 line-height: 1.3;
+                 line-height: 1.4;
                  margin: 0;
-                 word-wrap: break-word;
-               ">${p.album_title}</h2>
+               ">
+                 ${p.album_title.split(/\s+/).map(word => `<div>${word}</div>`).join('')}
+               </div>
              </div>
            </div>`
         : '';
