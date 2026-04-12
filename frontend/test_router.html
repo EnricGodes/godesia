@@ -173,6 +173,7 @@ function renderStats() {
     { k: '✓ Mejoras', v: counts.improvement, cls: counts.improvement > 0 ? 'ok' : '' },
     { k: 'Pendientes', v: counts.pending, cls: '' },
     { k: 'Nuevas', v: counts.new, cls: '' },
+    { k: 'Rechazadas', v: counts.rejected + counts.no_answer, cls: '' },
   ].map(s => `<div class="stat ${s.cls}"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join('');
 }
 

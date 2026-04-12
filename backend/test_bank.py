@@ -72,7 +72,8 @@ def _classify_case(case: dict) -> str:
     snapshot = case.get("approved_snapshot")
 
     # Detect improvements: rejected cases that now return valid answer (not "No he sabido responder")
-    if verdict == "rejected" and last_run:
+    # BUT only if not already reviewed and confirmed as "not a real improvement"
+    if verdict == "rejected" and last_run and not case.get("improvement_reviewed"):
         answer = last_run.get("answer", "")
         if answer and "No he sabido responder" not in answer:
             return "improvement"  # Rejected case that now works!
@@ -179,8 +180,17 @@ def set_verdict(case_id: str, verdict: str) -> dict:
 
     for case in bank["cases"]:
         if case["id"] == case_id:
+            old_classification = _classify_case(case)
             case["verdict"] = verdict
             case["updated_at"] = now
+
+            # If rejecting a case that was marked as "improvement", flag it as reviewed
+            if verdict == "rejected" and old_classification == "improvement":
+                case["improvement_reviewed"] = True
+            # Clear the improvement_reviewed flag when approving
+            elif verdict == "approved" and case.get("improvement_reviewed"):
+                case.pop("improvement_reviewed", None)
+
             if verdict == "approved" and case.get("last_run"):
                 case["approved_snapshot"] = {
                     "answer": case["last_run"]["answer"],
