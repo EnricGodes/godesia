@@ -326,12 +326,12 @@ class QueryRouter:
             (r"^(?:yernos?|son[s-]in.law)\s+.+$", "handle_sons_in_law"),
             (r"^(?:cu[nñ]adas?|sister[s-]in.law)\s+.+$", "handle_sisters_in_law"),
             (r"^(?:cu[nñ]ados?|brother[s-]in.law)\s+.+$", "handle_brothers_in_law"),
-            (r"^(?:donde|d[oó]nde)\s+naci[oó]\s+.+$", "handle_birth_place_of_person"),
+            (r"^(?:donde|d[oó]nde)\s+naci[oó]\s+.+$|(?:cu[aá]l\s+(?:fue|es)\s+(?:el\s+lugar|la\s+ciudad|la\s+localidad|el\s+pueblo)\s+(?:de\s+)?(?:nacimiento|origen|natal)|qu[eé]\s+lugar.*nacimiento)\s+.+", "handle_birth_place_of_person"),
             (r"(?:d[oó]nde\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:lugar|sitio|ciudad|pueblo)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+(?:el\s+lugar|la\s+ciudad)\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+lugar\s+de\s+(?:fallecimiento|defunci[oó]n)\s+(?:tiene|consta)|lugar\s+de\s+defunci[oó]n\s+de)\s+.+", "handle_death_place_of_person"),
-            (r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|en\s+qu[eé]\s+fecha.*naci)", "handle_birth_date_of_person"),
+            (r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|en\s+qu[eé]\s+fecha.*naci|cu[aá]l\s+(?:fue|es)\s+(?:la\s+)?fecha\s+(?:exacta\s+)?(?:de\s+)?nacimiento)\s+.+", "handle_birth_date_of_person"),
             (r"(?:cu[aá]ndo\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:fecha|a[nñ]o|d[ií]a)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+la\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+fecha\s+de\s+defunci[oó]n\s+(?:tiene|consta)|hay\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de|cu[aá]ndo\s+se\s+produjo\s+la\s+defunci[oó]n\s+de|fue\s+(?:enterrad[oa]|sepultad[oa]))\s+.+", "handle_death_date_of_person"),
-            (r"^(?:ocupaci[oó]n|qu[eé]\s+oficio|trabajo)\s+de\s+.+$", "handle_occupation_natural"),
-            (r"(?:residencia|d[óo]nde\s+(?:viv[ií]a|vivia|vive|ha\s+vivido))\s+", "handle_last_residence"),
+            (r"^(?:ocupaci[oó]n|qu[eé]\s+oficio|trabajo|cu[aá]l\s+(?:era|fue)\s+(?:el\s+medio\s+de\s+vida|el\s+oficio))\s+(?:de\s+)?.+$", "handle_occupation_natural"),
+            (r"(?:residencia|d[óo]nde\s+(?:viv[ií]a|vivia|vive|ha\s+vivido)|cu[aá]l\s+(?:fue|era|es)\s+(?:el\s+domicilio|la\s+direcci[oó]n|el\s+primer\s+domicilio))\s+", "handle_last_residence"),
             (r"^(?:notas?|apuntes?)\s+(?:biogr[aá]ficas?\s+)?de\s+.+$", "handle_notes_field"),
             (r"^(?:qu[eé]\s+)?descendencia\s+.+$", "handle_has_descendants"),
         ]
@@ -452,10 +452,10 @@ class QueryRouter:
             "baptism_date, baptism_place, godparents, nickname "
         )
         # Search with both original and expanded names to handle abbreviations like Mª
-        # Use NORMALIZE() function for accent-insensitive search
+        # Use case-insensitive LIKE search
         rows = self.conn.execute(
             select_cols +
-            "FROM people WHERE (NORMALIZE(name) LIKE NORMALIZE(?) OR NORMALIZE(name) LIKE NORMALIZE(?)) "
+            "FROM people WHERE (name LIKE ? COLLATE NOCASE OR name LIKE ? COLLATE NOCASE) "
             "ORDER BY name LIMIT ?",
             (like_original, like_expanded, max(limit * 4, 80)),
         ).fetchall()
@@ -464,9 +464,9 @@ class QueryRouter:
         if len(rows) < limit:
             nickname_rows = self.conn.execute(
                 select_cols +
-                "FROM people WHERE (NORMALIZE(nickname) LIKE NORMALIZE(?) OR NORMALIZE(nickname) LIKE NORMALIZE(?)) "
+                "FROM people WHERE (nickname LIKE ? COLLATE NOCASE OR nickname LIKE ? COLLATE NOCASE) "
                 "AND id NOT IN "
-                "(SELECT id FROM people WHERE NORMALIZE(name) LIKE NORMALIZE(?) OR NORMALIZE(name) LIKE NORMALIZE(?)) "
+                "(SELECT id FROM people WHERE name LIKE ? COLLATE NOCASE OR name LIKE ? COLLATE NOCASE) "
                 "ORDER BY name LIMIT ?",
                 (like_original, like_expanded, like_original, like_expanded, max(limit * 2, 40)),
             ).fetchall()
@@ -2772,7 +2772,8 @@ class QueryRouter:
         m = (re.search(r"(?:a\s+)?qu[eé]\s+oficio\s+(?:ten[ií]a|se\s+dedic[oó])\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"en\s+qu[eé]\s+trabaja(?:ba)?\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"(?:qu[eé]\s+)?empleo\s+consta\s+de\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+(.+?)(?:\?|$)", q, re.I))
+             re.search(r"c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"cu[aá]l\s+(?:era|fue)\s+(?:el\s+medio\s+de\s+vida|el\s+oficio)\s+(?:de\s+)?(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person,_ = self._resolve_person(m.group(1))
@@ -3231,7 +3232,8 @@ class QueryRouter:
         q = _clean_question(question)
         m = (re.search(r"(?:ultima|[uú]ltima)\s+residencia\s+de\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"d[oó]nde\s+viv[ií]a\s+(.+?)\s+al\s+final\s+de\s+su\s+vida(?:\?|$)", q, re.I) or
-             re.search(r"(?:residencia|d[óo]nde\s+(?:vivia|viv[ií]a|vive|ha\s+vivido))\s+(.+?)(?:\?|$)", q, re.I))
+             re.search(r"(?:residencia|d[óo]nde\s+(?:vivia|viv[ií]a|vive|ha\s+vivido))\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"cu[aá]l\s+(?:fue|era|es)\s+(?:el\s+domicilio|la\s+direcci[oó]n|el\s+primer\s+domicilio)\s+(?:de\s+)?(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person, _ = self._resolve_person(m.group(1))
@@ -3309,8 +3311,10 @@ class QueryRouter:
         return {"answer": ans, "people_mentioned": [a['id'], b['id']], "people_with_photos": self._people_payload([a, b])}
 
     def handle_birth_place_of_person(self, question):
-        """Handle 'Donde nacio X?' - return X's birthplace"""
-        subject = self._extract_subject_name_from_pattern(question, r"(?:donde|d[oó]nde)\s+naci[oó]\s+(.+?)(?:\?|$)")
+        """Handle 'Donde nacio X?' or 'Cual fue el lugar de nacimiento de X?' - return X's birthplace"""
+        subject = (self._extract_subject_name_from_pattern(question, r"(?:donde|d[oó]nde)\s+naci[oó]\s+(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"(?:cu[aá]l\s+(?:fue|es)\s+(?:el\s+lugar|la\s+ciudad|la\s+localidad|el\s+pueblo)\s+(?:de\s+)?(?:nacimiento|origen|natal)\s+de)\s+(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"(?:qu[eé]\s+lugar.*nacimiento\s+(?:tiene|tiene|tuvo)\s+(?:de\s+)?)\s*(.+?)(?:\?|$)"))
         if not subject:
             return None
         person, _ = self._resolve_person(subject)
@@ -3339,8 +3343,9 @@ class QueryRouter:
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_birth_date_of_person(self, question):
-        """Handle 'Cuando nacio X?' - return X's birth date"""
-        subject = self._extract_subject_name_from_pattern(question, r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|en\s+qu[eé]\s+fecha.*naci)\s+(.+?)(?:\?|$)")
+        """Handle 'Cuando nacio X?' or 'Cual fue la fecha de nacimiento de X?' - return X's birth date"""
+        subject = (self._extract_subject_name_from_pattern(question, r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|en\s+qu[eé]\s+fecha.*naci)\s+(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"(?:cu[aá]l\s+(?:fue|es)\s+(?:la\s+)?fecha\s+(?:exacta\s+)?(?:de\s+)?nacimiento\s+de)\s+(.+?)(?:\?|$)"))
         if not subject:
             return None
         person, _ = self._resolve_person(subject)
