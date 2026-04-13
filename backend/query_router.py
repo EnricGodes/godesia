@@ -536,9 +536,12 @@ class QueryRouter:
             r"pares\s+de\s+(.+?)(?:\?|$)",
             r"padre\s+de\s+(.+?)(?:\?|$)",
             r"pare\s+de\s+(.+?)(?:\?|$)",
-            r"hermanos?\s+ten[ií]a\s+(.+?)(?:\?|$)",
+            r"hermanos?\s+(?:ten[ií]a|tuvo)\s+(.+?)(?:\?|$)",
             r"hermanos\s+de\s+(.+?)(?:\?|$)",
             r"germans\s+de\s+(.+?)(?:\?|$)",
+            r"con\s+qu[eé]\s+hermanos?\s+convivi[oó]\s+(.+?)(?:\?|$)",
+            r"qu[eé]\s+(?:grupo|familia)\s+de\s+hermanos\s+formaba\s+(.+?)(?:\?|$)",
+            r"qu[eé]\s+hermanos\s+y\s+hermanas\s+tuvo\s+(.+?)(?:\?|$)",
             r"(?:que\s+)?hijos?\s+(?:documentados?\s+)?(?:tuvo|tiene|ten[ií]a)\s+(.+?)(?:\?|$)",
             r"hijos\s+de\s+(.+?)(?:\?|$)",
             r"fills\s+de\s+(.+?)(?:\?|$)",
@@ -556,6 +559,10 @@ class QueryRouter:
             r"cu[aá]ntos?\s+hermanos(?:\s+y\s+hermanas)?\s+(?:ten[ií]a|tuvo)(?:\s+(?:realmente|aparentemente|exactamente|documentados?|seg[uú]n))?\s+(.+?)(?:\?|$)",
             r"con\s+cu[aá]ntos?\s+hermanos\s+se\s+cr[ií]o\s+(.+?)(?:\?|$)",
             r"cu[aá]ntos?\s+hermanos?\s+le\s+salieron\s+a\s+(.+?)(?:\?|$)",
+            r"qu[eé]\s+n[uú]mero\s+de\s+hermanos\s+(?:ten[ií]a|tuvo)\s+(.+?)(?:\?|$)",
+            r"qu[eé]\s+cantidad\s+de\s+hermanos\s+(?:ten[ií]a|tuvo)\s+(.+?)(?:\?|$)",
+            r"cu[aá]ntos?\s+eran\s+en\s+total\s+los\s+hermanos\s+de\s+(.+?)(?:\?|$)",
+            r"cu[aá]ntos?\s+hermanos\s+se\s+le\s+conocen\s+a\s+(.+?)(?:\?|$)",
             r"abuelo\s+paterno\s+de\s+(.+?)(?:\?|$)",
             r"abuela\s+materna\s+de\s+(.+?)(?:\?|$)",
             r"suegros\s+de\s+(.+?)(?:\?|$)",
@@ -1326,7 +1333,8 @@ class QueryRouter:
     def handle_age_at_marriage(self, question):
         q = _clean_question(question)
         m = (re.search(r"(?:a\s+)?qu[eé]\s+edad\s+se\s+cas[oó]\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"qu[eé]\s+edad\s+ten[ií]a\s+(.+?)\s+cuando\s+se\s+cas[oó](?:\?|$)", q, re.I))
+             re.search(r"qu[eé]\s+edad\s+ten[ií]a\s+(.+?)\s+cuando\s+se\s+cas[oó](?:\?|$)", q, re.I) or
+             re.search(r"qu[eé]\s+edad\s+(?:ten[ií]a|gastaba)\s+(.+?)\s+al\s+casarse(?:\?|$)", q, re.I))
         if not m:
             return None
         person, _ = self._resolve_person(m.group(1))
@@ -1438,7 +1446,9 @@ class QueryRouter:
 
     def handle_birth_order_among_siblings(self, question):
         q = _clean_question(question)
-        m = re.search(r"posici[oó]n\s+entre\s+sus\s+hermanos\s+naci[oó]\s+(.+?)(?:\?|$)", q, re.I)
+        m = (re.search(r"en\s+qu[eé]\s+posici[oó]n\s+(?:entre\s+)?sus\s+hermanos\s+naci[oó]\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"posici[oó]n\s+entre\s+sus\s+hermanos\s+naci[oó]\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"qu[eé]\s+lugar\s+(?:ocupaba|ocupa)\s+(?:dentro|entre)\s+sus\s+hermanos\s+(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person, _ = self._resolve_person(m.group(1))
@@ -3278,8 +3288,10 @@ class QueryRouter:
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_death_place_of_person(self, question):
-        """Handle 'Donde murio X?' - return X's death place"""
-        subject = self._extract_subject_name_from_pattern(question, r"(?:donde|d[oó]nde)\s+(?:murio|muri[oó])\s+(.+?)(?:\?|$)")
+        """Handle 'Donde/falleció X?' - return X's death place"""
+        subject = (self._extract_subject_name_from_pattern(question, r"(?:d[oó]nde|en\s+qu[eé]\s+(?:lugar|sitio|ciudad|pueblo))\s+(?:falleci[oó]|muri[oó])\s+(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"(?:cu[aá]l\s+fue\s+(?:el\s+lugar|la\s+ciudad)\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de|lugar\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de)\s+(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"(?:qu[eé]\s+lugar\s+de\s+(?:fallecimiento|defunci[oó]n)\s+(?:tiene|consta)\s+(?:de\s+)?)\s*(.+?)(?:\?|$)"))
         if not subject:
             return None
         person, _ = self._resolve_person(subject)
@@ -3306,8 +3318,12 @@ class QueryRouter:
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_death_date_of_person(self, question):
-        """Handle 'Cuando murio X?' - return X's death date"""
-        subject = self._extract_subject_name_from_pattern(question, r"(?:cuando|cu[aá]ndo)\s+(?:murio|muri[oó]|fue\s+enterrad[oa])\s+(.+?)(?:\?|$)")
+        """Handle 'Cuando murio/falleció X?' - return X's death date"""
+        subject = (self._extract_subject_name_from_pattern(question, r"(?:cu[aá]ndo|en\s+qu[eé]\s+(?:fecha|a[nñ]o|d[ií]a))\s+(?:falleci[oó]|muri[oó]|fue\s+enterrad[oa])\s+(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"(?:cu[aá]l\s+fue\s+la\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de)\s+(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"(?:qu[eé]\s+fecha\s+de\s+defunci[oó]n\s+(?:tiene|consta)\s+(?:de\s+)?)\s*(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"(?:hay\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de)\s+(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"(?:cu[aá]ndo\s+se\s+produjo\s+la\s+defunci[oó]n\s+de)\s+(.+?)(?:\?|$)"))
         if not subject:
             return None
         person, _ = self._resolve_person(subject)
