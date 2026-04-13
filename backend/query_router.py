@@ -195,7 +195,7 @@ class QueryRouter:
             (r"(?:qu[eé]\s+lugar\s+de\s+nacimiento\s+tiene\s+m[aá]s\s+variantes\s+de\s+escritura)", "handle_birth_place_variants"),
             (r"(?:qu[eé]\s+matrimonio\s+tuvo\s+m[aá]s\s+descendencia\s+documentada)", "handle_marriage_max_descendants"),
             (r"(?:cu[aá]ntos?\s+a[nñ]os\s+ten[ií]a\s+.+\s+cuando\s+naci[oó]\s+su\s+primer\s+hij[oa])", "handle_age_at_first_child"),
-            (r"(?:a\s+)?qu[eé]\s+edad\s+(?:se\s+cas[oó]|ten[ií]a.*cuando\s+se\s+cas[oó])\s+.+", "handle_age_at_marriage"),
+            (r"(?:a\s+)?qu[eé]\s+edad\s+(?:se\s+cas[oó]|ten[ií]a.*cuando\s+se\s+cas[oó])", "handle_age_at_marriage"),
             (r"(?:con\s+qui[eé]n\s+se\s+cas[oó]\s+la\s+persona\s+nacida\s+en\s+.+\s+llamada\s+.+)", "handle_spouse_disambiguated_by_birth_place"),
             (r"(?:cu[aá]ntos?\s+hijos\s+(?:tuvo\s+)?(?:el\s+matrimonio\s+de\s+)?.+\s+y\s+.+|cu[aá]ntos?\s+hijos\s+tuvieron\s+.+\s+y\s+.+)", "handle_couple_children_count"),
             (r"(?:qui[eé]nes\s+eran\s+los\s+abuelos\s+de\s+.+\s+y\s+en\s+qu[eé]\s+a[nñ]os\s+nacieron)", "handle_grandparents_with_years"),
@@ -519,8 +519,8 @@ class QueryRouter:
         patterns = [
             r"entre\s+(.+?)\s+y\s+(.+?)(?:\?|$)",
             r"(?:eran\s+primos|era[n]?\s+primos?)\s+(.+?)\s+y\s+(.+?)(?:\?|$)",
-            r"(?:qu[eé]\s+parentesco\s+(?:hay|hab[ií]a))\s+entre\s+(.+?)\s+y\s+(.+?)(?:\?|$)",
-            r"(?:qu[eé]\s+relaci[oó]n\s+ten[ií]a|qu[eé]\s+parentesco\s+hab[ií]a)\s+(.+?)\s+con\s+(.+?)(?:\?|$)",
+            r"(?:qu[eé]\s+parentesco\s+(?:hay|hab[ií]a|ten[ií]a))\s+(?:entre\s+)?(.+?)\s+con\s+(.+?)(?:\s+y\s+cu[aá]l|\?|$)",
+            r"(?:qu[eé]\s+relaci[oó]n\s+ten[ií]a|qu[eé]\s+parentesco\s+(?:hab[ií]a|ten[ií]a))\s+(.+?)\s+con\s+(.+?)(?:\?|$)",
             r"(?:qui[eé]n\s+era\s+mayor,?)\s+(.+?)\s+o\s+(.+?)(?:\?|$)",
         ]
         for p in patterns:
