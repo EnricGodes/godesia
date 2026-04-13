@@ -231,7 +231,7 @@ class QueryRouter:
             (r"(?:qu[eé]\s+personas\s+nacieron\s+en|which\s+people\s+were\s+born\s+in)", "handle_birth_place_people"),
             (r"(?:de\s+qu[eé]\s+(?:matrimonio(?:\s+o\s+pareja)?|pareja)\s+naci[oó])", "handle_birth_union"),
             (r"(?:padres\s+y\s+los\s+hijos|pares\s+i\s+els\s+fills)", "handle_parents_and_children"),
-            (r"(?:cu[aá]ntos?\s+herman|quants?\s+germans?|qu[eé]\s+n[uú]mero\s+de\s+hermanos|qu[eé]\s+cantidad\s+de\s+hermanos|eran\s+muchos\s+los\s+hermanos|cu[aá]ntos\s+eran\s+en\s+total\s+los\s+hermanos|cu[aá]ntos?\s+hermanos\s+se\s+le\s+conocen|cu[aá]ntos?\s+hermanos\s+tuvo\s+(?:realmente|de\s+verdad))", "handle_siblings_count"),
+            (r"(?:cu[aá]ntos?\s+herman|quants?\s+germans?|qu[eé]\s+n[uú]mero\s+de\s+hermanos|qu[eé]\s+cantidad\s+de\s+hermanos|eran\s+muchos\s+los\s+hermanos|cu[aá]ntos\s+eran\s+en\s+total\s+los\s+hermanos|cu[aá]ntos?\s+hermanos\s+se\s+le\s+conocen)", "handle_siblings_count"),
             (r"(?:abuelo\s+paterno|avi\s+patern|abuelo\s+por\s+v[ií]a\s+paterna|abuelo\s+por\s+parte\s+de\s+padre|abuelo\s+de\s+l[ií]nea\s+paterna|qu[eé]\s+abuelo\s+ten[ií]a\s+por\s+v[ií]a\s+paterna|qu[eé]\s+abuelo\s+ten[ií]a\s+por\s+parte\s+de\s+padre)", "handle_paternal_grandfather"),
             (r"(?:abuela\s+materna|[àa]via\s+matern|abuela\s+por\s+v[ií]a\s+materna|abuela\s+por\s+parte\s+de\s+madre|abuela\s+de\s+l[ií]nea\s+materna|qu[eé]\s+abuela\s+ten[ií]a\s+por\s+v[ií]a\s+materna|qu[eé]\s+abuela\s+ten[ií]a\s+por\s+parte\s+de\s+madre)", "handle_maternal_grandmother"),
             (r"(?:t[ií]os?\s+(?:y\s+)?t[ií]as?\s+de|uncles\s+and\s+aunts\s+of)", "handle_uncles_and_aunts"),
@@ -254,7 +254,7 @@ class QueryRouter:
             (r"(?:hermanos\s+de|germans\s+de|siblings\s+of)", "handle_siblings"),
             (r"(?:c[oó]nyuge\s+de|spouse\s+of|compa[ñn]era\s+de\s+vida\s+de|pareja\s+de)", "handle_spouse"),
             (r"(?:hijos\s+de|fills\s+de|children\s+of)", "handle_children"),
-            (r"(?:(?:cu[aá]l|qu[ií]en)\s+(?:fue|es)\s+el\s+primer\s+hij[oa]\s+(?:de\s+|que\s+(?:tuvo|tiene)\s+).+|primer\s+hij[oa]\s+(?:de|que\s+(?:tuvo|tiene)).+|qu[eé]\s+rama\s+arranca\s+con\s+el\s+primer\s+hij[oa]\s+de|first\s+child\s+of)", "handle_first_child"),
+            (r"(?:(?:cu[aá]l|qu[ií]en)\s+(?:fue|es)\s+el\s+primer\s+hij[oa]\s+(?:de\s+|que\s+(?:tuvo|tiene)\s+).+|first\s+child\s+of)", "handle_first_child"),
             (r"(?:(?:cu[aá]l|qu[ií]en)\s+(?:fue|es)\s+el\s+[uú]ltimo\s+hij[oa]\s+(?:que\s+(?:tuvo|tiene)\s+|de\s+).+|last\s+child\s+of)", "handle_last_child"),
             (r"(?:hij[oa]\s+mayor\s+de\s+.+|oldest\s+son\s+of|oldest\s+daughter\s+of)", "handle_oldest_son"),
             (r"(?:hija\s+mayor\s+de\s+.+|oldest\s+daughter\s+of)", "handle_oldest_daughter"),
@@ -559,7 +559,7 @@ class QueryRouter:
             r"nueras?\s+de\s+(.+?)(?:\?|$)",
             r"yernos?\s+de\s+(.+?)(?:\?|$)",
             r"cu[aá]ntos?\s+hijos\s+tuvo\s+(.+?)(?:\?|$)",
-            r"cu[aá]ntos?\s+hermanos(?:\s+y\s+hermanas)?\s+(?:tuvo|ten[ií]a)(?:\s+(?:realmente|aparentemente|exactamente|documentados?|seg[uú]n|de\s+verdad))?\s+(.+?)(?:\?|$)",
+            r"cu[aá]ntos?\s+hermanos(?:\s+y\s+hermanas)?\s+(?:ten[ií]a|tuvo)(?:\s+(?:realmente|aparentemente|exactamente|documentados?|seg[uú]n))?\s+(.+?)(?:\?|$)",
             r"con\s+cu[aá]ntos?\s+hermanos\s+se\s+cr[ií]o\s+(.+?)(?:\?|$)",
             r"cu[aá]ntos?\s+hermanos?\s+le\s+salieron\s+a\s+(.+?)(?:\?|$)",
             r"qu[eé]\s+n[uú]mero\s+de\s+hermanos\s+(?:ten[ií]a|tuvo)\s+(.+?)(?:\?|$)",
@@ -1127,8 +1127,7 @@ class QueryRouter:
     def handle_first_child(self, question):
         q = _clean_question(question)
         m = (re.search(r"(?:primer\s+hijo|primer\s+hija|first\s+child)\s+(?:de|of)\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"(?:cu[aá]l|qu[ií]en)\s+(?:fue|es)\s+el\s+primer\s+hij[oa]\s+(?:de|que\s+(?:tuvo|tiene))\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"qu[eé]\s+rama\s+arranca\s+con\s+el\s+primer\s+hij[oa]\s+de\s+(.+?)(?:\?|$)", q, re.I))
+             re.search(r"(?:cu[aá]l|qu[ií]en)\s+(?:fue|es)\s+el\s+primer\s+hij[oa]\s+(?:de|que\s+(?:tuvo|tiene))\s+(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person, _ = self._resolve_person(m.group(1))
