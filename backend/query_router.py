@@ -194,7 +194,7 @@ class QueryRouter:
             (r"(?:qu[eé]\s+rama\s+tuvo\s+m[aá]s\s+hijos:\s*la\s+formada\s+por\s+.+\s+y\s+.+\s+o\s+la\s+siguiente\s+pareja\s+en\s+el\s+ranking)", "handle_branch_vs_next_couple"),
             (r"(?:qu[eé]\s+lugar\s+de\s+nacimiento\s+tiene\s+m[aá]s\s+variantes\s+de\s+escritura)", "handle_birth_place_variants"),
             (r"(?:qu[eé]\s+matrimonio\s+tuvo\s+m[aá]s\s+descendencia\s+documentada)", "handle_marriage_max_descendants"),
-            (r"(?:cu[aá]ntos?\s+a[nñ]os\s+ten[ií]a\s+.+\s+cuando\s+naci[oó]\s+su\s+primer\s+hij[oa])", "handle_age_at_first_child"),
+            (r"(?:(?:a\s+)?qu[eé]\s+edad\s+(?:tuvo|ten[ií]a.*cuando\s+naci[oó])\s+su\s+primer\s+hij[oa]|cu[aá]ntos?\s+a[nñ]os\s+ten[ií]a\s+.+\s+cuando\s+naci[oó]\s+su\s+primer\s+hij[oa])", "handle_age_at_first_child"),
             (r"(?:(?:a\s+)?qu[eé]\s+edad\s+(?:se\s+cas[oó]|ten[ií]a.*cuando\s+se\s+cas[oó]|gastaba.*al\s+casarse|ten[ií]a.*al\s+casarse)|qu[eé]\s+edad\s+ten[ií]a.*al\s+casarse)", "handle_age_at_marriage"),
             (r"(?:con\s+qui[eé]n\s+se\s+cas[oó]\s+la\s+persona\s+nacida\s+en\s+.+\s+llamada\s+.+)", "handle_spouse_disambiguated_by_birth_place"),
             (r"(?:cu[aá]ntos?\s+hijos\s+(?:tuvo\s+)?(?:el\s+matrimonio\s+de\s+)?.+\s+y\s+.+|cu[aá]ntos?\s+hijos\s+tuvieron\s+.+\s+y\s+.+)", "handle_couple_children_count"),
@@ -212,7 +212,7 @@ class QueryRouter:
             (r"(?:qu[eé]\s+hijos\s+tuvo\s+la\s+pareja\s+que\s+se\s+cas[oó]\s+en\s+.+\s+formada\s+por\s+.+\s+y\s+.+)", "handle_children_of_couple_married_at_place"),
             (r"(?:qui[eé]n\s+era\s+mayor\s+cuando\s+se\s+casaron:\s*.+\s+o\s+.+)", "handle_who_older_when_married"),
             (r"(?:d[oó]nde\s+naci[oó]\s+.+\s+y\s+qu[eé]\s+ocupaci[oó]n\s+consta\s+en\s+su\s+ficha)", "handle_birth_place_and_occupation"),
-            (r"(?:cu[aá]ntos?\s+hijos\s+sobrevivieron\s+a\s+.+)", "handle_surviving_children_count"),
+            (r"(?:cu[aá]ntos?\s+hijos\s+(?:le\s+)?sobrevivieron\s+a\s+.+|qu[eé]\s+hijos\s+(?:le\s+)?sobrevivieron\s+a\s+.+)", "handle_surviving_children_count"),
             (r"(?:qui[eé]n\s+naci[oó]\s+en\s+(?:el\s+)?a[nñ]o|who\s+was\s+born\s+in\s+the\s+year|qui[eé]n\s+naci[oó]\s+en\s+\d{4})", "handle_birth_year_search"),
             (r"(?:qu[eé]\s+personas\s+murieron\s+en|which\s+people\s+died\s+in)", "handle_death_place_people"),
             (r"(?:qu[eé]\s+parejas\s+se\s+casaron\s+en|which\s+couples\s+married\s+in)", "handle_marriages_place"),
@@ -254,12 +254,15 @@ class QueryRouter:
             (r"(?:hermanos\s+de|germans\s+de|siblings\s+of)", "handle_siblings"),
             (r"(?:c[oó]nyuge\s+de|spouse\s+of|compa[ñn]era\s+de\s+vida\s+de|pareja\s+de)", "handle_spouse"),
             (r"(?:hijos\s+de|fills\s+de|children\s+of)", "handle_children"),
-            (r"(?:primer\s+hij[oa]\s+de\s+.+|first\s+child\s+of)", "handle_first_child"),
+            (r"(?:(?:cu[aá]l|qu[ií]en)\s+(?:fue|es)\s+el\s+primer\s+hij[oa]\s+(?:de\s+|que\s+(?:tuvo|tiene)\s+).+|first\s+child\s+of)", "handle_first_child"),
+            (r"(?:(?:cu[aá]l|qu[ií]en)\s+(?:fue|es)\s+el\s+[uú]ltimo\s+hij[oa]\s+(?:que\s+(?:tuvo|tiene)\s+|de\s+).+|last\s+child\s+of)", "handle_last_child"),
             (r"(?:hij[oa]\s+mayor\s+de\s+.+|oldest\s+son\s+of|oldest\s+daughter\s+of)", "handle_oldest_son"),
             (r"(?:hija\s+mayor\s+de\s+.+|oldest\s+daughter\s+of)", "handle_oldest_daughter"),
             (r"(?:busco\s+a\s+las\s+personas\s+que\s+nacieron\s+en\s+.+\s+y\s+tamb[ié]n\s+murieron\s+all[ií])", "handle_birth_and_death_same_place_natural"),
             (r"(?:qu[ií]ero\s+ver\s+si\s+.+\s+ten[ií]a\s+consuegros\s+documentados|consuegros\s+de\s+.+)", "handle_consuegros"),
             (r"(?:primos\s+segundos\s+de\s+.+)", "handle_second_cousins"),
+            (r"(?:qu[eé]\s+primos?\s+(?:le\s+)?(?:salían?|tenía?)\s+(?:.+\s+)?por\s+(?:la\s+(?:rama|familia|l[ií]nea)\s+)?(?:paterna|materna))", "handle_cousins_by_lineage"),
+            (r"(?:ascendientes\s+inmediatos\s+de|immediate\s+ancestors\s+of)", "handle_immediate_ascendants"),
             (r"(?:n[oó]mbrame\s+(?:las\s+)?nueras\s+de\s+.+|nueras?\s+de\s+.+|tuvo\s+.+\s+alguna\s+nuera)", "handle_daughters_in_law"),
             (r"(?:dime\s+c[oó]mo\s+se\s+llamaba\s+el\s+yerno\s+de\s+.+|yernos?\s+de\s+.+|hab[ií]a\s+alg[uú]n\s+yerno\s+en\s+la\s+familia\s+de\s+.+)", "handle_sons_in_law"),
             (r"(?:qu[eé]\s+relaci[oó]n\s+ten[ií]a\s+.+\s+con\s+los\s+padres\s+de\s+.+)", "handle_relationship_with_parents_of"),
@@ -1123,7 +1126,8 @@ class QueryRouter:
 
     def handle_first_child(self, question):
         q = _clean_question(question)
-        m = re.search(r"(?:primer\s+hijo|primer\s+hija|first\s+child)\s+(?:de|of)\s+(.+?)(?:\?|$)", q, re.I)
+        m = (re.search(r"(?:primer\s+hijo|primer\s+hija|first\s+child)\s+(?:de|of)\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"(?:cu[aá]l|qu[ií]en)\s+(?:fue|es)\s+el\s+primer\s+hij[oa]\s+(?:de|que\s+(?:tuvo|tiene))\s+(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person, _ = self._resolve_person(m.group(1))
@@ -1134,6 +1138,21 @@ class QueryRouter:
             return {"answer": f"No constan hijos documentados de {_person_link(person)}.", "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
         first = children[0]
         return {"answer": f"El primer hijo de {_person_link(person)} fue {_person_link(first)}.", "people_mentioned": [person["id"], first["id"]], "people_with_photos": self._people_payload([person, first])}
+
+    def handle_last_child(self, question):
+        """Handle 'Cuál fue el último hijo de X?' - return last child by birth order"""
+        q = _clean_question(question)
+        m = re.search(r"(?:cu[aá]l|qu[ií]en)\s+(?:fue|es)\s+el\s+[uú]ltimo\s+hij[oa]\s+(?:que\s+(?:tuvo|tiene)|de)\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        children = _sort_people(list(get_children(self.conn, person["id"])))
+        if not children:
+            return {"answer": f"No constan hijos documentados de {_person_link(person)}.", "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
+        last = children[-1]
+        return {"answer": f"El último hijo de {_person_link(person)} fue {_person_link(last)}.", "people_mentioned": [person["id"], last["id"]], "people_with_photos": self._people_payload([person, last])}
 
     def handle_oldest_son(self, question):
         q = _clean_question(question)
@@ -2558,6 +2577,75 @@ class QueryRouter:
         if not rows:
             return {"answer": f"No constan yernos documentados de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         return {"answer": self._list_people_answer(f"Los yernos de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
+
+    def handle_cousins_by_lineage(self, question):
+        """Handle 'Qué primos tenía X por la rama paterna/materna?' - return cousins from specific lineage"""
+        q = _clean_question(question)
+        m = re.search(r"qu[eé]\s+primos?\s+(?:le\s+)?(?:salían?|tenía?)\s+(?:(.+?)\s+)?por\s+(?:la\s+(?:rama|familia|l[ií]nea)\s+)?(paterna|materna)\s+de\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            m = re.search(r"qu[eé]\s+primos?\s+(?:le\s+)?(?:salían?|tenía?)\s+(.+?)\s+por\s+(?:la\s+(?:rama|familia|l[ií]nea)\s+)?(paterna|materna)(?:\?|$)", q, re.I)
+            if m:
+                person_str = m.group(1)
+                lineage = m.group(2)
+            else:
+                return None
+        else:
+            person_str = m.group(3)
+            lineage = m.group(2)
+
+        person, _ = self._resolve_person(person_str)
+        if not person:
+            return None
+
+        # Get parent from specified lineage
+        parent = self._get_parent(person, 'father' if lineage.lower().startswith('p') else 'mother')
+        if not parent:
+            return {"answer": f"No consta el progenitor por {lineage} de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+        # Get parent's siblings (uncles/aunts)
+        uncle_aunts = _sort_people(get_siblings(self.conn, parent['id']))
+        if not uncle_aunts:
+            return {"answer": f"No constan tíos/tías documentados por {lineage} de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+        # Get cousins from these siblings
+        cousins = []
+        for ua in uncle_aunts:
+            cousins.extend(get_children(self.conn, ua['id']))
+
+        cousins = _sort_people(_unique_people(cousins))
+        if not cousins:
+            return {"answer": f"No constan primos documentados por {lineage} de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+        return {"answer": self._list_people_answer(f"Los primos de {_person_link(person)} por {lineage} fueron", cousins), "people_mentioned": [person['id']] + [c['id'] for c in cousins], "people_with_photos": self._people_payload([person] + cousins[:25])}
+
+    def handle_immediate_ascendants(self, question):
+        """Handle 'Quiénes son los ascendientes inmediatos de X?' - return parents and grandparents"""
+        q = _clean_question(question)
+        m = re.search(r"ascendientes\s+inmediatos\s+de\s+(.+?)(?:\?|$)", q, re.I)
+        if not m:
+            return None
+
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+
+        # Get parents
+        father = self._get_parent(person, 'father')
+        mother = self._get_parent(person, 'mother')
+        ascendants = [p for p in [father, mother] if p]
+
+        # Get grandparents
+        for parent in [father, mother]:
+            if parent:
+                gf = self._get_parent(parent, 'father')
+                gm = self._get_parent(parent, 'mother')
+                ascendants.extend([p for p in [gf, gm] if p])
+
+        ascendants = _sort_people(_unique_people(ascendants))
+        if not ascendants:
+            return {"answer": f"No constan ascendientes documentados de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+        return {"answer": self._list_people_answer(f"Los ascendientes inmediatos de {_person_link(person)} fueron", ascendants), "people_mentioned": [person['id']] + [a['id'] for a in ascendants], "people_with_photos": self._people_payload([person] + ascendants[:25])}
 
     def handle_relationship_with_parents_of(self, question):
         q = _clean_question(question)
