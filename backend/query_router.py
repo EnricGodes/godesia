@@ -195,16 +195,17 @@ class QueryRouter:
             (r"(?:qu[eé]\s+lugar\s+de\s+nacimiento\s+tiene\s+m[aá]s\s+variantes\s+de\s+escritura)", "handle_birth_place_variants"),
             (r"(?:qu[eé]\s+matrimonio\s+tuvo\s+m[aá]s\s+descendencia\s+documentada)", "handle_marriage_max_descendants"),
             (r"(?:cu[aá]ntos?\s+a[nñ]os\s+ten[ií]a\s+.+\s+cuando\s+naci[oó]\s+su\s+primer\s+hij[oa])", "handle_age_at_first_child"),
-            (r"(?:a\s+)?qu[eé]\s+edad\s+(?:se\s+cas[oó]|ten[ií]a.*cuando\s+se\s+cas[oó])", "handle_age_at_marriage"),
+            (r"(?:(?:a\s+)?qu[eé]\s+edad\s+(?:se\s+cas[oó]|ten[ií]a.*cuando\s+se\s+cas[oó]|gastaba.*al\s+casarse|ten[ií]a.*al\s+casarse)|qu[eé]\s+edad\s+ten[ií]a.*al\s+casarse)", "handle_age_at_marriage"),
             (r"(?:con\s+qui[eé]n\s+se\s+cas[oó]\s+la\s+persona\s+nacida\s+en\s+.+\s+llamada\s+.+)", "handle_spouse_disambiguated_by_birth_place"),
             (r"(?:cu[aá]ntos?\s+hijos\s+(?:tuvo\s+)?(?:el\s+matrimonio\s+de\s+)?.+\s+y\s+.+|cu[aá]ntos?\s+hijos\s+tuvieron\s+.+\s+y\s+.+)", "handle_couple_children_count"),
             (r"(?:qui[eé]nes\s+eran\s+los\s+abuelos\s+de\s+.+\s+y\s+en\s+qu[eé]\s+a[nñ]os\s+nacieron)", "handle_grandparents_with_years"),
-            (r"(?:c[oó]mo\s+se\s+llamaban\s+los\s+abuelos\s+de|qui[eé]nes\s+eran\s+los\s+abuelos\s+de)", "handle_grandparents_names"),
-            (r"(?:en\s+qu[eé]\s+posici[oó]n\s+entre\s+sus\s+hermanos\s+naci[oó]\s+.+)", "handle_birth_order_among_siblings"),
+            (r"(?:c[oó]mo\s+se\s+llamaban\s+los\s+(?:cuatro\s+)?abuelos\s+de|qui[eé]nes\s+(?:eran|fueron)\s+los\s+(?:cuatro\s+)?abuelos\s+de|qu[eé]\s+abuelos?\s+ten[ií]a\s+.+|me\s+sacas\s+los\s+nombres\s+de\s+los\s+abuelos\s+de|abuelos\s+ten[ií]a\s+por\s+las\s+dos\s+ramas\s+.+|abuelos?\s+(?:paternos?\s+y\s+maternos?|maternos?\s+y\s+paternos?)\s+de)", "handle_grandparents_names"),
+            (r"(?:en\s+qu[eé]\s+posici[oó]n\s+(?:entre\s+)?sus\s+hermanos\s+(?:naci[oó]|naci[oó]\s+)|qu[eé]\s+lugar\s+(?:ocupaba|ocupa)\s+(?:dentro|entre)\s+sus\s+hermanos)", "handle_birth_order_among_siblings"),
             (r"(?:qui[eé]nes\s+eran\s+los\s+padres\s+de\s+.+\s+y\s+d[oó]nde\s+se\s+casaron)", "handle_parents_and_marriage_place"),
             (r"(?:qu[eé]\s+personas\s+nacieron\s+en\s+.+\s+y\s+murieron\s+en\s+.+)", "handle_birth_and_death_place_people"),
             (r"(?:qu[eé]\s+parentesco\s+ten[ií]a\s+.+\s+con\s+.+\s+y\s+cu[aá]l\s+de\s+los\s+dos\s+era\s+mayor)", "handle_relationship_and_older"),
             (r"(?:con\s+qu[eé]\s+(?:mujer|persona|hombre)\s+(?:form[oó]|enlaz[oó])\s+familia\s+.+|con\s+qu[eé]\s+(?:mujer|persona|hombre)\s+casó\s+.+)", "handle_spouse_with_person_type"),
+            (r"(?:cu[aá]ndo\s+se\s+cas[oó]\s+.+|en\s+qu[eé]\s+(?:fecha|a[nñ]o|d[ií]a)\s+se\s+cas[oó]\s+.+|d[oó]nde\s+se\s+cas[oó]\s+.+|en\s+qu[eé]\s+(?:lugar|iglesia|sitio)\s+se\s+cas[oó]\s+.+)", "handle_marriage_date_place"),
             (r"(?:con\s+qui[eé]n\s+se\s+cas[oó]\s+.+\s+y\s+en\s+qu[eé]\s+fecha\s+fue\s+la\s+boda)", "handle_spouse_and_wedding_date"),
             (r"(?:qui[eé]n\s+era\s+el\s+padre\s+de\s+la\s+madre\s+de\s+.+)", "handle_father_of_mother"),
             (r"(?:qu[eé]\s+hijos\s+de\s+.+\s+nacieron\s+en\s+.+)", "handle_children_born_in_place"),
@@ -230,9 +231,9 @@ class QueryRouter:
             (r"(?:qu[eé]\s+personas\s+nacieron\s+en|which\s+people\s+were\s+born\s+in)", "handle_birth_place_people"),
             (r"(?:de\s+qu[eé]\s+(?:matrimonio(?:\s+o\s+pareja)?|pareja)\s+naci[oó])", "handle_birth_union"),
             (r"(?:padres\s+y\s+los\s+hijos|pares\s+i\s+els\s+fills)", "handle_parents_and_children"),
-            (r"(?:cu[aá]ntos?\s+herman|quants?\s+germans?)", "handle_siblings_count"),
-            (r"(?:abuelo\s+paterno|avi\s+patern)", "handle_paternal_grandfather"),
-            (r"(?:abuela\s+materna|[àa]via\s+matern)", "handle_maternal_grandmother"),
+            (r"(?:cu[aá]ntos?\s+herman|quants?\s+germans?|qu[eé]\s+n[uú]mero\s+de\s+hermanos|qu[eé]\s+cantidad\s+de\s+hermanos|eran\s+muchos\s+los\s+hermanos|cu[aá]ntos\s+eran\s+en\s+total\s+los\s+hermanos|cu[aá]ntos?\s+hermanos\s+se\s+le\s+conocen)", "handle_siblings_count"),
+            (r"(?:abuelo\s+paterno|avi\s+patern|abuelo\s+por\s+v[ií]a\s+paterna|abuelo\s+por\s+parte\s+de\s+padre|abuelo\s+de\s+l[ií]nea\s+paterna|qu[eé]\s+abuelo\s+ten[ií]a\s+por\s+v[ií]a\s+paterna|qu[eé]\s+abuelo\s+ten[ií]a\s+por\s+parte\s+de\s+padre)", "handle_paternal_grandfather"),
+            (r"(?:abuela\s+materna|[àa]via\s+matern|abuela\s+por\s+v[ií]a\s+materna|abuela\s+por\s+parte\s+de\s+madre|abuela\s+de\s+l[ií]nea\s+materna|qu[eé]\s+abuela\s+ten[ií]a\s+por\s+v[ií]a\s+materna|qu[eé]\s+abuela\s+ten[ií]a\s+por\s+parte\s+de\s+madre)", "handle_maternal_grandmother"),
             (r"(?:t[ií]os?\s+(?:y\s+)?t[ií]as?\s+de|uncles\s+and\s+aunts\s+of)", "handle_uncles_and_aunts"),
             (r"(?:t[ií]os?|oncles?)\b", "handle_uncles"),
             (r"(?:n[oó]mbrame\s+los\s+primos\s+de\s+.+)", "handle_first_cousins"),
@@ -242,7 +243,7 @@ class QueryRouter:
             (r"(?:cu[aá]ntos?\s+descendientes?\s+directos?\s+(?:tuvo|dej[oó])\s+.+|how\s+many\s+direct\s+descendants)", "handle_direct_descendants"),
             (r"(?:qu[eé]\s+hijos\s+(?:documentados?\s+)?tuvo\s+.+|what\s+children\s+did\s+.+\s+have)", "handle_children"),
             (r"(?:cu[aá]ntos?\s+hijos\s+(?:tuvo|tiene|ten[ií]a)|quants?\s+fills\s+va\s+tenir)", "handle_children_count"),
-            (r"(?:que\s+hermanos?\s+ten[ií]a\s+.+|hermanos?\s+de\s+.+)", "handle_siblings"),
+            (r"(?:qu[eé]?\s+hermanos?\s+(?:ten[ií]a|tuvo)\s+.+|hermanos?\s+de\s+.+|con\s+qu[eé]\s+hermanos?\s+convivi[oó]|qu[eé]\s+(?:grupo|familia)\s+de\s+hermanos\s+formaba|qu[eé]\s+hermanos\s+y\s+hermanas\s+tuvo|quién\s+iba\s+con\s+.+\s+entre\s+hermanos)", "handle_siblings"),
             (r"(?:eran\s+primos|were\s+.*cousins)", "handle_are_cousins"),
             (r"(?:era\s+.+\s+abuelo\s+o\s+abuela\s+de|was\s+.+\s+grandparent\s+of)", "handle_is_grandparent_of"),
             (r"(?:(?:ten[ií]a|tiene)\s+descendencia|had\s+descendants)", "handle_has_descendants"),
@@ -324,9 +325,9 @@ class QueryRouter:
             (r"^(?:cu[nñ]adas?|sister[s-]in.law)\s+.+$", "handle_sisters_in_law"),
             (r"^(?:cu[nñ]ados?|brother[s-]in.law)\s+.+$", "handle_brothers_in_law"),
             (r"^(?:donde|d[oó]nde)\s+naci[oó]\s+.+$", "handle_birth_place_of_person"),
-            (r"^(?:donde|d[oó]nde)\s+(?:murio|muri[oó])\s+.+$", "handle_death_place_of_person"),
+            (r"(?:d[oó]nde\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:lugar|sitio|ciudad|pueblo)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+(?:el\s+lugar|la\s+ciudad)\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+lugar\s+de\s+(?:fallecimiento|defunci[oó]n)\s+(?:tiene|consta)|lugar\s+de\s+defunci[oó]n\s+de)\s+.+", "handle_death_place_of_person"),
             (r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|en\s+qu[eé]\s+fecha.*naci)", "handle_birth_date_of_person"),
-            (r"^(?:cuando|cu[aá]ndo)\s+(?:murio|muri[oó]|fue\s+enterrad[oa])\s+.+$", "handle_death_date_of_person"),
+            (r"(?:cu[aá]ndo\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:fecha|a[nñ]o|d[ií]a)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+la\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+fecha\s+de\s+defunci[oó]n\s+(?:tiene|consta)|hay\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de|cu[aá]ndo\s+se\s+produjo\s+la\s+defunci[oó]n\s+de|fue\s+(?:enterrad[oa]|sepultad[oa]))\s+.+", "handle_death_date_of_person"),
             (r"^(?:ocupaci[oó]n|qu[eé]\s+oficio|trabajo)\s+de\s+.+$", "handle_occupation_natural"),
             (r"(?:residencia|d[óo]nde\s+(?:viv[ií]a|vivia|vive|ha\s+vivido))\s+", "handle_last_residence"),
             (r"^(?:notas?|apuntes?)\s+(?:biogr[aá]ficas?\s+)?de\s+.+$", "handle_notes_field"),
@@ -1412,7 +1413,11 @@ class QueryRouter:
 
     def handle_grandparents_names(self, question):
         q = _clean_question(question)
-        m = re.search(r"(?:c[oó]mo\s+se\s+llamaban\s+los\s+abuelos\s+de|qui[eé]nes\s+eran\s+los\s+abuelos\s+de)\s+(.+?)(?:\?|$)", q, re.I)
+        m = (re.search(r"abuelos\s+de\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"qu[eé]\s+abuelos?\s+ten[ií]a\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"nombres\s+de\s+los\s+abuelos\s+de\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"abuelos\s+ten[ií]a\s+por\s+las\s+dos\s+ramas\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"abuelos?\s+(?:paternos?\s+y\s+maternos?|maternos?\s+y\s+paternos?)\s+de\s+(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person, _ = self._resolve_person(m.group(1))
@@ -1523,6 +1528,57 @@ class QueryRouter:
             parts.append(txt)
             people.append(sp)
         answer = f"{person['name']} se casó con " + "; y con ".join(parts) + "."
+        return {"answer": answer, "people_mentioned": [p['id'] for p in people], "people_with_photos": self._people_payload(people)}
+
+    def handle_marriage_date_place(self, question):
+        """Handle 'cuándo/dónde se casó X?' - return marriage date/place."""
+        q = _clean_question(question)
+        m = (re.search(r"(?:cu[aá]ndo|en\s+qu[eé]\s+(?:fecha|a[nñ]o|d[ií]a))\s+se\s+cas[oó]\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"(?:d[oó]nde|en\s+qu[eé]\s+(?:lugar|iglesia|sitio))\s+se\s+cas[oó]\s+(.+?)(?:\?|$)", q, re.I))
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1).strip())
+        if not person:
+            return None
+
+        # Determine if asking for date or place
+        is_date_query = bool(re.search(r"cu[aá]ndo|fecha|a[nñ]o|d[ií]a", q, re.I))
+
+        spouses = get_spouses(self.conn, person['id'])
+        if not spouses:
+            return {"answer": f"No consta ningún matrimonio documentado de {person['name']}.",
+                    "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+        parts = []
+        people = [person]
+        for sp in spouses:
+            sp = _as_dict(sp)
+            spouse = sp.get('person')
+            if spouse:
+                spouse = _as_dict(spouse)
+                people.append(spouse)
+                spouse_name = spouse.get('name', '?')
+            else:
+                spouse_name = '?'
+
+            if is_date_query:
+                date_str = sp.get('marriage_date') or ''
+                if date_str:
+                    parts.append(f"el {date_str}")
+                else:
+                    parts.append(f"sin fecha documentada")
+            else:
+                place_str = sp.get('marriage_place') or ''
+                if place_str:
+                    parts.append(f"en {place_str}")
+                else:
+                    parts.append(f"sin lugar documentado")
+
+        if is_date_query:
+            answer = f"{person['name']} se casó " + " y ".join(parts) + "."
+        else:
+            answer = f"{person['name']} se casó " + " y ".join(parts) + "."
+
         return {"answer": answer, "people_mentioned": [p['id'] for p in people], "people_with_photos": self._people_payload(people)}
 
     def handle_father_of_mother(self, question):
