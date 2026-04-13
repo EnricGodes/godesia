@@ -541,7 +541,7 @@ class QueryRouter:
             r"(?:que\s+)?hijos?\s+(?:documentados?\s+)?(?:tuvo|tiene|ten[ií]a)\s+(.+?)(?:\?|$)",
             r"hijos\s+de\s+(.+?)(?:\?|$)",
             r"fills\s+de\s+(.+?)(?:\?|$)",
-            r"t[ií]os\s+de\s+(.+?)(?:\?|$)",
+            r"t[ií]os\s+(?:abuelos\s+)?de\s+(.+?)(?:\s+(?:por\s+cada\s+lado|maternos|paternos)|\?|$)",
             r"oncles\s+de\s+(.+?)(?:\?|$)",
             r"primos\s+hermanos\s+de\s+(.+?)(?:\?|$)",
             r"cosins?\s+germans?\s+de\s+(.+?)(?:\?|$)",
@@ -558,7 +558,7 @@ class QueryRouter:
             r"suegros\s+de\s+(.+?)(?:\?|$)",
             r"consuegros\s+de\s+(.+?)(?:\?|$)",
             r"primos\s+segundos\s+de\s+(.+?)(?:\?|$)",
-            r"t[ií]os\s+abuelos\s+de\s+(.+?)(?:\?|$)",
+            r"t[ií]os\s+abuelos\s+(?:maternos|paternos)?\s+(?:de|que\s+ten[ií]a)\s+(.+?)(?:\?|$)",
             r"sobrinos\s+nietos\s+de\s+(.+?)(?:\?|$)",
             r"bisabuelos\s+de\s+(.+?)(?:\?|$)",
             r"tatarabuelos\s+de\s+(.+?)(?:\?|$)",
@@ -1614,7 +1614,7 @@ class QueryRouter:
         occupations = get_occupations(self.conn, person['id'])
         occ_text = "; ".join(
             (o['title'] + (f" ({o['date']})" if o.get('date') else "") + (f" en {o['place']}" if o.get('place') else ""))
-            for o in occupations if o.get('title')
+            for o in (_as_dict(occ) for occ in occupations) if o.get('title')
         )
         bp = full.get('birth_place') or 'lugar de nacimiento no documentado'
         if occ_text:
