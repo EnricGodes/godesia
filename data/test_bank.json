@@ -132747,17 +132747,28 @@
       "tags": [],
       "verdict": "rejected",
       "created_at": "2026-04-12T19:53:16.606295",
-      "updated_at": "2026-04-12T23:57:31.896108",
+      "updated_at": "2026-04-13T07:13:12.843151",
       "approved_snapshot": null,
       "last_run": {
-        "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+        "answer": "<a href=\"/dossier.html?id=I4\">Artur Godes Caballeria</a> se casó o emparejó con <a href=\"/dossier.html?id=I8\">Emilia Hurtado Giró</a> (matrimonio: 23 jun. 1894) en Basílica de Santa María del Mar, Barcelona.",
         "handler": "",
-        "people_mentioned": [],
+        "people_mentioned": [
+          "@I4@",
+          "@I8@"
+        ],
         "status": 200,
-        "ran_at": "2026-04-12T23:57:31.896108",
-        "run_id": "run_36dca5f9"
+        "ran_at": "2026-04-13T07:13:12.843151",
+        "run_id": "run_19ce473c"
       },
       "history": [
+        {
+          "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+          "handler": "",
+          "people_mentioned": [],
+          "status": 200,
+          "ran_at": "2026-04-12T23:57:31.896108",
+          "run_id": "run_36dca5f9"
+        },
         {
           "answer": "No he sabido responder esta pregunta con las reglas actuales.",
           "handler": "",
@@ -155192,6 +155203,6 @@
       ]
     }
   ],
-  "last_run_id": "run_876de6e3",
-  "last_run_at": "2026-04-13T07:09:52.691864"
+  "last_run_id": "run_19ce473c",
+  "last_run_at": "2026-04-13T07:13:12.843151"
 }

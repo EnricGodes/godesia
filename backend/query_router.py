@@ -312,7 +312,7 @@ class QueryRouter:
             (r"^(?:hijos?|fills?)\s+.+$", "handle_children"),
             (r"^(?:hermanos?|germans?)\s+.+$", "handle_siblings"),
             (r"^(?:esposa?|spouse)\s+.+$", "handle_spouse"),
-            (r"^(?:con\s+qui[eé]n\s+se\s+cas[oó]|qui[eé]n\s+se\s+cas[oó]\s+con)\s+.+$", "handle_spouse_or_partner"),
+            (r"(?:con\s+qui[eé]n\s+(?:se\s+cas[oó]|form[oó]\s+pareja)|qui[eé]n\s+se\s+cas[oó]\s+con)\s+", "handle_spouse_or_partner"),
             (r"^(?:tíos?|oncles?)\s+.+$", "handle_uncles"),
             (r"^(?:abuelos?|grands?par[eè]nts?)\s+.+$", "handle_grandparents_names"),
             (r"^(?:bisabuelos?|great\s+grand[ps]ar[eè]nts?)\s+.+$", "handle_great_grandparents"),
@@ -989,7 +989,7 @@ class QueryRouter:
         return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
 
     def handle_spouse_or_partner(self, question):
-        m = re.search(r"(?:con\s+qui[eé]n\s+se\s+cas[oó](?:\s+o\s+emparej[oó])?|amb\s+qui\s+es\s+va\s+casar\s+o\s+emparellar)\s+(.+?)(?:\?|$)", _clean_question(question), re.I)
+        m = re.search(r"(?:con\s+qui[eé]n\s+(?:se\s+cas[oó]|form[oó]\s+pareja)(?:\s+o\s+emparej[oó])?|amb\s+qui\s+es\s+va\s+casar\s+o\s+emparellar)\s+(.+?)(?:\?|$)", _clean_question(question), re.I)
         subject = m.group(1) if m else self._extract_subject_name(question)
         if not subject:
             return None
