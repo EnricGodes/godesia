@@ -2779,6 +2779,55 @@ class QueryRouter:
             return None
         return self.handle_parents_in_law(f"suegra o suegro de {m.group(1)}")
 
+    def _build_targeted_response(self, person, question):
+        """Build a targeted response based on what the question asks about (birth, death, occupation, etc.)"""
+        full = _as_dict(get_person(self.conn, person["id"]))
+        if not full:
+            return None
+
+        q = _clean_question(question)
+
+        # Check if asking about birth place/date
+        if re.search(r"(?:donde|dónde|lugar).+(?:nac[ií]|nacimiento)", q, re.I) or \
+           re.search(r"(?:nac[ií]|nacimiento).+(?:donde|dónde|lugar)", q, re.I) or \
+           re.search(r"sit[úu]a.*(?:árbol|arbol).*(?:nacer|nacimiento)", q, re.I):  # "sitúa el árbol en el momento de nacer"
+            if full.get("birth_date") and full.get("birth_place"):
+                return {"answer": f"{full['name']} nació el {full['birth_date']} en {full['birth_place']}.",
+                        "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
+            elif full.get("birth_place"):
+                return {"answer": f"{full['name']} nació en {full['birth_place']}.",
+                        "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
+            elif full.get("birth_date"):
+                return {"answer": f"{full['name']} nació el {full['birth_date']}.",
+                        "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
+
+        # Check if asking about death place/date
+        if re.search(r"(?:donde|dónde|lugar).+(?:mur[ií]|murió|defunción)", q, re.I) or \
+           re.search(r"(?:mur[ií]|murió|defunción).+(?:donde|dónde|lugar)", q, re.I):
+            if full.get("death_date") and full.get("death_place"):
+                return {"answer": f"{full['name']} murió el {full['death_date']} en {full['death_place']}.",
+                        "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
+            elif full.get("death_place"):
+                return {"answer": f"{full['name']} murió en {full['death_place']}.",
+                        "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
+            elif full.get("death_date"):
+                return {"answer": f"{full['name']} murió el {full['death_date']}.",
+                        "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
+
+        # Check if asking about occupation
+        if re.search(r"(?:en\s+qu[eé]|ocupaci[óo]n|profesi[óo]n|trabajo|oficio)", q, re.I):
+            occupations = [_as_dict(r) for r in self.conn.execute(
+                "SELECT description FROM occupations WHERE person_id = ? ORDER BY year",
+                (full["id"],)
+            ).fetchall()]
+            if occupations:
+                occ_str = "; ".join(o.get("description", "") for o in occupations if o.get("description"))
+                return {"answer": f"{full['name']} trabajaba como {occ_str}.",
+                        "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
+
+        # Default to full response
+        return self._build_info_response(person)
+
     def _build_info_response(self, person):
         full = _as_dict(get_person(self.conn, person["id"]))
         if not full:
@@ -3235,7 +3284,7 @@ class QueryRouter:
             person, matches = self._resolve_person(candidate)
             if person:
                 if len(matches) == 1:
-                    return self._build_info_response(person)
+                    return self._build_targeted_response(person, question)
                 parts = ["He encontrado varias coincidencias:"]
                 for m in matches[:10]:
                     parts.append(f"- {_person_brief(m)}")
