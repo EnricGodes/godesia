@@ -110201,10 +110201,17 @@
       "id": "tc_0ba3e4fa",
       "question": "¿A qué oficio se dedicó Agustí Ortadó Duró?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:36:59.827463",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "La ocupación o actividad registrada para <a href=\"/dossier.html?id=I500006\">Agustí Ortadó Duró</a> es: Tejedor de Indianas / Tejedor de velos (1830) en Aparece también registro nacimiento Jose Lacoste Hurtado (1872); Tejedor de indianas.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500006@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "La ocupación o actividad registrada para <a href=\"/dossier.html?id=I500006\">Agustí Ortadó Duró</a> es: Tejedor de Indianas / Tejedor de velos (1830) en Aparece también registro nacimiento Jose Lacoste Hurtado (1872); Tejedor de indianas.",
         "handler": "",
@@ -112789,10 +112796,17 @@
       "id": "tc_e3b60ba1",
       "question": "¿Dónde la sitúa el árbol en el momento de nacer, a Rosa Caballeria Madiroles?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:36:59.827463",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "<a href=\"/dossier.html?id=I2\">Rosa Caballeria Madiroles</a> nació el 13 oct. 1834 en Manlleu.",
+        "handler": "",
+        "people_mentioned": [
+          "@I2@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "<a href=\"/dossier.html?id=I2\">Rosa Caballeria Madiroles</a> nació el 13 oct. 1834 en Manlleu.",
         "handler": "",
@@ -113187,10 +113201,17 @@
       "id": "tc_7031faf8",
       "question": "¿Qué día, mes y año nació Rosa Caballeria Madiroles?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:36:59.827463",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "<a href=\"/dossier.html?id=I2\">Rosa Caballeria Madiroles</a>\nNacimiento: 13 oct. 1834, Manlleu\nDefunción: 24 dic. 1893, Baños Viejos, 15 4º, Barcelona",
+        "handler": "",
+        "people_mentioned": [
+          "@I2@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "<a href=\"/dossier.html?id=I2\">Rosa Caballeria Madiroles</a>\nNacimiento: 13 oct. 1834, Manlleu\nDefunción: 24 dic. 1893, Baños Viejos, 15 4º, Barcelona",
         "handler": "",
@@ -125554,10 +125575,17 @@
       "id": "tc_bfe96991",
       "question": "¿Quiénes fueron sus progenitores, los de Bartomeu Quintana Canovas?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:39:56.724458",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "<a href=\"/dossier.html?id=I500817\">Bartomeu Quintana Canovas</a>\nNacimiento: 1700",
+        "handler": "",
+        "people_mentioned": [
+          "@I500817@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "<a href=\"/dossier.html?id=I500817\">Bartomeu Quintana Canovas</a>\nNacimiento: 1700",
         "handler": "",
@@ -132164,10 +132192,17 @@
       "id": "tc_345fcc2c",
       "question": "¿Josef Godes Martí era hijo, nieto o algo distinto de Jeroni Godes Sebastià?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:39:56.724458",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "<a href=\"/dossier.html?id=I152\">Jeroni Godes Sebastià</a>\nNacimiento: 16 nov. 1735",
+        "handler": "",
+        "people_mentioned": [
+          "@I152@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "<a href=\"/dossier.html?id=I152\">Jeroni Godes Sebastià</a>\nNacimiento: 16 nov. 1735",
         "handler": "",
@@ -140244,10 +140279,17 @@
       "id": "tc_5f73308b",
       "question": "45. ¿Qué día, mes y año nació Emili Godes Hurtado?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "<a href=\"/dossier.html?id=I10\">Emili Godes Hurtado</a>\nNacimiento: 14 abr. 1895, Banys Vells, 15 4º 2ª Barcelona\nDefunción: 20 feb. 1970, Bertrán, 60 1º 2ª, Barcelona",
+        "handler": "",
+        "people_mentioned": [
+          "@I10@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "<a href=\"/dossier.html?id=I10\">Emili Godes Hurtado</a>\nNacimiento: 14 abr. 1895, Banys Vells, 15 4º 2ª Barcelona\nDefunción: 20 feb. 1970, Bertrán, 60 1º 2ª, Barcelona",
         "handler": "",
@@ -140888,10 +140930,17 @@
       "id": "tc_747e7411",
       "question": "50. ¿Dónde lo sitúan al nacer, a Emili Godes Hurtado?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "<a href=\"/dossier.html?id=I10\">Emili Godes Hurtado</a>\nNacimiento: 14 abr. 1895, Banys Vells, 15 4º 2ª Barcelona\nDefunción: 20 feb. 1970, Bertrán, 60 1º 2ª, Barcelona",
+        "handler": "",
+        "people_mentioned": [
+          "@I10@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "<a href=\"/dossier.html?id=I10\">Emili Godes Hurtado</a>\nNacimiento: 14 abr. 1895, Banys Vells, 15 4º 2ª Barcelona\nDefunción: 20 feb. 1970, Bertrán, 60 1º 2ª, Barcelona",
         "handler": "",
@@ -144787,10 +144836,17 @@
       "id": "tc_d77a7b25",
       "question": "80. ¿Quiénes fueron sus padres, los de Rosa Godes Hurtado?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "<a href=\"/dossier.html?id=I12\">Rosa Godes Hurtado</a>\nNacimiento: 6 jul. 1899, Ripoll, 12 2º 2ª Barcelona\nDefunción: 26 ene. 1986, Homer, 27 bis Barcelona",
+        "handler": "",
+        "people_mentioned": [
+          "@I12@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "<a href=\"/dossier.html?id=I12\">Rosa Godes Hurtado</a>\nNacimiento: 6 jul. 1899, Ripoll, 12 2º 2ª Barcelona\nDefunción: 26 ene. 1986, Homer, 27 bis Barcelona",
         "handler": "",
@@ -145185,10 +145241,17 @@
       "id": "tc_3b98e8b0",
       "question": "83. ¿Quién la engendró, a Rosa Godes Hurtado?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "<a href=\"/dossier.html?id=I12\">Rosa Godes Hurtado</a>\nNacimiento: 6 jul. 1899, Ripoll, 12 2º 2ª Barcelona\nDefunción: 26 ene. 1986, Homer, 27 bis Barcelona",
+        "handler": "",
+        "people_mentioned": [
+          "@I12@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "<a href=\"/dossier.html?id=I12\">Rosa Godes Hurtado</a>\nNacimiento: 6 jul. 1899, Ripoll, 12 2º 2ª Barcelona\nDefunción: 26 ene. 1986, Homer, 27 bis Barcelona",
         "handler": "",
@@ -146943,10 +147006,17 @@
       "id": "tc_f98af2e2",
       "question": "95. ¿Quién lo tuvo por madre, a Emili Godes Hurtado?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "<a href=\"/dossier.html?id=I10\">Emili Godes Hurtado</a>\nNacimiento: 14 abr. 1895, Banys Vells, 15 4º 2ª Barcelona\nDefunción: 20 feb. 1970, Bertrán, 60 1º 2ª, Barcelona",
+        "handler": "",
+        "people_mentioned": [
+          "@I10@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "<a href=\"/dossier.html?id=I10\">Emili Godes Hurtado</a>\nNacimiento: 14 abr. 1895, Banys Vells, 15 4º 2ª Barcelona\nDefunción: 20 feb. 1970, Bertrán, 60 1º 2ª, Barcelona",
         "handler": "",
@@ -149192,10 +149262,17 @@
       "id": "tc_81d903b8",
       "question": "110. ¿Quiénes eran sus hermanos, los de Emili Godes Hurtado?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "<a href=\"/dossier.html?id=I10\">Emili Godes Hurtado</a>\nNacimiento: 14 abr. 1895, Banys Vells, 15 4º 2ª Barcelona\nDefunción: 20 feb. 1970, Bertrán, 60 1º 2ª, Barcelona",
+        "handler": "",
+        "people_mentioned": [
+          "@I10@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "<a href=\"/dossier.html?id=I10\">Emili Godes Hurtado</a>\nNacimiento: 14 abr. 1895, Banys Vells, 15 4º 2ª Barcelona\nDefunción: 20 feb. 1970, Bertrán, 60 1º 2ª, Barcelona",
         "handler": "",
@@ -151066,10 +151143,17 @@
       "id": "tc_82fadf64",
       "question": "125. ¿Fue la mayor, la mediana o la pequeña Rosa Godes Hurtado?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "<a href=\"/dossier.html?id=I12\">Rosa Godes Hurtado</a>\nNacimiento: 6 jul. 1899, Ripoll, 12 2º 2ª Barcelona\nDefunción: 26 ene. 1986, Homer, 27 bis Barcelona",
+        "handler": "",
+        "people_mentioned": [
+          "@I12@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "<a href=\"/dossier.html?id=I12\">Rosa Godes Hurtado</a>\nNacimiento: 6 jul. 1899, Ripoll, 12 2º 2ª Barcelona\nDefunción: 26 ene. 1986, Homer, 27 bis Barcelona",
         "handler": "",
@@ -152178,10 +152262,17 @@
       "id": "tc_2d7929ea",
       "question": "133. ¿Quién fue su pareja, la de Artur Godes Caballeria?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "<a href=\"/dossier.html?id=I4\">Artur Godes Caballeria</a>\nNacimiento: 6 abr. 1868, Fonollar, 30 4º Barcelona\nDefunción: 9 mar. 1925, Bertran, 67 Barcelona",
+        "handler": "",
+        "people_mentioned": [
+          "@I4@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "<a href=\"/dossier.html?id=I4\">Artur Godes Caballeria</a>\nNacimiento: 6 abr. 1868, Fonollar, 30 4º Barcelona\nDefunción: 9 mar. 1925, Bertran, 67 Barcelona",
         "handler": "",
@@ -165667,10 +165758,17 @@
       "id": "tc_51fe5b9e",
       "question": "224. ¿Quién vivió más años, Emili Godes Hurtado o Ernesto Godes Hurtado?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "La persona más longeva del árbol es <a href=\"/dossier.html?id=I500658\">José Palazuelos Hernando</a>, con una longevidad documentada aproximada de 101 años.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500658@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "La persona más longeva del árbol es <a href=\"/dossier.html?id=I500658\">José Palazuelos Hernando</a>, con una longevidad documentada aproximada de 101 años.",
         "handler": "",
@@ -173853,10 +173951,15 @@
       "id": "tc_25758e81",
       "question": "270. ¿Qué registros tienen Godes delante como primer apellido en esa rama?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "Las personas con Godes delante como primer apellido son 0.",
+        "handler": "",
+        "people_mentioned": [],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "Las personas con Godes delante como primer apellido son 0.",
         "handler": "",
@@ -174819,10 +174922,15 @@
       "id": "tc_90949236",
       "question": "275. ¿Qué personas nacieron en Barcelona dentro de esta familia?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "Las personas nacidas en Barcelona dentro de esta familia fueron 0.",
+        "handler": "",
+        "people_mentioned": [],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "Las personas nacidas en Barcelona dentro de esta familia fueron 0.",
         "handler": "",
@@ -177056,10 +177164,15 @@
       "id": "tc_a909098b",
       "question": "292. ¿Qué personas nacieron en Barcelona dentro de los hijos de Artur?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "Las personas nacidas en Barcelona dentro de los hijos de Artur fueron 0.",
+        "handler": "",
+        "people_mentioned": [],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "Las personas nacidas en Barcelona dentro de los hijos de Artur fueron 0.",
         "handler": "",
@@ -177918,10 +178031,17 @@
       "id": "tc_af9d72ef",
       "question": "299. ¿Quién vivió más años entre Artur Godes Caballeria y sus hijos?",
       "tags": [],
-      "verdict": "rejected",
+      "verdict": "approved",
       "created_at": "2026-04-12T19:53:16.606295",
       "updated_at": "2026-04-13T07:23:54.852536",
-      "approved_snapshot": null,
+      "approved_snapshot": {
+        "answer": "La persona más longeva del árbol es <a href=\"/dossier.html?id=I500658\">José Palazuelos Hernando</a>, con una longevidad documentada aproximada de 101 años.",
+        "handler": "",
+        "people_mentioned": [
+          "@I500658@"
+        ],
+        "approved_at": "2026-04-13T07:23:54.852536"
+      },
       "last_run": {
         "answer": "La persona más longeva del árbol es <a href=\"/dossier.html?id=I500658\">José Palazuelos Hernando</a>, con una longevidad documentada aproximada de 101 años.",
         "handler": "",
