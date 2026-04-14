@@ -431,71 +431,21 @@ class QueryRouter:
         name_fragment = re.sub(r"\((\d{4})\)", "", name_fragment).strip()
         if not name_fragment:
             return []
-
-        # Strip accents from search terms for accent-insensitive matching
-        name_fragment_stripped = _strip_accents(name_fragment)
-
-        # Expand common abbreviations
-        abbrevs = {
-            'ma': 'maria', 'ma.': 'maria', 'mª': 'maria',
-            'fco': 'francisco', 'fco.': 'francisco',
-            'jse': 'jose', 'jse.': 'jose',
-            'anto': 'antonio', 'anto.': 'antonio',
-        }
-        expanded_tokens = []
-        for tok in name_fragment_stripped.split():
-            expanded_tokens.append(abbrevs.get(tok.lower(), tok))
-        expanded_fragment = " ".join(expanded_tokens)
-
-        like_expanded = "%" + re.sub(r"\s+", "%", expanded_fragment) + "%"
-        like_original = "%" + re.sub(r"\s+", "%", name_fragment_stripped) + "%"
         select_cols = (
             "SELECT id, name, given_name, surname, birth_year, death_year, birth_place, death_place, photo_file, "
             "is_alive, father_id, mother_id, father_name, mother_name, sex, "
             "baptism_date, baptism_place, godparents, nickname "
         )
-        # Search with both original and expanded names to handle abbreviations like Mª
-        # Use case-insensitive LIKE search, fetch more results for better filtering
+        # IMPORTANT: Fetch ALL people and do Python-level filtering with accent-insensitive matching
+        # SQL LIKE with COLLATE NOCASE doesn't handle accents, so we need Python-level comparison
         rows = self.conn.execute(
-            select_cols +
-            "FROM people WHERE (name LIKE ? COLLATE NOCASE OR name LIKE ? COLLATE NOCASE) "
-            "ORDER BY name LIMIT ?",
-            (like_original, like_expanded, max(limit * 8, 160)),  # Fetch more results to account for accent variations
+            select_cols + "FROM people ORDER BY name",
         ).fetchall()
 
-        # Fallback: if no results, try searching with accent-insensitive matching in Python
-        # This handles cases like "enric godes mate" matching "Enric Godes Maté"
-        if not rows:
-            all_people = self.conn.execute(
-                select_cols + "FROM people ORDER BY name LIMIT ?",
-                (max(limit * 20, 400),)
-            ).fetchall()
-            # Filter by accent-insensitive matching
-            def matches_accent_insensitive(person_name):
-                person_norm = _norm_cmp(person_name)
-                query_norm = _norm_cmp(name_fragment)
-                # Check if all tokens from query are in the person's normalized name
-                query_tokens = set(_tokenize_name(name_fragment))
-                person_tokens = set(_tokenize_name(person_norm))
-                return bool(query_tokens and query_tokens.issubset(person_tokens))
-
-            rows = [r for r in all_people if matches_accent_insensitive(_as_dict(r)["name"])]
-
-        # Also search by nickname
-        if len(rows) < limit:
-            nickname_rows = self.conn.execute(
-                select_cols +
-                "FROM people WHERE (nickname LIKE ? COLLATE NOCASE OR nickname LIKE ? COLLATE NOCASE) "
-                "AND id NOT IN "
-                "(SELECT id FROM people WHERE name LIKE ? COLLATE NOCASE OR name LIKE ? COLLATE NOCASE) "
-                "ORDER BY name LIMIT ?",
-                (like_original, like_expanded, like_original, like_expanded, max(limit * 2, 40)),
-            ).fetchall()
-            rows = list(rows) + list(nickname_rows)
-
-        query_norm = _norm_cmp(name_fragment_stripped)
-        query_tokens = set(_tokenize_name(name_fragment_stripped))
-        query_token_list = _tokenize_name(name_fragment_stripped)
+        # Use _norm_cmp for accent-insensitive comparison (it already strips accents)
+        query_norm = _norm_cmp(name_fragment)
+        query_tokens = set(_tokenize_name(name_fragment))
+        query_token_list = _tokenize_name(name_fragment)
 
         def score(row):
             rr = _as_dict(row)
