@@ -290,6 +290,39 @@
     document.head.appendChild(link);
   }
 
+  // ─── Smart search: person name → dossier, question → chat ─────────────────
+
+  window.smartSearch = async function(q) {
+    // Heuristic: if query looks like a name (no question words, short), try person search
+    const questionWords = /(\?|qui[éè]n|quants|com|on[t]?|per[q]ué|quin[a]?|dónde|cual|qué)/i;
+    const isQuestion = questionWords.test(q) || q.length > 60;
+
+    if (isQuestion) {
+      // Looks like a question → chat
+      window.location.href = '/chat.html?q=' + encodeURIComponent(q);
+      return;
+    }
+
+    // Looks like a name → try person search first
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      if (!res.ok) throw new Error('Search failed');
+      const data = await res.json();
+
+      if (data.results && data.results.length > 0) {
+        const person = data.results[0];
+        // Found a person → go to dossier
+        window.location.href = `/dossier.html?id=${person.id}`;
+      } else {
+        // No person found → try chat
+        window.location.href = '/chat.html?q=' + encodeURIComponent(q);
+      }
+    } catch (e) {
+      // Search failed → fallback to chat
+      window.location.href = '/chat.html?q=' + encodeURIComponent(q);
+    }
+  };
+
   function init() {
     ensureMaterialSymbols();
     ensureNavResetStyles();
@@ -388,11 +421,11 @@
     searchInput.addEventListener('blur', () => { if (!searchInput.value.trim()) collapseSearch(); });
     searchInput.addEventListener('keydown', e => { if (e.key === 'Escape') collapseSearch(); });
 
-    /* Submit → chat page */
+    /* Submit → smart routing (dossier if person, chat if question) */
     document.getElementById('gn-search-form').addEventListener('submit', e => {
       e.preventDefault();
       const q = searchInput.value.trim();
-      if (q) window.location.href = '/chat.html?q=' + encodeURIComponent(q);
+      if (q) smartSearch(q);
     });
 
     /* 7. @ mention autocomplete on the nav search input */

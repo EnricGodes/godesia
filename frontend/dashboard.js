@@ -181,11 +181,17 @@ function renderDocuments(documents) {
     container.parentElement.appendChild(link);
 }
 
-// Hero search: redirect to chat with query
+// Hero search: smart routing (dossier if person, chat if question)
 function doSearch() {
     const q = document.getElementById('hero-query').value.trim();
     if (q) {
-        window.location.href = '/chat.html?q=' + encodeURIComponent(q);
+        // Wait for nav.js to load smartSearch
+        if (window.smartSearch) {
+            window.smartSearch(q);
+        } else {
+            // Fallback to chat if nav.js not loaded yet
+            window.location.href = '/chat.html?q=' + encodeURIComponent(q);
+        }
     }
 }
 
@@ -196,7 +202,12 @@ document.getElementById('hero-query').addEventListener('keydown', e => {
 
 document.querySelectorAll('.hero-chip').forEach(chip => {
     chip.addEventListener('click', () => {
-        window.location.href = '/chat.html?q=' + encodeURIComponent(chip.dataset.q);
+        const q = chip.dataset.q;
+        if (window.smartSearch) {
+            window.smartSearch(q);
+        } else {
+            window.location.href = '/chat.html?q=' + encodeURIComponent(q);
+        }
     });
 });
 
