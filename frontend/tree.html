@@ -9,17 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <!-- Tree styles now in style.css -->
+    <script>window.tailwind={config:{corePlugins:{preflight:false}}}</script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <div class="tree-app">
-        <header>
-            <h1>Godesia</h1>
-            <nav>
-                <a href="/" class="nav-link">Inici</a>
-                <a href="/chat.html" class="nav-link">Consulta</a>
-                <a href="/tree.html" class="nav-link active">Arbre</a>
-            </nav>
-        </header>
 
         <div class="tree-controls">
             <div class="search-wrapper">
@@ -41,5 +35,6 @@
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="tree.js"></script>
+    <script src="/nav.js"></script>
 </body>
 </html>
