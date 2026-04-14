@@ -152,7 +152,7 @@
                 `Buscar` +
               `</button>` +
               /* Expanded state: input + submit (hidden until toggle) */
-              `<div id="gn-search-expanded" class="hidden flex items-center">` +
+              `<div id="gn-search-expanded" class="items-center" style="display:none">` +
                 `<div class="relative flex items-center">` +
                   `<span class="material-symbols-outlined absolute left-3 text-white/50 pointer-events-none select-none"` +
                   ` style="font-size:16px;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20">auto_awesome</span>` +
