@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html class="light" lang="ca">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Saga Godes Molina | Familia Godes</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#2D4B33",
+                        "surface-container": "#f1eee5",
+                        "surface-container-low": "#f6f3ea",
+                        "surface-bright": "#fcf9f0",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#fcf9f0",
+                        "on-background": "#1c1c17",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#424842",
+                        "primary-container": "#d4e4d6",
+                        "on-primary-container": "#0b1f10",
+                        "secondary-container": "#fdd2b1",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#78583f",
+                        "surface-variant": "#e5e2da",
+                        "surface-tint": "#2D4B33",
+                        "surface-dim": "#dddad1",
+                        "error": "#ba1a1a",
+                        "surface": "#fcf9f0",
+                        "surface-container-high": "#ebe8df",
+                        "outline": "#727971",
+                        "on-surface": "#1c1c17",
+                        "inverse-on-surface": "#f4f1e8",
+                        "inverse-surface": "#31312b",
+                        "surface-container-highest": "#e5e2da",
+                        "outline-variant": "#c2c8bf",
+                        "secondary": "#78583e",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .heritage-border { border: 1px solid rgba(114, 121, 113, 0.2); }
+        .watermark { opacity: 0.03; pointer-events: none; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-secondary-container">
+
+<!-- Navigation -->
+<nav class="sticky top-0 z-50 bg-surface border-b border-outline-variant/30">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <a href="/" class="font-headline text-2xl font-bold text-primary">Godesia</a>
+        <div class="flex gap-8">
+            <a href="/" class="text-on-surface hover:text-primary">Inici</a>
+            <a href="/chat.html" class="text-on-surface hover:text-primary">Consulta</a>
+            <a href="/tree.html" class="text-on-surface hover:text-primary">Arbre</a>
+            <a href="/godes_molina.html" class="text-primary font-semibold">Saga Godes Molina</a>
+        </div>
+    </div>
+</nav>
+
+<main class="min-h-screen">
+    <div class="max-w-5xl mx-auto px-6 py-16">
+
+        <!-- Header Section -->
+        <header class="mb-16 space-y-6">
+            <div class="space-y-4">
+                <div class="text-xs uppercase tracking-[0.3em] text-outline font-bold">Saga Familiar</div>
+                <h1 class="font-headline text-5xl md:text-6xl font-bold text-primary leading-tight">La saga Godes Molina</h1>
+                <p class="text-lg text-on-surface-variant max-w-3xl leading-relaxed">De Barcelona a Córdoba, de Córdoba a Madrid, y de ahí a las ramas vivas de hoy. La historia de Ernest Godes Hurtado y Dolores Molina Beca, del matrimonio fundacional de 1925 a las familias Garrido Godes, Garrido Ballart, Garrido Vicente y Godes Maté.</p>
+            </div>
+        </header>
+
+        <!-- Branches Navigation -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-16">
+            <a href="#dolores" class="p-4 bg-primary-container text-on-primary-container rounded-lg hover:bg-primary hover:text-on-primary transition-colors text-center font-semibold">Dolores Godes Molina</a>
+            <a href="#ernesto" class="p-4 bg-primary-container text-on-primary-container rounded-lg hover:bg-primary hover:text-on-primary transition-colors text-center font-semibold">Ernesto Godes Molina</a>
+            <a href="#mercedes" class="p-4 bg-primary-container text-on-primary-container rounded-lg hover:bg-primary hover:text-on-primary transition-colors text-center font-semibold">María Mercedes Godes Molina</a>
+            <a href="#marilisa" class="p-4 bg-primary-container text-on-primary-container rounded-lg hover:bg-primary hover:text-on-primary transition-colors text-center font-semibold">Eloísa "Marilisa" Godes Molina</a>
+            <a href="#enrique" class="p-4 bg-primary-container text-on-primary-container rounded-lg hover:bg-primary hover:text-on-primary transition-colors text-center font-semibold">Enrique Godes Molina</a>
+        </div>
+
+        <!-- Origins Section -->
+        <section class="mb-20 space-y-8">
+            <h2 class="font-headline text-3xl font-bold text-primary border-b border-outline-variant pb-4">Los Orígenes</h2>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Ernest Godes Hurtado -->
+                <div class="bg-surface-container-low border border-outline-variant/30 rounded-xl p-6 space-y-4">
+                    <h3 class="font-headline text-xl font-bold text-primary">Ernest Godes Hurtado</h3>
+                    <div class="space-y-2 text-sm">
+                        <p><span class="font-semibold">Nacimiento:</span> Barcelona, 1896</p>
+                        <p><span class="font-semibold">Fallecimiento:</span> 1949</p>
+                        <p class="leading-relaxed text-on-surface-variant">Hijo de Artur Godes Caballeria y Emilia Hurtado Giró. Una vida marcada por la migración: de Barcelona a Córdoba, llevando los valores y la tradición familiar a nuevas tierras.</p>
+                    </div>
+                </div>
+
+                <!-- Dolores Molina Beca -->
+                <div class="bg-surface-container-low border border-outline-variant/30 rounded-xl p-6 space-y-4">
+                    <h3 class="font-headline text-xl font-bold text-primary">Dolores Molina Beca</h3>
+                    <div class="space-y-2 text-sm">
+                        <p><span class="font-semibold">Nacimiento:</span> 1904</p>
+                        <p><span class="font-semibold">Fallecimiento:</span> 1961</p>
+                        <p class="leading-relaxed text-on-surface-variant">Hija de Enrique Molina de Pazos y Eloísa Beca y Espinosa de los Monteros. Su matrimonio con Ernest en 1925 marcó el inicio de una nueva rama familiar que se extendería por toda España.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ancestors -->
+            <div class="bg-primary-container/30 border border-primary/20 rounded-xl p-6 space-y-4">
+                <h3 class="font-headline text-lg font-bold text-primary">Ancestros del Matrimonio</h3>
+                <div class="grid md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                        <p class="font-semibold text-primary">Artur Godes Caballeria</p>
+                        <p class="text-on-surface-variant">Padre de Ernest</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-primary">Emilia Hurtado Giró</p>
+                        <p class="text-on-surface-variant">Madre de Ernest</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-primary">Enrique Molina de Pazos</p>
+                        <p class="text-on-surface-variant">Padre de Dolores</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-primary">Eloísa Beca y Espinosa de los Monteros</p>
+                        <p class="text-on-surface-variant">Madre de Dolores</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Children Section -->
+        <section class="mb-20 space-y-8">
+            <h2 class="font-headline text-3xl font-bold text-primary border-b border-outline-variant pb-4">Los Cinco Hijos</h2>
+
+            <div class="grid md:grid-cols-2 gap-6 space-y-0">
+                <!-- Dolores Godes Molina -->
+                <div id="dolores" class="bg-surface-container-low border border-outline-variant/30 rounded-xl p-6 space-y-3">
+                    <h3 class="font-headline text-lg font-bold text-primary">Dolores Godes Molina</h3>
+                    <p class="text-sm text-on-surface-variant">Primogénita de la saga Godes Molina. Su vida y descendencia forma una rama importante de la familia en el siglo XX.</p>
+                </div>
+
+                <!-- Ernesto Godes Molina -->
+                <div id="ernesto" class="bg-surface-container-low border border-outline-variant/30 rounded-xl p-6 space-y-3">
+                    <h3 class="font-headline text-lg font-bold text-primary">Ernesto Godes Molina</h3>
+                    <p class="text-sm text-on-surface-variant">Segundo hijo. Continuó la tradición familiar en las nuevas ciudades donde se asentó la familia.</p>
+                </div>
+
+                <!-- María Mercedes Godes Molina -->
+                <div id="mercedes" class="bg-surface-container-low border border-outline-variant/30 rounded-xl p-6 space-y-3">
+                    <h3 class="font-headline text-lg font-bold text-primary">María Mercedes Godes Molina</h3>
+                    <p class="text-sm text-on-surface-variant">Tercera hija. Su rama familiar se extendió con nuevas conexiones a través del matrimonio.</p>
+                </div>
+
+                <!-- Eloísa "Marilisa" Godes Molina -->
+                <div id="marilisa" class="bg-surface-container-low border border-outline-variant/30 rounded-xl p-6 space-y-3">
+                    <h3 class="font-headline text-lg font-bold text-primary">Eloísa "Marilisa" Godes Molina</h3>
+                    <p class="text-sm text-on-surface-variant">Conocida como Marilisa. Su vida y familia representan la continuidad del legado familiar en el siglo XX.</p>
+                </div>
+
+                <!-- Enrique Godes Molina -->
+                <div id="enrique" class="bg-surface-container-low border border-outline-variant/30 rounded-xl p-6 space-y-3">
+                    <h3 class="font-headline text-lg font-bold text-primary">Enrique Godes Molina</h3>
+                    <p class="text-sm text-on-surface-variant">Quinto hijo. El benjamín de la familia, completando la generación de Ernest y Dolores.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timeline Section -->
+        <section class="mb-20 space-y-8">
+            <h2 class="font-headline text-3xl font-bold text-primary border-b border-outline-variant pb-4">Cronología</h2>
+
+            <div class="space-y-4 border-l-2 border-outline-variant pl-6">
+                <div class="space-y-2">
+                    <p class="font-semibold text-on-surface">1896</p>
+                    <p class="text-on-surface-variant text-sm">Nacimiento de Ernest Godes Hurtado en Barcelona</p>
+                </div>
+                <div class="space-y-2">
+                    <p class="font-semibold text-on-surface">1904</p>
+                    <p class="text-on-surface-variant text-sm">Nacimiento de Dolores Molina Beca</p>
+                </div>
+                <div class="space-y-2">
+                    <p class="font-semibold text-on-surface">1925</p>
+                    <p class="text-on-surface-variant text-sm">Matrimonio de Ernest Godes Hurtado y Dolores Molina Beca</p>
+                </div>
+                <div class="space-y-2">
+                    <p class="font-semibold text-on-surface">1925-1940</p>
+                    <p class="text-on-surface-variant text-sm">Nacimiento de los cinco hijos: Dolores, Ernesto, María Mercedes, Eloísa y Enrique</p>
+                </div>
+                <div class="space-y-2">
+                    <p class="font-semibold text-on-surface">1949</p>
+                    <p class="text-on-surface-variant text-sm">Fallecimiento de Ernest Godes Hurtado</p>
+                </div>
+                <div class="space-y-2">
+                    <p class="font-semibold text-on-surface">1961</p>
+                    <p class="text-on-surface-variant text-sm">Fallecimiento de Dolores Molina Beca</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Living Descendants -->
+        <section class="mb-20">
+            <div class="bg-secondary-container/30 border border-secondary/20 rounded-xl p-8">
+                <h2 class="font-headline text-2xl font-bold text-primary mb-4">Descendientes Vivos</h2>
+                <p class="text-lg font-headline font-bold text-secondary mb-2">17 descendientes vivos</p>
+                <p class="text-on-surface-variant">La familia Godes Molina cuenta con una vibrante rama de 17 miembros vivos a fecha de abril de 2026, distribuidos principalmente entre las ciudades de Barcelona, Madrid y otras localidades españolas.</p>
+            </div>
+        </section>
+
+        <!-- Subramas Section -->
+        <section class="mb-20 space-y-8">
+            <h2 class="font-headline text-3xl font-bold text-primary border-b border-outline-variant pb-4">Subramas Principales</h2>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-surface-container rounded-xl p-6 space-y-3">
+                    <h3 class="font-headline text-xl font-bold text-primary">Familia Garrido Godes</h3>
+                    <p class="text-on-surface-variant text-sm">La rama resultante de los matrimonios de la primera generación de Godes Molina, que llevó el apellido Godes a nuevas ramas.</p>
+                </div>
+
+                <div class="bg-surface-container rounded-xl p-6 space-y-3">
+                    <h3 class="font-headline text-xl font-bold text-primary">Familia Godes Maté</h3>
+                    <p class="text-on-surface-variant text-sm">Rama colateral que continúa la tradición familiar en Barcelona y sus alrededores.</p>
+                </div>
+
+                <div class="bg-surface-container rounded-xl p-6 space-y-3">
+                    <h3 class="font-headline text-xl font-bold text-primary">Familia Garrido Ballart</h3>
+                    <p class="text-on-surface-variant text-sm">Extensión de la familia a través de nuevos matrimonios, ampliando la red genealógica familiar.</p>
+                </div>
+
+                <div class="bg-surface-container rounded-xl p-6 space-y-3">
+                    <h3 class="font-headline text-xl font-bold text-primary">Familia Garrido Vicente</h3>
+                    <p class="text-on-surface-variant text-sm">Otra rama importante que muestra la expansión y diversificación del árbol familiar.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="mb-20">
+            <div class="bg-primary-container/30 border border-primary/20 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="space-y-2">
+                    <h4 class="font-headline text-xl font-bold text-primary">¿Tienes información sobre esta rama?</h4>
+                    <p class="text-sm opacity-80">Ayúdanos a completar y mejorar el registro familiar</p>
+                </div>
+                <button class="bg-primary text-on-primary px-8 py-3 font-bold text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors shadow-lg shrink-0 rounded">Colabora</button>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+</body>
+</html>
