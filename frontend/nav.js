@@ -194,16 +194,14 @@
     const style = document.createElement('style');
     style.id = 'gn-reset-styles';
     style.textContent = `
-      #godesia-nav a { text-decoration: none; color: inherit; }
+      #godesia-nav a { text-decoration: none; }
       #godesia-nav button {
         border: none; background: none; padding: 0; margin: 0;
-        font: inherit; color: inherit; cursor: pointer;
-        -webkit-appearance: none; appearance: none;
+        cursor: pointer; -webkit-appearance: none; appearance: none;
         display: inline-flex; align-items: center; box-sizing: border-box;
       }
       #godesia-nav input {
-        border: none; background: none; padding: 0; margin: 0;
-        font: inherit; color: inherit; outline: none;
+        border: none; background: none; padding: 0; margin: 0; outline: none;
         -webkit-appearance: none; appearance: none; box-sizing: border-box;
       }
       #godesia-nav form { display: flex; align-items: center; }
