@@ -129,7 +129,7 @@
           `</div>` +
 
           /* ── Col 2: Nav items (centred, never wrap) ── */
-          `<div class="flex items-center gap-0.5">` +
+          `<div class="flex-1 flex items-center justify-center gap-0.5">` +
             `<a href="/tree.html" class="${linkCls}${arbolActive}">Árbol</a>` +
             renderDropdown('ramas',      'Ramas familiares', RAMAS) +
             `<a href="/chat.html" class="${linkCls}${chatActive}">Consultas</a>` +
