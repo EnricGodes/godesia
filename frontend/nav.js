@@ -196,11 +196,15 @@
     style.textContent = `
       #godesia-nav a { text-decoration: none; color: inherit; }
       #godesia-nav button {
-        all: unset; cursor: pointer; box-sizing: border-box;
-        display: inline-flex; align-items: center;
+        border: none; background: none; padding: 0; margin: 0;
+        font: inherit; color: inherit; cursor: pointer;
+        -webkit-appearance: none; appearance: none;
+        display: inline-flex; align-items: center; box-sizing: border-box;
       }
       #godesia-nav input {
-        all: unset; box-sizing: border-box;
+        border: none; background: none; padding: 0; margin: 0;
+        font: inherit; color: inherit; outline: none;
+        -webkit-appearance: none; appearance: none; box-sizing: border-box;
       }
       #godesia-nav form { display: flex; align-items: center; }
     `;
