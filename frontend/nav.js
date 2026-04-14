@@ -120,16 +120,16 @@
     return (
       `<nav id="godesia-nav" class="z-50 bg-[#2D4B33] shadow-md" style="position:sticky;top:0;left:0;right:0;width:100%">` +
         /* 3-column Facebook-style layout: logo | center items | right actions */
-        `<div class="px-4 flex items-center h-14">` +
+        `<div class="px-4 flex items-center h-14" style="position:relative">` +
 
-          /* ── Col 1: Logo (far left, flex-1 so it pushes centre to true centre) ── */
-          `<div class="flex-1 flex items-center">` +
+          /* ── Col 1: Logo (far left) ── */
+          `<div class="flex items-center">` +
             `<a href="/" class="text-lg font-bold text-white hover:text-white/80 transition-colors${homeActive}"` +
             ` style="font-family:'Noto Serif',serif;letter-spacing:-.01em">Godesia</a>` +
           `</div>` +
 
-          /* ── Col 2: Nav items (centred, never wrap) ── */
-          `<div class="flex-1 flex items-center justify-center gap-0.5">` +
+          /* ── Col 2: Nav items (absolutely centred) ── */
+          `<div class="flex items-center gap-0.5" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)">` +
             `<a href="/tree.html" class="${linkCls}${arbolActive}">Árbol</a>` +
             renderDropdown('ramas',      'Ramas familiares', RAMAS) +
             `<a href="/chat.html" class="${linkCls}${chatActive}">Consultas</a>` +
@@ -138,8 +138,8 @@
             renderDropdown('diversos',   'Diversos',         DIVERSOS) +
           `</div>` +
 
-          /* ── Col 3: Search + buttons (far right, flex-1 justify-end) ── */
-          `<div class="flex-1 flex items-center justify-end gap-2">` +
+          /* ── Col 3: Search + buttons (far right) ── */
+          `<div class="flex items-center justify-end gap-2" style="margin-left:auto">` +
 
             /* Search — collapsed by default, expands on click */
             `<form id="gn-search-form" class="flex items-center">` +
