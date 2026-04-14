@@ -235,7 +235,7 @@ class QueryRouter:
             (r"(?:qui[eé]n\s+naci[oó]\s+en\s+(?:el\s+)?a[nñ]o|who\s+was\s+born\s+in\s+the\s+year|qui[eé]n\s+naci[oó]\s+en\s+\d{4})", "handle_birth_year_search"),
             (r"(?:qu[eé]\s+personas\s+murieron\s+en|which\s+people\s+died\s+in)", "handle_death_place_people"),
             (r"(?:qu[eé]\s+parejas\s+se\s+casaron\s+en|which\s+couples\s+married\s+in)", "handle_marriages_place"),
-            (r"(?:nombre\s+de\s+pila\s+que\s+empieza\s+por|given\s+name\s+starts\s+with)", "handle_given_name_initial"),
+            (r"(?:nombre\s+de\s+pila\s+que\s+empie(?:ce|za)\s+por|given\s+name\s+starts\s+with)", "handle_given_name_initial"),
             (r"(?:primer\s+apellido|first\s+surname)", "handle_first_surname"),
             (r"(?:nacieron\s+y\s+murieron\s+en|were\s+born\s+and\s+died\s+in)", "handle_birth_and_death_place_people"),
             (r"(?:ocupaci[oó]n\s+o\s+actividad\s+figura\s+registrada\s+para|occupation\s+for)", "handle_occupation_field"),
@@ -1793,12 +1793,12 @@ class QueryRouter:
         return {"answer": answer, "people_mentioned": [p['id'] for p in up], "people_with_photos": self._people_payload(up[:25])}
 
     def handle_given_name_initial(self, question):
-        m = re.search(r"empieza\s+por\s+([A-ZÁÉÍÓÚÀÈÌÒÙÑÇ])", _clean_question(question), re.I)
+        m = re.search(r"empie(?:ce|za)\s+por\s+([A-ZÁÉÍÓÚÀÈÌÒÙÑÇ])", _clean_question(question), re.I)
         if not m:
             return None
         initial = _strip_accents(m.group(1).upper())
         rows = [_as_dict(r) for r in self.conn.execute(
-            "SELECT id, name, given_name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE given_name IS NOT NULL ORDER BY birth_year, name LIMIT 500"
+            "SELECT id, name, given_name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE given_name IS NOT NULL ORDER BY birth_year, name"
         ).fetchall()]
         filtered=[r for r in rows if _strip_accents((r.get('given_name') or '').strip()).upper().startswith(initial)]
         answer = self._list_people_answer(f"Las personas cuyo nombre de pila empieza por {m.group(1).upper()} son", filtered)
