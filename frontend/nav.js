@@ -118,7 +118,7 @@
                     ' hover:bg-white/15 hover:text-white transition-colors';
 
     return (
-      `<nav id="godesia-nav" class="sticky top-0 z-50 bg-[#2D4B33] shadow-md">` +
+      `<nav id="godesia-nav" class="z-50 bg-[#2D4B33] shadow-md" style="position:sticky;top:0;left:0;right:0;width:100%">` +
         /* 3-column Facebook-style layout: logo | center items | right actions */
         `<div class="px-4 flex items-center h-14">` +
 
@@ -272,6 +272,7 @@
   function init() {
     ensureMaterialSymbols();
     /* 1. Parse the nav HTML — menus (gn-menu) are siblings of the nav, not inside it */
+    const NAV_H = 56; // h-14 = 56px
     const wrapper = document.createElement('div');
     wrapper.innerHTML = renderNav();
 
@@ -312,7 +313,33 @@
     document.addEventListener('click', closeAll);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
 
-    /* 5. Prevent clicks inside menus from closing them */
+    /* 5. Layout compensation — fixes pages with body{display:flex} or fixed sidebars */
+    const bodyFlex      = getComputedStyle(document.body).display === 'flex';
+    const dashSidebar   = document.querySelector('.dash-sidebar');
+    const needsFixed    = bodyFlex || !!dashSidebar;
+
+    if (needsFixed) {
+      // Switch nav from sticky to fixed so it breaks out of any flex/grid parent
+      navEl.style.position = 'fixed';
+    }
+
+    if (bodyFlex) {
+      // chat.html, tree.html: the single flex child needs to start below the fixed nav
+      ['.app', '.tree-app'].forEach(sel => {
+        const el = document.querySelector(sel);
+        if (el) {
+          el.style.marginTop = NAV_H + 'px';
+          el.style.height    = `calc(100vh - ${NAV_H}px)`;
+        }
+      });
+    }
+
+    if (dashSidebar) {
+      // Dashboard pages: old .dash-nav was 64px; new nav is 56px
+      dashSidebar.style.top = NAV_H + 'px';
+    }
+
+    /* 5b. Prevent clicks inside menus from closing them */
     document.querySelectorAll('.gn-menu').forEach(m => {
       m.addEventListener('click', e => e.stopPropagation());
     });
