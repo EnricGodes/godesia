@@ -293,32 +293,38 @@
   // ─── Smart search: person name → dossier, question → chat ─────────────────
 
   window.smartSearch = async function(q) {
-    // If query contains question words, it's a question → chat
-    const questionWords = /(\?|qui[éè]n|quants|com|on[t]?|per[q]ué|quin[a]?|dónde|cual|qué|estadísticas|naci|moriu|pares|fills|germanes|casat|matrimoni|fills|descend)/i;
+    const toChat = () => { window.location.href = '/chat.html?q=' + encodeURIComponent(q); };
 
-    if (questionWords.test(q)) {
-      // Clearly a question → chat
-      window.location.href = '/chat.html?q=' + encodeURIComponent(q);
-      return;
-    }
+    // 1. Query terminada en "?" → chat (pregunta explícita)
+    if (q.trim().endsWith('?')) { toChat(); return; }
 
-    // No question words → try person search first
+    // 2. Buscar persona
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
       if (!res.ok) throw new Error('Search failed');
       const data = await res.json();
 
-      if (data.results && data.results.length > 0) {
-        const person = data.results[0];
-        // Found a person → go to dossier
+      // 0 resultados o múltiples → chat (que desambigüe allí)
+      if (!data.results || data.results.length !== 1) { toChat(); return; }
+
+      // 3. Un solo match: ¿la query es solo el nombre de esa persona?
+      const person = data.results[0];
+      const normalize = s => s.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w\s]/g, ' ')
+        .split(/\s+/).filter(Boolean);
+
+      const queryWords = normalize(q);
+      const nameWords = new Set(normalize(person.name || ''));
+      const allInName = queryWords.length > 0 && queryWords.every(w => nameWords.has(w));
+
+      if (allInName) {
         window.location.href = `/dossier.html?id=${person.id}`;
       } else {
-        // No person found → try chat anyway (user might want general info)
-        window.location.href = '/chat.html?q=' + encodeURIComponent(q);
+        toChat();
       }
     } catch (e) {
-      // Search failed → fallback to chat
-      window.location.href = '/chat.html?q=' + encodeURIComponent(q);
+      toChat();
     }
   };
 
