@@ -110,7 +110,6 @@
   }
 
   function renderNav() {
-    const homeActive  = (PATH === '/' || PATH === '/index.html') ? ' bg-white/20 font-semibold' : '';
     const arbolActive = isActivePage('/tree.html') ? ' bg-white/20 font-semibold' : '';
     const chatActive  = isActivePage('/chat.html') ? ' bg-white/20 font-semibold' : '';
 
@@ -124,7 +123,7 @@
 
           /* ── Col 1: Logo (far left) ── */
           `<div class="flex items-center">` +
-            `<a href="/" class="text-lg font-bold text-white hover:text-white/80 transition-colors${homeActive}"` +
+            `<a href="/" class="text-lg font-bold text-white hover:text-white/80 transition-colors"` +
             ` style="font-family:'Noto Serif',serif;letter-spacing:-.01em">Godesia</a>` +
           `</div>` +
 
