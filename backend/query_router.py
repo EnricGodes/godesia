@@ -31,6 +31,16 @@ def _strip_accents(text: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFD", text or "") if unicodedata.category(c) != "Mn")
 
 
+def _sql_norm(text: str) -> str:
+    """Normalization used for SQL comparisons: strip accents + lowercase.
+
+    Kept minimal (no punctuation rewriting) so LIKE wildcards and spacing still work.
+    Used on both sides of comparisons (user input AND DB data) so accented characters
+    match their unaccented equivalents universally.
+    """
+    return _strip_accents(text or "").lower()
+
+
 def _norm_cmp(text: str) -> str:
     text = _strip_accents((text or "").lower())
     text = re.sub(r"\((\d{4})\)", r" \1 ", text)
@@ -171,6 +181,15 @@ class QueryRouter:
     def __init__(self, conn):
         self.conn = conn
         self._sql_trace: List[str] = []
+
+        # Register a SQL normalization function so we can compare both sides
+        # (user input and DB data) with accents stripped and lowercased. This
+        # removes the need for regex classes like [óo] or case-by-case patches.
+        try:
+            self.conn.create_function("NORM", 1, _sql_norm, deterministic=True)
+        except TypeError:
+            # Older SQLite/Python: no `deterministic` kwarg
+            self.conn.create_function("NORM", 1, _sql_norm)
 
         self.patterns: List[Tuple[str, str]] = [
             (r"(?:qu[eé]\s+persona\s+(?:tuvo|tenia)\s+m[aá]s\s+hijos|cu[aá]l\s+es\s+la\s+persona\s+con\s+m[aá]s\s+hijos\s+registrados)", "handle_max_children_person"),
@@ -436,10 +455,16 @@ class QueryRouter:
             "is_alive, father_id, mother_id, father_name, mother_name, sex, "
             "baptism_date, baptism_place, godparents, nickname "
         )
-        # IMPORTANT: Fetch ALL people and do Python-level filtering with accent-insensitive matching
-        # SQL LIKE with COLLATE NOCASE doesn't handle accents, so we need Python-level comparison
+        # Normalize BOTH sides of the comparison: NORM(name) strips accents and
+        # lowercases DB values; _sql_norm() does the same to the user's fragment.
+        # This way "eNRÎC GÓDES mate" matches "Enric Godes Maté" without any
+        # per-character regex classes. Response output still uses the original
+        # (accented) `name` column from the row.
+        normalized_fragment = _sql_norm(name_fragment)
+        like_pattern = "%" + re.sub(r"\s+", "%", normalized_fragment) + "%"
         rows = self.conn.execute(
-            select_cols + "FROM people ORDER BY name",
+            select_cols + "FROM people WHERE NORM(name) LIKE ? ORDER BY name LIMIT ?",
+            (like_pattern, max(limit * 4, 80))
         ).fetchall()
 
         # Use _norm_cmp for accent-insensitive comparison (it already strips accents)
