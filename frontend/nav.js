@@ -194,8 +194,9 @@
     const style = document.createElement('style');
     style.id = 'gn-reset-styles';
     style.textContent = `
+      #godesia-nav { display: block; }
       #godesia-nav a { text-decoration: none; }
-      #godesia-nav button {
+      #godesia-nav .gn-btn {
         border: none; background: none; padding: 0; margin: 0;
         cursor: pointer; -webkit-appearance: none; appearance: none;
         display: inline-flex; align-items: center; box-sizing: border-box;
