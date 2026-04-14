@@ -187,6 +187,26 @@
     );
   }
 
+  // ─── Nav reset styles (injected once, fixes pages with preflight:false) ─────
+
+  function ensureNavResetStyles() {
+    if (document.getElementById('gn-reset-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'gn-reset-styles';
+    style.textContent = `
+      #godesia-nav a { text-decoration: none; color: inherit; }
+      #godesia-nav button {
+        all: unset; cursor: pointer; box-sizing: border-box;
+        display: inline-flex; align-items: center;
+      }
+      #godesia-nav input {
+        all: unset; box-sizing: border-box;
+      }
+      #godesia-nav form { display: flex; align-items: center; }
+    `;
+    document.head.appendChild(style);
+  }
+
   // ─── Mention autocomplete styles (injected once, for pages without style.css) ──
 
   function ensureMentionStyles() {
@@ -271,6 +291,7 @@
 
   function init() {
     ensureMaterialSymbols();
+    ensureNavResetStyles();
     /* 1. Parse the nav HTML — menus (gn-menu) are siblings of the nav, not inside it */
     const NAV_H = 56; // h-14 = 56px
     const wrapper = document.createElement('div');
