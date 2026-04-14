@@ -197,9 +197,9 @@
       #godesia-nav { display: block; }
       #godesia-nav a { text-decoration: none; }
       #godesia-nav .gn-btn {
-        border: none; background: none; padding: 0; margin: 0;
+        border: none; background: none; margin: 0;
         cursor: pointer; -webkit-appearance: none; appearance: none;
-        display: inline-flex; align-items: center; box-sizing: border-box;
+        box-sizing: border-box;
       }
       #godesia-nav input:focus {
         outline: none; box-shadow: none !important;
