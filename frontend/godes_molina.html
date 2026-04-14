@@ -1,448 +1,257 @@
 <!DOCTYPE html>
-<html class="light" lang="ca">
+<html lang="es">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Saga Godes Molina | Familia Godes</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;400;600;800&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "primary": "#2D4B33",
-                        "surface-container": "#f1eee5",
-                        "surface-container-low": "#f6f3ea",
-                        "surface-bright": "#fcf9f0",
-                        "on-error": "#ffffff",
-                        "on-error-container": "#93000a",
-                        "surface-container-lowest": "#ffffff",
-                        "background": "#fcf9f0",
-                        "on-background": "#1c1c17",
-                        "on-primary": "#ffffff",
-                        "on-surface-variant": "#424842",
-                        "primary-container": "#d4e4d6",
-                        "on-primary-container": "#0b1f10",
-                        "secondary-container": "#fdd2b1",
-                        "error-container": "#ffdad6",
-                        "on-secondary-container": "#78583f",
-                        "surface-variant": "#e5e2da",
-                        "surface-tint": "#2D4B33",
-                        "surface-dim": "#dddad1",
-                        "error": "#ba1a1a",
-                        "surface": "#fcf9f0",
-                        "surface-container-high": "#ebe8df",
-                        "outline": "#727971",
-                        "on-surface": "#1c1c17",
-                        "inverse-on-surface": "#f4f1e8",
-                        "inverse-surface": "#31312b",
-                        "surface-container-highest": "#e5e2da",
-                        "outline-variant": "#c2c8bf",
-                        "secondary": "#78583e",
-                        "on-secondary": "#ffffff"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.5rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "fontFamily": {
-                        "headline": ["Noto Serif"],
-                        "body": ["Manrope"],
-                        "label": ["Manrope"]
-                    }
-                },
-            }
-        }
-    </script>
-    <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .heritage-border { border: 1px solid rgba(114, 121, 113, 0.2); }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saga Godes Molina - Godesia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="saga.css">
 </head>
-<body class="bg-surface font-body text-on-surface selection:bg-secondary-container">
+<body class="dashboard-body">
 
-<!-- Navigation -->
-<nav class="sticky top-0 z-50 bg-surface border-b border-outline-variant/30">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <a href="/" class="font-headline text-2xl font-bold text-primary">Godesia</a>
-        <div class="flex gap-8">
-            <a href="/" class="text-on-surface hover:text-primary">Inici</a>
-            <a href="/chat.html" class="text-on-surface hover:text-primary">Consulta</a>
-            <a href="/tree.html" class="text-on-surface hover:text-primary">Arbre</a>
-            <a href="/godes_molina.html" class="text-primary font-semibold">Saga Godes Molina</a>
+<nav class="dash-nav">
+    <div class="dash-nav-left">
+        <span class="dash-logo">Godesia</span>
+        <div class="dash-nav-links">
+            <a href="/" class="dash-nav-link">Inici</a>
+            <a href="/chat.html" class="dash-nav-link">Consulta</a>
+            <a href="/tree.html" class="dash-nav-link">Arbre</a>
+            <a href="/godes_molina.html" class="dash-nav-link active">Saga</a>
         </div>
     </div>
 </nav>
 
-<div class="flex min-h-screen">
-    <!-- Sidebar Navigation for Subramas -->
-    <aside class="w-64 bg-surface-container-low border-r border-outline-variant/30 p-6 space-y-4 hidden lg:block">
-        <h3 class="font-headline text-lg font-bold text-primary mb-6">Subramas</h3>
-        <nav class="space-y-2">
-            <a href="#main" class="block px-4 py-2 rounded text-on-surface hover:bg-surface-container-high border-l-4 border-primary font-semibold">Página Principal</a>
-            <a href="#dolores" class="block px-4 py-2 rounded text-on-surface hover:bg-surface-container-high border-l-4 border-transparent hover:border-primary">Dolores Godes Molina</a>
-            <a href="#ernesto" class="block px-4 py-2 rounded text-on-surface hover:bg-surface-container-high border-l-4 border-transparent hover:border-primary">Ernesto Godes Molina</a>
-            <a href="#mercedes" class="block px-4 py-2 rounded text-on-surface hover:bg-surface-container-high border-l-4 border-transparent hover:border-primary">María Mercedes Godes Molina</a>
-            <a href="#marilisa" class="block px-4 py-2 rounded text-on-surface hover:bg-surface-container-high border-l-4 border-transparent hover:border-primary">Eloísa "Marilisa" Godes Molina</a>
-            <a href="#enrique" class="block px-4 py-2 rounded text-on-surface hover:bg-surface-container-high border-l-4 border-transparent hover:border-primary">Enrique Godes Molina</a>
-        </nav>
-
-        <hr class="border-outline-variant/30 my-4"/>
-
-        <h3 class="font-headline text-lg font-bold text-primary mb-4">Otras ramas</h3>
-        <nav class="space-y-2 text-sm">
-            <a href="#" class="block px-4 py-2 rounded text-on-surface hover:bg-surface-container-high border-l-4 border-transparent hover:border-primary">Garrido Godes</a>
-            <a href="#" class="block px-4 py-2 rounded text-on-surface hover:bg-surface-container-high border-l-4 border-transparent hover:border-primary">Garrido Ballart</a>
-            <a href="#" class="block px-4 py-2 rounded text-on-surface hover:bg-surface-container-high border-l-4 border-transparent hover:border-primary">Garrido Vicente</a>
-            <a href="#" class="block px-4 py-2 rounded text-on-surface hover:bg-surface-container-high border-l-4 border-transparent hover:border-primary">Godes Maté</a>
-        </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="flex-1 min-h-screen">
-        <div class="max-w-4xl mx-auto px-6 py-16 space-y-16">
-
-            <!-- Page Main: Section 1 -->
-            <section id="main" class="space-y-8">
-                <header class="space-y-4 border-b-2 border-outline-variant pb-8">
-                    <h1 class="font-headline text-5xl md:text-6xl font-bold text-primary leading-tight">La saga Godes Molina: de Barcelona a Córdoba, de Córdoba a Madrid, y de ahí a las ramas vivas de hoy</h1>
-                    <p class="font-headline text-xl italic text-secondary">La historia de Ernest Godes Hurtado y Dolores Molina Beca, del matrimonio fundacional de 1925 a las familias Garrido Godes, Garrido Ballart, Garrido Vicente y Godes Maté.</p>
-                </header>
-
-                <!-- Hero Image -->
-                <figure class="space-y-2">
-                    <div class="bg-surface-container-high heritage-border overflow-hidden">
-                        <img src="/photos/000065_7080186cj59ek8u954c93m_V.jpg" alt="Ernest/Ernesto Godes Hurtado y Dolores Molina Beca, fotografía de boda, 1925, Córdoba." class="w-full h-96 object-cover">
-                    </div>
-                    <figcaption class="text-sm text-on-surface-variant">Ernest/Ernesto Godes Hurtado y Dolores Molina Beca, fotografía de boda, 1925, Córdoba.</figcaption>
-                </figure>
-
-                <!-- Main Narrative -->
-                <article class="prose prose-lg max-w-none space-y-6 font-body text-on-surface">
-                    <p>La rama <strong>Godes Molina</strong> nace del desplazamiento de <strong>Ernest Godes Hurtado</strong> (1896–1949) desde Barcelona hacia Andalucía y de su matrimonio con <strong>Dolores Molina Beca</strong> (1904–1961), conocida en la familia como <strong>Lola</strong>. Es una rama particularmente narrativa porque condensa varios movimientos de la familia en apenas una generación: el origen barcelonés de los Godes, el arraigo cordobés de los Molina, la fractura de la Guerra Civil y el posterior establecimiento en Madrid. Desde ese núcleo inicial saldrán, ya en la segunda mitad del siglo XX, las subramas <strong>Garrido Godes</strong>, <strong>Garrido Ballart</strong>, <strong>Garrido Vicente</strong>, <strong>Godes Maté</strong>, <strong>Godes Mateo</strong>, <strong>Cardoner Garrido</strong>, <strong>Garzón Garrido</strong> y <strong>Plomer Garrido</strong>.</p>
-
-                    <p>Ernest nació el <strong>11 de octubre de 1896, Mediana de San Pedro, 12 6º, Barcelona</strong>, hijo de <strong>Artur Godes Caballeria</strong> (1868–1925) y <strong>Emilia Hurtado Giró</strong> (1872–1963). Era una persona simpática y elegante. Su familia de origen estaba sólidamente asentada en Barcelona: el padre, Artur, fue <strong>músico, compositor y tenor del Liceu</strong>, además de <strong>mestre de capella</strong> de <strong>Santa Maria del Mar</strong> y de <strong>la Bonanova</strong>. Es decir: Ernest procede de una rama Godes ya plenamente urbanizada, culta y vinculada a la vida barcelonesa de finales del XIX y principios del XX.</p>
-
-                    <p>Antes de formar su propia familia, Ernest tuvo una trayectoria profesional móvil. Trabajó <strong>hacia 1914</strong> en <strong>Tarragona</strong> como <strong>gerente de los estibadores del puerto</strong> para la naviera <strong>José Tayá</strong>. En <strong>1923</strong> pasó un episodio de <strong>tifus</strong> en Barcelona. Hacia <strong>1925</strong>, ya en Córdoba, aparece como <strong>propietario de una serrería</strong>. Más adelante, hacia <strong>1943</strong>, ejercía como <strong>Inspector general de Assicurazioni Generali y Covadonga Seguros S.A. (ramo transportes)</strong>. La secuencia es muy expresiva: del entorno portuario y logístico a la actividad industrial y, finalmente, al sector asegurador. Tampoco parece haber sido movilizado durante la Guerra Civil.</p>
-
-                    <p>Dolores Molina Beca nació el <strong>8 de junio de 1904, Cabra, Córdoba</strong>. Era hija de <strong>Enrique Molina de Pazos</strong> (1872–1949) y <strong>Eloísa Beca y Espinosa de los Monteros</strong> (1878–1955). La rama Molina aporta al relato un fuerte anclaje institucional y urbano en Córdoba. El padre, Enrique Molina de Pazos, había nacido en Madrid en 1872 y fue primero <strong>secretario y contador del Ayuntamiento de Cabra</strong>; después, ya en Córdoba, <strong>Interventor de Fondos de la Corporación municipal</strong>. También recibió la <strong>Orden del Mérito Civil</strong> en 1943 y su jubilación quedó reflejada en la documentación familiar. La madre, Eloísa, había nacido en Lucena en 1878. Los distintos domicilios de esta familia permiten seguir bastante bien su recorrido por Córdoba: <strong>Victoriano Rivera, 2</strong> (1911), <strong>José Rey, 4</strong> (1915), <strong>Rey Heredia, 27</strong> (1917), <strong>Juan Valera, 8</strong> (1920) y <strong>Claudio Marcelo, 17</strong> (1935). La casa de Claudio Marcelo fue bombardeada en 1936.</p>
-
-                    <p>Ernest y Dolores se casaron el <strong>10 de septiembre de 1925 en Córdoba</strong>. A partir de ahí se forma el núcleo fundador de la saga. La familia recuerda a sus cinco hijos por sus nombres más cercanos: <strong>Lola, Ernesto, Menenes, Marilisa y Enrique</strong>. Con ellos se dibuja también el gran recorrido doméstico de esta rama: primero la vida en <strong>Juan Valera, 8</strong>, en Córdoba; después la ruptura de la guerra, con la destrucción de la casa; más tarde el paso por <strong>Bilbao</strong> hasta el final de la contienda; y, por último, el asentamiento en <strong>Madrid</strong>, en un gran piso de la <strong>Gran Vía, 78</strong>.</p>
-
-                    <p>La familia tuvo <strong>cinco hijos</strong>: <strong>Dolores Godes Molina</strong> (1926), <strong>Ernesto Godes Molina</strong> (1928), <strong>María Mercedes Godes Molina</strong> (1931), <strong>Eloísa Godes Molina</strong> (1932) y <strong>Enrique Godes Molina</strong> (1935). Las fotografías conservadas permiten seguir visualmente el cambio de etapa: las imágenes de <strong>Córdoba en 1932</strong>, con los niños aún pequeños; la presencia en <strong>Barcelona en 1942-1943</strong> en visitas o estancias familiares; y la etapa de <strong>Madrid en 1944</strong>, cuando la familia ya está asentada en Gran Vía.</p>
-
-                    <p>Ernest murió el <strong>8 de enero de 1949, Avenida de Jose Antonio, 78. Madrid</strong>, con 52 años, por <strong>leucemia</strong>, y fue enterrado en el <strong>cementerio de la Almudena</strong>. Dolores murió después, el <strong>3 de marzo de 1961, Madrid</strong>, y su funeral se celebró el <strong>7 de marzo de 1961</strong> en la <strong>parroquia de San Martín de Madrid</strong>. Además, arrastró problemas cardiacos y había recibido diagnósticos pesimistas sobre el riesgo de tener hijos; aun así, tuvo cinco y sostuvo el núcleo familiar durante todas las mudanzas del periodo.</p>
-
-                    <p>Desde ese matrimonio fundador, la rama ha llegado viva al presente. De los cinco hijos, tres no dejaron descendencia conocida, mientras que <strong>Eloísa/Marilisa</strong> y <strong>Enrique</strong> abrieron las dos grandes líneas vivas de hoy: por un lado la rama <strong>Garrido Godes</strong> y sus descendencias <strong>Garrido Ballart</strong>, <strong>Garrido Vicente</strong>, <strong>Garzón Garrido</strong>, <strong>Cardoner Garrido</strong> y <strong>Plomer Garrido</strong>; por otro, la rama <strong>Godes Maté</strong>, prolongada hoy en <strong>Godes Mateo</strong>.</p>
-                </article>
-
-                <!-- Origins Section -->
-                <section class="grid md:grid-cols-2 gap-6 py-8">
-                    <div class="bg-surface-container-low border border-outline-variant/30 rounded-lg p-6 space-y-4">
-                        <h3 class="font-headline text-2xl font-bold text-primary">Origen familiar de Ernest Godes Hurtado</h3>
-
-                        <div class="space-y-3">
-                            <div class="space-y-1">
-                                <h4 class="font-semibold text-on-surface">Padre</h4>
-                                <p class="text-on-surface-variant"><strong>Artur Godes Caballeria</strong> (1868–1925)</p>
-                                <ul class="text-sm text-on-surface-variant space-y-1 ml-4">
-                                    <li>Nacimiento: 6 de abril de 1868, Fonollar, 30 4º Barcelona</li>
-                                    <li>Defunción: 9 de marzo de 1925, Bertran, 67 Barcelona</li>
-                                    <li>Rasgos destacados: músico, compositor, tenor del Liceu; mestre de capella de Santa Maria del Mar y de la Bonanova.</li>
-                                </ul>
-                            </div>
-
-                            <div class="space-y-1">
-                                <h4 class="font-semibold text-on-surface">Madre</h4>
-                                <p class="text-on-surface-variant"><strong>Emilia Hurtado Giró</strong> (1872–1963)</p>
-                                <ul class="text-sm text-on-surface-variant space-y-1 ml-4">
-                                    <li>Nacimiento: 29 de abril de 1872, Cuch, 5 4º</li>
-                                    <li>Defunción: 21 de septiembre de 1963, Homer, 27 bis Barcelona</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <p class="text-sm italic text-on-surface-variant border-t border-outline-variant/30 pt-4">Ernest no sale de la nada: procede de una Barcelona menestral, musical y burguesa a pequeña escala, con una familia Godes ya integrada en el tejido urbano. Esto permite presentar su marcha a Córdoba no como una simple mudanza, sino como una bifurcación geográfica de la familia: una rama nacida en el corazón histórico de Barcelona que se abre hacia Andalucía y más tarde hacia Madrid.</p>
-                    </div>
-
-                    <div class="bg-surface-container-low border border-outline-variant/30 rounded-lg p-6 space-y-4">
-                        <h3 class="font-headline text-2xl font-bold text-primary">Origen familiar de Dolores Molina Beca</h3>
-
-                        <div class="space-y-3">
-                            <div class="space-y-1">
-                                <h4 class="font-semibold text-on-surface">Padre</h4>
-                                <p class="text-on-surface-variant"><strong>Enrique Molina de Pazos</strong> (1872–1949)</p>
-                                <ul class="text-sm text-on-surface-variant space-y-1 ml-4">
-                                    <li>Nacimiento: 12 de agosto de 1872, Madrid</li>
-                                    <li>Defunción: 9 de agosto de 1949, Claudio Marcelo, 17 Córdoba</li>
-                                    <li>Secretario y contador del Ayuntamiento de Cabra (antes de 1911)</li>
-                                    <li>Interventor de Fondos de la Corporación municipal de Córdoba (después de 1911)</li>
-                                    <li>Orden del Mérito Civil (2 de diciembre de 1943)</li>
-                                </ul>
-                            </div>
-
-                            <div class="space-y-1">
-                                <h4 class="font-semibold text-on-surface">Madre</h4>
-                                <p class="text-on-surface-variant"><strong>Eloísa Beca y Espinosa de los Monteros</strong> (1878–1955)</p>
-                                <ul class="text-sm text-on-surface-variant space-y-1 ml-4">
-                                    <li>Nacimiento: 17 de junio de 1878, Lucena, Córdoba</li>
-                                    <li>Defunción: 26 de agosto de 1955, Madrid</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <p class="text-sm italic text-on-surface-variant border-t border-outline-variant/30 pt-4">La familia de Lola no es una familia periférica, sino una familia con presencia administrativa en Córdoba. Esto da a la unión con Ernest un fuerte contraste narrativo: él llega desde una rama Godes barcelonesa con capital cultural; ella pertenece a una casa cordobesa con peso social e institucional.</p>
-                    </div>
-                </section>
-
-                <!-- Chronology -->
-                <section class="space-y-4 bg-surface-container-low border border-outline-variant/30 rounded-lg p-8">
-                    <h2 class="font-headline text-3xl font-bold text-primary">Cronología</h2>
-                    <ul class="space-y-3 text-sm text-on-surface-variant">
-                        <li><strong>11 de octubre de 1896</strong> — Nace Ernest Godes Hurtado en Barcelona.</li>
-                        <li><strong>18 de octubre de 1896</strong> — Bautismo de Ernest en Sant Francesc de Paula.</li>
-                        <li><strong>8 de junio de 1904</strong> — Nace Dolores Molina Beca en Cabra, Córdoba.</li>
-                        <li><strong>1911–1920</strong> — La familia Molina se desplaza por distintos domicilios de Córdoba hasta instalarse en Juan Valera, 8.</li>
-                        <li><strong>Hacia 1914</strong> — Ernest trabaja en Tarragona como gerente de los estibadores del puerto para la naviera José Tayá.</li>
-                        <li><strong>1923</strong> — Ernest pasa un episodio de tifus en Barcelona.</li>
-                        <li><strong>10 de septiembre de 1925</strong> — Matrimonio de Ernest Godes Hurtado y Dolores Molina Beca en Córdoba.</li>
-                        <li><strong>1925</strong> — Ernest figura ya en Córdoba; aparece vinculado a una serrería.</li>
-                        <li><strong>2 de julio de 1926</strong> — Nace Dolores Godes Molina.</li>
-                        <li><strong>9 de mayo de 1928</strong> — Nace Ernesto Godes Molina.</li>
-                        <li><strong>24 de marzo de 1931</strong> — Nace María Mercedes Godes Molina.</li>
-                        <li><strong>20 de agosto de 1932</strong> — Nace Eloísa Godes Molina.</li>
-                        <li><strong>20 de julio de 1935</strong> — Nace Enrique Godes Molina.</li>
-                        <li><strong>1935–1936</strong> — El entorno familiar Molina se sitúa en Claudio Marcelo, 17; la casa fue bombardeada.</li>
-                        <li><strong>Del 1 de marzo al 1 de octubre de 1939</strong> — Ernest reside en Bilbao.</li>
-                        <li><strong>Desde el 1 de octubre de 1939 hasta 1949</strong> — La familia vive en Avenida de José Antonio / Gran Vía, 78, Madrid.</li>
-                        <li><strong>28 de mayo de 1944</strong> — Primera comunión de Enrique Godes Molina en Madrid.</li>
-                        <li><strong>8 de enero de 1949</strong> — Muere Ernest Godes Hurtado en Madrid.</li>
-                        <li><strong>3 de marzo de 1961</strong> — Muere Dolores Molina Beca en Madrid.</li>
-                    </ul>
-                </section>
-
-                <!-- Living Descendants -->
-                <section class="bg-primary-container/30 border border-primary/20 rounded-lg p-8 space-y-4">
-                    <h2 class="font-headline text-3xl font-bold text-primary">Descendencia viva actual del matrimonio fundador</h2>
-                    <p class="text-on-surface">Hasta <strong>abril de 2026</strong>, la descendencia viva de Ernest Godes Hurtado y Dolores Molina Beca suma <strong>17 descendientes directos vivos</strong>:</p>
-                    <ul class="space-y-2 text-on-surface text-sm">
-                        <li><strong>Hijos de segunda generación vivos:</strong> ninguno; los cinco hijos del matrimonio fundador están fallecidos.</li>
-                        <li><strong>4 nietos</strong> que siguen vivos:
-                            <ul class="ml-4 space-y-1 mt-1">
-                                <li>Ernesto Garrido Godes</li>
-                                <li>Fernando Garrido Godes</li>
-                                <li>Enric Godes Maté</li>
-                                <li>Ignacio Godes Maté</li>
-                            </ul>
-                        </li>
-                        <li><strong>8 bisnietos vivos</strong>:
-                            <ul class="ml-4 space-y-1 mt-1">
-                                <li>Clàudia Garrido Ballart</li>
-                                <li>Sònia Garrido Ballart</li>
-                                <li>Paula Garrido Ballart</li>
-                                <li>Núria Garrido Ballart</li>
-                                <li>Maria Garrido Vicente</li>
-                                <li>Fernando Garrido Vicente</li>
-                                <li>Héctor Godes Mateo</li>
-                                <li>Iván Godes Mateo</li>
-                            </ul>
-                        </li>
-                        <li><strong>5 tataranietos vivos</strong>:
-                            <ul class="ml-4 space-y-1 mt-1">
-                                <li>Gil Cardoner Garrido</li>
-                                <li>Ignasi Cardoner Garrido</li>
-                                <li>Antoni Cardoner Garrido</li>
-                                <li>Santi Garzón Garrido</li>
-                                <li>Clara Plomer Garrido</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </section>
-            </section>
-
-            <!-- Subramas: Dolores Godes Molina -->
-            <section id="dolores" class="space-y-8 pt-16 border-t-2 border-outline-variant">
-                <header class="space-y-4">
-                    <h2 class="font-headline text-4xl font-bold text-primary">Dolores Godes Molina</h2>
-                    <figure class="space-y-2">
-                        <div class="bg-surface-container-high heritage-border overflow-hidden">
-                            <img src="/photos/000243_7258215n6c8e9a55e4ph76_V.jpg" alt="Puesta de largo de Lola Godes Molina, 1944, Gran Vía 78, Madrid" class="w-full h-96 object-cover">
-                        </div>
-                        <figcaption class="text-sm text-on-surface-variant">Puesta de largo de Lola Godes Molina, 1944, Gran Vía 78, Madrid</figcaption>
-                    </figure>
-                </header>
-
-                <article class="space-y-6 text-on-surface">
-                    <p><strong>Dolores Godes Molina</strong> (1926–1991), llamada <strong>Lola</strong> en el entorno familiar, fue la <strong>primera hija</strong> del matrimonio fundador. Nació el <strong>2 de julio de 1926, Córdoba</strong>, en la primera etapa cordobesa de la familia. Su historia es más visual que textual: aparece repetidamente en fotos de la infancia y juventud, por lo que puede construirse una subpágina basada en la transición <strong>Córdoba → Madrid → Barcelona</strong>.</p>
-
-                    <p>La foto de <strong>1932 en los Jardines de la Agricultura de Córdoba</strong> la muestra aún dentro del núcleo familiar originario, junto a sus padres, su hermano Ernesto y su hermana Mercedes. En <strong>1944</strong>, la imagen de su <strong>puesta de largo</strong> en la <strong>Gran Vía 78 de Madrid</strong> funciona casi como una escena de madurez de la familia: están ya en la capital, con los abuelos presentes y con una clara sensación de ascenso o consolidación urbana tras la guerra.</p>
-
-                    <p>Se casó, <strong>aproximadamente en 1960</strong>, con <strong>Robert Lee Shahan</strong>. No dejó descendencia conocida. Murió el <strong>6 de mayo de 1991</strong> y fue enterrada en <strong>Montjuïc</strong>, en el mismo nicho o conjunto funerario donde también aparecen otros miembros de la rama.</p>
-                </article>
-
-                <div class="bg-surface-container-low border border-outline-variant/30 rounded-lg p-6 space-y-4">
-                    <h3 class="font-headline text-xl font-bold text-primary">Datos clave</h3>
-                    <ul class="text-sm text-on-surface-variant space-y-2">
-                        <li><strong>Nacimiento:</strong> 2 de julio de 1926, Córdoba</li>
-                        <li><strong>Matrimonio:</strong> aprox. 1960 con Robert Lee Shahan</li>
-                        <li><strong>Descendencia:</strong> sin descendencia conocida</li>
-                        <li><strong>Defunción:</strong> 6 de mayo de 1991</li>
-                        <li><strong>Sepultura:</strong> Montjuïc, vía de San Francisco de Paula, agrupación 7ª, piso 2º, hipogeo arqueado de clase 6ª, número 125</li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- Subramas: Ernesto Godes Molina -->
-            <section id="ernesto" class="space-y-8 pt-16 border-t-2 border-outline-variant">
-                <header class="space-y-4">
-                    <h2 class="font-headline text-4xl font-bold text-primary">Ernesto Godes Molina</h2>
-                    <figure class="space-y-2">
-                        <div class="bg-surface-container-high heritage-border overflow-hidden">
-                            <img src="/photos/000247_1277791953wc944g65u8fe_V.jpg" alt="Ernesto Godes Molina, Lola Godes Molina y Anna Maria Faura Ramoneda, abril de 1950, Gran Vía, Madrid" class="w-full h-96 object-cover">
-                        </div>
-                        <figcaption class="text-sm text-on-surface-variant">Ernesto Godes Molina, Lola Godes Molina y Anna Maria Faura Ramoneda, abril de 1950, Gran Vía, Madrid</figcaption>
-                    </figure>
-                </header>
-
-                <article class="space-y-6 text-on-surface">
-                    <p><strong>Ernesto Godes Molina</strong> (1928–1989) fue el <strong>segundo hijo</strong> de Ernest y Lola. Nació el <strong>9 de mayo de 1928, Córdoba</strong>. La familia vivía entonces en <strong>Juan Valera, 8, Córdoba</strong>, todavía en el primer gran domicilio del matrimonio fundador.</p>
-
-                    <p>Su historia puede leerse en tres momentos: la infancia cordobesa, la juventud madrileña y el final en Barcelona. La foto de <strong>1932</strong> en Córdoba lo muestra siendo todavía un niño, en brazos o muy cerca del padre, dentro de una escena nuclear de la rama. Las imágenes de <strong>1950 en Madrid</strong> lo sitúan ya como joven adulto, compartiendo espacio con su hermana Lola y otros miembros de la familia Godes que visitan o pasan tiempo en la capital.</p>
-
-                    <p>No parece haber formado una familia con descendencia. Murió el <strong>3 de enero de 1989</strong>, por cáncer, y fue enterrado en <strong>Montjuïc</strong>. Su subpágina debería funcionar como una microhistoria de "hijo sin rama propia", pero imprescindible para entender el equilibrio interno de la familia Godes Molina.</p>
-                </article>
-
-                <div class="bg-surface-container-low border border-outline-variant/30 rounded-lg p-6 space-y-4">
-                    <h3 class="font-headline text-xl font-bold text-primary">Datos clave</h3>
-                    <ul class="text-sm text-on-surface-variant space-y-2">
-                        <li><strong>Nacimiento:</strong> 9 de mayo de 1928, Córdoba</li>
-                        <li><strong>Domicilio familiar al nacer:</strong> Juan Valera, 8, Córdoba</li>
-                        <li><strong>Descendencia:</strong> sin descendencia conocida</li>
-                        <li><strong>Defunción:</strong> 3 de enero de 1989</li>
-                        <li><strong>Sepultura:</strong> Montjuïc, agrupación 7ª, piso 2º, hipogeo arqueado de clase 6ª, número 125</li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- Subramas: María Mercedes Godes Molina -->
-            <section id="mercedes" class="space-y-8 pt-16 border-t-2 border-outline-variant">
-                <header class="space-y-4">
-                    <h2 class="font-headline text-4xl font-bold text-primary">María Mercedes Godes Molina</h2>
-                    <figure class="space-y-2">
-                        <div class="bg-surface-container-high heritage-border overflow-hidden">
-                            <img src="/photos/500196_3298497717o2m96z663bhl_A.jpg" alt="Menenes Godes Molina en el Palacio de Cristal del Retiro, abril de 1950" class="w-full h-96 object-cover">
-                        </div>
-                        <figcaption class="text-sm text-on-surface-variant">Menenes Godes Molina en el Palacio de Cristal del Retiro, abril de 1950</figcaption>
-                    </figure>
-                </header>
-
-                <article class="space-y-6 text-on-surface">
-                    <p><strong>María Mercedes Godes Molina</strong> (1931–1992) aparece en las fotos familiares con el nombre de <strong>Menenes</strong>, y esa forma debería incorporarse a la narrativa porque es, de hecho, la manera en que la familia parece recordarla visualmente. Nació el <strong>24 de marzo de 1931</strong> y forma parte del grupo de hijos nacidos en la larga etapa cordobesa del matrimonio.</p>
-
-                    <p>Su presencia fotográfica permite seguirla desde niña, en la conocida imagen de <strong>1932 en Córdoba</strong>, hasta el Madrid de 1950, cuando ya aparece retratada en el <strong>Parque del Retiro</strong>. También está presente en fotos familiares posteriores, incluida una de <strong>1970</strong> en la casa de Eloísa, lo que sugiere continuidad del vínculo entre hermanos incluso décadas después de la etapa fundacional.</p>
-
-                    <p>No parece haber formado una familia con descendencia. Murió el <strong>15 de noviembre de 1992</strong> y fue enterrada en el <strong>Cementiri de Poble Nou</strong>. Su subrama, como la de Lola y Ernesto, es una subrama cerrada, pero narrativamente muy útil para mostrar la cohesión fraterna y la persistencia del grupo de hermanos.</p>
-                </article>
-
-                <div class="bg-surface-container-low border border-outline-variant/30 rounded-lg p-6 space-y-4">
-                    <h3 class="font-headline text-xl font-bold text-primary">Datos clave</h3>
-                    <ul class="text-sm text-on-surface-variant space-y-2">
-                        <li><strong>Nacimiento:</strong> 24 de marzo de 1931</li>
-                        <li><strong>Alias visual/familiar:</strong> Menenes</li>
-                        <li><strong>Descendencia:</strong> sin descendencia conocida</li>
-                        <li><strong>Defunción:</strong> 15 de noviembre de 1992</li>
-                        <li><strong>Sepultura:</strong> Cementiri de Poble Nou</li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- Subramas: Eloísa "Marilisa" Godes Molina -->
-            <section id="marilisa" class="space-y-8 pt-16 border-t-2 border-outline-variant">
-                <header class="space-y-4">
-                    <h2 class="font-headline text-4xl font-bold text-primary">Eloísa Godes Molina / "Marilisa"</h2>
-                    <figure class="space-y-2">
-                        <div class="bg-surface-container-high heritage-border overflow-hidden">
-                            <img src="/photos/000251_362021eo5f4g89xc5iw9b6_V.jpg" alt="Marilisa y sus nietos, hacia 1999, Carrer Bruc, Barcelona" class="w-full h-96 object-cover">
-                        </div>
-                        <figcaption class="text-sm text-on-surface-variant">Marilisa y sus nietos, hacia 1999, Carrer Bruc, Barcelona</figcaption>
-                    </figure>
-                </header>
-
-                <article class="space-y-6 text-on-surface">
-                    <p><strong>Eloísa Godes Molina</strong> (1932–2013) es una de las dos hijas que realmente abren descendencia en la saga. También aparece asociada al nombre <strong>María Luisa</strong>, aunque en la familia se impone de forma natural el apodo <strong>Marilisa</strong>. Nació el <strong>20 de agosto de 1932, Córdoba, Córdoba, Andalucía, España</strong>, todavía en la etapa cordobesa del matrimonio fundador.</p>
-
-                    <p>Su subrama es decisiva porque enlaza la vieja rama Godes Molina con una gran parte de la descendencia viva actual. Se casó el <strong>6 de abril de 1959 en Madrid</strong> con <strong>Fernando Garrido Lagunilla</strong> (1933–1998). Él había nacido en Barcelona en 1933 y murió en <strong>Sarvisé de Broto (Huesca)</strong> en 1998. De ese matrimonio nacieron dos hijos, ambos en Barcelona: <strong>Ernesto Garrido Godes</strong> (1960) y <strong>Fernando Garrido Godes</strong> (1962).</p>
-
-                    <p>La rama de <strong>Ernesto Garrido Godes</strong> y <strong>Ester Ballart Hernández</strong> arranca con su matrimonio en <strong>Sitges, el 7 de octubre de 1988</strong>, y da lugar a una descendencia especialmente amplia: <strong>Clàudia</strong>, <strong>Sònia</strong>, <strong>Paula</strong> y <strong>Núria Garrido Ballart</strong>. A su vez, la línea se prolonga en una cuarta generación con <strong>Santi Garzón Garrido</strong> (hijo de Clàudia), y con <strong>Gil</strong>, <strong>Ignasi</strong> y <strong>Antoni Cardoner Garrido</strong> (hijos de Sònia).</p>
-
-                    <p>La rama de <strong>Fernando Garrido Godes</strong> y <strong>María Isabel Vicente Oliva</strong> se casó el <strong>18 de junio de 1988</strong> en <strong>Santa Maria del Mar</strong>, Barcelona. Tuvieron dos hijos: <strong>Maria Garrido Vicente</strong> y <strong>Fernando Garrido Vicente</strong>. Maria, casada en 2024 con <strong>Martí Plomer Sánchez</strong>, ha dado lugar a la prolongación más reciente de esta rama con <strong>Clara Plomer Garrido</strong> (2025).</p>
-
-                    <p>Si la página principal cuenta el origen de la saga, la subpágina de Marilisa puede contar su continuidad. La foto de <strong>1999</strong>, titulada precisamente <strong>"Marilisa y sus nietos"</strong>, es casi la imagen-resumen de la línea: la hija nacida en Córdoba, hija del matrimonio fundador, convertida décadas más tarde en el centro visible de una nueva constelación familiar barcelonesa. Y la foto de <strong>2024 de la Familia Garrido Ballart</strong> demuestra que esta rama no solo existe, sino que mantiene conciencia de grupo.</p>
-                </article>
-
-                <div class="bg-surface-container-low border border-outline-variant/30 rounded-lg p-6 space-y-4">
-                    <h3 class="font-headline text-xl font-bold text-primary">Datos clave</h3>
-                    <ul class="text-sm text-on-surface-variant space-y-2">
-                        <li><strong>Nacimiento:</strong> 20 de agosto de 1932, Córdoba, Córdoba, Andalucía, España</li>
-                        <li><strong>Nombre familiar:</strong> Marilisa</li>
-                        <li><strong>Matrimonio:</strong> 6 de abril de 1959, Madrid, con Fernando Garrido Lagunilla</li>
-                        <li><strong>Hijos:</strong>
-                            <ul class="ml-4 mt-1">
-                                <li>Ernesto Garrido Godes (n. 1960)</li>
-                                <li>Fernando Garrido Godes (n. 1962)</li>
-                            </ul>
-                        </li>
-                        <li><strong>Defunción:</strong> 11 de enero de 2013, Bruc, 120, Barcelona, Barcelona, Catalunya, España</li>
-                        <li><strong>Sepultura:</strong> Cementiri de Montjuïc</li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- Subramas: Enrique Godes Molina -->
-            <section id="enrique" class="space-y-8 pt-16 border-t-2 border-outline-variant pb-16">
-                <header class="space-y-4">
-                    <h2 class="font-headline text-4xl font-bold text-primary">Enrique Godes Molina</h2>
-                </header>
-
-                <article class="space-y-6 text-on-surface">
-                    <p><strong>Enrique Godes Molina</strong> (1935–2011) fue el <strong>quinto hijo</strong>, el benjamín de la familia Ernest y Dolores. Nació el <strong>20 de julio de 1935</strong>, en el último periodo cordobés antes de la Guerra Civil y las grandes migraciones familiares.</p>
-
-                    <p>Su rama es la otra línea viva mayor de la saga. Se casó con <strong>María Esther Maté Ramos</strong> (1941–2018) y tuvo dos hijos: <strong>Enric Godes Maté</strong> (1971) e <strong>Ignacio Godes Maté</strong> (1974). A través de <strong>Enric Godes Maté</strong>, casado con <strong>María Mercedes Mateo Valls</strong>, nacieron <strong>Héctor Godes Mateo</strong> (2012) e <strong>Iván Godes Mateo</strong> (2016), abriendo una cuarta generación viva.</p>
-
-                    <p>Enrique murió el <strong>3 de enero de 2011</strong> y fue enterrado en Barcelona. Su subrama representa la continuidad de la saga Godes Molina a través de la rama Godes Maté, que mantiene una presencia activa en Barcelona y sus alrededores.</p>
-                </article>
-
-                <div class="bg-surface-container-low border border-outline-variant/30 rounded-lg p-6 space-y-4">
-                    <h3 class="font-headline text-xl font-bold text-primary">Datos clave</h3>
-                    <ul class="text-sm text-on-surface-variant space-y-2">
-                        <li><strong>Nacimiento:</strong> 20 de julio de 1935, Córdoba</li>
-                        <li><strong>Matrimonio:</strong> con María Esther Maté Ramos (1941–2018)</li>
-                        <li><strong>Hijos:</strong>
-                            <ul class="ml-4 mt-1">
-                                <li>Enric Godes Maté (n. 1971)</li>
-                                <li>Ignacio Godes Maté (n. 1974)</li>
-                            </ul>
-                        </li>
-                        <li><strong>Defunción:</strong> 3 de enero de 2011</li>
-                    </ul>
-                </div>
-            </section>
-
+<aside class="dash-sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-icon">
+            <span class="material-symbols-outlined">account_tree</span>
         </div>
-    </main>
-</div>
+        <div>
+            <h3 class="sidebar-title">Saga Godes Molina</h3>
+            <p class="sidebar-subtitle">Subramas</p>
+        </div>
+    </div>
+    <nav class="sidebar-branches">
+        <a href="/godes_molina.html" class="branch-link active">
+            <span class="material-symbols-outlined branch-icon">hub</span>
+            <span class="branch-name">Página principal</span>
+        </a>
+        <a href="/garrido_godes.html" class="branch-link">
+            <span class="material-symbols-outlined branch-icon">family_history</span>
+            <span class="branch-name">Garrido Godes</span>
+        </a>
+        <a href="/godes_mate.html" class="branch-link">
+            <span class="material-symbols-outlined branch-icon">family_history</span>
+            <span class="branch-name">Godes Maté</span>
+        </a>
+    </nav>
+</aside>
 
-<script>
-    // Mobile sidebar toggle (optional)
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add any interactive features here if needed
-    });
-</script>
+<main class="dash-main">
+<div class="saga-container">
+
+    <section class="saga-hero">
+        <div class="saga-kicker">Saga familiar</div>
+        <h1 class="saga-title">La saga Godes Molina: de Barcelona a Córdoba, de Córdoba a Madrid, y de ahí a las ramas vivas de hoy</h1>
+        <p class="saga-subtitle">La historia de Ernest Godes Hurtado y Dolores Molina Beca, del matrimonio fundacional de 1925 a las familias Garrido Godes, Garrido Ballart, Garrido Vicente y Godes Maté.</p>
+
+        <figure class="saga-hero-figure">
+            <img src="/photos/000075_440225j348e549a6weck5b_V.jpg" alt="Boda Ernest Godes y Dolores Molina 1925 Córdoba">
+            <figcaption class="saga-caption">Ernest/Ernesto Godes Hurtado y Dolores Molina Beca, fotografía de boda, 1925, Córdoba.</figcaption>
+        </figure>
+    </section>
+
+    <section class="saga-section saga-prose">
+        <p>La rama <strong>Godes Molina</strong> nace del desplazamiento de <strong>Ernest Godes Hurtado</strong> (1896–1949) desde Barcelona hacia Andalucía y de su matrimonio con <strong>Dolores Molina Beca</strong> (1904–1961), conocida en la familia como <strong>Lola</strong>. Es una rama particularmente narrativa porque condensa varios movimientos de la familia en apenas una generación: el origen barcelonés de los Godes, el arraigo cordobés de los Molina, la fractura de la Guerra Civil y el posterior establecimiento en Madrid. Desde ese núcleo inicial saldrán, ya en la segunda mitad del siglo XX, las subramas <strong>Garrido Godes</strong>, <strong>Garrido Ballart</strong>, <strong>Garrido Vicente</strong>, <strong>Godes Maté</strong>, <strong>Godes Mateo</strong>, <strong>Cardoner Garrido</strong>, <strong>Garzón Garrido</strong> y <strong>Plomer Garrido</strong>.</p>
+
+        <p>Ernest nació el <strong>11 de octubre de 1896, Mediana de San Pedro, 12 6º, Barcelona</strong>, hijo de <strong>Artur Godes Caballeria</strong> (1868–1925) y <strong>Emilia Hurtado Giró</strong> (1872–1963). Era una persona simpática y elegante. Su familia de origen estaba sólidamente asentada en Barcelona: el padre, Artur, fue <strong>músico, compositor y tenor del Liceu</strong>, además de <strong>mestre de capella</strong> de <strong>Santa Maria del Mar</strong> y de <strong>la Bonanova</strong>. Es decir: Ernest procede de una rama Godes ya plenamente urbanizada, culta y vinculada a la vida barcelonesa de finales del XIX y principios del XX.</p>
+
+        <p>Antes de formar su propia familia, Ernest tuvo una trayectoria profesional móvil. Trabajó <strong>hacia 1914</strong> en <strong>Tarragona</strong> como <strong>gerente de los estibadores del puerto</strong> para la naviera <strong>José Tayá</strong>. En <strong>1923</strong> pasó un episodio de <strong>tifus</strong> en Barcelona. Hacia <strong>1925</strong>, ya en Córdoba, aparece como <strong>propietario de una serrería</strong>. Más adelante, hacia <strong>1943</strong>, ejercía como <strong>Inspector general de Assicurazioni Generali y Covadonga Seguros S.A. (ramo transportes)</strong>. La secuencia es muy expresiva: del entorno portuario y logístico a la actividad industrial y, finalmente, al sector asegurador. Tampoco parece haber sido movilizado durante la Guerra Civil.</p>
+
+        <p>Dolores Molina Beca nació el <strong>8 de junio de 1904, Cabra, Córdoba</strong>. Era hija de <strong>Enrique Molina de Pazos</strong> (1872–1949) y <strong>Eloísa Beca y Espinosa de los Monteros</strong> (1878–1955). La rama Molina aporta al relato un fuerte anclaje institucional y urbano en Córdoba. El padre, Enrique Molina de Pazos, había nacido en Madrid en 1872 y fue primero <strong>secretario y contador del Ayuntamiento de Cabra</strong>; después, ya en Córdoba, <strong>Interventor de Fondos de la Corporación municipal</strong>. También recibió la <strong>Orden del Mérito Civil</strong> en 1943 y su jubilación quedó reflejada en la documentación familiar. La madre, Eloísa, había nacido en Lucena en 1878. Los distintos domicilios de esta familia permiten seguir bastante bien su recorrido por Córdoba: <strong>Victoriano Rivera, 2</strong> (1911), <strong>José Rey, 4</strong> (1915), <strong>Rey Heredia, 27</strong> (1917), <strong>Juan Valera, 8</strong> (1920) y <strong>Claudio Marcelo, 17</strong> (1935). La casa de Claudio Marcelo fue bombardeada en 1936.</p>
+
+        <p>Ernest y Dolores se casaron el <strong>10 de septiembre de 1925 en Córdoba</strong>. A partir de ahí se forma el núcleo fundador de la saga. La familia recuerda a sus cinco hijos por sus nombres más cercanos: <strong>Lola, Ernesto, Menenes, Marilisa y Enrique</strong>. Con ellos se dibuja también el gran recorrido doméstico de esta rama: primero la vida en <strong>Juan Valera, 8</strong>, en Córdoba; después la ruptura de la guerra, con la destrucción de la casa; más tarde el paso por <strong>Bilbao</strong> hasta el final de la contienda; y, por último, el asentamiento en <strong>Madrid</strong>, en un gran piso de la <strong>Gran Vía, 78</strong>.</p>
+
+        <p>La familia tuvo <strong>cinco hijos</strong>: <strong>Dolores Godes Molina</strong> (1926), <strong>Ernesto Godes Molina</strong> (1928), <strong>María Mercedes Godes Molina</strong> (1931), <strong>Eloísa Godes Molina</strong> (1932) y <strong>Enrique Godes Molina</strong> (1935). Las fotografías conservadas permiten seguir visualmente el cambio de etapa: las imágenes de <strong>Córdoba en 1932</strong>, con los niños aún pequeños; la presencia en <strong>Barcelona en 1942-1943</strong> en visitas o estancias familiares; y la etapa de <strong>Madrid en 1944</strong>, cuando la familia ya está asentada en Gran Vía.</p>
+
+        <p>Ernest murió el <strong>8 de enero de 1949, Avenida de Jose Antonio, 78. Madrid</strong>, con 52 años, por <strong>leucemia</strong>, y fue enterrado en el <strong>cementerio de la Almudena</strong>. Dolores murió después, el <strong>3 de marzo de 1961, Madrid</strong>, y su funeral se celebró el <strong>7 de marzo de 1961</strong> en la <strong>parroquia de San Martín de Madrid</strong>. Además, arrastró problemas cardiacos y había recibido diagnósticos pesimistas sobre el riesgo de tener hijos; aun así, tuvo cinco y sostuvo el núcleo familiar durante todas las mudanzas del periodo.</p>
+
+        <p>Desde ese matrimonio fundador, la rama ha llegado viva al presente. De los cinco hijos, tres no dejaron descendencia conocida, mientras que <strong>Eloísa/Marilisa</strong> y <strong>Enrique</strong> abrieron las dos grandes líneas vivas de hoy: por un lado la rama <strong>Garrido Godes</strong> y sus descendencias <strong>Garrido Ballart</strong>, <strong>Garrido Vicente</strong>, <strong>Garzón Garrido</strong>, <strong>Cardoner Garrido</strong> y <strong>Plomer Garrido</strong>; por otro, la rama <strong>Godes Maté</strong>, prolongada hoy en <strong>Godes Mateo</strong>.</p>
+    </section>
+
+    <section class="saga-section">
+        <h2 class="saga-section-title">Orígenes familiares</h2>
+        <div class="saga-origin-grid">
+            <div class="saga-origin-card">
+                <h4>Origen familiar de Ernest Godes Hurtado</h4>
+                <h5>Padre</h5>
+                <ul>
+                    <li><span class="name">Artur Godes Caballeria</span> (1868–1925)</li>
+                    <li>Nacimiento: 6 de abril de 1868, Fonollar, 30 4º Barcelona</li>
+                    <li>Defunción: 9 de marzo de 1925, Bertran, 67 Barcelona</li>
+                    <li>Rasgos destacados: músico, compositor, tenor del Liceu; mestre de capella de Santa Maria del Mar y de la Bonanova.</li>
+                </ul>
+                <h5>Madre</h5>
+                <ul>
+                    <li><span class="name">Emilia Hurtado Giró</span> (1872–1963)</li>
+                    <li>Nacimiento: 29 de abril de 1872, Cuch, 5 4º</li>
+                    <li>Defunción: 21 de septiembre de 1963, Homer, 27 bis Barcelona</li>
+                </ul>
+                <p class="context">Ernest no sale de la nada: procede de una Barcelona menestral, musical y burguesa a pequeña escala, con una familia Godes ya integrada en el tejido urbano. Esto permite presentar su marcha a Córdoba no como una simple mudanza, sino como una bifurcación geográfica de la familia: una rama nacida en el corazón histórico de Barcelona que se abre hacia Andalucía y más tarde hacia Madrid.</p>
+            </div>
+
+            <div class="saga-origin-card">
+                <h4>Origen familiar de Dolores Molina Beca</h4>
+                <h5>Padre</h5>
+                <ul>
+                    <li><span class="name">Enrique Molina de Pazos</span> (1872–1949)</li>
+                    <li>Nacimiento: 12 de agosto de 1872, Madrid</li>
+                    <li>Defunción: 9 de agosto de 1949, Claudio Marcelo, 17 Córdoba</li>
+                    <li>Secretario y contador del Ayuntamiento de Cabra (antes de 1911).</li>
+                    <li>Interventor de Fondos de la Corporación municipal de Córdoba (después de 1911).</li>
+                    <li>Referencias posteriores a Hacienda y arbitrios municipales.</li>
+                    <li>Jubilación oficial en 1943.</li>
+                    <li>Distinción: Orden del Mérito Civil (2 de diciembre de 1943).</li>
+                </ul>
+                <h5>Madre</h5>
+                <ul>
+                    <li><span class="name">Eloísa Beca y Espinosa de los Monteros</span> (1878–1955)</li>
+                    <li>Nacimiento: 17 de junio de 1878, Lucena, Córdoba</li>
+                    <li>Defunción: 26 de agosto de 1955, Madrid</li>
+                </ul>
+                <h5>Hermanos de Dolores</h5>
+                <ul>
+                    <li><span class="name">Enrique Molina Beca</span> (1905–?)</li>
+                    <li><span class="name">Celso Rafael Molina Beca</span> (1912–2006)</li>
+                </ul>
+                <h5>Residencias de la familia Molina de Pazos / Beca</h5>
+                <ul>
+                    <li>Desde 1899: Barroso, 1, Córdoba.</li>
+                    <li>Hacia 1911: Victoriano Rivera, 2, Córdoba.</li>
+                    <li>1915: José Rey, 4, Córdoba.</li>
+                    <li>1917: Rey Heredia, 27, Córdoba.</li>
+                    <li>1920: Juan Valera, 8, Córdoba.</li>
+                    <li>1935: Claudio Marcelo, 17, Córdoba.</li>
+                </ul>
+                <p class="context">La familia de Lola no es una familia periférica, sino una familia con presencia administrativa en Córdoba. Esto da a la unión con Ernest un fuerte contraste narrativo: él llega desde una rama Godes barcelonesa con capital cultural; ella pertenece a una casa cordobesa con peso social e institucional.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="saga-section">
+        <h2 class="saga-section-title">Cronología</h2>
+        <ul class="saga-timeline">
+            <li><span class="date">11 de octubre de 1896</span> — Nace Ernest Godes Hurtado en Barcelona.</li>
+            <li><span class="date">18 de octubre de 1896</span> — Bautismo de Ernest en Sant Francesc de Paula.</li>
+            <li><span class="date">8 de junio de 1904</span> — Nace Dolores Molina Beca en Cabra, Córdoba.</li>
+            <li><span class="date">1911–1920</span> — La familia Molina se desplaza por distintos domicilios de Córdoba hasta instalarse en Juan Valera, 8.</li>
+            <li><span class="date">Hacia 1914</span> — Ernest trabaja en Tarragona como gerente de los estibadores del puerto para la naviera José Tayá.</li>
+            <li><span class="date">1923</span> — Ernest pasa un episodio de tifus en Barcelona.</li>
+            <li><span class="date">10 de septiembre de 1925</span> — Matrimonio de Ernest Godes Hurtado y Dolores Molina Beca en Córdoba.</li>
+            <li><span class="date">1925</span> — Ernest figura ya en Córdoba; aparece vinculado a una serrería.</li>
+            <li><span class="date">2 de julio de 1926</span> — Nace Dolores Godes Molina.</li>
+            <li><span class="date">9 de mayo de 1928</span> — Nace Ernesto Godes Molina.</li>
+            <li><span class="date">24 de marzo de 1931</span> — Nace María Mercedes Godes Molina.</li>
+            <li><span class="date">20 de agosto de 1932</span> — Nace Eloísa Godes Molina.</li>
+            <li><span class="date">20 de julio de 1935</span> — Nace Enrique Godes Molina.</li>
+            <li><span class="date">1935–1936</span> — El entorno familiar Molina se sitúa en Claudio Marcelo, 17; la casa fue bombardeada.</li>
+            <li><span class="date">Del 1 de marzo al 1 de octubre de 1939</span> — Ernest reside en Bilbao.</li>
+            <li><span class="date">Desde el 1 de octubre de 1939 hasta 1949</span> — La familia vive en Avenida de José Antonio / Gran Vía, 78, Madrid.</li>
+            <li><span class="date">28 de mayo de 1944</span> — Primera comunión de Enrique Godes Molina en Madrid.</li>
+            <li><span class="date">8 de enero de 1949</span> — Muere Ernest Godes Hurtado en Madrid.</li>
+            <li><span class="date">3 de marzo de 1961</span> — Muere Dolores Molina Beca en Madrid.</li>
+        </ul>
+    </section>
+
+    <section class="saga-section">
+        <h2 class="saga-section-title">Galería principal</h2>
+
+        <h3 class="saga-section-subtitle">Galería 01 — Fundación de la rama</h3>
+        <div class="saga-gallery">
+            <figure>
+                <img src="/photos/000075_440225j348e549a6weck5b_V.jpg" alt="Boda 1925 Córdoba">
+                <figcaption>Boda de Ernest/Ernesto Godes Hurtado y Dolores Molina Beca, 1925, Córdoba</figcaption>
+            </figure>
+            <figure>
+                <img src="/photos/000070_7364475946tqeccq85t59e_V.jpg" alt="Ernest y Dolores 1925 Barcelona">
+                <figcaption>Ernest Godes Hurtado y Dolores Molina Beca, 1925, Barcelona</figcaption>
+            </figure>
+            <figure>
+                <img src="/photos/000074_198903a9cheo455xv918c6_V.jpg" alt="Montserrat 1925">
+                <figcaption>Ernesto Godes Hurtado y Lola Molina Beca, 1925, Montserrat, Monumento a los Héroes del Bruc</figcaption>
+            </figure>
+        </div>
+
+        <h3 class="saga-section-subtitle">Galería 02 — La familia en Córdoba</h3>
+        <div class="saga-gallery">
+            <figure>
+                <img src="/photos/000067_044110el5a60594i8vm3cl_V.jpg" alt="Familia 1932 Córdoba">
+                <figcaption>Ernesto Godes Molina, Ernest Godes Hurtado, Menenes Godes Molina, Lola Molina Beca y Lola Godes Molina, 1932, Jardines de la Agricultura, Córdoba</figcaption>
+            </figure>
+        </div>
+
+        <h3 class="saga-section-subtitle">Galería 03 — Entorno Molina</h3>
+        <div class="saga-gallery">
+            <figure>
+                <img src="/photos/000347_796693l56iee4r961c5589_V.jpg" alt="Eloisa Beca y Enrique Molina 1945">
+                <figcaption>Eloisa Beca y Enrique Molina, 1945, Madrid</figcaption>
+            </figure>
+        </div>
+
+        <h3 class="saga-section-subtitle">Galería 04 — Etapa madrileña</h3>
+        <div class="saga-gallery">
+            <figure>
+                <img src="/photos/000076_986827pmcq598e4e6ek95a_V.jpg" alt="Puesta de largo Lola Godes 1944">
+                <figcaption>Puesta de largo de Lola Godes Molina, con presencia de los abuelos y el núcleo familiar, 1944, Gran Vía 78, Madrid</figcaption>
+            </figure>
+        </div>
+    </section>
+
+    <section class="saga-section">
+        <div class="saga-living">
+            <h3>Descendencia viva actual del matrimonio fundador</h3>
+            <p>Hasta <strong>abril de 2026</strong>, la descendencia viva de Ernest Godes Hurtado y Dolores Molina Beca suma <strong>17 descendientes directos vivos</strong>:</p>
+            <ul>
+                <li><strong>Hijos de segunda generación vivos</strong>: ninguno; los cinco hijos del matrimonio fundador están fallecidos.</li>
+                <li><strong>4 nietos</strong> que siguen vivos:
+                    <ul>
+                        <li>Ernesto Garrido Godes</li>
+                        <li>Fernando Garrido Godes</li>
+                        <li>Enric Godes Maté</li>
+                        <li>Ignacio Godes Maté</li>
+                    </ul>
+                </li>
+                <li><strong>8 bisnietos vivos</strong>:
+                    <ul>
+                        <li>Clàudia Garrido Ballart</li>
+                        <li>Sònia Garrido Ballart</li>
+                        <li>Paula Garrido Ballart</li>
+                        <li>Núria Garrido Ballart</li>
+                        <li>Maria Garrido Vicente</li>
+                        <li>Fernando Garrido Vicente</li>
+                        <li>Héctor Godes Mateo</li>
+                        <li>Iván Godes Mateo</li>
+                    </ul>
+                </li>
+                <li><strong>5 tataranietos vivos</strong>:
+                    <ul>
+                        <li>Gil Cardoner Garrido</li>
+                        <li>Ignasi Cardoner Garrido</li>
+                        <li>Antoni Cardoner Garrido</li>
+                        <li>Santi Garzón Garrido</li>
+                        <li>Clara Plomer Garrido</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+</div>
+</main>
 
 </body>
 </html>
