@@ -303,7 +303,7 @@ class QueryRouter:
             (r"(?:acab[oó]\s+cas[aá]ndose|con\s+qui[eé]n\s+acab[oó]\s+cas[aá]ndose)", "handle_last_spouse"),
             (r"(?:misma\s+ciudad\s+en\s+la\s+que\s+naci[oó])", "handle_same_birth_death_city"),
             (r"(?:tengan\s+.+\s+como\s+primer\s+apellido)", "handle_first_surname_natural"),
-            (r"(?:(?:a\s+)?(?:qu[eé]|cu[aá]l)\s+(?:era\s+)?(?:(?:la|el)\s+)?(?:profesión|oficio|ocupación|empleo|(?:actividad|empleo)\s+(?:laboral|profesional)?|tipo\s+de\s+(?:trabajo|actividad|empleo)|medio\s+de\s+vida)(?:\s+(?:ten[ií]a|figura|aparece|se\s+dedic[oó]|consta|desempe[nñ][oó]|realiz[oó]|era|fue))?\s+.+|de\s+qu[eé]\s+trabaja(?:ba)?\s+.+|en\s+qu[eé]\s+trabaja(?:ba)?\s+.+|con\s+qu[eé]\s+(?:oficio|trabajo|actividad|empleo)\s+(?:aparece|figura|documentado)\s+.+|(?:hay\s+)?constancia\s+(?:de|del)\s+(?:empleo|oficio|trabajo|actividad)\s+(?:de|para)\s+.+|c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+.+)", "handle_occupation_natural"),
+            (r"(?:(?:a\s+)?(?:qu[eé]|cu[aá]l)\s+(?:era\s+)?(?:(?:la|el)\s+)?(?:profesión|oficio|ocupaci[oó]n(?:es)?|empleo|(?:actividad|empleo)\s+(?:laboral|profesional)?|tipo\s+de\s+(?:trabajo|actividad|empleo)|medio\s+de\s+vida)(?:\s+(?:distint[ao]s?|diferentes))?(?:\s+(?:ten[ií]a|tuvo|figura|aparece|se\s+dedic[oó]|consta|desempe[nñ][oó]|realiz[oó]|era|fue))?\s+.+|de\s+qu[eé]\s+trabaja(?:ba)?\s+.+|en\s+qu[eé]\s+trabaja(?:ba)?\s+.+|con\s+qu[eé]\s+(?:oficio|trabajo|actividad|empleo)\s+(?:aparece|figura|documentado|consta)\s+.+|(?:hay\s+)?constancia\s+(?:de|del)\s+(?:empleo|oficio|trabajo|actividad|profesión|ocupaci[oó]n)\s+(?:de|para)\s+.+|c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+.+)", "handle_occupation_natural"),
             (r"(?:d[oó]nde\s+viv[ií]a\s+.+\s+al\s+final\s+de\s+su\s+vida)", "handle_last_residence"),
             (r"(?:cu[aá]ntos\s+hijos\s+lleg[oó]\s+a\s+tener\s+.+)", "handle_children_total_natural"),
             (r"(?:dime\s+qu[eé]\s+personas\s+nacieron\s+en\s+.+\s+y\s+luego\s+murieron\s+fuera\s+de\s+.+)", "handle_born_in_and_died_outside"),
@@ -2765,15 +2765,18 @@ class QueryRouter:
 
     def handle_occupation_natural(self, question):
         q = _clean_question(question)
-        m = (re.search(r"(?:a\s+)?qu[eé]\s+(?:profesión|oficio|ocupación|actividad\s+(?:laboral|profesional)?)\s+(?:ten[ií]a|figura|aparece|se\s+dedic[oó])\s+(?:registrada\s+)?(.+?)(?:\?|$)", q, re.I) or
+        # Common "filler" words that can appear between the verb and the person name.
+        # Examples: "figura en la ficha de X", "aparece documentado X", "registrada para X".
+        _filler = r"(?:registrad[oa]\s+)?(?:documentad[oa]\s+)?(?:en\s+(?:la\s+ficha|su\s+ficha|su\s+registro|el\s+registro|los\s+datos)\s+(?:de\s+|para\s+)?)?(?:para\s+)?(?:de\s+)?"
+        m = (re.search(r"(?:a\s+)?qu[eé]\s+(?:profesión|oficio|ocupaci[oó]n(?:es)?|actividad\s+(?:laboral|profesional)?)\s+(?:distint[ao]s?\s+|diferentes\s+)?(?:ten[ií]a|tuvo|figura|aparece|se\s+dedic[oó]|consta|desempe[nñ][oó]|realiz[oó])\s+" + _filler + r"(.+?)(?:\?|$)", q, re.I) or
              re.search(r"de\s+qu[eé]\s+trabaja(?:ba)?\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"en\s+qu[eé]\s+trabaja(?:ba)?\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"con\s+qu[eé]\s+(?:oficio|trabajo|actividad)\s+(?:aparece|figura|documentado)\s+(?:como\s+)?(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"qu[eé]\s+tipo\s+de\s+(?:trabajo|actividad)\s+(?:desempe[nñ][oó]|hac[ií]a|realiz[oó])\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"(?:hay\s+)?constancia\s+(?:del|de\s+)?(?:empleo|oficio|trabajo)\s+(?:de|para)\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"(?:qu[eé]\s+)?empleo\s+consta\s+de\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"con\s+qu[eé]\s+(?:oficio|trabajo|actividad|empleo)\s+(?:aparece|figura|documentado|consta)\s+(?:documentad[oa]\s+)?(?:como\s+)?(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"qu[eé]\s+tipo\s+de\s+(?:trabajo|actividad|empleo)\s+(?:desempe[nñ][oó]|hac[ií]a|realiz[oó]|tuvo|ten[ií]a)\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"(?:hay\s+)?constancia\s+(?:del\s+|de\s+(?:la\s+)?)?(?:empleo|oficio|trabajo|actividad|profesión|ocupaci[oó]n)\s+(?:de|para)\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"(?:qu[eé]\s+)?empleo\s+consta\s+(?:de|para)\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"cu[aá]l\s+(?:era|fue)\s+(?:el\s+medio\s+de\s+vida|el\s+oficio)\s+(?:de\s+)?(.+?)(?:\?|$)", q, re.I))
+             re.search(r"cu[aá]l\s+(?:era|fue)\s+(?:el\s+medio\s+de\s+vida|el\s+oficio|la\s+profesión|la\s+ocupaci[oó]n|el\s+empleo|la\s+actividad)\s+(?:de\s+)?(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person,_ = self._resolve_person(m.group(1))
