@@ -201,14 +201,8 @@
         cursor: pointer; -webkit-appearance: none; appearance: none;
         display: inline-flex; align-items: center; box-sizing: border-box;
       }
-      #godesia-nav input {
-        border: none; background: none; margin: 0; outline: none;
-        -webkit-appearance: none; appearance: none; box-sizing: border-box;
-        box-shadow: none !important;
-      }
       #godesia-nav input:focus {
         outline: none; box-shadow: none !important;
-        border-color: transparent;
       }
       #godesia-nav form { display: flex; align-items: center; }
     `;
