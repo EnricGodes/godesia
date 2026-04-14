@@ -213,7 +213,7 @@ class QueryRouter:
             (r"(?:qu[eé]\s+rama\s+tuvo\s+m[aá]s\s+hijos:\s*la\s+formada\s+por\s+.+\s+y\s+.+\s+o\s+la\s+siguiente\s+pareja\s+en\s+el\s+ranking)", "handle_branch_vs_next_couple"),
             (r"(?:qu[eé]\s+lugar\s+de\s+nacimiento\s+tiene\s+m[aá]s\s+variantes\s+de\s+escritura)", "handle_birth_place_variants"),
             (r"(?:qu[eé]\s+matrimonio\s+tuvo\s+m[aá]s\s+descendencia\s+documentada)", "handle_marriage_max_descendants"),
-            (r"(?:cu[aá]ntos?\s+a[nñ]os\s+ten[ií]a\s+.+\s+cuando\s+naci[oó]\s+su\s+primer\s+hij[oa])", "handle_age_at_first_child"),
+            (r"(?:(?:a\s+)?qu[eé]\s+edad\s+(?:tuvo|ten[ií]a.*cuando\s+naci[oó])\s+su\s+primer\s+hij[oa]|cu[aá]ntos?\s+a[nñ]os\s+ten[ií]a\s+.+\s+cuando\s+naci[oó]\s+su\s+primer\s+hij[oa])", "handle_age_at_first_child"),
             (r"(?:(?:a\s+)?qu[eé]\s+edad\s+(?:se\s+cas[oó]|ten[ií]a.*cuando\s+se\s+cas[oó]|gastaba.*al\s+casarse|ten[ií]a.*al\s+casarse)|qu[eé]\s+edad\s+ten[ií]a.*al\s+casarse)", "handle_age_at_marriage"),
             (r"(?:con\s+qui[eé]n\s+se\s+cas[oó]\s+la\s+persona\s+nacida\s+en\s+.+\s+llamada\s+.+)", "handle_spouse_disambiguated_by_birth_place"),
             (r"(?:cu[aá]ntos?\s+hijos\s+(?:tuvo\s+)?(?:el\s+matrimonio\s+de\s+)?.+\s+y\s+.+|cu[aá]ntos?\s+hijos\s+tuvieron\s+.+\s+y\s+.+)", "handle_couple_children_count"),
@@ -1349,7 +1349,7 @@ class QueryRouter:
             answer = f"No constan hijos documentados de {parent['name']}."
             return {"answer": answer, "people_mentioned": [parent['id']], "people_with_photos": self._people_payload([parent])}
         child = children[0]
-        named_child = _normalize_name_fragment(m.group(2)) if m.group(2) else None
+        named_child = _normalize_name_fragment(m.group(2)) if m.lastindex and m.lastindex >= 2 else None
         if named_child:
             chosen, _ = self._resolve_person(named_child)
             if chosen and any(c['id'] == chosen['id'] for c in children):
