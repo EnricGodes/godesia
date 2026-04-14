@@ -293,17 +293,16 @@
   // ─── Smart search: person name → dossier, question → chat ─────────────────
 
   window.smartSearch = async function(q) {
-    // Heuristic: if query looks like a name (no question words, short), try person search
-    const questionWords = /(\?|qui[éè]n|quants|com|on[t]?|per[q]ué|quin[a]?|dónde|cual|qué)/i;
-    const isQuestion = questionWords.test(q) || q.length > 60;
+    // If query contains question words, it's a question → chat
+    const questionWords = /(\?|qui[éè]n|quants|com|on[t]?|per[q]ué|quin[a]?|dónde|cual|qué|estadísticas|naci|moriu|pares|fills|germanes|casat|matrimoni|fills|descend)/i;
 
-    if (isQuestion) {
-      // Looks like a question → chat
+    if (questionWords.test(q)) {
+      // Clearly a question → chat
       window.location.href = '/chat.html?q=' + encodeURIComponent(q);
       return;
     }
 
-    // Looks like a name → try person search first
+    // No question words → try person search first
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
       if (!res.ok) throw new Error('Search failed');
@@ -314,7 +313,7 @@
         // Found a person → go to dossier
         window.location.href = `/dossier.html?id=${person.id}`;
       } else {
-        // No person found → try chat
+        // No person found → try chat anyway (user might want general info)
         window.location.href = '/chat.html?q=' + encodeURIComponent(q);
       }
     } catch (e) {
