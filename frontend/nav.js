@@ -309,8 +309,7 @@
 
       // Múltiples resultados → chat con lista de coincidencias
       if (data.results.length > 1) {
-        sessionStorage.setItem('gn-search-matches', JSON.stringify({ q, results: data.results }));
-        window.location.href = '/chat.html?matches=1';
+        window.location.href = '/chat.html?matches=' + encodeURIComponent(q);
         return;
       }
 

@@ -224,17 +224,19 @@ function renderPeopleList(q, results) {
   chat.scrollTop = chat.scrollHeight;
 }
 
-// Handle search matches passed via sessionStorage (from smartSearch)
+// Handle search matches: fetch results fresh from API and render
 const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('matches') === '1') {
-  const raw = sessionStorage.getItem('gn-search-matches');
-  sessionStorage.removeItem('gn-search-matches');
-  if (raw) {
+const matchesQ = urlParams.get('matches');
+if (matchesQ) {
+  (async () => {
     try {
-      const { q, results } = JSON.parse(raw);
-      renderPeopleList(q, results);
-    } catch (e) { console.error('matches parse error', e); }
-  }
+      const res = await fetch('/api/search?q=' + encodeURIComponent(matchesQ));
+      const data = await res.json();
+      if (data.results && data.results.length > 0) {
+        renderPeopleList(matchesQ, data.results);
+      }
+    } catch (e) { console.error('matches fetch error', e); }
+  })();
   window.history.replaceState({}, '', window.location.pathname);
 } else {
   // Auto-submit query from URL param (e.g. ?q=who+is...)
