@@ -1415,32 +1415,6 @@ function renderMilitary(data) {
     document.getElementById('military-section').innerHTML = html;
 }
 
-function cleanDraftJsHtml(html) {
-    // Parse Draft.js HTML and extract readable text with basic formatting
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-
-    // Extract all text nodes while preserving some structure
-    const paragraphs = [];
-    let currentPara = '';
-
-    temp.querySelectorAll('[data-offset-key]').forEach(block => {
-        const text = block.innerText?.trim();
-        if (text) {
-            if (currentPara) currentPara += ' ';
-            currentPara += text;
-        }
-        // If block looks like a paragraph break, start new para
-        if (currentPara.length > 100 || block.getAttribute('data-block') === 'true') {
-            if (currentPara) paragraphs.push(`<p>${currentPara}</p>`);
-            currentPara = '';
-        }
-    });
-    if (currentPara) paragraphs.push(`<p>${currentPara}</p>`);
-
-    return paragraphs.join('') || temp.innerText;
-}
-
 function renderNotes(notes) {
     if (!notes || notes.length === 0) {
         document.getElementById('notes-section').style.display = 'none';
@@ -1450,7 +1424,11 @@ function renderNotes(notes) {
     document.getElementById('notes-section').style.display = 'block';
 
     const articles = notes.map((n, i) => {
-        const cleanHtml = cleanDraftJsHtml(n);
+        // Strip Draft.js wrapper divs but keep content and formatting
+        let cleanHtml = n
+            .replace(/^<div[^>]*>/i, '')  // Remove opening div
+            .replace(/<\/div>$/i, '');     // Remove closing div
+
         return `
             <article class="relative p-10 bg-white heritage-border shadow-inner rounded-sm font-headline">
                 <div class="absolute top-0 right-0 p-4 text-[10px] font-bold text-outline">SIGNATURA: NOTA_${i+1}</div>
