@@ -228,16 +228,18 @@ function renderPeopleList(q, results) {
 const urlParams = new URLSearchParams(window.location.search);
 const matchesQ = urlParams.get('matches');
 if (matchesQ) {
+  console.log('[matches] handling query:', matchesQ);
   (async () => {
     try {
       const res = await fetch('/api/search?q=' + encodeURIComponent(matchesQ));
       const data = await res.json();
+      console.log('[matches] got results:', data.results?.length);
       if (data.results && data.results.length > 0) {
         renderPeopleList(matchesQ, data.results);
+        console.log('[matches] rendered');
       }
     } catch (e) { console.error('matches fetch error', e); }
   })();
-  window.history.replaceState({}, '', window.location.pathname);
 } else {
   // Auto-submit query from URL param (e.g. ?q=who+is...)
   const urlQ = urlParams.get('q');
