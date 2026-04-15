@@ -167,11 +167,11 @@ async def tree(person_id: str, generations_up: int = 3, generations_down: int = 
 
 
 @app.get("/api/search")
-async def search(q: str = Query(..., min_length=2)):
+async def search(q: str = Query(..., min_length=2), limit: int = Query(20, ge=1, le=100)):
     """Buscar personas por nombre."""
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
-    results = search_people(db_conn, q, limit=20)
+    results = search_people(db_conn, q, limit=limit)
     return {"results": [dict(r) for r in results]}
 
 
