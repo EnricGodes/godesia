@@ -300,7 +300,7 @@
 
     // 2. Buscar persona
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&limit=50`);
       if (!res.ok) throw new Error('Search failed');
       const data = await res.json();
 

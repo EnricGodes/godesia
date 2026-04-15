@@ -219,7 +219,9 @@ function renderPeopleList(q, results) {
   }).join('');
   const asstDiv = document.createElement('div');
   asstDiv.className = 'message assistant';
-  asstDiv.innerHTML = `<div class="message-content">He trobat ${results.length} persones que coincideixen amb "<strong>${q}</strong>". Fes clic sobre la que busques:<ul style="margin-top:8px;padding-left:20px">${list}</ul></div>`;
+  const hasMore = results.length === 50;
+  const moreMsg = hasMore ? '<p style="margin-top:12px;color:#666;font-size:0.9em"><em>He encontrado más de 50 resultados. Te muestro los primeros 50. Intenta refinar tu búsqueda para obtener resultados más específicos.</em></p>' : '';
+  asstDiv.innerHTML = `<div class="message-content">He encontrado ${results.length} personas que coinciden con "<strong>${q}</strong>". Haz clic sobre la que buscas:<ul style="margin-top:8px;padding-left:20px">${list}</ul>${moreMsg}</div>`;
   chat.appendChild(asstDiv);
   chat.scrollTop = chat.scrollHeight;
 }
@@ -228,17 +230,14 @@ function renderPeopleList(q, results) {
 const urlParams = new URLSearchParams(window.location.search);
 const matchesQ = urlParams.get('matches');
 if (matchesQ) {
-  console.log('[matches] handling query:', matchesQ);
   (async () => {
     try {
-      const res = await fetch('/api/search?q=' + encodeURIComponent(matchesQ));
+      const res = await fetch('/api/search?q=' + encodeURIComponent(matchesQ) + '&limit=50');
       const data = await res.json();
-      console.log('[matches] got results:', data.results?.length);
       if (data.results && data.results.length > 0) {
         renderPeopleList(matchesQ, data.results);
-        console.log('[matches] rendered');
       }
-    } catch (e) { console.error('matches fetch error', e); }
+    } catch (e) {}
   })();
 } else {
   // Auto-submit query from URL param (e.g. ?q=who+is...)
