@@ -1436,7 +1436,9 @@ function cleanNotesHtml(raw) {
         }
         let t = p;
         // A: strip CSS prop-chains ending in `"` + attrs + `>`
-        t = t.replace(/(?:[\w-]+\s*:\s*[^;"<>]*;\s*){1,}[^"<>]*?"\s*(?:[\w-]+\s*=\s*"[^"]*"\s*)*\/?>/g, '');
+        // Replace with <br> since each such chain marks a block boundary in the
+        // original Draft.js output (one per </div><div> junction).
+        t = t.replace(/(?:[\w-]+\s*:\s*[^;"<>]*;\s*){1,}[^"<>]*?"\s*(?:[\w-]+\s*=\s*"[^"]*"\s*)*\/?>/g, '<br>');
         // A2: strip CSS prop-chains (2+) without closing
         t = t.replace(/(?:[\w-]+\s*:\s*[^;"<>]*;\s*){2,}/g, '');
         // B: strip stray HTML attributes `word="value"`
@@ -1462,7 +1464,24 @@ function cleanNotesHtml(raw) {
         t = t.replace(/\s+/g, ' ');
         return t;
     });
-    return out.join('').replace(/\s+/g, ' ').trim();
+    let result = out.join('');
+    // Fix broken HTML entities split by a space, e.g. `&oa cute;` -> `&oacute;`
+    result = result.replace(/&([a-zA-Z]{1,4})\s+([a-zA-Z]+);/g, '&$1$2;');
+    // Fix broken words split by a space at unexpected places (e.g. `Castell ón` -> `Castellón`)
+    // This is risky in general; skip.
+    // Decode HTML entities (&oacute; -> ó, etc.) using a textarea
+    const ta = document.createElement('textarea');
+    ta.innerHTML = result;
+    result = ta.value;
+    // Collapse runs of whitespace but keep <br>
+    result = result.replace(/[ \t]+/g, ' ').replace(/(<br>\s*)+/g, '<br>').trim();
+    // Linkify URLs (stop at whitespace; trim trailing punctuation)
+    result = result.replace(/(https?:\/\/[^\s<]+)/g, (url) => {
+        let trimmed = url.replace(/[.,;:)\]]+$/, '');
+        const tail = url.slice(trimmed.length);
+        return `<a href="${trimmed}" target="_blank" rel="noopener" class="underline">${trimmed}</a>${tail}`;
+    });
+    return result;
 }
 
 function renderNotes(notes) {
