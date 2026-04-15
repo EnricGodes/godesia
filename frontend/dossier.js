@@ -1415,6 +1415,56 @@ function renderMilitary(data) {
     document.getElementById('military-section').innerHTML = html;
 }
 
+const NOTES_KEEP_TAGS = new Set(['b','i','strong','em','u','br']);
+
+function cleanNotesHtml(raw) {
+    if (!raw) return '';
+    // The stored Draft.js HTML has truncated opening tags (missing `<` + word
+    // chars), leaving orphan CSS/attribute fragments as literal text.
+    // We tokenize by well-formed `<...>` tags, sanitize them (keep only
+    // semantic inline formatting), and scrub garbage from text segments.
+    const parts = raw.split(/(<[^<>]*>)/);
+    const out = parts.map(p => {
+        if (!p) return '';
+        if (p.startsWith('<') && p.endsWith('>')) {
+            const m = p.match(/^<\s*(\/?)\s*([a-zA-Z]+)/);
+            if (!m) return '';
+            const name = m[2].toLowerCase();
+            if (!NOTES_KEEP_TAGS.has(name)) return '';
+            if (m[1]) return `</${name}>`;
+            return `<${name}>`;
+        }
+        let t = p;
+        // A: strip CSS prop-chains ending in `"` + attrs + `>`
+        t = t.replace(/(?:[\w-]+\s*:\s*[^;"<>]*;\s*){1,}[^"<>]*?"\s*(?:[\w-]+\s*=\s*"[^"]*"\s*)*\/?>/g, '');
+        // A2: strip CSS prop-chains (2+) without closing
+        t = t.replace(/(?:[\w-]+\s*:\s*[^;"<>]*;\s*){2,}/g, '');
+        // B: strip stray HTML attributes `word="value"`
+        t = t.replace(/\s*[\w-]+\s*=\s*"[^"]*"/g, '');
+        // C: strip word-ending-in-quote orphans: `dgx"` `iv"`
+        t = t.replace(/(?:^|(?<=\s))[\w-]+"(?=\s|$)/g, '');
+        // D1: strip broken tag leftovers like `dgx"_1mf style="`
+        t = t.replace(/[\w-]+"[\w_-]*\s+[\w-]+="?/g, '');
+        // D2: strip single CSS `prop: value;"` tails
+        t = t.replace(/[\w-]+\s*:\s*[^;<>"]*;?"\s*\/?>?/g, '');
+        // D3: strip hex color leftovers `abc123;`
+        t = t.replace(/(?:^|(?<=\s))[0-9a-fA-F]{3,6};\s*/g, '');
+        // D4: strip hyphenated CSS value tokens `-wrap;` `pre-wrap;`
+        t = t.replace(/(?:^|(?<=\s))(?:-[a-z]+|[a-z]+-[a-z]+(?:-[a-z]+)*);\s*/g, '');
+        // D4b: strip `!important;"` tails (bounded by sentence punctuation)
+        t = t.replace(/[^<>;".!?]*!important;"\s*\/?>?/g, '');
+        // D5: strip trailing </div> remnants like ` iv` ` iv>`
+        t = t.replace(/\s+iv\s*>?\s*$/g, '');
+        // E: normalize residual `>` and whitespace
+        t = t.replace(/\s*\/?>\s*/g, ' ');
+        t = t.replace(/(^|\s);\s*/g, '$1');
+        t = t.replace(/^\s*["']+/g, '');
+        t = t.replace(/\s+/g, ' ');
+        return t;
+    });
+    return out.join('').replace(/\s+/g, ' ').trim();
+}
+
 function renderNotes(notes) {
     if (!notes || notes.length === 0) {
         document.getElementById('notes-section').style.display = 'none';
@@ -1424,10 +1474,7 @@ function renderNotes(notes) {
     document.getElementById('notes-section').style.display = 'block';
 
     const articles = notes.map((n, i) => {
-        // Strip Draft.js wrapper divs but keep content and formatting
-        let cleanHtml = n
-            .replace(/^<div[^>]*>/i, '')  // Remove opening div
-            .replace(/<\/div>$/i, '');     // Remove closing div
+        const cleanHtml = cleanNotesHtml(n);
 
         return `
             <article class="relative p-10 bg-white heritage-border shadow-inner rounded-sm font-headline">
