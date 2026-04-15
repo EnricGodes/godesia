@@ -48,7 +48,31 @@
       "Bash(git clean:*)",
       "Bash(kill -9 5651)",
       "Bash(sed -n '245p' query_router.py)",
-      "Bash(sed -n '244,246p' query_router.py)"
+      "Bash(sed -n '244,246p' query_router.py)",
+      "Bash(tasklist //FI \"IMAGENAME eq python.exe\")",
+      "Bash(taskkill:*)",
+      "Bash(python:*)",
+      "Bash(sqlite3:*)",
+      "Bash(Get-Process python:*)",
+      "Bash(Stop-Process -Force)",
+      "Bash(powershell -Command \"Get-Process python | Stop-Process -Force\")",
+      "Bash(git:*)",
+      "Bash(node -e \"require\\('C:/Users/enric/SynologyDrive/claude/godesia/frontend/nav.js'\\)\")",
+      "Bash(node --check \"C:/Users/enric/SynologyDrive/claude/godesia/frontend/nav.js\")",
+      "Bash(sed -n '253,256p' C:/Users/enric/SynologyDrive/claude/godesia/frontend/godes_molina.html)",
+      "Bash(sed -n '161,164p' C:/Users/enric/SynologyDrive/claude/godesia/frontend/garrido_godes.html)",
+      "Bash(sed -n '144,147p' C:/Users/enric/SynologyDrive/claude/godesia/frontend/godes_mate.html)",
+      "Bash(sed -n '244,247p' C:/Users/enric/SynologyDrive/claude/godesia/frontend/godes_molina.html)",
+      "Bash(sed -n '152,155p' C:/Users/enric/SynologyDrive/claude/godesia/frontend/garrido_godes.html)",
+      "Bash(sed -n '135,138p' C:/Users/enric/SynologyDrive/claude/godesia/frontend/godes_mate.html)",
+      "Bash(pkill -f \"uvicorn.*8000\")",
+      "Bash(find 'C:\\\\Users\\\\enric\\\\SynologyDrive\\\\claude\\\\godesia\\\\backend' -name \"*.pyc\" -delete)",
+      "Bash(find 'C:\\\\Users\\\\enric\\\\SynologyDrive\\\\claude\\\\godesia\\\\backend' -type d -name \"__pycache__\" -exec rm -rf {} +)",
+      "Bash(find 'C:\\\\Users\\\\enric\\\\SynologyDrive\\\\claude\\\\godesia' -type d -name \"__pycache__\" -exec rm -rf {} +)",
+      "Bash(find 'C:\\\\Users\\\\enric\\\\SynologyDrive\\\\claude\\\\godesia' -type f -name \"*.pyc\" -delete)",
+      "Bash(find 'C:\\\\Users\\\\enric\\\\SynologyDrive\\\\claude\\\\godesia' -type f -name \"*.pyo\" -delete)",
+      "Bash(awk '{print $NF}')",
+      "Bash(xargs -r taskkill /PID {} /F)"
     ]
   }
 }

@@ -374,14 +374,19 @@ function renderFamilyTree(data) {
     // Connector line from parents/siblings down to the main subject
     html += `<div class="w-px h-12 bg-outline-variant"></div>`;
 
-    // Main subject - centered at 50% with spouse to the right.
-    // Uses an invisible spacer (same size as spouse) on the LEFT so that
+    // Main subject - centered at 50% with spouses to the right.
+    // Uses an invisible spacer (same size as spouses column) on the LEFT so that
     // flex justify-center mathematically centers the main-node at 50%.
+
+    // Get spouses list (use plural array if available, fallback to single spouse)
+    const spousesList = (data.spouses && data.spouses.length > 0) ? data.spouses : (data.spouse ? [data.spouse] : []);
+
     html += `
-        <div class="relative w-full flex justify-center items-center gap-16 my-6">
+        <div class="relative w-full flex justify-center items-start gap-16 my-6">
     `;
 
-    if (data.spouse) {
+    // Invisible spacer on the left to center main person
+    if (spousesList.length > 0) {
         html += `
                 <div class="flex flex-col items-center node-card invisible" aria-hidden="true">
                     <div class="w-20 h-20 mb-2"></div>
@@ -404,20 +409,28 @@ function renderFamilyTree(data) {
                 </div>
     `;
 
-    if (data.spouse) {
-        const spouseDisplayName = getDisplayName(data.spouse);
-        html += `
-                <a href="/dossier.html?id=${dossierId(data.spouse.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
+    // Render all spouses in a vertical column
+    if (spousesList.length > 0) {
+        html += `<div class="flex flex-col gap-4">`;
+        spousesList.forEach((s, idx) => {
+            const spouseDisplayName = getDisplayName(s);
+            const marriageInfo = s.marriage_date ? ` (${s.marriage_date})` : '';
+            html += `
+                <a href="/dossier.html?id=${dossierId(s.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-secondary/20 mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${data.spouse.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${data.spouse.photo_file}" alt="${spouseDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
+                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${spouseDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${spouseDisplayName}</h4>
-                        <span class="text-[10px] opacity-60 text-center">${formatYears(data.spouse.birth_year, data.spouse.death_year)}</span>
-                        ${recentDeathTag(data.spouse)}
+                        <span class="text-[10px] opacity-60 text-center">${formatYears(s.birth_year, s.death_year)}</span>
+                        ${s.marriage_date ? `<span class="text-[9px] opacity-50 text-center">${s.marriage_date}</span>` : ''}
+                        ${s.divorce ? `<span class="text-[9px] opacity-40 text-center italic">divorciado ${s.divorce.date || ''}</span>` : ''}
+                        ${recentDeathTag(s)}
                     </div>
                 </a>
-        `;
+            `;
+        });
+        html += `</div>`;
     }
 
     html += `

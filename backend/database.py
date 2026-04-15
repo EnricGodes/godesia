@@ -871,6 +871,8 @@ def get_person_dossier(conn, person_id):
             spouse = spouse_data
 
     # Partnerships (non-marriage relationships)
+    # Deduplicate: only add if not already in spouses_list (from marriages)
+    partner_ids_in_list = {s["id"] for s in spouses_list}
     partnership_rows = conn.execute("""
         SELECT person2_id, date FROM partnerships WHERE person1_id = ?
         UNION ALL
@@ -881,9 +883,10 @@ def get_person_dossier(conn, person_id):
     for row in partnership_rows:
         partner_id = row[0]
         partnership_date = row[1]
-        partner_data = dict(conn.execute("SELECT * FROM people WHERE id = ?", (partner_id,)).fetchone())
-        partner_data["partnership_date"] = partnership_date
-        spouses_list.append(partner_data)
+        if partner_id not in partner_ids_in_list:  # Skip if already in marriages
+            partner_data = dict(conn.execute("SELECT * FROM people WHERE id = ?", (partner_id,)).fetchone())
+            partner_data["partnership_date"] = partnership_date
+            spouses_list.append(partner_data)
 
     # Children (with their marriages)
     children = conn.execute(
