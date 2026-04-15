@@ -202,10 +202,34 @@ form.addEventListener("submit", async (e) => {
 // Load birthdays on page load
 loadBirthdays();
 
-// Auto-submit query from URL param (e.g. ?q=who+is...)
-const urlQ = new URLSearchParams(window.location.search).get('q');
-if (urlQ) {
-  input.value = urlQ;
-  form.dispatchEvent(new Event('submit'));
+// Handle search matches passed via sessionStorage (from smartSearch)
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('matches') === '1') {
+  const raw = sessionStorage.getItem('gn-search-matches');
+  sessionStorage.removeItem('gn-search-matches');
+  if (raw) {
+    try {
+      const { q, results } = JSON.parse(raw);
+      input.value = q;
+      // Echo user's search as a user message
+      addMessage(q, 'user');
+      // Render results as an assistant message with clickable links
+      const list = results.map(p => {
+        const years = [p.birth_year, p.death_year].filter(Boolean).join('–');
+        const yearsLabel = years ? ` (${years})` : '';
+        return `<li><a href="/dossier.html?id=${p.id}" style="color:#2D4B33;font-weight:600;text-decoration:none">${p.name}</a>${yearsLabel}</li>`;
+      }).join('');
+      const html = `He trobat ${results.length} persones que coincideixen amb "<strong>${q}</strong>":<ul style="margin-top:8px;padding-left:20px">${list}</ul>`;
+      addMessage(html, 'assistant');
+    } catch (e) {}
+  }
   window.history.replaceState({}, '', window.location.pathname);
+} else {
+  // Auto-submit query from URL param (e.g. ?q=who+is...)
+  const urlQ = urlParams.get('q');
+  if (urlQ) {
+    input.value = urlQ;
+    form.dispatchEvent(new Event('submit'));
+    window.history.replaceState({}, '', window.location.pathname);
+  }
 }

@@ -304,8 +304,15 @@
       if (!res.ok) throw new Error('Search failed');
       const data = await res.json();
 
-      // 0 resultados o múltiples → chat (que desambigüe allí)
-      if (!data.results || data.results.length !== 1) { toChat(); return; }
+      // 0 resultados → chat (que el LLM lo resuelva)
+      if (!data.results || data.results.length === 0) { toChat(); return; }
+
+      // Múltiples resultados → chat con lista de coincidencias
+      if (data.results.length > 1) {
+        sessionStorage.setItem('gn-search-matches', JSON.stringify({ q, results: data.results }));
+        window.location.href = '/chat.html?matches=1';
+        return;
+      }
 
       // 3. Un solo match: ¿la query es solo el nombre de esa persona?
       const person = data.results[0];
