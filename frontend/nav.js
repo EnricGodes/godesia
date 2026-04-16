@@ -162,16 +162,23 @@
             `</a>` +
 
             /* Search input (appears below on toggle) */
-            `<div id="gn-search-expanded" class="absolute" style="display:none;width:calc(100% - 2rem);max-width:500px;top:calc(100% + 6px);left:1rem;right:1rem">` +
-              `<form id="gn-search-form" class="flex items-center gap-0 bg-white rounded-full shadow-lg overflow-hidden" style="height:32px">` +
-                `<span class="flex items-center justify-center pl-3 text-[#2D4B33] flex-shrink-0">` +
-                  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#2D4B33">` +
-                    `<path d="M12 2L15.09 8.26H21.77L16.54 12.46L18.63 18.74L12 14.54L5.37 18.74L7.46 12.46L2.23 8.26H8.91L12 2Z"/>` +
-                  `</svg>` +
-                `</span>` +
-                `<input id="gn-search-input" type="text" placeholder="Buscar..." autocomplete="off" class="flex-1 border-0 bg-transparent text-[#1c1c17] placeholder-[#b8b5ac] focus:outline-none px-3" style="font-size:0.85rem"/>` +
-                `<button type="submit" class="hidden"></button>` +
-              `</form>` +
+            `<div id="gn-search-expanded" class="absolute" style="display:none;width:calc(100% + 4rem);max-width:650px;top:calc(100% + 12px);left:-2rem;right:auto">` +
+              `<div class="bg-white rounded-2xl shadow-2xl p-6 border border-[#e5e2da]">` +
+                /* Título */
+                `<h3 style="font-family:'Noto Serif',serif;font-size:1.1rem;color:#2D4B33;margin:0 0 0.75rem 0;font-weight:600">Buscador</h3>` +
+                /* Texto intro */
+                `<p style="font-size:0.85rem;color:#424842;margin:0 0 1.25rem 0;line-height:1.5">Pregúntame sobre la familia Godes. Usa <strong>@</strong> para acceder al listado de miembros</p>` +
+                /* Search box */
+                `<form id="gn-search-form" class="flex items-center gap-3 bg-[#fcf9f0] rounded-xl p-3 border border-[#e5e2da] mb-4">` +
+                  `<span class="flex items-center justify-center text-[#2D4B33] flex-shrink-0">` +
+                    `<span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20">auto_awesome</span>` +
+                  `</span>` +
+                  `<input id="gn-search-input" type="text" placeholder="Escribe tu pregunta" autocomplete="off" class="flex-1 border-0 bg-transparent text-[#1c1c17] placeholder-[#b8b5ac] focus:outline-none" style="font-size:0.95rem"/>` +
+                  `<button type="submit" class="hidden"></button>` +
+                `</form>` +
+                /* Botón consultar */
+                `<button type="button" id="gn-search-submit" class="w-full bg-[#2D4B33] text-white rounded-lg py-2.5 font-medium text-sm hover:bg-[#1a2f22] transition-colors">Consultar</button>` +
+              `</div>` +
             `</div>` +
 
           `</div>` +
@@ -443,6 +450,7 @@
     const searchExpanded = document.getElementById('gn-search-expanded');
     const searchInput    = document.getElementById('gn-search-input');
     const searchForm     = document.getElementById('gn-search-form');
+    const searchSubmit   = document.getElementById('gn-search-submit');
 
     function closeSearch() {
       searchExpanded.style.display = 'none';
@@ -471,17 +479,27 @@
         e.preventDefault();
         closeSearch();
       }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        searchSubmit.click();
+      }
     });
 
     /* Submit → smart routing (dossier if person, chat if question) */
-    searchForm.addEventListener('submit', e => {
-      e.preventDefault();
+    const handleSearch = () => {
       const q = searchInput.value.trim();
       if (q) {
         closeSearch();
         smartSearch(q);
       }
+    };
+
+    searchForm.addEventListener('submit', e => {
+      e.preventDefault();
+      handleSearch();
     });
+
+    searchSubmit.addEventListener('click', handleSearch);
 
     /* 7. @ mention autocomplete on the nav search input */
     ensureMentionStyles();
