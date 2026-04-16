@@ -162,7 +162,7 @@
             `</a>` +
 
             /* Search input (appears below on toggle) */
-            `<div id="gn-search-expanded" class="absolute" style="display:none;width:calc(100% + 4rem);max-width:650px;top:calc(100% + 12px);left:-2rem;right:auto">` +
+            `<div id="gn-search-expanded" class="absolute" style="display:none;width:calc(100vw - 2rem);max-width:1800px;top:calc(100% + 12px);left:1rem;right:auto;z-index:10000">` +
               `<div class="bg-white rounded-2xl shadow-2xl p-6 border border-[#e5e2da]">` +
                 /* Título */
                 `<h3 style="font-family:'Noto Serif',serif;font-size:1.1rem;color:#2D4B33;margin:0 0 0.75rem 0;font-weight:600">Buscador</h3>` +
@@ -234,6 +234,11 @@
       #gn-colaborar-btn:hover {
         background-color: rgba(255,255,255,0.15) !important;
         color: white !important;
+      }
+      /* Search expanded visibility across all pages */
+      #gn-search-expanded {
+        position: fixed !important;
+        z-index: 10000 !important;
       }
     `;
     document.head.appendChild(style);
