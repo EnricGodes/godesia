@@ -138,38 +138,38 @@
           `</div>` +
 
           /* ── Col 3: Action buttons (far right) ── */
-          `<div class="flex items-center gap-1.5" style="height:36px;position:relative">` +
+          `<div class="flex items-center gap-0.5" style="position:relative">` +
 
             /* Search — icon only circle */
-            `<button type="button" id="gn-search-toggle" class="flex items-center justify-center rounded-full border border-white text-white hover:border-white hover:text-white transition" style="width:36px;height:36px;background:transparent">` +
-              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">` +
+            `<button type="button" id="gn-search-toggle" class="flex items-center justify-center rounded-full border border-white text-white hover:border-white hover:text-white transition" style="width:28px;height:28px;background:transparent">` +
+              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">` +
                 `<path d="M17 17L21 21" />` +
                 `<path d="M19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19C15.4183 19 19 15.4183 19 11Z" />` +
               `</svg>` +
             `</button>` +
 
-            /* Colaborar — pill button */
-            `<a href="/colaborar.html" id="gn-colaborar-btn" class="flex items-center justify-center text-white border border-white hover:bg-white/10 transition font-medium text-sm rounded-full px-5" style="height:36px;white-space:nowrap;background:transparent">` +
+            /* Colaborar — pill button, same style as nav links */
+            `<a href="/colaborar.html" id="gn-colaborar-btn" class="whitespace-nowrap px-3 py-1.5 rounded-md text-sm font-medium text-white/90 border border-white hover:bg-white/15 hover:text-white transition-colors" style="background:transparent">` +
               `Colaborar` +
             `</a>` +
 
             /* Login — user icon circle */
-            `<a href="/login.html" title="Login" class="flex items-center justify-center rounded-full border border-white text-white hover:border-white hover:text-white transition" style="width:36px;height:36px;background:transparent" id="gn-login-btn">` +
-              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">` +
+            `<a href="/login.html" title="Login" class="flex items-center justify-center rounded-full border border-white text-white hover:border-white hover:text-white transition" style="width:28px;height:28px;background:transparent" id="gn-login-btn">` +
+              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">` +
                 `<path d="M17 8.5C17 5.73858 14.7614 3.5 12 3.5C9.23858 3.5 7 5.73858 7 8.5C7 11.2614 9.23858 13.5 12 13.5C14.7614 13.5 17 11.2614 17 8.5Z" />` +
                 `<path d="M19 20.5C19 16.634 15.866 13.5 12 13.5C8.13401 13.5 5 16.634 5 20.5" />` +
               `</svg>` +
             `</a>` +
 
             /* Search input (appears below on toggle) */
-            `<div id="gn-search-expanded" class="absolute" style="display:none;width:calc(100% - 2rem);max-width:600px;top:calc(100% + 8px);left:1rem;right:1rem">` +
-              `<form id="gn-search-form" class="flex items-center gap-0 bg-white rounded-full shadow-lg overflow-hidden" style="height:36px">` +
+            `<div id="gn-search-expanded" class="absolute" style="display:none;width:calc(100% - 2rem);max-width:500px;top:calc(100% + 6px);left:1rem;right:1rem">` +
+              `<form id="gn-search-form" class="flex items-center gap-0 bg-white rounded-full shadow-lg overflow-hidden" style="height:32px">` +
                 `<span class="flex items-center justify-center pl-3 text-[#2D4B33] flex-shrink-0">` +
-                  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#2D4B33">` +
+                  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#2D4B33">` +
                     `<path d="M12 2L15.09 8.26H21.77L16.54 12.46L18.63 18.74L12 14.54L5.37 18.74L7.46 12.46L2.23 8.26H8.91L12 2Z"/>` +
                   `</svg>` +
                 `</span>` +
-                `<input id="gn-search-input" type="text" placeholder="Buscar..." autocomplete="off" class="flex-1 border-0 bg-transparent text-[#1c1c17] placeholder-[#b8b5ac] focus:outline-none px-3" style="font-size:0.95rem"/>` +
+                `<input id="gn-search-input" type="text" placeholder="Buscar..." autocomplete="off" class="flex-1 border-0 bg-transparent text-[#1c1c17] placeholder-[#b8b5ac] focus:outline-none px-3" style="font-size:0.85rem"/>` +
                 `<button type="submit" class="hidden"></button>` +
               `</form>` +
             `</div>` +
@@ -205,6 +205,8 @@
         border: 1px solid white !important;
         background: transparent !important;
         box-sizing: border-box;
+        min-width: 0 !important;
+        padding: 0 !important;
       }
       /* Colaborar button */
       #gn-colaborar-btn {
@@ -214,8 +216,7 @@
       }
       /* Action buttons hover effects */
       #gn-search-toggle:hover,
-      #gn-login-btn:hover,
-      #gn-colaborar-btn:hover {
+      #gn-login-btn:hover {
         border-color: rgba(255,255,255,0.7) !important;
         background-color: rgba(255,255,255,0.15) !important;
       }
@@ -224,7 +225,8 @@
         stroke: rgba(255,255,255,0.9);
       }
       #gn-colaborar-btn:hover {
-        color: rgba(255,255,255,0.9) !important;
+        background-color: rgba(255,255,255,0.15) !important;
+        color: white !important;
       }
     `;
     document.head.appendChild(style);
