@@ -162,7 +162,7 @@
             `</a>` +
 
             /* Search input (appears below on toggle) */
-            `<div id="gn-search-expanded" class="absolute" style="display:none;width:calc(100vw - 2rem);max-width:1800px;top:calc(100% + 12px);left:1rem;right:auto;z-index:10000">` +
+            `<div id="gn-search-expanded" style="display:none;width:calc(100vw - 2rem);max-width:1800px;left:1rem;z-index:10000">` +
               `<div class="bg-white rounded-2xl shadow-2xl p-6 border border-[#e5e2da]">` +
                 /* Título */
                 `<h3 style="font-family:'Noto Serif',serif;font-size:1.1rem;color:#2D4B33;margin:0 0 0.75rem 0;font-weight:600">Buscador</h3>` +
@@ -457,6 +457,12 @@
     const searchForm     = document.getElementById('gn-search-form');
     const searchSubmit   = document.getElementById('gn-search-submit');
 
+    function positionSearchExpanded() {
+      const rect = searchToggle.getBoundingClientRect();
+      searchExpanded.style.position = 'fixed';
+      searchExpanded.style.top = (rect.bottom + 12) + 'px';
+    }
+
     function closeSearch() {
       searchExpanded.style.display = 'none';
       searchInput.value = '';
@@ -468,12 +474,18 @@
       if (searchExpanded.style.display === 'none') {
         closeAll(); // Close other dropdowns
         searchExpanded.style.display = 'block';
+        positionSearchExpanded();
         openMenu = { menu: searchExpanded, chevron: null, btn: searchToggle }; // Track for repositioning on scroll
         searchInput.focus();
       } else {
         closeSearch();
       }
     });
+
+    /* Reposition on scroll */
+    window.addEventListener('scroll', () => {
+      if (openMenu && openMenu.menu === searchExpanded) positionSearchExpanded();
+    }, { passive: true });
 
     searchInput.addEventListener('blur', () => {
       if (!searchInput.value.trim()) closeSearch();
