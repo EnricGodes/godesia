@@ -137,47 +137,42 @@
             renderDropdown('diversos',   'Diversos',         DIVERSOS) +
           `</div>` +
 
-          /* ── Col 3: Search + buttons (far right) ── */
-          `<div class="flex items-center gap-2">` +
+          /* ── Col 3: Action buttons (far right) ── */
+          `<div class="flex items-center gap-1.5" style="height:36px;position:relative">` +
 
-            /* Search — collapsed by default, expands on click */
-            `<form id="gn-search-form" class="flex items-center">` +
-              /* Collapsed state: just the icon + "Buscar" pill */
-              `<button type="button" id="gn-search-toggle"` +
-              ` class="flex items-center gap-1.5 whitespace-nowrap h-9 px-4 bg-white/10 border border-white/20` +
-              ` rounded-full text-white/75 hover:bg-white/20 hover:text-white transition text-sm font-medium">` +
-                `<span class="material-symbols-outlined"` +
-                ` style="font-size:16px;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20">auto_awesome</span>` +
-                `Buscar` +
-              `</button>` +
-              /* Expanded state: input + submit (hidden until toggle) */
-              `<div id="gn-search-expanded" class="items-center" style="display:none">` +
-                `<div class="relative flex items-center">` +
-                  `<span class="material-symbols-outlined absolute left-3 text-white/50 pointer-events-none select-none"` +
-                  ` style="font-size:16px;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20">auto_awesome</span>` +
-                  `<input id="gn-search-input" type="text" placeholder="Buscar…" autocomplete="off"` +
-                  ` class="w-52 lg:w-64 h-9 pl-9 pr-3 text-sm bg-white/10 border border-white/20 rounded-l-full` +
-                  ` text-white placeholder-white/45 focus:outline-none focus:bg-white/20 focus:border-white/40 transition"/>` +
-                `</div>` +
-                `<button type="submit"` +
-                ` class="whitespace-nowrap h-9 px-4 bg-white/10 border border-l-0 border-white/20 rounded-r-full` +
-                ` text-white/75 hover:bg-white/20 hover:text-white transition text-sm font-medium">` +
-                  `Buscar` +
-                `</button>` +
-              `</div>` +
-            `</form>` +
+            /* Search — icon only circle */
+            `<button type="button" id="gn-search-toggle" class="flex items-center justify-center rounded-full border border-white text-white hover:border-white hover:text-white transition" style="width:36px;height:36px;background:transparent">` +
+              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">` +
+                `<path d="M17 17L21 21" />` +
+                `<path d="M19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19C15.4183 19 19 15.4183 19 11Z" />` +
+              `</svg>` +
+            `</button>` +
 
-            /* Colaborar — grey pill */
-            `<a href="/colaborar.html"` +
-            ` class="whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold` +
-            ` bg-white/20 text-white hover:bg-white/30 transition-colors">` +
-            `Colaborar</a>` +
+            /* Colaborar — pill button */
+            `<a href="/colaborar.html" id="gn-colaborar-btn" class="flex items-center justify-center text-white border border-white hover:bg-white/10 transition font-medium text-sm rounded-full px-5" style="height:36px;white-space:nowrap;background:transparent">` +
+              `Colaborar` +
+            `</a>` +
 
-            /* Login — outlined pill */
-            `<a href="/login.html"` +
-            ` class="whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium` +
-            ` border border-white/30 text-white/90 hover:bg-white/15 hover:text-white transition-colors">` +
-            `Login</a>` +
+            /* Login — user icon circle */
+            `<a href="/login.html" title="Login" class="flex items-center justify-center rounded-full border border-white text-white hover:border-white hover:text-white transition" style="width:36px;height:36px;background:transparent" id="gn-login-btn">` +
+              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">` +
+                `<path d="M17 8.5C17 5.73858 14.7614 3.5 12 3.5C9.23858 3.5 7 5.73858 7 8.5C7 11.2614 9.23858 13.5 12 13.5C14.7614 13.5 17 11.2614 17 8.5Z" />` +
+                `<path d="M19 20.5C19 16.634 15.866 13.5 12 13.5C8.13401 13.5 5 16.634 5 20.5" />` +
+              `</svg>` +
+            `</a>` +
+
+            /* Search input (appears below on toggle) */
+            `<div id="gn-search-expanded" class="absolute" style="display:none;width:calc(100% - 2rem);max-width:600px;top:calc(100% + 8px);left:1rem;right:1rem">` +
+              `<form id="gn-search-form" class="flex items-center gap-0 bg-white rounded-full shadow-lg overflow-hidden" style="height:36px">` +
+                `<span class="flex items-center justify-center pl-3 text-[#2D4B33] flex-shrink-0">` +
+                  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#2D4B33">` +
+                    `<path d="M12 2L15.09 8.26H21.77L16.54 12.46L18.63 18.74L12 14.54L5.37 18.74L7.46 12.46L2.23 8.26H8.91L12 2Z"/>` +
+                  `</svg>` +
+                `</span>` +
+                `<input id="gn-search-input" type="text" placeholder="Buscar..." autocomplete="off" class="flex-1 border-0 bg-transparent text-[#1c1c17] placeholder-[#b8b5ac] focus:outline-none px-3" style="font-size:0.95rem"/>` +
+                `<button type="submit" class="hidden"></button>` +
+              `</form>` +
+            `</div>` +
 
           `</div>` +
 
@@ -204,6 +199,33 @@
         outline: none; box-shadow: none !important;
       }
       #godesia-nav form { display: flex; align-items: center; }
+      /* Action buttons styling */
+      #gn-search-toggle,
+      #gn-login-btn {
+        border: 1px solid white !important;
+        background: transparent !important;
+        box-sizing: border-box;
+      }
+      /* Colaborar button */
+      #gn-colaborar-btn {
+        border: 1px solid white !important;
+        background: transparent !important;
+        box-sizing: border-box;
+      }
+      /* Action buttons hover effects */
+      #gn-search-toggle:hover,
+      #gn-login-btn:hover,
+      #gn-colaborar-btn:hover {
+        border-color: rgba(255,255,255,0.7) !important;
+        background-color: rgba(255,255,255,0.15) !important;
+      }
+      #gn-search-toggle:hover svg,
+      #gn-login-btn:hover svg {
+        stroke: rgba(255,255,255,0.9);
+      }
+      #gn-colaborar-btn:hover {
+        color: rgba(255,255,255,0.9) !important;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -410,33 +432,53 @@
       m.addEventListener('click', e => e.stopPropagation());
     });
 
-    /* 6. Search toggle: collapsed pill ↔ expanded input */
+    /* 5c. Also add search expanded to this rule */
+    const searchExpandedLater = document.getElementById('gn-search-expanded');
+    if (searchExpandedLater) searchExpandedLater.addEventListener('click', e => e.stopPropagation());
+
+    /* 6. Search toggle: show/hide expanded search input */
     const searchToggle   = document.getElementById('gn-search-toggle');
     const searchExpanded = document.getElementById('gn-search-expanded');
     const searchInput    = document.getElementById('gn-search-input');
+    const searchForm     = document.getElementById('gn-search-form');
 
-    function expandSearch() {
-      searchToggle.classList.add('hidden');
-      searchExpanded.classList.remove('hidden');
-      searchExpanded.style.display = 'flex';
-      searchInput.focus();
-    }
-    function collapseSearch() {
+    function closeSearch() {
+      searchExpanded.style.display = 'none';
       searchInput.value = '';
-      searchExpanded.classList.add('hidden');
-      searchExpanded.style.display = '';
-      searchToggle.classList.remove('hidden');
+      if (openMenu && openMenu.menu === searchExpanded) openMenu = null;
     }
 
-    searchToggle.addEventListener('click', e => { e.stopPropagation(); expandSearch(); });
-    searchInput.addEventListener('blur', () => { if (!searchInput.value.trim()) collapseSearch(); });
-    searchInput.addEventListener('keydown', e => { if (e.key === 'Escape') collapseSearch(); });
+    searchToggle.addEventListener('click', e => {
+      e.stopPropagation();
+      if (searchExpanded.style.display === 'none') {
+        closeAll(); // Close other dropdowns
+        searchExpanded.style.display = 'block';
+        openMenu = { menu: searchExpanded, chevron: null, btn: searchToggle }; // Track for repositioning on scroll
+        searchInput.focus();
+      } else {
+        closeSearch();
+      }
+    });
+
+    searchInput.addEventListener('blur', () => {
+      if (!searchInput.value.trim()) closeSearch();
+    });
+
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeSearch();
+      }
+    });
 
     /* Submit → smart routing (dossier if person, chat if question) */
-    document.getElementById('gn-search-form').addEventListener('submit', e => {
+    searchForm.addEventListener('submit', e => {
       e.preventDefault();
       const q = searchInput.value.trim();
-      if (q) smartSearch(q);
+      if (q) {
+        closeSearch();
+        smartSearch(q);
+      }
     });
 
     /* 7. @ mention autocomplete on the nav search input */
