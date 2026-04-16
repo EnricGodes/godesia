@@ -1415,76 +1415,6 @@ function renderMilitary(data) {
     document.getElementById('military-section').innerHTML = html;
 }
 
-const NOTES_KEEP_TAGS = new Set(['b','i','strong','em','u','br']);
-
-function cleanNotesHtml(raw) {
-    if (!raw) return '';
-    // The stored Draft.js HTML has truncated opening tags (missing `<` + word
-    // chars), leaving orphan CSS/attribute fragments as literal text.
-    // We tokenize by well-formed `<...>` tags, sanitize them (keep only
-    // semantic inline formatting), and scrub garbage from text segments.
-    const parts = raw.split(/(<[^<>]*>)/);
-    const out = parts.map(p => {
-        if (!p) return '';
-        if (p.startsWith('<') && p.endsWith('>')) {
-            const m = p.match(/^<\s*(\/?)\s*([a-zA-Z]+)/);
-            if (!m) return '';
-            const name = m[2].toLowerCase();
-            if (!NOTES_KEEP_TAGS.has(name)) return '';
-            if (m[1]) return `</${name}>`;
-            return `<${name}>`;
-        }
-        let t = p;
-        // A: strip CSS prop-chains ending in `"` + attrs + `>`
-        // Insert a sentinel (\u0001) to mark a block boundary; replaced with <br>
-        // at the end, after the `>`-scrubbing passes finish.
-        t = t.replace(/(?:[\w-]+\s*:\s*[^;"<>]*;\s*){1,}[^"<>]*?"\s*(?:[\w-]+\s*=\s*"[^"]*"\s*)*\/?>/g, '\u0001');
-        // A2: strip CSS prop-chains (2+) without closing
-        t = t.replace(/(?:[\w-]+\s*:\s*[^;"<>]*;\s*){2,}/g, '');
-        // B: strip stray HTML attributes `word="value"`
-        t = t.replace(/\s*[\w-]+\s*=\s*"[^"]*"/g, '');
-        // C: strip word-ending-in-quote orphans: `dgx"` `iv"`
-        t = t.replace(/(?:^|(?<=\s))[\w-]+"(?=\s|$)/g, '');
-        // D1: strip broken tag leftovers like `dgx"_1mf style="`
-        t = t.replace(/[\w-]+"[\w_-]*\s+[\w-]+="?/g, '');
-        // D2: strip single CSS `prop: value;"` tails
-        t = t.replace(/[\w-]+\s*:\s*[^;<>"]*;?"\s*\/?>?/g, '');
-        // D3: strip hex color leftovers `abc123;`
-        t = t.replace(/(?:^|(?<=\s))[0-9a-fA-F]{3,6};\s*/g, '');
-        // D4: strip hyphenated CSS value tokens `-wrap;` `pre-wrap;`
-        t = t.replace(/(?:^|(?<=\s))(?:-[a-z]+|[a-z]+-[a-z]+(?:-[a-z]+)*);\s*/g, '');
-        // D4b: strip `!important;"` tails (bounded by sentence punctuation)
-        t = t.replace(/[^<>;".!?]*!important;"\s*\/?>?/g, '');
-        // D5: strip trailing </div> remnants like ` iv` ` iv>`
-        t = t.replace(/\s+iv\s*>?\s*$/g, '');
-        // E: normalize residual `>` and whitespace
-        t = t.replace(/\s*\/?>\s*/g, ' ');
-        t = t.replace(/(^|\s);\s*/g, '$1');
-        t = t.replace(/^\s*["']+/g, '');
-        t = t.replace(/\s+/g, ' ');
-        return t;
-    });
-    let result = out.join('');
-    // Fix broken HTML entities split by a space, e.g. `&oa cute;` -> `&oacute;`
-    result = result.replace(/&([a-zA-Z]{1,4})\s+([a-zA-Z]+);/g, '&$1$2;');
-    // Decode HTML entities (&oacute; -> ó, etc.) using a textarea
-    // Do this BEFORE converting sentinels so <br> is not affected.
-    const ta = document.createElement('textarea');
-    ta.innerHTML = result;
-    result = ta.value;
-    // Now convert sentinels to real <br> tags
-    result = result.replace(/\u0001+/g, '<br>');
-    // Collapse runs of whitespace but keep <br>
-    result = result.replace(/[ \t]+/g, ' ').replace(/(<br>\s*)+/g, '<br>').trim();
-    // Linkify URLs (stop at whitespace; trim trailing punctuation)
-    result = result.replace(/(https?:\/\/[^\s<]+)/g, (url) => {
-        let trimmed = url.replace(/[.,;:)\]]+$/, '');
-        const tail = url.slice(trimmed.length);
-        return `<a href="${trimmed}" target="_blank" rel="noopener" class="underline">${trimmed}</a>${tail}`;
-    });
-    return result;
-}
-
 function renderNotes(notes) {
     if (!notes || notes.length === 0) {
         document.getElementById('notes-section').style.display = 'none';
@@ -1494,13 +1424,12 @@ function renderNotes(notes) {
     document.getElementById('notes-section').style.display = 'block';
 
     const articles = notes.map((n, i) => {
-        const cleanHtml = cleanNotesHtml(n);
-
+        const clean = n.replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim();
         return `
             <article class="relative p-10 bg-white heritage-border shadow-inner rounded-sm font-headline">
                 <div class="absolute top-0 right-0 p-4 text-[10px] font-bold text-outline">SIGNATURA: NOTA_${i+1}</div>
                 <div class="space-y-6 text-lg italic leading-relaxed opacity-90">
-                    ${cleanHtml}
+                    <p>${clean}</p>
                 </div>
             </article>
         `;
