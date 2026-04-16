@@ -138,7 +138,7 @@
           `</div>` +
 
           /* ── Col 3: Action buttons (far right) ── */
-          `<div class="flex items-center gap-0.5" style="position:relative">` +
+          `<div class="flex items-center gap-2" style="position:relative">` +
 
             /* Search — icon only circle */
             `<button type="button" id="gn-search-toggle" class="flex items-center justify-center rounded-full border border-white text-white hover:border-white hover:text-white transition" style="width:28px;height:28px;background:transparent">` +
@@ -148,8 +148,8 @@
               `</svg>` +
             `</button>` +
 
-            /* Colaborar — pill button, same style as nav links */
-            `<a href="/colaborar.html" id="gn-colaborar-btn" class="whitespace-nowrap px-3 py-1.5 rounded-md text-sm font-medium text-white/90 border border-white hover:bg-white/15 hover:text-white transition-colors" style="background:transparent">` +
+            /* Colaborar — stretched circle (rounded-full) with nav styling */
+            `<a href="/colaborar.html" id="gn-colaborar-btn" class="whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium text-white/90 border border-white hover:bg-white/15 hover:text-white transition-colors" style="background:transparent">` +
               `Colaborar` +
             `</a>` +
 
