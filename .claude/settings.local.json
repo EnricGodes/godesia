@@ -72,7 +72,13 @@
       "Bash(find 'C:\\\\Users\\\\enric\\\\SynologyDrive\\\\claude\\\\godesia' -type f -name \"*.pyc\" -delete)",
       "Bash(find 'C:\\\\Users\\\\enric\\\\SynologyDrive\\\\claude\\\\godesia' -type f -name \"*.pyo\" -delete)",
       "Bash(awk '{print $NF}')",
-      "Bash(xargs -r taskkill /PID {} /F)"
+      "Bash(xargs -r taskkill /PID {} /F)",
+      "Bash(kill 99)",
+      "Bash(node -c /c/Users/enric/SynologyDrive/claude/godesia/frontend/nav.js)",
+      "Bash(awk '{print $2}')",
+      "Bash(xargs kill *)",
+      "Bash(rm -f godesia.db-wal godesia.db-shm)",
+      "Bash(pkill -f \"python3 -m uvicorn\")"
     ]
   }
 }

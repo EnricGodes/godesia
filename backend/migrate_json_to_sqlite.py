@@ -11,79 +11,83 @@ from database import get_connection, init_db, parse_gedcom_date, convert_date_to
 
 
 class PlainTextExtractor(HTMLParser):
-    """Extract plain text from HTML, handling <br> as newlines."""
+    """Extract plain text from HTML, treating block elements as paragraph breaks."""
     def __init__(self):
         super().__init__()
         self.text_parts = []
-        self.br_found = False
+        self.last_was_text = False
 
     def handle_starttag(self, tag, attrs):
-        if tag.lower() in ['br', 'p', 'div']:
-            self.text_parts.append('\n')
+        tag_lower = tag.lower()
+        # Insert paragraph break before block elements
+        if tag_lower in ['br', 'p', 'div', 'blockquote']:
+            if self.last_was_text:
+                self.text_parts.append('\n')
+                self.last_was_text = False
 
     def handle_data(self, data):
-        self.text_parts.append(data)
+        # Only add non-whitespace text
+        stripped = data.strip()
+        if stripped:
+            self.text_parts.append(stripped + ' ')
+            self.last_was_text = True
 
     def get_text(self):
-        return ''.join(self.text_parts)
+        text = ''.join(self.text_parts)
+        # Clean up excessive spaces and newlines
+        text = re.sub(r' +', ' ', text)
+        text = re.sub(r'\n +', '\n', text)
+        return text.strip()
 
 
 def clean_note_html(text: str) -> str:
-    """Remove HTML tags and styles from notes, preserve meaningful line breaks."""
+    """Extract clean text from malformed HTML notes."""
     if not text:
         return ""
 
-    # Step 1: Remove everything between < and > (all HTML tags)
-    text = re.sub(r'<[^>]+>', '', text, flags=re.DOTALL)
+    import html as html_module
 
-    # Step 2: Remove HTML attribute fragments
-    text = re.sub(r'\s*=\s*["\']?[^"\'>\s]*["\']?', '', text)
-    text = re.sub(r'\s+[a-z\-]+\s*=', '', text, flags=re.IGNORECASE)
+    # Step 1: First, collapse all HTML tags (even malformed ones with newlines)
+    # Remove < ... > even if they span multiple lines
+    text = re.sub(r'<[^<]*?>', '', text, flags=re.DOTALL)
 
-    # Step 3: Decode HTML entities
-    import html
-    text = html.unescape(text)
+    # Step 2: Decode HTML entities (&oacute; → ó, etc)
+    text = html_module.unescape(text)
 
-    # Step 4: Remove CSS attribute fragments
-    text = re.sub(r'[a-z\-]+:\s*[^;]+;', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'[a-z\-]+:\s+[^;>\s]+', '', text, flags=re.IGNORECASE)
+    # Step 3: Remove CSS fragments that look like "property: value"
+    text = re.sub(r'\b[a-z\-]+:\s*[^;]*;?', '', text, flags=re.IGNORECASE)
 
-    # Step 5: Remove CSS class fragments and values
-    # Remove patterns like: _1mj, _3dgx (CSS classes with underscore+numbers)
-    text = re.sub(r'_\d+[a-z]*', '', text, flags=re.IGNORECASE)
+    # Step 4: Remove URLs
+    text = re.sub(r'https?://\S+', '', text)
 
-    # Remove CSS keywords and vendor prefixes
-    text = re.sub(r'\b(pre-wrap|relative|absolute|inherit|important|solid|normal|white-spac|dgx|iv)\b', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'-webkit-[a-z\-]+', '', text)
-    text = re.sub(r'-moz-[a-z\-]+', '', text)
+    # Step 5: Remove remaining HTML attribute-like fragments
+    text = re.sub(r'\s+[a-z\-_]+="[^"]*"', ' ', text, flags=re.IGNORECASE)
 
-    # Remove hex color codes (like 1d2129)
-    text = re.sub(r'\b[0-9a-f]{6}\b', '', text, flags=re.IGNORECASE)
+    # Step 6: Remove stray HTML fragments and junk
+    text = re.sub(r'" >\s*" >', ' ', text)  # Remove broken tag remnants
+    text = re.sub(r'["\'>\/]', '', text)    # Remove stray quotes/brackets
 
-    # Remove font names that appear as junk
-    text = re.sub(r'\b(OpenSans|Helvetica|Arial|Verdana|Georgia|sans-serif|serif)\b', '', text, flags=re.IGNORECASE)
+    # Step 7: Remove common junk words that appear from CSS/attributes
+    junk = [' dgx', ' iv', ' -wrap', ' white-spac', ' wrap', ' pre', ' py', '1d2129', '1c1e21']
+    for word in junk:
+        text = text.replace(word, '')
 
-    # Step 6: Remove HTML attribute names
-    text = re.sub(r'\s+(data-|style|class|id|type|name)[a-z\-]*', '', text, flags=re.IGNORECASE)
-
-    # Step 7: Replace separator lines with newline
-    text = re.sub(r'\s*\++\s*', '\n', text)
-
-    # Step 8: Remove quotes, slashes, and other HTML debris
-    text = re.sub(r'["\'>\/;]+', ' ', text)
-
-    # Step 10: Clean up excessive whitespace
+    # Step 8: Clean whitespace
     text = re.sub(r' +', ' ', text)
-
-    # Step 11: Clean up excessive newlines
-    text = re.sub(r'\n{3,}', '\n\n', text)
     text = re.sub(r'\n +', '\n', text)
+    text = re.sub(r'\n{3,}', '\n\n', text)
 
-    # Step 12: Strip leading/trailing whitespace from lines
+    # Step 9: Remove lines that are just junk or too short
     lines = [line.strip() for line in text.split('\n')]
-    text = '\n'.join([line for line in lines if line])  # Remove empty lines
+    cleaned = []
+    for line in lines:
+        # Skip lines that are all symbols, very short, or CSS fragments
+        if (line and len(line) > 3 and
+            not re.match(r'^[+\-;:=#\s\d]*$', line) and
+            not re.match(r'^[a-z\-]+:[^;]*;?$', line, re.IGNORECASE)):
+            cleaned.append(line)
 
-    return text
+    return '\n\n'.join(cleaned).strip()
 
 
 def migrate(json_path, db_path):
