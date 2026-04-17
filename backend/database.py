@@ -361,7 +361,7 @@ def get_birthdays_this_week(conn):
     for delta in range(7):
         d = today + timedelta(days=delta)
         rows = conn.execute(
-            "SELECT id, name, given_name, surname, nickname, birth_day, birth_month, birth_year, "
+            "SELECT id, name, given_name, surname, birth_day, birth_month, birth_year, "
             "photo_file, is_alive FROM people "
             "WHERE birth_month = ? AND birth_day = ? ORDER BY name",
             (d.month, d.day)
@@ -373,7 +373,6 @@ def get_birthdays_this_week(conn):
                 "name": row["name"],
                 "given_name": row["given_name"],
                 "surname": row["surname"],
-                "nickname": row["nickname"],
                 "birth_day": row["birth_day"],
                 "birth_month": row["birth_month"],
                 "birth_year": row["birth_year"],
@@ -761,7 +760,7 @@ def get_dashboard_data(conn):
 
     # Recently "added" — people with most recent birth years (latest additions to tree)
     featured = conn.execute(
-        "SELECT id, name, given_name, surname, nickname, birth_year, death_year, photo_file, is_alive, birth_place "
+        "SELECT id, name, given_name, surname, birth_year, death_year, photo_file, is_alive, birth_place "
         "FROM people WHERE photo_file IS NOT NULL AND birth_year IS NOT NULL "
         "ORDER BY birth_year DESC LIMIT 4"
     ).fetchall()

@@ -1,11 +1,89 @@
 """Migración: family_tree.json → SQLite (data/godesia.db)."""
 
 import json
+import re
 import sys
 from pathlib import Path
+from html.parser import HTMLParser
 
 sys.path.insert(0, str(Path(__file__).parent))
 from database import get_connection, init_db, parse_gedcom_date, convert_date_to_spanish, update_all_photo_files
+
+
+class PlainTextExtractor(HTMLParser):
+    """Extract plain text from HTML, handling <br> as newlines."""
+    def __init__(self):
+        super().__init__()
+        self.text_parts = []
+        self.br_found = False
+
+    def handle_starttag(self, tag, attrs):
+        if tag.lower() in ['br', 'p', 'div']:
+            self.text_parts.append('\n')
+
+    def handle_data(self, data):
+        self.text_parts.append(data)
+
+    def get_text(self):
+        return ''.join(self.text_parts)
+
+
+def clean_note_html(text: str) -> str:
+    """Remove HTML tags and styles from notes, preserve meaningful line breaks."""
+    if not text:
+        return ""
+
+    # Step 1: Remove everything between < and > (all HTML tags)
+    text = re.sub(r'<[^>]+>', '', text, flags=re.DOTALL)
+
+    # Step 2: Remove HTML attribute fragments
+    text = re.sub(r'\s*=\s*["\']?[^"\'>\s]*["\']?', '', text)
+    text = re.sub(r'\s+[a-z\-]+\s*=', '', text, flags=re.IGNORECASE)
+
+    # Step 3: Decode HTML entities
+    import html
+    text = html.unescape(text)
+
+    # Step 4: Remove CSS attribute fragments
+    text = re.sub(r'[a-z\-]+:\s*[^;]+;', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'[a-z\-]+:\s+[^;>\s]+', '', text, flags=re.IGNORECASE)
+
+    # Step 5: Remove CSS class fragments and values
+    # Remove patterns like: _1mj, _3dgx (CSS classes with underscore+numbers)
+    text = re.sub(r'_\d+[a-z]*', '', text, flags=re.IGNORECASE)
+
+    # Remove CSS keywords and vendor prefixes
+    text = re.sub(r'\b(pre-wrap|relative|absolute|inherit|important|solid|normal|white-spac|dgx|iv)\b', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'-webkit-[a-z\-]+', '', text)
+    text = re.sub(r'-moz-[a-z\-]+', '', text)
+
+    # Remove hex color codes (like 1d2129)
+    text = re.sub(r'\b[0-9a-f]{6}\b', '', text, flags=re.IGNORECASE)
+
+    # Remove font names that appear as junk
+    text = re.sub(r'\b(OpenSans|Helvetica|Arial|Verdana|Georgia|sans-serif|serif)\b', '', text, flags=re.IGNORECASE)
+
+    # Step 6: Remove HTML attribute names
+    text = re.sub(r'\s+(data-|style|class|id|type|name)[a-z\-]*', '', text, flags=re.IGNORECASE)
+
+    # Step 7: Replace separator lines with newline
+    text = re.sub(r'\s*\++\s*', '\n', text)
+
+    # Step 8: Remove quotes, slashes, and other HTML debris
+    text = re.sub(r'["\'>\/;]+', ' ', text)
+
+    # Step 10: Clean up excessive whitespace
+    text = re.sub(r' +', ' ', text)
+
+    # Step 11: Clean up excessive newlines
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    text = re.sub(r'\n +', '\n', text)
+
+    # Step 12: Strip leading/trailing whitespace from lines
+    lines = [line.strip() for line in text.split('\n')]
+    text = '\n'.join([line for line in lines if line])  # Remove empty lines
+
+    return text
 
 
 def migrate(json_path, db_path):
@@ -191,12 +269,14 @@ def migrate(json_path, db_path):
         # No insertar fotos aquí — el script de sync crea el esquema correcto
         # con metadatos completos, relaciones padre-hijo, y etiquetado múltiple
 
-        # Notes
+        # Notes (cleaned of HTML tags and formatting)
         for note in person.get("notes", []):
-            conn.execute(
-                "INSERT INTO notes (person_id, content) VALUES (?,?)",
-                (person["id"], note)
-            )
+            cleaned_note = clean_note_html(note)
+            if cleaned_note:  # Only insert if not empty after cleaning
+                conn.execute(
+                    "INSERT INTO notes (person_id, content) VALUES (?,?)",
+                    (person["id"], cleaned_note)
+                )
 
     conn.commit()
 
