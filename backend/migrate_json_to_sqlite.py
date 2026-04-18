@@ -4,90 +4,9 @@ import json
 import re
 import sys
 from pathlib import Path
-from html.parser import HTMLParser
 
 sys.path.insert(0, str(Path(__file__).parent))
 from database import get_connection, init_db, parse_gedcom_date, convert_date_to_spanish, update_all_photo_files
-
-
-class PlainTextExtractor(HTMLParser):
-    """Extract plain text from HTML, treating block elements as paragraph breaks."""
-    def __init__(self):
-        super().__init__()
-        self.text_parts = []
-        self.last_was_text = False
-
-    def handle_starttag(self, tag, attrs):
-        tag_lower = tag.lower()
-        # Insert paragraph break before block elements
-        if tag_lower in ['br', 'p', 'div', 'blockquote']:
-            if self.last_was_text:
-                self.text_parts.append('\n')
-                self.last_was_text = False
-
-    def handle_data(self, data):
-        # Only add non-whitespace text
-        stripped = data.strip()
-        if stripped:
-            self.text_parts.append(stripped + ' ')
-            self.last_was_text = True
-
-    def get_text(self):
-        text = ''.join(self.text_parts)
-        # Clean up excessive spaces and newlines
-        text = re.sub(r' +', ' ', text)
-        text = re.sub(r'\n +', '\n', text)
-        return text.strip()
-
-
-def clean_note_html(text: str) -> str:
-    """Extract clean text from malformed HTML notes."""
-    if not text:
-        return ""
-
-    import html as html_module
-
-    # Step 1: First, collapse all HTML tags (even malformed ones with newlines)
-    # Remove < ... > even if they span multiple lines
-    text = re.sub(r'<[^<]*?>', '', text, flags=re.DOTALL)
-
-    # Step 2: Decode HTML entities (&oacute; → ó, etc)
-    text = html_module.unescape(text)
-
-    # Step 3: Remove CSS fragments that look like "property: value"
-    text = re.sub(r'\b[a-z\-]+:\s*[^;]*;?', '', text, flags=re.IGNORECASE)
-
-    # Step 4: Remove URLs
-    text = re.sub(r'https?://\S+', '', text)
-
-    # Step 5: Remove remaining HTML attribute-like fragments
-    text = re.sub(r'\s+[a-z\-_]+="[^"]*"', ' ', text, flags=re.IGNORECASE)
-
-    # Step 6: Remove stray HTML fragments and junk
-    text = re.sub(r'" >\s*" >', ' ', text)  # Remove broken tag remnants
-    text = re.sub(r'["\'>\/]', '', text)    # Remove stray quotes/brackets
-
-    # Step 7: Remove common junk words that appear from CSS/attributes
-    junk = [' dgx', ' iv', ' -wrap', ' white-spac', ' wrap', ' pre', ' py', '1d2129', '1c1e21']
-    for word in junk:
-        text = text.replace(word, '')
-
-    # Step 8: Clean whitespace
-    text = re.sub(r' +', ' ', text)
-    text = re.sub(r'\n +', '\n', text)
-    text = re.sub(r'\n{3,}', '\n\n', text)
-
-    # Step 9: Remove lines that are just junk or too short
-    lines = [line.strip() for line in text.split('\n')]
-    cleaned = []
-    for line in lines:
-        # Skip lines that are all symbols, very short, or CSS fragments
-        if (line and len(line) > 3 and
-            not re.match(r'^[+\-;:=#\s\d]*$', line) and
-            not re.match(r'^[a-z\-]+:[^;]*;?$', line, re.IGNORECASE)):
-            cleaned.append(line)
-
-    return '\n\n'.join(cleaned).strip()
 
 
 def migrate(json_path, db_path):
@@ -273,13 +192,12 @@ def migrate(json_path, db_path):
         # No insertar fotos aquí — el script de sync crea el esquema correcto
         # con metadatos completos, relaciones padre-hijo, y etiquetado múltiple
 
-        # Notes (cleaned of HTML tags and formatting)
+        # Notes (already cleaned by gedcom_parser.py)
         for note in person.get("notes", []):
-            cleaned_note = clean_note_html(note)
-            if cleaned_note:  # Only insert if not empty after cleaning
+            if note.strip():
                 conn.execute(
                     "INSERT INTO notes (person_id, content) VALUES (?,?)",
-                    (person["id"], cleaned_note)
+                    (person["id"], note)
                 )
 
     conn.commit()

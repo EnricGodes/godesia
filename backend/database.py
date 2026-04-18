@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS people (
     name TEXT NOT NULL,
     given_name TEXT,
     surname TEXT,
+    nickname TEXT,
     sex TEXT,
     birth_date TEXT,
     birth_day INTEGER,

@@ -28,6 +28,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 
+# Import note cleaning from the main parser
+sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
+from gedcom_parser import clean_note_html
+
 
 DOC_TYPES = [
     ("bautisme",     r"bautis|bateig|baptis"),
@@ -347,14 +351,25 @@ def parse_gedcom_people(lines):
                             j += 1
                         residences[person_id].append(resi_data)
                     elif tag == "NOTE":
+                        # Accumulate raw content including non-CONC continuation lines
                         note_content = rest
                         j = i + 1
-                        while j < len(lines) and lines[j].startswith("2"):
-                            conc = lines[j].rstrip("\n")
-                            if "CONC" in conc or "CONT" in conc:
-                                note_content += " " + conc.split(None, 1)[1] if len(conc.split(None, 1)) > 1 else ""
-                            j += 1
-                        notes[person_id].append(note_content)
+                        while j < len(lines):
+                            raw_line = lines[j].rstrip("\n")
+                            conc_match = re.match(r"^2\s+CONC\s?(.*)", raw_line)
+                            if conc_match:
+                                note_content += conc_match.group(1)
+                                j += 1
+                            elif re.match(r"^\d+\s+", raw_line) and not raw_line.startswith("2 CONC"):
+                                break  # New GEDCOM record — stop
+                            else:
+                                # Raw HTML continuation line (no level prefix)
+                                note_content += raw_line
+                                j += 1
+                        i = j - 1  # Rewind so outer loop processes next record
+                        cleaned = clean_note_html(note_content)
+                        if cleaned:
+                            notes[person_id].append(cleaned)
                 i += 1
 
             people[person_id] = person

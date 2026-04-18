@@ -8,10 +8,91 @@ from pathlib import Path
 
 
 def clean_html(text: str) -> str:
-    """Remove HTML tags and decode entities."""
+    """Remove HTML tags and decode entities (for simple fields, not notes)."""
     text = html.unescape(text)
     text = re.sub(r"<[^>]+>", " ", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def clean_note_html(raw: str) -> str:
+    """Clean Draft.js HTML from biographical notes, preserving meaningful content.
+
+    Preserves: line breaks, <b>, <i>, <strong>, <em>, <u>, <a href>, bare URLs.
+    Removes: Draft.js divs/spans, CSS classes, inline styles, data-* attributes.
+    """
+    if not raw or not raw.strip():
+        return ""
+
+    # 1. Preserve <a> links — extract and replace with placeholders
+    links = []
+    def save_link(m):
+        href = m.group(1)
+        text = m.group(2)
+        idx = len(links)
+        links.append((href, text))
+        return f"\x00LINK{idx}\x00"
+    raw = re.sub(r'<a\s[^>]*href="([^"]*)"[^>]*>(.*?)</a>', save_link, raw, flags=re.DOTALL | re.IGNORECASE)
+
+    # 2. Preserve inline formatting with placeholders
+    FORMAT_TAGS = {'b': 'B', 'i': 'I', 'strong': 'STRONG', 'em': 'EM', 'u': 'U'}
+    for tag_name, placeholder in FORMAT_TAGS.items():
+        raw = re.sub(rf'<{tag_name}\b[^>]*>', f'\x00O{placeholder}\x00', raw, flags=re.IGNORECASE)
+        raw = re.sub(rf'</{tag_name}>', f'\x00C{placeholder}\x00', raw, flags=re.IGNORECASE)
+
+    # 3. Convert block boundaries to newlines
+    raw = re.sub(r'<br\b[^>]*/?\s*>', '\n', raw, flags=re.IGNORECASE)
+    raw = re.sub(r'<hr\b[^>]*/?\s*>', '\n---\n', raw, flags=re.IGNORECASE)
+    raw = re.sub(r'</(?:div|p|tr|blockquote)>', '\n', raw, flags=re.IGNORECASE)
+    raw = re.sub(r'</t[dh]>', '  ', raw, flags=re.IGNORECASE)
+
+    # 4. Strip all remaining HTML tags
+    raw = re.sub(r'<[^>]*>', '', raw)
+
+    # 5. Decode HTML entities (now that split entities are reunited)
+    # Loop to handle double-encoded entities: &amp;lt; → &lt; → <
+    prev = None
+    while prev != raw:
+        prev = raw
+        raw = html.unescape(raw)
+    # After full decoding, any newly-revealed tags must also be processed
+    # Re-apply block boundary conversion and tag stripping on decoded content
+    raw = re.sub(r'<br\b[^>]*/?\s*>', '\n', raw, flags=re.IGNORECASE)
+    raw = re.sub(r'<hr\b[^>]*/?\s*>', '\n---\n', raw, flags=re.IGNORECASE)
+    raw = re.sub(r'</(?:div|p|tr|blockquote)>', '\n', raw, flags=re.IGNORECASE)
+    raw = re.sub(r'</t[dh]>', '  ', raw, flags=re.IGNORECASE)
+    raw = re.sub(r'<[^>]*>', '', raw)
+
+    # 6. Clean up whitespace
+    raw = raw.replace('\u00a0', ' ')           # &nbsp; → regular space
+    raw = re.sub(r'[ \t]+', ' ', raw)          # collapse horizontal whitespace
+    raw = re.sub(r' *\n *', '\n', raw)         # trim spaces around newlines
+    raw = re.sub(r'\n{3,}', '\n\n', raw)       # max 2 consecutive newlines
+
+    # 7. Restore inline formatting placeholders
+    for tag_name, placeholder in FORMAT_TAGS.items():
+        raw = raw.replace(f'\x00O{placeholder}\x00', f'<{tag_name}>')
+        raw = raw.replace(f'\x00C{placeholder}\x00', f'</{tag_name}>')
+
+    # 8. Restore links with target="_blank"
+    for idx, (href, text) in enumerate(links):
+        # Strip any HTML tags inside link text (e.g. <bdi style="...">, <span style="...">)
+        clean_text = re.sub(r'<[^>]*>', '', text).strip()
+        raw = raw.replace(f'\x00LINK{idx}\x00', f'<a href="{href}" target="_blank" rel="noopener">{clean_text}</a>')
+
+    # 9. Detect bare URLs not already in <a> tags and wrap them
+    raw = re.sub(
+        r'(?<!["\'>])(https?://[^\s<]+)',
+        r'<a href="\1" target="_blank" rel="noopener">\1</a>',
+        raw
+    )
+
+    # 10. Strip and check if empty
+    raw = raw.strip()
+    # Skip notes that are empty or only whitespace/nbsp
+    if not raw or re.match(r'^[\s\u00a0]*$', raw):
+        return ""
+
+    return raw
 
 
 def translate_event_type(event_type: str) -> str:
@@ -47,6 +128,8 @@ def parse_gedcom(filepath: str) -> dict:
     current_id = None
     current_level1 = None
     current_level2 = None
+    # Track raw note accumulation for the current INDI
+    _in_note_block = False  # True when inside a 1 NOTE block
 
     i = 0
     while i < len(lines):
@@ -56,6 +139,11 @@ def parse_gedcom(filepath: str) -> dict:
         # Parse level, tag, value
         match = re.match(r"^(\d+)\s+(@\w+@)?\s*(\w+)\s*(.*)?$", line)
         if not match:
+            # Non-standard line: if inside a NOTE block, it's a raw HTML continuation
+            if _in_note_block and current_record == "INDI" and current_id:
+                indi = individuals[current_id]
+                if indi.get("_raw_notes"):
+                    indi["_raw_notes"][-1] += line
             continue
 
         level = int(match.group(1))
@@ -66,6 +154,7 @@ def parse_gedcom(filepath: str) -> dict:
         if level == 0:
             current_level1 = None
             current_level2 = None
+            _in_note_block = False
             if tag == "INDI":
                 current_id = xref
                 current_record = "INDI"
@@ -85,6 +174,7 @@ def parse_gedcom(filepath: str) -> dict:
                     "anecdotes": [],
                     "events": [],
                     "notes": [],
+                    "_raw_notes": [],
                     "photos": [],
                     "family_spouse": [],
                     "family_child": None,
@@ -110,6 +200,8 @@ def parse_gedcom(filepath: str) -> dict:
         if current_record == "INDI" and current_id:
             indi = individuals[current_id]
             if level == 1:
+                if tag != "NOTE":
+                    _in_note_block = False
                 current_level1 = tag
                 current_level2 = None
 
@@ -152,10 +244,10 @@ def parse_gedcom(filepath: str) -> dict:
                 elif tag == "FAMC":
                     indi["family_child"] = value
                 elif tag == "NOTE":
-                    clean = clean_html(value)
-                    if clean:
-                        indi["notes"].append(clean)
+                    indi["_raw_notes"].append(value)
+                    _in_note_block = True
                 elif tag == "OBJE":
+                    _in_note_block = False
                     current_level1 = "OBJE"
                     indi["photos"].append({})
 
@@ -283,9 +375,10 @@ def parse_gedcom(filepath: str) -> dict:
                             evt["type"] = translate_event_type(value)
                 elif current_level1 == "NOTE":
                     if tag == "CONC":
-                        clean = clean_html(value)
-                        if indi["notes"] and clean:
-                            indi["notes"][-1] += " " + clean
+                        if indi.get("_raw_notes"):
+                            # Use raw match group (not stripped) — CONC joins at arbitrary byte boundaries
+                            raw_value = match.group(4) or ""
+                            indi["_raw_notes"][-1] += raw_value
 
             elif level == 3:
                 if current_level1 == "RESI" and current_level2 == "ADDR" and indi["residences"]:
@@ -333,6 +426,15 @@ def parse_gedcom(filepath: str) -> dict:
                     fam["partnership"]["type"] = "partners"
                 elif tag == "DATE":
                     fam["partnership"]["date"] = value
+
+    # Post-processing: clean accumulated raw notes
+    for indi in individuals.values():
+        cleaned = []
+        for raw in indi.pop("_raw_notes", []):
+            result = clean_note_html(raw)
+            if result:
+                cleaned.append(result)
+        indi["notes"] = cleaned
 
     return {"individuals": individuals, "families": families}
 

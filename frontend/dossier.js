@@ -1424,12 +1424,14 @@ function renderNotes(notes) {
     document.getElementById('notes-section').style.display = 'block';
 
     const articles = notes.map((n, i) => {
-        const clean = n.replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim();
+        const formatted = n
+            .replace(/\n/g, '<br>')
+            .replace(/^---$/gm, '<hr class="my-4 border-outline-variant">');
         return `
             <article class="relative p-10 bg-white heritage-border shadow-inner rounded-sm font-headline">
                 <div class="absolute top-0 right-0 p-4 text-[10px] font-bold text-outline">SIGNATURA: NOTA_${i+1}</div>
                 <div class="space-y-6 text-lg italic leading-relaxed opacity-90">
-                    <p>${clean}</p>
+                    <p>${formatted}</p>
                 </div>
             </article>
         `;
