@@ -65,8 +65,7 @@ CREATE TABLE IF NOT EXISTS marriages (
     place TEXT,
     divorce_date TEXT,
     divorce_place TEXT,
-    divorce_note TEXT,
-    UNIQUE(person1_id, person2_id)
+    divorce_note TEXT
 );
 
 CREATE TABLE IF NOT EXISTS partnerships (
@@ -845,9 +844,9 @@ def get_person_dossier(conn, person_id):
     spouse = None
     spouses_list = []
     spouse_rows = conn.execute("""
-        SELECT person2_id, date, place, divorce_date, divorce_place, divorce_note FROM marriages WHERE person1_id = ? AND date IS NOT NULL
+        SELECT person2_id, date, place, divorce_date, divorce_place, divorce_note FROM marriages WHERE person1_id = ?
         UNION ALL
-        SELECT person1_id, date, place, divorce_date, divorce_place, divorce_note FROM marriages WHERE person2_id = ? AND date IS NOT NULL
+        SELECT person1_id, date, place, divorce_date, divorce_place, divorce_note FROM marriages WHERE person2_id = ?
         ORDER BY date
     """, (person_id, person_id)).fetchall()
 
@@ -899,9 +898,9 @@ def get_person_dossier(conn, person_id):
         child_dict = dict(c)
         # Get child's marriages (only with dates)
         marriages = conn.execute("""
-            SELECT person2_id, date, place FROM marriages WHERE person1_id = ? AND date IS NOT NULL
+            SELECT person2_id, date, place FROM marriages WHERE person1_id = ?
             UNION ALL
-            SELECT person1_id, date, place FROM marriages WHERE person2_id = ? AND date IS NOT NULL
+            SELECT person1_id, date, place FROM marriages WHERE person2_id = ?
             ORDER BY date
         """, (c["id"], c["id"])).fetchall()
 
