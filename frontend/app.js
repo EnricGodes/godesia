@@ -213,7 +213,13 @@ function renderPeopleList(q, results) {
 
   // List of matches
   const list = results.map(p => {
-    const years = [p.birth_year, p.death_year].filter(Boolean).join('–');
+    let years;
+    if (p.birth_year && p.death_year) years = `${p.birth_year}–${p.death_year}`;
+    else if (p.birth_year && !p.death_year && !p.is_alive) years = `${p.birth_year}–?`;
+    else if (p.birth_year) years = `${p.birth_year}`;
+    else if (p.death_year) years = `?–${p.death_year}`;
+    else if (!p.is_alive) years = `?–?`;
+    else years = '';
     const yearsLabel = years ? ` (${years})` : '';
     return `<li style="margin:4px 0"><a href="/dossier.html?id=${encodeURIComponent(p.id)}" style="color:#2D4B33;font-weight:600;text-decoration:none">${p.name}</a>${yearsLabel}</li>`;
   }).join('');

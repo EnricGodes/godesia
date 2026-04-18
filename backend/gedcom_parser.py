@@ -213,6 +213,8 @@ def parse_gedcom(filepath: str) -> dict:
                     current_level1 = "BIRT"
                 elif tag == "DEAT":
                     current_level1 = "DEAT"
+                    if value.upper() == "Y":
+                        indi["death"]["confirmed"] = True
                 elif tag == "BURI":
                     indi["burial"].append({"place_detail": value} if value else {})
                     current_level1 = "BURI"

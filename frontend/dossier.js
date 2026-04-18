@@ -114,11 +114,13 @@ function renderDossier(data) {
     vitalDatesEl.classList.remove('flex-wrap', 'items-center', 'gap-6');
     vitalDatesEl.classList.add('flex-col', 'gap-2');
 
-    // Only show death date if it exists or death_year is set
+    // Show death date, year, or '?' for deceased without date
     let deathDisplay = '';
     if (person.death_date || person.death_year) {
         const deathYear = person.death_year || '?';
         deathDisplay = ` — ${person.death_date || deathYear}`;
+    } else if (!person.is_alive) {
+        deathDisplay = ' — ?';
     }
 
     vitalDatesEl.innerHTML = `
@@ -231,7 +233,7 @@ function renderPerfil(data, displayName) {
                 </div>
             </div>
         </div>
-        ${person.death_date || person.death_year ? `
+        ${person.death_date || person.death_year || !person.is_alive ? `
         <div class="space-y-8">
             <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                 <span class="material-symbols-outlined">account_balance</span>
@@ -242,7 +244,7 @@ function renderPerfil(data, displayName) {
                     <div>
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Fallecimiento</dt>
                         <dd class="text-sm">
-                            <span class="font-bold block">${person.death_date || person.death_year}${person.death_age ? ' (' + person.death_age + ' años)' : ''}</span>
+                            <span class="font-bold block">${person.death_date || person.death_year || '?'}${person.death_age ? ' (' + person.death_age + ' años)' : ''}</span>
                             ${person.death_place ? `<span class="italic opacity-80 text-xs">${person.death_place}</span>` : ''}
                         </dd>
                     </div>
@@ -306,15 +308,13 @@ function renderFamilyTree(data) {
 
     // Helper functions
     function dossierId(id) { return id ? id.replace(/@/g, '') : ''; }
-    function formatYears(birth_year, death_year) {
-        // If birth_year AND death_year: "birth_year - death_year"
+    function formatYears(birth_year, death_year, is_alive = true) {
         if (birth_year && death_year) return `${birth_year} - ${death_year}`;
-        // If birth_year but NO death_year: "birth_year" (no " - ?")
-        if (birth_year) return birth_year;
-        // If NO birth_year but death_year: "? - death_year"
+        if (birth_year && !death_year && !is_alive) return `${birth_year} - ?`;
+        if (birth_year) return `${birth_year}`;
         if (death_year) return `? - ${death_year}`;
-        // If neither: "? - ?"
-        return '? - ?';
+        if (!is_alive) return `? - ?`;
+        return '';
     }
     function getDisplayName(person) {
         return formatNameWithNickname(person.name, person.nickname, person.given_name, person.surname);
@@ -337,7 +337,7 @@ function renderFamilyTree(data) {
                             ${p.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${p.photo_file}" alt="${pDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
                         </div>
                         <h4 class="text-[11px] font-bold text-center leading-tight">${pDisplayName}</h4>
-                        <span class="text-[10px] opacity-60">${formatYears(p.birth_year, p.death_year)}</span>
+                        <span class="text-[10px] opacity-60">${formatYears(p.birth_year, p.death_year, p.is_alive)}</span>
                         ${recentDeathTag(p)}
                     </div>
                 </a>
@@ -362,7 +362,7 @@ function renderFamilyTree(data) {
                             ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${sDisplayName}">` : '<span class="material-symbols-outlined text-sm">person</span>'}
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${sDisplayName}</h4>
-                        <span class="text-[10px] opacity-40">${formatYears(s.birth_year, s.death_year)}</span>
+                        <span class="text-[10px] opacity-40">${formatYears(s.birth_year, s.death_year, s.is_alive)}</span>
                         ${recentDeathTag(s)}
                     </div>
                 </a>
@@ -404,7 +404,7 @@ function renderFamilyTree(data) {
                         ${person.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${person.photo_file}" alt="${personDisplayName}">` : '<span class="material-symbols-outlined text-2xl">person</span>'}
                     </div>
                     <h3 class="font-headline font-bold text-primary text-center text-sm">${personDisplayName}</h3>
-                    <span class="text-xs opacity-60 italic text-center">${formatYears(person.birth_year, person.death_year)}</span>
+                    <span class="text-xs opacity-60 italic text-center">${formatYears(person.birth_year, person.death_year, person.is_alive)}</span>
                     <div class="mt-2 text-[8px] uppercase tracking-widest font-extrabold bg-primary text-on-primary px-2 py-0.5 rounded">Sujeto Central</div>
                     ${recentDeathTag(person)}
                 </div>
@@ -423,7 +423,7 @@ function renderFamilyTree(data) {
                             ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${spouseDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${spouseDisplayName}</h4>
-                        <span class="text-[10px] opacity-60 text-center">${formatYears(s.birth_year, s.death_year)}</span>
+                        <span class="text-[10px] opacity-60 text-center">${formatYears(s.birth_year, s.death_year, s.is_alive)}</span>
                         ${s.marriage_date ? `<span class="text-[9px] opacity-50 text-center">${s.marriage_date}</span>` : ''}
                         ${s.divorce ? `<span class="text-[9px] opacity-40 text-center italic">divorciado ${s.divorce.date || ''}</span>` : ''}
                         ${recentDeathTag(s)}
@@ -444,7 +444,7 @@ function renderFamilyTree(data) {
         <div class="flex justify-center gap-16 border-t border-outline-variant pt-6 w-full flex-wrap">`;
         children.forEach(c => {
             const cDisplayName = getDisplayName(c);
-            const childYears = c.is_alive ? c.birth_year : formatYears(c.birth_year, c.death_year);
+            const childYears = formatYears(c.birth_year, c.death_year, c.is_alive);
             html += `
                 <a href="/dossier.html?id=${dossierId(c.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">

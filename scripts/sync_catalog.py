@@ -261,7 +261,7 @@ def parse_gedcom_people(lines):
                 "sex": None, "birth_date": None, "birth_day": None, "birth_month": None,
                 "birth_year": None, "birth_place": None, "death_date": None, "death_year": None,
                 "death_place": None, "death_cause": None, "death_note": None, "death_age": None,
-                "is_alive": 0, "father_id": None, "mother_id": None, "photo_file": None, "photo_count": 0
+                "is_alive": 0, "_has_deat": False, "father_id": None, "mother_id": None, "photo_file": None, "photo_count": 0
             }
 
             while i < len(lines):
@@ -305,6 +305,7 @@ def parse_gedcom_people(lines):
                                 person["birth_place"] = birt_line.split("PLAC", 1)[1].strip()
                             j += 1
                     elif tag == "DEAT":
+                        person["_has_deat"] = True
                         j = i + 1
                         while j < len(lines) and lines[j].startswith("2"):
                             deat_line = lines[j].rstrip("\n")
@@ -606,6 +607,14 @@ def main():
 
     if not args.dry_run:
         print("\nFase 7: Escribiendo en base de datos...")
+
+        # Compute is_alive before UPSERT: born after 1900, no death record, no DEAT flag
+        for person_id, person in people.items():
+            if (person["birth_year"] and person["birth_year"] > 1900
+                    and not person["death_date"] and not person["death_year"]
+                    and not person["_has_deat"]):
+                person["is_alive"] = 1
+
         cursor = db_conn.cursor()
 
         # UPSERT personas — preserves photo_file and photo_count (managed by sync_photos)
@@ -791,12 +800,7 @@ def main():
                 (album_id, album_info["title"])
             )
 
-        # Calcular is_alive: personas nacidas después de 1900 sin registro de muerte
-        cursor.execute("""
-            UPDATE people SET is_alive = 1
-            WHERE death_date IS NULL AND death_year IS NULL
-            AND birth_year IS NOT NULL AND birth_year > 1900
-        """)
+        # is_alive already computed per-person before UPSERT (respects DEAT Y flag)
 
         cursor.execute("""
             UPDATE people SET

@@ -37,8 +37,9 @@ def migrate(json_path, db_path):
         _, _, d_year = parse_gedcom_date(death_date_raw)
 
         # Determine if alive: has birth, no death, born after 1900
+        death_confirmed = bool(death.get("confirmed"))
         is_alive = 0
-        if b_year and b_year > 1900 and not death_date_raw:
+        if b_year and b_year > 1900 and not death_date_raw and not death_confirmed:
             is_alive = 1
 
         # Primary photo
