@@ -381,8 +381,9 @@ function renderFamilyTree(data) {
     // Get spouses list (use plural array if available, fallback to single spouse)
     const spousesList = (data.spouses && data.spouses.length > 0) ? data.spouses : (data.spouse ? [data.spouse] : []);
 
+    const alignClass = spousesList.length === 1 ? 'items-center' : 'items-start';
     html += `
-        <div class="relative w-full flex justify-center items-start gap-16 my-6">
+        <div class="relative w-full flex justify-center ${alignClass} gap-16 my-6">
     `;
 
     // Invisible spacer on the left to center main person
