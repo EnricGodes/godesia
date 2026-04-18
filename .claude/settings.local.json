@@ -78,7 +78,8 @@
       "Bash(awk '{print $2}')",
       "Bash(xargs kill *)",
       "Bash(rm -f godesia.db-wal godesia.db-shm)",
-      "Bash(pkill -f \"python3 -m uvicorn\")"
+      "Bash(pkill -f \"python3 -m uvicorn\")",
+      "Bash(ls -lth /Users/enricgodes/SynologyDrive/claude/godesia/docs/*.ged)"
     ]
   }
 }
