@@ -65,7 +65,8 @@ CREATE TABLE IF NOT EXISTS marriages (
     place TEXT,
     divorce_date TEXT,
     divorce_place TEXT,
-    divorce_note TEXT
+    divorce_note TEXT,
+    UNIQUE(person1_id, person2_id)
 );
 
 CREATE TABLE IF NOT EXISTS partnerships (

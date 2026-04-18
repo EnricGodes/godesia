@@ -650,12 +650,15 @@ def main():
                   person["death_cause"], person["death_note"], person["death_age"], person["is_alive"],
                   person["father_id"], person["mother_id"]))
 
-        # UPSERT matrimonios
+        # UPSERT matrimonios (sort pair to match migrate_json_to_sqlite convention)
         for fam_id, marr in marriages.items():
+            p1, p2 = sorted([marr["husb"], marr["wife"]])
             cursor.execute("""
-                INSERT OR REPLACE INTO marriages (person1_id, person2_id, date, place)
+                INSERT INTO marriages (person1_id, person2_id, date, place)
                 VALUES (?, ?, ?, ?)
-            """, (marr["husb"], marr["wife"], marr["date"], marr["place"]))
+                ON CONFLICT(person1_id, person2_id) DO UPDATE SET
+                    date=excluded.date, place=excluded.place
+            """, (p1, p2, marr["date"], marr["place"]))
 
         # DELETE + re-insert ocupaciones, residencias, notas (1-to-many)
         cursor.execute("DELETE FROM occupations")
