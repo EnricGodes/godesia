@@ -1030,10 +1030,16 @@ def get_person_dossier(conn, person_id):
 
     # Education events (events with type = "Educación")
     education_events = conn.execute(
-        "SELECT description as title, date, place FROM events WHERE person_id = ? AND type = 'Educación' ORDER BY date",
+        "SELECT description as title, date, place FROM events WHERE person_id = ? AND type = 'Educación'",
         (person_id,)
     ).fetchall()
     education_list = [dict(e) for e in education_events]
+    # Sort by earliest year found in the Spanish date string
+    def _edu_year(e):
+        import re as _re
+        m = _re.search(r'\b(\d{4})\b', e.get('date', '') or '')
+        return int(m.group(1)) if m else 9999
+    education_list.sort(key=_edu_year)
 
     # Work events (events with type = "Trabajo") — displayed in Trayectoria Profesional
     work_events = conn.execute(

@@ -160,11 +160,11 @@ function renderDossier(data) {
     // 6. CRONOGRAMA
     renderTimeline(data);
 
-    // 7. TRAYECTORIA PROFESIONAL (Ocupación + Trabajo)
-    renderCareer(data.career || data.occupations);
-
-    // 7b. ESTUDIOS
+    // 7. ESTUDIOS
     renderEducation(data.education);
+
+    // 7b. TRAYECTORIA PROFESIONAL (Ocupación + Trabajo)
+    renderCareer(data.career || data.occupations);
 
     // 8. MILITAR
     renderMilitary(data);
@@ -1455,15 +1455,11 @@ function renderEducation(educationList) {
 
     const html = `
         <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" class="w-7 h-7">
-                <path d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V16H3V10Z" />
-                <path d="M2 16H22" />
-                <path d="M4 22L7 16" />
-                <path d="M20 22L17 16" />
-                <path d="M13 9H11" />
-                <path d="M8 11L8 7L7 8" />
-                <path d="M17 11L17 7L16 8" />
-                <path d="M12 20L12 16" />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7">
+                <path d="M5.33333 3.00001C7.79379 2.99657 10.1685 3.88709 12 5.5V21C10.1685 19.3871 7.79379 18.4966 5.33333 18.5C3.77132 18.5 2.99032 18.5 2.64526 18.2792C2.4381 18.1466 2.35346 18.0619 2.22086 17.8547C2 17.5097 2 16.8941 2 15.6629V6.40322C2 4.97543 2 4.26154 2.54874 3.68286C3.09748 3.10418 3.65923 3.07432 4.78272 3.0146C4.965 3.00491 5.14858 3.00001 5.33333 3.00001Z" />
+                <path d="M18.6667 3.00001C16.2062 2.99657 13.8315 3.88709 12 5.5V21C13.8315 19.3871 16.2062 18.4966 18.6667 18.5C20.2287 18.5 21.0097 18.5 21.3547 18.2792C21.5619 18.1466 21.6465 18.0619 21.7791 17.8547C22 17.5097 22 16.8941 22 15.6629V6.40322C22 4.97543 22 4.26154 21.4513 3.68286C20.9025 3.10418 20.3408 3.07432 19.2173 3.0146C19.035 3.00491 18.8514 3.00001 18.6667 3.00001Z" />
+                <path d="M19 7.32566C18.8893 7.32211 18.7782 7.32032 18.6667 7.32032C18.1048 7.31954 17.5475 7.36537 17 7.45576M19 11.0067C18.8893 11.0032 18.7782 11.0014 18.6667 11.0014C17.401 10.9996 16.158 11.2344 15 11.6824M19 14.501C18.8893 14.4975 18.7782 14.4957 18.6667 14.4957C17.401 14.4939 16.158 14.7287 15 15.1767" />
+                <path d="M5 7.32566C5.11067 7.32211 5.22179 7.32032 5.33333 7.32032C5.89518 7.31954 6.45255 7.36537 7 7.45576M5 11.0067C5.11067 11.0032 5.22179 11.0014 5.33333 11.0014C6.599 10.9996 7.84198 11.2344 9 11.6824M5 14.501C5.11067 14.4975 5.22179 14.4957 5.33333 14.4957C6.599 14.4939 7.84198 14.7287 9 15.1767" />
             </svg>
             Estudios
         </h2>
