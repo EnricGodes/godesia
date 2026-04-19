@@ -1406,12 +1406,20 @@ function renderCareer(careerList) {
 
     document.getElementById('career-section').style.display = 'block';
 
+    function linkifyCareerText(text) {
+        if (!text) return text;
+        return text.replace(/(https?:\/\/[^\s]+)/g, url => {
+            const display = url.length > 50 ? url.slice(0, 50) + '…' : url;
+            return `<a href="${url}" target="_blank" rel="noopener" style="color:var(--primary);word-break:break-all;">${display}</a>`;
+        });
+    }
+
     const cards = careerList.map((c, i) => {
         return `
             <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 border-primary">
                 <p class="text-[10px] text-outline font-medium mb-2">${c.date || 'Período desconocido'}</p>
                 ${c.place ? `<p class="text-sm font-bold text-on-surface mb-3">${c.place}</p>` : ''}
-                <p class="text-xs text-outline">${c.title}</p>
+                <p class="text-xs text-outline">${linkifyCareerText(c.title)}</p>
             </div>
         `;
     }).join('');
