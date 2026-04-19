@@ -664,10 +664,11 @@ def main():
                   person["death_cause"], person["death_note"], person["death_age"], person["is_alive"],
                   person["father_id"], person["mother_id"]))
 
-        # UPSERT matrimonios
+        # DELETE + re-insert matrimonios (avoid duplicates with autoincrement PK)
+        cursor.execute("DELETE FROM marriages")
         for fam_id, marr in marriages.items():
             cursor.execute("""
-                INSERT OR REPLACE INTO marriages (person1_id, person2_id, date, place)
+                INSERT INTO marriages (person1_id, person2_id, date, place)
                 VALUES (?, ?, ?, ?)
             """, (marr["husb"], marr["wife"], marr["date"], marr["place"]))
 
