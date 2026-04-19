@@ -801,8 +801,8 @@ function buildEvents(data) {
     }
 
     // Bautismo
-    if (data.baptism_date) {
-        const year = extractYear(data.baptism_date);
+    if (person.baptism_date) {
+        const year = extractYear(person.baptism_date);
         if (year) {
             const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
             events.push({
@@ -810,10 +810,11 @@ function buildEvents(data) {
                 age: ageText(year),
                 type: 'Bautismo',
                 lines: [
-                    formatDateWithQualifier(data.baptism_date) || '',
-                    data.baptism_place || ''
+                    formatDateWithQualifier(person.baptism_date) || '',
+                    person.baptism_place || '',
+                    person.godparents ? `Padrinos: ${person.godparents}` : ''
                 ].filter(Boolean),
-                note: data.baptism ? (data.baptism.note || '') : '',
+                note: '',
                 photo: null,
                 name: personName
             });

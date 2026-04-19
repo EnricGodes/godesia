@@ -61,6 +61,10 @@ def migrate(json_path, db_path):
         baptism_date = convert_date_to_spanish(baptism_date_raw)
         baptism_place = baptism.get("place", "")
         godparents = baptism.get("godparents", "")
+        if not godparents:
+            bapt_note = baptism.get("note", "") or ""
+            if bapt_note.lower().startswith("godparents:"):
+                godparents = bapt_note.split(":", 1)[1].strip()
 
         conn.execute(
             "INSERT INTO people (id, name, given_name, surname, sex, "
