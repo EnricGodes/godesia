@@ -217,41 +217,35 @@ def convert_date_to_spanish(date_str):
 
     original = date_str
 
-    # Handle ranges: "FROM APR 1925 TO 1935" or "BET 1860 AND 1865" or "TO 13 JUN 1958"
+    # Handle compound ranges first: "FROM ... TO ...", "BET ... AND ..."
     if "FROM" in date_str and "TO" in date_str:
         start = date_str.split("FROM")[1].split("TO")[0].strip()
         end = date_str.split("TO")[1].strip()
-        start_spanish = convert_date_to_spanish(start)
-        end_spanish = convert_date_to_spanish(end)
-        return f"De {start_spanish} a {end_spanish}"
-    elif date_str.startswith("TO "):
-        end_date = date_str[3:].strip()
-        end_spanish = convert_date_to_spanish(end_date)
-        return f"Hasta {end_spanish}"
+        return f"De {convert_date_to_spanish(start)} a {convert_date_to_spanish(end)}"
     elif "BET" in date_str and "AND" in date_str:
         start = date_str.split("BET")[1].split("AND")[0].strip()
         end = date_str.split("AND")[1].strip()
-        start_spanish = convert_date_to_spanish(start)
-        end_spanish = convert_date_to_spanish(end)
-        return f"Entre {start_spanish} y {end_spanish}"
+        return f"Entre {convert_date_to_spanish(start)} y {convert_date_to_spanish(end)}"
 
-    # Extract and translate prefixes (ABT, BEF, AFT, etc.)
+    # Handle prefixes — strip and translate, then recurse for the rest
     prefix_map = {
+        "FROM": "Desde",
+        "TO": "Hasta",
         "ABT": "Aprox.",
-        "EST": "Aprox.",
-        "CAL": "Aprox.",
+        "EST": "Estimado",
+        "CAL": "Calculado",
         "BEF": "Antes de",
         "AFT": "Después de",
+        "INT": "Interpretado",
     }
-    spanish_prefix = ""
     for prefix, translation in prefix_map.items():
-        if date_str.startswith(prefix):
-            spanish_prefix = translation
-            date_str = date_str[len(prefix):].strip()
-            break
+        if date_str.startswith(prefix + " "):
+            rest = date_str[len(prefix):].strip()
+            converted_rest = convert_date_to_spanish(rest)
+            return f"{translation} {converted_rest}"
 
+    # Convert simple date: "5 APR 1824", "APR 1824", "1824"
     parts = date_str.split()
-    prefix_str = f"{spanish_prefix} " if spanish_prefix else ""
 
     if len(parts) == 3:  # "5 APR 1824"
         try:
@@ -259,22 +253,22 @@ def convert_date_to_spanish(date_str):
             month = MONTHS.get(parts[1].upper())
             year = int(parts[2])
             if month:
-                return f"{prefix_str}{day} {MONTHS_SPANISH[month]} {year}"
+                return f"{day} {MONTHS_SPANISH[month]} {year}"
         except (ValueError, KeyError):
             pass
-    elif len(parts) == 2:  # "APR 1824" o "1824"
-        if parts[0].isdigit():  # "1824"
-            return f"{prefix_str}{parts[0]}"
-        else:  # "APR 1824"
+    elif len(parts) == 2:  # "APR 1824"
+        if parts[0].isdigit():
+            return parts[0]
+        else:
             month = MONTHS.get(parts[0].upper())
             try:
                 year = int(parts[1])
                 if month:
-                    return f"{prefix_str}{MONTHS_SPANISH[month]} {year}"
+                    return f"{MONTHS_SPANISH[month]} {year}"
             except ValueError:
                 pass
     elif len(parts) == 1 and parts[0].isdigit():  # "1824"
-        return f"{prefix_str}{parts[0]}"
+        return parts[0]
 
     # Si no puede parsear, retorna el original
     return original
