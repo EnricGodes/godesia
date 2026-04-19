@@ -421,10 +421,6 @@ def parse_gedcom_people(lines):
 
             if husb_id and wife_id:
                 marriages[fam_id] = {"husb": husb_id, "wife": wife_id, "date": marr_data["date"], "place": marr_data["place"]}
-                if husb_id in people:
-                    people[husb_id]["father_id"] = None
-                if wife_id in people:
-                    people[wife_id]["mother_id"] = None
 
             for chil_id in chil_list:
                 children[fam_id].append(chil_id)
