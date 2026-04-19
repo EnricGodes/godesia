@@ -10,99 +10,132 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config={corePlugins:{preflight:false}}</script>
+    <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          colors: {
+            'primary': '#17341e',
+            'primary-container': '#2d4b33',
+            'on-primary': '#ffffff',
+            'secondary': '#78583e',
+            'secondary-container': '#fdd2b1',
+            'on-secondary-container': '#78583f',
+            'tertiary': '#392d13',
+            'tertiary-container': '#504327',
+            'surface': '#fcf9f0',
+            'surface-bright': '#fcf9f0',
+            'surface-dim': '#dddad1',
+            'surface-container': '#f1eee5',
+            'surface-container-high': '#ebe8df',
+            'surface-container-low': '#f6f3ea',
+            'surface-container-lowest': '#ffffff',
+            'on-surface': '#1c1c17',
+            'on-surface-variant': '#424842',
+            'outline-variant': '#c2c8bf',
+            'alive-green': '#4a7c50',
+          },
+          fontFamily: {
+            serif: ["'Noto Serif'", 'serif'],
+            sans: ["'Manrope'", 'sans-serif'],
+          },
+        }
+      }
+    }
+    </script>
 </head>
-<body class="dashboard-body">
+<body class="dashboard-body block bg-surface">
 
 
 <!-- Sidebar: Family Branches -->
-<aside class="dash-sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <div class="sidebar-icon">
-            <span class="material-symbols-outlined">diversity_3</span>
+<aside class="dash-sidebar hidden lg:flex lg:flex-col fixed left-0 top-[64px] bottom-0 w-[260px] bg-surface-container py-8 px-6 overflow-y-auto z-40" id="sidebar">
+    <div class="flex items-center gap-3 mb-8">
+        <div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
+            <span class="material-symbols-outlined text-on-primary text-[1.2rem]">diversity_3</span>
         </div>
         <div>
-            <h3 class="sidebar-title">Ramas Familiares</h3>
-            <p class="sidebar-subtitle">Explora tu linaje</p>
+            <h3 class="font-serif text-[0.9rem] font-semibold text-primary italic">Ramas Familiares</h3>
+            <p class="text-[0.6rem] uppercase tracking-[0.15em] text-on-surface-variant">Explora tu linaje</p>
         </div>
     </div>
-    <nav class="sidebar-branches" id="sidebar-branches">
+    <nav class="sidebar-branches flex flex-col gap-1" id="sidebar-branches">
         <!-- Filled by JS -->
     </nav>
 </aside>
 
 <!-- Main Content -->
-<main class="dash-main">
+<main class="pt-[88px] pb-16 px-6 max-w-[1200px] mx-auto lg:ml-[max(260px,calc(50vw-470px))] lg:mr-auto lg:px-12">
 
     <!-- Hero Section -->
-    <section class="dash-hero">
-        <div class="hero-text">
-            <h1>Bienvenido al legado de la <em>Familia Godes</em>.</h1>
-            <p>Tu linaje es una historia viva. Descubre las conexiones, los documentos y mantén vivos los recuerdos para las generaciones futuras.</p>
+    <section class="text-center mb-16 flex flex-col items-center">
+        <div class="max-w-[700px] mb-10">
+            <h1 class="font-serif text-[2.5rem] md:text-[3.2rem] text-primary leading-[1.2] mb-4 font-normal">Bienvenido al legado de la <em class="text-secondary italic">Familia Godes</em>.</h1>
+            <p class="text-[1.05rem] text-on-surface-variant leading-[1.7] font-light">Tu linaje es una historia viva. Descubre las conexiones, los documentos y mantén vivos los recuerdos para las generaciones futuras.</p>
         </div>
-        <div class="hero-search">
-            <div class="hero-search-box">
-                <span class="material-symbols-outlined hero-search-icon">auto_awesome</span>
-                <input type="text" id="hero-query" placeholder="Pregúntame sobre la familia Godes..." autocomplete="off">
-                <button id="hero-send">Consultar</button>
+        <div class="w-full max-w-[700px]">
+            <div class="hero-search-box relative flex items-center bg-surface-container-lowest rounded-2xl pl-6 pr-2 py-2 shadow-[0_12px_40px_rgba(28,28,23,0.08)] border-2 border-transparent transition-colors focus-within:border-[rgba(23,52,30,0.2)]">
+                <span class="material-symbols-outlined text-secondary text-2xl mr-4">auto_awesome</span>
+                <input type="text" id="hero-query" class="flex-1 border-none bg-transparent font-sans text-[1.1rem] text-on-surface outline-none placeholder:text-outline-variant" placeholder="Pregúntame sobre la familia Godes..." autocomplete="off">
+                <button id="hero-send" class="bg-primary text-on-primary border-none py-3 px-7 rounded-xl font-sans text-[0.95rem] font-bold cursor-pointer transition-colors hover:bg-primary-container whitespace-nowrap">Consultar</button>
             </div>
-            <div class="hero-chips">
-                <span class="hero-chips-label">Consultas rápidas:</span>
-                <button class="hero-chip" data-q="cuántos miembros tiene la familia godes?">Estadísticas</button>
-                <button class="hero-chip" data-q="quién está vivo?">Miembros vivos</button>
-                <button class="hero-chip" data-q="aniversarios esta semana">Aniversarios</button>
+            <div class="mt-4 flex gap-2 flex-wrap justify-center items-center">
+                <span class="text-[0.7rem] uppercase tracking-[0.15em] text-on-surface-variant font-bold">Consultas rápidas:</span>
+                <button class="hero-chip text-[0.75rem] font-semibold py-1.5 px-4 rounded-full bg-surface-container-high text-on-surface border border-outline-variant cursor-pointer transition-all font-sans hover:bg-secondary-container hover:text-secondary" data-q="cuántos miembros tiene la familia godes?">Estadísticas</button>
+                <button class="hero-chip text-[0.75rem] font-semibold py-1.5 px-4 rounded-full bg-surface-container-high text-on-surface border border-outline-variant cursor-pointer transition-all font-sans hover:bg-secondary-container hover:text-secondary" data-q="quién está vivo?">Miembros vivos</button>
+                <button class="hero-chip text-[0.75rem] font-semibold py-1.5 px-4 rounded-full bg-surface-container-high text-on-surface border border-outline-variant cursor-pointer transition-all font-sans hover:bg-secondary-container hover:text-secondary" data-q="aniversarios esta semana">Aniversarios</button>
             </div>
         </div>
     </section>
 
     <!-- Bento Grid -->
-    <section class="dash-grid">
+    <section class="grid grid-cols-1 gap-8 md:grid-cols-12">
 
         <!-- Stats Card -->
-        <div class="dash-card dash-stats">
-            <h4 class="dash-card-label">Pulso del Legado</h4>
-            <div class="stats-list">
-                <div class="stat-row">
-                    <span class="stat-label">Miembros Documentados</span>
-                    <span class="stat-value" id="stat-people">--</span>
+        <div class="dash-card rounded-3xl p-8 bg-primary text-on-primary col-span-1 md:col-span-6 shadow-[0_12px_40px_rgba(23,52,30,0.2)]">
+            <h4 class="text-[0.65rem] uppercase tracking-[0.2em] font-bold opacity-70 mb-6">Pulso del Legado</h4>
+            <div class="flex flex-col gap-5">
+                <div class="flex justify-between items-end pb-3 border-b border-white/15">
+                    <span class="text-[0.85rem] font-light">Miembros Documentados</span>
+                    <span class="font-serif text-[1.8rem] leading-none" id="stat-people">--</span>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Familias</span>
-                    <span class="stat-value" id="stat-families">--</span>
+                <div class="flex justify-between items-end pb-3 border-b border-white/15">
+                    <span class="text-[0.85rem] font-light">Familias</span>
+                    <span class="font-serif text-[1.8rem] leading-none" id="stat-families">--</span>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Miembros Vivos</span>
-                    <span class="stat-value" id="stat-alive">--</span>
+                <div class="flex justify-between items-end pb-3 border-b border-white/15">
+                    <span class="text-[0.85rem] font-light">Miembros Vivos</span>
+                    <span class="font-serif text-[1.8rem] leading-none" id="stat-alive">--</span>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Fotografías</span>
-                    <span class="stat-value" id="stat-photos">--</span>
+                <div class="flex justify-between items-end pb-3 border-b border-white/15">
+                    <span class="text-[0.85rem] font-light">Fotografías</span>
+                    <span class="font-serif text-[1.8rem] leading-none" id="stat-photos">--</span>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Años de historia</span>
-                    <span class="stat-value" id="stat-years">--</span>
+                <div class="flex justify-between items-end pb-3 border-b border-white/15">
+                    <span class="text-[0.85rem] font-light">Años de historia</span>
+                    <span class="font-serif text-[1.8rem] leading-none" id="stat-years">--</span>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Última actualización</span>
-                    <span class="stat-value" id="stat-updated">--</span>
+                <div class="flex justify-between items-end pb-3 border-b border-white/15">
+                    <span class="text-[0.85rem] font-light">Última actualización</span>
+                    <span class="font-serif text-[1.8rem] leading-none" id="stat-updated">--</span>
                 </div>
             </div>
         </div>
 
         <!-- Birthdays / Anniversaries -->
-        <div class="dash-card dash-anniversaries">
-            <h4 class="dash-card-title">Aniversarios Próximos</h4>
-            <div id="birthdays-list" class="anniversaries-list">
+        <div class="dash-card rounded-3xl p-8 bg-surface-container col-span-1 md:col-span-6">
+            <h4 class="dash-card-title font-serif text-[1.3rem] text-primary mb-6 font-normal">Aniversarios Próximos</h4>
+            <div id="birthdays-list" class="anniversaries-list flex flex-col gap-5">
                 <!-- Filled by JS -->
             </div>
         </div>
 
         <!-- Photo Gallery -->
-        <div class="dash-card dash-photos-section">
-            <div class="photos-header">
+        <div class="dash-card rounded-3xl bg-transparent py-8 px-0 col-span-1 md:col-span-12">
+            <div class="photos-header flex justify-between items-end mb-8 pb-4 border-b border-surface-dim">
                 <div>
-                    <h2 class="dash-card-title-lg">Galería Fotográfica</h2>
-                    <p class="photos-subtitle">Fotografías del archivo familiar</p>
+                    <h2 class="font-serif text-[1.8rem] text-primary font-normal">Galería Fotográfica</h2>
+                    <p class="text-[0.8rem] text-on-surface-variant mt-1">Fotografías del archivo familiar</p>
                 </div>
             </div>
             <div class="photos-strip-dash" id="photos-gallery">
@@ -111,19 +144,19 @@
         </div>
 
         <!-- Latest Additions -->
-        <div class="dash-card dash-featured">
-            <h4 class="dash-card-title">Últimas Incorporaciones al Árbol 🎉</h4>
+        <div class="dash-card rounded-3xl p-8 bg-surface-container-lowest col-span-1 md:col-span-12 shadow-[0_4px_20px_rgba(28,28,23,0.05)]">
+            <h4 class="dash-card-title font-serif text-[1.3rem] text-primary mb-6 font-normal">Últimas Incorporaciones al Árbol 🎉</h4>
             <div class="featured-grid" id="featured-list">
                 <!-- Filled by JS -->
             </div>
         </div>
 
         <!-- Arxiu Documental -->
-        <div class="dash-card dash-documents-section">
-            <div class="documents-header">
+        <div class="dash-card rounded-3xl bg-transparent py-8 px-0 col-span-1 md:col-span-12">
+            <div class="documents-header flex justify-between items-end mb-8 pb-4 border-b border-surface-dim">
                 <div>
-                    <h2 class="dash-card-title-lg">Archivo Documental</h2>
-                    <p class="documents-subtitle">Certificados, cartas, testamentos y más</p>
+                    <h2 class="font-serif text-[1.8rem] text-primary font-normal">Archivo Documental</h2>
+                    <p class="text-[0.8rem] text-on-surface-variant mt-1">Certificados, cartas, testamentos y más</p>
                 </div>
             </div>
             <div class="documents-grid" id="documents-gallery">
@@ -135,28 +168,28 @@
 </main>
 
 <!-- Footer -->
-<footer style="background:#2D4B33;color:#fff;margin-top:4rem;padding:3rem 2rem 2rem;">
-    <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;">
+<footer class="bg-primary-container text-white mt-16 pt-12 px-8 pb-8">
+    <div class="max-w-[1200px] mx-auto grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-8">
         <div>
-            <h3 style="font-family:'Noto Serif',serif;font-size:1.1rem;font-weight:700;margin-bottom:0.75rem;">Godesia</h3>
-            <p style="font-size:0.85rem;opacity:0.7;line-height:1.6;">Archivo genealógico digital de la familia Godes. Preservando la memoria familiar para las generaciones futuras.</p>
+            <h3 class="font-serif text-[1.1rem] font-bold mb-3">Godesia</h3>
+            <p class="text-[0.85rem] opacity-70 leading-relaxed">Archivo genealógico digital de la familia Godes. Preservando la memoria familiar para las generaciones futuras.</p>
         </div>
         <div>
-            <h4 style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.2em;font-weight:700;opacity:0.5;margin-bottom:0.75rem;">Navegación</h4>
-            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;line-height:2;">
-                <li><a href="/" style="color:rgba(255,255,255,0.7);text-decoration:none;">Inicio</a></li>
-                <li><a href="/tree.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">Árbol</a></li>
-                <li><a href="/chat.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">Consultas</a></li>
+            <h4 class="text-[0.65rem] uppercase tracking-[0.2em] font-bold opacity-50 mb-3">Navegación</h4>
+            <ul class="list-none p-0 m-0 text-[0.85rem] leading-8">
+                <li><a href="/" class="text-white/70 no-underline">Inicio</a></li>
+                <li><a href="/tree.html" class="text-white/70 no-underline">Árbol</a></li>
+                <li><a href="/chat.html" class="text-white/70 no-underline">Consultas</a></li>
             </ul>
         </div>
         <div>
-            <h4 style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.2em;font-weight:700;opacity:0.5;margin-bottom:0.75rem;">Proyecto</h4>
-            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;line-height:2;">
-                <li><a href="/colaborar.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">Colaborar</a></li>
+            <h4 class="text-[0.65rem] uppercase tracking-[0.2em] font-bold opacity-50 mb-3">Proyecto</h4>
+            <ul class="list-none p-0 m-0 text-[0.85rem] leading-8">
+                <li><a href="/colaborar.html" class="text-white/70 no-underline">Colaborar</a></li>
             </ul>
         </div>
     </div>
-    <div style="border-top:1px solid rgba(255,255,255,0.15);margin-top:2rem;padding-top:1.5rem;text-align:center;font-size:0.75rem;opacity:0.4;">
+    <div class="border-t border-white/15 mt-8 pt-6 text-center text-[0.75rem] opacity-40">
         Godesia &copy; 2025 — Familia Godes
     </div>
 </footer>

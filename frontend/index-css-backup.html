@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godesia - Familia Godes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={corePlugins:{preflight:false}}</script>
+</head>
+<body class="dashboard-body">
+
+
+<!-- Sidebar: Family Branches -->
+<aside class="dash-sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-icon">
+            <span class="material-symbols-outlined">diversity_3</span>
+        </div>
+        <div>
+            <h3 class="sidebar-title">Ramas Familiares</h3>
+            <p class="sidebar-subtitle">Explora tu linaje</p>
+        </div>
+    </div>
+    <nav class="sidebar-branches" id="sidebar-branches">
+        <!-- Filled by JS -->
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="dash-main">
+
+    <!-- Hero Section -->
+    <section class="dash-hero">
+        <div class="hero-text">
+            <h1>Bienvenido al legado de la <em>Familia Godes</em>.</h1>
+            <p>Tu linaje es una historia viva. Descubre las conexiones, los documentos y mantén vivos los recuerdos para las generaciones futuras.</p>
+        </div>
+        <div class="hero-search">
+            <div class="hero-search-box">
+                <span class="material-symbols-outlined hero-search-icon">auto_awesome</span>
+                <input type="text" id="hero-query" placeholder="Pregúntame sobre la familia Godes..." autocomplete="off">
+                <button id="hero-send">Consultar</button>
+            </div>
+            <div class="hero-chips">
+                <span class="hero-chips-label">Consultas rápidas:</span>
+                <button class="hero-chip" data-q="cuántos miembros tiene la familia godes?">Estadísticas</button>
+                <button class="hero-chip" data-q="quién está vivo?">Miembros vivos</button>
+                <button class="hero-chip" data-q="aniversarios esta semana">Aniversarios</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bento Grid -->
+    <section class="dash-grid">
+
+        <!-- Stats Card -->
+        <div class="dash-card dash-stats">
+            <h4 class="dash-card-label">Pulso del Legado</h4>
+            <div class="stats-list">
+                <div class="stat-row">
+                    <span class="stat-label">Miembros Documentados</span>
+                    <span class="stat-value" id="stat-people">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Familias</span>
+                    <span class="stat-value" id="stat-families">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Miembros Vivos</span>
+                    <span class="stat-value" id="stat-alive">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Fotografías</span>
+                    <span class="stat-value" id="stat-photos">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Años de historia</span>
+                    <span class="stat-value" id="stat-years">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Última actualización</span>
+                    <span class="stat-value" id="stat-updated">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Birthdays / Anniversaries -->
+        <div class="dash-card dash-anniversaries">
+            <h4 class="dash-card-title">Aniversarios Próximos</h4>
+            <div id="birthdays-list" class="anniversaries-list">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+        <!-- Photo Gallery -->
+        <div class="dash-card dash-photos-section">
+            <div class="photos-header">
+                <div>
+                    <h2 class="dash-card-title-lg">Galería Fotográfica</h2>
+                    <p class="photos-subtitle">Fotografías del archivo familiar</p>
+                </div>
+            </div>
+            <div class="photos-strip-dash" id="photos-gallery">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+        <!-- Latest Additions -->
+        <div class="dash-card dash-featured">
+            <h4 class="dash-card-title">Últimas Incorporaciones al Árbol 🎉</h4>
+            <div class="featured-grid" id="featured-list">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+        <!-- Arxiu Documental -->
+        <div class="dash-card dash-documents-section">
+            <div class="documents-header">
+                <div>
+                    <h2 class="dash-card-title-lg">Archivo Documental</h2>
+                    <p class="documents-subtitle">Certificados, cartas, testamentos y más</p>
+                </div>
+            </div>
+            <div class="documents-grid" id="documents-gallery">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<!-- Footer -->
+<footer style="background:#2D4B33;color:#fff;margin-top:4rem;padding:3rem 2rem 2rem;">
+    <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;">
+        <div>
+            <h3 style="font-family:'Noto Serif',serif;font-size:1.1rem;font-weight:700;margin-bottom:0.75rem;">Godesia</h3>
+            <p style="font-size:0.85rem;opacity:0.7;line-height:1.6;">Archivo genealógico digital de la familia Godes. Preservando la memoria familiar para las generaciones futuras.</p>
+        </div>
+        <div>
+            <h4 style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.2em;font-weight:700;opacity:0.5;margin-bottom:0.75rem;">Navegación</h4>
+            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;line-height:2;">
+                <li><a href="/" style="color:rgba(255,255,255,0.7);text-decoration:none;">Inicio</a></li>
+                <li><a href="/tree.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">Árbol</a></li>
+                <li><a href="/chat.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">Consultas</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.2em;font-weight:700;opacity:0.5;margin-bottom:0.75rem;">Proyecto</h4>
+            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;line-height:2;">
+                <li><a href="/colaborar.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">Colaborar</a></li>
+            </ul>
+        </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.15);margin-top:2rem;padding-top:1.5rem;text-align:center;font-size:0.75rem;opacity:0.4;">
+        Godesia &copy; 2025 — Familia Godes
+    </div>
+</footer>
+
+<script src="photo-modal.js"></script>
+<script src="mention-autocomplete.js"></script>
+<script src="dashboard.js"></script>
+<script src="/nav.js"></script>
+</body>
+</html>
