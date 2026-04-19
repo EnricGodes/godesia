@@ -210,6 +210,45 @@ def parse_gedcom_date(date_str):
     return None, None, None
 
 
+def calculate_age_at_death(person_dict):
+    """Calculate exact age at death when birth and death years are known.
+    Uses birth_month and birth_day to determine if birthday had passed that year.
+    Returns an integer, or None if insufficient data."""
+    birth_year = person_dict.get("birth_year")
+    death_year = person_dict.get("death_year")
+    if not birth_year or not death_year or death_year <= birth_year:
+        return None
+
+    age = death_year - birth_year
+
+    # Refine using month: parse death_date for month number
+    # death_date is in Spanish format like "19 ago. 1944"
+    SPANISH_MONTHS = {
+        'ene': 1, 'feb': 2, 'mar': 3, 'abr': 4, 'may': 5, 'jun': 6,
+        'jul': 7, 'ago': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dic': 12
+    }
+    birth_month = person_dict.get("birth_month")  # integer 1-12
+    birth_day = person_dict.get("birth_day")       # integer 1-31
+    death_date_str = person_dict.get("death_date", "") or ""
+
+    death_month = None
+    death_day = None
+    parts = death_date_str.lower().replace('.', '').split()
+    for part in parts:
+        if part in SPANISH_MONTHS:
+            death_month = SPANISH_MONTHS[part]
+        elif part.isdigit() and int(part) <= 31:
+            death_day = int(part)
+
+    if birth_month and death_month:
+        if death_month < birth_month:
+            age -= 1
+        elif death_month == birth_month and birth_day and death_day and death_day < birth_day:
+            age -= 1
+
+    return age
+
+
 def convert_date_to_spanish(date_str):
     """Convert GEDCOM/date string to Spanish format: '19 ago. 1917'"""
     if not date_str:
@@ -810,6 +849,11 @@ def get_person_dossier(conn, person_id):
         return None
 
     person_dict = dict(person)
+
+    # Override death_age with calculated value when we have enough data
+    calc_age = calculate_age_at_death(person_dict)
+    if calc_age is not None:
+        person_dict["death_age"] = str(calc_age)
 
     # Parents
     father = None
