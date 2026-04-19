@@ -363,7 +363,7 @@ def get_birthdays_this_week(conn):
     for delta in range(7):
         d = today + timedelta(days=delta)
         rows = conn.execute(
-            "SELECT id, name, given_name, surname, birth_day, birth_month, birth_year, "
+            "SELECT id, name, given_name, surname, nickname, birth_day, birth_month, birth_year, "
             "photo_file, is_alive FROM people "
             "WHERE birth_month = ? AND birth_day = ? ORDER BY name",
             (d.month, d.day)
@@ -375,6 +375,7 @@ def get_birthdays_this_week(conn):
                 "name": row["name"],
                 "given_name": row["given_name"],
                 "surname": row["surname"],
+                "nickname": row["nickname"],
                 "birth_day": row["birth_day"],
                 "birth_month": row["birth_month"],
                 "birth_year": row["birth_year"],
@@ -746,7 +747,7 @@ def get_dashboard_data(conn):
     # Birthdays this week
     birthdays = get_birthdays_this_week(conn)
 
-    # Family photos (random selection for gallery)
+    # Family photos (random selection for gallery, excluding documents with [...] in title)
     photo_people = conn.execute("""
         SELECT DISTINCT p.id, p.name, p.birth_year, p.death_year, p.birth_place,
                ph.id as photo_id, ph.filename as local_file, ph.title, ph.date, ph.place
@@ -757,14 +758,17 @@ def get_dashboard_data(conn):
         AND ph.filename NOT LIKE '%.pdf'
         AND ph.is_personal_photo = 0
         AND ph.is_cutout = 0
+        AND ph.title NOT LIKE '%[%]%'
         ORDER BY RANDOM() LIMIT 8
     """).fetchall()
 
     # Recently "added" — people with most recent birth years (latest additions to tree)
     featured = conn.execute(
-        "SELECT id, name, given_name, surname, birth_year, death_year, photo_file, is_alive, birth_place "
-        "FROM people WHERE photo_file IS NOT NULL AND birth_year IS NOT NULL "
-        "ORDER BY birth_year DESC LIMIT 4"
+        "SELECT p.id, p.name, p.given_name, p.surname, p.birth_year, p.birth_date, "
+        "p.death_year, p.photo_file, p.is_alive, p.birth_place, p.nickname, "
+        "p.father_name, p.mother_name "
+        "FROM people p WHERE p.photo_file IS NOT NULL AND p.birth_year IS NOT NULL "
+        "ORDER BY p.birth_year DESC LIMIT 4"
     ).fetchall()
 
     # Documents from archive
@@ -788,13 +792,13 @@ def get_dashboard_data(conn):
                 "name": p["name"],
                 "photo": p["local_file"],
                 "title": p["title"],
-                "date": p["date"],
+                "date": convert_date_to_spanish(p["date"]),
                 "place": p["place"],
             }
             for p in photo_people
         ],
         "featured": [dict(p) for p in featured],
-        "documents": [dict(d) for d in documents],
+        "documents": [{**dict(d), "date": convert_date_to_spanish(d["date"])} for d in documents],
     }
 
 
