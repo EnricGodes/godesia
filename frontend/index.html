@@ -1,182 +1,132 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Godesia - Familia Godes</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#2D4B33",
-                        "surface-container": "#f1eee5",
-                        "surface-container-low": "#f6f3ea",
-                        "surface-bright": "#fcf9f0",
-                        "surface-container-lowest": "#ffffff",
-                        "background": "#fcf9f0",
-                        "on-background": "#1c1c17",
-                        "on-primary": "#ffffff",
-                        "on-surface-variant": "#424842",
-                        "primary-container": "#d4e4d6",
-                        "on-primary-container": "#0b1f10",
-                        "secondary-container": "#fdd2b1",
-                        "on-secondary-container": "#78583f",
-                        "surface-variant": "#e5e2da",
-                        "surface-dim": "#dddad1",
-                        "surface": "#fcf9f0",
-                        "surface-container-high": "#ebe8df",
-                        "outline": "#727971",
-                        "on-surface": "#1c1c17",
-                        "outline-variant": "#c2c8bf",
-                        "secondary": "#78583e",
-                        "on-secondary": "#ffffff",
-                        "alive-green": "#4a7c50",
-                    },
-                    fontFamily: {
-                        headline: ["Noto Serif", "serif"],
-                        body: ["Manrope", "sans-serif"],
-                    },
-                },
-            },
-        }
-    </script>
-    <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        /* Photo title clamp to 2 lines */
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={corePlugins:{preflight:false}}</script>
 </head>
-<body class="bg-surface font-body text-on-surface">
+<body class="dashboard-body">
 
-<!-- Sidebar -->
-<aside id="sidebar" class="dash-sidebar hidden lg:flex fixed left-0 bottom-0 w-[260px] bg-surface-container flex-col p-6 overflow-y-auto z-40" style="top:56px;">
-    <div class="flex items-center gap-3 mb-8">
-        <div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
-            <span class="material-symbols-outlined text-on-primary text-xl">diversity_3</span>
+
+<!-- Sidebar: Family Branches -->
+<aside class="dash-sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-icon">
+            <span class="material-symbols-outlined">diversity_3</span>
         </div>
         <div>
-            <h3 class="font-headline text-sm font-bold text-primary">Ramas Familiares</h3>
-            <p class="text-[11px] text-on-surface-variant">Explora tu linaje</p>
+            <h3 class="sidebar-title">Ramas Familiares</h3>
+            <p class="sidebar-subtitle">Explora tu linaje</p>
         </div>
     </div>
-    <nav id="sidebar-branches" class="flex flex-col gap-1">
+    <nav class="sidebar-branches" id="sidebar-branches">
         <!-- Filled by JS -->
     </nav>
 </aside>
 
 <!-- Main Content -->
-<main class="pt-[88px] pb-16 px-4 lg:px-12" style="margin-left:0" id="dash-main">
+<main class="dash-main">
 
-    <!-- Hero -->
-    <section class="text-center mb-16 flex flex-col items-center">
-        <div class="max-w-[700px] mb-10">
-            <h1 class="font-headline text-4xl md:text-5xl font-bold text-primary leading-tight mb-6">
-                Bienvenido al legado de la <em>Familia Godes</em>.
-            </h1>
-            <p class="text-base text-on-surface-variant leading-relaxed">
-                Tu linaje es una historia viva. Descubre las conexiones, los documentos y mantén vivos los recuerdos para las generaciones futuras.
-            </p>
+    <!-- Hero Section -->
+    <section class="dash-hero">
+        <div class="hero-text">
+            <h1>Bienvenido al legado de la <em>Familia Godes</em>.</h1>
+            <p>Tu linaje es una historia viva. Descubre las conexiones, los documentos y mantén vivos los recuerdos para las generaciones futuras.</p>
         </div>
-        <div class="w-full max-w-[560px]">
-            <div class="flex items-center gap-3 bg-surface-container rounded-2xl px-4 py-3 border border-outline-variant/30 focus-within:border-primary/40 transition-colors">
-                <span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings:'FILL' 0,'wght' 300">auto_awesome</span>
-                <input type="text" id="hero-query" placeholder="Pregunta sobre la familia Godes..." autocomplete="off"
-                       class="flex-1 bg-transparent border-0 text-on-surface placeholder-on-surface-variant/50 focus:outline-none text-sm">
-                <button id="hero-send" class="bg-primary text-on-primary px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors whitespace-nowrap">
-                    Consultar
-                </button>
+        <div class="hero-search">
+            <div class="hero-search-box">
+                <span class="material-symbols-outlined hero-search-icon">auto_awesome</span>
+                <input type="text" id="hero-query" placeholder="Pregúntame sobre la familia Godes..." autocomplete="off">
+                <button id="hero-send">Consultar</button>
             </div>
-            <div class="flex items-center justify-center gap-2 mt-4 flex-wrap">
-                <span class="text-[10px] text-on-surface-variant/60 uppercase tracking-wider font-semibold">Consultas rápidas:</span>
-                <button class="hero-chip text-xs px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-dim transition-colors" data-q="cuántos miembros tiene la familia godes?">Estadísticas</button>
-                <button class="hero-chip text-xs px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-dim transition-colors" data-q="quién está vivo?">Miembros vivos</button>
-                <button class="hero-chip text-xs px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-dim transition-colors" data-q="aniversarios esta semana">Aniversarios</button>
+            <div class="hero-chips">
+                <span class="hero-chips-label">Consultas rápidas:</span>
+                <button class="hero-chip" data-q="cuántos miembros tiene la familia godes?">Estadísticas</button>
+                <button class="hero-chip" data-q="quién está vivo?">Miembros vivos</button>
+                <button class="hero-chip" data-q="aniversarios esta semana">Aniversarios</button>
             </div>
         </div>
     </section>
 
     <!-- Bento Grid -->
-    <section class="grid grid-cols-1 md:grid-cols-12 gap-8 max-w-[1200px] mx-auto">
+    <section class="dash-grid">
 
         <!-- Stats Card -->
-        <div class="md:col-span-6 bg-primary text-on-primary rounded-3xl p-8 shadow-lg">
-            <h4 class="text-[0.65rem] uppercase tracking-[0.2em] font-bold opacity-70 mb-6">Pulso del Legado</h4>
-            <div class="flex flex-col gap-5">
-                <div class="flex justify-between items-end pb-3 border-b border-white/15">
-                    <span class="text-sm font-light">Miembros Documentados</span>
-                    <span class="font-headline text-3xl leading-none" id="stat-people">--</span>
+        <div class="dash-card dash-stats">
+            <h4 class="dash-card-label">Pulso del Legado</h4>
+            <div class="stats-list">
+                <div class="stat-row">
+                    <span class="stat-label">Miembros Documentados</span>
+                    <span class="stat-value" id="stat-people">--</span>
                 </div>
-                <div class="flex justify-between items-end pb-3 border-b border-white/15">
-                    <span class="text-sm font-light">Familias</span>
-                    <span class="font-headline text-3xl leading-none" id="stat-families">--</span>
+                <div class="stat-row">
+                    <span class="stat-label">Familias</span>
+                    <span class="stat-value" id="stat-families">--</span>
                 </div>
-                <div class="flex justify-between items-end pb-3 border-b border-white/15">
-                    <span class="text-sm font-light">Miembros Vivos</span>
-                    <span class="font-headline text-3xl leading-none" id="stat-alive">--</span>
+                <div class="stat-row">
+                    <span class="stat-label">Miembros Vivos</span>
+                    <span class="stat-value" id="stat-alive">--</span>
                 </div>
-                <div class="flex justify-between items-end pb-3 border-b border-white/15">
-                    <span class="text-sm font-light">Fotografías</span>
-                    <span class="font-headline text-3xl leading-none" id="stat-photos">--</span>
+                <div class="stat-row">
+                    <span class="stat-label">Fotografías</span>
+                    <span class="stat-value" id="stat-photos">--</span>
                 </div>
-                <div class="flex justify-between items-end pb-3 border-b border-white/15">
-                    <span class="text-sm font-light">Años de historia</span>
-                    <span class="font-headline text-3xl leading-none" id="stat-years">--</span>
+                <div class="stat-row">
+                    <span class="stat-label">Años de historia</span>
+                    <span class="stat-value" id="stat-years">--</span>
                 </div>
-                <div class="flex justify-between items-end">
-                    <span class="text-sm font-light">Última actualización</span>
-                    <span class="font-headline text-3xl leading-none" id="stat-updated">--</span>
+                <div class="stat-row">
+                    <span class="stat-label">Última actualización</span>
+                    <span class="stat-value" id="stat-updated">--</span>
                 </div>
             </div>
         </div>
 
-        <!-- Birthdays -->
-        <div class="md:col-span-6 bg-surface-container rounded-3xl p-8">
-            <h4 class="font-headline text-xl text-primary mb-6">Aniversarios Próximos</h4>
-            <div id="birthdays-list" class="flex flex-col gap-5">
+        <!-- Birthdays / Anniversaries -->
+        <div class="dash-card dash-anniversaries">
+            <h4 class="dash-card-title">Aniversarios Próximos</h4>
+            <div id="birthdays-list" class="anniversaries-list">
                 <!-- Filled by JS -->
             </div>
         </div>
 
         <!-- Photo Gallery -->
-        <div class="md:col-span-12 py-8">
-            <div class="flex justify-between items-end mb-8 pb-4 border-b border-surface-dim">
+        <div class="dash-card dash-photos-section">
+            <div class="photos-header">
                 <div>
-                    <h2 class="font-headline text-2xl text-primary">Galería Fotográfica</h2>
-                    <p class="text-xs text-on-surface-variant mt-1">Fotografías del archivo familiar</p>
+                    <h2 class="dash-card-title-lg">Galería Fotográfica</h2>
+                    <p class="photos-subtitle">Fotografías del archivo familiar</p>
                 </div>
             </div>
-            <div id="photos-gallery" class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-8 mb-8">
+            <div class="photos-strip-dash" id="photos-gallery">
                 <!-- Filled by JS -->
             </div>
         </div>
 
-        <!-- Featured / Latest Additions -->
-        <div class="md:col-span-12 bg-surface-container-lowest rounded-3xl p-8 shadow-sm">
-            <h4 class="font-headline text-xl text-primary mb-6">Últimas Incorporaciones al Árbol 🎉</h4>
-            <div id="featured-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <!-- Latest Additions -->
+        <div class="dash-card dash-featured">
+            <h4 class="dash-card-title">Últimas Incorporaciones al Árbol 🎉</h4>
+            <div class="featured-grid" id="featured-list">
                 <!-- Filled by JS -->
             </div>
         </div>
 
-        <!-- Documents Archive -->
-        <div class="md:col-span-12 py-8">
-            <div class="flex justify-between items-end mb-8 pb-4 border-b border-surface-dim">
+        <!-- Arxiu Documental -->
+        <div class="dash-card dash-documents-section">
+            <div class="documents-header">
                 <div>
-                    <h2 class="font-headline text-2xl text-primary">Archivo Documental</h2>
-                    <p class="text-xs text-on-surface-variant mt-1">Certificados, cartas, testamentos y más</p>
+                    <h2 class="dash-card-title-lg">Archivo Documental</h2>
+                    <p class="documents-subtitle">Certificados, cartas, testamentos y más</p>
                 </div>
             </div>
-            <div id="documents-gallery" class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm">
+            <div class="documents-grid" id="documents-gallery">
                 <!-- Filled by JS -->
             </div>
         </div>
@@ -185,31 +135,29 @@
 </main>
 
 <!-- Footer -->
-<footer class="bg-primary text-on-primary mt-16" id="site-footer">
-    <div class="max-w-[1200px] mx-auto px-6 py-12 lg:pl-[calc(260px+3rem)]">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-                <h3 class="font-headline text-lg font-bold mb-3">Godesia</h3>
-                <p class="text-sm text-white/70 leading-relaxed">Archivo genealógico digital de la familia Godes. Preservando la memoria familiar para las generaciones futuras.</p>
-            </div>
-            <div>
-                <h4 class="text-xs uppercase tracking-[0.2em] font-bold text-white/50 mb-3">Navegación</h4>
-                <ul class="space-y-2 text-sm text-white/70">
-                    <li><a href="/" class="hover:text-white transition-colors">Inicio</a></li>
-                    <li><a href="/tree.html" class="hover:text-white transition-colors">Árbol</a></li>
-                    <li><a href="/chat.html" class="hover:text-white transition-colors">Consultas</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-xs uppercase tracking-[0.2em] font-bold text-white/50 mb-3">Proyecto</h4>
-                <ul class="space-y-2 text-sm text-white/70">
-                    <li><a href="/colaborar.html" class="hover:text-white transition-colors">Colaborar</a></li>
-                </ul>
-            </div>
+<footer style="background:#2D4B33;color:#fff;margin-top:4rem;padding:3rem 2rem 2rem;">
+    <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;">
+        <div>
+            <h3 style="font-family:'Noto Serif',serif;font-size:1.1rem;font-weight:700;margin-bottom:0.75rem;">Godesia</h3>
+            <p style="font-size:0.85rem;opacity:0.7;line-height:1.6;">Archivo genealógico digital de la familia Godes. Preservando la memoria familiar para las generaciones futuras.</p>
         </div>
-        <div class="border-t border-white/15 mt-8 pt-6 text-center text-xs text-white/40">
-            Godesia &copy; 2025 &mdash; Familia Godes
+        <div>
+            <h4 style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.2em;font-weight:700;opacity:0.5;margin-bottom:0.75rem;">Navegación</h4>
+            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;line-height:2;">
+                <li><a href="/" style="color:rgba(255,255,255,0.7);text-decoration:none;">Inicio</a></li>
+                <li><a href="/tree.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">Árbol</a></li>
+                <li><a href="/chat.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">Consultas</a></li>
+            </ul>
         </div>
+        <div>
+            <h4 style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.2em;font-weight:700;opacity:0.5;margin-bottom:0.75rem;">Proyecto</h4>
+            <ul style="list-style:none;padding:0;margin:0;font-size:0.85rem;line-height:2;">
+                <li><a href="/colaborar.html" style="color:rgba(255,255,255,0.7);text-decoration:none;">Colaborar</a></li>
+            </ul>
+        </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.15);margin-top:2rem;padding-top:1.5rem;text-align:center;font-size:0.75rem;opacity:0.4;">
+        Godesia &copy; 2025 — Familia Godes
     </div>
 </footer>
 

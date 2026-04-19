@@ -797,7 +797,7 @@ def get_dashboard_data(conn):
             }
             for p in photo_people
         ],
-        "featured": [dict(p) for p in featured],
+        "featured": [{**dict(p), "birth_date": convert_date_to_spanish(p["birth_date"])} for p in featured],
         "documents": [{**dict(d), "date": convert_date_to_spanish(d["date"])} for d in documents],
     }
 
