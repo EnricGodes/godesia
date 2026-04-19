@@ -787,7 +787,12 @@ nav {
 
 @media (min-width: 1024px) {
     .dash-main {
-        margin-left: 260px;
+        /* Center within the viewport area right of the fixed sidebar.
+           Center of remaining space = (260px + 100vw) / 2 = 130px + 50vw.
+           Left edge of centered 1200px block = center - 600px = 50vw - 470px.
+           Never less than 260px (sidebar width). */
+        margin-left: max(260px, calc(50vw - 470px));
+        margin-right: auto;
         padding-left: 3rem;
         padding-right: 3rem;
     }
