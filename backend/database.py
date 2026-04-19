@@ -767,7 +767,7 @@ def get_dashboard_data(conn):
         "SELECT p.id, p.name, p.given_name, p.surname, p.birth_year, p.birth_date, "
         "p.death_year, p.photo_file, p.is_alive, p.birth_place, p.nickname, "
         "p.father_name, p.mother_name "
-        "FROM people p WHERE p.photo_file IS NOT NULL AND p.birth_year IS NOT NULL "
+        "FROM people p WHERE p.birth_year IS NOT NULL "
         "ORDER BY p.birth_year DESC LIMIT 4"
     ).fetchall()
 
