@@ -31,6 +31,7 @@ from pathlib import Path
 # Import note cleaning from the main parser
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 from gedcom_parser import clean_note_html
+from database import convert_date_to_spanish
 
 
 DOC_TYPES = [
@@ -615,6 +616,19 @@ def main():
                     and not person["_has_deat"]):
                 person["is_alive"] = 1
 
+        # Convert GEDCOM dates to Spanish before writing to DB
+        for person in people.values():
+            person["birth_date"] = convert_date_to_spanish(person["birth_date"])
+            person["death_date"] = convert_date_to_spanish(person["death_date"])
+        for marr in marriages.values():
+            marr["date"] = convert_date_to_spanish(marr["date"])
+        for occs in occupations.values():
+            for occ in occs:
+                occ["date"] = convert_date_to_spanish(occ["date"])
+        for ress in residences.values():
+            for res in ress:
+                res["date"] = convert_date_to_spanish(res["date"])
+
         cursor = db_conn.cursor()
 
         # UPSERT personas — preserves photo_file and photo_count (managed by sync_photos)
@@ -650,15 +664,12 @@ def main():
                   person["death_cause"], person["death_note"], person["death_age"], person["is_alive"],
                   person["father_id"], person["mother_id"]))
 
-        # UPSERT matrimonios (sort pair to match migrate_json_to_sqlite convention)
+        # UPSERT matrimonios
         for fam_id, marr in marriages.items():
-            p1, p2 = sorted([marr["husb"], marr["wife"]])
             cursor.execute("""
-                INSERT INTO marriages (person1_id, person2_id, date, place)
+                INSERT OR REPLACE INTO marriages (person1_id, person2_id, date, place)
                 VALUES (?, ?, ?, ?)
-                ON CONFLICT(person1_id, person2_id) DO UPDATE SET
-                    date=excluded.date, place=excluded.place
-            """, (p1, p2, marr["date"], marr["place"]))
+            """, (marr["husb"], marr["wife"], marr["date"], marr["place"]))
 
         # DELETE + re-insert ocupaciones, residencias, notas (1-to-many)
         cursor.execute("DELETE FROM occupations")
