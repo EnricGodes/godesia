@@ -879,6 +879,27 @@ function buildEvents(data) {
                     });
                 }
             }
+
+            // Fallecimiento del cónyuge (only if before or same year as subject's death)
+            if (s.death_year && !s.is_alive) {
+                const spouseDeathYear = s.death_year;
+                const subjectDeathYear = person.death_year || 9999;
+                if (spouseDeathYear <= subjectDeathYear) {
+                    const spouseName = formatNameWithNickname(s.name, s.nickname, s.given_name, s.surname) || s.name;
+                    const isFemale = (s.sex === 'F');
+                    events.push({
+                        year: spouseDeathYear,
+                        age: ageText(spouseDeathYear),
+                        type: isFemale ? 'Fallecimiento de la esposa:' : 'Fallecimiento del esposo:',
+                        lines: [
+                            s.death_date ? formatDateWithQualifier(s.death_date) : `${spouseDeathYear}`,
+                            s.death_place || ''
+                        ].filter(Boolean),
+                        photo: s.photo_file,
+                        name: spouseName
+                    });
+                }
+            }
         });
     }
 
@@ -900,6 +921,27 @@ function buildEvents(data) {
                     photo: c.photo_file,
                     name: childName
                 });
+            }
+
+            // Fallecimiento del hijo/hija (only if before or same year as subject's death)
+            if (c.death_year && !c.is_alive) {
+                const childDeathYear = c.death_year;
+                const subjectDeathYear = person.death_year || 9999;
+                if (childDeathYear <= subjectDeathYear) {
+                    const typeText = c.sex === 'F' ? 'Fallecimiento de la hija:' : 'Fallecimiento del hijo:';
+                    const childName = formatNameWithNickname(c.name, c.nickname, c.given_name, c.surname) || c.name;
+                    events.push({
+                        year: childDeathYear,
+                        age: ageText(childDeathYear),
+                        type: typeText,
+                        lines: [
+                            c.death_date ? formatDateWithQualifier(c.death_date) : `${childDeathYear}`,
+                            c.death_place || ''
+                        ].filter(Boolean),
+                        photo: c.photo_file,
+                        name: childName
+                    });
+                }
             }
 
             // Children's marriages (but only if before parent's death)
