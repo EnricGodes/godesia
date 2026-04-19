@@ -54,7 +54,8 @@ CREATE TABLE IF NOT EXISTS people (
     photo_count INTEGER DEFAULT 0,
     baptism_date TEXT,
     baptism_place TEXT,
-    godparents TEXT
+    godparents TEXT,
+    updated_at TEXT
 );
 
 CREATE TABLE IF NOT EXISTS marriages (
@@ -320,12 +321,24 @@ def get_connection(db_path):
     conn.execute("PRAGMA journal_mode=WAL")
     # Register custom function for accent-insensitive search
     conn.create_function("NORMALIZE", 1, _normalize_accent)
+    # Migrate: add updated_at column if not present (SQLite has no ADD COLUMN IF NOT EXISTS)
+    try:
+        conn.execute("ALTER TABLE people ADD COLUMN updated_at TEXT")
+        conn.commit()
+    except Exception:
+        pass  # Column already exists or table not created yet
     return conn
 
 
 def init_db(conn):
     """Initialize the database schema."""
     conn.executescript(SCHEMA)
+    # Migrate: add updated_at column if not present (SQLite has no ADD COLUMN IF NOT EXISTS)
+    try:
+        conn.execute("ALTER TABLE people ADD COLUMN updated_at TEXT")
+        conn.commit()
+    except Exception:
+        pass  # Column already exists
     conn.commit()
 
 
@@ -743,7 +756,7 @@ def get_dashboard_data(conn):
         try:
             from datetime import datetime
             dt = datetime.fromisoformat(last_updated_str.replace('Z', '+00:00'))
-            last_updated = dt.strftime("%b %Y")
+            last_updated = f"{MONTHS_SPANISH[dt.month]} {dt.year}"
         except:
             last_updated = "--"
     else:

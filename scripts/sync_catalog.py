@@ -262,7 +262,8 @@ def parse_gedcom_people(lines):
                 "sex": None, "birth_date": None, "birth_day": None, "birth_month": None,
                 "birth_year": None, "birth_place": None, "death_date": None, "death_year": None,
                 "death_place": None, "death_cause": None, "death_note": None, "death_age": None,
-                "is_alive": 0, "_has_deat": False, "father_id": None, "mother_id": None, "photo_file": None, "photo_count": 0
+                "is_alive": 0, "_has_deat": False, "father_id": None, "mother_id": None, "photo_file": None, "photo_count": 0,
+                "updated_at": None
             }
 
             while i < len(lines):
@@ -378,6 +379,13 @@ def parse_gedcom_people(lines):
                         cleaned = clean_note_html(note_content)
                         if cleaned:
                             notes[person_id].append(cleaned)
+                    elif tag == "_UPD":
+                        # Format: "6 JUL 2024 03:09:19 GMT -0500" — take date part only
+                        upd_parts = rest.split()
+                        if len(upd_parts) >= 3:
+                            person["updated_at"] = " ".join(upd_parts[:3])
+                        elif rest:
+                            person["updated_at"] = rest
                 i += 1
 
             people[person_id] = person
@@ -633,14 +641,21 @@ def main():
 
         cursor = db_conn.cursor()
 
+        # Migrate: add updated_at column if not present
+        try:
+            cursor.execute("ALTER TABLE people ADD COLUMN updated_at TEXT")
+            db_conn.commit()
+        except Exception:
+            pass  # Column already exists
+
         # UPSERT personas — preserves photo_file and photo_count (managed by sync_photos)
         for person_id, person in people.items():
             cursor.execute("""
                 INSERT INTO people
                 (id, name, given_name, surname, sex, birth_date, birth_day, birth_month,
                  birth_year, birth_place, death_date, death_year, death_place, death_cause,
-                 death_note, death_age, is_alive, father_id, mother_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 death_note, death_age, is_alive, father_id, mother_id, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET
                     name=excluded.name,
                     given_name=excluded.given_name,
@@ -659,12 +674,13 @@ def main():
                     death_age=excluded.death_age,
                     is_alive=excluded.is_alive,
                     father_id=excluded.father_id,
-                    mother_id=excluded.mother_id
+                    mother_id=excluded.mother_id,
+                    updated_at=excluded.updated_at
             """, (person_id, person["name"], person["given_name"], person["surname"], person["sex"],
                   person["birth_date"], person["birth_day"], person["birth_month"], person["birth_year"],
                   person["birth_place"], person["death_date"], person["death_year"], person["death_place"],
                   person["death_cause"], person["death_note"], person["death_age"], person["is_alive"],
-                  person["father_id"], person["mother_id"]))
+                  person["father_id"], person["mother_id"], person["updated_at"]))
 
         # DELETE + re-insert matrimonios (avoid duplicates with autoincrement PK)
         cursor.execute("DELETE FROM marriages")

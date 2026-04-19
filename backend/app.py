@@ -203,7 +203,11 @@ async def dossier(person_id: str):
     dossier_data = get_person_dossier(db_conn, person_id)
     if not dossier_data:
         raise HTTPException(status_code=404, detail="Persona no encontrada")
-    dossier_data["gedcom_date"] = gedcom_export_date or ""
+    person_updated_at = dossier_data.get("person", {}).get("updated_at", "")
+    if person_updated_at:
+        dossier_data["gedcom_date"] = convert_date_to_spanish(person_updated_at)
+    else:
+        dossier_data["gedcom_date"] = gedcom_export_date or ""
     return dossier_data
 
 
