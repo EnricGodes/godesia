@@ -1028,6 +1028,13 @@ def get_person_dossier(conn, person_id):
     ).fetchall()
     occupations_list = [dict(o) for o in occupations]
 
+    # Education events (events with type = "Educación")
+    education_events = conn.execute(
+        "SELECT description as title, date, place FROM events WHERE person_id = ? AND type = 'Educación' ORDER BY date",
+        (person_id,)
+    ).fetchall()
+    education_list = [dict(e) for e in education_events]
+
     # Work events (events with type = "Trabajo") — displayed in Trayectoria Profesional
     work_events = conn.execute(
         "SELECT description as title, date, place, 'Trabajo' as event_type FROM events WHERE person_id = ? AND type = 'Trabajo' ORDER BY date",
@@ -1122,6 +1129,7 @@ def get_person_dossier(conn, person_id):
         "children": children_list,
         "residences": residences_list,
         "occupations": occupations_list,
+        "education": education_list,
         "career": career_list,
         "military": military_list,
         "anecdotes": anecdotes_list,

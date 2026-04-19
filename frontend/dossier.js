@@ -163,6 +163,9 @@ function renderDossier(data) {
     // 7. TRAYECTORIA PROFESIONAL (Ocupación + Trabajo)
     renderCareer(data.career || data.occupations);
 
+    // 7b. ESTUDIOS
+    renderEducation(data.education);
+
     // 8. MILITAR
     renderMilitary(data);
 
@@ -1432,6 +1435,41 @@ function renderCareer(careerList) {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">${cards}</div>
     `;
     document.getElementById('career-section').innerHTML = html;
+}
+
+function renderEducation(educationList) {
+    if (!educationList || educationList.length === 0) {
+        document.getElementById('education-section').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('education-section').style.display = 'block';
+
+    const cards = educationList.map(e => `
+        <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 border-primary">
+            <p class="text-[10px] text-outline font-medium mb-2">${e.date || 'Período desconocido'}</p>
+            ${e.place ? `<p class="text-sm font-bold text-on-surface mb-3">${e.place}</p>` : ''}
+            <p class="text-xs text-outline">${e.title || ''}</p>
+        </div>
+    `).join('');
+
+    const html = `
+        <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" class="w-7 h-7">
+                <path d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V16H3V10Z" />
+                <path d="M2 16H22" />
+                <path d="M4 22L7 16" />
+                <path d="M20 22L17 16" />
+                <path d="M13 9H11" />
+                <path d="M8 11L8 7L7 8" />
+                <path d="M17 11L17 7L16 8" />
+                <path d="M12 20L12 16" />
+            </svg>
+            Estudios
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">${cards}</div>
+    `;
+    document.getElementById('education-section').innerHTML = html;
 }
 
 function renderMilitary(data) {
