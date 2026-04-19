@@ -338,18 +338,24 @@ def parse_gedcom_people(lines):
                     elif tag == "RESI":
                         j = i + 1
                         resi_data = {"address": None, "address2": None, "city": None, "country": None, "date": None}
-                        while j < len(lines) and lines[j].startswith("2"):
+                        while j < len(lines) and (lines[j].startswith("2") or lines[j].startswith("3")):
                             resi_line = lines[j].rstrip("\n")
-                            if "DATE" in resi_line:
-                                resi_data["date"] = resi_line.split("DATE", 1)[1].strip()
-                            elif "ADDR" in resi_line:
-                                resi_data["address"] = resi_line.split("ADDR", 1)[1].strip()
-                            elif "ADR2" in resi_line:
-                                resi_data["address2"] = resi_line.split("ADR2", 1)[1].strip()
-                            elif "CITY" in resi_line:
-                                resi_data["city"] = resi_line.split("CITY", 1)[1].strip()
-                            elif "CTRY" in resi_line:
-                                resi_data["country"] = resi_line.split("CTRY", 1)[1].strip()
+                            level_match = re.match(r"^(\d+)\s+(\S+)\s*(.*)", resi_line)
+                            if not level_match:
+                                j += 1
+                                continue
+                            rl, rtag, rval = level_match.group(1), level_match.group(2), level_match.group(3).strip()
+                            if rtag == "DATE" and rl == "2":
+                                resi_data["date"] = rval
+                            elif rtag in ("ADDR", "ADR1") and rl in ("2", "3"):
+                                if not resi_data["address"]:
+                                    resi_data["address"] = rval
+                            elif rtag == "ADR2" and rl in ("2", "3"):
+                                resi_data["address2"] = rval
+                            elif rtag == "CITY" and rl in ("2", "3"):
+                                resi_data["city"] = rval
+                            elif rtag == "CTRY" and rl in ("2", "3"):
+                                resi_data["country"] = rval
                             j += 1
                         residences[person_id].append(resi_data)
                     elif tag == "NOTE":
