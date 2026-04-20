@@ -347,6 +347,8 @@ function renderSidebarPeople(people) {
         const isActive = STATE.activePersonId && (
             p.id === STATE.activePersonId || p.id === `@${STATE.activePersonId}@`
         );
+        const parts = [p.given_name, p.nickname ? `"${p.nickname}"` : null, p.surname].filter(Boolean);
+        const displayName = parts.length ? parts.join(' ') : (p.name || '?');
         return `
         <div class="person-pill ${isActive ? 'active' : ''}"
              data-person-id="${p.id}"
@@ -355,7 +357,7 @@ function renderSidebarPeople(people) {
                 ? `<img src="/photos/${p.photo_file}" class="w-6 h-6 rounded-full object-cover shrink-0" loading="lazy"/>`
                 : `<div class="w-6 h-6 rounded-full bg-primary-container text-primary text-[10px] font-bold flex items-center justify-center shrink-0">${initials}</div>`
             }
-            <span class="truncate flex-1">${p.given_name || p.name}</span>
+            <span class="truncate flex-1">${displayName}</span>
             <span class="text-[10px] text-outline shrink-0">${p.photo_count}</span>
         </div>`;
     }).join('');
@@ -365,7 +367,12 @@ function setupPersonSearch() {
     document.getElementById('person-filter-input').addEventListener('input', function () {
         const q = this.value.toLowerCase();
         STATE.filteredPeople = q
-            ? STATE.allPeople.filter(p => (p.name || '').toLowerCase().includes(q))
+            ? STATE.allPeople.filter(p =>
+                (p.name || '').toLowerCase().includes(q) ||
+                (p.given_name || '').toLowerCase().includes(q) ||
+                (p.surname || '').toLowerCase().includes(q) ||
+                (p.nickname || '').toLowerCase().includes(q)
+              )
             : STATE.allPeople;
         renderSidebarPeople(STATE.filteredPeople);
     });

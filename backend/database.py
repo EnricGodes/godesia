@@ -1418,13 +1418,15 @@ def get_album_photos(conn, album_id, q="", sort="date", person_id="", page=1, li
     if q:
         where.append("""(
             ph.title LIKE '%' || ? || '%'
+            OR ph.date LIKE '%' || ? || '%'
+            OR ph.place LIKE '%' || ? || '%'
             OR ph.id IN (
                 SELECT pt2.photo_id FROM photo_tags pt2
                 JOIN people pe ON pe.id = pt2.person_id
                 WHERE pe.name LIKE '%' || ? || '%'
             )
         )""")
-        params.extend([q, q])
+        params.extend([q, q, q, q])
 
     where_sql = " AND ".join(where)
 
@@ -1499,7 +1501,7 @@ def get_album_photos(conn, album_id, q="", sort="date", person_id="", page=1, li
         "id": r["id"],
         "filename": r["filename"],
         "title": r["title"],
-        "date": r["date"],
+        "date": convert_date_to_spanish(r["date"]) if r["date"] else None,
         "place": r["place"],
         "year": _extract_year(r["date"]),
         "people": people_by_photo.get(r["id"], []),
@@ -1518,7 +1520,7 @@ def get_album_photos(conn, album_id, q="", sort="date", person_id="", page=1, li
 def get_photos_people_list(conn):
     """Return all people appearing in at least one non-cutout photo, ordered by photo count."""
     rows = conn.execute("""
-        SELECT p.id, p.name, p.given_name, p.surname, p.photo_file,
+        SELECT p.id, p.name, p.given_name, p.surname, p.nickname, p.photo_file,
                COUNT(DISTINCT pt.photo_id) as photo_count
         FROM people p
         JOIN photo_tags pt ON pt.person_id = p.id
@@ -1532,6 +1534,7 @@ def get_photos_people_list(conn):
         "name": r["name"],
         "given_name": r["given_name"],
         "surname": r["surname"],
+        "nickname": r["nickname"],
         "photo_file": r["photo_file"],
         "photo_count": r["photo_count"],
     } for r in rows]}
