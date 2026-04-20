@@ -125,7 +125,7 @@ function renderPhotos(photos) {
     // Add link to see all photos
     const link = document.createElement('div');
     link.className = 'photos-see-all';
-    link.innerHTML = '<a href="/tree.html">Ver todas las fotografías →</a>';
+    link.innerHTML = '<a href="/albums.html#__all__">Ver todas las fotografías →</a>';
     container.parentElement.appendChild(link);
 }
 
