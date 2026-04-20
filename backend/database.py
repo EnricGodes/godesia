@@ -1398,6 +1398,8 @@ def get_album_photos(conn, album_id, q="", sort="date", person_id="", page=1, li
     if album_id == "__unassigned__":
         where.append("ph.album_id IS NULL")
         album_title = "Fotos Familiares"
+    elif album_id == "__all__":
+        album_title = "Todas las fotos"
     else:
         where.append("ph.album_id = ?")
         params.append(album_id)
@@ -1425,19 +1427,46 @@ def get_album_photos(conn, album_id, q="", sort="date", person_id="", page=1, li
         f"SELECT COUNT(DISTINCT ph.id) FROM photos ph WHERE {where_sql}", params
     ).fetchone()[0]
 
-    sort_sql = {
-        "added": "ph.inserted_at DESC",
-        "title": "COALESCE(ph.title,'') ASC",
-    }.get(sort, "ph.id ASC")
-
-    offset = (page - 1) * limit
-    rows = conn.execute(f"""
-        SELECT DISTINCT ph.id, ph.filename, ph.title, ph.date, ph.place, ph.inserted_at
-        FROM photos ph
-        WHERE {where_sql}
-        ORDER BY {sort_sql}
-        LIMIT ? OFFSET ?
-    """, params + [limit, offset]).fetchall()
+    # For date sort: fetch all IDs + dates, sort in Python (handles mixed GEDCOM formats),
+    # then paginate using a sorted ID list to get correct cross-page ordering.
+    if sort == "date":
+        id_date_rows = conn.execute(
+            f"SELECT ph.id, ph.date FROM photos ph WHERE {where_sql}", params
+        ).fetchall()
+        sorted_ids = [r["id"] for r in sorted(
+            id_date_rows,
+            key=lambda r: (
+                _extract_year(r["date"]) is None,
+                _extract_year(r["date"]) or 0,
+            )
+        )]
+        offset = (page - 1) * limit
+        page_ids = sorted_ids[offset: offset + limit]
+        if not page_ids:
+            rows = []
+        else:
+            phs = ",".join("?" * len(page_ids))
+            # Fetch details for this page's IDs, preserving Python sort order
+            rows_unordered = {
+                r["id"]: r for r in conn.execute(f"""
+                    SELECT ph.id, ph.filename, ph.title, ph.date, ph.place, ph.inserted_at
+                    FROM photos ph WHERE ph.id IN ({phs})
+                """, page_ids).fetchall()
+            }
+            rows = [rows_unordered[pid] for pid in page_ids if pid in rows_unordered]
+    else:
+        sort_sql = {
+            "added": "ph.inserted_at DESC",
+            "title": "COALESCE(ph.title,'') ASC",
+        }.get(sort, "ph.id ASC")
+        offset = (page - 1) * limit
+        rows = conn.execute(f"""
+            SELECT DISTINCT ph.id, ph.filename, ph.title, ph.date, ph.place, ph.inserted_at
+            FROM photos ph
+            WHERE {where_sql}
+            ORDER BY {sort_sql}
+            LIMIT ? OFFSET ?
+        """, params + [limit, offset]).fetchall()
 
     photo_ids = [r["id"] for r in rows]
     people_by_photo = {}
@@ -1470,9 +1499,6 @@ def get_album_photos(conn, album_id, q="", sort="date", person_id="", page=1, li
         "year": _extract_year(r["date"]),
         "people": people_by_photo.get(r["id"], []),
     } for r in rows]
-
-    if sort == "date":
-        photos.sort(key=lambda x: (x["year"] is None, x["year"] or 0))
 
     return {
         "album_id": album_id,

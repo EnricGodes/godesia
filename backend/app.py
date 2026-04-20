@@ -338,7 +338,7 @@ async def album_photos(
 ):
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
-    if album_id != "__unassigned__" and not album_id.startswith("@"):
+    if album_id not in ("__unassigned__", "__all__") and not album_id.startswith("@"):
         album_id = f"@{album_id}@"
     if person_id and not person_id.startswith("@"):
         person_id = f"@{person_id}@"

@@ -49,7 +49,12 @@ async function init() {
     setupKeyboardNav();
     attachSearchListener();
 
-    checkUrlHash();
+    // Default: show all photos; hash overrides to a specific album
+    if (window.location.hash) {
+        checkUrlHash();
+    } else {
+        selectAlbum('__all__');
+    }
 
     document.getElementById('albums-loading').classList.add('hidden');
 }
@@ -61,7 +66,7 @@ function checkUrlHash() {
     if (hash) {
         selectAlbum(hash);
     } else {
-        showAlbumsOverview();
+        selectAlbum('__all__');
     }
 }
 
@@ -77,8 +82,8 @@ function selectAlbum(albumId) {
     history.replaceState(null, '', '#' + albumId);
 
     // Breadcrumb
-    const album = albumId === '__unassigned__'
-        ? STATE.unassigned
+    const album = albumId === '__unassigned__' ? STATE.unassigned
+        : albumId === '__all__' ? { title: 'Todas las fotos' }
         : STATE.albums.find(a => a.id === albumId || a.id === `@${albumId}@`);
     const title = album ? album.title : albumId;
 
@@ -282,8 +287,8 @@ function openPhotoFromAlbum(index) {
     const photo = STATE.photos[index];
     if (!photo) return;
 
-    const album = STATE.activeAlbumId === '__unassigned__'
-        ? STATE.unassigned
+    const album = STATE.activeAlbumId === '__unassigned__' ? STATE.unassigned
+        : STATE.activeAlbumId === '__all__' ? null
         : STATE.albums.find(a => a.id === STATE.activeAlbumId || a.id === `@${STATE.activeAlbumId}@`);
 
     window.__photoModalContext = album ? {
@@ -298,9 +303,27 @@ function openPhotoFromAlbum(index) {
 
 function renderSidebarAlbums() {
     const nav = document.getElementById('sidebar-album-list');
-    const allAlbums = [...STATE.albums, ...(STATE.unassigned ? [STATE.unassigned] : [])];
+    const totalPhotos = STATE.albums.reduce((s, a) => s + a.photo_count, 0)
+        + (STATE.unassigned?.photo_count || 0);
 
-    nav.innerHTML = allAlbums.map(album => {
+    const allEntry = `
+        <a class="sidebar-album-link" data-id="__all__" onclick="selectAlbum('__all__')">
+            <span class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-outline">collections</span>
+                <span class="truncate font-semibold">Todas las fotos</span>
+            </span>
+            <span class="text-[10px] text-outline shrink-0 ml-1">${totalPhotos}</span>
+        </a>
+        <div class="border-t border-outline-variant/20 my-1.5"></div>
+        <a class="sidebar-album-link text-[11px] text-outline" onclick="showAlbumsOverview()">
+            <span class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">grid_view</span>
+                <span>Ver álbumes</span>
+            </span>
+        </a>
+        <div class="border-t border-outline-variant/20 my-1.5"></div>`;
+
+    const albumLinks = [...STATE.albums, ...(STATE.unassigned ? [STATE.unassigned] : [])].map(album => {
         const isUA = album.id === '__unassigned__';
         const icon = isUA ? 'family_home' : 'photo_library';
         return `
@@ -312,6 +335,8 @@ function renderSidebarAlbums() {
             <span class="text-[10px] text-outline shrink-0 ml-1">${album.photo_count}</span>
         </a>`;
     }).join('');
+
+    nav.innerHTML = allEntry + albumLinks;
 }
 
 function renderSidebarPeople(people) {
@@ -478,11 +503,8 @@ function setupBackToTop() {
 
 function setupKeyboardNav() {
     document.addEventListener('keydown', e => {
-        // Only when modal is open and we're in an album
-        if (!document.getElementById('photo-modal') || !STATE.activeAlbumId) return;
-        const modal = document.getElementById('photo-modal');
-        if (!modal || modal.style.display === 'none' || modal.classList.contains('hidden')) return;
-
+        const overlay = document.getElementById('photo-modal-overlay');
+        if (!overlay || overlay.style.display === 'none' || overlay.style.display === '') return;
         if (e.key === 'ArrowRight' && STATE.currentPhotoIndex < STATE.photos.length - 1) {
             openPhotoFromAlbum(STATE.currentPhotoIndex + 1);
         } else if (e.key === 'ArrowLeft' && STATE.currentPhotoIndex > 0) {
