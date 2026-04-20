@@ -192,27 +192,19 @@ function renderAnecdota(a) {
 function renderInMemoriam(people) {
     const container = document.getElementById('in-memoriam-list');
     if (!people || !people.length) return;
-    const rotations = [-4, 1, -2];
     container.innerHTML = people.map(p => {
         const years = [p.birth_year, p.death_year].filter(Boolean).join('–');
         const pid = dossierId(p.id);
         const displayName = formatNameWithNickname(p.name, p.nickname, p.given_name, p.surname);
         const deathInfo = [p.death_date, p.death_place ? p.death_place.split(',')[0].trim() : null].filter(Boolean).join(' · ');
-        const photoSrcs = (p.photos && p.photos.length) ? p.photos.slice(0, 3) : (p.photo_file ? [p.photo_file] : []);
-        const photoStack = photoSrcs.length > 1
-            ? `<div class="relative h-20 w-[88px] shrink-0">
-                ${photoSrcs.map((f, i) => `
-                <img src="/photos/${f}" alt="${displayName}"
-                     class="absolute w-14 h-20 object-cover rounded shadow-md border border-white/60"
-                     style="left:${i * 14}px; transform:rotate(${rotations[i] || 0}deg); z-index:${i+1}; filter:grayscale(20%);">`
-                ).join('')}
-               </div>`
-            : photoSrcs.length === 1
-                ? `<img src="/photos/${photoSrcs[0]}" alt="${displayName}" class="featured-photo shrink-0" style="filter:grayscale(20%)">`
-                : `<div class="featured-no-photo shrink-0"><span class="material-symbols-outlined">person</span></div>`;
+        const photoEl = p.photo_file
+            ? `<img src="/photos/${p.photo_file}" alt="${displayName}"
+                    class="shrink-0 object-cover"
+                    style="width:48px;height:64px;border-radius:6px;filter:grayscale(15%);">`
+            : `<div class="featured-no-photo shrink-0" style="border-radius:6px;width:48px;height:64px;"><span class="material-symbols-outlined">person</span></div>`;
         return `
         <a href="/dossier.html?id=${pid}" class="featured-member items-start" style="opacity:0.92; text-decoration:none;">
-            ${photoStack}
+            ${photoEl}
             <div class="featured-info">
                 <p class="text-[0.55rem] uppercase tracking-widest text-outline font-bold mb-0.5 italic">In Memoriam</p>
                 <p class="featured-name">${displayName}</p>
