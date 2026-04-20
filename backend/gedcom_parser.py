@@ -163,6 +163,7 @@ def parse_gedcom(filepath: str) -> dict:
                     "name": "",
                     "given_name": "",
                     "surname": "",
+                    "nickname": "",
                     "sex": "",
                     "birth": {},
                     "death": {},
@@ -260,6 +261,8 @@ def parse_gedcom(filepath: str) -> dict:
                         indi["given_name"] = value
                     elif tag == "SURN":
                         indi["surname"] = value
+                    elif tag == "NICK":
+                        indi["nickname"] = value
                 elif current_level1 == "BIRT":
                     if tag == "DATE":
                         indi["birth"]["date"] = value
@@ -458,6 +461,7 @@ def resolve_relationships(data: dict) -> list:
             "name": indi["name"],
             "given_name": indi["given_name"],
             "surname": indi["surname"],
+            "nickname": indi["nickname"] or None,
             "sex": indi["sex"],
         }
 

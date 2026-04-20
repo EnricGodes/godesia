@@ -69,7 +69,8 @@
         .bento-xsmall { grid-column: span 1; grid-row: span 1; height: 80px; }
         .albums-layout { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 56px); }
         @media (max-width: 1023px) { .albums-layout { grid-template-columns: 1fr; } }
-        .sidebar-sticky { position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: #c2c8bf transparent; align-self: start; }
+        .sidebar-sticky { position: sticky; top: 56px; height: calc(100vh - 56px); align-self: start; overflow: hidden; }
+        .sidebar-scroll { height: 100%; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #c2c8bf transparent; }
         .sidebar-album-link { display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0.6rem; border-radius: 0.375rem; font-size: 0.8rem; color: #424842; cursor: pointer; transition: background 0.15s; }
         .sidebar-album-link:hover { background: #f1eee5; color: #2D4B33; }
         .sidebar-album-link.active { background: #f1eee5; color: #2D4B33; font-weight: 700; }
@@ -91,27 +92,31 @@
 
     <!-- ── SIDEBAR ──────────────────────────────────────────────────── -->
     <aside id="albums-sidebar"
-           class="sidebar-sticky hidden lg:block bg-surface-container border-r border-outline-variant/30 px-4 py-6">
+           class="sidebar-sticky hidden lg:block bg-surface-container border-r border-outline-variant/30">
 
-        <div class="flex items-center gap-2 mb-5">
-            <span class="material-symbols-outlined text-primary">photo_library</span>
-            <h2 class="font-headline text-base text-primary font-semibold">Álbumes</h2>
-        </div>
+        <div class="sidebar-scroll px-4 py-6">
 
-        <nav id="sidebar-album-list" class="flex flex-col gap-0.5 mb-6"></nav>
+            <div class="flex items-center gap-2 mb-5">
+                <span class="material-symbols-outlined text-primary">photo_library</span>
+                <h2 class="font-headline text-base text-primary font-semibold">Álbumes</h2>
+            </div>
 
-        <div class="border-t border-outline-variant/30 my-4"></div>
+            <nav id="sidebar-album-list" class="flex flex-col gap-0.5 mb-6"></nav>
 
-        <div class="flex items-center justify-between mb-2">
-            <span class="text-[10px] uppercase tracking-widest text-outline font-extrabold">Por persona</span>
-            <button id="clear-person-btn"
-                    class="hidden text-[10px] text-primary font-bold hover:underline"
-                    onclick="clearPersonFilter()">Limpiar</button>
-        </div>
-        <input id="person-filter-input" type="text" placeholder="Buscar persona..."
-               class="w-full bg-surface-container-lowest rounded-lg px-3 py-1.5 text-xs border border-outline-variant/40
-                      focus:outline-none focus:border-primary/50 mb-3 placeholder:text-outline"/>
-        <div id="person-filter-list" class="flex flex-col gap-0.5 max-h-[420px] overflow-y-auto pr-1"></div>
+            <div class="border-t border-outline-variant/30 my-4"></div>
+
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] uppercase tracking-widest text-outline font-extrabold">Por persona</span>
+                <button id="clear-person-btn"
+                        class="hidden text-[10px] text-primary font-bold hover:underline"
+                        onclick="clearPersonFilter()">Limpiar</button>
+            </div>
+            <input id="person-filter-input" type="text" placeholder="Buscar persona..."
+                   class="w-full bg-surface-container-lowest rounded-lg px-3 py-1.5 text-xs border border-outline-variant/40
+                          focus:outline-none focus:border-primary/50 mb-3 placeholder:text-outline"/>
+            <div id="person-filter-list" class="flex flex-col gap-0.5 max-h-[420px] overflow-y-auto pr-1"></div>
+
+        </div><!-- /.sidebar-scroll -->
 
     </aside>
 
