@@ -173,7 +173,9 @@ function renderPhotoModal() {
     const albumHtml = p.album_title
         ? `<div style="margin-bottom: 28px;">
              <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">Álbum</h3>
-             <div style="font-size: 13px; color: #1c1c17;">${p.album_title}</div>
+             <a href="/albums.html#${p.album_id}" style="font-size: 13px; color: #2D4B33; font-weight: 600; text-decoration: none;"
+                onmouseover="this.style.textDecoration='underline'"
+                onmouseout="this.style.textDecoration='none'">${p.album_title}</a>
            </div>`
         : '';
 
