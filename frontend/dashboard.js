@@ -36,6 +36,8 @@ async function loadDashboard() {
         renderStats(data.stats);
         renderBranches(data.branches);
         renderBirthdays(data.birthdays);
+        renderAnecdota(data.anecdota);
+        renderInMemoriam(data.in_memoriam);
         renderPhotos(data.photos);
         renderFeatured(data.featured);
         renderDocuments(data.documents);
@@ -156,6 +158,48 @@ function renderFeatured(featured) {
     }).join('');
 }
 
+function renderAnecdota(a) {
+    const section = document.getElementById('anecdota-section');
+    if (!a) return;
+    // Extract person name from cta: "Saber más sobre Nombre Apellidos" → everything after "sobre "
+    const ctaName = a.cta && a.cta.includes('sobre ') ? a.cta.split('sobre ')[1] : null;
+    const ctaHref = ctaName ? `/chat.html?q=${encodeURIComponent(ctaName)}` : null;
+    section.innerHTML = `
+        <div class="flex items-start gap-4 bg-surface-container rounded-2xl px-6 py-5 border border-outline-variant/20">
+            <span class="material-symbols-outlined text-secondary text-3xl mt-0.5 shrink-0" style="font-variation-settings:'FILL' 1">auto_awesome</span>
+            <div class="flex-1 min-w-0">
+                <p class="text-[0.65rem] uppercase tracking-[0.18em] font-extrabold text-secondary mb-1">¿Sabías que...?</p>
+                <p class="font-serif text-[1.05rem] text-on-surface leading-snug mb-2">${a.titulo}</p>
+                <p class="text-[0.88rem] text-on-surface-variant leading-relaxed mb-3">${a.texto}</p>
+                ${ctaHref ? `<a href="${ctaHref}" class="text-[0.8rem] font-bold text-primary hover:underline">${a.cta} →</a>` : ''}
+            </div>
+        </div>`;
+    section.classList.remove('hidden');
+}
+
+function renderInMemoriam(people) {
+    const container = document.getElementById('in-memoriam-list');
+    if (!people || !people.length) return;
+    container.innerHTML = people.map(p => {
+        const years = [p.birth_year, p.death_year].filter(Boolean).join('–');
+        const pid = dossierId(p.id);
+        const displayName = formatNameWithNickname(p.name, p.nickname, p.given_name, p.surname);
+        const deathInfo = [p.death_date, p.death_place].filter(Boolean).join(' · ');
+        return `
+        <a href="/dossier.html?id=${pid}" class="featured-member" style="opacity:0.9;">
+            ${p.photo_file
+                ? `<img class="featured-photo" src="/photos/${p.photo_file}" alt="${displayName}" style="filter:grayscale(30%)">`
+                : `<div class="featured-no-photo"><span class="material-symbols-outlined">person</span></div>`
+            }
+            <div class="featured-info">
+                <p class="featured-name">${displayName}</p>
+                <p class="featured-years">${years}</p>
+                ${deathInfo ? `<p class="featured-desc">${deathInfo}</p>` : ''}
+            </div>
+        </a>`;
+    }).join('');
+}
+
 function renderDocuments(documents) {
     const container = document.getElementById('documents-gallery');
     if (!documents || !documents.length) {
@@ -163,45 +207,41 @@ function renderDocuments(documents) {
         return;
     }
 
-    const docLabels = {
-        'bautisme': 'Bautismo',
-        'matrimoni': 'Matrimonio',
-        'defuncio': 'Defunción',
-        'naixement': 'Nacimiento',
-        'certificat': 'Certificado',
-        'padro': 'Padrón',
-        'testament': 'Testamento',
-        'arbre': 'Árbol',
-        'transcripcio': 'Transcripción',
-        'poema': 'Poema',
-        'invitacio': 'Invitación',
-        'carta': 'Carta',
-        'dibuix': 'Dibujo',
-        'biografia': 'Biografía',
-        'document': 'Documento'
-    };
-
-    const docIcons = {
-        'Bautismo':    '/icons/bautismo.svg',
-        'Matrimonio':  '/icons/matrimonio.svg',
-        'Defunción':   '/icons/defuncion.svg',
-        'Nacimiento':  '/icons/nacimiento.svg',
-        'Certificado': '/icons/documentacion.svg',
-        'Padrón':      '/icons/padron.svg',
-        'Testamento':  '/icons/carta.svg',
-        'Carta':       '/icons/carta.svg',
-        'Biografía':   '/icons/biografia.svg',
-        'Documento':   '/icons/documentacion.svg'
+    const docIconMap = {
+        'nacimiento':    '/icons/nacimiento.svg',
+        'naixement':     '/icons/nacimiento.svg',
+        'matrimonio':    '/icons/matrimonio.svg',
+        'matrimoni':     '/icons/matrimonio.svg',
+        'defunción':     '/icons/defuncion.svg',
+        'defuncio':      '/icons/defuncion.svg',
+        'bautismo':      '/icons/bautismo.svg',
+        'bautisme':      '/icons/bautismo.svg',
+        'obituario':     '/icons/obituario.svg',
+        'obituari':      '/icons/obituario.svg',
+        'cementerio':    '/icons/cementerio.svg',
+        'documentación': '/icons/documentacion.svg',
+        'documentacio':  '/icons/documentacion.svg',
+        'documento':     '/icons/documentacion.svg',
+        'certificado':   '/icons/documentacion.svg',
+        'certificat':    '/icons/documentacion.svg',
+        'biografia':     '/icons/biografia.svg',
+        'padrón':        '/icons/padron.svg',
+        'padro':         '/icons/padron.svg',
+        'carta':         '/icons/carta.svg',
+        'testamento':    '/icons/carta.svg',
+        'testament':     '/icons/carta.svg',
+        'diversos':      '/icons/diversos.svg',
+        'militar':       '/icons/militar.svg',
     };
 
     const d = documents[0];
-    // Extract [Type] prefix from title if present
+    // Extract [Type] from title if present
     const rawCaption = d.title || 'Documento';
     const typeMatch = rawCaption.match(/\[([^\]]+)\]/);
     const docType = typeMatch ? typeMatch[1].toLowerCase() : '';
     const caption = rawCaption.replace(/\s*\[.*?\]\s*/g, '').trim();
-    const typeLabel = docLabels[docType] || (docType || '');
-    const iconPath = docIcons[typeLabel] || '/icons/documentacion.svg';
+    const typeLabel = docType ? docType.charAt(0).toUpperCase() + docType.slice(1) : '';
+    const iconPath = docIconMap[docType] || '/icons/documentacion.svg';
 
     container.innerHTML = `
         <div class="document-single" onclick="openPhotoModal(${d.id})" style="cursor:pointer;">

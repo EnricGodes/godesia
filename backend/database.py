@@ -1,5 +1,7 @@
 """SQLite database for Godesia — schema, connection, and query helpers."""
 
+import json
+import random
 import re
 import sqlite3
 import unicodedata
@@ -740,6 +742,17 @@ def get_branch_descendants(conn, person_ids):
     return len(all_descendants)
 
 
+def get_random_anecdota():
+    """Return a random entry from data/anecdotas.json."""
+    path = Path(__file__).parent.parent / "data" / "anecdotas.json"
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        return random.choice(data) if data else None
+    except Exception:
+        return None
+
+
 def get_dashboard_data(conn):
     """Return all data needed for the dashboard page in a single call."""
     # Stats
@@ -826,6 +839,19 @@ def get_dashboard_data(conn):
     # Documents from archive
     documents = get_documents(conn, limit=1)
 
+    # In memoriam — 4 most recent deaths
+    in_memoriam = conn.execute("""
+        SELECT id, name, given_name, surname, nickname,
+               birth_year, death_year, death_date, death_place, photo_file
+        FROM people
+        WHERE death_year IS NOT NULL
+        ORDER BY death_year DESC, id DESC
+        LIMIT 4
+    """).fetchall()
+
+    # Random anecdote
+    anecdota = get_random_anecdota()
+
     return {
         "stats": {
             "total_people": total_people,
@@ -851,6 +877,8 @@ def get_dashboard_data(conn):
         ],
         "featured": [{**dict(p), "birth_date": convert_date_to_spanish(p["birth_date"])} for p in featured],
         "documents": [{**dict(d), "date": convert_date_to_spanish(d["date"])} for d in documents],
+        "in_memoriam": [dict(p) for p in in_memoriam],
+        "anecdota": anecdota,
     }
 
 
