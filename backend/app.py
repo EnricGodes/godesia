@@ -335,6 +335,7 @@ async def album_photos(
     person_id: str = Query(""),
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=200),
+    show_docs: bool = Query(False),
 ):
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
@@ -342,7 +343,7 @@ async def album_photos(
         album_id = f"@{album_id}@"
     if person_id and not person_id.startswith("@"):
         person_id = f"@{person_id}@"
-    return get_album_photos(db_conn, album_id, q=q, sort=sort, person_id=person_id, page=page, limit=limit)
+    return get_album_photos(db_conn, album_id, q=q, sort=sort, person_id=person_id, page=page, limit=limit, show_docs=show_docs)
 
 
 # Serve photos

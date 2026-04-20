@@ -11,6 +11,7 @@ const STATE = {
     searchQuery: '',
     sortBy: 'date',
     viewMode: 'bento',
+    showDocs: false,
 
     photos: [],
     total: 0,
@@ -81,13 +82,11 @@ function selectAlbum(albumId) {
 
     history.replaceState(null, '', '#' + albumId);
 
-    // Breadcrumb
     const album = albumId === '__unassigned__' ? STATE.unassigned
-        : albumId === '__all__' ? { title: 'Todas las fotos' }
+        : albumId === '__all__' ? { title: 'Álbum de fotos' }
         : STATE.albums.find(a => a.id === albumId || a.id === `@${albumId}@`);
     const title = album ? album.title : albumId;
 
-    document.getElementById('breadcrumb-label').textContent = title;
     document.getElementById('page-title').textContent = title;
 
     // Sidebar highlight
@@ -106,7 +105,6 @@ function showAlbumsOverview() {
     STATE.photos = [];
     history.replaceState(null, '', window.location.pathname);
 
-    document.getElementById('breadcrumb-label').textContent = 'Álbum de fotos';
     document.getElementById('page-title').textContent = 'Álbum de fotos';
 
     document.querySelectorAll('.sidebar-album-link').forEach(el => el.classList.remove('active'));
@@ -132,6 +130,7 @@ async function fetchPhotos(append = false) {
     });
     if (STATE.searchQuery) params.set('q', STATE.searchQuery);
     if (STATE.activePersonId) params.set('person_id', STATE.activePersonId);
+    if (STATE.showDocs) params.set('show_docs', 'true');
 
     // Normalize albumId for URL: strip @ wrappers for the path
     const pathId = albumId === '__unassigned__' ? albumId
@@ -294,6 +293,8 @@ function openPhotoFromAlbum(index) {
     window.__photoModalContext = album ? {
         albumId: STATE.activeAlbumId,
         albumTitle: album.title,
+        onPrev: index > 0 ? () => openPhotoFromAlbum(STATE.currentPhotoIndex - 1) : null,
+        onNext: index < STATE.photos.length - 1 ? () => openPhotoFromAlbum(STATE.currentPhotoIndex + 1) : null,
     } : null;
 
     openPhotoModal(photo.id);
@@ -473,17 +474,17 @@ function setViewMode(mode) {
 function setupInfiniteScroll() {
     const sentinel = document.getElementById('load-more-sentinel');
     const observer = new IntersectionObserver(entries => {
-        if (entries[0].isIntersecting && !STATE.isLoading && STATE.photos.length < STATE.total) {
-            STATE.page++;
-            fetchPhotos(true);
-        }
-    }, { rootMargin: '200px' });
+        if (!entries[0].isIntersecting) return;
+        if (STATE.isLoading || STATE.photos.length >= STATE.total) return;
+        STATE.page++;
+        fetchPhotos(true);
+    }, { rootMargin: '400px', threshold: 0 });
     observer.observe(sentinel);
 }
 
 function updateLoadMoreSentinel() {
-    const sentinel = document.getElementById('load-more-sentinel');
-    sentinel.classList.toggle('hidden', STATE.photos.length >= STATE.total);
+    const spinner = document.getElementById('load-more-spinner');
+    spinner.classList.toggle('hidden', STATE.photos.length >= STATE.total);
 }
 
 // ─── Back to top ──────────────────────────────────────────────────────────────
@@ -511,6 +512,25 @@ function setupKeyboardNav() {
             openPhotoFromAlbum(STATE.currentPhotoIndex - 1);
         }
     });
+}
+
+// ─── Docs toggle ─────────────────────────────────────────────────────────────
+
+function toggleDocs() {
+    STATE.showDocs = !STATE.showDocs;
+    const btn = document.getElementById('docs-toggle');
+    if (STATE.showDocs) {
+        btn.classList.add('bg-primary', 'text-on-primary', 'border-primary');
+        btn.classList.remove('text-outline', 'border-outline-variant');
+    } else {
+        btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+        btn.classList.add('text-outline', 'border-outline-variant');
+    }
+    if (STATE.activeAlbumId) {
+        STATE.page = 1;
+        STATE.photos = [];
+        fetchPhotos(false);
+    }
 }
 
 // ─── UI helpers ───────────────────────────────────────────────────────────────

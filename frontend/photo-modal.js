@@ -218,6 +218,26 @@ function renderPhotoModal() {
                     ✕
                 </button>
 
+                <!-- Prev arrow -->
+                ${ctx?.onPrev ? `<button onclick="window.__photoModalContext.onPrev()" title="Anterior"
+                    style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); z-index: 50;
+                           width: 44px; height: 44px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33;
+                           border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer;
+                           font-size: 22px; display: flex; align-items: center; justify-content: center;
+                           box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s;"
+                    onmouseover="this.style.backgroundColor='#2D4B33';this.style.color='white'"
+                    onmouseout="this.style.backgroundColor='rgba(252,249,240,0.95)';this.style.color='#2D4B33'">‹</button>` : ''}
+
+                <!-- Next arrow -->
+                ${ctx?.onNext ? `<button onclick="window.__photoModalContext.onNext()" title="Siguiente"
+                    style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); z-index: 50;
+                           width: 44px; height: 44px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33;
+                           border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer;
+                           font-size: 22px; display: flex; align-items: center; justify-content: center;
+                           box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s;"
+                    onmouseover="this.style.backgroundColor='#2D4B33';this.style.color='white'"
+                    onmouseout="this.style.backgroundColor='rgba(252,249,240,0.95)';this.style.color='#2D4B33'">›</button>` : ''}
+
                 <!-- Photo container -->
                 <div id="photo-container" style="flex: 1; display: flex; align-items: center; justify-content: center; background-color: #e5e2da; position: relative; overflow: hidden; padding: 24px;">
                     <div id="photo-wrapper" style="position: relative; display: inline-block;">

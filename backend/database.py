@@ -1347,11 +1347,14 @@ def get_albums_list(conn):
 
     albums = []
     for r in rows:
+        photo_count = r["photo_count"] or 0
+        if photo_count == 0:
+            continue
         min_y, max_y = _year_range(r["gedcom_id"])
         albums.append({
             "id": r["gedcom_id"],
             "title": r["title"],
-            "photo_count": r["photo_count"] or 0,
+            "photo_count": photo_count,
             "person_count": r["person_count"] or 0,
             "min_year": min_y,
             "max_year": max_y,
@@ -1382,7 +1385,7 @@ def get_albums_list(conn):
     }
 
 
-def get_album_photos(conn, album_id, q="", sort="date", person_id="", page=1, limit=50):
+def get_album_photos(conn, album_id, q="", sort="date", person_id="", page=1, limit=50, show_docs=False):
     """Return paginated photos for an album. album_id='__unassigned__' returns untagged photos."""
     import re as _re
 
@@ -1393,6 +1396,8 @@ def get_album_photos(conn, album_id, q="", sort="date", person_id="", page=1, li
         return int(m.group()) if m else None
 
     where = ["ph.filename NOT LIKE '%.pdf'", "ph.is_cutout = 0"]
+    if not show_docs:
+        where.append("(ph.title IS NULL OR ph.title NOT LIKE '%[%]%')")
     params = []
 
     if album_id == "__unassigned__":
