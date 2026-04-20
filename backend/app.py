@@ -67,9 +67,10 @@ async def startup():
     except Exception as e:
         print(f"  Auto-heal de fotos falló: {e}")
 
-    # Read GEDCOM export date from header
-    gedcom_path = BASE_DIR / "docs" / "site380341641-tree5-20260324_signed.ged"
-    if gedcom_path.exists():
+    # Read GEDCOM export date from header (auto-detect most recent .ged file)
+    ged_files = sorted((BASE_DIR / "docs").glob("*.ged"), key=lambda p: p.stat().st_mtime, reverse=True)
+    gedcom_path = ged_files[0] if ged_files else None
+    if gedcom_path and gedcom_path.exists():
         try:
             with open(gedcom_path, encoding="utf-8", errors="replace") as f:
                 for line in f:
