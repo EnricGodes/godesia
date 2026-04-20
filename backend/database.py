@@ -839,8 +839,8 @@ def get_dashboard_data(conn):
     # Documents from archive
     documents = get_documents(conn, limit=1)
 
-    # In memoriam — 4 most recent deaths
-    in_memoriam = conn.execute("""
+    # In memoriam — 4 most recent deaths, with up to 3 extra photos each
+    in_memoriam_rows = conn.execute("""
         SELECT id, name, given_name, surname, nickname,
                birth_year, death_year, death_date, death_place, photo_file
         FROM people
@@ -848,6 +848,19 @@ def get_dashboard_data(conn):
         ORDER BY death_year DESC, id DESC
         LIMIT 4
     """).fetchall()
+    in_memoriam = []
+    for p in in_memoriam_rows:
+        d = dict(p)
+        extra = conn.execute("""
+            SELECT ph.filename FROM photos ph
+            JOIN photo_tags pt ON pt.photo_id = ph.id
+            WHERE pt.person_id = ? AND ph.is_cutout = 0
+            AND ph.filename NOT LIKE '%.pdf'
+            AND (ph.title IS NULL OR ph.title NOT LIKE '%[%]%')
+            LIMIT 3
+        """, (p["id"],)).fetchall()
+        d["photos"] = [r["filename"] for r in extra]
+        in_memoriam.append(d)
 
     # Random anecdote
     anecdota = get_random_anecdota()
@@ -877,7 +890,7 @@ def get_dashboard_data(conn):
         ],
         "featured": [{**dict(p), "birth_date": convert_date_to_spanish(p["birth_date"])} for p in featured],
         "documents": [{**dict(d), "date": convert_date_to_spanish(d["date"])} for d in documents],
-        "in_memoriam": [dict(p) for p in in_memoriam],
+        "in_memoriam": in_memoriam,
         "anecdota": anecdota,
     }
 

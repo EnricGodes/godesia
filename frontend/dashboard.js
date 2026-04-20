@@ -161,37 +161,60 @@ function renderFeatured(featured) {
 function renderAnecdota(a) {
     const section = document.getElementById('anecdota-section');
     if (!a) return;
-    // Extract person name from cta: "Saber más sobre Nombre Apellidos" → everything after "sobre "
     const ctaName = a.cta && a.cta.includes('sobre ') ? a.cta.split('sobre ')[1] : null;
-    const ctaHref = ctaName ? `/chat.html?q=${encodeURIComponent(ctaName)}` : null;
+    const infoIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-secondary shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><path d="M12 16V12"/><path d="M12.125 8.25H12M12.25 8.25C12.25 8.11193 12.1381 8 12 8C11.8619 8 11.75 8.11193 11.75 8.25C11.75 8.38807 11.8619 8.5 12 8.5C12.1381 8.5 12.25 8.38807 12.25 8.25Z"/></svg>`;
     section.innerHTML = `
         <div class="flex items-start gap-4 bg-surface-container rounded-2xl px-6 py-5 border border-outline-variant/20">
-            <span class="material-symbols-outlined text-secondary text-3xl mt-0.5 shrink-0" style="font-variation-settings:'FILL' 1">auto_awesome</span>
+            ${infoIcon}
             <div class="flex-1 min-w-0">
                 <p class="text-[0.65rem] uppercase tracking-[0.18em] font-extrabold text-secondary mb-1">¿Sabías que...?</p>
                 <p class="font-serif text-[1.05rem] text-on-surface leading-snug mb-2">${a.titulo}</p>
                 <p class="text-[0.88rem] text-on-surface-variant leading-relaxed mb-3">${a.texto}</p>
-                ${ctaHref ? `<a href="${ctaHref}" class="text-[0.8rem] font-bold text-primary hover:underline">${a.cta} →</a>` : ''}
+                ${ctaName ? `<a id="anecdota-cta" href="/chat.html?q=${encodeURIComponent(ctaName)}" class="text-[0.8rem] font-bold text-primary hover:underline">${a.cta} →</a>` : ''}
             </div>
         </div>`;
     section.classList.remove('hidden');
+    // Try to resolve person name → dossier link
+    if (ctaName) {
+        fetch(`/api/search?q=${encodeURIComponent(ctaName)}&limit=1`)
+            .then(r => r.json())
+            .then(data => {
+                const match = data.results && data.results[0];
+                if (match) {
+                    const el = document.getElementById('anecdota-cta');
+                    if (el) el.href = `/dossier.html?id=${dossierId(match.id)}`;
+                }
+            })
+            .catch(() => {});
+    }
 }
 
 function renderInMemoriam(people) {
     const container = document.getElementById('in-memoriam-list');
     if (!people || !people.length) return;
+    const rotations = [-4, 1, -2];
     container.innerHTML = people.map(p => {
         const years = [p.birth_year, p.death_year].filter(Boolean).join('–');
         const pid = dossierId(p.id);
         const displayName = formatNameWithNickname(p.name, p.nickname, p.given_name, p.surname);
-        const deathInfo = [p.death_date, p.death_place].filter(Boolean).join(' · ');
+        const deathInfo = [p.death_date, p.death_place ? p.death_place.split(',')[0].trim() : null].filter(Boolean).join(' · ');
+        const photoSrcs = (p.photos && p.photos.length) ? p.photos.slice(0, 3) : (p.photo_file ? [p.photo_file] : []);
+        const photoStack = photoSrcs.length > 1
+            ? `<div class="relative h-20 w-[88px] shrink-0">
+                ${photoSrcs.map((f, i) => `
+                <img src="/photos/${f}" alt="${displayName}"
+                     class="absolute w-14 h-20 object-cover rounded shadow-md border border-white/60"
+                     style="left:${i * 14}px; transform:rotate(${rotations[i] || 0}deg); z-index:${i+1}; filter:grayscale(20%);">`
+                ).join('')}
+               </div>`
+            : photoSrcs.length === 1
+                ? `<img src="/photos/${photoSrcs[0]}" alt="${displayName}" class="featured-photo shrink-0" style="filter:grayscale(20%)">`
+                : `<div class="featured-no-photo shrink-0"><span class="material-symbols-outlined">person</span></div>`;
         return `
-        <a href="/dossier.html?id=${pid}" class="featured-member" style="opacity:0.9;">
-            ${p.photo_file
-                ? `<img class="featured-photo" src="/photos/${p.photo_file}" alt="${displayName}" style="filter:grayscale(30%)">`
-                : `<div class="featured-no-photo"><span class="material-symbols-outlined">person</span></div>`
-            }
+        <a href="/dossier.html?id=${pid}" class="featured-member items-start" style="opacity:0.92; text-decoration:none;">
+            ${photoStack}
             <div class="featured-info">
+                <p class="text-[0.55rem] uppercase tracking-widest text-outline font-bold mb-0.5 italic">In Memoriam</p>
                 <p class="featured-name">${displayName}</p>
                 <p class="featured-years">${years}</p>
                 ${deathInfo ? `<p class="featured-desc">${deathInfo}</p>` : ''}
