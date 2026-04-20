@@ -20,14 +20,14 @@
   ];
 
   const ALBUM = [
-    { label: 'Godes',          href: null },
-    { label: 'Godes Diago',    href: null },
-    { label: 'Godes Hospital', href: null },
-    { label: 'Godes Molina',   href: null },
-    { label: 'Godes Schmid',   href: null },
-    { label: 'Godes Terrats',  href: null },
-    { label: 'Pujol Godes',    href: null },
-    { label: 'Diversos',       href: null },
+    { label: 'Todos los álbumes', href: '/albums.html' },
+    { label: 'Godes',             href: '/albums.html#A800008' },
+    { label: 'Godes Diago',       href: '/albums.html#A800003' },
+    { label: 'Godes Hospital',    href: '/albums.html#A800005' },
+    { label: 'Godes Schmid',      href: '/albums.html#A800006' },
+    { label: 'Godes Terrats',     href: '/albums.html#A800007' },
+    { label: 'Pujol Godes',       href: '/albums.html#A800004' },
+    { label: 'Fotos Familiares',  href: '/albums.html#__unassigned__' },
   ];
 
   const DOCUMENTOS = [

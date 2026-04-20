@@ -15,6 +15,7 @@ from database import (
     get_connection, get_tree_data, get_birthdays_this_week, search_people,
     get_dashboard_data, get_documents, get_person_dossier, convert_date_to_spanish,
     update_all_photo_files, get_photo_details,
+    get_albums_list, get_album_photos, get_photos_people_list,
 )
 from query_router import QueryRouter
 from query_engine import QueryEngine
@@ -310,6 +311,38 @@ async def export_test_bank():
 @app.post("/api/tests/bank/import")
 async def import_test_bank(req: ImportBankRequest):
     return test_bank.import_bank(req.data)
+
+
+@app.get("/api/albums")
+async def albums_list():
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    return get_albums_list(db_conn)
+
+
+@app.get("/api/albums/people")
+async def albums_people():
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    return get_photos_people_list(db_conn)
+
+
+@app.get("/api/album/{album_id}/photos")
+async def album_photos(
+    album_id: str,
+    q: str = Query(""),
+    sort: str = Query("date"),
+    person_id: str = Query(""),
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
+):
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    if album_id != "__unassigned__" and not album_id.startswith("@"):
+        album_id = f"@{album_id}@"
+    if person_id and not person_id.startswith("@"):
+        person_id = f"@{person_id}@"
+    return get_album_photos(db_conn, album_id, q=q, sort=sort, person_id=person_id, page=page, limit=limit)
 
 
 # Serve photos

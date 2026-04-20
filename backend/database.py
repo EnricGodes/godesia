@@ -1294,6 +1294,218 @@ def update_all_photo_files(conn):
     return updated
 
 
+def get_albums_list(conn):
+    """Return all albums with cover photo and aggregate stats, plus virtual 'Fotos Familiares'."""
+    import re as _re
+
+    def _extract_year(d):
+        if not d:
+            return None
+        m = _re.search(r'\d{4}', d)
+        return int(m.group()) if m else None
+
+    def _album_cover(album_id_val):
+        if album_id_val == "__unassigned__":
+            clause = "ph.album_id IS NULL"
+            params = []
+        else:
+            clause = "ph.album_id = ?"
+            params = [album_id_val]
+        row = conn.execute(f"""
+            SELECT ph.filename FROM photos ph
+            LEFT JOIN photo_tags pt ON pt.photo_id = ph.id
+            WHERE {clause} AND ph.filename NOT LIKE '%.pdf' AND ph.is_cutout = 0
+            GROUP BY ph.id ORDER BY COUNT(pt.person_id) DESC, ph.id ASC LIMIT 1
+        """, params).fetchone()
+        return row["filename"] if row else None
+
+    def _year_range(album_id_val):
+        if album_id_val == "__unassigned__":
+            clause = "album_id IS NULL"
+            params = []
+        else:
+            clause = "album_id = ?"
+            params = [album_id_val]
+        rows = conn.execute(
+            f"SELECT date FROM photos WHERE {clause} AND date IS NOT NULL AND filename NOT LIKE '%.pdf'",
+            params
+        ).fetchall()
+        years = [y for y in (_extract_year(r["date"]) for r in rows) if y]
+        return (min(years), max(years)) if years else (None, None)
+
+    rows = conn.execute("""
+        SELECT a.gedcom_id, a.title,
+               COUNT(DISTINCT ph.id) as photo_count,
+               COUNT(DISTINCT pt.person_id) as person_count
+        FROM albums a
+        LEFT JOIN photos ph ON ph.album_id = a.gedcom_id
+            AND ph.filename NOT LIKE '%.pdf' AND ph.is_cutout = 0
+        LEFT JOIN photo_tags pt ON pt.photo_id = ph.id
+        GROUP BY a.gedcom_id, a.title
+        ORDER BY a.title
+    """).fetchall()
+
+    albums = []
+    for r in rows:
+        min_y, max_y = _year_range(r["gedcom_id"])
+        albums.append({
+            "id": r["gedcom_id"],
+            "title": r["title"],
+            "photo_count": r["photo_count"] or 0,
+            "person_count": r["person_count"] or 0,
+            "min_year": min_y,
+            "max_year": max_y,
+            "cover": _album_cover(r["gedcom_id"]),
+        })
+
+    ua_count = conn.execute(
+        "SELECT COUNT(*) FROM photos WHERE album_id IS NULL AND filename NOT LIKE '%.pdf' AND is_cutout = 0"
+    ).fetchone()[0]
+    ua_persons = conn.execute("""
+        SELECT COUNT(DISTINCT pt.person_id) FROM photo_tags pt
+        JOIN photos ph ON ph.id = pt.photo_id
+        WHERE ph.album_id IS NULL AND ph.filename NOT LIKE '%.pdf' AND ph.is_cutout = 0
+    """).fetchone()[0]
+    ua_min, ua_max = _year_range("__unassigned__")
+
+    return {
+        "albums": albums,
+        "unassigned": {
+            "id": "__unassigned__",
+            "title": "Fotos Familiares",
+            "photo_count": ua_count,
+            "person_count": ua_persons,
+            "min_year": ua_min,
+            "max_year": ua_max,
+            "cover": _album_cover("__unassigned__"),
+        }
+    }
+
+
+def get_album_photos(conn, album_id, q="", sort="date", person_id="", page=1, limit=50):
+    """Return paginated photos for an album. album_id='__unassigned__' returns untagged photos."""
+    import re as _re
+
+    def _extract_year(d):
+        if not d:
+            return None
+        m = _re.search(r'\d{4}', d)
+        return int(m.group()) if m else None
+
+    where = ["ph.filename NOT LIKE '%.pdf'", "ph.is_cutout = 0"]
+    params = []
+
+    if album_id == "__unassigned__":
+        where.append("ph.album_id IS NULL")
+        album_title = "Fotos Familiares"
+    else:
+        where.append("ph.album_id = ?")
+        params.append(album_id)
+        row = conn.execute("SELECT title FROM albums WHERE gedcom_id = ?", (album_id,)).fetchone()
+        album_title = row["title"] if row else album_id
+
+    if person_id:
+        where.append("ph.id IN (SELECT photo_id FROM photo_tags WHERE person_id = ?)")
+        params.append(person_id)
+
+    if q:
+        where.append("""(
+            ph.title LIKE '%' || ? || '%'
+            OR ph.id IN (
+                SELECT pt2.photo_id FROM photo_tags pt2
+                JOIN people pe ON pe.id = pt2.person_id
+                WHERE pe.name LIKE '%' || ? || '%'
+            )
+        )""")
+        params.extend([q, q])
+
+    where_sql = " AND ".join(where)
+
+    total = conn.execute(
+        f"SELECT COUNT(DISTINCT ph.id) FROM photos ph WHERE {where_sql}", params
+    ).fetchone()[0]
+
+    sort_sql = {
+        "added": "ph.inserted_at DESC",
+        "title": "COALESCE(ph.title,'') ASC",
+    }.get(sort, "ph.id ASC")
+
+    offset = (page - 1) * limit
+    rows = conn.execute(f"""
+        SELECT DISTINCT ph.id, ph.filename, ph.title, ph.date, ph.place, ph.inserted_at
+        FROM photos ph
+        WHERE {where_sql}
+        ORDER BY {sort_sql}
+        LIMIT ? OFFSET ?
+    """, params + [limit, offset]).fetchall()
+
+    photo_ids = [r["id"] for r in rows]
+    people_by_photo = {}
+    if photo_ids:
+        phs = ",".join("?" * len(photo_ids))
+        for tr in conn.execute(f"""
+            SELECT pt.photo_id, pt.person_id, p.name, p.given_name, p.surname, p.photo_file
+            FROM photo_tags pt JOIN people p ON p.id = pt.person_id
+            WHERE pt.photo_id IN ({phs})
+            ORDER BY pt.photo_id, p.name
+        """, photo_ids).fetchall():
+            pid = tr["photo_id"]
+            if pid not in people_by_photo:
+                people_by_photo[pid] = []
+            if len(people_by_photo[pid]) < 5:
+                people_by_photo[pid].append({
+                    "person_id": tr["person_id"],
+                    "name": tr["name"],
+                    "given_name": tr["given_name"],
+                    "surname": tr["surname"],
+                    "photo_file": tr["photo_file"],
+                })
+
+    photos = [{
+        "id": r["id"],
+        "filename": r["filename"],
+        "title": r["title"],
+        "date": r["date"],
+        "place": r["place"],
+        "year": _extract_year(r["date"]),
+        "people": people_by_photo.get(r["id"], []),
+    } for r in rows]
+
+    if sort == "date":
+        photos.sort(key=lambda x: (x["year"] is None, x["year"] or 0))
+
+    return {
+        "album_id": album_id,
+        "album_title": album_title,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "photos": photos,
+    }
+
+
+def get_photos_people_list(conn):
+    """Return all people appearing in at least one non-cutout photo, ordered by photo count."""
+    rows = conn.execute("""
+        SELECT p.id, p.name, p.given_name, p.surname, p.photo_file,
+               COUNT(DISTINCT pt.photo_id) as photo_count
+        FROM people p
+        JOIN photo_tags pt ON pt.person_id = p.id
+        JOIN photos ph ON ph.id = pt.photo_id
+        WHERE ph.filename NOT LIKE '%.pdf' AND ph.is_cutout = 0
+        GROUP BY p.id
+        ORDER BY photo_count DESC
+    """).fetchall()
+    return {"people": [{
+        "id": r["id"],
+        "name": r["name"],
+        "given_name": r["given_name"],
+        "surname": r["surname"],
+        "photo_file": r["photo_file"],
+        "photo_count": r["photo_count"],
+    } for r in rows]}
+
+
 def _person_to_node(person):
     """Convert a DB row to a tree node dict."""
     p = dict(person) if not isinstance(person, dict) else person

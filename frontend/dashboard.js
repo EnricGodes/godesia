@@ -181,13 +181,27 @@ function renderDocuments(documents) {
         'document': 'Documento'
     };
 
+    const docIcons = {
+        'Bautismo':    '/icons/bautismo.svg',
+        'Matrimonio':  '/icons/matrimonio.svg',
+        'Defunción':   '/icons/defuncion.svg',
+        'Nacimiento':  '/icons/nacimiento.svg',
+        'Certificado': '/icons/documentacion.svg',
+        'Padrón':      '/icons/padron.svg',
+        'Testamento':  '/icons/carta.svg',
+        'Carta':       '/icons/carta.svg',
+        'Biografía':   '/icons/biografia.svg',
+        'Documento':   '/icons/documentacion.svg'
+    };
+
     const d = documents[0];
     // Extract [Type] prefix from title if present
     const rawCaption = d.title || 'Documento';
-    const typeMatch = rawCaption.match(/^\[([^\]]+)\]/);
+    const typeMatch = rawCaption.match(/\[([^\]]+)\]/);
     const docType = typeMatch ? typeMatch[1].toLowerCase() : '';
-    const caption = rawCaption.replace(/^\[.*?\]\s*/, '');
+    const caption = rawCaption.replace(/\s*\[.*?\]\s*/g, '').trim();
     const typeLabel = docLabels[docType] || (docType || '');
+    const iconPath = docIcons[typeLabel] || '/icons/documentacion.svg';
 
     container.innerHTML = `
         <div class="document-single" onclick="openPhotoModal(${d.id})" style="cursor:pointer;">
@@ -197,7 +211,7 @@ function renderDocuments(documents) {
             <div class="document-content-full">
                 <h4 class="document-title">${caption}</h4>
                 <div class="document-meta">
-                    ${typeLabel ? `<span class="doc-badge">${typeLabel}</span>` : ''}
+                    ${typeLabel ? `<span class="doc-badge"><img src="${iconPath}" alt="${typeLabel}" class="doc-badge-icon"> ${typeLabel}</span>` : ''}
                     ${d.date ? `<span class="doc-date">${d.date}</span>` : ''}
                 </div>
             </div>

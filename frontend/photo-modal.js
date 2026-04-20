@@ -125,6 +125,17 @@ function renderPhotoModal() {
     // Build sidebar content
     let sidebarContent = '';
 
+    // Breadcrumb from album context (set by albums.js before opening modal)
+    const ctx = window.__photoModalContext;
+    const breadcrumbHtml = ctx
+        ? `<div style="font-size: 11px; color: #727971; margin-bottom: 16px;">
+               <a href="/albums.html#${ctx.albumId}" style="color: #2D4B33; font-weight: 700; text-decoration: none;"
+                  onmouseover="this.style.textDecoration='underline'"
+                  onmouseout="this.style.textDecoration='none'">${ctx.albumTitle}</a>
+               <span> › Foto</span>
+           </div>`
+        : '';
+
     // Title, date, place
     let infoHtml = '';
     if (p.title) {
@@ -166,7 +177,7 @@ function renderPhotoModal() {
            </div>`
         : '';
 
-    sidebarContent = `${infoHtml}${tagsHtml}${albumHtml}`;
+    sidebarContent = `${breadcrumbHtml}${infoHtml}${tagsHtml}${albumHtml}`;
 
     const modalHtml = `
         <style>

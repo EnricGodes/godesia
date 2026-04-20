@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Álbum de fotos | Familia Godes</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#2D4B33",
+                        "surface-container": "#f1eee5",
+                        "surface-container-low": "#f6f3ea",
+                        "surface-bright": "#fcf9f0",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#fcf9f0",
+                        "on-background": "#1c1c17",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#424842",
+                        "primary-container": "#d4e4d6",
+                        "on-primary-container": "#0b1f10",
+                        "secondary-container": "#fdd2b1",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#78583f",
+                        "surface-variant": "#e5e2da",
+                        "surface-tint": "#2D4B33",
+                        "surface-dim": "#dddad1",
+                        "error": "#ba1a1a",
+                        "surface": "#fcf9f0",
+                        "surface-container-high": "#ebe8df",
+                        "outline": "#727971",
+                        "on-surface": "#1c1c17",
+                        "inverse-on-surface": "#f4f1e8",
+                        "inverse-surface": "#31312b",
+                        "surface-container-highest": "#e5e2da",
+                        "outline-variant": "#c2c8bf",
+                        "secondary": "#78583e",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .heritage-border { border: 1px solid rgba(114, 121, 113, 0.2); }
+        .bento-grid { display: grid; grid-template-columns: repeat(8, 1fr); grid-auto-rows: minmax(80px, auto); gap: 10px; grid-auto-flow: dense; }
+        .bento-hero { grid-column: span 4; grid-row: span 4; }
+        .bento-med  { grid-column: span 2; grid-row: span 2; }
+        .bento-small  { grid-column: span 1; grid-row: span 1; }
+        .bento-xsmall { grid-column: span 1; grid-row: span 1; height: 80px; }
+        .albums-layout { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 56px); }
+        @media (max-width: 1023px) { .albums-layout { grid-template-columns: 1fr; } }
+        .sidebar-sticky { position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: #c2c8bf transparent; }
+        .sidebar-album-link { display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0.6rem; border-radius: 0.375rem; font-size: 0.8rem; color: #424842; cursor: pointer; transition: background 0.15s; }
+        .sidebar-album-link:hover { background: #f1eee5; color: #2D4B33; }
+        .sidebar-album-link.active { background: #f1eee5; color: #2D4B33; font-weight: 700; }
+        .sort-btn.active { background: #2D4B33; color: white; border-color: #2D4B33; }
+        .view-btn.active { background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.12); color: #2D4B33; }
+        .album-card { cursor: pointer; border-radius: 0.75rem; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+        .album-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .person-pill { display: flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.5rem; border-radius: 9999px; cursor: pointer; transition: background 0.15s; font-size: 0.75rem; }
+        .person-pill:hover { background: #f1eee5; }
+        .person-pill.active { background: #d4e4d6; color: #2D4B33; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+
+<script src="/nav.js"></script>
+<script src="/photo-modal.js"></script>
+
+<div class="albums-layout">
+
+    <!-- ── SIDEBAR ──────────────────────────────────────────────────── -->
+    <aside id="albums-sidebar"
+           class="sidebar-sticky hidden lg:block bg-surface-container border-r border-outline-variant/30 px-4 py-6">
+
+        <div class="flex items-center gap-2 mb-5">
+            <span class="material-symbols-outlined text-primary">photo_library</span>
+            <h2 class="font-headline text-base text-primary font-semibold">Álbumes</h2>
+        </div>
+
+        <nav id="sidebar-album-list" class="flex flex-col gap-0.5 mb-6"></nav>
+
+        <div class="border-t border-outline-variant/30 my-4"></div>
+
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-[10px] uppercase tracking-widest text-outline font-extrabold">Por persona</span>
+            <button id="clear-person-btn"
+                    class="hidden text-[10px] text-primary font-bold hover:underline"
+                    onclick="clearPersonFilter()">Limpiar</button>
+        </div>
+        <input id="person-filter-input" type="text" placeholder="Buscar persona..."
+               class="w-full bg-surface-container-lowest rounded-lg px-3 py-1.5 text-xs border border-outline-variant/40
+                      focus:outline-none focus:border-primary/50 mb-3 placeholder:text-outline"/>
+        <div id="person-filter-list" class="flex flex-col gap-0.5 max-h-[420px] overflow-y-auto pr-1"></div>
+
+    </aside>
+
+    <!-- ── MAIN ─────────────────────────────────────────────────────── -->
+    <main class="min-h-screen">
+
+        <!-- Header -->
+        <div class="px-6 pt-8 pb-4 border-b border-outline-variant/20">
+            <nav class="flex items-center gap-1.5 text-xs text-outline mb-3">
+                <a href="/" class="hover:text-primary transition-colors">Inicio</a>
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                <span id="breadcrumb-label" class="text-on-surface font-semibold">Álbum de fotos</span>
+            </nav>
+            <div class="flex items-start justify-between gap-4 flex-wrap">
+                <div>
+                    <h1 id="page-title" class="font-headline text-3xl text-primary mb-1">Álbum de fotos</h1>
+                    <p id="page-subtitle" class="text-sm text-outline"></p>
+                </div>
+                <!-- View toggle -->
+                <div class="flex items-center gap-1 bg-surface-container rounded-lg p-1 self-start">
+                    <button id="view-bento" title="Vista bento"
+                            class="view-btn active p-2 rounded-md transition-all"
+                            onclick="setViewMode('bento')">
+                        <span class="material-symbols-outlined text-base leading-none">dashboard</span>
+                    </button>
+                    <button id="view-grid" title="Vista cuadrícula"
+                            class="view-btn p-2 rounded-md text-outline hover:text-primary transition-all"
+                            onclick="setViewMode('grid')">
+                        <span class="material-symbols-outlined text-base leading-none">grid_view</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="px-6 py-3 flex flex-wrap items-center gap-3 border-b border-outline-variant/20 bg-surface-container/40">
+            <!-- Search -->
+            <div class="relative flex-1 min-w-[180px] max-w-sm">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-base">search</span>
+                <input id="photo-search" type="text" placeholder="Título, persona, año..."
+                       class="w-full pl-9 pr-4 py-1.5 bg-surface-container-lowest rounded-xl text-sm border
+                              border-outline-variant/40 focus:outline-none focus:border-primary/50 placeholder:text-outline"/>
+            </div>
+            <!-- Sort -->
+            <div class="flex gap-1.5">
+                <button data-sort="date"
+                        class="sort-btn active px-3 py-1 text-[11px] font-bold uppercase rounded-full border
+                               border-outline-variant transition-colors"
+                        onclick="setSort('date')">Fecha</button>
+                <button data-sort="added"
+                        class="sort-btn px-3 py-1 text-[11px] font-bold uppercase rounded-full border
+                               border-outline-variant text-outline transition-colors hover:bg-outline-variant/10"
+                        onclick="setSort('added')">Recientes</button>
+                <button data-sort="title"
+                        class="sort-btn px-3 py-1 text-[11px] font-bold uppercase rounded-full border
+                               border-outline-variant text-outline transition-colors hover:bg-outline-variant/10"
+                        onclick="setSort('title')">Título</button>
+            </div>
+            <!-- Active person chip -->
+            <div id="active-person-chip" class="hidden items-center gap-2 bg-primary-container
+                 text-on-primary-container px-3 py-1 rounded-full text-xs font-semibold">
+                <img id="chip-avatar" src="" class="w-5 h-5 rounded-full object-cover hidden"/>
+                <span id="chip-name"></span>
+                <button onclick="clearPersonFilter()" class="ml-1 font-bold hover:opacity-70 leading-none">✕</button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="albums-loading" class="py-24 text-center text-outline">
+            <span class="material-symbols-outlined text-4xl mb-3 block" style="animation:spin 1s linear infinite">progress_activity</span>
+            Cargando álbumes...
+        </div>
+
+        <!-- Albums overview -->
+        <section id="albums-overview" class="px-6 py-8 hidden">
+            <div id="albums-card-grid"
+                 class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4"></div>
+        </section>
+
+        <!-- Single album photos -->
+        <section id="album-photos-section" class="px-6 py-6 hidden">
+            <div class="flex items-center justify-between mb-4">
+                <span id="photo-count-label" class="text-xs text-outline"></span>
+                <button onclick="showAlbumsOverview()"
+                        class="text-primary text-xs font-semibold hover:underline flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                    Todos los álbumes
+                </button>
+            </div>
+            <div id="photos-grid-container"></div>
+            <div id="load-more-sentinel" class="py-8 text-center text-outline text-sm hidden">
+                <span class="material-symbols-outlined text-2xl block mb-2" style="animation:spin 1s linear infinite">progress_activity</span>
+                Cargando más...
+            </div>
+        </section>
+
+        <!-- Back to top -->
+        <button id="back-to-top"
+                onclick="window.scrollTo({top:0,behavior:'smooth'})"
+                class="hidden fixed bottom-8 right-8 w-12 h-12 bg-primary text-white rounded-full
+                       shadow-xl items-center justify-center hover:bg-primary/90 transition-all z-40">
+            <span class="material-symbols-outlined">arrow_upward</span>
+        </button>
+
+    </main>
+</div>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<script src="/albums.js"></script>
+</body>
+</html>
