@@ -166,6 +166,9 @@ function renderDossier(data) {
     // 7b. TRAYECTORIA PROFESIONAL (Ocupación + Trabajo)
     renderCareer(data.career || data.occupations);
 
+    // 7c. DOMICILIOS
+    renderResidences(data.residences);
+
     // 8. MILITAR
     renderMilitary(data);
 
@@ -1466,6 +1469,64 @@ function renderEducation(educationList) {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">${cards}</div>
     `;
     document.getElementById('education-section').innerHTML = html;
+}
+
+function renderResidences(residences) {
+    const section = document.getElementById('residences-section');
+    if (!residences || !residences.length) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+
+    const houseIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary shrink-0"><path d="M1.5 10.002L7 4.00195M7 4.00195L11.311 8.70485C11.8967 9.34385 12.1896 9.66335 12.5745 9.83265C12.9593 10.002 13.3928 10.002 14.2596 10.002H22.5L18.189 5.29905C17.6033 4.66006 17.3104 4.34056 16.9255 4.17126C16.5407 4.00195 16.1072 4.00195 15.2404 4.00195H7Z"/><path d="M11 8.50028V19.9997H7C5.11438 19.9997 4.17157 19.9997 3.58579 19.4139C3 18.8281 3 17.8853 3 15.9997V8.5"/><path d="M11 19.9997H17C18.8856 19.9997 19.8284 19.9997 20.4142 19.4139C21 18.8281 21 17.8853 21 15.9997V10"/><path d="M4 7V4"/><path d="M7.125 11.25H7M7.25 11.25C7.25 11.3881 7.13807 11.5 7 11.5C6.86193 11.5 6.75 11.3881 6.75 11.25C6.75 11.1119 6.86193 11 7 11C7.13807 11 7.25 11.1119 7.25 11.25Z"/><path d="M7 20V16"/><path d="M15 14L17 14"/></svg>`;
+
+    const cards = residences.map((r, i) => {
+        const addrLine = r.address || '';
+        const cityLine = [r.city, r.country].filter(Boolean).join(', ');
+        const hasCoords = r.lat && r.lng;
+        return `
+        <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 border-primary flex gap-3">
+            ${hasCoords ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-on-primary text-[10px] font-bold shrink-0 mt-0.5">${i + 1}</span>` : ''}
+            <div class="min-w-0">
+                ${r.date ? `<p class="text-[10px] text-outline font-medium mb-1">${r.date}</p>` : ''}
+                ${addrLine ? `<p class="text-sm font-bold text-on-surface mb-0.5">${addrLine}</p>` : ''}
+                ${cityLine ? `<p class="text-xs text-outline">${cityLine}</p>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+
+    section.innerHTML = `
+        <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
+            ${houseIcon} Domicilios
+        </h2>
+        <div id="residences-map" class="w-full heritage-border shadow-sm"></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">${cards}</div>`;
+
+    // Leaflet map
+    const geocoded = residences.map((r, i) => ({ ...r, _idx: i })).filter(r => r.lat && r.lng);
+    if (!geocoded.length) {
+        document.getElementById('residences-map').style.display = 'none';
+        return;
+    }
+
+    const map = L.map('residences-map', { scrollWheelZoom: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 18,
+    }).addTo(map);
+
+    const markerHtml = (n) => `<div style="background:#2D4B33;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25);">${n}</div>`;
+
+    const bounds = [];
+    geocoded.forEach(r => {
+        const marker = L.marker([r.lat, r.lng], {
+            icon: L.divIcon({ className: '', html: markerHtml(r._idx + 1), iconSize: [28, 28], iconAnchor: [14, 14] })
+        }).addTo(map);
+        const addrParts = [r.address, r.city].filter(Boolean).join(', ');
+        const dateStr = r.date ? `<div style="font-size:11px;color:#727971;margin-top:4px">${r.date}</div>` : '';
+        marker.bindPopup(`<b style="color:#2D4B33;font-size:13px">${addrParts}</b>${dateStr}`, { maxWidth: 240 });
+        bounds.push([r.lat, r.lng]);
+    });
+
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
 }
 
 function renderMilitary(data) {

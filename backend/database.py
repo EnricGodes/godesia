@@ -99,7 +99,9 @@ CREATE TABLE IF NOT EXISTS residences (
     address2 TEXT,
     city TEXT,
     country TEXT,
-    date TEXT
+    date TEXT,
+    lat  REAL,
+    lng  REAL
 );
 
 CREATE TABLE IF NOT EXISTS burial (
@@ -628,7 +630,7 @@ def get_occupations(conn, person_id):
 def get_residences(conn, person_id):
     """Get residences for a person."""
     return conn.execute(
-        "SELECT address, address2, city, country, date FROM residences WHERE person_id = ?",
+        "SELECT address, address2, city, country, date, lat, lng FROM residences WHERE person_id = ?",
         (person_id,)
     ).fetchall()
 
@@ -1057,7 +1059,7 @@ def get_person_dossier(conn, person_id):
 
     # Residences
     residences = conn.execute(
-        "SELECT address, address2, city, country, date FROM residences WHERE person_id = ? ORDER BY date",
+        "SELECT address, address2, city, country, date, lat, lng FROM residences WHERE person_id = ? ORDER BY date",
         (person_id,)
     ).fetchall()
     residences_list = [dict(r) for r in residences]

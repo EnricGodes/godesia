@@ -71,7 +71,13 @@
         .bento-med { grid-column: span 2; grid-row: span 2; }
         .bento-small { grid-column: span 1; grid-row: span 1; }
         .bento-xsmall { grid-column: span 1; grid-row: span 1; height: 80px; }
+        #residences-map { height: 380px; border-radius: 0.75rem; z-index: 0; }
+        .leaflet-popup-content-wrapper { background: #fcf9f0; border: 1px solid rgba(114,121,113,0.2); border-radius: 0.5rem; box-shadow: 0 4px 16px rgba(28,28,23,0.1); color: #1c1c17; }
+        .leaflet-popup-tip { background: #fcf9f0; }
+        .leaflet-popup-close-button { color: #727971 !important; }
     </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body class="bg-surface font-body text-on-surface selection:bg-secondary-container">
 
@@ -125,6 +131,9 @@
 
         <!-- 7b. TRAYECTORIA PROFESIONAL -->
         <section id="career-section" class="mb-20 space-y-8" style="display:none;"></section>
+
+        <!-- 7c. DOMICILIOS -->
+        <section id="residences-section" class="mb-20 space-y-8" style="display:none;"></section>
 
         <!-- 8. ACTIVIDAD MILITAR -->
         <section id="military-section" class="mb-20" style="display:none;"></section>
