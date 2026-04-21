@@ -58,7 +58,10 @@ _CITY_HINT = re.compile(
 )
 _COUNTRY_HINT = re.compile(
     r'\b(espa[ñn]a|france|francia|estados\s+unidos|usa|england|inglaterra|'
-    r'alemania|germany|argentina|m[eé]xico|italia|italy|portugal|cuba)\b',
+    r'alemania|germany|argentina|m[eé]xico|m[eé]xico|italia|italy|portugal|cuba|'
+    r'ireland|irlanda|colombia|venezuela|chile|per[uú]|ecuador|bolivia|uruguay|'
+    r'suiza|switzerland|belgique|b[eé]lgica|netherlands|holanda|'
+    r'ee\.?\s*uu\.?|u\.?s\.?a\.?)\b',
     re.IGNORECASE,
 )
 
@@ -119,11 +122,14 @@ def build_queries(normalized: str) -> list:
         return [f"{normalized}, España", normalized]
     if has_city or has_country:
         return [normalized]
-    return [
-        f"{normalized}, Barcelona, España",
-        f"{normalized}, España",
-        normalized,
-    ]
+    # No explicit location hint: distinguish street addresses (have digits) from
+    # place names (no digits). Streets default to Barcelona; place names try
+    # as-is first so Nominatim can resolve foreign cities/countries correctly.
+    has_number = bool(re.search(r'\d', normalized))
+    if has_number:
+        return [f"{normalized}, Barcelona, España", f"{normalized}, España", normalized]
+    else:
+        return [normalized, f"{normalized}, España", f"{normalized}, Barcelona, España"]
 
 
 def build_residence_raw(address: str, city: str, country: str) -> str:
