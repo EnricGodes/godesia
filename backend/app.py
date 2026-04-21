@@ -357,6 +357,7 @@ class GeoResolveRequest(BaseModel):
     query: str
     lat: float
     lng: float
+    display_name: str = ""
 
 
 class GeoSearchRequest(BaseModel):
@@ -400,7 +401,7 @@ async def geocoder_resolved():
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
     rows = db_conn.execute(
-        "SELECT query, raw_place, lat, lng, geocoded_at FROM geocache WHERE lat IS NOT NULL ORDER BY geocoded_at DESC"
+        "SELECT query, raw_place, lat, lng, geocoded_at, display_name FROM geocache WHERE lat IS NOT NULL ORDER BY geocoded_at DESC"
     ).fetchall()
     return [
         {
@@ -409,9 +410,28 @@ async def geocoder_resolved():
             "lat": row[2],
             "lng": row[3],
             "geocoded_at": row[4],
+            "display_name": row[5] or "",
         }
         for row in rows
     ]
+
+
+@app.get("/api/admin/geocoder/reverse")
+async def geocoder_reverse(lat: float, lng: float):
+    """Reverse geocode a lat/lng via Nominatim and return a display_name."""
+    from geocode_utils import nominatim_search
+    results = nominatim_search(f"{lat}, {lng}")
+    if results:
+        name = results[0].get("display_name", "")
+        # Also persist in geocache if we find the matching entry
+        if db_conn and name:
+            db_conn.execute(
+                "UPDATE geocache SET display_name=? WHERE lat=? AND lng=? AND (display_name IS NULL OR display_name='')",
+                (name, lat, lng)
+            )
+            db_conn.commit()
+        return {"display_name": name}
+    return {"display_name": ""}
 
 
 @app.post("/api/admin/geocoder/search")
@@ -436,8 +456,8 @@ async def geocoder_resolve(req: GeoResolveRequest):
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
     db_conn.execute(
-        "UPDATE geocache SET lat=?, lng=? WHERE query=?",
-        (req.lat, req.lng, req.query)
+        "UPDATE geocache SET lat=?, lng=?, display_name=? WHERE query=?",
+        (req.lat, req.lng, req.display_name or None, req.query)
     )
     db_conn.commit()
     updated = propagate_geocache(db_conn)

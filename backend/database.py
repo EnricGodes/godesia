@@ -341,6 +341,7 @@ def get_connection(db_path):
         "ALTER TABLE events ADD COLUMN lat REAL",
         "ALTER TABLE events ADD COLUMN lng REAL",
         "CREATE TABLE IF NOT EXISTS geocache (query TEXT PRIMARY KEY, lat REAL, lng REAL, raw_place TEXT, geocoded_at TEXT DEFAULT (datetime('now')))",
+        "ALTER TABLE geocache ADD COLUMN display_name TEXT",
     ]:
         try:
             conn.execute(stmt)

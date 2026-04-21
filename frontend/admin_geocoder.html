@@ -114,13 +114,21 @@
     </table>
 
     <!-- Resolved table -->
+    <div id="resolved-toolbar" class="hidden flex items-center justify-between mb-3">
+        <p class="text-xs text-outline">Columna "Dirección GPS" cargada desde Nominatim inverso.</p>
+        <button onclick="fetchAllDisplayNames()"
+            id="btn-fetch-all"
+            class="text-xs border border-outline/40 text-outline px-3 py-1.5 rounded-lg hover:border-primary hover:text-primary font-semibold">
+            Cargar nombres GPS faltantes
+        </button>
+    </div>
     <table id="table-resolved" class="hidden w-full text-sm border-collapse">
         <thead>
             <tr class="text-xs text-outline uppercase border-b border-outline/20">
                 <th class="text-left py-3 px-2 w-8">#</th>
-                <th class="text-left py-3 px-2">Lugar original</th>
-                <th class="text-left py-3 px-2">Query</th>
-                <th class="text-left py-3 px-2 w-40">Coordenadas</th>
+                <th class="text-left py-3 px-2">Lugar buscado</th>
+                <th class="text-left py-3 px-2">Dirección GPS</th>
+                <th class="text-left py-3 px-2 w-36">Coordenadas</th>
                 <th class="py-3 px-2 w-24"></th>
             </tr>
         </thead>
@@ -202,9 +210,13 @@ function renderTable() {
         document.getElementById('tbody-resolved').innerHTML = resolved.map((e, i) => `
             <tr id="row-r-${i}" class="border-b border-outline/10 hover:bg-primary/5">
                 <td class="py-3 px-2 text-outline text-xs">${i + 1}</td>
-                <td class="py-3 px-2 font-medium max-w-xs truncate" title="${esc(e.raw_place)}">${esc(e.raw_place || '—')}</td>
-                <td class="py-3 px-2 text-outline text-xs max-w-xs truncate" title="${esc(e.query)}">${esc(e.query)}</td>
-                <td class="py-3 px-2 text-xs text-outline font-mono">${e.lat.toFixed(4)}, ${e.lng.toFixed(4)}</td>
+                <td class="py-3 px-2 font-medium max-w-[200px] truncate" title="${esc(e.raw_place)}">${esc(e.raw_place || e.query || '—')}</td>
+                <td class="py-3 px-2 text-xs max-w-xs" id="dn-${i}">
+                    ${e.display_name
+                        ? `<span class="${matchQuality(e.raw_place || e.query, e.display_name)}" title="${esc(e.display_name)}">${esc(shortDisplayName(e.display_name))}</span>`
+                        : `<button onclick="fetchDisplayName(${i})" class="text-outline/50 hover:text-primary text-xs underline decoration-dotted">cargar</button>`}
+                </td>
+                <td class="py-3 px-2 text-xs text-outline font-mono whitespace-nowrap">${e.lat.toFixed(4)}, ${e.lng.toFixed(4)}</td>
                 <td class="py-3 px-2 text-right">
                     <button onclick="openPanel('resolved', ${i})"
                         class="text-xs border border-primary text-primary px-3 py-1.5 rounded-lg hover:bg-primary/5 font-semibold">
@@ -214,11 +226,64 @@ function renderTable() {
             </tr>
         `).join('');
         document.getElementById('table-resolved').classList.remove('hidden');
+        document.getElementById('resolved-toolbar').classList.remove('hidden');
     }
 }
 
 function esc(s) {
     return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function shortDisplayName(dn) {
+    // Show first 2 meaningful parts of Nominatim display_name (e.g. "Carrer de Tamarit, Eixample, Barcelona")
+    if (!dn) return '';
+    const parts = dn.split(',').map(p => p.trim()).filter(Boolean);
+    return parts.slice(0, 3).join(', ');
+}
+
+function matchQuality(searched, found) {
+    // Color hint: green if found name contains a word from searched, amber otherwise
+    if (!searched || !found) return 'text-outline';
+    const words = searched.toLowerCase().replace(/[,]/g,' ').split(/\s+/).filter(w => w.length > 3);
+    const foundLc = found.toLowerCase();
+    const ok = words.some(w => foundLc.includes(w));
+    return ok ? 'text-green-700' : 'text-amber-600';
+}
+
+async function fetchDisplayName(idx) {
+    const e = resolved[idx];
+    const cell = document.getElementById(`dn-${idx}`);
+    if (!cell) return;
+    cell.innerHTML = '<span class="text-outline/40 text-xs">…</span>';
+    try {
+        const r = await fetch(`/api/admin/geocoder/reverse?lat=${e.lat}&lng=${e.lng}`);
+        const data = await r.json();
+        const dn = data.display_name || '';
+        resolved[idx].display_name = dn;
+        cell.innerHTML = dn
+            ? `<span class="${matchQuality(e.raw_place || e.query, dn)}" title="${esc(dn)}">${esc(shortDisplayName(dn))}</span>`
+            : '<span class="text-outline/30 text-xs">—</span>';
+    } catch {
+        cell.innerHTML = '<span class="text-red-400 text-xs">error</span>';
+    }
+}
+
+let _fetchAllRunning = false;
+async function fetchAllDisplayNames() {
+    if (_fetchAllRunning) return;
+    _fetchAllRunning = true;
+    const btn = document.getElementById('btn-fetch-all');
+    const missing = resolved.map((e, i) => ({e, i})).filter(({e}) => !e.display_name);
+    if (!missing.length) { btn.textContent = 'Todo cargado'; _fetchAllRunning = false; return; }
+    btn.disabled = true;
+    for (let k = 0; k < missing.length; k++) {
+        btn.textContent = `Cargando ${k + 1}/${missing.length}…`;
+        await fetchDisplayName(missing[k].i);
+        if (k < missing.length - 1) await new Promise(r => setTimeout(r, 1200)); // Nominatim rate limit
+    }
+    btn.textContent = 'Cargado';
+    btn.disabled = false;
+    _fetchAllRunning = false;
 }
 
 function openPanel(source, idx) {
@@ -330,6 +395,7 @@ async function saveResolution() {
             query: currentEntry.query,
             lat: selectedResult.lat,
             lng: selectedResult.lng,
+            display_name: selectedResult.name || '',
         })
     });
     closePanel();
