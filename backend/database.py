@@ -1082,6 +1082,24 @@ def get_person_dossier(conn, person_id):
     ).fetchall()
     residences_list = [dict(r) for r in residences]
 
+    # Prepend birth place as first residence entry
+    birth_place = person_dict.get("birth_place")
+    if birth_place and birth_place.strip():
+        from geocode_utils import geocode_with_cache
+        lat, lng = geocode_with_cache(conn, birth_place, cache_only=False)
+        birth_year = person_dict.get("birth_year")
+        residences_list.insert(0, {
+            "address": birth_place,
+            "address2": None,
+            "city": None,
+            "country": None,
+            "date": str(birth_year) if birth_year else "",
+            "lat": lat,
+            "lng": lng,
+            "_type": "birth",
+            "source_type": "Nacimiento",
+        })
+
     # Occupations
     occupations = conn.execute(
         "SELECT title, date, place, 'Ocupación' as event_type FROM occupations WHERE person_id = ? ORDER BY date",

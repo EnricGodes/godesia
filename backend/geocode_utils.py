@@ -23,9 +23,11 @@ _FLOOR_ONLY = re.compile(
     re.IGNORECASE,
 )
 
-# Trailing floor/apt info — anchored to end ($) to avoid stripping from middle of strings
+# Strip floor/apt/door info from address parts.
+# Does NOT consume trailing space ([\doaºª°]* no spaces) so "30 4º Barcelona"
+# becomes "30 Barcelona" not "30Barcelona".
 _FLOOR_SUFFIX = re.compile(
-    r'\s+\d+[oaºª°][\doaºª°\s]*(?:izda?|dcha?|esc\s*\w*)?$'
+    r'\s+\d{1,2}[oaºª°][\doaºª°]*(?:\s+\d{1,2}[oaºª°][\doaºª°]*)?(?:\s+(?:izda?|dcha?|esc\s*\w*))?'
     r'|\s+(?:izda?|dcha?|pral|ent|bajo|bajos|bis|planta\s*\w+)$'
     r'|\s+p\b$',
     re.IGNORECASE,
@@ -99,8 +101,11 @@ def build_queries(normalized: str) -> list:
     """Return Nominatim query attempts ordered by specificity."""
     if not normalized:
         return []
-    has_location = bool(_CITY_HINT.search(normalized) or _COUNTRY_HINT.search(normalized))
-    if has_location:
+    has_city    = bool(_CITY_HINT.search(normalized))
+    has_country = bool(_COUNTRY_HINT.search(normalized))
+    if has_city and not has_country:
+        return [f"{normalized}, España", normalized]
+    if has_city or has_country:
         return [normalized]
     return [
         f"{normalized}, Barcelona, España",
