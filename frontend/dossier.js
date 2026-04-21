@@ -1473,6 +1473,7 @@ function renderEducation(educationList) {
 
 function renderResidences(residences) {
     const section = document.getElementById('residences-section');
+    if (!section) return;
     if (!residences || !residences.length) { section.style.display = 'none'; return; }
     section.style.display = 'block';
 
