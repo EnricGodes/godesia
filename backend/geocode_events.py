@@ -37,9 +37,9 @@ def main():
             )
             conn.commit()
             resolved += 1
-            print(f"[{i}/{total}] {row[1]} {row[2]}/{row[3]}: {row[4]!r} → {lat:.4f}, {lng:.4f}")
+            print(f"[{i}/{total}] {row[1]} {row[2]}/{row[3]}: {row[4]!r} -> {lat:.4f}, {lng:.4f}")
         else:
-            print(f"[{i}/{total}] {row[1]} {row[2]}/{row[3]}: {row[4]!r} → NO ENCONTRADO")
+            print(f"[{i}/{total}] {row[1]} {row[2]}/{row[3]}: {row[4]!r} -> NO ENCONTRADO")
 
     total_done = conn.execute(f"""
         SELECT COUNT(*) FROM events

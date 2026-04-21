@@ -27,27 +27,39 @@
     <style>
         body { font-family: Manrope, sans-serif; background: #fcf9f0; }
         #preview-map { height: 220px; border-radius: 8px; }
-        .row-resolved { opacity: 0.4; }
+        .row-just-resolved { opacity: 0.45; }
     </style>
 </head>
 <body class="text-on-surface">
 
 <div class="max-w-5xl mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-3xl font-extrabold text-primary">Geocodificador</h1>
-            <p class="text-sm text-outline mt-1">Direcciones pendientes de geocodificación</p>
+            <p class="text-sm text-outline mt-1">Gestión de direcciones y coordenadas</p>
         </div>
         <div id="stats" class="text-right text-sm text-outline"></div>
     </div>
 
-    <div id="loading" class="text-center py-16 text-outline">Cargando pendientes…</div>
-    <div id="empty" class="hidden text-center py-16 text-outline">
-        <p class="text-2xl mb-2">✓</p>
-        <p>No hay direcciones pendientes.</p>
+    <!-- Tabs -->
+    <div class="flex gap-1 mb-6 border-b border-outline/20">
+        <button id="tab-pending" onclick="setTab('pending')"
+            class="px-5 py-2.5 text-sm font-semibold rounded-t-lg border-b-2 border-primary text-primary">
+            Pendientes <span id="count-pending" class="ml-1 bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full"></span>
+        </button>
+        <button id="tab-resolved" onclick="setTab('resolved')"
+            class="px-5 py-2.5 text-sm font-semibold rounded-t-lg border-b-2 border-transparent text-outline hover:text-on-surface">
+            Resueltas <span id="count-resolved" class="ml-1 bg-outline/10 text-outline text-xs px-1.5 py-0.5 rounded-full"></span>
+        </button>
     </div>
 
-    <!-- Search panel (floats over) -->
+    <div id="loading" class="text-center py-16 text-outline">Cargando…</div>
+    <div id="empty" class="hidden text-center py-16 text-outline">
+        <p class="text-2xl mb-2">✓</p>
+        <p>No hay entradas en esta pestaña.</p>
+    </div>
+
+    <!-- Search panel (modal) -->
     <div id="search-panel" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 space-y-4">
             <div class="flex items-start justify-between">
@@ -87,7 +99,8 @@
         </div>
     </div>
 
-    <table id="table" class="hidden w-full text-sm border-collapse">
+    <!-- Pending table -->
+    <table id="table-pending" class="hidden w-full text-sm border-collapse">
         <thead>
             <tr class="text-xs text-outline uppercase border-b border-outline/20">
                 <th class="text-left py-3 px-2 w-8">#</th>
@@ -97,59 +110,121 @@
                 <th class="py-3 px-2 w-24"></th>
             </tr>
         </thead>
-        <tbody id="tbody"></tbody>
+        <tbody id="tbody-pending"></tbody>
+    </table>
+
+    <!-- Resolved table -->
+    <table id="table-resolved" class="hidden w-full text-sm border-collapse">
+        <thead>
+            <tr class="text-xs text-outline uppercase border-b border-outline/20">
+                <th class="text-left py-3 px-2 w-8">#</th>
+                <th class="text-left py-3 px-2">Lugar original</th>
+                <th class="text-left py-3 px-2">Query</th>
+                <th class="text-left py-3 px-2 w-40">Coordenadas</th>
+                <th class="py-3 px-2 w-24"></th>
+            </tr>
+        </thead>
+        <tbody id="tbody-resolved"></tbody>
     </table>
 </div>
 
 <script>
-let pending = [];
+let pending = [], resolved = [];
 let currentEntry = null;
+let activeTab = 'pending';
 let previewMap = null;
 let previewMarker = null;
 let selectedResult = null;
 
 async function load() {
-    const res = await fetch('/api/admin/geocoder/pending');
-    pending = await res.json();
+    const [rPending, rResolved] = await Promise.all([
+        fetch('/api/admin/geocoder/pending'),
+        fetch('/api/admin/geocoder/resolved'),
+    ]);
+    pending = await rPending.json();
+    resolved = await rResolved.json();
 
     document.getElementById('loading').classList.add('hidden');
+    updateTabCounts();
+    renderTable();
+}
+
+function updateTabCounts() {
+    document.getElementById('count-pending').textContent = pending.length;
+    document.getElementById('count-resolved').textContent = resolved.length;
     document.getElementById('stats').textContent =
-        `${pending.length} pendientes`;
+        `${pending.length} pendientes · ${resolved.length} resueltas`;
+}
 
-    if (!pending.length) {
-        document.getElementById('empty').classList.remove('hidden');
-        return;
+function setTab(tab) {
+    activeTab = tab;
+    ['pending', 'resolved'].forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) {
+            btn.classList.add('border-primary', 'text-primary');
+            btn.classList.remove('border-transparent', 'text-outline');
+        } else {
+            btn.classList.remove('border-primary', 'text-primary');
+            btn.classList.add('border-transparent', 'text-outline');
+        }
+        document.getElementById(`table-${t}`).classList.add('hidden');
+    });
+    renderTable();
+}
+
+function renderTable() {
+    document.getElementById('empty').classList.add('hidden');
+
+    if (activeTab === 'pending') {
+        if (!pending.length) { document.getElementById('empty').classList.remove('hidden'); return; }
+        document.getElementById('tbody-pending').innerHTML = pending.map((e, i) => `
+            <tr id="row-p-${i}" class="border-b border-outline/10 hover:bg-primary/5">
+                <td class="py-3 px-2 text-outline text-xs">${i + 1}</td>
+                <td class="py-3 px-2 font-medium max-w-xs truncate" title="${esc(e.raw_place)}">${esc(e.raw_place || '—')}</td>
+                <td class="py-3 px-2 text-outline text-xs max-w-xs truncate" title="${esc(e.query)}">${esc(e.query)}</td>
+                <td class="py-3 px-2 text-center">
+                    ${e.affected > 0
+                        ? `<span class="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">${e.affected}</span>`
+                        : '<span class="text-outline text-xs">—</span>'}
+                </td>
+                <td class="py-3 px-2 text-right">
+                    <button onclick="openPanel('pending', ${i})"
+                        class="text-xs bg-primary text-on-primary px-3 py-1.5 rounded-lg hover:bg-primary/90 font-semibold">
+                        Resolver
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+        document.getElementById('table-pending').classList.remove('hidden');
+
+    } else {
+        if (!resolved.length) { document.getElementById('empty').classList.remove('hidden'); return; }
+        document.getElementById('tbody-resolved').innerHTML = resolved.map((e, i) => `
+            <tr id="row-r-${i}" class="border-b border-outline/10 hover:bg-primary/5">
+                <td class="py-3 px-2 text-outline text-xs">${i + 1}</td>
+                <td class="py-3 px-2 font-medium max-w-xs truncate" title="${esc(e.raw_place)}">${esc(e.raw_place || '—')}</td>
+                <td class="py-3 px-2 text-outline text-xs max-w-xs truncate" title="${esc(e.query)}">${esc(e.query)}</td>
+                <td class="py-3 px-2 text-xs text-outline font-mono">${e.lat.toFixed(4)}, ${e.lng.toFixed(4)}</td>
+                <td class="py-3 px-2 text-right">
+                    <button onclick="openPanel('resolved', ${i})"
+                        class="text-xs border border-primary text-primary px-3 py-1.5 rounded-lg hover:bg-primary/5 font-semibold">
+                        Editar
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+        document.getElementById('table-resolved').classList.remove('hidden');
     }
-
-    const tbody = document.getElementById('tbody');
-    tbody.innerHTML = pending.map((e, i) => `
-        <tr id="row-${i}" class="border-b border-outline/10 hover:bg-primary/5">
-            <td class="py-3 px-2 text-outline text-xs">${i + 1}</td>
-            <td class="py-3 px-2 font-medium max-w-xs truncate" title="${esc(e.raw_place)}">${esc(e.raw_place || '—')}</td>
-            <td class="py-3 px-2 text-outline text-xs max-w-xs truncate" title="${esc(e.query)}">${esc(e.query)}</td>
-            <td class="py-3 px-2 text-center">
-                ${e.affected > 0
-                    ? `<span class="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">${e.affected}</span>`
-                    : '<span class="text-outline text-xs">—</span>'}
-            </td>
-            <td class="py-3 px-2 text-right">
-                <button onclick="openPanel(${i})"
-                    class="text-xs bg-primary text-on-primary px-3 py-1.5 rounded-lg hover:bg-primary/90 font-semibold">
-                    Resolver
-                </button>
-            </td>
-        </tr>
-    `).join('');
-
-    document.getElementById('table').classList.remove('hidden');
 }
 
 function esc(s) {
     return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function openPanel(idx) {
-    currentEntry = pending[idx];
+function openPanel(source, idx) {
+    currentEntry = source === 'pending' ? pending[idx] : resolved[idx];
+    currentEntry._source = source;
+    currentEntry._idx = idx;
     selectedResult = null;
 
     document.getElementById('panel-raw').textContent = currentEntry.raw_place || currentEntry.query;
@@ -164,6 +239,11 @@ function openPanel(idx) {
     if (previewMap) { previewMap.remove(); previewMap = null; previewMarker = null; }
 
     document.getElementById('search-panel').classList.remove('hidden');
+
+    // For resolved entries, pre-show current coords on map
+    if (source === 'resolved' && currentEntry.lat) {
+        showOnMap(currentEntry.lat, currentEntry.lng, currentEntry.query);
+    }
     doSearch();
 }
 
@@ -199,12 +279,10 @@ async function doSearch() {
         </button>
     `).join('');
 
-    // Auto-select first
     selectCandidate(0);
 }
 
 function selectCandidate(idx) {
-    // Deselect all
     document.querySelectorAll('[id^="cand-"]').forEach(b =>
         b.classList.remove('border-primary', 'bg-primary/10')
     );
@@ -217,13 +295,15 @@ function selectCandidate(idx) {
     const name = btn.dataset.name;
     selectedResult = {lat, lng, name};
 
-    // Update info box
     document.getElementById('sel-name').textContent = name;
     document.getElementById('sel-coords').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     document.getElementById('selected-info').classList.remove('hidden');
     document.getElementById('btn-save').disabled = false;
 
-    // Map preview
+    showOnMap(lat, lng, name);
+}
+
+function showOnMap(lat, lng, label) {
     const mapEl = document.getElementById('preview-map');
     mapEl.classList.remove('hidden');
     if (!previewMap) {
@@ -234,7 +314,7 @@ function selectCandidate(idx) {
     }
     previewMap.setView([lat, lng], 14);
     if (previewMarker) previewMarker.remove();
-    previewMarker = L.marker([lat, lng]).addTo(previewMap);
+    previewMarker = L.marker([lat, lng]).bindPopup(label).addTo(previewMap);
     setTimeout(() => previewMap.invalidateSize(), 50);
 }
 
@@ -243,7 +323,7 @@ async function saveResolution() {
     document.getElementById('btn-save').disabled = true;
     document.getElementById('btn-save').textContent = 'Guardando…';
 
-    const res = await fetch('/api/admin/geocoder/resolve', {
+    await fetch('/api/admin/geocoder/resolve', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -252,21 +332,37 @@ async function saveResolution() {
             lng: selectedResult.lng,
         })
     });
-    const data = await res.json();
     closePanel();
 
-    // Mark row as resolved
-    const idx = pending.indexOf(currentEntry);
-    const row = document.getElementById(`row-${idx}`);
-    if (row) {
-        row.classList.add('row-resolved');
-        row.querySelector('button').textContent = '✓ Resuelto';
-        row.querySelector('button').disabled = true;
+    const src = currentEntry._source;
+    const idx = currentEntry._idx;
+
+    if (src === 'pending') {
+        // Move from pending to resolved
+        const entry = pending[idx];
+        entry.lat = selectedResult.lat;
+        entry.lng = selectedResult.lng;
+        resolved.unshift({...entry});
+        // Mark row visually
+        const row = document.getElementById(`row-p-${idx}`);
+        if (row) {
+            row.classList.add('row-just-resolved');
+            const btn = row.querySelector('button');
+            btn.textContent = '✓ Resuelto';
+            btn.disabled = true;
+        }
+    } else {
+        // Update in-place in resolved list
+        resolved[idx].lat = selectedResult.lat;
+        resolved[idx].lng = selectedResult.lng;
+        const row = document.getElementById(`row-r-${idx}`);
+        if (row) {
+            row.querySelector('td:nth-child(4)').textContent =
+                `${selectedResult.lat.toFixed(4)}, ${selectedResult.lng.toFixed(4)}`;
+        }
     }
 
-    document.getElementById('stats').textContent =
-        `${pending.filter((_, i) => !document.getElementById(`row-${i}`)?.classList.contains('row-resolved')).length} pendientes`;
-
+    updateTabCounts();
     document.getElementById('btn-save').textContent = 'Guardar';
     document.getElementById('btn-save').disabled = false;
 }
@@ -274,8 +370,7 @@ async function saveResolution() {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closePanel();
     if (e.key === 'Enter' && !document.getElementById('search-panel').classList.contains('hidden')) {
-        const focused = document.activeElement;
-        if (focused?.id === 'panel-query') doSearch();
+        if (document.activeElement?.id === 'panel-query') doSearch();
     }
 });
 

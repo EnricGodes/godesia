@@ -394,6 +394,26 @@ async def geocoder_pending():
     return result
 
 
+@app.get("/api/admin/geocoder/resolved")
+async def geocoder_resolved():
+    """List geocache entries that have been successfully geocoded (lat IS NOT NULL)."""
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    rows = db_conn.execute(
+        "SELECT query, raw_place, lat, lng, geocoded_at FROM geocache WHERE lat IS NOT NULL ORDER BY geocoded_at DESC"
+    ).fetchall()
+    return [
+        {
+            "query": row[0],
+            "raw_place": row[1] or "",
+            "lat": row[2],
+            "lng": row[3],
+            "geocoded_at": row[4],
+        }
+        for row in rows
+    ]
+
+
 @app.post("/api/admin/geocoder/search")
 async def geocoder_search(req: GeoSearchRequest):
     """Search Nominatim for candidates (for the CMS)."""

@@ -68,9 +68,9 @@ def main():
             )
             conn.commit()
             resolved += 1
-            print(f"[{i}/{total}] {label} → {lat:.4f}, {lng:.4f}")
+            print(f"[{i}/{total}] {label} -> {lat:.4f}, {lng:.4f}")
         else:
-            print(f"[{i}/{total}] {label} → NO ENCONTRADO (pendiente en geocache)")
+            print(f"[{i}/{total}] {label} -> NO ENCONTRADO (pendiente en geocache)")
 
     total_done = conn.execute(
         "SELECT COUNT(*) FROM residences WHERE lat IS NOT NULL"
