@@ -215,8 +215,26 @@ def geocode_with_cache(conn: sqlite3.Connection, raw_place: str, cache_only: boo
     return None, None
 
 
+def _get_validated_cache(conn: sqlite3.Connection, raw: str):
+    """Return (lat, lng, is_validated) from geocache if found, else (None, None, False)."""
+    normalized = normalize_place(raw)
+    queries = build_queries(normalized)
+    for q in queries:
+        row = conn.execute(
+            "SELECT lat, lng, validated FROM geocache WHERE query=? AND lat IS NOT NULL", (q,)
+        ).fetchone()
+        if row:
+            return row[0], row[1], bool(row[2])
+    return None, None, False
+
+
 def propagate_geocache(conn: sqlite3.Connection) -> int:
-    """After resolving geocache entries, push lat/lng to residences and events.
+    """Push geocache lat/lng to residences and events.
+
+    Rules:
+    - Always update rows where lat IS NULL.
+    - Also update rows where lat/lng differ from geocache AND the geocache entry
+      is validated (validated=1). This corrects stale coords set by old scripts.
 
     Returns number of rows updated.
     """
@@ -224,29 +242,41 @@ def propagate_geocache(conn: sqlite3.Connection) -> int:
 
     # Residences
     rows = conn.execute(
-        "SELECT id, address, city, country FROM residences WHERE lat IS NULL"
+        "SELECT id, address, city, country, lat, lng FROM residences"
     ).fetchall()
     for row in rows:
         raw = build_residence_raw(row["address"] or "", row["city"] or "", row["country"] or "")
-        lat, lng = geocode_with_cache(conn, raw, cache_only=True)
-        if lat is not None:
+        c_lat, c_lng, is_validated = _get_validated_cache(conn, raw)
+        if c_lat is None:
+            continue
+        current_lat = row["lat"]
+        needs_update = (current_lat is None) or (
+            is_validated and round(current_lat, 5) != round(c_lat, 5)
+        )
+        if needs_update:
             conn.execute(
-                "UPDATE residences SET lat=?,lng=? WHERE id=?", (lat, lng, row["id"])
+                "UPDATE residences SET lat=?,lng=? WHERE id=?", (c_lat, c_lng, row["id"])
             )
             updated += 1
 
     # Events (geocodeable tags/types only)
     rows = conn.execute(
-        "SELECT id, place FROM events "
-        "WHERE lat IS NULL AND place IS NOT NULL AND place != '' "
+        "SELECT id, place, lat FROM events "
+        "WHERE place IS NOT NULL AND place != '' "
         "AND (tag IN ('RESI','EMIG','CENS') "
         "     OR type IN ('Mudanza','Emigración','Residencia','Padrón','Censo'))"
     ).fetchall()
     for row in rows:
-        lat, lng = geocode_with_cache(conn, row["place"], cache_only=True)
-        if lat is not None:
+        c_lat, c_lng, is_validated = _get_validated_cache(conn, row["place"])
+        if c_lat is None:
+            continue
+        current_lat = row["lat"]
+        needs_update = (current_lat is None) or (
+            is_validated and round(current_lat, 5) != round(c_lat, 5)
+        )
+        if needs_update:
             conn.execute(
-                "UPDATE events SET lat=?,lng=? WHERE id=?", (lat, lng, row["id"])
+                "UPDATE events SET lat=?,lng=? WHERE id=?", (c_lat, c_lng, row["id"])
             )
             updated += 1
 
