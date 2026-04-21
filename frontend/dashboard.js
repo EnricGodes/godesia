@@ -167,10 +167,10 @@ function renderAnecdota(a) {
         <div class="flex items-start gap-4 bg-surface-container rounded-2xl px-6 py-5 border border-outline-variant/20">
             ${infoIcon}
             <div class="flex-1 min-w-0">
-                <p class="text-[0.65rem] uppercase tracking-[0.18em] font-extrabold text-secondary mb-1">¿Sabías que...?</p>
+                <p class="text-[0.65rem] uppercase tracking-[0.18em] font-extrabold text-secondary mb-1">Anécdotas familiares</p>
                 <p class="font-serif text-[1.05rem] text-on-surface leading-snug mb-2">${a.titulo}</p>
                 <p class="text-[0.88rem] text-on-surface-variant leading-relaxed mb-3">${a.texto}</p>
-                ${ctaName ? `<a id="anecdota-cta" href="/chat.html?q=${encodeURIComponent(ctaName)}" class="text-[0.8rem] font-bold text-primary hover:underline">${a.cta} →</a>` : ''}
+                ${ctaName ? `<a id="anecdota-cta" href="/chat.html?q=${encodeURIComponent(ctaName)}" style="text-decoration:none;" class="text-[0.8rem] font-bold text-primary">${a.cta} →</a>` : ''}
             </div>
         </div>`;
     section.classList.remove('hidden');
