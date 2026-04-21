@@ -1526,8 +1526,18 @@ function renderResidences(residences) {
 
         const markerHtml = (n) => `<div style="background:#2D4B33;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25);">${n}</div>`;
 
+        // Offset markers that share identical coords so they're all visible
+        const seen = {};
+        const jittered = geocoded.map(r => {
+            const key = `${r.lat.toFixed(5)},${r.lng.toFixed(5)}`;
+            const n = seen[key] = (seen[key] || 0) + 1;
+            const angle = (n - 1) * 2.4; // ~golden angle spread
+            const dist = n === 1 ? 0 : 0.0003 * Math.ceil((n - 1) / 6);
+            return { ...r, lat: r.lat + dist * Math.cos(angle), lng: r.lng + dist * Math.sin(angle) };
+        });
+
         const bounds = [];
-        geocoded.forEach(r => {
+        jittered.forEach(r => {
             const marker = L.marker([r.lat, r.lng], {
                 icon: L.divIcon({ className: '', html: markerHtml(r._idx + 1), iconSize: [28, 28], iconAnchor: [14, 14] })
             }).addTo(map);
