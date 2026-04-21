@@ -81,7 +81,19 @@ def normalize_place(raw: str) -> str:
         if _FLOOR_ONLY.match(p):
             continue
         p = _FLOOR_SUFFIX.sub("", p).strip().rstrip(",").strip()
-        if p:
+        if not p:
+            continue
+        # If a city name is embedded mid-part (e.g. "15 Barcelona"), split it out
+        # so "Banys Vells, 15 Barcelona" and "Banys Vells, 15, Barcelona, España"
+        # both produce the same canonical key.
+        m = _CITY_HINT.search(p)
+        if m and m.start() > 0:
+            before = p[:m.start()].strip().rstrip(",").strip()
+            city   = p[m.start():].strip()
+            if before:
+                clean_parts.append(before)
+            clean_parts.append(city)
+        else:
             clean_parts.append(p)
 
     # Deduplicate case-insensitive, translate countries
