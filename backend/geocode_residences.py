@@ -46,50 +46,70 @@ def backfill_geocache(conn):
 
 
 def seed_birth_places(conn):
-    """Insert birth_place values from people into geocache as pending if not already resolved.
+    """Insert birth_place values from people into geocache as pending only when
+    no resolved geocache entry exists for that place.
 
-    Uses LIKE prefix matching so that e.g. 'Foo, Barcelona' matches the existing
-    geocache key 'Foo, Barcelona, España' that was created from a residence entry.
+    Matching strategy (in order):
+    1. Exact match on any query variant from build_queries(normalized)
+    2. Fallback: geocache CONTAINS the first comma-part of the raw address
+       (catches 'Fonollar, Barcelona, España' when birth_place is 'Fonollar, 30 4° Barcelona')
     """
-    # First remove any lat=NULL entries created by a previous bad run of this function
-    birth_places = conn.execute(
+    birth_places = [row[0] for row in conn.execute(
         "SELECT DISTINCT birth_place FROM people WHERE birth_place IS NOT NULL AND birth_place != ''"
-    ).fetchall()
+    ).fetchall()]
 
+    # Wipe all existing pending birth-place entries so we start clean
     cleaned = 0
-    inserted = 0
-    for (raw,) in birth_places:
+    for raw in birth_places:
         normalized = normalize_place(raw)
         if not normalized:
             continue
-
-        # Check for an existing resolved entry whose key starts with our normalized query
-        # (covers cases where the geocache key has ', España' appended)
-        resolved = conn.execute(
-            "SELECT 1 FROM geocache WHERE query LIKE ? AND lat IS NOT NULL",
-            (normalized + "%",)
-        ).fetchone()
-        if resolved:
-            # Also clean up any stale pending duplicate we may have inserted before
-            deleted = conn.execute(
-                "DELETE FROM geocache WHERE query=? AND lat IS NULL", (normalized,)
+        for q in build_queries(normalized):
+            cleaned += conn.execute(
+                "DELETE FROM geocache WHERE query=? AND lat IS NULL", (q,)
             ).rowcount
-            cleaned += deleted
+    if cleaned:
+        conn.commit()
+        print(f"Nacimientos: {cleaned} entradas pendientes antiguas eliminadas")
+
+    inserted = 0
+    for raw in birth_places:
+        normalized = normalize_place(raw)
+        if not normalized:
+            continue
+        queries = build_queries(normalized)
+        if not queries:
             continue
 
-        # Check if already pending under this exact key
-        already = conn.execute("SELECT 1 FROM geocache WHERE query=?", (normalized,)).fetchone()
-        if not already:
+        # 1. Exact query match against resolved entries
+        resolved = any(
             conn.execute(
-                "INSERT INTO geocache (query, lat, lng, raw_place) VALUES (?, NULL, NULL, ?)",
-                (normalized, raw),
+                "SELECT 1 FROM geocache WHERE query=? AND lat IS NOT NULL", (q,)
+            ).fetchone()
+            for q in queries
+        )
+
+        # 2. Fallback: check if geocache has an entry whose key CONTAINS the
+        #    first comma-part of the raw address (street or city name).
+        #    This handles 'Fonollar, Barcelona, España' vs 'Fonollar, 30 4° Barcelona'.
+        if not resolved:
+            first_part = raw.split(",")[0].strip()
+            if len(first_part) >= 4:
+                resolved = bool(conn.execute(
+                    "SELECT 1 FROM geocache WHERE query LIKE ? AND lat IS NOT NULL",
+                    (f"%{first_part}%",)
+                ).fetchone())
+
+        if not resolved:
+            conn.execute(
+                "INSERT OR IGNORE INTO geocache (query, lat, lng, raw_place) "
+                "VALUES (?, NULL, NULL, ?)",
+                (queries[0], raw),
             )
             inserted += 1
 
     conn.commit()
-    if cleaned:
-        print(f"Nacimientos: {cleaned} entradas duplicadas eliminadas del geocache")
-    print(f"Nacimientos: {inserted} entradas nuevas en geocache (pendientes)")
+    print(f"Nacimientos: {inserted} nuevas entradas pendientes en geocache")
 
 
 def main():
