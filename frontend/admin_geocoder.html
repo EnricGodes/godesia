@@ -51,6 +51,10 @@
             class="px-5 py-2.5 text-sm font-semibold rounded-t-lg border-b-2 border-transparent text-outline hover:text-on-surface">
             Resueltas <span id="count-resolved" class="ml-1 bg-outline/10 text-outline text-xs px-1.5 py-0.5 rounded-full"></span>
         </button>
+        <button id="tab-validated" onclick="setTab('validated')"
+            class="px-5 py-2.5 text-sm font-semibold rounded-t-lg border-b-2 border-transparent text-outline hover:text-on-surface">
+            Validadas <span id="count-validated" class="ml-1 bg-outline/10 text-outline text-xs px-1.5 py-0.5 rounded-full"></span>
+        </button>
     </div>
 
     <div id="loading" class="text-center py-16 text-outline">Cargando…</div>
@@ -113,6 +117,19 @@
         <tbody id="tbody-pending"></tbody>
     </table>
 
+    <!-- Validated table -->
+    <table id="table-validated" class="hidden w-full text-sm border-collapse">
+        <thead>
+            <tr class="text-xs text-outline uppercase border-b border-outline/20">
+                <th class="text-left py-3 px-2 w-8">#</th>
+                <th class="text-left py-3 px-2">Lugar buscado</th>
+                <th class="text-left py-3 px-2">Dirección GPS</th>
+                <th class="text-left py-3 px-2 w-36">Coordenadas</th>
+            </tr>
+        </thead>
+        <tbody id="tbody-validated"></tbody>
+    </table>
+
     <!-- Resolved table -->
     <div id="resolved-toolbar" class="hidden flex items-center justify-between mb-3">
         <p class="text-xs text-outline">Columna "Dirección GPS" cargada desde Nominatim inverso.</p>
@@ -137,7 +154,7 @@
 </div>
 
 <script>
-let pending = [], resolved = [];
+let pending = [], resolved = [], validated = [];
 let currentEntry = null;
 let activeTab = 'pending';
 let previewMap = null;
@@ -145,12 +162,14 @@ let previewMarker = null;
 let selectedResult = null;
 
 async function load() {
-    const [rPending, rResolved] = await Promise.all([
+    const [rPending, rResolved, rValidated] = await Promise.all([
         fetch('/api/admin/geocoder/pending'),
         fetch('/api/admin/geocoder/resolved'),
+        fetch('/api/admin/geocoder/validated'),
     ]);
     pending = await rPending.json();
     resolved = await rResolved.json();
+    validated = await rValidated.json();
 
     document.getElementById('loading').classList.add('hidden');
     updateTabCounts();
@@ -160,13 +179,14 @@ async function load() {
 function updateTabCounts() {
     document.getElementById('count-pending').textContent = pending.length;
     document.getElementById('count-resolved').textContent = resolved.length;
+    document.getElementById('count-validated').textContent = validated.length;
     document.getElementById('stats').textContent =
-        `${pending.length} pendientes · ${resolved.length} resueltas`;
+        `${pending.length} pendientes · ${resolved.length} resueltas · ${validated.length} validadas`;
 }
 
 function setTab(tab) {
     activeTab = tab;
-    ['pending', 'resolved'].forEach(t => {
+    ['pending', 'resolved', 'validated'].forEach(t => {
         const btn = document.getElementById(`tab-${t}`);
         if (t === tab) {
             btn.classList.add('border-primary', 'text-primary');
@@ -175,8 +195,11 @@ function setTab(tab) {
             btn.classList.remove('border-primary', 'text-primary');
             btn.classList.add('border-transparent', 'text-outline');
         }
-        document.getElementById(`table-${t}`).classList.add('hidden');
+        const tbl = document.getElementById(`table-${t}`);
+        if (tbl) tbl.classList.add('hidden');
     });
+    const toolbar = document.getElementById('resolved-toolbar');
+    if (toolbar) toolbar.classList.add('hidden');
     renderTable();
 }
 
@@ -218,15 +241,33 @@ function renderTable() {
                 </td>
                 <td class="py-3 px-2 text-xs text-outline font-mono whitespace-nowrap">${e.lat.toFixed(4)}, ${e.lng.toFixed(4)}</td>
                 <td class="py-3 px-2 text-right">
-                    <button onclick="openPanel('resolved', ${i})"
-                        class="text-xs border border-primary text-primary px-3 py-1.5 rounded-lg hover:bg-primary/5 font-semibold">
-                        Editar
-                    </button>
+                    <div class="flex gap-2 justify-end">
+                        <button onclick="validateEntry(${i})" id="val-btn-${i}"
+                            class="text-xs bg-green-700 text-white px-3 py-1.5 rounded-lg hover:bg-green-800 font-semibold">
+                            Validar
+                        </button>
+                        <button onclick="openPanel('resolved', ${i})"
+                            class="text-xs border border-primary text-primary px-3 py-1.5 rounded-lg hover:bg-primary/5 font-semibold">
+                            Editar
+                        </button>
+                    </div>
                 </td>
             </tr>
         `).join('');
         document.getElementById('table-resolved').classList.remove('hidden');
         document.getElementById('resolved-toolbar').classList.remove('hidden');
+
+    } else {
+        if (!validated.length) { document.getElementById('empty').classList.remove('hidden'); return; }
+        document.getElementById('tbody-validated').innerHTML = validated.map((e, i) => `
+            <tr class="border-b border-outline/10">
+                <td class="py-3 px-2 text-outline text-xs">${i + 1}</td>
+                <td class="py-3 px-2 font-medium max-w-[200px] truncate" title="${esc(e.raw_place)}">${esc(e.raw_place || e.query || '—')}</td>
+                <td class="py-3 px-2 text-xs text-green-700">${esc(e.display_name || '—')}</td>
+                <td class="py-3 px-2 text-xs text-outline font-mono whitespace-nowrap">${e.lat.toFixed(4)}, ${e.lng.toFixed(4)}</td>
+            </tr>
+        `).join('');
+        document.getElementById('table-validated').classList.remove('hidden');
     }
 }
 
@@ -381,6 +422,21 @@ function showOnMap(lat, lng, label) {
     if (previewMarker) previewMarker.remove();
     previewMarker = L.marker([lat, lng]).bindPopup(label).addTo(previewMap);
     setTimeout(() => previewMap.invalidateSize(), 50);
+}
+
+async function validateEntry(idx) {
+    const e = resolved[idx];
+    const btn = document.getElementById(`val-btn-${idx}`);
+    if (btn) { btn.disabled = true; btn.textContent = '…'; }
+    await fetch('/api/admin/geocoder/validate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({query: e.query})
+    });
+    validated.unshift({...e});
+    resolved.splice(idx, 1);
+    updateTabCounts();
+    renderTable();
 }
 
 async function saveResolution() {

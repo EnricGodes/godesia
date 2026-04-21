@@ -401,19 +401,40 @@ async def geocoder_resolved():
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
     rows = db_conn.execute(
-        "SELECT query, raw_place, lat, lng, geocoded_at, display_name FROM geocache WHERE lat IS NOT NULL ORDER BY geocoded_at DESC"
+        "SELECT query, raw_place, lat, lng, geocoded_at, display_name FROM geocache "
+        "WHERE lat IS NOT NULL AND (validated IS NULL OR validated = 0) ORDER BY geocoded_at DESC"
     ).fetchall()
     return [
-        {
-            "query": row[0],
-            "raw_place": row[1] or "",
-            "lat": row[2],
-            "lng": row[3],
-            "geocoded_at": row[4],
-            "display_name": row[5] or "",
-        }
+        {"query": row[0], "raw_place": row[1] or "", "lat": row[2],
+         "lng": row[3], "geocoded_at": row[4], "display_name": row[5] or ""}
         for row in rows
     ]
+
+
+@app.get("/api/admin/geocoder/validated")
+async def geocoder_validated():
+    """List geocache entries that have been validated by a human."""
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    rows = db_conn.execute(
+        "SELECT query, raw_place, lat, lng, geocoded_at, display_name FROM geocache "
+        "WHERE validated = 1 ORDER BY geocoded_at DESC"
+    ).fetchall()
+    return [
+        {"query": row[0], "raw_place": row[1] or "", "lat": row[2],
+         "lng": row[3], "geocoded_at": row[4], "display_name": row[5] or ""}
+        for row in rows
+    ]
+
+
+@app.post("/api/admin/geocoder/validate")
+async def geocoder_validate(req: GeoSearchRequest):
+    """Mark a geocache entry as validated (query field used as key)."""
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    db_conn.execute("UPDATE geocache SET validated=1 WHERE query=?", (req.query,))
+    db_conn.commit()
+    return {"status": "ok"}
 
 
 @app.get("/api/admin/geocoder/reverse")
