@@ -228,7 +228,7 @@ function renderTable() {
         `).join('');
         document.getElementById('table-pending').classList.remove('hidden');
 
-    } else {
+    } else if (activeTab === 'resolved') {
         if (!resolved.length) { document.getElementById('empty').classList.remove('hidden'); return; }
         document.getElementById('tbody-resolved').innerHTML = resolved.map((e, i) => `
             <tr id="row-r-${i}" class="border-b border-outline/10 hover:bg-primary/5">
@@ -257,7 +257,7 @@ function renderTable() {
         document.getElementById('table-resolved').classList.remove('hidden');
         document.getElementById('resolved-toolbar').classList.remove('hidden');
 
-    } else {
+    } else if (activeTab === 'validated') {
         if (!validated.length) { document.getElementById('empty').classList.remove('hidden'); return; }
         document.getElementById('tbody-validated').innerHTML = validated.map((e, i) => `
             <tr class="border-b border-outline/10">
