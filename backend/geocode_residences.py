@@ -45,11 +45,33 @@ def backfill_geocache(conn):
     print(f"Backfill geocache: {inserted} entradas nuevas desde residencias existentes")
 
 
+def seed_birth_places(conn):
+    """Insert birth_place values from people into geocache as pending if not already present."""
+    rows = conn.execute(
+        "SELECT DISTINCT birth_place FROM people WHERE birth_place IS NOT NULL AND birth_place != ''"
+    ).fetchall()
+    inserted = 0
+    for (raw,) in rows:
+        normalized = normalize_place(raw)
+        if not normalized:
+            continue
+        existing = conn.execute("SELECT 1 FROM geocache WHERE query=?", (normalized,)).fetchone()
+        if not existing:
+            conn.execute(
+                "INSERT INTO geocache (query, lat, lng, raw_place) VALUES (?, NULL, NULL, ?)",
+                (normalized, raw),
+            )
+            inserted += 1
+    conn.commit()
+    print(f"Nacimientos: {inserted} entradas nuevas en geocache (pendientes)")
+
+
 def main():
     conn = get_connection(str(DB_PATH))
 
     print("Poblando geocache desde datos existentes...")
     backfill_geocache(conn)
+    seed_birth_places(conn)
 
     rows = conn.execute(
         "SELECT id, address, city, country FROM residences WHERE lat IS NULL"
