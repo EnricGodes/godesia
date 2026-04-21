@@ -7,6 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from database import get_connection, init_db, parse_gedcom_date, convert_date_to_spanish, update_all_photo_files
+from geocode_utils import geocode_with_cache, build_residence_raw, GEOCODEABLE_TAGS, GEOCODEABLE_TYPES
 
 
 def migrate(json_path, db_path):
@@ -156,34 +157,48 @@ def migrate(json_path, db_path):
         # ALL events (Bautismo, Emigración, Educación, Ocupación, Residencia, Censo, etc.)
         for evt in person.get("events", []):
             evt_date = convert_date_to_spanish(evt.get("date", ""))
+            evt_tag = evt.get("tag", "")
+            evt_type = evt.get("type", "")
+            evt_place = evt.get("place", "")
             conn.execute(
                 "INSERT INTO events (person_id, tag, type, description, date, place, age, note, cause, address, email, www) "
                 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                 (
-                    person["id"],
-                    evt.get("tag", ""),
-                    evt.get("type", ""),
-                    evt.get("description", ""),
-                    evt_date,
-                    evt.get("place", ""),
-                    evt.get("age", ""),
-                    evt.get("note", ""),
-                    evt.get("cause", ""),
-                    evt.get("address", ""),
-                    evt.get("email", ""),
-                    evt.get("www", "")
+                    person["id"], evt_tag, evt_type,
+                    evt.get("description", ""), evt_date, evt_place,
+                    evt.get("age", ""), evt.get("note", ""), evt.get("cause", ""),
+                    evt.get("address", ""), evt.get("email", ""), evt.get("www", "")
                 )
             )
+            # Populate lat/lng from geocache if this is a geocodeable event
+            if evt_place and (evt_tag in GEOCODEABLE_TAGS or evt_type in GEOCODEABLE_TYPES):
+                lat, lng = geocode_with_cache(conn, evt_place, cache_only=True)
+                if lat is not None:
+                    conn.execute(
+                        "UPDATE events SET lat=?,lng=? WHERE rowid=last_insert_rowid()",
+                        (lat, lng)
+                    )
 
         # Residences
         for res in person.get("residences", []):
             res_date = convert_date_to_spanish(res.get("date", ""))
+            res_address = res.get("address", "")
+            res_city = res.get("city", "")
+            res_country = res.get("country", "")
             conn.execute(
                 "INSERT INTO residences (person_id, address, address2, city, country, date) "
                 "VALUES (?,?,?,?,?,?)",
-                (person["id"], res.get("address", ""), res.get("address2", ""),
-                 res.get("city", ""), res.get("country", ""), res_date)
+                (person["id"], res_address, res.get("address2", ""),
+                 res_city, res_country, res_date)
             )
+            raw = build_residence_raw(res_address, res_city, res_country)
+            if raw:
+                lat, lng = geocode_with_cache(conn, raw, cache_only=True)
+                if lat is not None:
+                    conn.execute(
+                        "UPDATE residences SET lat=?,lng=? WHERE rowid=last_insert_rowid()",
+                        (lat, lng)
+                    )
 
         # Burial
         for buri in person.get("burial", []):

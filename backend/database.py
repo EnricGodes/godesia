@@ -141,7 +141,17 @@ CREATE TABLE IF NOT EXISTS events (
     cause TEXT,
     address TEXT,
     email TEXT,
-    www TEXT
+    www TEXT,
+    lat  REAL,
+    lng  REAL
+);
+
+CREATE TABLE IF NOT EXISTS geocache (
+    query       TEXT PRIMARY KEY,
+    lat         REAL,
+    lng         REAL,
+    raw_place   TEXT,
+    geocoded_at TEXT DEFAULT (datetime('now'))
 );
 
 -- NOTA: Las tablas photos, photo_tags, albums son gestionadas por scripts/sync_catalog.py
@@ -325,12 +335,18 @@ def get_connection(db_path):
     conn.execute("PRAGMA journal_mode=WAL")
     # Register custom function for accent-insensitive search
     conn.create_function("NORMALIZE", 1, _normalize_accent)
-    # Migrate: add updated_at column if not present (SQLite has no ADD COLUMN IF NOT EXISTS)
-    try:
-        conn.execute("ALTER TABLE people ADD COLUMN updated_at TEXT")
-        conn.commit()
-    except Exception:
-        pass  # Column already exists or table not created yet
+    # Migrate: add columns that may be missing from older schemas
+    for stmt in [
+        "ALTER TABLE people ADD COLUMN updated_at TEXT",
+        "ALTER TABLE events ADD COLUMN lat REAL",
+        "ALTER TABLE events ADD COLUMN lng REAL",
+        "CREATE TABLE IF NOT EXISTS geocache (query TEXT PRIMARY KEY, lat REAL, lng REAL, raw_place TEXT, geocoded_at TEXT DEFAULT (datetime('now')))",
+    ]:
+        try:
+            conn.execute(stmt)
+            conn.commit()
+        except Exception:
+            pass
     return conn
 
 
@@ -1111,7 +1127,7 @@ def get_person_dossier(conn, person_id):
 
     # ALL events (Bautismo, Emigración, Educación, Ocupación, Residencia, Censo, etc.)
     events = conn.execute(
-        "SELECT tag, type, description, date, place, age, note, cause, address, email, www FROM events WHERE person_id = ? ORDER BY date",
+        "SELECT tag, type, description, date, place, age, note, cause, address, email, www, lat, lng FROM events WHERE person_id = ? ORDER BY date",
         (person_id,)
     ).fetchall()
     events_list = [dict(e) for e in events]

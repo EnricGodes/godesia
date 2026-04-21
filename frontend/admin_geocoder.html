@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Geocodificador Admin | Familia Godes</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2D4B33",
+                        "on-primary": "#ffffff",
+                        "surface": "#fcf9f0",
+                        "outline": "#727971",
+                        "on-surface": "#1c1c17",
+                    },
+                    fontFamily: { body: ["Manrope"] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: Manrope, sans-serif; background: #fcf9f0; }
+        #preview-map { height: 220px; border-radius: 8px; }
+        .row-resolved { opacity: 0.4; }
+    </style>
+</head>
+<body class="text-on-surface">
+
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-extrabold text-primary">Geocodificador</h1>
+            <p class="text-sm text-outline mt-1">Direcciones pendientes de geocodificación</p>
+        </div>
+        <div id="stats" class="text-right text-sm text-outline"></div>
+    </div>
+
+    <div id="loading" class="text-center py-16 text-outline">Cargando pendientes…</div>
+    <div id="empty" class="hidden text-center py-16 text-outline">
+        <p class="text-2xl mb-2">✓</p>
+        <p>No hay direcciones pendientes.</p>
+    </div>
+
+    <!-- Search panel (floats over) -->
+    <div id="search-panel" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 space-y-4">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h2 class="font-bold text-lg text-primary" id="panel-raw"></h2>
+                    <p class="text-xs text-outline" id="panel-orig"></p>
+                </div>
+                <button onclick="closePanel()" class="text-outline hover:text-on-surface text-2xl leading-none">&times;</button>
+            </div>
+
+            <div class="flex gap-2">
+                <input id="panel-query" type="text"
+                    class="flex-1 border border-outline/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    placeholder="Refinar búsqueda…"/>
+                <button onclick="doSearch()"
+                    class="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90">
+                    Buscar
+                </button>
+            </div>
+
+            <div id="candidates" class="space-y-2 max-h-52 overflow-y-auto"></div>
+
+            <div id="preview-map" class="hidden"></div>
+
+            <div id="selected-info" class="hidden bg-primary/10 rounded-lg p-3 text-sm space-y-1">
+                <p class="font-bold text-primary" id="sel-name"></p>
+                <p class="text-xs text-outline" id="sel-coords"></p>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="closePanel()" class="text-sm text-outline hover:text-on-surface px-4 py-2">Cancelar</button>
+                <button id="btn-save" onclick="saveResolution()" disabled
+                    class="bg-primary text-on-primary px-5 py-2 rounded-lg text-sm font-semibold disabled:opacity-40 hover:bg-primary/90">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <table id="table" class="hidden w-full text-sm border-collapse">
+        <thead>
+            <tr class="text-xs text-outline uppercase border-b border-outline/20">
+                <th class="text-left py-3 px-2 w-8">#</th>
+                <th class="text-left py-3 px-2">Lugar original</th>
+                <th class="text-left py-3 px-2">Query normalizada</th>
+                <th class="text-left py-3 px-2 w-20">Afecta</th>
+                <th class="py-3 px-2 w-24"></th>
+            </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </table>
+</div>
+
+<script>
+let pending = [];
+let currentEntry = null;
+let previewMap = null;
+let previewMarker = null;
+let selectedResult = null;
+
+async function load() {
+    const res = await fetch('/api/admin/geocoder/pending');
+    pending = await res.json();
+
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('stats').textContent =
+        `${pending.length} pendientes`;
+
+    if (!pending.length) {
+        document.getElementById('empty').classList.remove('hidden');
+        return;
+    }
+
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = pending.map((e, i) => `
+        <tr id="row-${i}" class="border-b border-outline/10 hover:bg-primary/5">
+            <td class="py-3 px-2 text-outline text-xs">${i + 1}</td>
+            <td class="py-3 px-2 font-medium max-w-xs truncate" title="${esc(e.raw_place)}">${esc(e.raw_place || '—')}</td>
+            <td class="py-3 px-2 text-outline text-xs max-w-xs truncate" title="${esc(e.query)}">${esc(e.query)}</td>
+            <td class="py-3 px-2 text-center">
+                ${e.affected > 0
+                    ? `<span class="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">${e.affected}</span>`
+                    : '<span class="text-outline text-xs">—</span>'}
+            </td>
+            <td class="py-3 px-2 text-right">
+                <button onclick="openPanel(${i})"
+                    class="text-xs bg-primary text-on-primary px-3 py-1.5 rounded-lg hover:bg-primary/90 font-semibold">
+                    Resolver
+                </button>
+            </td>
+        </tr>
+    `).join('');
+
+    document.getElementById('table').classList.remove('hidden');
+}
+
+function esc(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openPanel(idx) {
+    currentEntry = pending[idx];
+    selectedResult = null;
+
+    document.getElementById('panel-raw').textContent = currentEntry.raw_place || currentEntry.query;
+    document.getElementById('panel-orig').textContent = `Query: ${currentEntry.query}`;
+    document.getElementById('panel-query').value = currentEntry.query;
+    document.getElementById('candidates').innerHTML = '';
+    document.getElementById('selected-info').classList.add('hidden');
+    document.getElementById('btn-save').disabled = true;
+
+    const mapEl = document.getElementById('preview-map');
+    mapEl.classList.add('hidden');
+    if (previewMap) { previewMap.remove(); previewMap = null; previewMarker = null; }
+
+    document.getElementById('search-panel').classList.remove('hidden');
+    doSearch();
+}
+
+function closePanel() {
+    document.getElementById('search-panel').classList.add('hidden');
+    if (previewMap) { previewMap.remove(); previewMap = null; }
+}
+
+async function doSearch() {
+    const query = document.getElementById('panel-query').value.trim();
+    if (!query) return;
+    document.getElementById('candidates').innerHTML =
+        '<p class="text-xs text-outline animate-pulse">Buscando…</p>';
+    const res = await fetch('/api/admin/geocoder/search', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({query})
+    });
+    const results = await res.json();
+
+    if (!results.length) {
+        document.getElementById('candidates').innerHTML =
+            '<p class="text-xs text-outline">Sin resultados. Prueba otra búsqueda.</p>';
+        return;
+    }
+
+    document.getElementById('candidates').innerHTML = results.map((r, i) => `
+        <button onclick="selectCandidate(${i})"
+            class="w-full text-left px-3 py-2 rounded-lg border border-outline/20 hover:border-primary hover:bg-primary/5 text-sm transition-colors"
+            id="cand-${i}" data-lat="${r.lat}" data-lng="${r.lng}" data-name="${esc(r.display_name)}">
+            <span class="font-medium">${esc(r.display_name)}</span>
+            <span class="block text-xs text-outline">${r.lat.toFixed(5)}, ${r.lng.toFixed(5)} · ${esc(r.class)}/${esc(r.type)}</span>
+        </button>
+    `).join('');
+
+    // Auto-select first
+    selectCandidate(0);
+}
+
+function selectCandidate(idx) {
+    // Deselect all
+    document.querySelectorAll('[id^="cand-"]').forEach(b =>
+        b.classList.remove('border-primary', 'bg-primary/10')
+    );
+    const btn = document.getElementById(`cand-${idx}`);
+    if (!btn) return;
+    btn.classList.add('border-primary', 'bg-primary/10');
+
+    const lat = parseFloat(btn.dataset.lat);
+    const lng = parseFloat(btn.dataset.lng);
+    const name = btn.dataset.name;
+    selectedResult = {lat, lng, name};
+
+    // Update info box
+    document.getElementById('sel-name').textContent = name;
+    document.getElementById('sel-coords').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    document.getElementById('selected-info').classList.remove('hidden');
+    document.getElementById('btn-save').disabled = false;
+
+    // Map preview
+    const mapEl = document.getElementById('preview-map');
+    mapEl.classList.remove('hidden');
+    if (!previewMap) {
+        previewMap = L.map('preview-map', {scrollWheelZoom: false});
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap', maxZoom: 18
+        }).addTo(previewMap);
+    }
+    previewMap.setView([lat, lng], 14);
+    if (previewMarker) previewMarker.remove();
+    previewMarker = L.marker([lat, lng]).addTo(previewMap);
+    setTimeout(() => previewMap.invalidateSize(), 50);
+}
+
+async function saveResolution() {
+    if (!selectedResult || !currentEntry) return;
+    document.getElementById('btn-save').disabled = true;
+    document.getElementById('btn-save').textContent = 'Guardando…';
+
+    const res = await fetch('/api/admin/geocoder/resolve', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: currentEntry.query,
+            lat: selectedResult.lat,
+            lng: selectedResult.lng,
+        })
+    });
+    const data = await res.json();
+    closePanel();
+
+    // Mark row as resolved
+    const idx = pending.indexOf(currentEntry);
+    const row = document.getElementById(`row-${idx}`);
+    if (row) {
+        row.classList.add('row-resolved');
+        row.querySelector('button').textContent = '✓ Resuelto';
+        row.querySelector('button').disabled = true;
+    }
+
+    document.getElementById('stats').textContent =
+        `${pending.filter((_, i) => !document.getElementById(`row-${i}`)?.classList.contains('row-resolved')).length} pendientes`;
+
+    document.getElementById('btn-save').textContent = 'Guardar';
+    document.getElementById('btn-save').disabled = false;
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closePanel();
+    if (e.key === 'Enter' && !document.getElementById('search-panel').classList.contains('hidden')) {
+        const focused = document.activeElement;
+        if (focused?.id === 'panel-query') doSearch();
+    }
+});
+
+load();
+</script>
+</body>
+</html>

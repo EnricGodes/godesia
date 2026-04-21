@@ -346,6 +346,84 @@ async def album_photos(
     return get_album_photos(db_conn, album_id, q=q, sort=sort, person_id=person_id, page=page, limit=limit, show_docs=show_docs)
 
 
+# ---------------------------------------------------------------------------
+# Admin geocoder endpoints
+# ---------------------------------------------------------------------------
+
+from geocode_utils import nominatim_search, propagate_geocache
+
+
+class GeoResolveRequest(BaseModel):
+    query: str
+    lat: float
+    lng: float
+
+
+class GeoSearchRequest(BaseModel):
+    query: str
+
+
+@app.get("/api/admin/geocoder/pending")
+async def geocoder_pending():
+    """List geocache entries that could not be geocoded (lat IS NULL)."""
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    rows = db_conn.execute(
+        "SELECT query, raw_place, geocoded_at FROM geocache WHERE lat IS NULL ORDER BY geocoded_at DESC"
+    ).fetchall()
+    result = []
+    for row in rows:
+        query = row[0]
+        raw_place = row[1] or ""
+        # Count residences and events using this raw_place
+        r_count = db_conn.execute(
+            "SELECT COUNT(*) FROM residences WHERE lat IS NULL "
+            "AND (address || ', ' || city || ', ' || country LIKE ?)",
+            (f"%{raw_place[:30]}%",)
+        ).fetchone()[0]
+        e_count = db_conn.execute(
+            "SELECT COUNT(*) FROM events WHERE lat IS NULL AND place=?",
+            (raw_place,)
+        ).fetchone()[0]
+        result.append({
+            "query": query,
+            "raw_place": raw_place,
+            "affected": r_count + e_count,
+            "geocoded_at": row[2],
+        })
+    return result
+
+
+@app.post("/api/admin/geocoder/search")
+async def geocoder_search(req: GeoSearchRequest):
+    """Search Nominatim for candidates (for the CMS)."""
+    candidates = nominatim_search(req.query)
+    return [
+        {
+            "display_name": c.get("display_name", ""),
+            "lat": float(c["lat"]),
+            "lng": float(c["lon"]),
+            "type": c.get("type", ""),
+            "class": c.get("class", ""),
+        }
+        for c in candidates
+    ]
+
+
+@app.post("/api/admin/geocoder/resolve")
+async def geocoder_resolve(req: GeoResolveRequest):
+    """Save a resolved lat/lng for a geocache entry and propagate to DB rows."""
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    db_conn.execute(
+        "UPDATE geocache SET lat=?, lng=? WHERE query=?",
+        (req.lat, req.lng, req.query)
+    )
+    db_conn.commit()
+    updated = propagate_geocache(db_conn)
+    return {"status": "ok", "propagated": updated}
+
+
 # Serve photos
 if PHOTOS_DIR.exists():
     app.mount("/photos", StaticFiles(directory=str(PHOTOS_DIR)), name="photos")
