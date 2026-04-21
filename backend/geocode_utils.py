@@ -16,18 +16,18 @@ GEOCODEABLE_TYPES = frozenset(["Mudanza", "Emigración", "Residencia", "Padrón"
 # Part is purely floor/apt/door info → discard
 _FLOOR_ONLY = re.compile(
     r'^(?:'
-    r'[\d\s]+[oaºª°][\doaºª°\s]*(?:izda?|dcha?|esc\s*\w*)?'  # "4o 1a", "6o 2a"
-    r'|esc\s+\w*\s*\d*[oaºª°]?\s*\d*[oaºª°]?'                # "esc izq 6o1a"
-    r'|(?:izda?|dcha?|pral|ent|bajo|bajos|bis)'               # standalone door label
+    r'\d{1,2}\s*[oaºª°][\doaºª°\s]*(?:izda?|dcha?|esc\s*\w*)?'  # "4o 1a", "6o 2a" (≤2 digits = floor num)
+    r'|esc\s+\w*\s*\d*[oaºª°]?\s*\d*[oaºª°]?'                    # "esc izq 6o1a"
+    r'|(?:izda?|dcha?|pral|ent|bajo|bajos|bis)'                    # standalone door label
     r')$',
     re.IGNORECASE,
 )
 
-# Trailing floor/apt info within an address part
+# Trailing floor/apt info — anchored to end ($) to avoid stripping from middle of strings
 _FLOOR_SUFFIX = re.compile(
-    r'\s+\d+[oaºª°][\doaºª°\s]*(?:izda?|dcha?|esc\s*\w*)?'
+    r'\s+\d+[oaºª°][\doaºª°\s]*(?:izda?|dcha?|esc\s*\w*)?$'
     r'|\s+(?:izda?|dcha?|pral|ent|bajo|bajos|bis|planta\s*\w+)$'
-    r'|\s+p\b',
+    r'|\s+p\b$',
     re.IGNORECASE,
 )
 
