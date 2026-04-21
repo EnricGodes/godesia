@@ -477,10 +477,13 @@ async function saveResolution() {
         // Update in-place in resolved list
         resolved[idx].lat = selectedResult.lat;
         resolved[idx].lng = selectedResult.lng;
+        resolved[idx].display_name = selectedResult.name || '';
         const row = document.getElementById(`row-r-${idx}`);
         if (row) {
             row.querySelector('td:nth-child(4)').textContent =
                 `${selectedResult.lat.toFixed(4)}, ${selectedResult.lng.toFixed(4)}`;
+            const dnCell = row.querySelector(`#dn-${idx}`);
+            if (dnCell) dnCell.innerHTML = `<span class="${matchQuality(resolved[idx].raw_place || resolved[idx].query, resolved[idx].display_name)}">${esc(resolved[idx].display_name)}</span>`;
         }
     }
 
