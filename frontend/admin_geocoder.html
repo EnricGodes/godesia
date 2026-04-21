@@ -213,7 +213,7 @@ function renderTable() {
                 <td class="py-3 px-2 font-medium max-w-[200px] truncate" title="${esc(e.raw_place)}">${esc(e.raw_place || e.query || '—')}</td>
                 <td class="py-3 px-2 text-xs max-w-xs" id="dn-${i}">
                     ${e.display_name
-                        ? `<span class="${matchQuality(e.raw_place || e.query, e.display_name)}" title="${esc(e.display_name)}">${esc(shortDisplayName(e.display_name))}</span>`
+                        ? `<span class="${matchQuality(e.raw_place || e.query, e.display_name)}">${esc(e.display_name)}</span>`
                         : `<button onclick="fetchDisplayName(${i})" class="text-outline/50 hover:text-primary text-xs underline decoration-dotted">cargar</button>`}
                 </td>
                 <td class="py-3 px-2 text-xs text-outline font-mono whitespace-nowrap">${e.lat.toFixed(4)}, ${e.lng.toFixed(4)}</td>
@@ -261,7 +261,7 @@ async function fetchDisplayName(idx) {
         const dn = data.display_name || '';
         resolved[idx].display_name = dn;
         cell.innerHTML = dn
-            ? `<span class="${matchQuality(e.raw_place || e.query, dn)}" title="${esc(dn)}">${esc(shortDisplayName(dn))}</span>`
+            ? `<span class="${matchQuality(e.raw_place || e.query, dn)}">${esc(dn)}</span>`
             : '<span class="text-outline/30 text-xs">—</span>';
     } catch {
         cell.innerHTML = '<span class="text-red-400 text-xs">error</span>';
