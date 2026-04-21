@@ -1522,9 +1522,9 @@ function renderResidences(residences, events, person) {
         const borderColor = isBirth ? 'border-secondary' : 'border-primary';
         const badge = hasCoords
             ? (isBirth
-                ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-secondary text-on-secondary text-xs shrink-0 mt-0.5">★</span>`
+                ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-secondary shrink-0 mt-0.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M16.874 12C17.5826 13.037 18 14.3093 18 15.6842C18 16.5017 17.8524 17.2829 17.5838 18M7.12605 12C6.41738 13.037 6 14.3093 6 15.6842C6 19.1723 8.68629 22 12 22C14.5371 22 16.7064 20.3424 17.5838 18M17.5838 18C14.8509 16.8 12.0559 14.8333 11 14"/></svg></span>`
                 : `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-on-primary text-[10px] font-bold shrink-0 mt-0.5">${geocodedIdx}</span>`)
-            : (isBirth ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-secondary/20 text-secondary text-xs shrink-0 mt-0.5">★</span>` : '');
+            : (isBirth ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-secondary/20 shrink-0 mt-0.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#78583e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M16.874 12C17.5826 13.037 18 14.3093 18 15.6842C18 16.5017 17.8524 17.2829 17.5838 18M7.12605 12C6.41738 13.037 6 14.3093 6 15.6842C6 19.1723 8.68629 22 12 22C14.5371 22 16.7064 20.3424 17.5838 18M17.5838 18C14.8509 16.8 12.0559 14.8333 11 14"/></svg></span>` : '');
         return `
         <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 ${borderColor} flex gap-3">
             ${badge}
@@ -1560,8 +1560,9 @@ function renderResidences(residences, events, person) {
             maxZoom: 18,
         }).addTo(map);
 
+        const birthSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M16.874 12C17.5826 13.037 18 14.3093 18 15.6842C18 16.5017 17.8524 17.2829 17.5838 18M7.12605 12C6.41738 13.037 6 14.3093 6 15.6842C6 19.1723 8.68629 22 12 22C14.5371 22 16.7064 20.3424 17.5838 18M17.5838 18C14.8509 16.8 12.0559 14.8333 11 14"/></svg>`;
         const markerHtml = (n, isBirth) => isBirth
-            ? `<div style="background:#78583e;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25);">★</div>`
+            ? `<div style="background:#78583e;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25);">${birthSvg}</div>`
             : `<div style="background:#2D4B33;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25);">${n}</div>`;
 
         // Offset markers that share identical coords so they're all visible
