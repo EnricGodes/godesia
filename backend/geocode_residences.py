@@ -46,23 +46,49 @@ def backfill_geocache(conn):
 
 
 def seed_birth_places(conn):
-    """Insert birth_place values from people into geocache as pending if not already present."""
-    rows = conn.execute(
+    """Insert birth_place values from people into geocache as pending if not already resolved.
+
+    Uses LIKE prefix matching so that e.g. 'Foo, Barcelona' matches the existing
+    geocache key 'Foo, Barcelona, España' that was created from a residence entry.
+    """
+    # First remove any lat=NULL entries created by a previous bad run of this function
+    birth_places = conn.execute(
         "SELECT DISTINCT birth_place FROM people WHERE birth_place IS NOT NULL AND birth_place != ''"
     ).fetchall()
+
+    cleaned = 0
     inserted = 0
-    for (raw,) in rows:
+    for (raw,) in birth_places:
         normalized = normalize_place(raw)
         if not normalized:
             continue
-        existing = conn.execute("SELECT 1 FROM geocache WHERE query=?", (normalized,)).fetchone()
-        if not existing:
+
+        # Check for an existing resolved entry whose key starts with our normalized query
+        # (covers cases where the geocache key has ', España' appended)
+        resolved = conn.execute(
+            "SELECT 1 FROM geocache WHERE query LIKE ? AND lat IS NOT NULL",
+            (normalized + "%",)
+        ).fetchone()
+        if resolved:
+            # Also clean up any stale pending duplicate we may have inserted before
+            deleted = conn.execute(
+                "DELETE FROM geocache WHERE query=? AND lat IS NULL", (normalized,)
+            ).rowcount
+            cleaned += deleted
+            continue
+
+        # Check if already pending under this exact key
+        already = conn.execute("SELECT 1 FROM geocache WHERE query=?", (normalized,)).fetchone()
+        if not already:
             conn.execute(
                 "INSERT INTO geocache (query, lat, lng, raw_place) VALUES (?, NULL, NULL, ?)",
                 (normalized, raw),
             )
             inserted += 1
+
     conn.commit()
+    if cleaned:
+        print(f"Nacimientos: {cleaned} entradas duplicadas eliminadas del geocache")
     print(f"Nacimientos: {inserted} entradas nuevas en geocache (pendientes)")
 
 
