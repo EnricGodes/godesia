@@ -212,13 +212,64 @@ def geocode_with_cache(conn: sqlite3.Connection, raw_place: str, cache_only: boo
             conn.commit()
             return lat, lng
 
-    # 3. Register as pending so CMS can pick it up
+    # 3. Fallback: search by raw_place (key may have changed after normalization update)
+    row = conn.execute(
+        "SELECT lat, lng FROM geocache WHERE raw_place = ? AND lat IS NOT NULL LIMIT 1",
+        (raw_place,)
+    ).fetchone()
+    if row:
+        conn.execute(
+            "INSERT OR IGNORE INTO geocache (query, lat, lng, raw_place) VALUES (?,?,?,?)",
+            (queries[0], row[0], row[1], raw_place),
+        )
+        conn.commit()
+        return row[0], row[1]
+
+    # 4. Register as pending so CMS can pick it up
     conn.execute(
         "INSERT OR IGNORE INTO geocache (query, lat, lng, raw_place) VALUES (?,NULL,NULL,?)",
         (queries[0], raw_place),
     )
     conn.commit()
     return None, None
+
+
+def normalize_geocache_keys(conn: sqlite3.Connection) -> int:
+    """Re-normalize all geocache query keys to current canonical form.
+
+    Safe to run on every startup — idempotent, fast for ~300 entries.
+    Ensures that changes to normalize_place() don't leave stale keys.
+    Returns number of entries renamed or merged.
+    """
+    rows = conn.execute(
+        "SELECT query, raw_place, lat, lng, validated FROM geocache"
+    ).fetchall()
+    updated = 0
+    for row in rows:
+        source = row["raw_place"] or row["query"]
+        canonical = build_queries(normalize_place(source))
+        if not canonical:
+            continue
+        new_key = canonical[0]
+        if new_key == row["query"]:
+            continue
+        existing = conn.execute(
+            "SELECT lat, lng, validated FROM geocache WHERE query=?", (new_key,)
+        ).fetchone()
+        if existing:
+            if row["lat"] is not None and existing[0] is None:
+                conn.execute(
+                    "UPDATE geocache SET lat=?,lng=?,validated=? WHERE query=?",
+                    (row["lat"], row["lng"], row["validated"], new_key),
+                )
+            conn.execute("DELETE FROM geocache WHERE query=?", (row["query"],))
+        else:
+            conn.execute(
+                "UPDATE geocache SET query=? WHERE query=?", (new_key, row["query"])
+            )
+        updated += 1
+    conn.commit()
+    return updated
 
 
 def _get_validated_cache(conn: sqlite3.Connection, raw: str):

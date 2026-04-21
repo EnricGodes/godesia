@@ -52,6 +52,16 @@ async def startup():
     count = db_conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
     print(f"SQLite cargado: {count} personas")
 
+    # AUTO-HEAL: Normalize geocache keys to current canonical form.
+    # Prevents validated entries from appearing as pending after normalize_place() changes.
+    try:
+        from geocode_utils import normalize_geocache_keys
+        n = normalize_geocache_keys(db_conn)
+        if n:
+            print(f"✓ geocache: {n} claves normalizadas en startup")
+    except Exception as e:
+        print(f"  Normalización geocache falló: {e}")
+
     # AUTO-HEAL: If any person has photos tagged but no photo_file set,
     # regenerate photo_file for everyone. This protects against photo loss
     # from any script that updates the people table without preserving photo_file.
