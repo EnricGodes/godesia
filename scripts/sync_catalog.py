@@ -88,6 +88,7 @@ class PhotoRecord:
         self.is_personal_photo = False
         self.is_prim_cutout = False
         self.position = None
+        self.note = None
         self.parent_photo_id = None
         self.tagged_people = {}  # person_id -> {is_primary, is_prim_cutout, position, source}
 
@@ -160,7 +161,7 @@ def parse_gedcom_photos(lines):
                     "title": None, "date": None, "place": None, "photo_rin": None,
                     "album_id": None, "is_cutout": False, "is_parent_photo": False,
                     "is_personal_photo": False, "is_prim": False, "is_prim_cutout": False,
-                    "position": None
+                    "position": None, "note": None
                 }
 
                 while i < len(lines):
@@ -202,6 +203,22 @@ def parse_gedcom_photos(lines):
                             obje["is_prim_cutout"] = True
                         elif tag == "_POSITION":
                             obje["position"] = value
+                        elif tag == "NOTE":
+                            note_content = value
+                            # Consume level-3 CONC and raw continuation lines
+                            while i < len(lines):
+                                conc_line = lines[i].rstrip("\n")
+                                conc_m = re.match(r"^3\s+CONC\s?(.*)", conc_line)
+                                if conc_m:
+                                    note_content += conc_m.group(1)
+                                    i += 1
+                                elif conc_line and re.match(r"^\d", conc_line):
+                                    break
+                                else:
+                                    note_content += conc_line
+                                    i += 1
+                            obje["note"] = note_content.strip()
+                            continue  # already advanced i
                     i += 1
 
                 if obje["filename"]:
@@ -228,6 +245,8 @@ def parse_gedcom_photos(lines):
                 photo.filesize = obje["filesize"]
             if not photo.position and obje["position"]:
                 photo.position = obje["position"]
+            if not photo.note and obje["note"]:
+                photo.note = obje["note"]
 
             photo.is_cutout = photo.is_cutout or obje["is_cutout"]
             photo.is_parent_photo = photo.is_parent_photo or obje["is_parent_photo"]
@@ -801,12 +820,12 @@ def main():
                 INSERT INTO photos
                 (filename, url, filesize, title, date, place, photo_rin, album_id,
                  is_cutout, is_parent_photo, is_personal_photo, is_prim_cutout, position, is_downloaded,
-                 is_document, doc_type, transcription)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 is_document, doc_type, transcription, note)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (filename, photo.url, photo.filesize, photo.title, photo.date,
                   photo.place, photo.photo_rin, photo.album_id, photo.is_cutout,
                   photo.is_parent_photo, photo.is_personal_photo, photo.is_prim_cutout,
-                  photo.position, is_downloaded, is_document, doc_type, transcription))
+                  photo.position, is_downloaded, is_document, doc_type, transcription, photo.note))
             parent_id_map[filename] = cursor.lastrowid
 
         for filename, photo in photos.items():

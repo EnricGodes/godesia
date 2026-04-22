@@ -490,8 +490,8 @@ async def geocoder_resolve(req: GeoResolveRequest):
 
 @app.post("/api/suggestions")
 async def submit_suggestion(
-    name: str = Form(...),
-    email: str = Form(...),
+    name: str = Form(""),
+    email: str = Form(""),
     type: str = Form(""),
     person_id: str = Form(""),
     message: str = Form(...),
@@ -500,7 +500,7 @@ async def submit_suggestion(
 ):
     """Save a user suggestion with optional file attachments."""
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    slug = re.sub(r"[^a-z0-9]", "_", name.lower())[:20].strip("_")
+    slug = re.sub(r"[^a-z0-9]", "_", name.lower())[:20].strip("_") or "anonimo"
     submission_id = f"{ts}_{slug}"
 
     sub_dir = SUGGESTIONS_DIR / submission_id

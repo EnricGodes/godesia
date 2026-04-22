@@ -198,19 +198,24 @@ function renderAnecdota(a) {
                 <p class="text-[0.65rem] uppercase tracking-[0.18em] font-extrabold text-secondary mb-1">Anécdotas familiares</p>
                 <p class="font-serif text-[1.05rem] text-on-surface leading-snug mb-2">${a.titulo}</p>
                 <p class="text-[0.88rem] text-on-surface-variant leading-relaxed mb-3">${a.texto}</p>
-                ${ctaName ? `<a id="anecdota-cta" href="/chat.html?q=${encodeURIComponent(ctaName)}" style="text-decoration:none;" class="text-[0.8rem] font-bold text-primary">${a.cta} →</a>` : ''}
+                <div class="flex items-center justify-between mt-1">
+                    ${ctaName ? `<a id="anecdota-cta" href="/chat.html?q=${encodeURIComponent(ctaName)}" style="text-decoration:none;" class="text-[0.8rem] font-bold text-primary">${a.cta} →</a>` : '<span></span>'}
+                    <a id="anecdota-colaborar" href="/colaborar.html?type=anecdota" style="text-decoration:none;" class="text-[0.8rem] font-bold text-secondary">Colabora →</a>
+                </div>
             </div>
         </div>`;
     section.classList.remove('hidden');
-    // Try to resolve person name → dossier link
+    // Try to resolve person name → dossier link + enrich colaborar link with person id
     if (ctaName) {
         fetch(`/api/search?q=${encodeURIComponent(ctaName)}&limit=1`)
             .then(r => r.json())
             .then(data => {
                 const match = data.results && data.results[0];
                 if (match) {
-                    const el = document.getElementById('anecdota-cta');
-                    if (el) el.href = `/dossier.html?id=${dossierId(match.id)}`;
+                    const cta = document.getElementById('anecdota-cta');
+                    if (cta) cta.href = `/dossier.html?id=${dossierId(match.id)}`;
+                    const col = document.getElementById('anecdota-colaborar');
+                    if (col) col.href = `/colaborar.html?type=anecdota&person=${dossierId(match.id)}`;
                 }
             })
             .catch(() => {});

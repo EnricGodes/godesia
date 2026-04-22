@@ -1265,7 +1265,7 @@ def get_documents(conn, limit=1):
 def get_photo_details(conn, photo_id):
     """Return complete details for a photo including tagged people, notes, and album."""
     photo = conn.execute("""
-        SELECT id, filename, title, date, place, album_id
+        SELECT id, filename, title, date, place, album_id, note
         FROM photos
         WHERE id = ?
     """, (photo_id,)).fetchone()

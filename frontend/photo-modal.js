@@ -149,6 +149,14 @@ function renderPhotoModal() {
         infoHtml += `<div style="font-size: 13px; color: #727971; margin-bottom: 28px;">${datePlace.join(' • ')}</div>`;
     }
 
+    // Comentario
+    const noteHtml = p.note
+        ? `<div style="margin-bottom: 28px;">
+             <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 10px 0;">Comentario</h3>
+             <p style="font-size: 13px; color: #424842; line-height: 1.65; white-space: pre-line;">${p.note}</p>
+           </div>`
+        : '';
+
     // Personas etiquetadas
     const tagsHtml = p.tagged_people && p.tagged_people.length > 0
         ? `<div style="margin-bottom: 28px;">
@@ -180,7 +188,7 @@ function renderPhotoModal() {
            </div>`
         : '';
 
-    sidebarContent = `${breadcrumbHtml}${infoHtml}${tagsHtml}${albumHtml}`;
+    sidebarContent = `${breadcrumbHtml}${infoHtml}${noteHtml}${tagsHtml}${albumHtml}`;
 
     const modalHtml = `
         <style>
