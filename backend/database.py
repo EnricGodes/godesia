@@ -177,6 +177,18 @@ CREATE TABLE IF NOT EXISTS notes (
     content TEXT
 );
 
+CREATE TABLE IF NOT EXISTS suggestions (
+    id TEXT PRIMARY KEY,
+    name TEXT,
+    email TEXT,
+    type TEXT,
+    person_id TEXT,
+    message TEXT,
+    files_count INTEGER DEFAULT 0,
+    submission_dir TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_people_birth_md ON people(birth_month, birth_day);
 CREATE INDEX IF NOT EXISTS idx_people_name ON people(name COLLATE NOCASE);
 CREATE INDEX IF NOT EXISTS idx_people_surname ON people(surname COLLATE NOCASE);
@@ -343,6 +355,7 @@ def get_connection(db_path):
         "CREATE TABLE IF NOT EXISTS geocache (query TEXT PRIMARY KEY, lat REAL, lng REAL, raw_place TEXT, geocoded_at TEXT DEFAULT (datetime('now')))",
         "ALTER TABLE geocache ADD COLUMN display_name TEXT",
         "ALTER TABLE geocache ADD COLUMN validated INTEGER DEFAULT 0",
+        "CREATE TABLE IF NOT EXISTS suggestions (id TEXT PRIMARY KEY, name TEXT, email TEXT, type TEXT, person_id TEXT, message TEXT, files_count INTEGER DEFAULT 0, submission_dir TEXT, created_at TEXT DEFAULT (datetime('now')))",
     ]:
         try:
             conn.execute(stmt)
@@ -856,36 +869,6 @@ def get_dashboard_data(conn):
         "ORDER BY p.birth_year DESC LIMIT 4"
     ).fetchall()
 
-    # Recently updated people — sorted by parsed GEDCOM _UPD date
-    def _upd_key(s):
-        if not s:
-            return (0, 0, 0)
-        parts = s.strip().split()
-        try:
-            if len(parts) == 3:
-                return (int(parts[2]), MONTHS.get(parts[1].upper(), 0), int(parts[0]))
-            if len(parts) == 2:
-                return (int(parts[1]), MONTHS.get(parts[0].upper(), 0), 0)
-            if len(parts) == 1:
-                return (int(parts[0]), 0, 0)
-        except Exception:
-            pass
-        return (0, 0, 0)
-
-    upd_rows = conn.execute(
-        "SELECT id, name, given_name, surname, nickname, birth_year, death_year, "
-        "photo_file, is_alive, updated_at "
-        "FROM people WHERE updated_at IS NOT NULL AND updated_at != ''"
-    ).fetchall()
-    upd_sorted = sorted(upd_rows, key=lambda r: _upd_key(r["updated_at"]), reverse=True)[:4]
-    recently_updated = [
-        {
-            **dict(r),
-            "updated_at_display": convert_date_to_spanish(r["updated_at"]),
-        }
-        for r in upd_sorted
-    ]
-
     # Documents from archive
     documents = get_documents(conn, limit=1)
 
@@ -940,7 +923,6 @@ def get_dashboard_data(conn):
         ],
         "featured": [{**dict(p), "birth_date": convert_date_to_spanish(p["birth_date"])} for p in featured],
         "documents": [{**dict(d), "date": convert_date_to_spanish(d["date"])} for d in documents],
-        "recently_updated": recently_updated,
         "in_memoriam": in_memoriam,
         "anecdota": anecdota,
     }
@@ -1112,24 +1094,6 @@ def get_person_dossier(conn, person_id):
         (person_id,)
     ).fetchall()
     residences_list = [dict(r) for r in residences]
-
-    # Prepend birth place as first residence entry
-    birth_place = person_dict.get("birth_place")
-    if birth_place and birth_place.strip():
-        from geocode_utils import geocode_with_cache
-        lat, lng = geocode_with_cache(conn, birth_place, cache_only=True)
-        birth_year = person_dict.get("birth_year")
-        residences_list.insert(0, {
-            "address": birth_place,
-            "address2": None,
-            "city": None,
-            "country": None,
-            "date": str(birth_year) if birth_year else "",
-            "lat": lat,
-            "lng": lng,
-            "_type": "birth",
-            "source_type": "Nacimiento",
-        })
 
     # Occupations
     occupations = conn.execute(

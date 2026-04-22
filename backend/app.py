@@ -6,7 +6,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Query
+import re
+import shutil
+from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -26,6 +28,7 @@ DATA_DIR = BASE_DIR / "data"
 PHOTOS_DIR = DATA_DIR / "photos"
 FRONTEND_DIR = BASE_DIR / "frontend"
 DB_PATH = DATA_DIR / "godesia.db"
+SUGGESTIONS_DIR = DATA_DIR / "suggestions"
 
 app = FastAPI(title="Godesia", description="Consulta genealógica en lenguaje natural")
 
@@ -51,16 +54,6 @@ async def startup():
     router = QueryRouter(db_conn)
     count = db_conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
     print(f"SQLite cargado: {count} personas")
-
-    # AUTO-HEAL: Normalize geocache keys to current canonical form.
-    # Prevents validated entries from appearing as pending after normalize_place() changes.
-    try:
-        from geocode_utils import normalize_geocache_keys
-        n = normalize_geocache_keys(db_conn)
-        if n:
-            print(f"✓ geocache: {n} claves normalizadas en startup")
-    except Exception as e:
-        print(f"  Normalización geocache falló: {e}")
 
     # AUTO-HEAL: If any person has photos tagged but no photo_file set,
     # regenerate photo_file for everyone. This protects against photo loss
@@ -493,6 +486,65 @@ async def geocoder_resolve(req: GeoResolveRequest):
     db_conn.commit()
     updated = propagate_geocache(db_conn)
     return {"status": "ok", "propagated": updated}
+
+
+@app.post("/api/suggestions")
+async def submit_suggestion(
+    name: str = Form(...),
+    email: str = Form(...),
+    type: str = Form(""),
+    person_id: str = Form(""),
+    message: str = Form(...),
+    context: str = Form("{}"),
+    files: list[UploadFile] = File(default=[]),
+):
+    """Save a user suggestion with optional file attachments."""
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    slug = re.sub(r"[^a-z0-9]", "_", name.lower())[:20].strip("_")
+    submission_id = f"{ts}_{slug}"
+
+    sub_dir = SUGGESTIONS_DIR / submission_id
+    sub_dir.mkdir(parents=True, exist_ok=True)
+
+    saved_files = []
+    for f in files:
+        if f.filename:
+            safe_name = re.sub(r"[^\w.\-]", "_", f.filename)
+            dest = sub_dir / safe_name
+            with dest.open("wb") as out:
+                shutil.copyfileobj(f.file, out)
+            saved_files.append(safe_name)
+
+    try:
+        ctx = json.loads(context)
+    except Exception:
+        ctx = {}
+
+    payload = {
+        "id": submission_id,
+        "name": name,
+        "email": email,
+        "type": type,
+        "person_id": person_id,
+        "message": message,
+        "files": saved_files,
+        "context": ctx,
+    }
+    (sub_dir / "submission.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    if db_conn:
+        db_conn.execute(
+            "INSERT OR IGNORE INTO suggestions "
+            "(id, name, email, type, person_id, message, files_count, submission_dir) "
+            "VALUES (?,?,?,?,?,?,?,?)",
+            (submission_id, name, email, type, person_id, message,
+             len(saved_files), str(sub_dir)),
+        )
+        db_conn.commit()
+
+    return {"status": "ok", "id": submission_id}
 
 
 # Serve photos
