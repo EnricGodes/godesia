@@ -1530,15 +1530,22 @@ function renderResidences(residences, events, person) {
     const geocodedCount = residences.filter(r => r.lat && r.lng).length;
     let geocodedIdx = 0;
     const cards = residences.map((r) => {
+        const isBirth = r._pinned_first === true;
         const addrLine = r.address || '';
         const cityLine = [r.city, r.country].filter(Boolean).join(', ');
         const hasCoords = r.lat && r.lng;
         if (hasCoords) geocodedIdx++;
+        const borderColor = isBirth ? 'border-secondary' : 'border-primary';
+        const badge = hasCoords
+            ? (isBirth
+                ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-secondary text-on-secondary text-xs shrink-0 mt-0.5">★</span>`
+                : `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-on-primary text-[10px] font-bold shrink-0 mt-0.5">${geocodedIdx}</span>`)
+            : (isBirth ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-secondary/20 text-secondary text-xs shrink-0 mt-0.5">★</span>` : '');
         return `
-        <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 border-primary flex gap-3">
-            ${hasCoords ? `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-on-primary text-[10px] font-bold shrink-0 mt-0.5">${geocodedIdx}</span>` : ''}
+        <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 ${borderColor} flex gap-3">
+            ${badge}
             <div class="min-w-0">
-                ${r.source_type ? `<p class="text-[10px] uppercase tracking-wide text-primary/60 font-semibold mb-0.5">${r.source_type}</p>` : ''}
+                ${r.source_type ? `<p class="text-[10px] uppercase tracking-wide ${isBirth ? 'text-secondary/80' : 'text-primary/60'} font-semibold mb-0.5">${r.source_type}</p>` : ''}
                 ${r.date ? `<p class="text-[10px] text-outline font-medium mb-1">${r.date}</p>` : ''}
                 ${addrLine ? `<p class="text-sm font-bold text-on-surface mb-0.5">${addrLine}</p>` : ''}
                 ${cityLine ? `<p class="text-xs text-outline">${cityLine}</p>` : ''}
@@ -1563,13 +1570,15 @@ function renderResidences(residences, events, person) {
 
     // Defer Leaflet init until after browser reflows the newly-visible section
     setTimeout(() => {
-        const map = L.map('residences-map', { scrollWheelZoom: false });
+        const map = L.map('residences-map', { scrollWheelZoom: true });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
             maxZoom: 18,
         }).addTo(map);
 
-        const markerHtml = (n) => `<div style="background:#2D4B33;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25);">${n}</div>`;
+        const markerHtml = (n, isBirth) => isBirth
+            ? `<div style="background:#78583e;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25);">★</div>`
+            : `<div style="background:#2D4B33;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25);">${n}</div>`;
 
         // Offset markers that share identical coords so they're all visible
         const seen = {};
@@ -1584,7 +1593,7 @@ function renderResidences(residences, events, person) {
         const bounds = [];
         jittered.forEach(r => {
             const marker = L.marker([r.lat, r.lng], {
-                icon: L.divIcon({ className: '', html: markerHtml(r._mapN), iconSize: [28, 28], iconAnchor: [14, 14] })
+                icon: L.divIcon({ className: '', html: markerHtml(r._mapN, r._pinned_first), iconSize: [28, 28], iconAnchor: [14, 14] })
             }).addTo(map);
             const addrParts = [r.address, r.city].filter(Boolean).join(', ');
             const dateStr = r.date ? `<div style="font-size:11px;color:#727971;margin-top:4px">${r.date}</div>` : '';

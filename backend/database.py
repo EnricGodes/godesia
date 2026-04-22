@@ -869,6 +869,36 @@ def get_dashboard_data(conn):
         "ORDER BY p.birth_year DESC LIMIT 4"
     ).fetchall()
 
+    # Recently updated people — sorted by parsed GEDCOM _UPD date
+    def _upd_key(s):
+        if not s:
+            return (0, 0, 0)
+        parts = s.strip().split()
+        try:
+            if len(parts) == 3:
+                return (int(parts[2]), MONTHS.get(parts[1].upper(), 0), int(parts[0]))
+            if len(parts) == 2:
+                return (int(parts[1]), MONTHS.get(parts[0].upper(), 0), 0)
+            if len(parts) == 1:
+                return (int(parts[0]), 0, 0)
+        except Exception:
+            pass
+        return (0, 0, 0)
+
+    upd_rows = conn.execute(
+        "SELECT id, name, given_name, surname, nickname, birth_year, death_year, "
+        "photo_file, is_alive, updated_at "
+        "FROM people WHERE updated_at IS NOT NULL AND updated_at != ''"
+    ).fetchall()
+    upd_sorted = sorted(upd_rows, key=lambda r: _upd_key(r["updated_at"]), reverse=True)[:4]
+    recently_updated = [
+        {
+            **dict(r),
+            "updated_at_display": convert_date_to_spanish(r["updated_at"]),
+        }
+        for r in upd_sorted
+    ]
+
     # Documents from archive
     documents = get_documents(conn, limit=1)
 
@@ -923,6 +953,7 @@ def get_dashboard_data(conn):
         ],
         "featured": [{**dict(p), "birth_date": convert_date_to_spanish(p["birth_date"])} for p in featured],
         "documents": [{**dict(d), "date": convert_date_to_spanish(d["date"])} for d in documents],
+        "recently_updated": recently_updated,
         "in_memoriam": in_memoriam,
         "anecdota": anecdota,
     }
