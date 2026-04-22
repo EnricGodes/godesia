@@ -392,25 +392,52 @@ if (document.readyState === 'loading') {
 }
 
 // ---------------------------------------------------------------------------
-// Zoom mode (x4)
+// Zoom mode
 // ---------------------------------------------------------------------------
+
+let _zoomLevel = 4;
 
 function _zoomMouseMove(e) {
     const img = document.getElementById('zoom-mode-img');
     if (!img) return;
     const dx = e.clientX - window.innerWidth / 2;
     const dy = e.clientY - window.innerHeight / 2;
-    // scale(4): translate is in scaled space, so divide by 4 to get viewport pixels.
-    // Pan range: mouse ±vw/2 → image offset ±1.5vw (the overflow on each side at 4×).
-    img.style.transform = `scale(4) translate(${-dx * 0.75}px, ${-dy * 0.75}px)`;
+    // translate is in scaled space: viewport offset = scale × translate
+    // to pan by (N-1)×dx in viewport, translate = -dx×(N-1)/N
+    const f = (_zoomLevel - 1) / _zoomLevel;
+    img.style.transform = `scale(${_zoomLevel}) translate(${-dx * f}px, ${-dy * f}px)`;
+}
+
+function _applyZoom(delta) {
+    _zoomLevel = Math.max(1, Math.min(10, _zoomLevel + delta));
+    const label = document.getElementById('zoom-level-label');
+    if (label) label.textContent = `${_zoomLevel}×`;
+    const img = document.getElementById('zoom-mode-img');
+    if (img) img.style.transform = `scale(${_zoomLevel}) translate(0px,0px)`;
 }
 
 function _zoomKeyHandler(e) {
     if (e.key === 'Escape') exitZoomMode();
 }
 
+function _makeZoomBtn(label, title, clickFn) {
+    const b = document.createElement('button');
+    b.title = title;
+    b.innerHTML = label;
+    b.style.cssText = [
+        'width:40px', 'height:40px', 'background:rgba(252,249,240,0.95)',
+        'color:#2D4B33', 'border:1px solid rgba(114,121,113,0.3)',
+        'border-radius:50%', 'cursor:pointer', 'font-size:20px',
+        'display:flex', 'align-items:center', 'justify-content:center',
+        'box-shadow:0 2px 8px rgba(0,0,0,0.2)', 'flex-shrink:0',
+    ].join(';');
+    b.onclick = clickFn;
+    return b;
+}
+
 window.enterZoomMode = function() {
     if (!_currentPhotoData || document.getElementById('zoom-mode-overlay')) return;
+    _zoomLevel = 4;
 
     const overlay = document.createElement('div');
     overlay.id = 'zoom-mode-overlay';
@@ -425,24 +452,38 @@ window.enterZoomMode = function() {
     img.style.cssText = [
         'position:absolute', 'top:0', 'left:0', 'width:100%', 'height:100%',
         'object-fit:contain', 'transform-origin:center center',
-        'transform:scale(4)', 'pointer-events:none',
+        `transform:scale(${_zoomLevel})`, 'pointer-events:none',
     ].join(';');
 
-    const btn = document.createElement('button');
-    btn.title = 'Cerrar zoom (Esc)';
-    btn.innerHTML = '✕';
-    btn.style.cssText = [
-        'position:absolute', 'top:16px', 'right:16px', 'z-index:10',
-        'width:40px', 'height:40px', 'background:rgba(252,249,240,0.95)',
-        'color:#2D4B33', 'border:1px solid rgba(114,121,113,0.3)',
-        'border-radius:50%', 'cursor:pointer', 'font-size:18px',
-        'display:flex', 'align-items:center', 'justify-content:center',
-        'box-shadow:0 2px 8px rgba(0,0,0,0.1)',
+    // Close button (top-right)
+    const closeBtn = _makeZoomBtn('✕', 'Cerrar zoom (Esc)', exitZoomMode);
+    closeBtn.style.cssText += ';position:absolute;top:16px;right:16px;z-index:10;font-size:18px;';
+
+    // +/- controls (bottom-center)
+    const controls = document.createElement('div');
+    controls.style.cssText = [
+        'position:absolute', 'bottom:24px', 'left:50%', 'transform:translateX(-50%)',
+        'display:flex', 'align-items:center', 'gap:12px', 'z-index:10',
     ].join(';');
-    btn.onclick = exitZoomMode;
+
+    const minusBtn = _makeZoomBtn('−', 'Reducir zoom', () => _applyZoom(-1));
+    const plusBtn  = _makeZoomBtn('+', 'Ampliar zoom',  () => _applyZoom(+1));
+
+    const label = document.createElement('span');
+    label.id = 'zoom-level-label';
+    label.textContent = `${_zoomLevel}×`;
+    label.style.cssText = [
+        'color:rgba(255,255,255,0.85)', 'font-size:15px', 'font-weight:700',
+        'min-width:36px', 'text-align:center', 'letter-spacing:0.03em',
+    ].join(';');
+
+    controls.appendChild(minusBtn);
+    controls.appendChild(label);
+    controls.appendChild(plusBtn);
 
     overlay.appendChild(img);
-    overlay.appendChild(btn);
+    overlay.appendChild(closeBtn);
+    overlay.appendChild(controls);
     document.body.appendChild(overlay);
 
     overlay.addEventListener('mousemove', _zoomMouseMove);
