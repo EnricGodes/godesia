@@ -1554,7 +1554,7 @@ function renderResidences(residences, events, person) {
 
     // Defer Leaflet init until after browser reflows the newly-visible section
     setTimeout(() => {
-        const map = L.map('residences-map', { scrollWheelZoom: false });
+        const map = L.map('residences-map', { scrollWheelZoom: true });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
             maxZoom: 18,
