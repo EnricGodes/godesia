@@ -79,7 +79,15 @@
       "Bash(xargs kill *)",
       "Bash(rm -f godesia.db-wal godesia.db-shm)",
       "Bash(pkill -f \"python3 -m uvicorn\")",
-      "Bash(ls -lth /Users/enricgodes/SynologyDrive/claude/godesia/docs/*.ged)"
+      "Bash(ls -lth /Users/enricgodes/SynologyDrive/claude/godesia/docs/*.ged)",
+      "Bash(cp /Users/enricgodes/SynologyDrive/claude/godesia/backup/godesia/data/godesia.db /tmp/godesia_backup.db)",
+      "Bash(cp /Users/enricgodes/SynologyDrive/claude/godesia/backup/godesia/data/godesia.db-wal /tmp/godesia_backup.db-wal)",
+      "Bash(cp /Users/enricgodes/SynologyDrive/claude/godesia/backup/godesia/data/godesia.db-shm /tmp/godesia_backup.db-shm)",
+      "Bash(chmod +x *)",
+      "Bash(ps *)",
+      "Bash(pip3 install *)",
+      "Bash(sed -n '2100,2120p' /Users/enricgodes/SynologyDrive/claude/godesia/docs/*.ged)",
+      "Bash(sed -n '7473,7495p' /Users/enricgodes/SynologyDrive/claude/godesia/docs/*.ged)"
     ]
   }
 }

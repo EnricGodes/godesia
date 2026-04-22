@@ -6,6 +6,14 @@
 let _currentPhotoData = null;
 let _sidebarVisible = true;
 
+function escHtml(s) {
+    return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
 /**
  * Format person name with nickname if available
  * Example: given_name "Josep Maria", surname "Godes Hurtado", nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
@@ -140,7 +148,7 @@ function renderPhotoModal() {
     // Title, date, place
     let infoHtml = '';
     if (p.title) {
-        infoHtml += `<h2 style="font-size: 22px; font-weight: bold; color: #2D4B33; font-family: 'Noto Serif', serif; margin: 0 0 12px 0; line-height: 1.3;">${p.title}</h2>`;
+        infoHtml += `<h2 style="font-size: 22px; font-weight: bold; color: #2D4B33; font-family: 'Noto Serif', serif; margin: 0 0 12px 0; line-height: 1.3;">${escHtml(p.title)}</h2>`;
     }
     if (p.date || p.place) {
         let datePlace = [];
@@ -153,7 +161,7 @@ function renderPhotoModal() {
     const noteHtml = p.note
         ? `<div style="margin-bottom: 28px;">
              <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 10px 0;">Comentario</h3>
-             <p style="font-size: 13px; color: #424842; line-height: 1.65; white-space: pre-line;">${p.note}</p>
+             <p style="font-size: 13px; color: #424842; line-height: 1.65; white-space: pre-line;">${escHtml(p.note)}</p>
            </div>`
         : '';
 
@@ -261,7 +269,7 @@ function renderPhotoModal() {
                     <div id="photo-wrapper" style="position: relative; display: inline-block;">
                         <img
                             src="/photos/${p.filename}"
-                            alt="${p.title || 'Foto'}"
+                            alt="${escHtml(p.title || 'Foto')}"
                             style="max-width: 100%; max-height: calc(100vh - 48px); object-fit: contain; display: block;"
                             id="modal-photo"
                             onload="attachFaceBoxes()"
