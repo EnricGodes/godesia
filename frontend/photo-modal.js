@@ -51,6 +51,7 @@ window.openPhotoModal = async function(photoId) {
  * Close photo modal
  */
 window.closePhotoModal = function() {
+    exitZoomMode();
     const overlay = document.getElementById('photo-modal-overlay');
     overlay.style.display = 'none';
     document.body.style.overflow = 'auto';
@@ -213,6 +214,13 @@ function renderPhotoModal() {
                 <!-- Toggle sidebar button -->
                 <button id="toggle-sidebar-btn" onclick="togglePhotoSidebar()" title="Ocultar panel" style="position: absolute; top: 16px; left: 16px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;">
                     ←
+                </button>
+
+                <!-- Zoom button -->
+                <button onclick="enterZoomMode()" title="Zoom x4" style="position: absolute; top: 16px; right: 66px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;"
+                    onmouseover="this.style.backgroundColor='#2D4B33';this.style.color='white'"
+                    onmouseout="this.style.backgroundColor='rgba(252,249,240,0.95)';this.style.color='#2D4B33'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </button>
 
                 <!-- Close button (top right) -->
@@ -381,4 +389,70 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPhotoModal);
 } else {
     initPhotoModal();
+}
+
+// ---------------------------------------------------------------------------
+// Zoom mode (x4)
+// ---------------------------------------------------------------------------
+
+function _zoomMouseMove(e) {
+    const img = document.getElementById('zoom-mode-img');
+    if (!img) return;
+    const dx = e.clientX - window.innerWidth / 2;
+    const dy = e.clientY - window.innerHeight / 2;
+    // scale(4): translate is in scaled space, so divide by 4 to get viewport pixels.
+    // Pan range: mouse ±vw/2 → image offset ±1.5vw (the overflow on each side at 4×).
+    img.style.transform = `scale(4) translate(${-dx * 0.75}px, ${-dy * 0.75}px)`;
+}
+
+function _zoomKeyHandler(e) {
+    if (e.key === 'Escape') exitZoomMode();
+}
+
+window.enterZoomMode = function() {
+    if (!_currentPhotoData || document.getElementById('zoom-mode-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'zoom-mode-overlay';
+    overlay.style.cssText = [
+        'position:fixed', 'top:0', 'left:0', 'width:100%', 'height:100%',
+        'z-index:2000', 'background:#000', 'overflow:hidden', 'cursor:crosshair',
+    ].join(';');
+
+    const img = document.createElement('img');
+    img.id = 'zoom-mode-img';
+    img.src = `/photos/${_currentPhotoData.filename}`;
+    img.style.cssText = [
+        'position:absolute', 'top:0', 'left:0', 'width:100%', 'height:100%',
+        'object-fit:contain', 'transform-origin:center center',
+        'transform:scale(4)', 'pointer-events:none',
+    ].join(';');
+
+    const btn = document.createElement('button');
+    btn.title = 'Cerrar zoom (Esc)';
+    btn.innerHTML = '✕';
+    btn.style.cssText = [
+        'position:absolute', 'top:16px', 'right:16px', 'z-index:10',
+        'width:40px', 'height:40px', 'background:rgba(252,249,240,0.95)',
+        'color:#2D4B33', 'border:1px solid rgba(114,121,113,0.3)',
+        'border-radius:50%', 'cursor:pointer', 'font-size:18px',
+        'display:flex', 'align-items:center', 'justify-content:center',
+        'box-shadow:0 2px 8px rgba(0,0,0,0.1)',
+    ].join(';');
+    btn.onclick = exitZoomMode;
+
+    overlay.appendChild(img);
+    overlay.appendChild(btn);
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('mousemove', _zoomMouseMove);
+    document.addEventListener('keydown', _zoomKeyHandler);
+};
+
+function exitZoomMode() {
+    const overlay = document.getElementById('zoom-mode-overlay');
+    if (!overlay) return;
+    overlay.removeEventListener('mousemove', _zoomMouseMove);
+    document.removeEventListener('keydown', _zoomKeyHandler);
+    overlay.remove();
 }
