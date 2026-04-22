@@ -40,6 +40,7 @@ async function loadDashboard() {
         renderInMemoriam(data.in_memoriam);
         renderPhotos(data.photos);
         renderFeatured(data.featured);
+        renderRecentlyUpdated(data.recently_updated);
         renderDocuments(data.documents);
     } catch (e) {
         console.error('Error loading dashboard:', e);
@@ -127,6 +128,33 @@ function renderPhotos(photos) {
     link.className = 'photos-see-all';
     link.innerHTML = '<a href="/albums.html#__all__">Ver todas las fotografías →</a>';
     container.parentElement.appendChild(link);
+}
+
+function renderRecentlyUpdated(people) {
+    const container = document.getElementById('recently-updated-list');
+    if (!container || !people || !people.length) return;
+    container.innerHTML = people.map(p => {
+        const pid = dossierId(p.id);
+        const displayName = formatNameWithNickname(p.name, p.nickname, p.given_name, p.surname);
+        const birth = p.birth_year || '';
+        const death = p.death_year || '';
+        const years = [birth, death].filter(Boolean).join(' – ') || '';
+        return `
+        <a href="/dossier.html?id=${pid}" class="featured-member" style="text-decoration:none;">
+            ${p.photo_file
+                ? `<img src="/photos/${p.photo_file}" alt="${displayName}"
+                        style="width:56px;height:56px;border-radius:8px;object-fit:cover;flex-shrink:0;">`
+                : `<div class="featured-no-photo" style="width:56px;height:56px;border-radius:8px;flex-shrink:0;">
+                       <span class="material-symbols-outlined">person</span>
+                   </div>`
+            }
+            <div class="featured-info">
+                <p style="font-size:0.6rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--secondary);margin:0 0 2px 0;">Datos actualizados · ${p.updated_at_display}</p>
+                <p class="featured-name">${displayName}</p>
+                ${years ? `<p class="featured-years">${years}</p>` : ''}
+            </div>
+        </a>`;
+    }).join('');
 }
 
 function renderFeatured(featured) {
