@@ -1,22 +1,4 @@
 // --- Utilities ---
-function isChild(p) {
-    if (!p.birth_year) return false;
-    if (p.death_year && (p.death_year - p.birth_year) < 14) return true;
-    if (p.is_alive && p.birth_year >= 2013) return true;
-    return false;
-}
-
-function getPlaceholderSrc(p) {
-    if (isChild(p)) {
-        if (p.sex === 'M') return '/img/nino.jpg';
-        if (p.sex === 'F') return '/img/nina.jpg';
-        return '/img/nino_neutro.jpg';
-    }
-    if (p.sex === 'M') return '/img/hombre.jpg';
-    if (p.sex === 'F') return '/img/mujer.jpg';
-    return '/img/neutro.jpg';
-}
-
 /**
  * Format person name with nickname if available
  * Example: given_name "Josep Maria", surname "Godes Hurtado", nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
@@ -236,20 +218,22 @@ function renderTree(data) {
 
   // Photo
   nodeGroup.each(function (d) {
-    d3.select(this)
-      .append("image")
-      .attr("href", d.data.photo ? `/photos/${d.data.photo}` : getPlaceholderSrc(d.data))
-      .attr("x", 4)
-      .attr("y", 5)
-      .attr("width", 28)
-      .attr("height", 28)
-      .attr("clip-path", "circle(14px at 14px 14px)");
+    if (d.data.photo) {
+      d3.select(this)
+        .append("image")
+        .attr("href", `/photos/${d.data.photo}`)
+        .attr("x", 4)
+        .attr("y", 5)
+        .attr("width", 28)
+        .attr("height", 28)
+        .attr("clip-path", "circle(14px at 14px 14px)");
+    }
   });
 
   // Name
   nodeGroup
     .append("text")
-    .attr("x", 38)
+    .attr("x", (d) => (d.data.photo ? 38 : 8))
     .attr("y", 20)
     .text((d) => {
       const displayName = formatNameWithNickname(d.data.name || "?", d.data.nickname, d.data.given_name, d.data.surname);
@@ -260,7 +244,7 @@ function renderTree(data) {
   nodeGroup
     .append("text")
     .attr("class", "years-text")
-    .attr("x", 38)
+    .attr("x", (d) => (d.data.photo ? 38 : 8))
     .attr("y", 35)
     .text((d) => {
       const b = d.data.birth_year || "?";
@@ -291,16 +275,17 @@ function renderTree(data) {
 
     sg.append("rect").attr("width", NODE_W).attr("height", NODE_H).attr("rx", 6);
 
-    sg.append("image")
-      .attr("href", spouse.photo ? `/photos/${spouse.photo}` : getPlaceholderSrc(spouse))
-      .attr("x", 4)
-      .attr("y", 5)
-      .attr("width", 28)
-      .attr("height", 28)
-      .attr("clip-path", "circle(14px at 14px 14px)");
+    if (spouse.photo) {
+      sg.append("image")
+        .attr("href", `/photos/${spouse.photo}`)
+        .attr("x", 4)
+        .attr("y", 5)
+        .attr("width", 28)
+        .attr("height", 28);
+    }
 
     sg.append("text")
-      .attr("x", 38)
+      .attr("x", spouse.photo ? 38 : 8)
       .attr("y", 20)
       .text(() => {
         const spouseName = formatNameWithNickname(spouse.name, spouse.nickname, spouse.given_name, spouse.surname);
@@ -311,7 +296,7 @@ function renderTree(data) {
 
     sg.append("text")
       .attr("class", "years-text")
-      .attr("x", 38)
+      .attr("x", spouse.photo ? 38 : 8)
       .attr("y", 35)
       .text(`${spouse.birth_year || "?"} - ${spouse.death_year || "?"}`);
   }
@@ -329,7 +314,6 @@ function buildAncestorHierarchy(data) {
     birth_year: data.birth_year,
     death_year: data.death_year,
     photo: data.photo,
-    sex: data.sex,
     is_alive: data.is_alive,
     children: [],
   };
@@ -352,7 +336,6 @@ function buildDescendantHierarchy(data) {
     birth_year: data.birth_year,
     death_year: data.death_year,
     photo: data.photo,
-    sex: data.sex,
     is_alive: data.is_alive,
   };
 
