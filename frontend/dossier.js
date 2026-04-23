@@ -1,3 +1,21 @@
+function personSvg(sex, birth_year, death_year, px) {
+    px = px || 24;
+    const cy = new Date().getFullYear();
+    const isKid = (birth_year && death_year && (death_year - birth_year) < 15)
+        || (birth_year && birth_year >= cy - 15);
+    let d;
+    if (isKid) {
+        if (sex === 'M')      d = 'M14.25 16.25L17.673 17.2794C18.9522 17.6708 19.9025 18.6969 20.218 19.9464C20.3428 20.4409 19.9163 20.8601 19.4042 20.8601H4.59584C4.08366 20.8601 3.65717 20.4409 3.78198 19.944C4.09753 18.6969 5.04776 17.6708 6.32701 17.2794L9.75 16.25V14.4039C8.19866 13.1157 7.05 11.5755 7.05 8.32592C7.05 5.07156 8.82684 3.39994 11.588 3.39994C13.543 3.39994 14.3564 4.29994 14.3564 4.29994C16.6636 4.29994 17.05 6.20012 17.05 8.32592C17.05 11.5755 15.9013 13.1157 14.35 14.4039V16.25Z';
+        else if (sex === 'F') d = 'M14.15 16.25L17.55 17.2734C18.8248 17.6623 19.7721 18.6816 20.0867 19.9221C20.2111 20.413 19.7859 20.8299 19.2754 20.8299H4.72458C4.21409 20.8299 3.78889 20.413 3.91334 19.9221C4.22789 18.6816 5.17518 17.6623 6.45 17.2734L9.85 16.25V14.2187C8.67634 14.0716 7.59559 13.8118 6.65 13.4669C7.05 12.605 7.45 11.3391 7.45 8.43866C7.45 3.6536 11.85 3.6537 13.05 5.24827C15.45 4.84984 15.45 6.84588 15.45 9.33267C15.45 11.3409 16.0056 12.9574 16.2833 13.4669C15.3377 13.8118 14.2569 14.076 13.0833 14.2187V16.25Z';
+        else                  d = 'M14.15 16.25L17.55 17.2734C18.8248 17.6623 19.7721 18.6816 20.0867 19.9221C20.2111 20.413 19.7859 20.8299 19.2754 20.8299H4.72458C4.21409 20.8299 3.78889 20.413 3.91334 19.9221C4.22789 18.6816 5.17518 17.6623 6.45 17.2734L9.85 16.25V14.2187C8.67634 14.0716 7.59559 13.8118 6.65 13.4669C7.05 12.605 7.45 11.3391 7.45 8.43866C7.45 3.65376 11.85 3.67 13.05 5.24827C15.45 4.84984 15.45 6.84588 15.45 9.33267C15.45 11.3409 16.0056 12.9574 16.2833 13.4669C15.3377 13.8118 14.2569 14.0716 13.0833 14.2187V16.25Z';
+    } else {
+        if (sex === 'M')      d = 'M14.5 16.5001L18.216 17.6178C19.6034 18.0424 20.6341 19.1553 20.9763 20.51C21.1115 21.0457 20.6489 21.5001 20.0936 21.5001H3.90639C3.35107 21.5001 2.88845 21.0457 3.02375 20.51C3.36593 19.1553 4.39659 18.0424 5.78401 17.6178L9.5 16.5001V14.5623C7.71916 13.1685 6.5 11.4999 6.5 7.91674C6.5 4.32689 8.45474 2.49993 11.4923 2.49993C13.6433 2.49993 14.5385 3.49993 14.5385 3.49993C17.0769 3.49993 17.5 5.59712 17.5 7.91674C17.5 11.4999 16.2808 13.1685 14.5 14.5623V16.5001Z';
+        else if (sex === 'F') d = 'M14.5 16.5L18.216 17.6177C19.6034 18.0423 20.6341 19.1553 20.9763 20.5099C21.1115 21.0456 20.6489 21.5 20.0936 21.5H3.90639C3.35107 21.5 2.88845 21.0456 3.02375 20.5099C3.36593 19.1553 4.39659 18.0423 5.78401 17.6177L9.5 16.5V14.345C8.21522 14.1822 7.03039 13.897 6 13.5161C6.5 12.5322 7 11.0563 7 7.61264C7 1.70919 12.5 1.70912 14 3.67672C17 3.18499 17 5.64483 17 8.59655C17 10.9579 17.6667 12.8602 18 13.5161C16.9696 13.897 15.7848 14.1822 14.5 14.345V16.5Z';
+        else                  d = 'M14.5 16.5001L18.216 17.6178C19.6034 18.0424 20.6341 19.1553 20.9763 20.51C21.1115 21.0457 20.6489 21.5001 20.0936 21.5001H3.90639C3.35107 21.5001 2.88845 21.0457 3.02375 20.51C3.36593 19.1553 4.39659 18.0424 5.78401 17.6178L9.5 16.5001V14.48C7.93012 13.2221 6.7 11.6426 6.7 7.95842C6.7 4.48276 8.71563 2.49993 11.7 2.49993C13.3812 2.49993 14.2558 3.09736 14.6923 3.49993C16.9538 3.49993 17.3 5.58519 17.3 7.95842C17.3 11.6426 16.0699 13.2221 14.5 14.48V16.5001Z';
+    }
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${px}" height="${px}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" style="opacity:0.45"><path d="${d}"/></svg>`;
+}
+
 async function loadDossier() {
     const params = new URLSearchParams(window.location.search);
     const personId = params.get('id');
@@ -357,7 +375,7 @@ function renderFamilyTree(data) {
                 <a href="/dossier.html?id=${dossierId(p.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${p.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${p.photo_file}" alt="${pDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
+                            ${p.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${p.photo_file}" alt="${pDisplayName}">` : personSvg(p.sex, p.birth_year, p.death_year, 32)}
                         </div>
                         <h4 class="text-[11px] font-bold text-center leading-tight">${pDisplayName}</h4>
                         <span class="text-[10px] opacity-60">${formatYears(p.birth_year, p.death_year, p.is_alive)}</span>
@@ -382,7 +400,7 @@ function renderFamilyTree(data) {
                 <a href="/dossier.html?id=${dossierId(s.id)}" class="cursor-pointer hover:opacity-90 transition-opacity">
                     <div class="flex flex-col items-center node-card opacity-80 shrink-0">
                         <div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant/30 mb-1 bg-surface-container-high flex items-center justify-center">
-                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${sDisplayName}">` : '<span class="material-symbols-outlined text-sm">person</span>'}
+                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${sDisplayName}">` : personSvg(s.sex, s.birth_year, s.death_year, 26)}
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${sDisplayName}</h4>
                         <span class="text-[10px] opacity-40">${formatYears(s.birth_year, s.death_year, s.is_alive)}</span>
@@ -424,7 +442,7 @@ function renderFamilyTree(data) {
     html += `
                 <div class="flex flex-col items-center main-node p-4 bg-primary/5 rounded-xl heritage-border border-primary/30 shadow-inner">
                     <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-primary mb-3 shadow-lg bg-surface-container-high flex items-center justify-center">
-                        ${person.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${person.photo_file}" alt="${personDisplayName}">` : '<span class="material-symbols-outlined text-2xl">person</span>'}
+                        ${person.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${person.photo_file}" alt="${personDisplayName}">` : personSvg(person.sex, person.birth_year, person.death_year, 44)}
                     </div>
                     <h3 class="font-headline font-bold text-primary text-center text-sm">${personDisplayName}</h3>
                     <span class="text-xs opacity-60 italic text-center">${formatYears(person.birth_year, person.death_year, person.is_alive)}</span>
@@ -443,7 +461,7 @@ function renderFamilyTree(data) {
                 <a href="/dossier.html?id=${dossierId(s.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-secondary/20 mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${spouseDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
+                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${spouseDisplayName}">` : personSvg(s.sex, s.birth_year, s.death_year, 36)}
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${spouseDisplayName}</h4>
                         <span class="text-[10px] opacity-60 text-center">${formatYears(s.birth_year, s.death_year, s.is_alive)}</span>
@@ -472,7 +490,7 @@ function renderFamilyTree(data) {
                 <a href="/dossier.html?id=${dossierId(c.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${c.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${c.photo_file}" alt="${cDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
+                            ${c.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${c.photo_file}" alt="${cDisplayName}">` : personSvg(c.sex, c.birth_year, c.death_year, 32)}
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${cDisplayName}</h4>
                         <span class="text-[10px] opacity-50">${childYears}</span>
@@ -860,6 +878,7 @@ function buildEvents(data) {
                         s.marriage_place ? `${s.marriage_place}` : ''
                     ].filter(Boolean),
                     photo: s.photo_file,
+                    personSex: s.sex, personBirthYear: s.birth_year, personDeathYear: s.death_year,
                     name: spouseName
                 });
             }
@@ -878,7 +897,8 @@ function buildEvents(data) {
                             s.divorce.place ? `${s.divorce.place}` : ''
                         ].filter(Boolean),
                         note: s.divorce.note || '',
-                        photo: s.photo_file,  // Show ex-spouse's photo
+                        photo: s.photo_file,
+                        personSex: s.sex, personBirthYear: s.birth_year, personDeathYear: s.death_year,
                         name: spouseName
                     });
                 }
@@ -899,6 +919,7 @@ function buildEvents(data) {
                             formatDateWithQualifier(s.partnership_date) || ''
                         ].filter(Boolean),
                         photo: s.photo_file,
+                        personSex: s.sex, personBirthYear: s.birth_year, personDeathYear: s.death_year,
                         name: spouseName
                     });
                 }
@@ -920,6 +941,7 @@ function buildEvents(data) {
                             s.death_place || ''
                         ].filter(Boolean),
                         photo: s.photo_file,
+                        personSex: s.sex, personBirthYear: s.birth_year, personDeathYear: s.death_year,
                         name: spouseName
                     });
                 }
@@ -943,6 +965,7 @@ function buildEvents(data) {
                         c.birth_place || ''
                     ].filter(Boolean),
                     photo: c.photo_file,
+                    personSex: c.sex, personBirthYear: c.birth_year, personDeathYear: c.death_year,
                     name: childName
                 });
             }
@@ -963,6 +986,7 @@ function buildEvents(data) {
                             c.death_place || ''
                         ].filter(Boolean),
                         photo: c.photo_file,
+                        personSex: c.sex, personBirthYear: c.birth_year, personDeathYear: c.death_year,
                         name: childName
                     });
                 }
@@ -992,6 +1016,7 @@ function buildEvents(data) {
                             photo: m.spouse_photo,
                             name: spouseName,
                             childPhoto: c.photo_file,
+                            childSex: c.sex, childBirthYear: c.birth_year, childDeathYear: c.death_year,
                             childName: childName,
                             isChildMarriage: true
                         });
@@ -1234,10 +1259,14 @@ function buildEvents(data) {
 
                         const photos = [];
                         if (child.photo_file) {
-                            photos.push({ name: childName, photo: child.photo_file });
+                            photos.push({ name: childName, photo: child.photo_file, personSex: child.sex, personBirthYear: child.birth_year, personDeathYear: child.death_year });
+                        } else {
+                            photos.push({ name: childName, photo: null, personSex: child.sex, personBirthYear: child.birth_year, personDeathYear: child.death_year });
                         }
                         if (partnership.partner_photo) {
                             photos.push({ name: partnerName, photo: partnership.partner_photo });
+                        } else {
+                            photos.push({ name: partnerName, photo: null });
                         }
 
                         events.push({
@@ -1245,7 +1274,7 @@ function buildEvents(data) {
                             age: ageText(year),
                             type: 'Sociedad del hijo',
                             lines: [formatDateWithQualifier(partnership.partnership_date) || ''],
-                            photos: photos.length > 0 ? photos : null,
+                            photos: photos,
                             name: person.name
                         });
                     }
@@ -1328,31 +1357,30 @@ function renderTimelineSection() {
 function renderGraphicMode(events) {
     const graphicHtml = events.map((e, idx) => {
         let photosHtml = '';
+        const thumbDiv = (photo, sex, by, dy, name) => {
+            const img = photo
+                ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${photo}" alt="${name}">`
+                : `<div class="w-8 h-8 rounded-full border border-outline-variant/30 bg-surface-container-high flex items-center justify-center flex-shrink-0">${personSvg(sex, by, dy, 20)}</div>`;
+            return `<div class="flex items-center gap-1">${img}<span class="text-sm font-bold">${name}</span></div>`;
+        };
+
         if (e.isChildMarriage) {
-            // Show two photos side by side for child's marriage
             photosHtml = `
                 <div class="flex items-center gap-2 mb-3">
-                    ${e.childPhoto ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${e.childPhoto}" alt="${e.childName}">` : ''}
-                    <span class="text-sm font-bold">${e.childName}</span>
+                    ${thumbDiv(e.childPhoto, e.childSex, e.childBirthYear, e.childDeathYear, e.childName)}
                     <span class="text-xs text-outline mx-1">y</span>
-                    ${e.photo ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${e.photo}" alt="${e.name}">` : ''}
-                    <span class="text-sm font-bold">${e.name}</span>
+                    ${thumbDiv(e.photo, null, null, null, e.name)}
                 </div>
             `;
         } else if (e.photos && e.photos.length > 0) {
-            // Multiple photos for events like sociedad/partnership
             photosHtml = `
                 <div class="flex items-center gap-3 mb-2">
-                    ${e.photos.map(p => `
-                        <div class="flex items-center gap-1">
-                            ${p.photo ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${p.photo}" alt="${p.name}">` : ''}
-                            <span class="text-sm font-bold">${p.name}</span>
-                        </div>
-                    `).join('<span class="text-xs text-outline mx-1">y</span>')}
+                    ${e.photos.map(p => thumbDiv(p.photo, p.personSex, p.personBirthYear, p.personDeathYear, p.name))
+                        .join('<span class="text-xs text-outline mx-1">y</span>')}
                 </div>
             `;
-        } else if (e.photo) {
-            photosHtml = `<div class="flex items-center gap-3 mb-2"><img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${e.photo}" alt="${e.name}"><span class="text-sm font-bold">${e.name}</span></div>`;
+        } else if (e.photo || e.personSex !== undefined) {
+            photosHtml = `<div class="flex items-center gap-3 mb-2">${thumbDiv(e.photo, e.personSex, e.personBirthYear, e.personDeathYear, e.name)}</div>`;
         }
 
         return `

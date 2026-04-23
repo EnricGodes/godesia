@@ -451,7 +451,7 @@ def get_birthdays_this_week(conn):
         d = today + timedelta(days=delta)
         rows = conn.execute(
             "SELECT id, name, given_name, surname, nickname, birth_day, birth_month, birth_year, "
-            "photo_file, is_alive FROM people "
+            "death_year, sex, photo_file, is_alive FROM people "
             "WHERE birth_month = ? AND birth_day = ? ORDER BY name",
             (d.month, d.day)
         ).fetchall()
@@ -466,6 +466,8 @@ def get_birthdays_this_week(conn):
                 "birth_day": row["birth_day"],
                 "birth_month": row["birth_month"],
                 "birth_year": row["birth_year"],
+                "death_year": row["death_year"],
+                "sex": row["sex"],
                 "age": age,
                 "is_alive": bool(row["is_alive"]),
                 "photo": row["photo_file"],
@@ -862,7 +864,7 @@ def get_dashboard_data(conn):
 
     # Recently "added" — people with most recent birth years (latest additions to tree)
     featured = conn.execute(
-        "SELECT p.id, p.name, p.given_name, p.surname, p.birth_year, p.birth_date, "
+        "SELECT p.id, p.name, p.given_name, p.surname, p.sex, p.birth_year, p.birth_date, "
         "p.death_year, p.photo_file, p.is_alive, p.birth_place, p.nickname, "
         "p.father_name, p.mother_name "
         "FROM people p WHERE p.birth_year IS NOT NULL "
@@ -886,7 +888,7 @@ def get_dashboard_data(conn):
         return (0, 0, 0)
 
     upd_rows = conn.execute(
-        "SELECT id, name, given_name, surname, nickname, birth_year, death_year, "
+        "SELECT id, name, given_name, surname, nickname, sex, birth_year, death_year, "
         "photo_file, is_alive, updated_at "
         "FROM people WHERE updated_at IS NOT NULL AND updated_at != ''"
     ).fetchall()
@@ -904,7 +906,7 @@ def get_dashboard_data(conn):
 
     # In memoriam — 4 most recent deaths, with up to 3 extra photos each
     in_memoriam_rows = conn.execute("""
-        SELECT id, name, given_name, surname, nickname,
+        SELECT id, name, given_name, surname, nickname, sex,
                birth_year, death_year, death_date, death_place, photo_file
         FROM people
         WHERE death_year IS NOT NULL
@@ -1277,7 +1279,8 @@ def get_photo_details(conn, photo_id):
 
     # Tagged people in this photo (with nicknames)
     tagged_people = conn.execute("""
-        SELECT pt.person_id, p.name, p.given_name, p.surname, p.nickname, p.photo_file, pt.position
+        SELECT pt.person_id, p.name, p.given_name, p.surname, p.nickname, p.photo_file,
+               p.sex, p.birth_year, p.death_year, pt.position
         FROM photo_tags pt
         JOIN people p ON p.id = pt.person_id
         WHERE pt.photo_id = ?

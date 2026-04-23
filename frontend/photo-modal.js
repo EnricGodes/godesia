@@ -14,6 +14,24 @@ function escHtml(s) {
         .replace(/"/g, '&quot;');
 }
 
+function personSvg(sex, birth_year, death_year, px) {
+    px = px || 24;
+    const cy = new Date().getFullYear();
+    const isKid = (birth_year && death_year && (death_year - birth_year) < 15)
+        || (birth_year && birth_year >= cy - 15);
+    let d;
+    if (isKid) {
+        if (sex === 'M')      d = 'M14.25 16.25L17.673 17.2794C18.9522 17.6708 19.9025 18.6969 20.218 19.9464C20.3428 20.4409 19.9163 20.8601 19.4042 20.8601H4.59584C4.08366 20.8601 3.65717 20.4409 3.78198 19.944C4.09753 18.6969 5.04776 17.6708 6.32701 17.2794L9.75 16.25V14.4039C8.19866 13.1157 7.05 11.5755 7.05 8.32592C7.05 5.07156 8.82684 3.39994 11.588 3.39994C13.543 3.39994 14.3564 4.29994 14.3564 4.29994C16.6636 4.29994 17.05 6.20012 17.05 8.32592C17.05 11.5755 15.9013 13.1157 14.35 14.4039V16.25Z';
+        else if (sex === 'F') d = 'M14.15 16.25L17.55 17.2734C18.8248 17.6623 19.7721 18.6816 20.0867 19.9221C20.2111 20.413 19.7859 20.8299 19.2754 20.8299H4.72458C4.21409 20.8299 3.78889 20.413 3.91334 19.9221C4.22789 18.6816 5.17518 17.6623 6.45 17.2734L9.85 16.25V14.2187C8.67634 14.0716 7.59559 13.8118 6.65 13.4669C7.05 12.605 7.45 11.3391 7.45 8.43866C7.45 3.6536 11.85 3.6537 13.05 5.24827C15.45 4.84984 15.45 6.84588 15.45 9.33267C15.45 11.3409 16.0056 12.9574 16.2833 13.4669C15.3377 13.8118 14.2569 14.076 13.0833 14.2187V16.25Z';
+        else                  d = 'M14.15 16.25L17.55 17.2734C18.8248 17.6623 19.7721 18.6816 20.0867 19.9221C20.2111 20.413 19.7859 20.8299 19.2754 20.8299H4.72458C4.21409 20.8299 3.78889 20.413 3.91334 19.9221C4.22789 18.6816 5.17518 17.6623 6.45 17.2734L9.85 16.25V14.2187C8.67634 14.0716 7.59559 13.8118 6.65 13.4669C7.05 12.605 7.45 11.3391 7.45 8.43866C7.45 3.65376 11.85 3.67 13.05 5.24827C15.45 4.84984 15.45 6.84588 15.45 9.33267C15.45 11.3409 16.0056 12.9574 16.2833 13.4669C15.3377 13.8118 14.2569 14.0716 13.0833 14.2187V16.25Z';
+    } else {
+        if (sex === 'M')      d = 'M14.5 16.5001L18.216 17.6178C19.6034 18.0424 20.6341 19.1553 20.9763 20.51C21.1115 21.0457 20.6489 21.5001 20.0936 21.5001H3.90639C3.35107 21.5001 2.88845 21.0457 3.02375 20.51C3.36593 19.1553 4.39659 18.0424 5.78401 17.6178L9.5 16.5001V14.5623C7.71916 13.1685 6.5 11.4999 6.5 7.91674C6.5 4.32689 8.45474 2.49993 11.4923 2.49993C13.6433 2.49993 14.5385 3.49993 14.5385 3.49993C17.0769 3.49993 17.5 5.59712 17.5 7.91674C17.5 11.4999 16.2808 13.1685 14.5 14.5623V16.5001Z';
+        else if (sex === 'F') d = 'M14.5 16.5L18.216 17.6177C19.6034 18.0423 20.6341 19.1553 20.9763 20.5099C21.1115 21.0456 20.6489 21.5 20.0936 21.5H3.90639C3.35107 21.5 2.88845 21.0456 3.02375 20.5099C3.36593 19.1553 4.39659 18.0423 5.78401 17.6177L9.5 16.5V14.345C8.21522 14.1822 7.03039 13.897 6 13.5161C6.5 12.5322 7 11.0563 7 7.61264C7 1.70919 12.5 1.70912 14 3.67672C17 3.18499 17 5.64483 17 8.59655C17 10.9579 17.6667 12.8602 18 13.5161C16.9696 13.897 15.7848 14.1822 14.5 14.345V16.5Z';
+        else                  d = 'M14.5 16.5001L18.216 17.6178C19.6034 18.0424 20.6341 19.1553 20.9763 20.51C21.1115 21.0457 20.6489 21.5001 20.0936 21.5001H3.90639C3.35107 21.5001 2.88845 21.0457 3.02375 20.51C3.36593 19.1553 4.39659 18.0424 5.78401 17.6178L9.5 16.5001V14.48C7.93012 13.2221 6.7 11.6426 6.7 7.95842C6.7 4.48276 8.71563 2.49993 11.7 2.49993C13.3812 2.49993 14.2558 3.09736 14.6923 3.49993C16.9538 3.49993 17.3 5.58519 17.3 7.95842C17.3 11.6426 16.0699 13.2221 14.5 14.48V16.5001Z';
+    }
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${px}" height="${px}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" style="opacity:0.45"><path d="${d}"/></svg>`;
+}
+
 /**
  * Format person name with nickname if available
  * Example: given_name "Josep Maria", surname "Godes Hurtado", nickname "Bep" -> 'Josep Maria "Bep" Godes Hurtado'
@@ -178,7 +196,9 @@ function renderPhotoModal() {
                       onmouseover="this.style.backgroundColor='rgba(45, 75, 51, 0.1)'; highlightFaceBox('${person.person_id}', true)"
                       onmouseout="this.style.backgroundColor='transparent'; highlightFaceBox('${person.person_id}', false)"
                       onclick="gotoPersonDossier('${person.person_id}')">
-                   ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(114, 121, 113, 0.3); flex-shrink: 0;">` : `<div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f1eee5; flex-shrink: 0;"></div>`}
+                   ${person.photo_file
+                     ? `<img src="/photos/${person.photo_file}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(114, 121, 113, 0.3); flex-shrink: 0;">`
+                     : `<div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f1eee5; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">${personSvg(person.sex, person.birth_year, person.death_year, 20)}</div>`}
                    <span style="font-size: 13px; color: #1c1c17; flex: 1;">${displayName}</span>
                  </div>
                `}).join('')}
