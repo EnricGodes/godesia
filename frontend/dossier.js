@@ -1,3 +1,28 @@
+function isChild(p) {
+    if (!p.birth_year) return false;
+    if (p.death_year && (p.death_year - p.birth_year) < 14) return true;
+    if (p.is_alive && p.birth_year >= 2013) return true;
+    return false;
+}
+
+function getPlaceholderSrc(p) {
+    if (isChild(p)) {
+        if (p.sex === 'M') return '/img/nino.jpg';
+        if (p.sex === 'F') return '/img/nina.jpg';
+        return '/img/nino_neutro.jpg';
+    }
+    if (p.sex === 'M') return '/img/hombre.jpg';
+    if (p.sex === 'F') return '/img/mujer.jpg';
+    return '/img/neutro.jpg';
+}
+
+// Returns photo URL or a gender/age appropriate placeholder; null if no person data.
+function photoSrcOrPlaceholder(photo_file, personData) {
+    if (photo_file) return '/photos/' + photo_file;
+    if (personData) return getPlaceholderSrc(personData);
+    return null;
+}
+
 async function loadDossier() {
     const params = new URLSearchParams(window.location.search);
     const personId = params.get('id');
@@ -109,9 +134,9 @@ function renderDossier(data) {
     document.title = `${displayName} | Familia Godes`;
 
     // 1. HEADER
-    if (person.photo_file && person.photo_file.trim()) {
-        document.querySelector('#hero-photo img').src = `/photos/${person.photo_file}`;
-    }
+    document.querySelector('#hero-photo img').src = (person.photo_file && person.photo_file.trim())
+        ? `/photos/${person.photo_file}`
+        : getPlaceholderSrc(person);
     document.getElementById('hero-name').textContent = displayName;
 
     const birthYear = person.birth_year || '?';
@@ -346,7 +371,7 @@ function renderFamilyTree(data) {
                 <a href="/dossier.html?id=${dossierId(p.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${p.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${p.photo_file}" alt="${pDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
+                            <img class="w-full h-full object-cover" src="${p.photo_file ? `/photos/${p.photo_file}` : getPlaceholderSrc(p)}" alt="${pDisplayName}">
                         </div>
                         <h4 class="text-[11px] font-bold text-center leading-tight">${pDisplayName}</h4>
                         <span class="text-[10px] opacity-60">${formatYears(p.birth_year, p.death_year, p.is_alive)}</span>
@@ -371,7 +396,7 @@ function renderFamilyTree(data) {
                 <a href="/dossier.html?id=${dossierId(s.id)}" class="cursor-pointer hover:opacity-90 transition-opacity">
                     <div class="flex flex-col items-center node-card opacity-80 shrink-0">
                         <div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant/30 mb-1 bg-surface-container-high flex items-center justify-center">
-                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${sDisplayName}">` : '<span class="material-symbols-outlined text-sm">person</span>'}
+                            <img class="w-full h-full object-cover" src="${s.photo_file ? `/photos/${s.photo_file}` : getPlaceholderSrc(s)}" alt="${sDisplayName}">
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${sDisplayName}</h4>
                         <span class="text-[10px] opacity-40">${formatYears(s.birth_year, s.death_year, s.is_alive)}</span>
@@ -413,7 +438,7 @@ function renderFamilyTree(data) {
     html += `
                 <div class="flex flex-col items-center main-node p-4 bg-primary/5 rounded-xl heritage-border border-primary/30 shadow-inner">
                     <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-primary mb-3 shadow-lg bg-surface-container-high flex items-center justify-center">
-                        ${person.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${person.photo_file}" alt="${personDisplayName}">` : '<span class="material-symbols-outlined text-2xl">person</span>'}
+                        <img class="w-full h-full object-cover" src="${person.photo_file ? `/photos/${person.photo_file}` : getPlaceholderSrc(person)}" alt="${personDisplayName}">
                     </div>
                     <h3 class="font-headline font-bold text-primary text-center text-sm">${personDisplayName}</h3>
                     <span class="text-xs opacity-60 italic text-center">${formatYears(person.birth_year, person.death_year, person.is_alive)}</span>
@@ -432,7 +457,7 @@ function renderFamilyTree(data) {
                 <a href="/dossier.html?id=${dossierId(s.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-secondary/20 mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${spouseDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
+                            <img class="w-full h-full object-cover" src="${s.photo_file ? `/photos/${s.photo_file}` : getPlaceholderSrc(s)}" alt="${spouseDisplayName}">
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${spouseDisplayName}</h4>
                         <span class="text-[10px] opacity-60 text-center">${formatYears(s.birth_year, s.death_year, s.is_alive)}</span>
@@ -461,7 +486,7 @@ function renderFamilyTree(data) {
                 <a href="/dossier.html?id=${dossierId(c.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${c.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${c.photo_file}" alt="${cDisplayName}">` : '<span class="material-symbols-outlined">person</span>'}
+                            <img class="w-full h-full object-cover" src="${c.photo_file ? `/photos/${c.photo_file}` : getPlaceholderSrc(c)}" alt="${cDisplayName}">
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${cDisplayName}</h4>
                         <span class="text-[10px] opacity-50">${childYears}</span>
@@ -848,7 +873,7 @@ function buildEvents(data) {
                         s.marriage_date ? formatDateWithQualifier(s.marriage_date) : '',
                         s.marriage_place ? `${s.marriage_place}` : ''
                     ].filter(Boolean),
-                    photo: s.photo_file,
+                    photoSrc: photoSrcOrPlaceholder(s.photo_file, s),
                     name: spouseName
                 });
             }
@@ -867,7 +892,7 @@ function buildEvents(data) {
                             s.divorce.place ? `${s.divorce.place}` : ''
                         ].filter(Boolean),
                         note: s.divorce.note || '',
-                        photo: s.photo_file,  // Show ex-spouse's photo
+                        photoSrc: photoSrcOrPlaceholder(s.photo_file, s),
                         name: spouseName
                     });
                 }
@@ -887,7 +912,7 @@ function buildEvents(data) {
                         lines: [
                             formatDateWithQualifier(s.partnership_date) || ''
                         ].filter(Boolean),
-                        photo: s.photo_file,
+                        photoSrc: photoSrcOrPlaceholder(s.photo_file, s),
                         name: spouseName
                     });
                 }
@@ -908,7 +933,7 @@ function buildEvents(data) {
                             s.death_date ? formatDateWithQualifier(s.death_date) : `${spouseDeathYear}`,
                             s.death_place || ''
                         ].filter(Boolean),
-                        photo: s.photo_file,
+                        photoSrc: photoSrcOrPlaceholder(s.photo_file, s),
                         name: spouseName
                     });
                 }
@@ -931,7 +956,7 @@ function buildEvents(data) {
                         formatDateWithQualifier(c.birth_date) || `${c.birth_year}`,
                         c.birth_place || ''
                     ].filter(Boolean),
-                    photo: c.photo_file,
+                    photoSrc: photoSrcOrPlaceholder(c.photo_file, c),
                     name: childName
                 });
             }
@@ -951,7 +976,7 @@ function buildEvents(data) {
                             c.death_date ? formatDateWithQualifier(c.death_date) : `${childDeathYear}`,
                             c.death_place || ''
                         ].filter(Boolean),
-                        photo: c.photo_file,
+                        photoSrc: photoSrcOrPlaceholder(c.photo_file, c),
                         name: childName
                     });
                 }
@@ -978,9 +1003,9 @@ function buildEvents(data) {
                             age: ageText(mYear),
                             type: `Matrimonio de ${c.sex === 'F' ? 'la hija' : 'el hijo'}:`,
                             lines: lines,
-                            photo: m.spouse_photo,
+                            photoSrc: m.spouse_photo ? '/photos/' + m.spouse_photo : null,
                             name: spouseName,
-                            childPhoto: c.photo_file,
+                            childPhotoSrc: photoSrcOrPlaceholder(c.photo_file, c),
                             childName: childName,
                             isChildMarriage: true
                         });
@@ -1204,7 +1229,7 @@ function buildEvents(data) {
                         s.death_date ? formatDateWithQualifier(s.death_date) : `${deathYear}`,
                         s.death_place ? `${s.death_place}` : ''
                     ].filter(Boolean),
-                    photo: s.photo_file,
+                    photoSrc: photoSrcOrPlaceholder(s.photo_file, s),
                     name: spouseName
                 });
             }
@@ -1221,13 +1246,10 @@ function buildEvents(data) {
                         const childName = formatNameWithNickname(child.name, child.nickname, child.given_name, child.surname) || child.name;
                         const partnerName = formatNameWithNickname(partnership.partner_name, partnership.partner_nickname, partnership.partner_given_name, partnership.partner_surname) || partnership.partner_name;
 
-                        const photos = [];
-                        if (child.photo_file) {
-                            photos.push({ name: childName, photo: child.photo_file });
-                        }
-                        if (partnership.partner_photo) {
-                            photos.push({ name: partnerName, photo: partnership.partner_photo });
-                        }
+                        const photos = [
+                            { name: childName, photoSrc: photoSrcOrPlaceholder(child.photo_file, child) },
+                            ...(partnership.partner_photo ? [{ name: partnerName, photoSrc: '/photos/' + partnership.partner_photo }] : [{ name: partnerName, photoSrc: null }])
+                        ].filter(p => p.photoSrc);
 
                         events.push({
                             year: year,
@@ -1321,10 +1343,10 @@ function renderGraphicMode(events) {
             // Show two photos side by side for child's marriage
             photosHtml = `
                 <div class="flex items-center gap-2 mb-3">
-                    ${e.childPhoto ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${e.childPhoto}" alt="${e.childName}">` : ''}
+                    ${e.childPhotoSrc ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="${e.childPhotoSrc}" alt="${e.childName}">` : ''}
                     <span class="text-sm font-bold">${e.childName}</span>
                     <span class="text-xs text-outline mx-1">y</span>
-                    ${e.photo ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${e.photo}" alt="${e.name}">` : ''}
+                    ${e.photoSrc ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="${e.photoSrc}" alt="${e.name}">` : ''}
                     <span class="text-sm font-bold">${e.name}</span>
                 </div>
             `;
@@ -1334,14 +1356,14 @@ function renderGraphicMode(events) {
                 <div class="flex items-center gap-3 mb-2">
                     ${e.photos.map(p => `
                         <div class="flex items-center gap-1">
-                            ${p.photo ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${p.photo}" alt="${p.name}">` : ''}
+                            ${p.photoSrc ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="${p.photoSrc}" alt="${p.name}">` : ''}
                             <span class="text-sm font-bold">${p.name}</span>
                         </div>
                     `).join('<span class="text-xs text-outline mx-1">y</span>')}
                 </div>
             `;
-        } else if (e.photo) {
-            photosHtml = `<div class="flex items-center gap-3 mb-2"><img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${e.photo}" alt="${e.name}"><span class="text-sm font-bold">${e.name}</span></div>`;
+        } else if (e.photoSrc) {
+            photosHtml = `<div class="flex items-center gap-3 mb-2"><img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="${e.photoSrc}" alt="${e.name}"><span class="text-sm font-bold">${e.name}</span></div>`;
         }
 
         return `
