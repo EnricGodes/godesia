@@ -87,7 +87,9 @@
       "Bash(ps *)",
       "Bash(pip3 install *)",
       "Bash(sed -n '2100,2120p' /Users/enricgodes/SynologyDrive/claude/godesia/docs/*.ged)",
-      "Bash(sed -n '7473,7495p' /Users/enricgodes/SynologyDrive/claude/godesia/docs/*.ged)"
+      "Bash(sed -n '7473,7495p' /Users/enricgodes/SynologyDrive/claude/godesia/docs/*.ged)",
+      "Bash(kill 33462)",
+      "Bash(xargs ls *)"
     ]
   }
 }

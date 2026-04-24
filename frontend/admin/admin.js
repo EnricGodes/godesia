@@ -87,6 +87,7 @@ const Status = {
     init() {
         this.refresh();
         this.refreshLogs();
+        this.refreshDbInfo();
     },
 
     async refresh() {
@@ -100,7 +101,7 @@ const Status = {
             const labels = {
                 people: 'Persones', marriages: 'Matrimonis', photos: 'Fotos',
                 photo_tags: 'Tags foto', albums: 'Àlbums', suggestions: 'Aportacions',
-                occupations: 'Ocupacions', residences: 'Residències', anecdotes: 'Anècdotes',
+                occupations: 'Ocupacions', residences: 'Residències', anecdotes: 'Anècdotes BD',
                 geocache: 'Geocache', notes: 'Notes', events: 'Events',
             };
             grid.innerHTML = Object.entries(d.db_row_counts || {}).map(([k, v]) => `
@@ -109,11 +110,6 @@ const Status = {
                     <div class="stat-label">${labels[k] || k}</div>
                 </div>
             `).join('');
-
-            if (d.restart_command) {
-                document.getElementById('restart-cmd').textContent = d.restart_command;
-                document.getElementById('status-restart-card').style.display = '';
-            }
         } catch (e) {
             console.error('Status error:', e);
         }
@@ -133,6 +129,53 @@ const Status = {
             box.scrollTop = box.scrollHeight;
         } catch (e) {
             document.getElementById('log-box').textContent = 'Error carregant logs.';
+        }
+    },
+
+    async refreshDbInfo() {
+        try {
+            const d = await apiFetch('/api/admin/db/info');
+            const el = document.getElementById('db-info');
+            if (el) {
+                el.textContent = `BD: ${fmtSize(d.db_size)}  ·  WAL: ${fmtSize(d.wal_size)}  ·  Modificada: ${d.last_modified?.slice(0,19).replace('T',' ')}`;
+            }
+        } catch {}
+    },
+
+    async serverAction(action) {
+        const msg = document.getElementById('server-action-msg');
+        msg.textContent = 'Executant…';
+        try {
+            const d = await apiFetch('/api/admin/server/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action }),
+            });
+            msg.textContent = d.message || '✓';
+            if (action === 'restart') {
+                setTimeout(() => {
+                    msg.textContent = 'Reconnectant…';
+                    setTimeout(() => window.location.reload(), 4000);
+                }, 2000);
+            }
+        } catch (e) {
+            msg.textContent = 'Error: ' + e.message;
+        }
+    },
+
+    async dbAction(action) {
+        const msg = document.getElementById('db-action-msg');
+        msg.textContent = 'Executant…';
+        try {
+            const d = await apiFetch('/api/admin/db/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action }),
+            });
+            msg.textContent = d.message || '✓';
+            this.refreshDbInfo();
+        } catch (e) {
+            msg.textContent = 'Error: ' + e.message;
         }
     },
 };
@@ -774,10 +817,8 @@ const Geocoder = {
 // Anecdotes section
 // ---------------------------------------------------------------------------
 
+// Anecdotes — uses data/anecdotas.json (permanent, survives GEDCOM imports)
 const Anecdotes = {
-    offset: 0,
-    limit: 50,
-    total: 0,
     searchQuery: '',
     searchTimer: null,
 
@@ -787,7 +828,6 @@ const Anecdotes = {
         clearTimeout(this.searchTimer);
         this.searchTimer = setTimeout(() => {
             this.searchQuery = val;
-            this.offset = 0;
             this.load();
         }, 300);
     },
@@ -796,118 +836,72 @@ const Anecdotes = {
         const el = document.getElementById('anec-list');
         el.innerHTML = '<div class="empty-state">Carregant…</div>';
         try {
-            const url = `/api/admin/anecdotes?limit=${this.limit}&offset=${this.offset}&search=${encodeURIComponent(this.searchQuery)}`;
+            const url = `/api/admin/anecdotes?search=${encodeURIComponent(this.searchQuery)}`;
             const d = await apiFetch(url);
-            this.total = d.total;
 
             if (!d.items.length) {
                 el.innerHTML = '<div class="empty-state"><div class="empty-icon">✦</div>Cap anècdota trobada.</div>';
                 document.getElementById('anec-pagination').style.display = 'none';
                 return;
             }
+            document.getElementById('anec-pagination').style.display = 'none';
 
             el.innerHTML = `<table class="admin-table">
                 <thead><tr>
-                    <th>Persona</th><th>Descripció</th><th>Data</th><th>Lloc</th><th></th>
+                    <th style="width:40px;">#</th><th>Títol</th><th>Text</th><th>CTA</th><th></th>
                 </tr></thead>
                 <tbody>${d.items.map(a => `
                     <tr>
-                        <td style="white-space:nowrap;font-size:0.8rem;">
-                            ${a.person_name ? `<a href="/dossier.html?id=${encodeURIComponent(a.person_id?.replace(/@/g,''))}" target="_blank" style="color:var(--primary,#17341e);">${esc(a.person_name)}</a>` : '<span style="color:#c2c8bf;">—</span>'}
-                        </td>
-                        <td style="font-size:0.82rem;max-width:320px;">${esc((a.description || '').slice(0, 120))}${a.description?.length > 120 ? '…' : ''}</td>
-                        <td style="font-size:0.78rem;color:#727971;white-space:nowrap;">${esc(a.date || '—')}</td>
-                        <td style="font-size:0.78rem;color:#727971;">${esc(a.place || '—')}</td>
+                        <td style="color:#727971;font-size:0.75rem;">${a.index + 1}</td>
+                        <td style="font-size:0.82rem;font-weight:600;max-width:200px;">${esc((a.titulo || '').slice(0, 70))}${(a.titulo || '').length > 70 ? '…' : ''}</td>
+                        <td style="font-size:0.8rem;max-width:280px;color:#3d3d37;">${esc((a.texto || '').slice(0, 100))}${(a.texto || '').length > 100 ? '…' : ''}</td>
+                        <td style="font-size:0.75rem;color:#727971;max-width:150px;">${esc((a.cta || '').slice(0, 50))}${(a.cta || '').length > 50 ? '…' : ''}</td>
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
-                                <button class="btn btn-secondary btn-sm" onclick="Anecdotes.openEdit(${a.id}, '${esc(a.person_id)}', '${esc(a.person_name)}', ${JSON.stringify(a.description).replace(/'/g,"&#39;")}, '${esc(a.date)}', '${esc(a.place)}')">✎</button>
-                                <button class="btn btn-danger btn-sm" onclick="Anecdotes.delete(${a.id})">✕</button>
+                                <button class="btn btn-secondary btn-sm" onclick="Anecdotes.openEdit(${a.index})">✎</button>
+                                <button class="btn btn-danger btn-sm" onclick="Anecdotes.delete(${a.index})">✕</button>
                             </div>
                         </td>
                     </tr>
                 `).join('')}</tbody>
             </table>`;
 
-            const pag = document.getElementById('anec-pagination');
-            if (this.total > this.limit) {
-                pag.style.display = 'flex';
-                document.getElementById('anec-page-info').textContent =
-                    `${this.offset + 1}–${Math.min(this.offset + this.limit, this.total)} de ${this.total}`;
-                document.getElementById('anec-prev').disabled = this.offset === 0;
-                document.getElementById('anec-next').disabled = this.offset + this.limit >= this.total;
-            } else {
-                pag.style.display = 'none';
-            }
+            this._items = d.items;
         } catch (e) {
             el.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
         }
     },
 
-    prevPage() { this.offset = Math.max(0, this.offset - this.limit); this.load(); },
-    nextPage() { this.offset += this.limit; this.load(); },
-
     openNew() {
         document.getElementById('anec-modal-title').textContent = 'Nova anècdota';
-        document.getElementById('anec-edit-id').value = '';
-        document.getElementById('anec-person-search').value = '';
-        document.getElementById('anec-person-id').value = '';
-        document.getElementById('anec-desc').value = '';
-        document.getElementById('anec-date').value = '';
-        document.getElementById('anec-place').value = '';
+        document.getElementById('anec-edit-index').value = '';
+        document.getElementById('anec-titulo').value = '';
+        document.getElementById('anec-texto').value = '';
+        document.getElementById('anec-cta').value = '';
         openModal('anec-modal');
     },
 
-    openEdit(id, personId, personName, desc, date, place) {
+    openEdit(index) {
+        const a = (this._items || []).find(x => x.index === index);
+        if (!a) return;
         document.getElementById('anec-modal-title').textContent = 'Editar anècdota';
-        document.getElementById('anec-edit-id').value = id;
-        document.getElementById('anec-person-search').value = personName || '';
-        document.getElementById('anec-person-id').value = personId || '';
-        document.getElementById('anec-desc').value = desc || '';
-        document.getElementById('anec-date').value = date || '';
-        document.getElementById('anec-place').value = place || '';
+        document.getElementById('anec-edit-index').value = index;
+        document.getElementById('anec-titulo').value = a.titulo || '';
+        document.getElementById('anec-texto').value = a.texto || '';
+        document.getElementById('anec-cta').value = a.cta || '';
         openModal('anec-modal');
-    },
-
-    searchTimer2: null,
-    async searchPerson(val) {
-        clearTimeout(this.searchTimer2);
-        const results = document.getElementById('anec-person-results');
-        if (val.length < 2) { results.style.display = 'none'; return; }
-        this.searchTimer2 = setTimeout(async () => {
-            try {
-                const d = await apiFetch(`/api/search?q=${encodeURIComponent(val)}&limit=8`);
-                if (!d.results.length) { results.style.display = 'none'; return; }
-                results.style.display = '';
-                results.innerHTML = d.results.map(p => `
-                    <div onclick="Anecdotes.selectPerson('${esc(p.id)}', '${esc(p.name)}')"
-                         style="padding:0.5rem 0.75rem;cursor:pointer;font-size:0.82rem;border-bottom:1px solid var(--outline-variant,#c2c8bf);"
-                         onmouseover="this.style.background='var(--surface-container,#f1eee5)'"
-                         onmouseout="this.style.background=''">
-                        ${esc(p.name)}
-                        <span style="font-size:0.72rem;color:#727971;"> ${p.birth_year || '?'} – ${p.death_year || (p.is_alive ? 'viu/a' : '?')}</span>
-                    </div>
-                `).join('');
-            } catch {}
-        }, 300);
-    },
-
-    selectPerson(id, name) {
-        document.getElementById('anec-person-id').value = id;
-        document.getElementById('anec-person-search').value = name;
-        document.getElementById('anec-person-results').style.display = 'none';
     },
 
     async save() {
-        const id = document.getElementById('anec-edit-id').value;
+        const index = document.getElementById('anec-edit-index').value;
         const body = {
-            person_id: document.getElementById('anec-person-id').value,
-            description: document.getElementById('anec-desc').value,
-            date: document.getElementById('anec-date').value,
-            place: document.getElementById('anec-place').value,
+            titulo: document.getElementById('anec-titulo').value,
+            texto: document.getElementById('anec-texto').value,
+            cta: document.getElementById('anec-cta').value,
         };
         try {
-            if (id) {
-                await apiFetch(`/api/admin/anecdotes/${id}`, {
+            if (index !== '') {
+                await apiFetch(`/api/admin/anecdotes/${index}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body),
@@ -924,10 +918,10 @@ const Anecdotes = {
         } catch (e) { alert('Error: ' + e.message); }
     },
 
-    async delete(id) {
+    async delete(index) {
         if (!confirm('Eliminar aquesta anècdota?')) return;
         try {
-            await apiFetch(`/api/admin/anecdotes/${id}`, { method: 'DELETE' });
+            await apiFetch(`/api/admin/anecdotes/${index}`, { method: 'DELETE' });
             this.load();
         } catch (e) { alert(e.message); }
     },

@@ -1,7 +1,22 @@
-/* Admin panel styles — imports variables from parent style.css */
-@import url('../style.css');
+/* Admin panel styles — standalone, NO import from parent style.css to avoid conflicts */
 
-* { box-sizing: border-box; }
+:root {
+    --primary: #17341e;
+    --primary-container: #2d4b33;
+    --on-primary: #ffffff;
+    --secondary: #78583e;
+    --surface: #fcf9f0;
+    --surface-container: #f1eee5;
+    --surface-container-high: #ebe8df;
+    --surface-container-lowest: #ffffff;
+    --outline-variant: #c2c8bf;
+    --on-surface: #1c1c17;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Reset nav — prevent any global nav styles from interfering */
+nav, nav a, nav a:hover, nav a:focus { all: unset; }
 
 body {
     margin: 0;

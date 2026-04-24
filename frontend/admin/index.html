@@ -65,10 +65,27 @@
 
             <div class="stat-grid" id="stat-grid"></div>
 
-            <div class="info-card" id="status-restart-card" style="display:none;">
-                <h3>Reiniciar el servidor</h3>
-                <p style="font-size:0.82rem;color:#727971;margin:0 0 0.75rem;">Executa aquesta comanda al terminal del servidor:</p>
-                <div class="code-block" id="restart-cmd"></div>
+            <!-- Server controls -->
+            <div class="info-card" style="margin-bottom:1.25rem;">
+                <h3>Control del servidor</h3>
+                <div style="display:flex;gap:0.75rem;margin-top:0.75rem;flex-wrap:wrap;align-items:center;">
+                    <button class="btn btn-primary btn-sm" onclick="Status.serverAction('restart')">↺ Reiniciar</button>
+                    <button class="btn btn-danger btn-sm" onclick="Status.serverAction('stop')">■ Aturar</button>
+                    <span style="font-size:0.78rem;color:#727971;flex:1;">Reiniciar tarda ~3s. Aturar desconnectarà el panell.</span>
+                    <span id="server-action-msg" style="font-size:0.8rem;font-weight:600;color:var(--primary,#17341e);"></span>
+                </div>
+            </div>
+
+            <!-- DB controls -->
+            <div class="info-card" style="margin-bottom:1.25rem;">
+                <h3>Control de la base de dades (SQLite)</h3>
+                <div style="font-size:0.8rem;color:#727971;margin:0.5rem 0 0.75rem;" id="db-info"></div>
+                <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+                    <button class="btn btn-secondary btn-sm" onclick="Status.dbAction('checkpoint')">✓ Checkpoint WAL</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Status.dbAction('reconnect')">↻ Reconnectar</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Status.dbAction('vacuum')">◈ Vacuum</button>
+                    <span id="db-action-msg" style="font-size:0.8rem;font-weight:600;color:var(--primary,#17341e);"></span>
+                </div>
             </div>
 
             <div class="info-card">
@@ -276,28 +293,18 @@
             <div class="modal-overlay" id="anec-modal">
                 <div class="modal">
                     <div class="modal-title" id="anec-modal-title">Nova anècdota</div>
-                    <input type="hidden" id="anec-edit-id"/>
+                    <input type="hidden" id="anec-edit-index"/>
                     <div class="form-group">
-                        <label>Persona</label>
-                        <input type="text" class="form-input" id="anec-person-search" placeholder="Cercar persona…" oninput="Anecdotes.searchPerson(this.value)" autocomplete="off"/>
-                        <input type="hidden" id="anec-person-id"/>
-                        <div id="anec-person-dropdown" style="position:relative;">
-                            <div id="anec-person-results" style="display:none;position:absolute;top:0;left:0;right:0;background:white;border:1px solid var(--outline-variant,#c2c8bf);border-radius:7px;z-index:100;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
-                        </div>
+                        <label>Títol ("¿Sabías que…?")</label>
+                        <input type="text" class="form-input" id="anec-titulo" placeholder="¿Sabías que…?"/>
                     </div>
                     <div class="form-group">
-                        <label>Descripció</label>
-                        <textarea class="form-textarea" id="anec-desc" rows="4" placeholder="Text de l'anècdota…"></textarea>
+                        <label>Text</label>
+                        <textarea class="form-textarea" id="anec-texto" rows="4" placeholder="Descripció de l'anècdota…"></textarea>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-                        <div class="form-group">
-                            <label>Data</label>
-                            <input type="text" class="form-input" id="anec-date" placeholder="p.ex. 1920"/>
-                        </div>
-                        <div class="form-group">
-                            <label>Lloc</label>
-                            <input type="text" class="form-input" id="anec-place" placeholder="p.ex. Barcelona"/>
-                        </div>
+                    <div class="form-group">
+                        <label>CTA (text del botó)</label>
+                        <input type="text" class="form-input" id="anec-cta" placeholder="Saber más sobre…"/>
                     </div>
                     <div class="modal-actions">
                         <button class="btn btn-secondary" onclick="closeModal('anec-modal')">Cancel·lar</button>
@@ -310,7 +317,10 @@
         <!-- TESTS -->
         <section id="s-tests" class="admin-section">
             <h1 class="section-title">Tests del Query Router</h1>
-            <p class="section-subtitle">Proves de regressió i tester de preguntes en temps real.</p>
+            <p class="section-subtitle">
+                Proves de regressió i tester de preguntes en temps real.
+                <a href="/preview_incremental.html" target="_blank" style="color:var(--primary,#17341e);font-weight:600;margin-left:0.75rem;">→ Obrir Preview Incremental</a>
+            </p>
 
             <!-- Query tester -->
             <div class="info-card" style="margin-bottom:1.5rem;">

@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Body, HTTPException, UploadFile, File, Form
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -428,85 +428,140 @@ async def delete_all_queries():
 
 
 # ---------------------------------------------------------------------------
-# Anecdotes
+# Anecdotes — stored in data/anecdotas.json (permanent, survives GEDCOM imports)
+# Format: [{titulo, texto, cta}, ...]
 # ---------------------------------------------------------------------------
 
-@router.get("/anecdotes/people")
-async def anecdotes_people():
-    db = _db()
-    rows = db.execute(
-        "SELECT DISTINCT p.id, p.name FROM anecdotes a "
-        "JOIN people p ON a.person_id = p.id ORDER BY p.name"
-    ).fetchall()
-    return [dict(r) for r in rows]
+def _anecdotas_path() -> Path:
+    return _base_dir / "data" / "anecdotas.json"
+
+
+def _read_anecdotas() -> list:
+    path = _anecdotas_path()
+    if not path.exists():
+        return []
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+
+
+def _write_anecdotas(data: list):
+    _anecdotas_path().write_text(
+        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
 
 @router.get("/anecdotes")
-async def list_anecdotes(
-    search: str = "",
-    person_id: str = "",
-    limit: int = 50,
-    offset: int = 0,
-):
-    db = _db()
-    where = []
-    params: list = []
-    if person_id:
-        where.append("a.person_id = ?")
-        params.append(person_id)
+async def list_anecdotes(search: str = ""):
+    items = _read_anecdotas()
     if search:
-        where.append("(a.description LIKE ? OR a.place LIKE ? OR p.name LIKE ?)")
-        params += [f"%{search}%", f"%{search}%", f"%{search}%"]
-
-    where_clause = ("WHERE " + " AND ".join(where)) if where else ""
-
-    total = db.execute(
-        f"SELECT COUNT(*) FROM anecdotes a LEFT JOIN people p ON a.person_id = p.id {where_clause}",
-        params,
-    ).fetchone()[0]
-
-    rows = db.execute(
-        f"SELECT a.id, a.person_id, p.name AS person_name, a.description, a.date, a.place "
-        f"FROM anecdotes a LEFT JOIN people p ON a.person_id = p.id {where_clause} "
-        f"ORDER BY a.id DESC LIMIT ? OFFSET ?",
-        params + [limit, offset],
-    ).fetchall()
-
-    return {"items": [dict(r) for r in rows], "total": total}
+        q = search.lower()
+        items = [a for a in items if q in (a.get("titulo") or "").lower() or q in (a.get("texto") or "").lower()]
+    return {"items": [{"index": i, **a} for i, a in enumerate(items)], "total": len(items)}
 
 
 class AnecdoteBody(BaseModel):
-    person_id: str = ""
-    description: str = ""
-    date: str = ""
-    place: str = ""
+    titulo: str = ""
+    texto: str = ""
+    cta: str = ""
 
 
 @router.post("/anecdotes")
 async def create_anecdote(body: AnecdoteBody):
-    db = _db()
-    cur = db.execute(
-        "INSERT INTO anecdotes (person_id, description, date, place) VALUES (?,?,?,?)",
-        (body.person_id, body.description, body.date, body.place),
-    )
-    db.commit()
-    return {"id": cur.lastrowid, "status": "ok"}
+    items = _read_anecdotas()
+    items.append({"titulo": body.titulo, "texto": body.texto, "cta": body.cta})
+    _write_anecdotas(items)
+    return {"index": len(items) - 1, "status": "ok"}
 
 
-@router.put("/anecdotes/{anecdote_id}")
-async def update_anecdote(anecdote_id: int, body: AnecdoteBody):
-    db = _db()
-    db.execute(
-        "UPDATE anecdotes SET person_id=?, description=?, date=?, place=? WHERE id=?",
-        (body.person_id, body.description, body.date, body.place, anecdote_id),
-    )
-    db.commit()
+@router.put("/anecdotes/{anecdote_index}")
+async def update_anecdote(anecdote_index: int, body: AnecdoteBody):
+    items = _read_anecdotas()
+    if anecdote_index < 0 or anecdote_index >= len(items):
+        raise HTTPException(status_code=404, detail="Anècdota no trobada")
+    items[anecdote_index] = {"titulo": body.titulo, "texto": body.texto, "cta": body.cta}
+    _write_anecdotas(items)
     return {"status": "ok"}
 
 
-@router.delete("/anecdotes/{anecdote_id}")
-async def delete_anecdote(anecdote_id: int):
-    db = _db()
-    db.execute("DELETE FROM anecdotes WHERE id=?", (anecdote_id,))
-    db.commit()
+@router.delete("/anecdotes/{anecdote_index}")
+async def delete_anecdote(anecdote_index: int):
+    items = _read_anecdotas()
+    if anecdote_index < 0 or anecdote_index >= len(items):
+        raise HTTPException(status_code=404, detail="Anècdota no trobada")
+    items.pop(anecdote_index)
+    _write_anecdotas(items)
     return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# Server control
+# ---------------------------------------------------------------------------
+
+class ActionRequest(BaseModel):
+    action: str
+
+
+@router.post("/server/action")
+async def server_action(req: ActionRequest):
+    if req.action == "restart":
+        cmd = (
+            f"sleep 2 && pkill -f 'uvicorn app:app' && sleep 1 && "
+            f"cd {str(_base_dir)}/backend && python3 -m uvicorn app:app --port 8000 "
+            f"> /tmp/godesia_server.log 2>&1"
+        )
+        subprocess.Popen(["bash", "-c", cmd], start_new_session=True, close_fds=True)
+        return {"status": "ok", "message": "Servidor reiniciant en 2 s…"}
+    elif req.action == "stop":
+        cmd = "sleep 2 && pkill -f 'uvicorn app:app'"
+        subprocess.Popen(["bash", "-c", cmd], start_new_session=True, close_fds=True)
+        return {"status": "ok", "message": "Servidor aturant-se en 2 s…"}
+    else:
+        raise HTTPException(status_code=400, detail="Acció no vàlida: usa restart o stop")
+
+
+# ---------------------------------------------------------------------------
+# Database control (SQLite)
+# ---------------------------------------------------------------------------
+
+@router.post("/db/action")
+async def db_action(req: ActionRequest):
+    global _db_conn
+    if req.action == "checkpoint":
+        try:
+            _db_conn.execute("PRAGMA wal_checkpoint(FULL)")
+            _db_conn.commit()
+            return {"status": "ok", "message": "WAL checkpoint completat. Dades al fitxer principal."}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    elif req.action == "reconnect":
+        try:
+            from database import get_connection
+            _db_conn.close()
+            _db_conn = get_connection(str(_base_dir / "data" / "godesia.db"))
+            return {"status": "ok", "message": "Connexió a la BD reiniciada correctament."}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    elif req.action == "vacuum":
+        try:
+            _db_conn.execute("VACUUM")
+            return {"status": "ok", "message": "VACUUM completat. BD compactada."}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    else:
+        raise HTTPException(status_code=400, detail="Acció no vàlida: usa checkpoint, reconnect o vacuum")
+
+
+@router.get("/db/info")
+async def db_info():
+    db_path = _base_dir / "data" / "godesia.db"
+    wal_path = db_path.with_suffix(".db-wal")
+    shm_path = db_path.with_suffix(".db-shm")
+    return {
+        "db_size": db_path.stat().st_size if db_path.exists() else 0,
+        "wal_size": wal_path.stat().st_size if wal_path.exists() else 0,
+        "shm_size": shm_path.stat().st_size if shm_path.exists() else 0,
+        "db_path": str(db_path),
+        "last_modified": datetime.fromtimestamp(db_path.stat().st_mtime).isoformat() if db_path.exists() else None,
+    }
