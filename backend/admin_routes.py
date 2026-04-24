@@ -1,0 +1,512 @@
+"""Admin API routes for the Godesia management panel."""
+
+import collections
+import json
+import logging
+import shutil
+import subprocess
+import sys
+import threading
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+
+router = APIRouter(prefix="/api/admin", tags=["admin"])
+
+# Shared state — set by init_admin() called from app.py startup
+_db_conn = None
+_base_dir: Optional[Path] = None
+_startup_time = datetime.now()
+
+
+def init_admin(db_conn, base_dir: Path):
+    global _db_conn, _base_dir
+    _db_conn = db_conn
+    _base_dir = base_dir
+
+
+def _db():
+    if not _db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    return _db_conn
+
+
+# ---------------------------------------------------------------------------
+# Log ring buffer
+# ---------------------------------------------------------------------------
+
+class _RingHandler(logging.Handler):
+    def __init__(self, capacity=500):
+        super().__init__()
+        self._buf = collections.deque(maxlen=capacity)
+
+    def emit(self, record):
+        try:
+            self._buf.append({
+                "level": record.levelname,
+                "time": datetime.fromtimestamp(record.created).strftime("%H:%M:%S"),
+                "message": self.format(record),
+            })
+        except Exception:
+            pass
+
+    def get_logs(self, n=100):
+        buf = list(self._buf)
+        return buf[-n:] if n else buf
+
+
+_ring = _RingHandler(capacity=500)
+
+
+def init_log_capture():
+    _ring.setFormatter(logging.Formatter("%(name)s: %(message)s"))
+    for name in ("", "uvicorn", "uvicorn.access", "uvicorn.error", "fastapi"):
+        logging.getLogger(name).addHandler(_ring)
+
+
+# ---------------------------------------------------------------------------
+# Status
+# ---------------------------------------------------------------------------
+
+@router.get("/status")
+async def admin_status():
+    db = _db()
+    tables = ["people", "marriages", "photos", "photo_tags", "albums",
+              "suggestions", "occupations", "residences", "anecdotes",
+              "geocache", "notes", "events"]
+    counts = {}
+    for t in tables:
+        try:
+            counts[t] = db.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+        except Exception:
+            counts[t] = 0
+
+    last_import = None
+    try:
+        row = db.execute("SELECT MAX(updated_at) FROM people").fetchone()
+        last_import = row[0] if row else None
+    except Exception:
+        pass
+
+    ged_file = ""
+    if _base_dir:
+        ged_files = sorted(
+            (_base_dir / "docs").glob("*.ged"),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+        if ged_files:
+            ged_file = ged_files[0].name
+
+    uptime = int((datetime.now() - _startup_time).total_seconds())
+    restart_cmd = ""
+    if _base_dir:
+        restart_cmd = (
+            f"pkill -f 'uvicorn app:app' && sleep 1 && "
+            f"cd {_base_dir}/backend && uvicorn app:app --port 8000 &"
+        )
+
+    return {
+        "uptime_seconds": uptime,
+        "db_row_counts": counts,
+        "last_import": last_import,
+        "gedcom_file": ged_file,
+        "server_time": datetime.now().isoformat(),
+        "restart_command": restart_cmd,
+    }
+
+
+@router.get("/logs")
+async def admin_logs(lines: int = 100):
+    return {"logs": _ring.get_logs(lines)}
+
+
+# ---------------------------------------------------------------------------
+# GEDCOM Import
+# ---------------------------------------------------------------------------
+
+_job = {
+    "status": "idle",
+    "log": [],
+    "started_at": None,
+    "finished_at": None,
+    "error": None,
+}
+_job_lock = threading.Lock()
+
+
+def _log_job(msg: str):
+    with _job_lock:
+        _job["log"].append(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
+    print(msg)
+
+
+def _run_fast_import(ged_path: str, db_path: str):
+    try:
+        backend_dir = str(Path(db_path).parent)
+        if backend_dir not in sys.path:
+            sys.path.insert(0, backend_dir)
+
+        from gedcom_parser import build_family_tree_json
+        from migrate_json_to_sqlite import migrate
+        from database import update_all_photo_files, get_connection
+
+        json_path = str(Path(db_path).parent.parent / "data" / "family_tree.json")
+
+        _log_job("Parseando GEDCOM…")
+        build_family_tree_json(ged_path, json_path)
+        _log_job(f"Parseado → {Path(json_path).name}")
+
+        _log_job("Migrando a SQLite…")
+        migrate(json_path, db_path)
+        _log_job("Migración completada.")
+
+        _log_job("Sincronizando fotos de perfil…")
+        fresh = get_connection(db_path)
+        n = update_all_photo_files(fresh)
+        fresh.close()
+        _log_job(f"✓ {n} fotos de perfil actualizadas.")
+
+        with _job_lock:
+            _job["status"] = "done"
+            _job["finished_at"] = datetime.now().isoformat()
+        _log_job("✓ Importación rápida completada.")
+    except Exception as e:
+        with _job_lock:
+            _job["status"] = "error"
+            _job["error"] = str(e)
+            _job["finished_at"] = datetime.now().isoformat()
+        _log_job(f"ERROR: {e}")
+
+
+def _run_full_import(ged_path: str, base_dir: Path, skip_download: bool):
+    try:
+        cmd = [
+            "python3",
+            str(base_dir / "scripts" / "sync_catalog.py"),
+            "--gedcom", ged_path,
+        ]
+        if skip_download:
+            cmd.append("--skip-download")
+        _log_job(f"Ejecutando: {' '.join(cmd)}")
+
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            cwd=str(base_dir / "backend"),
+        )
+        timeout_at = datetime.now().timestamp() + 600  # 10 min
+        for line in proc.stdout:
+            _log_job(line.rstrip())
+            if datetime.now().timestamp() > timeout_at:
+                proc.kill()
+                raise RuntimeError("Timeout: sync_catalog.py tardó más de 10 minutos")
+        proc.wait()
+        if proc.returncode != 0:
+            raise RuntimeError(f"sync_catalog.py terminó con código {proc.returncode}")
+
+        with _job_lock:
+            _job["status"] = "done"
+            _job["finished_at"] = datetime.now().isoformat()
+        _log_job("✓ Importación completa finalizada.")
+    except Exception as e:
+        with _job_lock:
+            _job["status"] = "error"
+            _job["error"] = str(e)
+            _job["finished_at"] = datetime.now().isoformat()
+        _log_job(f"ERROR: {e}")
+
+
+@router.post("/import/gedcom")
+async def import_gedcom(
+    file: Optional[UploadFile] = File(default=None),
+    mode: str = Form(default="fast"),
+    delete_old_photos: bool = Form(default=False),
+):
+    with _job_lock:
+        if _job["status"] == "running":
+            raise HTTPException(status_code=409, detail="Ya hay una importación en curso")
+        _job.update({
+            "status": "running",
+            "log": [],
+            "started_at": datetime.now().isoformat(),
+            "finished_at": None,
+            "error": None,
+        })
+
+    base_dir = _base_dir
+    data_dir = base_dir / "data"
+    db_path = str(data_dir / "godesia.db")
+    photos_dir = data_dir / "photos"
+
+    # Determine GEDCOM source
+    if file and file.filename:
+        uploads_dir = data_dir / "uploads"
+        uploads_dir.mkdir(exist_ok=True)
+        ged_path = str(uploads_dir / file.filename)
+        content = await file.read()
+        with open(ged_path, "wb") as f:
+            f.write(content)
+        _log_job(f"GEDCOM subido: {file.filename} ({len(content):,} bytes)")
+    else:
+        ged_files = sorted(
+            (base_dir / "docs").glob("*.ged"),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+        if not ged_files:
+            with _job_lock:
+                _job.update({"status": "error", "error": "No hay GEDCOM en docs/"})
+            raise HTTPException(status_code=400, detail="No hay GEDCOM en docs/")
+        ged_path = str(ged_files[0])
+        _log_job(f"Usando GEDCOM: {ged_files[0].name}")
+
+    # Delete old photos if requested
+    if delete_old_photos and photos_dir.exists():
+        _log_job("Eliminando fotos antiguas…")
+        shutil.rmtree(photos_dir)
+        photos_dir.mkdir()
+        _log_job("Fotos eliminadas.")
+
+    if mode == "fast":
+        t = threading.Thread(target=_run_fast_import, args=(ged_path, db_path), daemon=True)
+    else:
+        skip_dl = (mode != "full_with_download")
+        t = threading.Thread(target=_run_full_import, args=(ged_path, base_dir, skip_dl), daemon=True)
+    t.start()
+
+    return {"status": "started", "mode": mode}
+
+
+@router.get("/import/status")
+async def import_status():
+    with _job_lock:
+        return dict(_job)
+
+
+@router.delete("/import/job")
+async def reset_import_job():
+    with _job_lock:
+        if _job["status"] == "running":
+            raise HTTPException(status_code=409, detail="Importación en curso")
+        _job.update({"status": "idle", "log": [], "started_at": None, "finished_at": None, "error": None})
+    return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# Suggestions
+# ---------------------------------------------------------------------------
+
+@router.get("/suggestions")
+async def list_suggestions():
+    db = _db()
+    try:
+        rows = db.execute(
+            "SELECT id, name, email, type, person_id, message, files_count, "
+            "submission_dir, created_at, resolved_at FROM suggestions ORDER BY created_at DESC"
+        ).fetchall()
+    except Exception:
+        rows = db.execute(
+            "SELECT id, name, email, type, person_id, message, files_count, "
+            "submission_dir, created_at FROM suggestions ORDER BY created_at DESC"
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+@router.get("/suggestions/{suggestion_id}/files")
+async def suggestion_files(suggestion_id: str):
+    if ".." in suggestion_id:
+        raise HTTPException(status_code=400, detail="Path inválido")
+    base = _base_dir / "data" / "suggestions" / suggestion_id
+    if not base.exists():
+        raise HTTPException(status_code=404, detail="Submission no encontrada")
+    files = []
+    for f in base.iterdir():
+        if f.name != "submission.json":
+            files.append({
+                "name": f.name,
+                "size": f.stat().st_size,
+                "url": f"/api/admin/suggestions/{suggestion_id}/file/{f.name}",
+            })
+    return files
+
+
+@router.get("/suggestions/{suggestion_id}/file/{filename}")
+async def suggestion_file(suggestion_id: str, filename: str):
+    if ".." in suggestion_id or ".." in filename:
+        raise HTTPException(status_code=400, detail="Path inválido")
+    path = _base_dir / "data" / "suggestions" / suggestion_id / filename
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+    return FileResponse(str(path))
+
+
+@router.post("/suggestions/{suggestion_id}/resolve")
+async def resolve_suggestion(suggestion_id: str):
+    db = _db()
+    now = datetime.now().isoformat()
+    try:
+        db.execute("UPDATE suggestions SET resolved_at=? WHERE id=?", (now, suggestion_id))
+        db.commit()
+    except Exception:
+        pass
+    return {"status": "ok", "resolved_at": now}
+
+
+@router.delete("/suggestions/{suggestion_id}")
+async def delete_suggestion(suggestion_id: str):
+    if ".." in suggestion_id:
+        raise HTTPException(status_code=400, detail="Path inválido")
+    db = _db()
+    db.execute("DELETE FROM suggestions WHERE id=?", (suggestion_id,))
+    db.commit()
+    sub_dir = _base_dir / "data" / "suggestions" / suggestion_id
+    if sub_dir.exists():
+        shutil.rmtree(sub_dir)
+    return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# Unresolved Queries
+# ---------------------------------------------------------------------------
+
+def _queries_path() -> Path:
+    return _base_dir / "data" / "unresolved_queries.jsonl"
+
+
+@router.get("/queries")
+async def list_queries():
+    path = _queries_path()
+    if not path.exists():
+        return []
+    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    result = []
+    for i, line in enumerate(reversed(lines)):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            entry = json.loads(line)
+            entry["index"] = len(lines) - 1 - i
+            result.append(entry)
+        except Exception:
+            pass
+    return result
+
+
+class DeleteQueriesRequest(BaseModel):
+    indices: list
+
+
+@router.delete("/queries")
+async def delete_queries(req: DeleteQueriesRequest):
+    path = _queries_path()
+    if not path.exists():
+        return {"deleted": 0, "remaining": 0}
+    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    to_delete = set(req.indices)
+    kept = [l for i, l in enumerate(lines) if i not in to_delete and l.strip()]
+    path.write_text("\n".join(kept) + ("\n" if kept else ""), encoding="utf-8")
+    return {"deleted": len(lines) - len(kept), "remaining": len(kept)}
+
+
+@router.delete("/queries/all")
+async def delete_all_queries():
+    path = _queries_path()
+    count = 0
+    if path.exists():
+        lines = [l for l in path.read_text().splitlines() if l.strip()]
+        count = len(lines)
+        path.write_text("", encoding="utf-8")
+    return {"deleted": count}
+
+
+# ---------------------------------------------------------------------------
+# Anecdotes
+# ---------------------------------------------------------------------------
+
+@router.get("/anecdotes/people")
+async def anecdotes_people():
+    db = _db()
+    rows = db.execute(
+        "SELECT DISTINCT p.id, p.name FROM anecdotes a "
+        "JOIN people p ON a.person_id = p.id ORDER BY p.name"
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+@router.get("/anecdotes")
+async def list_anecdotes(
+    search: str = "",
+    person_id: str = "",
+    limit: int = 50,
+    offset: int = 0,
+):
+    db = _db()
+    where = []
+    params: list = []
+    if person_id:
+        where.append("a.person_id = ?")
+        params.append(person_id)
+    if search:
+        where.append("(a.description LIKE ? OR a.place LIKE ? OR p.name LIKE ?)")
+        params += [f"%{search}%", f"%{search}%", f"%{search}%"]
+
+    where_clause = ("WHERE " + " AND ".join(where)) if where else ""
+
+    total = db.execute(
+        f"SELECT COUNT(*) FROM anecdotes a LEFT JOIN people p ON a.person_id = p.id {where_clause}",
+        params,
+    ).fetchone()[0]
+
+    rows = db.execute(
+        f"SELECT a.id, a.person_id, p.name AS person_name, a.description, a.date, a.place "
+        f"FROM anecdotes a LEFT JOIN people p ON a.person_id = p.id {where_clause} "
+        f"ORDER BY a.id DESC LIMIT ? OFFSET ?",
+        params + [limit, offset],
+    ).fetchall()
+
+    return {"items": [dict(r) for r in rows], "total": total}
+
+
+class AnecdoteBody(BaseModel):
+    person_id: str = ""
+    description: str = ""
+    date: str = ""
+    place: str = ""
+
+
+@router.post("/anecdotes")
+async def create_anecdote(body: AnecdoteBody):
+    db = _db()
+    cur = db.execute(
+        "INSERT INTO anecdotes (person_id, description, date, place) VALUES (?,?,?,?)",
+        (body.person_id, body.description, body.date, body.place),
+    )
+    db.commit()
+    return {"id": cur.lastrowid, "status": "ok"}
+
+
+@router.put("/anecdotes/{anecdote_id}")
+async def update_anecdote(anecdote_id: int, body: AnecdoteBody):
+    db = _db()
+    db.execute(
+        "UPDATE anecdotes SET person_id=?, description=?, date=?, place=? WHERE id=?",
+        (body.person_id, body.description, body.date, body.place, anecdote_id),
+    )
+    db.commit()
+    return {"status": "ok"}
+
+
+@router.delete("/anecdotes/{anecdote_id}")
+async def delete_anecdote(anecdote_id: int):
+    db = _db()
+    db.execute("DELETE FROM anecdotes WHERE id=?", (anecdote_id,))
+    db.commit()
+    return {"status": "ok"}

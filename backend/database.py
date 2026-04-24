@@ -356,6 +356,7 @@ def get_connection(db_path):
         "ALTER TABLE geocache ADD COLUMN display_name TEXT",
         "ALTER TABLE geocache ADD COLUMN validated INTEGER DEFAULT 0",
         "CREATE TABLE IF NOT EXISTS suggestions (id TEXT PRIMARY KEY, name TEXT, email TEXT, type TEXT, person_id TEXT, message TEXT, files_count INTEGER DEFAULT 0, submission_dir TEXT, created_at TEXT DEFAULT (datetime('now')))",
+        "ALTER TABLE suggestions ADD COLUMN resolved_at TEXT",
     ]:
         try:
             conn.execute(stmt)

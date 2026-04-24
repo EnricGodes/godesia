@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Godesia Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<div class="admin-layout">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="admin-logo">
+            Godesia
+            <span>Panell d'administració</span>
+        </div>
+        <nav class="admin-nav">
+            <a data-section="status" class="active">
+                <span class="nav-icon">⬡</span> Estat del servidor
+            </a>
+            <a data-section="import">
+                <span class="nav-icon">↑</span> Importar GEDCOM
+            </a>
+            <a data-section="suggestions">
+                <span class="nav-icon">✉</span> Aportacions
+                <span class="nav-badge" id="badge-suggestions"></span>
+            </a>
+            <a data-section="queries">
+                <span class="nav-icon">?</span> Preguntes no resoltes
+                <span class="nav-badge alert" id="badge-queries"></span>
+            </a>
+            <a data-section="geocoder">
+                <span class="nav-icon">⊕</span> Geocodificació
+                <span class="nav-badge" id="badge-geo"></span>
+            </a>
+            <a data-section="anecdotes">
+                <span class="nav-icon">✦</span> Anècdotes
+            </a>
+            <a data-section="tests">
+                <span class="nav-icon">▷</span> Tests
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="admin-main">
+
+        <!-- STATUS -->
+        <section id="s-status" class="admin-section active">
+            <h1 class="section-title">Estat del servidor</h1>
+            <p class="section-subtitle">Comptadors de la base de dades, uptime i logs del servidor.</p>
+
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+                <span class="uptime-pill">
+                    <span class="uptime-dot"></span>
+                    <span id="status-uptime">Carregant…</span>
+                </span>
+                <span style="font-size:0.8rem;color:#727971;" id="status-time"></span>
+                <span style="font-size:0.8rem;color:#727971;" id="status-gedcom"></span>
+            </div>
+
+            <div class="stat-grid" id="stat-grid"></div>
+
+            <div class="info-card" id="status-restart-card" style="display:none;">
+                <h3>Reiniciar el servidor</h3>
+                <p style="font-size:0.82rem;color:#727971;margin:0 0 0.75rem;">Executa aquesta comanda al terminal del servidor:</p>
+                <div class="code-block" id="restart-cmd"></div>
+            </div>
+
+            <div class="info-card">
+                <h3 style="display:flex;align-items:center;gap:0.5rem;">
+                    Logs del servidor
+                    <button class="btn btn-secondary btn-sm" onclick="Status.refreshLogs()" style="margin-left:auto;">↻ Actualitzar</button>
+                </h3>
+                <div class="log-box" id="log-box">Carregant logs…</div>
+            </div>
+        </section>
+
+        <!-- IMPORT -->
+        <section id="s-import" class="admin-section">
+            <h1 class="section-title">Importar GEDCOM</h1>
+            <p class="section-subtitle">Importa un nou fitxer GEDCOM a la base de dades.</p>
+
+            <div class="info-card" id="import-form-card">
+                <h3>Font del GEDCOM</h3>
+                <div class="file-drop" id="ged-drop" onclick="document.getElementById('ged-file').click()">
+                    <input type="file" id="ged-file" accept=".ged" style="display:none" onchange="Import.onFileSelected(this)"/>
+                    <div id="ged-drop-label">Clica o arrossega un fitxer .ged<br><small>O deixa buit per usar l'últim de docs/</small></div>
+                </div>
+
+                <div class="form-group" style="margin-top:1.25rem;">
+                    <label>Mode d'importació</label>
+                    <div class="radio-group">
+                        <label class="radio-row">
+                            <input type="radio" name="import-mode" value="fast" checked/>
+                            <div>
+                                <div>Ràpida (parse + migrar, ~4s)</div>
+                                <div class="radio-desc">Actualitza persones, famílies, notes, residències. Recomanat per canvis de dades.</div>
+                            </div>
+                        </label>
+                        <label class="radio-row">
+                            <input type="radio" name="import-mode" value="full_no_download"/>
+                            <div>
+                                <div>Completa sense descàrrega (sync_catalog, sense baixar fotos)</div>
+                                <div class="radio-desc">Actualitza també fotos, àlbums i tags. Pot trigar minuts.</div>
+                            </div>
+                        </label>
+                        <label class="radio-row">
+                            <input type="radio" name="import-mode" value="full_with_download"/>
+                            <div>
+                                <div>Completa amb descàrrega (sync_catalog, baixa fotos noves)</div>
+                                <div class="radio-desc">Baixa totes les fotos noves. Pot trigar molt temps.</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <label class="checkbox-row" style="margin-bottom:1.25rem;">
+                    <input type="checkbox" id="delete-photos"/>
+                    Esborrar fotos antigues del servidor abans d'importar
+                </label>
+
+                <div class="toolbar">
+                    <button class="btn btn-primary" id="btn-start-import" onclick="Import.start()">Iniciar importació</button>
+                    <span style="font-size:0.8rem;color:#727971;" id="import-current-ged"></span>
+                </div>
+            </div>
+
+            <div class="info-card" id="import-log-card" style="display:none;">
+                <h3 style="display:flex;align-items:center;gap:0.5rem;">
+                    Log d'importació
+                    <span class="badge" id="import-status-badge"></span>
+                    <button class="btn btn-secondary btn-sm" id="btn-reset-import" onclick="Import.reset()" style="margin-left:auto;display:none;">Nova importació</button>
+                </h3>
+                <div class="import-log" id="import-log"></div>
+                <div style="margin-top:1rem;display:flex;gap:0.75rem;" id="import-post-actions" style="display:none;">
+                    <button class="btn btn-secondary btn-sm" onclick="Import.syncPhotos()">↻ Sincronitzar fotos de perfil</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUGGESTIONS -->
+        <section id="s-suggestions" class="admin-section">
+            <h1 class="section-title">Aportacions</h1>
+            <p class="section-subtitle">Submissions dels usuaris enviades des de la pàgina Colaborar.</p>
+
+            <div class="toolbar">
+                <button class="btn btn-secondary btn-sm" onclick="Suggestions.load()">↻ Actualitzar</button>
+            </div>
+
+            <div id="suggestions-list"></div>
+
+            <!-- Files modal -->
+            <div class="modal-overlay" id="files-modal">
+                <div class="modal">
+                    <div class="modal-title" id="files-modal-title">Fitxers adjunts</div>
+                    <div id="files-modal-body"></div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeModal('files-modal')">Tancar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUERIES -->
+        <section id="s-queries" class="admin-section">
+            <h1 class="section-title">Preguntes no resoltes</h1>
+            <p class="section-subtitle">Preguntes que el router no ha sabut respondre — registrades a unresolved_queries.jsonl.</p>
+
+            <div class="toolbar">
+                <button class="btn btn-secondary btn-sm" onclick="Queries.load()">↻ Actualitzar</button>
+                <div class="toolbar-right">
+                    <button class="btn btn-secondary btn-sm" id="btn-del-selected" onclick="Queries.deleteSelected()" disabled>Esborrar seleccionades</button>
+                    <button class="btn btn-danger btn-sm" onclick="Queries.deleteAll()">Esborrar totes</button>
+                </div>
+            </div>
+
+            <div id="queries-list"></div>
+        </section>
+
+        <!-- GEOCODER -->
+        <section id="s-geocoder" class="admin-section">
+            <h1 class="section-title">Geocodificació</h1>
+            <p class="section-subtitle">Gestió d'adreces i coordenades GPS per a residències i events.</p>
+
+            <div class="toolbar">
+                <div style="font-size:0.82rem;color:#727971;" id="geo-stats"></div>
+                <div class="toolbar-right">
+                    <button class="btn btn-secondary btn-sm" onclick="Geocoder.load()">↻ Actualitzar</button>
+                </div>
+            </div>
+
+            <div class="admin-tabs">
+                <button class="admin-tab active" onclick="Geocoder.setTab('pending')">
+                    Pendents <span class="tab-count" id="geo-count-pending">0</span>
+                </button>
+                <button class="admin-tab" onclick="Geocoder.setTab('resolved')">
+                    Resoltes <span class="tab-count" id="geo-count-resolved">0</span>
+                </button>
+                <button class="admin-tab" onclick="Geocoder.setTab('validated')">
+                    Validades <span class="tab-count" id="geo-count-validated">0</span>
+                </button>
+            </div>
+
+            <div id="geo-loading" class="empty-state">Carregant…</div>
+            <div id="geo-empty" class="empty-state" style="display:none;">
+                <div class="empty-icon">✓</div>
+                No hi ha entrades en aquesta pestanya.
+            </div>
+
+            <div id="geo-resolved-toolbar" style="display:none;margin-bottom:0.75rem;text-align:right;">
+                <button class="btn btn-secondary btn-sm" id="btn-fetch-all-names" onclick="Geocoder.fetchAllDisplayNames()">
+                    Carregar noms GPS que falten
+                </button>
+            </div>
+
+            <table class="admin-table" id="geo-table" style="display:none;">
+                <thead id="geo-thead"></thead>
+                <tbody id="geo-tbody"></tbody>
+            </table>
+
+            <!-- Geocoder search modal -->
+            <div class="modal-overlay" id="geo-modal">
+                <div class="modal" style="max-width:620px;">
+                    <div class="modal-title" id="geo-panel-raw"></div>
+                    <p style="font-size:0.75rem;color:#727971;margin:-0.75rem 0 1rem;" id="geo-panel-orig"></p>
+
+                    <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">
+                        <input type="text" id="geo-panel-query" class="form-input" placeholder="Refinar cerca…" style="flex:1;"
+                               onkeydown="if(event.key==='Enter') Geocoder.doSearch()"/>
+                        <button class="btn btn-primary" onclick="Geocoder.doSearch()">Cercar</button>
+                    </div>
+
+                    <div id="geo-candidates" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.75rem;"></div>
+
+                    <div id="geo-map" style="display:none;height:200px;border-radius:8px;margin-bottom:0.75rem;"></div>
+
+                    <div id="geo-selected-info" style="display:none;background:var(--surface-container,#f1eee5);border-radius:8px;padding:0.75rem 1rem;margin-bottom:0.75rem;">
+                        <div style="font-weight:600;font-size:0.84rem;" id="geo-sel-name"></div>
+                        <div style="font-size:0.75rem;color:#727971;font-family:monospace;" id="geo-sel-coords"></div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeModal('geo-modal')">Cancel·lar</button>
+                        <button class="btn btn-primary" id="geo-btn-save" onclick="Geocoder.saveResolution()" disabled>Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ANECDOTES -->
+        <section id="s-anecdotes" class="admin-section">
+            <h1 class="section-title">Anècdotes</h1>
+            <p class="section-subtitle">Edita les anècdotes associades a persones de la família.</p>
+
+            <div class="toolbar">
+                <input type="text" class="search-input" id="anec-search" placeholder="Cercar…" oninput="Anecdotes.onSearch(this.value)"/>
+                <div class="toolbar-right">
+                    <button class="btn btn-primary btn-sm" onclick="Anecdotes.openNew()">+ Nova anècdota</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Anecdotes.load()">↻ Actualitzar</button>
+                </div>
+            </div>
+
+            <div id="anec-list"></div>
+            <div class="pagination" id="anec-pagination" style="display:none;">
+                <span class="page-info" id="anec-page-info"></span>
+                <button class="btn btn-secondary btn-sm" id="anec-prev" onclick="Anecdotes.prevPage()">← Anterior</button>
+                <button class="btn btn-secondary btn-sm" id="anec-next" onclick="Anecdotes.nextPage()">Següent →</button>
+            </div>
+
+            <!-- Anecdote editor modal -->
+            <div class="modal-overlay" id="anec-modal">
+                <div class="modal">
+                    <div class="modal-title" id="anec-modal-title">Nova anècdota</div>
+                    <input type="hidden" id="anec-edit-id"/>
+                    <div class="form-group">
+                        <label>Persona</label>
+                        <input type="text" class="form-input" id="anec-person-search" placeholder="Cercar persona…" oninput="Anecdotes.searchPerson(this.value)" autocomplete="off"/>
+                        <input type="hidden" id="anec-person-id"/>
+                        <div id="anec-person-dropdown" style="position:relative;">
+                            <div id="anec-person-results" style="display:none;position:absolute;top:0;left:0;right:0;background:white;border:1px solid var(--outline-variant,#c2c8bf);border-radius:7px;z-index:100;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripció</label>
+                        <textarea class="form-textarea" id="anec-desc" rows="4" placeholder="Text de l'anècdota…"></textarea>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                        <div class="form-group">
+                            <label>Data</label>
+                            <input type="text" class="form-input" id="anec-date" placeholder="p.ex. 1920"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Lloc</label>
+                            <input type="text" class="form-input" id="anec-place" placeholder="p.ex. Barcelona"/>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeModal('anec-modal')">Cancel·lar</button>
+                        <button class="btn btn-primary" onclick="Anecdotes.save()">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TESTS -->
+        <section id="s-tests" class="admin-section">
+            <h1 class="section-title">Tests del Query Router</h1>
+            <p class="section-subtitle">Proves de regressió i tester de preguntes en temps real.</p>
+
+            <!-- Query tester -->
+            <div class="info-card" style="margin-bottom:1.5rem;">
+                <h3>Tester de preguntes</h3>
+                <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+                    <input type="text" class="form-input" id="test-question" placeholder="Escriu una pregunta…" style="flex:1;"
+                           onkeydown="if(event.key==='Enter') Tests.runQuestion()"/>
+                    <button class="btn btn-primary" onclick="Tests.runQuestion()">Executar</button>
+                </div>
+                <div id="test-question-result" style="display:none;background:var(--surface-container,#f1eee5);border-radius:8px;padding:1rem;font-size:0.84rem;"></div>
+            </div>
+
+            <!-- Test bank -->
+            <div class="toolbar">
+                <span style="font-size:0.82rem;color:#727971;" id="tests-stats"></span>
+                <div class="toolbar-right">
+                    <button class="btn btn-secondary btn-sm" onclick="Tests.loadBank()">↻ Actualitzar</button>
+                    <button class="btn btn-primary btn-sm" onclick="Tests.runAll()">▷ Executar tots</button>
+                </div>
+            </div>
+
+            <div id="tests-list"></div>
+        </section>
+
+    </main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
