@@ -205,7 +205,7 @@ def parse_gedcom_photos(lines):
                             obje["position"] = value
                         elif tag == "NOTE":
                             note_content = value
-                            # Consume level-3 CONC and raw continuation lines
+                            i += 1  # advance past the NOTE line itself before scanning continuations
                             while i < len(lines):
                                 conc_line = lines[i].rstrip("\n")
                                 conc_m = re.match(r"^3\s+CONC\s?(.*)", conc_line)
@@ -218,7 +218,7 @@ def parse_gedcom_photos(lines):
                                     note_content += conc_line
                                     i += 1
                             obje["note"] = note_content.strip()
-                            continue  # already advanced i
+                            continue  # i already positioned at next tag
                     i += 1
 
                 if obje["filename"]:
