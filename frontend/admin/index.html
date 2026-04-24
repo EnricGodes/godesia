@@ -115,26 +115,39 @@
                         <label class="radio-row">
                             <input type="radio" name="import-mode" value="fast" checked/>
                             <div>
-                                <div>Ràpida (parse + migrar, ~4s)</div>
-                                <div class="radio-desc">Actualitza persones, famílies, notes, residències. Recomanat per canvis de dades.</div>
+                                <div style="font-weight:600;">Ràpida ✓ <span style="font-size:0.75rem;font-weight:400;color:#727971;">(~4s)</span></div>
+                                <div class="radio-desc">Actualitza persones, famílies, notes, residències. Recomanat per a tots els canvis de dades.</div>
                             </div>
                         </label>
+                    </div>
+                </div>
+
+                <details style="margin-bottom:1.25rem;">
+                    <summary style="cursor:pointer;font-size:0.8rem;color:#727971;user-select:none;">
+                        Opcions avançades (sync_catalog.py — pot penjar)
+                    </summary>
+                    <div style="margin-top:0.75rem;padding:0.75rem;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:0.8rem;color:#92400e;margin-bottom:0.75rem;">
+                        ⚠ <strong>Atenció:</strong> sync_catalog.py pot quedar-se penjat indefinidament si el GEDCOM té notes HTML grans.
+                        El timeout és de 10 minuts. Usa el mode Ràpida per actualitzar dades genealògiques.
+                        Aquests modes només cal quan canvien les fotos o els àlbums.
+                    </div>
+                    <div class="radio-group">
                         <label class="radio-row">
                             <input type="radio" name="import-mode" value="full_no_download"/>
                             <div>
-                                <div>Completa sense descàrrega (sync_catalog, sense baixar fotos)</div>
-                                <div class="radio-desc">Actualitza també fotos, àlbums i tags. Pot trigar minuts.</div>
+                                <div>Completa sense descàrrega (sync_catalog)</div>
+                                <div class="radio-desc">Actualitza fotos, àlbums i tags. Pot trigar minuts o penjar.</div>
                             </div>
                         </label>
                         <label class="radio-row">
                             <input type="radio" name="import-mode" value="full_with_download"/>
                             <div>
-                                <div>Completa amb descàrrega (sync_catalog, baixa fotos noves)</div>
+                                <div>Completa amb descàrrega (sync_catalog + fotos)</div>
                                 <div class="radio-desc">Baixa totes les fotos noves. Pot trigar molt temps.</div>
                             </div>
                         </label>
                     </div>
-                </div>
+                </details>
 
                 <label class="checkbox-row" style="margin-bottom:1.25rem;">
                     <input type="checkbox" id="delete-photos"/>

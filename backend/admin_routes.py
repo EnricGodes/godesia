@@ -242,6 +242,10 @@ def _run_fast_import(ged_path: str, db_path: str):
 
 
 def _run_full_import(ged_path: str, base_dir: Path, skip_download: bool):
+    import select as _select
+    MAX_SECS = 600  # 10 min hard limit
+    HEARTBEAT = 15  # log a line every N seconds of silence
+    t_start = time.time()
     try:
         cmd = [
             "python3",
@@ -250,7 +254,8 @@ def _run_full_import(ged_path: str, base_dir: Path, skip_download: bool):
         ]
         if skip_download:
             cmd.append("--skip-download")
-        _log_job(f"Ejecutando: {' '.join(cmd)}")
+        _log_job(f"Executant: {' '.join(cmd)}")
+        _log_job(f"Timeout màxim: {MAX_SECS // 60} minuts")
 
         proc = subprocess.Popen(
             cmd,
@@ -259,26 +264,65 @@ def _run_full_import(ged_path: str, base_dir: Path, skip_download: bool):
             text=True,
             cwd=str(base_dir / "backend"),
         )
-        timeout_at = datetime.now().timestamp() + 600  # 10 min
-        for line in proc.stdout:
-            _log_job(line.rstrip())
-            if datetime.now().timestamp() > timeout_at:
+
+        last_output_t = time.time()
+        last_heartbeat_t = time.time()
+
+        while True:
+            elapsed = time.time() - t_start
+            if elapsed > MAX_SECS:
                 proc.kill()
-                raise RuntimeError("Timeout: sync_catalog.py tardó más de 10 minutos")
+                raise RuntimeError(
+                    f"Timeout: sync_catalog.py no ha acabat en {MAX_SECS // 60} minuts. "
+                    f"Prova el mode Ràpida."
+                )
+
+            if proc.poll() is not None:
+                # Process ended — drain remaining output
+                remaining = proc.stdout.read()
+                for ln in remaining.splitlines():
+                    if ln.strip():
+                        _log_job(ln)
+                break
+
+            # Non-blocking poll — 1s select timeout so we can check elapsed / heartbeat
+            ready = _select.select([proc.stdout], [], [], 1.0)[0]
+            if ready:
+                line = proc.stdout.readline()
+                if not line:  # EOF
+                    break
+                stripped = line.rstrip()
+                if stripped:
+                    _log_job(stripped)
+                last_output_t = time.time()
+                last_heartbeat_t = time.time()
+            else:
+                # No output — emit heartbeat periodically
+                silent = time.time() - last_output_t
+                if time.time() - last_heartbeat_t >= HEARTBEAT:
+                    _log_job(
+                        f"  (processant… {int(elapsed)}s transcorreguts, "
+                        f"{int(silent)}s sense output)"
+                    )
+                    last_heartbeat_t = time.time()
+
         proc.wait()
         if proc.returncode != 0:
-            raise RuntimeError(f"sync_catalog.py terminó con código {proc.returncode}")
+            raise RuntimeError(
+                f"sync_catalog.py ha acabat amb codi {proc.returncode}"
+            )
 
         with _job_lock:
             _job["status"] = "done"
             _job["finished_at"] = datetime.now().isoformat()
-        _log_job("✓ Importación completa finalizada.")
+        _log_job(f"✓ Importació completa en {_fmt_dur(time.time() - t_start)}")
     except Exception as e:
         with _job_lock:
             _job["status"] = "error"
             _job["error"] = str(e)
             _job["finished_at"] = datetime.now().isoformat()
-        _log_job(f"ERROR: {e}")
+        _log_job(f"✗ ERROR: {e}")
+        _log_job(traceback.format_exc())
 
 
 @router.post("/import/gedcom")
