@@ -772,7 +772,7 @@ def main():
                 is_personal_photo INTEGER DEFAULT 0, is_prim_cutout INTEGER DEFAULT 0,
                 is_document INTEGER DEFAULT 0, doc_type TEXT,
                 parent_photo_id INTEGER, position TEXT, is_downloaded INTEGER DEFAULT 0,
-                transcription TEXT,
+                transcription TEXT, note TEXT,
                 inserted_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
             )
         """)
