@@ -342,15 +342,18 @@ const Suggestions = {
 
             el.innerHTML = `<table class="admin-table">
                 <thead><tr>
-                    <th>Data</th><th>Nom</th><th>Tipus</th><th>Missatge</th>
+                    <th>Data</th><th>Qui envia</th><th>Persona afectada</th><th>Tipus</th><th>Missatge</th>
                     <th>Fitxers</th><th>Estat</th><th></th>
                 </tr></thead>
                 <tbody>${items.map(s => `
                     <tr>
                         <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${esc(s.created_at?.slice(0,16).replace('T',' '))}</td>
                         <td><strong>${esc(s.name || '—')}</strong>${s.email ? `<br><small style="color:#727971;">${esc(s.email)}</small>` : ''}</td>
+                        <td style="font-size:0.82rem;">${s.person_name
+                            ? `<a href="/index.html?person=${esc(s.person_id)}" target="_blank" style="color:var(--primary,#17341e);font-weight:600;">${esc(s.person_name)}</a>`
+                            : s.person_id ? `<span style="color:#727971;font-size:0.75rem;">${esc(s.person_id)}</span>` : '—'}</td>
                         <td><span class="badge badge-pending">${esc(s.type || '—')}</span></td>
-                        <td style="max-width:260px;font-size:0.8rem;">${esc((s.message || '').slice(0, 120))}${s.message?.length > 120 ? '…' : ''}</td>
+                        <td style="max-width:240px;font-size:0.8rem;">${esc((s.message || '').slice(0, 100))}${(s.message || '').length > 100 ? '…' : ''}</td>
                         <td style="text-align:center;">
                             ${s.files_count > 0
                                 ? `<button class="btn btn-secondary btn-sm" onclick="Suggestions.viewFiles('${esc(s.id)}', '${esc(s.name || s.id)}')">${s.files_count} fitxer${s.files_count > 1 ? 's' : ''}</button>`
@@ -362,7 +365,7 @@ const Suggestions = {
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
                                 ${!s.resolved_at ? `<button class="btn btn-secondary btn-sm" onclick="Suggestions.resolve('${esc(s.id)}')">Resoldre</button>` : ''}
-                                <button class="btn btn-danger btn-sm" onclick="Suggestions.delete('${esc(s.id)}')">✕</button>
+                                <button class="btn btn-danger btn-sm" onclick="Suggestions.remove('${esc(s.id)}')">✕</button>
                             </div>
                         </td>
                     </tr>
@@ -402,7 +405,7 @@ const Suggestions = {
         } catch (e) { alert(e.message); }
     },
 
-    async delete(id) {
+    async remove(id) {
         if (!confirm('Eliminar aquesta aportació i tots els seus fitxers?')) return;
         try {
             await apiFetch(`/api/admin/suggestions/${id}`, { method: 'DELETE' });
@@ -821,6 +824,7 @@ const Geocoder = {
 const Anecdotes = {
     searchQuery: '',
     searchTimer: null,
+    _editIndex: null,  // null = new, number = editing existing
 
     init() { this.load(); },
 
@@ -846,6 +850,8 @@ const Anecdotes = {
             }
             document.getElementById('anec-pagination').style.display = 'none';
 
+            this._items = d.items;
+
             el.innerHTML = `<table class="admin-table">
                 <thead><tr>
                     <th style="width:40px;">#</th><th>Títol</th><th>Text</th><th>CTA</th><th></th>
@@ -859,22 +865,20 @@ const Anecdotes = {
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
                                 <button class="btn btn-secondary btn-sm" onclick="Anecdotes.openEdit(${a.index})">✎</button>
-                                <button class="btn btn-danger btn-sm" onclick="Anecdotes.delete(${a.index})">✕</button>
+                                <button class="btn btn-danger btn-sm" onclick="Anecdotes.remove(${a.index})">✕</button>
                             </div>
                         </td>
                     </tr>
                 `).join('')}</tbody>
             </table>`;
-
-            this._items = d.items;
         } catch (e) {
             el.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
         }
     },
 
     openNew() {
+        this._editIndex = null;
         document.getElementById('anec-modal-title').textContent = 'Nova anècdota';
-        document.getElementById('anec-edit-index').value = '';
         document.getElementById('anec-titulo').value = '';
         document.getElementById('anec-texto').value = '';
         document.getElementById('anec-cta').value = '';
@@ -883,9 +887,9 @@ const Anecdotes = {
 
     openEdit(index) {
         const a = (this._items || []).find(x => x.index === index);
-        if (!a) return;
-        document.getElementById('anec-modal-title').textContent = 'Editar anècdota';
-        document.getElementById('anec-edit-index').value = index;
+        if (!a) { alert('Error: no s\'ha trobat l\'anècdota. Recarrega la pàgina.'); return; }
+        this._editIndex = index;
+        document.getElementById('anec-modal-title').textContent = `Editar anècdota #${index + 1}`;
         document.getElementById('anec-titulo').value = a.titulo || '';
         document.getElementById('anec-texto').value = a.texto || '';
         document.getElementById('anec-cta').value = a.cta || '';
@@ -893,15 +897,14 @@ const Anecdotes = {
     },
 
     async save() {
-        const index = document.getElementById('anec-edit-index').value;
         const body = {
-            titulo: document.getElementById('anec-titulo').value,
-            texto: document.getElementById('anec-texto').value,
-            cta: document.getElementById('anec-cta').value,
+            titulo: document.getElementById('anec-titulo').value.trim(),
+            texto: document.getElementById('anec-texto').value.trim(),
+            cta: document.getElementById('anec-cta').value.trim(),
         };
         try {
-            if (index !== '') {
-                await apiFetch(`/api/admin/anecdotes/${index}`, {
+            if (this._editIndex !== null) {
+                await apiFetch(`/api/admin/anecdotes/${this._editIndex}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body),
@@ -914,16 +917,17 @@ const Anecdotes = {
                 });
             }
             closeModal('anec-modal');
-            this.load();
-        } catch (e) { alert('Error: ' + e.message); }
+            this._editIndex = null;
+            await this.load();
+        } catch (e) { alert('Error guardant: ' + e.message); }
     },
 
-    async delete(index) {
-        if (!confirm('Eliminar aquesta anècdota?')) return;
+    async remove(index) {
+        if (!confirm(`Eliminar anècdota #${index + 1}?`)) return;
         try {
             await apiFetch(`/api/admin/anecdotes/${index}`, { method: 'DELETE' });
-            this.load();
-        } catch (e) { alert(e.message); }
+            await this.load();
+        } catch (e) { alert('Error eliminant: ' + e.message); }
     },
 };
 

@@ -15,8 +15,8 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Reset nav — prevent any global nav styles from interfering */
-nav, nav a, nav a:hover, nav a:focus { all: unset; }
+/* Reset only the admin nav to prevent parent stylesheet conflicts */
+.admin-nav, .admin-nav a { all: unset; box-sizing: border-box; cursor: pointer; }
 
 body {
     margin: 0;
@@ -64,6 +64,8 @@ body {
 }
 
 .admin-nav {
+    display: flex;
+    flex-direction: column;
     padding: 0.75rem 0;
     flex: 1;
 }
@@ -73,24 +75,25 @@ body {
     align-items: center;
     gap: 0.6rem;
     padding: 0.6rem 1.25rem;
+    font-family: 'Manrope', sans-serif;
     font-size: 0.82rem;
     font-weight: 500;
     color: rgba(255,255,255,0.65);
     text-decoration: none;
     border-left: 3px solid transparent;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: background-color 0.15s, color 0.15s, border-left-color 0.15s;
 }
 
 .admin-nav a:hover {
-    color: rgba(255,255,255,0.9);
-    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.9) !important;
+    background-color: rgba(255,255,255,0.06) !important;
 }
 
 .admin-nav a.active {
-    color: #fff;
-    background: rgba(255,255,255,0.1);
-    border-left-color: rgba(255,255,255,0.6);
+    color: #fff !important;
+    background-color: rgba(255,255,255,0.1) !important;
+    border-left-color: rgba(255,255,255,0.6) !important;
 }
 
 .admin-nav .nav-icon {

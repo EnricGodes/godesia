@@ -1,12 +1,16 @@
 """Admin API routes for the Godesia management panel."""
 
 import collections
+import contextlib
+import io
 import json
 import logging
 import shutil
 import subprocess
 import sys
 import threading
+import time
+import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -145,7 +149,23 @@ def _log_job(msg: str):
     print(msg)
 
 
+class _StdoutCapture(io.TextIOBase):
+    """Redirects print() output from called modules into the job log."""
+    def write(self, s):
+        stripped = s.rstrip()
+        if stripped:
+            _log_job(f"  {stripped}")
+        return len(s)
+    def flush(self): pass
+
+
+def _fmt_dur(secs: float) -> str:
+    if secs < 1: return f"{secs*1000:.0f}ms"
+    return f"{secs:.1f}s"
+
+
 def _run_fast_import(ged_path: str, db_path: str):
+    t_start = time.time()
     try:
         backend_dir = str(Path(db_path).parent)
         if backend_dir not in sys.path:
@@ -155,32 +175,66 @@ def _run_fast_import(ged_path: str, db_path: str):
         from migrate_json_to_sqlite import migrate
         from database import update_all_photo_files, get_connection
 
-        json_path = str(Path(db_path).parent.parent / "data" / "family_tree.json")
+        db_path_obj = Path(db_path)
+        json_path = str(db_path_obj.parent.parent / "data" / "family_tree.json")
+        ged_size = Path(ged_path).stat().st_size
+        _log_job(f"── Importació ràpida ──")
+        _log_job(f"GEDCOM: {Path(ged_path).name} ({ged_size // 1024} KB)")
+        _log_job(f"DB: {db_path_obj.name}")
 
-        _log_job("Parseando GEDCOM…")
-        build_family_tree_json(ged_path, json_path)
-        _log_job(f"Parseado → {Path(json_path).name}")
+        # Step 1: Parse GEDCOM → JSON
+        _log_job(f"")
+        _log_job(f"[1/4] Parsejant GEDCOM…")
+        t1 = time.time()
+        with contextlib.redirect_stdout(_StdoutCapture()):
+            build_family_tree_json(ged_path, json_path)
+        json_size = Path(json_path).stat().st_size
+        _log_job(f"  ✓ Parsejat en {_fmt_dur(time.time()-t1)} → {json_size // 1024} KB de JSON")
 
-        _log_job("Migrando a SQLite…")
-        migrate(json_path, db_path)
-        _log_job("Migración completada.")
+        # Step 2: Migrate JSON → SQLite
+        _log_job(f"")
+        _log_job(f"[2/4] Migrant JSON a SQLite…")
+        t2 = time.time()
+        with contextlib.redirect_stdout(_StdoutCapture()):
+            migrate(json_path, db_path)
+        _log_job(f"  ✓ Migració completada en {_fmt_dur(time.time()-t2)}")
 
-        _log_job("Sincronizando fotos de perfil…")
+        # Step 3: Count rows inserted
+        _log_job(f"")
+        _log_job(f"[3/4] Verificant dades importades…")
         fresh = get_connection(db_path)
-        n = update_all_photo_files(fresh)
+        tables = ["people", "marriages", "photos", "photo_tags", "albums",
+                  "occupations", "residences", "notes", "events"]
+        for tbl in tables:
+            try:
+                n = fresh.execute(f"SELECT COUNT(*) FROM {tbl}").fetchone()[0]
+                _log_job(f"  {tbl}: {n} files")
+            except Exception as e:
+                _log_job(f"  {tbl}: ERROR — {e}")
+
+        # Step 4: Sync profile photos
+        _log_job(f"")
+        _log_job(f"[4/4] Sincronitzant fotos de perfil…")
+        t4 = time.time()
+        n_photos = update_all_photo_files(fresh)
         fresh.close()
-        _log_job(f"✓ {n} fotos de perfil actualizadas.")
+        _log_job(f"  ✓ {n_photos} fotos de perfil actualitzades en {_fmt_dur(time.time()-t4)}")
+
+        total = _fmt_dur(time.time() - t_start)
+        _log_job(f"")
+        _log_job(f"✓ Importació completa en {total}")
 
         with _job_lock:
             _job["status"] = "done"
             _job["finished_at"] = datetime.now().isoformat()
-        _log_job("✓ Importación rápida completada.")
     except Exception as e:
         with _job_lock:
             _job["status"] = "error"
             _job["error"] = str(e)
             _job["finished_at"] = datetime.now().isoformat()
-        _log_job(f"ERROR: {e}")
+        _log_job(f"")
+        _log_job(f"✗ ERROR: {e}")
+        _log_job(traceback.format_exc())
 
 
 def _run_full_import(ged_path: str, base_dir: Path, skip_download: bool):
@@ -308,13 +362,19 @@ async def list_suggestions():
     db = _db()
     try:
         rows = db.execute(
-            "SELECT id, name, email, type, person_id, message, files_count, "
-            "submission_dir, created_at, resolved_at FROM suggestions ORDER BY created_at DESC"
+            "SELECT s.id, s.name, s.email, s.type, s.person_id, "
+            "p.name AS person_name, "
+            "s.message, s.files_count, s.submission_dir, s.created_at, s.resolved_at "
+            "FROM suggestions s "
+            "LEFT JOIN people p ON s.person_id = p.id "
+            "ORDER BY s.created_at DESC"
         ).fetchall()
     except Exception:
         rows = db.execute(
-            "SELECT id, name, email, type, person_id, message, files_count, "
-            "submission_dir, created_at FROM suggestions ORDER BY created_at DESC"
+            "SELECT s.id, s.name, s.email, s.type, s.person_id, "
+            "NULL AS person_name, "
+            "s.message, s.files_count, s.submission_dir, s.created_at "
+            "FROM suggestions s ORDER BY s.created_at DESC"
         ).fetchall()
     return [dict(r) for r in rows]
 
