@@ -143,10 +143,14 @@ _job = {
 _job_lock = threading.Lock()
 
 
+_real_stdout = sys.stdout
+
+
 def _log_job(msg: str):
     with _job_lock:
         _job["log"].append(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
-    print(msg)
+    _real_stdout.write(msg + "\n")
+    _real_stdout.flush()
 
 
 class _StdoutCapture(io.TextIOBase):
