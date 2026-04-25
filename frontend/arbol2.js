@@ -4,7 +4,7 @@
 const A2_DEFAULT_ID = 'I4'; // Artur Godes Caballeria
 
 let a2Store = null;
-let a2Svg = null;
+let a2Svg   = null;
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
@@ -15,63 +15,69 @@ async function a2Init(personId) {
 
   const cont = document.getElementById('FamilyChart');
   cont.innerHTML = '';
-  a2Svg = null;
+  a2Svg   = null;
   a2Store = null;
 
   a2Store = f3.createStore({
     data: nodes,
-    main_id: main_id,
+    main_id,
     node_separation: 300,
-    level_separation: 170,
+    level_separation: 180,
+    transition_time: 250,   // x4 faster than default 1000 (issue 2)
   });
 
   a2Svg = f3.createSvg(cont);
 
   const Card = f3.elements.CardSvg({
     store: a2Store,
-    svg: a2Svg,
+    svg:   a2Svg,
     card_dim: {
-      w: 220, h: 90,
-      text_x: 78, text_y: 18,
-      img_w: 66, img_h: 66,
-      img_x: 6, img_y: 12,
+      w: 240, h: 105,        // taller card for 3 text lines (issue 4)
+      text_x: 82, text_y: 18,
+      img_w: 68, img_h: 95, // portrait image area (issue 5)
+      img_x: 5,  img_y: 5,
     },
-    card_display: [
-      d => a2DisplayName(d.data),   // d = store item {id, data:{...}, rels:{...}}
-      d => a2DisplayYears(d.data),  // d.data = our custom data object
+    card_display: [          // 3 lines: given name / last name / years (issue 4)
+      d => (d.data['first name'] || '').substring(0, 20),
+      d => (d.data['last name']  || '').substring(0, 20),
+      d => a2DisplayYears(d.data),
     ],
     mini_tree: true,
     link_break: false,
     onCardClick: (_e, d) => {
-      // d is D3 datum: d.data = store item {id, data:{...}, rels:{...}}
+      // d = D3 datum; d.data = store item {id, data:{...}, rels:{...}}
       a2Store.updateMainId(d.data.id);
       a2Store.updateTree({});
       a2OpenSidebar(d.data);
     },
   });
 
-  a2Store.setOnUpdate(props => f3.view(a2Store.getTree(), a2Svg, Card, props || {}));
+  a2Store.setOnUpdate(props => {
+    f3.view(a2Store.getTree(), a2Svg, Card, props || {});
+    requestAnimationFrame(a2FixImages); // fix image aspect ratio (issue 5)
+  });
+
   a2Store.updateTree({ initial: true });
+
+  // After initial animation, center view on main person (issue 3)
+  setTimeout(() => {
+    if (!a2Store || !a2Svg) return;
+    try {
+      const datum   = a2Store.getTreeMainDatum();
+      const svg_dim = cont.getBoundingClientRect();
+      f3.handlers.cardToMiddle({ datum, svg: a2Svg, svg_dim, scale: 1, transition_time: 300 });
+    } catch (_) { /* ignore if tree not ready */ }
+  }, 320); // 250ms animation + buffer
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   a2Init(A2_DEFAULT_ID).catch(err => {
     document.getElementById('FamilyChart').innerHTML =
-      `<div style="color:#fff;padding:40px;font-family:Manrope,sans-serif;">Error: ${err.message}</div>`;
+      `<div style="padding:40px;font-family:Manrope,sans-serif;color:#ba1a1a;">Error: ${err.message}</div>`;
   });
 });
 
 // ─── Formateo ─────────────────────────────────────────────────────────────────
-
-function a2DisplayName(data) {
-  if (!data) return '';
-  const given  = data['first name'] || '';
-  const family = data['last name']  || '';
-  const nick   = data.nickname;
-  const full   = nick ? `${given} "${nick}" ${family}` : `${given} ${family}`;
-  const trimmed = full.trim();
-  return trimmed.length > 23 ? trimmed.substring(0, 22) + '…' : trimmed;
-}
 
 function a2DisplayYears(data) {
   if (!data) return '';
@@ -80,15 +86,26 @@ function a2DisplayYears(data) {
   return `${b} – ${d}`;
 }
 
+// ─── Fix images: portrait preserveAspectRatio (issue 5) ───────────────────────
+
+function a2FixImages() {
+  document.querySelectorAll('#FamilyChart .card_image image').forEach(img => {
+    img.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  });
+}
+
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 function a2OpenSidebar(storeItem) {
-  // storeItem = {id, data: {custom fields...}, rels: {...}}
+  // storeItem = {id, data: {custom fields…}, rels: {…}}
   const data   = storeItem.data || {};
   const nodeId = storeItem.id   || '';
   const dosId  = (data.db_id || '').replace(/@/g, '');
 
-  const fullName = `${data['first name'] || ''} ${data['last name'] || ''}`.trim();
+  const givenName = data['first name'] || '';
+  const lastName  = data['last name']  || '';
+  const fullName  = [givenName, lastName].filter(Boolean).join(' ');
+
   const birthLine = [data.birth_date, data.birth_place].filter(Boolean).join(' · ');
   const deathLine = data.death_date || '';
 
@@ -97,7 +114,7 @@ function a2OpenSidebar(storeItem) {
     <div style="padding:20px;position:relative;">
       <button onclick="a2CloseSidebar()"
         style="position:absolute;top:12px;right:12px;background:none;border:none;
-               font-size:22px;line-height:1;cursor:pointer;color:#6b6b60;">✕</button>
+               font-size:22px;line-height:1;cursor:pointer;color:#9e9b94;">✕</button>
 
       ${data.avatar
         ? `<img src="${data.avatar}" alt="${fullName}"
@@ -132,7 +149,7 @@ function a2OpenSidebar(storeItem) {
           ? `<a href="/dossier.html?id=${dosId}"
                style="display:block;text-align:center;padding:9px;
                       background:#f1eee5;color:#2d4b33;
-                      border:1px solid #d9d5cc;border-radius:8px;
+                      border:1px solid #c2c8bf;border-radius:8px;
                       font-family:Manrope,sans-serif;font-size:.875rem;
                       font-weight:500;text-decoration:none;">
                Veure dossier complet
@@ -159,32 +176,35 @@ function a2CenterOn(nodeId) {
   a2Init(nodeId).catch(console.error);
 }
 
-// ─── Zoom ─────────────────────────────────────────────────────────────────────
+// ─── Zoom (using f3.handlers.manualZoom) ──────────────────────────────────────
 
 function a2ZoomIn() {
-  const svgEl = document.querySelector('#FamilyChart svg');
-  if (svgEl) svgEl.dispatchEvent(new WheelEvent('wheel', { deltaY: -200, bubbles: true, cancelable: true }));
+  if (!a2Svg) return;
+  try { f3.handlers.manualZoom({ amount: 1.3,  svg: a2Svg, transition_time: 250 }); }
+  catch (_) {}
 }
 
 function a2ZoomOut() {
-  const svgEl = document.querySelector('#FamilyChart svg');
-  if (svgEl) svgEl.dispatchEvent(new WheelEvent('wheel', { deltaY: 200, bubbles: true, cancelable: true }));
+  if (!a2Svg) return;
+  try { f3.handlers.manualZoom({ amount: 0.77, svg: a2Svg, transition_time: 250 }); }
+  catch (_) {}
 }
 
 function a2ZoomReset() {
-  if (!a2Store) return;
-  const mainId = a2Store.getMainId();
-  if (mainId) {
-    a2Store.updateMainId(mainId);
-    a2Store.updateTree({});
-  }
+  if (!a2Store || !a2Svg) return;
+  try {
+    const datum   = a2Store.getTreeMainDatum();
+    const cont    = document.getElementById('FamilyChart');
+    const svg_dim = cont.getBoundingClientRect();
+    f3.handlers.cardToMiddle({ datum, svg: a2Svg, svg_dim, scale: 1, transition_time: 350 });
+  } catch (_) {}
 }
 
 // ─── Buscador ─────────────────────────────────────────────────────────────────
 
 let a2SearchTimeout = null;
-const a2SearchInput   = document.getElementById('a2-search');
-const a2ResultsBox    = document.getElementById('a2-results');
+const a2SearchInput = document.getElementById('a2-search');
+const a2ResultsBox  = document.getElementById('a2-results');
 
 if (a2SearchInput) {
   a2SearchInput.addEventListener('input', () => {

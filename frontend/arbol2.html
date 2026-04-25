@@ -14,22 +14,37 @@
   <script src="https://unpkg.com/family-chart/dist/family-chart.js"></script>
   <link rel="stylesheet" href="style.css">
   <style>
-    #FamilyChart { background: #1a2b20; }
+    /* ── Color overrides: light background + design system grays (issue 1, 9) ── */
+    #FamilyChart {
+      background: #fcf9f0;   /* --surface */
+      color: #1c1c17;        /* --on-surface */
+      --male-color:        #c8c5bc;  /* warm gray dark  (men) */
+      --female-color:      #e4e1d8;  /* warm gray light (women) */
+      --genderless-color:  #d5d2c9;
+      --background-color:  #fcf9f0;
+      --text-color:        #1c1c17;
+    }
     #FamilyChart svg { width: 100%; height: 100%; }
+    /* Ensure text in SVG cards uses dark color */
+    #FamilyChart svg text { fill: #1c1c17; }
+    /* Relationship lines: dark on light background */
+    #FamilyChart .links_view path { stroke: #8a8780; }
 
+    /* ── Search bar ── */
     #a2-search {
       width: 220px;
       padding: 6px 12px;
-      border: 1px solid rgba(255,255,255,0.25);
+      border: 1px solid #c2c8bf;
       border-radius: 8px;
-      background: rgba(255,255,255,0.12);
-      color: #fff;
+      background: #ffffff;
+      color: #1c1c17;
       font-size: 0.875rem;
       font-family: Manrope, sans-serif;
       outline: none;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
     }
-    #a2-search::placeholder { color: rgba(255,255,255,0.5); }
-    #a2-search:focus { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.18); }
+    #a2-search::placeholder { color: #9e9b94; }
+    #a2-search:focus { border-color: #2d4b33; box-shadow: 0 0 0 2px rgba(45,75,51,.15); }
 
     #a2-results {
       display: none;
@@ -38,9 +53,9 @@
       left: 0;
       min-width: 280px;
       background: #fff;
-      border: 1px solid #ddd;
+      border: 1px solid #c2c8bf;
       border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
       max-height: 300px;
       overflow-y: auto;
       z-index: 300;
@@ -52,33 +67,34 @@
       padding: 9px 14px;
       cursor: pointer;
       font-size: 0.875rem;
-      border-bottom: 1px solid #f3f0ea;
+      border-bottom: 1px solid #f1eee5;
       color: #1c1c17;
       gap: 8px;
     }
     .a2-result-item:last-child { border-bottom: none; }
-    .a2-result-item:hover { background: #f1eee5; }
+    .a2-result-item:hover { background: #f6f3ea; }
     .a2-result-item small { color: #9e9b94; font-size: 0.75rem; white-space: nowrap; }
 
+    /* ── Zoom buttons ── */
     .a2-zoom-btn {
       width: 32px;
       height: 32px;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.3);
+      background: #ffffff;
+      border: 1px solid #c2c8bf;
       border-radius: 6px;
-      color: #fff;
+      color: #424842;
       font-size: 1rem;
       cursor: pointer;
       font-family: Manrope, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
     }
-    .a2-zoom-btn:hover { background: rgba(255,255,255,0.28); }
+    .a2-zoom-btn:hover { background: #f1eee5; border-color: #2d4b33; }
 
-    #a2-sidebar {
-      font-family: Manrope, sans-serif;
-    }
+    /* ── Sidebar ── */
+    #a2-sidebar { font-family: Manrope, sans-serif; }
     .a2-field { margin-bottom: 12px; }
     .a2-label {
       font-size: 0.68rem;
