@@ -36,9 +36,13 @@ async function a2Init(personId) {
     mini_tree: true,
     cardInnerHtmlCreator: d => a2CardHtml(d),
     onCardClick: (_e, d) => {
-      // d = D3 datum; d.data = store item {id, data:{…}, rels:{…}}
-      a2Store.updateMainId(d.data.id);
-      a2Store.updateTree({});
+      // Center view on clicked card without reorganizing the tree
+      try {
+        const cont    = document.getElementById('FamilyChart');
+        const svg_dim = cont.getBoundingClientRect();
+        const scale   = f3.handlers.getCurrentZoom(a2Svg).k;
+        f3.handlers.cardToMiddle({ datum: d, svg: a2Svg, svg_dim, scale, transition_time: 350 });
+      } catch (_) {}
       a2OpenSidebar(d.data);
     },
   });

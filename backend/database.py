@@ -1793,6 +1793,60 @@ def get_tree_data_flat(conn, person_id, generations_up=3, generations_down=3):
                 if cid not in par_node["rels"]["children"]:
                     par_node["rels"]["children"].append(cid)
 
+    # Sibling closure: for any parent that IS in the tree, all their children
+    # must also be in the tree ("always show the full width of the family").
+    # Iterate until stable, then expand descendants of newly added nodes.
+    sib_expand = deque()
+    changed = True
+    while changed:
+        changed = False
+        for cid in list(nodes.keys()):
+            row = conn.execute(FULL_SELECT, (f"@{cid}@",)).fetchone()
+            if not row:
+                continue
+            for par_id in filter(None, [row["father_id"], row["mother_id"]]):
+                if clean(par_id) not in nodes:
+                    continue
+                kids = conn.execute(
+                    "SELECT child_id FROM children WHERE parent_id=?", (par_id,)
+                ).fetchall()
+                for k in kids:
+                    sib_id = k["child_id"]
+                    if clean(sib_id) not in nodes:
+                        if ensure_node(sib_id):
+                            changed = True
+                            sib_expand.append((sib_id, 0))
+
+    # Expand descendants and spouses of newly added siblings
+    while sib_expand:
+        pid, depth = sib_expand.popleft()
+        cid = clean(pid)
+        node = nodes.get(cid)
+        if not node:
+            continue
+        sp_rows = conn.execute(
+            "SELECT CASE WHEN person1_id=? THEN person2_id ELSE person1_id END AS sp_id "
+            "FROM marriages WHERE person1_id=? OR person2_id=?",
+            (pid, pid, pid)
+        ).fetchall()
+        for s in sp_rows:
+            sp_node = ensure_node(s["sp_id"])
+            if sp_node:
+                sp_cid = clean(s["sp_id"])
+                if sp_cid not in node["rels"]["spouses"]:
+                    node["rels"]["spouses"].append(sp_cid)
+                if cid not in nodes[sp_cid]["rels"]["spouses"]:
+                    nodes[sp_cid]["rels"]["spouses"].append(cid)
+        if depth < generations_down:
+            kids = conn.execute(
+                "SELECT child_id FROM children WHERE parent_id=?", (pid,)
+            ).fetchall()
+            for k in kids:
+                ch_id = k["child_id"]
+                if clean(ch_id) not in nodes:
+                    if ensure_node(ch_id):
+                        sib_expand.append((ch_id, depth + 1))
+
     # Add divorce info: list of spouse IDs this person is divorced from
     for cid, node in nodes.items():
         divorced = conn.execute(
