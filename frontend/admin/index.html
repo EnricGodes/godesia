@@ -82,8 +82,8 @@
                 <div style="font-size:0.8rem;color:#727971;margin:0.5rem 0 0.75rem;" id="db-info"></div>
                 <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
                     <button class="btn btn-secondary btn-sm" onclick="Status.dbAction('checkpoint')">✓ Checkpoint WAL</button>
-                    <button class="btn btn-secondary btn-sm" onclick="Status.dbAction('reconnect')">↻ Reconnectar</button>
                     <button class="btn btn-secondary btn-sm" onclick="Status.dbAction('vacuum')">◈ Vacuum</button>
+                    <span style="font-size:0.75rem;color:#727971;">Per reconectar, usa Reiniciar servidor.</span>
                     <span id="db-action-msg" style="font-size:0.8rem;font-weight:600;color:var(--primary,#17341e);"></span>
                 </div>
             </div>
