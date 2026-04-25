@@ -646,9 +646,11 @@ async def db_action(req: ActionRequest):
     elif req.action == "reconnect":
         try:
             from database import get_connection
-            _db_conn.close()
+            # Do NOT close the existing connection — app.py holds a reference to it
+            # and closing it would break all active queries. Open a fresh connection
+            # for admin routes only; the original connection stays alive in app.py.
             _db_conn = get_connection(str(_base_dir / "data" / "godesia.db"))
-            return {"status": "ok", "message": "Connexió a la BD reiniciada correctament."}
+            return {"status": "ok", "message": "Nova connexió admin establerta. La connexió principal segueix activa."}
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
     elif req.action == "vacuum":
