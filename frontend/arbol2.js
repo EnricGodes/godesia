@@ -9,7 +9,7 @@ let a2Svg    = null;  // SVG DOM element (for links + zoom)
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 async function a2Init(personId) {
-  const res = await fetch(`/api/tree2/${encodeURIComponent(personId)}?up=3&down=3`);
+  const res = await fetch(`/api/tree2/${encodeURIComponent(personId)}?up=6&down=6`);
   if (!res.ok) throw new Error(`Error carregant arbre: ${res.status}`);
   const { nodes, main_id } = await res.json();
 
@@ -18,35 +18,16 @@ async function a2Init(personId) {
   a2Svg   = null;
   a2Store = null;
 
-  // Create SVG (links + zoom host) with custom onZoom that also moves the HTML cards overlay
-  a2Svg = f3.createSvg(cont, {
-    onZoom: function(e) {
-      const t = e.transform;
-      const tStr = `translate(${t.x}px, ${t.y}px) scale(${t.k})`;
-      const svgView  = cont.querySelector('svg.main_svg .view');
-      const htmlView = cont.querySelector('#htmlSvg .cards_view');
-      if (svgView)  svgView.style.transform  = tStr;
-      if (htmlView) htmlView.style.transform = tStr;
-    },
-  });
-
-  // HTML overlay: positions card divs on top of the SVG link lines
-  const f3Canvas = cont.querySelector('#f3Canvas');
-  const htmlSvg = document.createElement('div');
-  htmlSvg.id = 'htmlSvg';
-  htmlSvg.style.cssText = 'position:absolute;width:100%;height:100%;z-index:2;top:0;left:0;pointer-events:none;';
-  const cardsViewEl = document.createElement('div');
-  cardsViewEl.className   = 'cards_view';
-  cardsViewEl.style.cssText = 'transform-origin:0 0;pointer-events:auto;';
-  htmlSvg.appendChild(cardsViewEl);
-  f3Canvas.appendChild(htmlSvg);
+  // htmlHandlers.default creates SVG + #htmlSvg overlay with synced zoom
+  const { svg, htmlSvg } = f3.htmlHandlers.default(cont);
+  a2Svg = svg;
 
   a2Store = f3.createStore({
     data: nodes,
     main_id,
     node_separation: 260,  // wider spacing for 220px cards
     level_separation: 220, // taller spacing for ~182px cards
-    transition_time: 250,  // x4 faster than default
+    transition_time: 125,  // x8 faster than default (issue 7)
   });
 
   const Card = f3.elements.CardHtml({
@@ -65,14 +46,15 @@ async function a2Init(personId) {
   a2Store.setOnUpdate(props => {
     f3.view(a2Store.getTree(), a2Svg, Card, {
       ...(props || {}),
-      cardComponent: true,
-      cardHtmlDiv:   htmlSvg,
+      cardHtml:    true,
+      cardHtmlDiv: htmlSvg,
     });
+    a2ApplyDivorcedLines();
   });
 
   a2Store.updateTree({ initial: true });
 
-  // After initial scatter animation, center view on main person (issue 3)
+  // After initial scatter animation, center view on main person
   setTimeout(() => {
     if (!a2Store || !a2Svg) return;
     try {
@@ -80,7 +62,7 @@ async function a2Init(personId) {
       const svg_dim = cont.getBoundingClientRect();
       f3.handlers.cardToMiddle({ datum, svg: a2Svg, svg_dim, scale: 1, transition_time: 300 });
     } catch (_) {}
-  }, 320);
+  }, 180);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -90,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ─── Card HTML (reference design, photo 50% bigger: 60px→90px) ───────────────
+// ─── Card HTML ────────────────────────────────────────────────────────────────
 
 function a2CardHtml(d) {
   // d.data = store item {id, data:{custom…}, rels:{…}}
@@ -98,12 +80,11 @@ function a2CardHtml(d) {
   const data     = d.data.data;
   const given    = data['first name'] || '';
   const family   = data['last name']  || '';
-  const years    = a2DisplayYears(data);
+  const info     = a2DisplayInfo(data);
   const avatar   = data.avatar || '';
   const isFemale = data.gender === 'F';
 
-  // Header background differs by gender (design system surface tokens)
-  const headerBg = isFemale ? '#f6f3ea' : '#ebe8df';
+  const headerBg = isFemale ? '#fdd2b1' : '#78583e';
 
   return `
 <div style="
@@ -116,7 +97,6 @@ function a2CardHtml(d) {
   user-select:none;
 " onmousedown="event.stopPropagation()">
 
-  <!-- Foto circular: 90px (reference 60px + 50%) -->
   <div style="
     height:130px;
     background:${headerBg};
@@ -141,7 +121,6 @@ function a2CardHtml(d) {
     </div>
   </div>
 
-  <!-- Info -->
   <div style="padding:10px 14px 12px;">
     <div style="
       font-family:'Noto Serif',Georgia,serif;
@@ -151,7 +130,7 @@ function a2CardHtml(d) {
       line-height:1.35;
       margin-bottom:3px;
     ">${given}<br>${family}</div>
-    <div style="font-size:11px;color:#7a7a6e;">${years}</div>
+    <div style="font-size:11px;color:#7a7a6e;">${info}</div>
   </div>
 
 </div>`;
@@ -164,6 +143,27 @@ function a2DisplayYears(data) {
   const b = data.birth_year || '?';
   const d = data.death_year || (data.is_alive ? 'viu/a' : '?');
   return `${b} – ${d}`;
+}
+
+function a2DisplayInfo(data) {
+  if (!data) return '';
+  const years = a2DisplayYears(data);
+  const place = data.birth_place || '';
+  return place ? `${years} · ${place}` : years;
+}
+
+// ─── Divorced lines ───────────────────────────────────────────────────────────
+
+function a2ApplyDivorcedLines() {
+  if (!a2Svg) return;
+  d3.select(a2Svg).select('.links_view').selectAll('path.link').each(function(d) {
+    if (!d || !d.spouse) return;
+    const srcData = d.source?.data?.data;
+    const tgtId   = d.target?.data?.id;
+    if (srcData && tgtId && (srcData.divorced_spouses || []).includes(tgtId)) {
+      d3.select(this).style('stroke-dasharray', '8,5').style('stroke-opacity', '0.65');
+    }
+  });
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -252,13 +252,13 @@ function a2CenterOn(nodeId) {
 
 function a2ZoomIn() {
   if (!a2Svg) return;
-  try { f3.handlers.manualZoom({ amount: 1.3,  svg: a2Svg, transition_time: 250 }); }
+  try { f3.handlers.manualZoom({ amount: 1.3,  svg: a2Svg, transition_time: 125 }); }
   catch (_) {}
 }
 
 function a2ZoomOut() {
   if (!a2Svg) return;
-  try { f3.handlers.manualZoom({ amount: 0.77, svg: a2Svg, transition_time: 250 }); }
+  try { f3.handlers.manualZoom({ amount: 0.77, svg: a2Svg, transition_time: 125 }); }
   catch (_) {}
 }
 
@@ -268,7 +268,7 @@ function a2ZoomReset() {
     const datum   = a2Store.getTreeMainDatum();
     const cont    = document.getElementById('FamilyChart');
     const svg_dim = cont.getBoundingClientRect();
-    f3.handlers.cardToMiddle({ datum, svg: a2Svg, svg_dim, scale: 1, transition_time: 350 });
+    f3.handlers.cardToMiddle({ datum, svg: a2Svg, svg_dim, scale: 1, transition_time: 200 });
   } catch (_) {}
 }
 

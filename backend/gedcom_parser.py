@@ -411,6 +411,8 @@ def parse_gedcom(filepath: str) -> dict:
                     current_level1 = "MARR"
                 elif tag == "DIV":
                     current_level1 = "DIV"
+                    if value == "Y":
+                        fam["divorce"]["confirmed"] = True
                 elif tag == "EVEN":
                     current_level1 = "EVEN"
             elif level == 2 and current_level1 == "MARR":

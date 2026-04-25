@@ -1729,6 +1729,21 @@ def get_tree_data_flat(conn, person_id, generations_up=3, generations_down=3):
                 if par_id not in visited:
                     queue.append((par_id, depth + 1, "up"))
 
+        # Expand siblings: when at an ancestor, also add their other children
+        # as "down" nodes so siblings/uncles/aunts and their descendants appear.
+        # Depth budget: children of ancestor at depth D get down-depth D-1,
+        # so they can expand (generations_down - (D-1)) further levels.
+        if direction == "up" and depth >= 1:
+            sib_down_depth = depth - 1
+            if sib_down_depth < generations_down:
+                kids = conn.execute(
+                    "SELECT child_id FROM children WHERE parent_id=?", (pid,)
+                ).fetchall()
+                for k in kids:
+                    ch_id = k["child_id"]
+                    if ch_id not in visited:
+                        queue.append((ch_id, sib_down_depth, "down"))
+
         # Expand descendants
         if direction in ("center", "down") and depth < generations_down:
             kids = conn.execute(
@@ -1777,6 +1792,16 @@ def get_tree_data_flat(conn, person_id, generations_up=3, generations_down=3):
                     node["rels"]["parents"].append(par_cid)
                 if cid not in par_node["rels"]["children"]:
                     par_node["rels"]["children"].append(cid)
+
+    # Add divorce info: list of spouse IDs this person is divorced from
+    for cid, node in nodes.items():
+        divorced = conn.execute(
+            "SELECT CASE WHEN person1_id=? THEN person2_id ELSE person1_id END AS sp_id "
+            "FROM marriages WHERE (person1_id=? OR person2_id=?) "
+            "AND (divorce_date IS NOT NULL OR divorce_note IS NOT NULL)",
+            (f"@{cid}@", f"@{cid}@", f"@{cid}@")
+        ).fetchall()
+        node["data"]["divorced_spouses"] = [clean(s["sp_id"]) for s in divorced]
 
     return list(nodes.values())
 

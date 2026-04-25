@@ -93,6 +93,10 @@
     }
     .a2-zoom-btn:hover { background: #f1eee5; border-color: #2d4b33; }
 
+    /* ── Mini-tree indicator (library uses white strokes, override for light theme) ── */
+    #FamilyChart .mini-tree line { stroke: #8a8780; }
+    #FamilyChart .mini-tree rect:not([fill="rgba(0,0,0,0)"]) { fill: #8a8780; }
+
     /* ── Sidebar ── */
     #a2-sidebar { font-family: Manrope, sans-serif; }
     .a2-field { margin-bottom: 12px; }

@@ -110,9 +110,10 @@ def migrate(json_path, db_path):
                 divorce = spouse.get("divorce", {})
                 marriage_date = convert_date_to_spanish(marriage.get("date", ""))
                 divorce_date = convert_date_to_spanish(divorce.get("date", "")) if divorce else ""
+                divorce_note = divorce.get("note", "") or ("Y" if divorce.get("confirmed") else "")
                 conn.execute(
                     "INSERT INTO marriages (person1_id, person2_id, date, place, divorce_date, divorce_place, divorce_note) VALUES (?,?,?,?,?,?,?)",
-                    (p1, p2, marriage_date, marriage.get("place", ""), divorce_date, divorce.get("place", ""), divorce.get("note", ""))
+                    (p1, p2, marriage_date, marriage.get("place", ""), divorce_date, divorce.get("place", ""), divorce_note)
                 )
 
             # Partnerships (non-marriage relationships)
