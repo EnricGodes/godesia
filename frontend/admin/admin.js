@@ -840,7 +840,7 @@ const Anecdotes = {
         const el = document.getElementById('anec-list');
         el.innerHTML = '<div class="empty-state">Carregant…</div>';
         try {
-            const url = `/api/admin/anecdotes?search=${encodeURIComponent(this.searchQuery)}`;
+            const url = `/api/admin/anecdotes?search=${encodeURIComponent(this.searchQuery)}&_t=${Date.now()}`;
             const d = await apiFetch(url);
 
             if (!d.items.length) {
