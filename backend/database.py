@@ -1342,13 +1342,14 @@ def update_all_photo_files(conn):
         """, (person_id,)).fetchone()["cnt"]
 
         # Find profile photo using 5-level selection algorithm
+        # Only considers photos that are actually on disk (is_downloaded = 1)
         photo_file = None
         if photo_count > 0:
             # Priority 1: is_primary=1
             photo_row = conn.execute("""
                 SELECT ph.filename FROM photos ph
                 JOIN photo_tags pt ON pt.photo_id = ph.id
-                WHERE pt.person_id = ? AND pt.is_primary = 1
+                WHERE pt.person_id = ? AND pt.is_primary = 1 AND ph.is_downloaded = 1
                 ORDER BY ph.id LIMIT 1
             """, (person_id,)).fetchone()
 
@@ -1358,6 +1359,7 @@ def update_all_photo_files(conn):
                     SELECT ph.filename FROM photos ph
                     JOIN photo_tags pt ON pt.photo_id = ph.id
                     WHERE pt.person_id = ? AND ph.is_prim_cutout = 1 AND ph.is_personal_photo = 1
+                      AND ph.is_downloaded = 1
                     ORDER BY ph.id LIMIT 1
                 """, (person_id,)).fetchone()
 
@@ -1366,7 +1368,7 @@ def update_all_photo_files(conn):
                 photo_row = conn.execute("""
                     SELECT ph.filename FROM photos ph
                     JOIN photo_tags pt ON pt.photo_id = ph.id
-                    WHERE pt.person_id = ? AND ph.is_prim_cutout = 1
+                    WHERE pt.person_id = ? AND ph.is_prim_cutout = 1 AND ph.is_downloaded = 1
                     ORDER BY ph.id LIMIT 1
                 """, (person_id,)).fetchone()
 
@@ -1375,16 +1377,16 @@ def update_all_photo_files(conn):
                 photo_row = conn.execute("""
                     SELECT ph.filename FROM photos ph
                     JOIN photo_tags pt ON pt.photo_id = ph.id
-                    WHERE pt.person_id = ? AND ph.is_cutout = 1
+                    WHERE pt.person_id = ? AND ph.is_cutout = 1 AND ph.is_downloaded = 1
                     ORDER BY ph.id LIMIT 1
                 """, (person_id,)).fetchone()
 
-            # Priority 5: any non-PDF photo
+            # Priority 5: any non-PDF photo on disk
             if not photo_row:
                 photo_row = conn.execute("""
                     SELECT ph.filename FROM photos ph
                     JOIN photo_tags pt ON pt.photo_id = ph.id
-                    WHERE pt.person_id = ? AND ph.filename NOT LIKE '%.pdf'
+                    WHERE pt.person_id = ? AND ph.filename NOT LIKE '%.pdf' AND ph.is_downloaded = 1
                     ORDER BY ph.id LIMIT 1
                 """, (person_id,)).fetchone()
 
