@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from database import (
-    get_connection, get_tree_data, get_birthdays_this_week, search_people,
+    get_connection, get_tree_data, get_tree_data_flat, get_birthdays_this_week, search_people,
     get_dashboard_data, get_documents, get_person_dossier, convert_date_to_spanish,
     update_all_photo_files, get_photo_details,
     get_albums_list, get_album_photos, get_photos_people_list,
@@ -174,6 +174,20 @@ async def tree(person_id: str, generations_up: int = 3, generations_down: int = 
     if not data:
         raise HTTPException(status_code=404, detail="Persona no encontrada")
     return data
+
+
+@app.get("/api/tree2/{person_id}")
+async def tree2(person_id: str, up: int = 3, down: int = 3):
+    """Datos del árbol en formato flat para family-chart (arbol2)."""
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    if not person_id.startswith("@"):
+        person_id = f"@{person_id}@"
+    data = get_tree_data_flat(db_conn, person_id, generations_up=up, generations_down=down)
+    if not data:
+        raise HTTPException(status_code=404, detail="Persona no encontrada")
+    clean_id = person_id.replace("@", "")
+    return {"nodes": data, "main_id": clean_id}
 
 
 @app.get("/api/search")

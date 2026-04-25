@@ -1651,6 +1651,120 @@ def get_photos_people_list(conn):
     } for r in rows]}
 
 
+def get_tree_data_flat(conn, person_id, generations_up=3, generations_down=3):
+    """Flat array in family-chart format for arbol2."""
+    from collections import deque
+
+    if not person_id.startswith("@"):
+        person_id = f"@{person_id}@"
+
+    FULL_SELECT = (
+        "SELECT id, name, given_name, surname, nickname, sex, "
+        "birth_year, birth_date, birth_place, death_year, death_date, "
+        "father_id, mother_id, photo_file, is_alive FROM people WHERE id=?"
+    )
+
+    nodes = {}  # clean_id -> node dict
+
+    def clean(pid):
+        return pid.replace("@", "")
+
+    def ensure_node(pid):
+        cid = clean(pid)
+        if cid in nodes:
+            return nodes[cid]
+        row = conn.execute(FULL_SELECT, (pid,)).fetchone()
+        if not row:
+            return None
+        node = {
+            "id": cid,
+            "data": {
+                "gender": row["sex"] if row["sex"] in ("M", "F") else "M",
+                "first name": row["given_name"] or row["name"] or "",
+                "last name": row["surname"] or "",
+                "birth_year": row["birth_year"],
+                "birth_date": row["birth_date"] or "",
+                "birth_place": row["birth_place"] or "",
+                "death_year": row["death_year"],
+                "death_date": row["death_date"] or "",
+                "is_alive": bool(row["is_alive"]),
+                "nickname": row["nickname"] or "",
+                "avatar": f"/photos/{row['photo_file']}" if row["photo_file"] else "",
+                "db_id": row["id"],
+            },
+            "rels": {"parents": [], "spouses": [], "children": []},
+        }
+        nodes[cid] = node
+        return node
+
+    visited = set()
+    queue = deque([(person_id, 0, "center")])
+
+    while queue:
+        pid, depth, direction = queue.popleft()
+        if pid in visited:
+            continue
+        visited.add(pid)
+
+        node = ensure_node(pid)
+        if not node:
+            continue
+
+        row = conn.execute(FULL_SELECT, (pid,)).fetchone()
+        if not row:
+            continue
+
+        cid = clean(pid)
+
+        # Expand ancestors
+        if direction in ("center", "up") and depth < generations_up:
+            for par_id in filter(None, [row["father_id"], row["mother_id"]]):
+                par_node = ensure_node(par_id)
+                if par_node:
+                    par_cid = clean(par_id)
+                    if par_cid not in node["rels"]["parents"]:
+                        node["rels"]["parents"].append(par_cid)
+                    if cid not in par_node["rels"]["children"]:
+                        par_node["rels"]["children"].append(cid)
+                if par_id not in visited:
+                    queue.append((par_id, depth + 1, "up"))
+
+        # Expand descendants
+        if direction in ("center", "down") and depth < generations_down:
+            kids = conn.execute(
+                "SELECT child_id FROM children WHERE parent_id=?", (pid,)
+            ).fetchall()
+            for k in kids:
+                ch_id = k["child_id"]
+                ch_node = ensure_node(ch_id)
+                if ch_node:
+                    ch_cid = clean(ch_id)
+                    if ch_cid not in node["rels"]["children"]:
+                        node["rels"]["children"].append(ch_cid)
+                    if cid not in ch_node["rels"]["parents"]:
+                        ch_node["rels"]["parents"].append(cid)
+                if ch_id not in visited:
+                    queue.append((ch_id, depth + 1, "down"))
+
+        # Always include spouses (don't BFS-expand their own families)
+        spouses = conn.execute(
+            "SELECT CASE WHEN person1_id=? THEN person2_id ELSE person1_id END AS sp_id "
+            "FROM marriages WHERE person1_id=? OR person2_id=?",
+            (pid, pid, pid)
+        ).fetchall()
+        for s in spouses:
+            sp_id = s["sp_id"]
+            sp_node = ensure_node(sp_id)
+            if sp_node:
+                sp_cid = clean(sp_id)
+                if sp_cid not in node["rels"]["spouses"]:
+                    node["rels"]["spouses"].append(sp_cid)
+                if cid not in sp_node["rels"]["spouses"]:
+                    sp_node["rels"]["spouses"].append(cid)
+
+    return list(nodes.values())
+
+
 def _person_to_node(person):
     """Convert a DB row to a tree node dict."""
     p = dict(person) if not isinstance(person, dict) else person
