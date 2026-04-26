@@ -5,6 +5,7 @@ const A2_DEFAULT_ID = 'I4'; // Artur Godes Caballeria
 
 let a2Store  = null;
 let a2Svg    = null;  // SVG DOM element (for links + zoom)
+let a2MainId = null;  // Originally requested person ID (viewport center target)
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
@@ -17,60 +18,97 @@ async function a2Init(personId) {
   cont.innerHTML = '';
   a2Svg   = null;
   a2Store = null;
+  a2MainId = main_id;
 
   // htmlHandlers.default creates SVG + #htmlSvg overlay with synced zoom
   const { svg, htmlSvg } = f3.htmlHandlers.default(cont);
   a2Svg = svg;
 
+  // Use the main person as store_main_id so family-chart renders:
+  //  - the main person and their siblings in the center row
+  //  - both parents (father + mother) as the couple above
+  //  - BOTH grandparent lines (paternal and maternal) above the parents
+  //  - paternal uncles/aunts beside the father (children of paternal grandfather)
+  //  - maternal uncles/aunts beside the mother (children of maternal grandfather)
+  const store_main_id = main_id;
+
   a2Store = f3.createStore({
     data: nodes,
-    main_id,
-    node_separation: 260,  // wider spacing for 220px cards
-    level_separation: 220, // taller spacing for ~182px cards
-    transition_time: 125,  // x8 faster than default (issue 7)
+    main_id: store_main_id,
+    node_separation: 260,   // wider spacing for 220px cards
+    level_separation: 240,  // vertical gap: 240 - 132px card = 108px for connectors + mini-tree
+    transition_time: 125,   // x8 faster than default
+    // Render the main person's siblings via the library's setupSiblings.
+    // Without this the parents end up with a mini-tree icon because their
+    // children (the main's siblings) are missing from the tree.
+    show_siblings_of_main: true,
+    // Sort children and siblings by birth year (oldest first). family-chart
+    // applies this both in hierarchyGetterChildren and inside setupSiblings.
+    sortChildrenFunction: (a, b) => {
+      const ay = (a && a.data && a.data.birth_year) || 9999;
+      const by = (b && b.data && b.data.birth_year) || 9999;
+      return ay - by;
+    },
   });
 
   const Card = f3.elements.CardHtml({
     store:   a2Store,
     svg:     a2Svg,
     mini_tree: true,
+    // Issue 3+4: tell family-chart the actual foreignObject size so the
+    // SVG mini-tree icon and connector lines are not covered by the card.
+    // Card renders at 220×132px (100px header + ~32px text block).
+    card_dim: { w: 220, h: 132, text_x: 0, text_y: 0, img_x: 0, img_y: 0, img_w: 0, img_h: 0 },
     cardInnerHtmlCreator: d => a2CardHtml(d),
     onCardClick: (_e, d) => {
-      // Center view on clicked card without reorganizing the tree
+      // Center view on clicked card without reorganizing the tree.
+      // Issue 7: must pass the *current* zoom transform (not scale:1) so that
+      // cardToMiddle computes the translation offset correctly when zoomed out.
       try {
-        const cont    = document.getElementById('FamilyChart');
-        const svg_dim = cont.getBoundingClientRect();
-        const scale   = f3.handlers.getCurrentZoom(a2Svg).k;
-        f3.handlers.cardToMiddle({ datum: d, svg: a2Svg, svg_dim, scale, transition_time: 350 });
+        const cont      = document.getElementById('FamilyChart');
+        const svg_dim   = cont.getBoundingClientRect();
+        const transform = f3.handlers.getCurrentZoom(a2Svg);
+        f3.handlers.cardToMiddle({ datum: d, svg: a2Svg, svg_dim, scale: transform.k, transition_time: 350 });
       } catch (_) {}
       a2OpenSidebar(d.data);
     },
   });
 
   a2Store.setOnUpdate(props => {
-    f3.view(a2Store.getTree(), a2Svg, Card, {
+    const tree = a2Store.getTree();
+    a2AddParentSiblings(tree);
+    f3.view(tree, a2Svg, Card, {
       ...(props || {}),
       cardHtml:    true,
       cardHtmlDiv: htmlSvg,
     });
     a2ApplyDivorcedLines();
+    a2BindMiniTreeClicks();
   });
 
   a2Store.updateTree({ initial: true });
 
-  // After initial scatter animation, center view on main person
+  // After initial scatter animation, center view on originally requested person
   setTimeout(() => {
     if (!a2Store || !a2Svg) return;
     try {
-      const datum   = a2Store.getTreeMainDatum();
       const svg_dim = cont.getBoundingClientRect();
+      const datum   = a2FindDatumById(a2MainId) || a2Store.getTreeMainDatum();
       f3.handlers.cardToMiddle({ datum, svg: a2Svg, svg_dim, scale: 1, transition_time: 300 });
     } catch (_) {}
   }, 180);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  a2Init(A2_DEFAULT_ID).catch(err => {
+document.addEventListener('DOMContentLoaded', async () => {
+  let defaultId = A2_DEFAULT_ID;
+  try {
+    const res = await fetch('/api/settings');
+    if (res.ok) {
+      const s = await res.json();
+      if (s.tree_default_person) defaultId = s.tree_default_person;
+    }
+  } catch (_) {}
+  a2Init(defaultId).catch(err => {
     document.getElementById('FamilyChart').innerHTML =
       `<div style="padding:40px;font-family:Manrope,sans-serif;color:#ba1a1a;">Error: ${err.message}</div>`;
   });
@@ -88,53 +126,57 @@ function a2CardHtml(d) {
   const avatar   = data.avatar || '';
   const isFemale = data.gender === 'F';
 
-  const headerBg = isFemale ? '#fdd2b1' : '#78583e';
+  // Issue 2: new palette — warm sand for men, blush for women
+  const cardBg = isFemale ? '#fee7d4' : '#ad947c';
+  const textColor = isFemale ? '#6b3a1f' : '#fff8f2';
+  const subColor  = isFemale ? '#a0613a' : '#f0ddd0';
 
   return `
 <div style="
-  background:#ffffff;
-  border-radius:8px;
-  overflow:hidden;
+  background:${cardBg};
+  border-radius:10px;
+  overflow:visible;
   width:220px;
   font-family:'Manrope',sans-serif;
-  box-shadow:0 4px 20px rgba(28,28,23,0.10);
+  box-shadow:0 4px 20px rgba(28,28,23,0.15);
   user-select:none;
 " onmousedown="event.stopPropagation()">
 
+  <!-- Issue 1: reduced height (~10% lower), photo centered with margin-top -->
   <div style="
-    height:130px;
-    background:${headerBg};
+    height:100px;
     display:flex;
     align-items:center;
     justify-content:center;
   ">
     <div style="
-      width:90px;
-      height:90px;
+      width:80px;
+      height:80px;
       border-radius:50%;
       overflow:hidden;
-      box-shadow:0 2px 12px rgba(28,28,23,0.18);
-      background:#d5d2c9;
+      box-shadow:0 2px 10px rgba(28,28,23,0.22);
+      background:rgba(255,255,255,0.25);
       flex-shrink:0;
+      margin-top:10px;
     ">
       ${avatar
         ? `<img src="${avatar}" alt="${given} ${family}"
-             style="width:90px;height:90px;object-fit:cover;object-position:top 10%;"
-             onerror="this.parentElement.style.background='#c2c8bf'">`
+             style="width:80px;height:80px;object-fit:cover;object-position:top 10%;"
+             onerror="this.parentElement.style.background='rgba(255,255,255,0.15)'">`
         : ''}
     </div>
   </div>
 
-  <div style="padding:10px 14px 12px;">
+  <div style="padding:8px 12px 10px;text-align:center;">
     <div style="
       font-family:'Noto Serif',Georgia,serif;
-      font-size:13px;
+      font-size:12.5px;
       font-weight:600;
-      color:#392d13;
-      line-height:1.35;
-      margin-bottom:3px;
+      color:${textColor};
+      line-height:1.3;
+      margin-bottom:2px;
     ">${given}<br>${family}</div>
-    <div style="font-size:11px;color:#7a7a6e;">${info}</div>
+    <div style="font-size:10.5px;color:${subColor};">${info}</div>
   </div>
 
 </div>`;
@@ -145,8 +187,9 @@ function a2CardHtml(d) {
 function a2DisplayYears(data) {
   if (!data) return '';
   const b = data.birth_year || '?';
-  const d = data.death_year || (data.is_alive ? 'viu/a' : '?');
-  return `${b} – ${d}`;
+  // Issue 5+6: alive people show only birth year; unknown death → '?' only if deceased
+  const d = data.death_year || (data.is_alive ? null : '?');
+  return d ? `${b} – ${d}` : `${b}`;
 }
 
 function a2DisplayInfo(data) {
@@ -154,6 +197,95 @@ function a2DisplayInfo(data) {
   const years = a2DisplayYears(data);
   const place = data.birth_place || '';
   return place ? `${years} · ${place}` : years;
+}
+
+// ─── Inject parent siblings (uncles/aunts of main) ───────────────────────────
+//
+// family-chart only renders the direct ancestor line: it never shows the
+// siblings of an ancestor. We want the parents of the main person to appear
+// expanded with their siblings (the main's uncles and aunts) on both sides.
+// We replicate the technique used internally by setupSiblings (lines 86+ of
+// family-chart.js): create extra nodes with `sibling:true`, position them
+// next to the parent, and link them to the grandparents already in the tree.
+//
+// Only depth-1 ancestors (the main's parents) are expanded. Grandparents stay
+// collapsed (the mini-tree icon remains clickable to recenter on them).
+
+function a2AddParentSiblings(tree) {
+  if (!tree || !Array.isArray(tree.data) || !a2Store) return;
+  const main = tree.data.find(d => d && d.data && d.data.main);
+  if (!main || !main.parents || main.parents.length === 0) return;
+
+  const dataStash = a2Store.getData();
+  if (!dataStash || dataStash.length === 0) return;
+
+  const nodeSep = (a2Store.state && a2Store.state.node_separation) || 260;
+  const existingIds = new Set(tree.data.map(d => d.data && d.data.id).filter(Boolean));
+  const newNodes = [];
+
+  main.parents.forEach(parent => {
+    if (!parent || !parent.data) return;
+    const pDatum = parent.data;
+    const pParentRels = (pDatum.rels && pDatum.rels.parents) || [];
+    if (pParentRels.length === 0) return; // can't find siblings without grandparents
+
+    const siblings = dataStash.filter(d => {
+      if (!d || d.id === pDatum.id) return false;
+      if (existingIds.has(d.id)) return false;
+      const dParents = (d.rels && d.rels.parents) || [];
+      return pParentRels.some(gpId => dParents.includes(gpId));
+    });
+    if (siblings.length === 0) return;
+
+    siblings.sort((a, b) => {
+      const ay = (a.data && a.data.birth_year) || 9999;
+      const by = (b.data && b.data.birth_year) || 9999;
+      return ay - by;
+    });
+
+    // Place siblings on the side of the parent farthest from main.
+    const direction = parent.x <= main.x ? -1 : 1;
+    const grandparentNodes = (parent.parents || []).filter(d => d && d.is_ancestry);
+
+    siblings.forEach((sibDatum, i) => {
+      const sib = {
+        data: sibDatum,
+        sibling: true,
+        is_ancestry: true,
+        depth: parent.depth,
+        x: parent.x + direction * nodeSep * (i + 1),
+        y: parent.y,
+        parents: grandparentNodes.length > 0 ? grandparentNodes : undefined,
+        // family-chart's calculateEnterAndExitPositions requires `parent` for
+        // is_ancestry nodes (used as the animation origin). Anchor to the
+        // genealogical parent so the sibling card flies out from its side.
+        parent: parent,
+        tid: `psib-${sibDatum.id}`,
+        all_rels_displayed: false,
+      };
+      newNodes.push(sib);
+      existingIds.add(sibDatum.id);
+    });
+  });
+
+  if (newNodes.length === 0) return;
+
+  newNodes.forEach(n => tree.data.push(n));
+
+  // Recompute tree.dim so the initial fit zooms out enough to show new nodes.
+  if (tree.dim) {
+    const xs = tree.data.map(d => d.x).filter(v => typeof v === 'number');
+    const ys = tree.data.map(d => d.y).filter(v => typeof v === 'number');
+    if (xs.length && ys.length) {
+      const xMin = Math.min(...xs), xMax = Math.max(...xs);
+      const yMin = Math.min(...ys), yMax = Math.max(...ys);
+      const levelSep = (a2Store.state && a2Store.state.level_separation) || 220;
+      tree.dim.width  = (xMax - xMin) + nodeSep;
+      tree.dim.height = (yMax - yMin) + levelSep;
+      tree.dim.x_off  = -xMin + nodeSep / 2;
+      tree.dim.y_off  = -yMin + levelSep / 2;
+    }
+  }
 }
 
 // ─── Divorced lines ───────────────────────────────────────────────────────────
@@ -252,6 +384,44 @@ function a2CenterOn(nodeId) {
   a2Init(nodeId).catch(console.error);
 }
 
+// ─── Tree helpers ─────────────────────────────────────────────────────────────
+
+function a2BindMiniTreeClicks() {
+  if (!a2Svg) return;
+  d3.select(a2Svg).selectAll('.mini-tree').each(function() {
+    // Walk up the DOM to find the D3 datum bound to the enclosing card group
+    let datum = null;
+    let node  = this.parentElement;
+    while (node && !datum) {
+      datum = d3.select(node).datum();
+      node  = node.parentElement;
+    }
+    const nodeId = datum?.data?.id;
+    if (!nodeId) return;
+    d3.select(this)
+      .style('cursor', 'pointer')
+      .on('click.minitree', (e) => {
+        e.stopPropagation();
+        a2Init(nodeId).catch(console.error);
+      });
+  });
+}
+
+function a2FindDatumById(nodeId) {
+  if (!a2Store || !nodeId) return null;
+  try {
+    const tree = a2Store.getTree();
+    if (!tree) return null;
+    if (tree.data && Array.isArray(tree.data)) {
+      return tree.data.find(d => d.data && d.data.id === nodeId) || null;
+    }
+    if (typeof tree.descendants === 'function') {
+      return tree.descendants().find(d => d.data && d.data.id === nodeId) || null;
+    }
+    return null;
+  } catch (_) { return null; }
+}
+
 // ─── Zoom ─────────────────────────────────────────────────────────────────────
 
 function a2ZoomIn() {
@@ -269,7 +439,7 @@ function a2ZoomOut() {
 function a2ZoomReset() {
   if (!a2Store || !a2Svg) return;
   try {
-    const datum   = a2Store.getTreeMainDatum();
+    const datum   = a2FindDatumById(a2MainId) || a2Store.getTreeMainDatum();
     const cont    = document.getElementById('FamilyChart');
     const svg_dim = cont.getBoundingClientRect();
     f3.handlers.cardToMiddle({ datum, svg: a2Svg, svg_dim, scale: 1, transition_time: 200 });
@@ -308,7 +478,8 @@ async function a2DoSearch(q) {
       a2ResultsBox.innerHTML = results.map(r => {
         const name  = r.nickname
           ? `${r.given_name || ''} "${r.nickname}" ${r.surname || ''}` : r.name;
-        const years = `${r.birth_year || '?'} – ${r.death_year || (r.is_alive ? 'viu/a' : '?')}`;
+        const _dy = r.death_year || (r.is_alive ? null : '?');
+        const years = _dy ? `${r.birth_year || '?'} – ${_dy}` : `${r.birth_year || '?'}`;
         const cid   = r.id.replace(/@/g, '');
         return `<div class="a2-result-item" onclick="a2SelectPerson('${cid}')">
           <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</span>
