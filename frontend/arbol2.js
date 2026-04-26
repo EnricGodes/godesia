@@ -400,6 +400,27 @@ function a2BindMiniTreeClicks() {
         e.stopPropagation();
         a2Init(nodeId).catch(console.error);
       });
+
+    // Scale down the SVG transform attribute directly (CSS transform would override
+    // the library's positioning translate and move the icon off-screen).
+    // We keep the bottom-center of the bounding box fixed so the connecting line
+    // to the card stays in place.
+    try {
+      const cur = this.getAttribute('transform') || '';
+      if (cur.includes('scale')) return; // already processed this render cycle
+      const bbox = this.getBBox();
+      const s  = 0.32;
+      const cx = bbox.x + bbox.width  / 2;
+      const by = bbox.y + bbox.height;
+      // Parse the library's translate(dx, dy)
+      const m  = cur.match(/translate\(\s*([-\d.e]+)[,\s]+([-\d.e]+)\s*\)/);
+      const dx = m ? parseFloat(m[1]) : 0;
+      const dy = m ? parseFloat(m[2]) : 0;
+      // Combined: translate that keeps bottom-center at (dx+cx, dy+by), then scale
+      this.setAttribute('transform',
+        `translate(${dx + cx*(1-s)},${dy + by*(1-s)}) scale(${s})`
+      );
+    } catch (_) {}
   });
 }
 
