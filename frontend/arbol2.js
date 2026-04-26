@@ -58,7 +58,7 @@ async function a2Init(personId) {
     // Issue 3+4: tell family-chart the actual foreignObject size so the
     // SVG mini-tree icon and connector lines are not covered by the card.
     // Card renders at 220×132px (100px header + ~32px text block).
-    card_dim: { w: 220, h: 132, text_x: 0, text_y: 0, img_x: 0, img_y: 0, img_w: 0, img_h: 0 },
+    card_dim: { w: 220, h: 156, text_x: 0, text_y: 0, img_x: 0, img_y: 0, img_w: 0, img_h: 0 },
     cardInnerHtmlCreator: d => a2CardHtml(d),
     onCardClick: (_e, d) => {
       // Center view on clicked card without reorganizing the tree.
@@ -126,57 +126,53 @@ function a2CardHtml(d) {
   const avatar   = data.avatar || '';
   const isFemale = data.gender === 'F';
 
-  // Issue 2: new palette — warm sand for men, blush for women
-  const cardBg = isFemale ? '#fee7d4' : '#ad947c';
-  const textColor = isFemale ? '#6b3a1f' : '#fff8f2';
-  const subColor  = isFemale ? '#a0613a' : '#f0ddd0';
+  const headerBg = isFemale ? '#fdd2b1' : '#78583e';
 
   return `
 <div style="
-  background:${cardBg};
-  border-radius:10px;
-  overflow:visible;
+  background:#ffffff;
+  border-radius:8px;
+  overflow:hidden;
   width:220px;
   font-family:'Manrope',sans-serif;
-  box-shadow:0 4px 20px rgba(28,28,23,0.15);
+  box-shadow:0 4px 20px rgba(28,28,23,0.10);
   user-select:none;
 " onmousedown="event.stopPropagation()">
 
-  <!-- Issue 1: reduced height (~10% lower), photo centered with margin-top -->
   <div style="
-    height:100px;
+    height:112px;
+    background:${headerBg};
     display:flex;
     align-items:center;
     justify-content:center;
   ">
     <div style="
-      width:80px;
-      height:80px;
+      width:90px;
+      height:90px;
       border-radius:50%;
       overflow:hidden;
-      box-shadow:0 2px 10px rgba(28,28,23,0.22);
-      background:rgba(255,255,255,0.25);
+      box-shadow:0 2px 12px rgba(28,28,23,0.18);
+      background:#d5d2c9;
       flex-shrink:0;
-      margin-top:10px;
     ">
       ${avatar
         ? `<img src="${avatar}" alt="${given} ${family}"
-             style="width:80px;height:80px;object-fit:cover;object-position:top 10%;"
-             onerror="this.parentElement.style.background='rgba(255,255,255,0.15)'">`
+             style="width:90px;height:90px;object-fit:cover;object-position:top 10%;"
+             onerror="this.parentElement.style.background='#c2c8bf'">`
         : ''}
     </div>
   </div>
 
-  <div style="padding:8px 12px 10px;text-align:center;">
+  <div style="padding:10px 14px 12px;">
     <div style="
       font-family:'Noto Serif',Georgia,serif;
-      font-size:12.5px;
+      font-size:13px;
       font-weight:600;
-      color:${textColor};
-      line-height:1.3;
-      margin-bottom:2px;
+      color:#392d13;
+      line-height:1.35;
+      margin-bottom:3px;
     ">${given}<br>${family}</div>
-    <div style="font-size:10.5px;color:${subColor};">${info}</div>
+    <div style="font-size:11px;color:#7a7a6e;">${info}</div>
   </div>
 
 </div>`;
