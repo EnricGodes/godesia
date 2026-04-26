@@ -1288,9 +1288,12 @@ const Comparador = {
 
             const ICONS = {
                 dates: '📅 Dates', places: '📍 Llocs', notes: '📝 Notes',
-                photos: '📸 Fotos', name: '💬 Nom', nomatch: '❓ No trobat',
+                photos: '📸 Fotos', documents: '📄 Documents',
+                name: '💬 Nom', nomatch: '❓ No trobat',
                 occupations: '💼 Oficis', residences: '🏠 Residències',
                 events: '🗓 Esdeveniments',
+                sex: '⚧ Sexe', parents: '👪 Pares',
+                marriage: '💍 Matrimoni', children: '🧒 Fills',
             };
 
             this._rows = {};
@@ -1362,7 +1365,7 @@ const Comparador = {
             let details = {};
             try { details = JSON.parse(row.diff_details || '{}'); } catch (_) {}
             const lines = Object.values(details).flat()
-                .map(item => `<div>• ${esc(String(item))}</div>`);
+                .map(item => `<div style="white-space:pre-wrap;margin-bottom:.35rem;">• ${esc(String(item))}</div>`);
             contentEl.innerHTML = lines.join('') || '<em style="color:#9e9b94;">Sense detalls.</em>';
         }
     },

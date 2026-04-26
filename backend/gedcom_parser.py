@@ -252,7 +252,17 @@ def parse_gedcom(filepath: str) -> dict:
                 elif tag == "OBJE":
                     _in_note_block = False
                     current_level1 = "OBJE"
-                    indi["photos"].append({})
+                    indi["photos"].append({
+                        "url": None,
+                        "title": None,
+                        "form": None,
+                        "photo_rin": None,
+                        "is_prim": False,
+                        "is_cutout": False,
+                        "is_prim_cutout": False,
+                        "is_personal": False,
+                        "position": None,
+                    })
 
             elif level == 2:
                 current_level2 = tag
@@ -355,6 +365,26 @@ def parse_gedcom(filepath: str) -> dict:
                         indi["immigration"]["date"] = value
                     elif tag == "PLAC":
                         indi["immigration"]["place"] = value
+                elif current_level1 == "OBJE" and indi["photos"]:
+                    photo = indi["photos"][-1]
+                    if tag == "FILE":
+                        photo["url"] = value
+                    elif tag == "TITL":
+                        photo["title"] = value
+                    elif tag == "FORM":
+                        photo["form"] = value
+                    elif tag == "_PHOTO_RIN":
+                        photo["photo_rin"] = value
+                    elif tag == "_PRIM":
+                        photo["is_prim"] = (value.upper() == "Y")
+                    elif tag == "_CUTOUT":
+                        photo["is_cutout"] = (value.upper() == "Y")
+                    elif tag == "_PRIM_CUTOUT":
+                        photo["is_prim_cutout"] = (value.upper() == "Y")
+                    elif tag == "_PERSONALPHOTO":
+                        photo["is_personal"] = (value.upper() == "Y")
+                    elif tag == "_POSITION":
+                        photo["position"] = value
                 # Capture fields for ALL event tags
                 elif current_level1 in ("CENS", "EDUC", "BAPM", "CHR", "CONF", "FCOM", "EMIG", "NATI", "RELI", "DSCR", "EVEN"):
                     if indi["events"] and indi["events"][-1].get("tag") == current_level1 or (current_level1 == "EVEN" and indi["events"][-1].get("tag") == "EVEN"):

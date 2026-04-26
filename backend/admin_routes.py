@@ -438,10 +438,96 @@ def _strip_nickname(text: str) -> str:
     import re
     if not text:
         return text
-    # Remove "..." and (...)
-    text = re.sub(r'"[^"]*"', '', text)
+    # Remove "..." and (...)  (also handles unicode “ ” ‘ ’ quotes)
+    text = re.sub(r'["“”][^"“”]*["“”]', '', text)
+    text = re.sub(r"['‘’][^'‘’]*['‘’]", '', text)
     text = re.sub(r'\([^)]*\)', '', text)
     return " ".join(text.split())
+
+
+# Catalan ↔ Spanish given-name variants. Each form maps to a single canonical
+# key so equivalent names collide in the index. Includes common diminutives.
+_NAME_VARIANT_PAIRS = [
+    ("joan", "juan"), ("joana", "juana"),
+    ("anna", "ana"),
+    ("pere", "pedro"),
+    ("jordi", "jorge"),
+    ("carme", "carmen"),
+    ("josep", "jose"), ("josepa", "josefa"),
+    ("francesc", "francisco"), ("francesca", "francisca"),
+    ("antoni", "antonio"), ("antonia", "antonia"),
+    ("miquel", "miguel"),
+    ("lluis", "luis"), ("lluisa", "luisa"),
+    ("joaquim", "joaquin"), ("joaquima", "joaquina"),
+    ("merce", "mercedes"),
+    ("concepcio", "concepcion"),
+    ("dolors", "dolores"),
+    ("cristofol", "cristobal"),
+    ("esteve", "esteban"),
+    ("vicens", "vicente"),
+    ("bernat", "bernardo"),
+    ("narcis", "narciso"),
+    ("isidre", "isidro"),
+    ("marti", "martin"),
+    ("domenec", "domingo"),
+    ("agusti", "agustin"),
+    ("rafel", "rafael"),
+    ("jaume", "jaime"),
+    ("guillem", "guillermo"),
+    ("felip", "felipe"),
+    ("ferran", "fernando"),
+    ("llorenc", "lorenzo"),
+    ("blai", "blas"),
+    ("raimon", "raimundo"),
+    ("enric", "enrique"),
+    ("salvador", "salvador"),
+    ("magdalena", "magdalena"),
+    ("teresa", "teresa"),
+]
+_NAME_DIMINUTIVES = {
+    "pep": "josep", "pepe": "josep",
+    "paco": "francesc", "cisco": "francesc", "kiko": "francesc", "fco": "francesc",
+    "toni": "antoni", "tonet": "antoni",
+    "quim": "joaquim",
+    "montse": "montserrat",
+    "tere": "teresa",
+    "lola": "dolors", "lolita": "dolors",
+    "concha": "concepcio", "conxita": "concepcio",
+    "lluiseta": "lluis",
+    "ma": "maria", "m": "maria",
+}
+_NAME_VARIANTS: dict = {}
+for _a, _b in _NAME_VARIANT_PAIRS:
+    _NAME_VARIANTS[_a] = _a
+    _NAME_VARIANTS[_b] = _a
+_NAME_VARIANTS.update(_NAME_DIMINUTIVES)
+
+# Tokens dropped during canonicalization (Catalan/Spanish surname connectors,
+# articles, and similar fillers between surnames).
+_NAME_STOPWORDS = {"i", "y", "de", "del", "la", "el", "les", "los", "da", "do"}
+
+
+def _canonicalize_person_name(text: str) -> str:
+    """Canonical form for matching genealogy people across GEDCOM ↔ DB.
+    Steps: strip nicknames → NFD/lowercase → drop connectors (i/y/de/...) →
+    drop 1-char tokens → map Catalan↔Spanish variants → reorder alphabetically
+    so 'surname given' and 'given surname' collide."""
+    if not text:
+        return ""
+    raw = _strip_nickname(text)
+    base = _normalize_name(raw)
+    if not base:
+        return ""
+    out_tokens = []
+    for tok in base.split():
+        if len(tok) <= 1:
+            continue
+        if tok in _NAME_STOPWORDS:
+            continue
+        out_tokens.append(_NAME_VARIANTS.get(tok, tok))
+    if not out_tokens:
+        return ""
+    return " ".join(out_tokens)
 
 
 def _ged_year(date_str: str) -> Optional[int]:
@@ -466,13 +552,19 @@ def _ged_has_full_date(date_str: str) -> bool:
 
 
 def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
-                  db_burials: list, db_events: list, ged: dict) -> tuple:
+                  db_burials: list, db_events: list, db_photos: list,
+                  db_marriages: list, db_children: list,
+                  ged: dict, families: dict, individuals: dict) -> tuple:
     """Compare one DB person against one GEDCOM individual.
     Returns (diff_types_list, diff_details_dict)."""
     diff_types = []
     details = {}
 
     # ── Dates ─────────────────────────────────────────────────────────────
+    # Flag when GEDCOM brings information the DB lacks: empty DB date, or
+    # year-only DB vs full GEDCOM date. Skip cross-format comparison
+    # (Spanish 'abr.' vs GEDCOM 'APR') — they would produce too many false
+    # positives without language-aware month parsing.
     date_diffs = []
     db_birth_year = db_person.get("birth_year")
     db_birth_date = (db_person.get("birth_date") or "").strip()
@@ -481,7 +573,9 @@ def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
     db_birth_is_year_only = bool(db_birth_year) and (
         not db_birth_date or db_birth_date == str(db_birth_year)
     )
-    if db_birth_is_year_only and _ged_has_full_date(ged_birth_date):
+    if ged_birth_date and not db_birth_date and not db_birth_year:
+        date_diffs.append(f"Naixement: BD no té data, GEDCOM té '{ged_birth_date}'")
+    elif db_birth_is_year_only and _ged_has_full_date(ged_birth_date):
         date_diffs.append(f"Naixement: BD té '{db_birth_date or db_birth_year}', GEDCOM té '{ged_birth_date}'")
 
     db_death_year = db_person.get("death_year")
@@ -491,7 +585,9 @@ def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
     db_death_is_year_only = bool(db_death_year) and (
         not db_death_date or db_death_date == str(db_death_year)
     )
-    if db_death_is_year_only and _ged_has_full_date(ged_death_date):
+    if ged_death_date and not db_death_date and not db_death_year:
+        date_diffs.append(f"Defunció: BD no té data, GEDCOM té '{ged_death_date}'")
+    elif db_death_is_year_only and _ged_has_full_date(ged_death_date):
         date_diffs.append(f"Defunció: BD té '{db_death_date or db_death_year}', GEDCOM té '{ged_death_date}'")
 
     # ── Baptism date ──────────────────────────────────────────────────────
@@ -585,12 +681,14 @@ def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
         details.setdefault("events", []).append(f"Causa defunció al GEDCOM: '{ged_death_cause}'")
 
     # ── Notes ─────────────────────────────────────────────────────────────
+    # Compare full normalized note text (case + whitespace insensitive) and
+    # send the entire content to the frontend so the user can read it whole.
     ged_notes = ged.get("notes") or []
-    db_notes_set = {n.strip()[:120] for n in db_notes}
-    new_notes = [n for n in ged_notes if n.strip()[:120] not in db_notes_set]
+    db_notes_norm = {_normalize_name(n) for n in db_notes if n}
+    new_notes = [n for n in ged_notes if n and _normalize_name(n) not in db_notes_norm]
     if new_notes:
         diff_types.append("notes")
-        details["notes"] = [f"Nova nota: {n[:300]}" for n in new_notes]
+        details["notes"] = [f"Nova nota: {n}" for n in new_notes]
 
     # ── Occupations ───────────────────────────────────────────────────────
     ged_occs = ged.get("occupations") or []
@@ -619,27 +717,146 @@ def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
             for r in new_res
         ]
 
-    # ── Photos ────────────────────────────────────────────────────────────
-    ged_photos = [p for p in (ged.get("photos") or []) if p.get("url")]
-    if ged_photos:
+    # ── Photos & documents ────────────────────────────────────────────────
+    # Match GEDCOM ↔ DB photos by MyHeritage `_PHOTO_RIN`, the only stable id
+    # both sides share. Photos in the GEDCOM with a RIN we don't have, or
+    # without a RIN at all (rarer), surface as new. PDF attachments surface
+    # under a separate `documents` category since the user cares about them.
+    ged_photos_all = ged.get("photos") or []
+    db_rin_set = {p["photo_rin"] for p in db_photos if p.get("photo_rin")}
+    new_photos: list = []
+    new_docs: list = []
+    for p in ged_photos_all:
+        rin = p.get("photo_rin")
+        if rin and rin in db_rin_set:
+            continue
+        url = p.get("url") or ""
+        is_document = (p.get("form") or "").lower() == "pdf" or url.lower().split("?")[0].endswith(".pdf")
+        label_parts = []
+        if p.get("title"):
+            label_parts.append(p["title"])
+        if rin:
+            label_parts.append(f"[{rin}]")
+        if not label_parts and url:
+            label_parts.append(url.rsplit("/", 1)[-1].split("?")[0])
+        label = " ".join(label_parts) or "(sense títol)"
+        if is_document:
+            new_docs.append(f"Document: {label}" + (f" — {url}" if url else ""))
+        else:
+            new_photos.append(f"Foto: {label}" + (f" — {url}" if url else ""))
+    if new_photos:
         diff_types.append("photos")
-        details["photos"] = [
-            f"Foto al GEDCOM: {p.get('title') or p.get('url', '')}"
-            for p in ged_photos[:5]
-        ]
+        details["photos"] = new_photos
+    if new_docs:
+        diff_types.append("documents")
+        details["documents"] = new_docs
+
+    # ── Sex ───────────────────────────────────────────────────────────────
+    db_sex  = (db_person.get("sex") or "").strip().upper()
+    ged_sex = (ged.get("sex") or "").strip().upper()
+    if ged_sex and db_sex and ged_sex != db_sex:
+        diff_types.append("sex")
+        details["sex"] = [f"Sexe: BD '{db_sex}' vs GEDCOM '{ged_sex}'"]
+    elif ged_sex and not db_sex:
+        diff_types.append("sex")
+        details["sex"] = [f"Sexe: BD buit, GEDCOM '{ged_sex}'"]
+
+    # ── Parents ───────────────────────────────────────────────────────────
+    parent_diffs = []
+    fam_child_ref = ged.get("family_child")
+    ged_father_canon = ged_mother_canon = ""
+    ged_father_name = ged_mother_name = ""
+    if fam_child_ref and fam_child_ref in families:
+        fam = families[fam_child_ref]
+        if fam.get("husband") and fam["husband"] in individuals:
+            ged_father_name = individuals[fam["husband"]].get("name") or ""
+            ged_father_canon = _canonicalize_person_name(ged_father_name)
+        if fam.get("wife") and fam["wife"] in individuals:
+            ged_mother_name = individuals[fam["wife"]].get("name") or ""
+            ged_mother_canon = _canonicalize_person_name(ged_mother_name)
+    db_father_canon = _canonicalize_person_name(db_person.get("father_name") or "")
+    db_mother_canon = _canonicalize_person_name(db_person.get("mother_name") or "")
+    if ged_father_canon and db_father_canon and ged_father_canon != db_father_canon:
+        parent_diffs.append(f"Pare: BD '{db_person.get('father_name')}' vs GEDCOM '{ged_father_name}'")
+    elif ged_father_canon and not db_father_canon:
+        parent_diffs.append(f"Pare al GEDCOM: '{ged_father_name}' (BD no té)")
+    if ged_mother_canon and db_mother_canon and ged_mother_canon != db_mother_canon:
+        parent_diffs.append(f"Mare: BD '{db_person.get('mother_name')}' vs GEDCOM '{ged_mother_name}'")
+    elif ged_mother_canon and not db_mother_canon:
+        parent_diffs.append(f"Mare al GEDCOM: '{ged_mother_name}' (BD no té)")
+    if parent_diffs:
+        diff_types.append("parents")
+        details["parents"] = parent_diffs
+
+    # ── Marriages / spouses ───────────────────────────────────────────────
+    marriage_diffs = []
+    db_spouses_canon = {_canonicalize_person_name(m.get("spouse_name") or "") for m in db_marriages}
+    db_spouses_canon.discard("")
+    ged_spouses_canon: set = set()
+    for fam_ref in (ged.get("family_spouse") or []):
+        if fam_ref not in families:
+            continue
+        fam = families[fam_ref]
+        for role in ("husband", "wife"):
+            ref = fam.get(role)
+            if not ref or ref == ged.get("id"):
+                continue
+            if ref not in individuals:
+                continue
+            sp_name = individuals[ref].get("name") or ""
+            sp_canon = _canonicalize_person_name(sp_name)
+            if not sp_canon:
+                continue
+            ged_spouses_canon.add(sp_canon)
+            if sp_canon not in db_spouses_canon:
+                marr = fam.get("marriage") or {}
+                bits = [f"Cònjuge nou al GEDCOM: '{sp_name}'"]
+                if marr.get("date"):
+                    bits.append(f"data {marr['date']}")
+                if marr.get("place"):
+                    bits.append(f"lloc {marr['place']}")
+                marriage_diffs.append(" — ".join(bits))
+    if marriage_diffs:
+        diff_types.append("marriage")
+        details["marriage"] = marriage_diffs
+
+    # ── Children ──────────────────────────────────────────────────────────
+    child_diffs = []
+    db_children_canon = {_canonicalize_person_name(c.get("name") or "") for c in db_children}
+    db_children_canon.discard("")
+    seen_children: set = set()
+    for fam_ref in (ged.get("family_spouse") or []):
+        if fam_ref not in families:
+            continue
+        fam = families[fam_ref]
+        for child_ref in fam.get("children") or []:
+            if child_ref not in individuals:
+                continue
+            ch_name = individuals[child_ref].get("name") or ""
+            ch_canon = _canonicalize_person_name(ch_name)
+            if not ch_canon or ch_canon in seen_children:
+                continue
+            seen_children.add(ch_canon)
+            if ch_canon not in db_children_canon:
+                child_diffs.append(f"Fill/a nou al GEDCOM: '{ch_name}'")
+    if child_diffs:
+        diff_types.append("children")
+        details["children"] = child_diffs
 
     # ── Name differences ──────────────────────────────────────────────────
+    # Compare on canonical form so Joan/Juan, "Mestre i Campi"/"Mestre Campi"
+    # and accent variants don't show up as false-positive differences.
     name_diffs = []
-    db_given   = _normalize_name(db_person.get("given_name") or "")
-    ged_given  = _normalize_name(ged.get("given_name") or "")
-    db_surname = _normalize_name(db_person.get("surname") or "")
-    ged_surname= _normalize_name(ged.get("surname") or "")
-    db_nick    = _normalize_name(db_person.get("nickname") or "")
-    ged_nick   = _normalize_name(ged.get("nickname") or "")
+    db_given_c   = _canonicalize_person_name(db_person.get("given_name") or "")
+    ged_given_c  = _canonicalize_person_name(ged.get("given_name") or "")
+    db_surname_c = _canonicalize_person_name(db_person.get("surname") or "")
+    ged_surname_c= _canonicalize_person_name(ged.get("surname") or "")
+    db_nick      = _normalize_name(db_person.get("nickname") or "")
+    ged_nick     = _normalize_name(ged.get("nickname") or "")
 
-    if db_given and ged_given and db_given != ged_given:
+    if db_given_c and ged_given_c and db_given_c != ged_given_c:
         name_diffs.append(f"Nom: BD '{db_person.get('given_name')}' vs GEDCOM '{ged.get('given_name')}'")
-    if db_surname and ged_surname and db_surname != ged_surname:
+    if db_surname_c and ged_surname_c and db_surname_c != ged_surname_c:
         name_diffs.append(f"Cognom: BD '{db_person.get('surname')}' vs GEDCOM '{ged.get('surname')}'")
     if ged_nick and not db_nick:
         name_diffs.append(f"Malnom al GEDCOM: '{ged.get('nickname')}'")
@@ -652,24 +869,35 @@ def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
 
 
 def _build_ged_index(individuals: dict) -> dict:
-    """Build normalized name → [ged_id, ...] lookup from all GEDCOM individuals."""
+    """Build canonical name → [ged_id, ...] lookup from all GEDCOM individuals.
+
+    Each individual is indexed under several canonical forms so callers can
+    probe whichever representation they have:
+      - full canonical name
+      - all given names + surname (and reversed)
+      - first given name only + surname (handles 'Juan Francisco' vs 'Joan')
+    """
     index: dict = {}
     for ged_id, indi in individuals.items():
         candidates = set()
-        # Index both raw and nickname-stripped versions of each name form
-        for raw_given in [indi.get("given_name") or "", _strip_nickname(indi.get("given_name") or "")]:
-            raw_surname = indi.get("surname") or ""
-            given   = _normalize_name(raw_given)
-            surname = _normalize_name(raw_surname)
-            if given and surname:
-                candidates.add(f"{given} {surname}")
-                candidates.add(f"{surname} {given}")
-        # Also index the full name field (with and without nicknames)
-        raw_full = indi.get("name") or ""
-        for raw in [raw_full, _strip_nickname(raw_full)]:
-            full = _normalize_name(raw)
-            if full:
-                candidates.add(full)
+        given   = indi.get("given_name") or ""
+        surname = indi.get("surname") or ""
+        full    = indi.get("name") or ""
+
+        canon_given   = _canonicalize_person_name(given)
+        canon_surname = _canonicalize_person_name(surname)
+        canon_full    = _canonicalize_person_name(full)
+        if canon_full:
+            candidates.add(canon_full)
+        if canon_given and canon_surname:
+            candidates.add(f"{canon_given} {canon_surname}")
+            candidates.add(f"{canon_surname} {canon_given}")
+            # First given name only (compound names like 'Juan Francisco'
+            # often appear as just 'Joan' / 'Juan' on the other side).
+            first_given = canon_given.split()[0]
+            if first_given and first_given != canon_given:
+                candidates.add(f"{first_given} {canon_surname}")
+                candidates.add(f"{canon_surname} {first_given}")
         for name in candidates:
             index.setdefault(name, []).append(ged_id)
     return index
@@ -677,43 +905,69 @@ def _build_ged_index(individuals: dict) -> dict:
 
 def _match_person(db_person: dict, individuals: dict, ged_index: dict) -> tuple:
     """Find best GEDCOM match for a DB person.
-    Returns (ged_id | None, score 0-100)."""
-    # Strip parenthetical nicknames from DB names too: 'Josep (Pepe)' → 'Josep'
-    raw_given   = db_person.get("given_name") or ""
-    raw_surname = db_person.get("surname") or ""
-    raw_full    = db_person.get("name") or ""
-    db_given    = _normalize_name(_strip_nickname(raw_given))
-    db_surname  = _normalize_name(raw_surname)
-    db_full     = _normalize_name(_strip_nickname(raw_full))
-    db_year     = db_person.get("birth_year")
+    Returns (ged_id | None, score 0-100).
+
+    Strategy: build canonical forms (Catalan↔Spanish variants, drop "i"
+    connectors, drop accents/case), look up candidates in the GEDCOM index,
+    then disambiguate by birth year when more than one candidate matches the
+    same canonical name."""
+    db_given_canon   = _canonicalize_person_name(db_person.get("given_name") or "")
+    db_surname_canon = _canonicalize_person_name(db_person.get("surname") or "")
+    db_full_canon    = _canonicalize_person_name(db_person.get("name") or "")
+    db_year          = db_person.get("birth_year")
+
+    probes = [db_full_canon]
+    if db_given_canon and db_surname_canon:
+        probes.append(f"{db_given_canon} {db_surname_canon}")
+        probes.append(f"{db_surname_canon} {db_given_canon}")
+        # Also probe by first given name only — handles cases like DB
+        # 'Juan Francisco' lookup against a GEDCOM 'Joan'.
+        first_given = db_given_canon.split()[0] if db_given_canon else ""
+        if first_given and first_given != db_given_canon:
+            probes.append(f"{first_given} {db_surname_canon}")
+            probes.append(f"{db_surname_canon} {first_given}")
 
     candidates: set = set()
-    for name in [db_full, f"{db_given} {db_surname}", f"{db_surname} {db_given}"]:
-        name = name.strip()
-        if name:
-            for gid in ged_index.get(name, []):
-                candidates.add(gid)
+    for name in probes:
+        if not name:
+            continue
+        for gid in ged_index.get(name, []):
+            candidates.add(gid)
 
     if not candidates:
         return None, 0
 
+    multiple = len(candidates) > 1
     best_gid, best_score = None, 0
     for gid in candidates:
         ged  = individuals[gid]
         ged_year = _ged_year((ged.get("birth") or {}).get("date") or "")
-        ged_full = _normalize_name(ged.get("name") or "")
+        ged_full_canon = _canonicalize_person_name(ged.get("name") or "")
+
+        canon_match = bool(ged_full_canon) and ged_full_canon == db_full_canon
 
         if db_year and ged_year:
-            if abs(db_year - ged_year) <= 5:
-                score = 100 if ged_full == db_full else 90
+            year_delta = abs(db_year - ged_year)
+            if year_delta <= 2:
+                score = 100 if canon_match else 92
+            elif year_delta <= 5:
+                score = 90 if canon_match else 80
             else:
-                score = 70
+                # Years disagree by >5: only acceptable if name is unique here
+                score = 65 if not multiple else 0
         else:
-            score = 90 if ged_full == db_full else 70
+            # No birth year on at least one side: be more cautious if multiple
+            # candidates share this name to avoid grabbing a homonym
+            if multiple:
+                score = 78 if canon_match else 60
+            else:
+                score = 88 if canon_match else 75
 
         if score > best_score:
             best_score, best_gid = score, gid
 
+    if best_score == 0:
+        return None, 0
     return best_gid, best_score
 
 
@@ -742,14 +996,15 @@ def _run_comparison(ged_path: str, db_path: str):
         ged_index = _build_ged_index(individuals)
         _cmp_log(f"  {len(ged_index):,} entrades a l'índex")
 
-        # 3. Load all DB people + pre-fetch related tables (3 queries, not N×3)
+        # 3. Load all DB people + pre-fetch related tables (one query each, not N×N)
         _cmp_log("[3/4] Carregant dades de la BD…")
         conn = _get_conn(db_path)
         db_people = conn.execute(
-            "SELECT id, name, given_name, surname, nickname, "
+            "SELECT id, name, given_name, surname, nickname, sex, "
             "birth_date, birth_year, birth_place, "
             "death_date, death_year, death_place, death_cause, "
-            "baptism_date, baptism_place "
+            "baptism_date, baptism_place, "
+            "father_id, mother_id, father_name, mother_name "
             "FROM people ORDER BY birth_year"
         ).fetchall()
 
@@ -777,6 +1032,38 @@ def _run_comparison(ged_path: str, db_path: str):
         ).fetchall():
             all_events.setdefault(r["person_id"], []).append(dict(r))
 
+        # Photos joined with their tags so we can index by person.
+        all_photos: dict = {}
+        for r in conn.execute(
+            "SELECT pt.person_id, p.photo_rin, p.filename, p.title, "
+            "       p.is_document, p.doc_type "
+            "FROM photo_tags pt JOIN photos p ON pt.photo_id = p.id"
+        ).fetchall():
+            all_photos.setdefault(r["person_id"], []).append(dict(r))
+
+        # Marriages: spouse name resolved via people table for both directions.
+        all_marriages: dict = {}
+        for r in conn.execute(
+            "SELECT m.person1_id AS pid, m.person2_id AS spouse_id, "
+            "       p.name AS spouse_name, m.date, m.place "
+            "FROM marriages m LEFT JOIN people p ON p.id = m.person2_id"
+        ).fetchall():
+            all_marriages.setdefault(r["pid"], []).append(dict(r))
+        for r in conn.execute(
+            "SELECT m.person2_id AS pid, m.person1_id AS spouse_id, "
+            "       p.name AS spouse_name, m.date, m.place "
+            "FROM marriages m LEFT JOIN people p ON p.id = m.person1_id"
+        ).fetchall():
+            all_marriages.setdefault(r["pid"], []).append(dict(r))
+
+        # Children of each parent, resolved to child name.
+        all_children: dict = {}
+        for r in conn.execute(
+            "SELECT c.parent_id AS pid, c.child_id, p.name "
+            "FROM children c LEFT JOIN people p ON p.id = c.child_id"
+        ).fetchall():
+            all_children.setdefault(r["pid"], []).append(dict(r))
+
         total = len(db_people)
         with _cmp_job_lock:
             _cmp_job["total"] = total
@@ -796,6 +1083,11 @@ def _run_comparison(ged_path: str, db_path: str):
             db_person = dict(db_row)
             pid = db_person["id"]
 
+            # Skip MyHeritage placeholder "Unassociated photos" which holds
+            # orphan photo metadata and would emit thousands of fake diffs.
+            if (db_person.get("name") or "").strip().lower() == "unassociated photos":
+                continue
+
             ged_id, score = _match_person(db_person, individuals, ged_index)
 
             if ged_id is None:
@@ -809,7 +1101,12 @@ def _run_comparison(ged_path: str, db_path: str):
                     all_res.get(pid, []),
                     all_burials.get(pid, []),
                     all_events.get(pid, []),
+                    all_photos.get(pid, []),
+                    all_marriages.get(pid, []),
+                    all_children.get(pid, []),
                     individuals[ged_id],
+                    data.get("families") or {},
+                    individuals,
                 )
 
             if diff_types:
