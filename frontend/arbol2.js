@@ -84,12 +84,30 @@ async function a2Init(personId) {
     });
     a2ApplyDivorcedLines();
     a2BindMiniTreeClicks();
-    // Re-run after the library's transitions finish — getBBox can return
-    // empty values mid-animation, leaving the icon at full size.
+    // Re-run several times so the icon catches even if the library
+    // re-creates DOM mid-transition.
+    setTimeout(a2BindMiniTreeClicks, 50);
     setTimeout(a2BindMiniTreeClicks, 200);
+    setTimeout(a2BindMiniTreeClicks, 500);
   });
 
   a2Store.updateTree({ initial: true });
+
+  // MutationObserver: any time .mini-tree content changes (library
+  // re-render), re-apply our small-icon replacement immediately.
+  try {
+    new MutationObserver(muts => {
+      for (const m of muts) {
+        if (m.target && m.target.classList && m.target.classList.contains('mini-tree')) {
+          // The marker child got removed → library re-rendered → redraw
+          if (!m.target.querySelector('.a2-mt-marker')) {
+            a2BindMiniTreeClicks();
+            return;
+          }
+        }
+      }
+    }).observe(a2Svg, { childList: true, subtree: true });
+  } catch (_) {}
 
   // After initial scatter animation, center view on originally requested person
   setTimeout(() => {
@@ -387,31 +405,68 @@ function a2CenterOn(nodeId) {
 
 function a2BindMiniTreeClicks() {
   if (!a2Svg) return;
+  const NS = 'http://www.w3.org/2000/svg';
   d3.select(a2Svg).selectAll('.mini-tree').each(function() {
-    // ── 1. SCALE FIRST (must run even if datum lookup below fails) ─────────
-    // Wrap children in an inner <g> that applies the scale, instead of
-    // modifying the outer .mini-tree transform attribute (the library
-    // overwrites that on every update via D3 transitions).
-    if (!this.querySelector('.mini-tree-scaled')) {
-      try {
-        const bbox = this.getBBox();
-        if (bbox.width && bbox.height) {
-          const s    = 0.22;
-          const cx   = bbox.x + bbox.width  / 2;
-          const by   = bbox.y + bbox.height;
-          const lift = 8;
-          const inner = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-          inner.setAttribute('class', 'mini-tree-scaled');
-          inner.setAttribute('transform',
-            `translate(${cx*(1-s)},${by*(1-s) - lift}) scale(${s})`
-          );
-          while (this.firstChild) inner.appendChild(this.firstChild);
-          this.appendChild(inner);
-        }
-      } catch (_) {}
+    // ── REPLACE the library's mini-tree content with our own small icon ─────
+    // The library may re-create its children on every render, so we just
+    // wipe and replace each time. Marker class lets us skip if already done
+    // (in case nothing changed).
+    if (!this.querySelector('.a2-mt-marker')) {
+      while (this.firstChild) this.removeChild(this.firstChild);
+
+      // Geometry — local origin (0,0) is the top-center of the card
+      const RW = 22, RH = 14, RX = 3, GAP = 8;
+      const yRect = -30;            // top edge of the two rects
+      const yMid  = yRect + RH / 2; // vertical center of rects (where horizontal line sits)
+
+      // Left rect
+      const r1 = document.createElementNS(NS, 'rect');
+      r1.setAttribute('x', -(GAP / 2 + RW));
+      r1.setAttribute('y', yRect);
+      r1.setAttribute('width',  RW);
+      r1.setAttribute('height', RH);
+      r1.setAttribute('rx', RX);
+      r1.setAttribute('fill', '#8a8780');
+
+      // Right rect
+      const r2 = document.createElementNS(NS, 'rect');
+      r2.setAttribute('x', GAP / 2);
+      r2.setAttribute('y', yRect);
+      r2.setAttribute('width',  RW);
+      r2.setAttribute('height', RH);
+      r2.setAttribute('rx', RX);
+      r2.setAttribute('fill', '#8a8780');
+
+      // Horizontal line linking the two rects
+      const lh = document.createElementNS(NS, 'line');
+      lh.setAttribute('x1', -GAP / 2);
+      lh.setAttribute('y1', yMid);
+      lh.setAttribute('x2',  GAP / 2);
+      lh.setAttribute('y2', yMid);
+      lh.setAttribute('stroke', '#8a8780');
+      lh.setAttribute('stroke-width', 1.5);
+
+      // Vertical line from horizontal line down to card top
+      const lv = document.createElementNS(NS, 'line');
+      lv.setAttribute('x1', 0);
+      lv.setAttribute('y1', yMid);
+      lv.setAttribute('x2', 0);
+      lv.setAttribute('y2', -2);
+      lv.setAttribute('stroke', '#8a8780');
+      lv.setAttribute('stroke-width', 1.5);
+
+      // Marker so we don't redraw every tick
+      const marker = document.createElementNS(NS, 'g');
+      marker.setAttribute('class', 'a2-mt-marker');
+
+      this.appendChild(r1);
+      this.appendChild(r2);
+      this.appendChild(lh);
+      this.appendChild(lv);
+      this.appendChild(marker);
     }
 
-    // ── 2. CLICK BINDING (conditional on finding the datum) ────────────────
+    // ── Click binding ──────────────────────────────────────────────────────
     let datum = null;
     let node  = this.parentElement;
     while (node && !datum) {
