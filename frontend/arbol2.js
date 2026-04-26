@@ -388,7 +388,30 @@ function a2CenterOn(nodeId) {
 function a2BindMiniTreeClicks() {
   if (!a2Svg) return;
   d3.select(a2Svg).selectAll('.mini-tree').each(function() {
-    // Walk up the DOM to find the D3 datum bound to the enclosing card group
+    // ── 1. SCALE FIRST (must run even if datum lookup below fails) ─────────
+    // Wrap children in an inner <g> that applies the scale, instead of
+    // modifying the outer .mini-tree transform attribute (the library
+    // overwrites that on every update via D3 transitions).
+    if (!this.querySelector('.mini-tree-scaled')) {
+      try {
+        const bbox = this.getBBox();
+        if (bbox.width && bbox.height) {
+          const s    = 0.22;
+          const cx   = bbox.x + bbox.width  / 2;
+          const by   = bbox.y + bbox.height;
+          const lift = 8;
+          const inner = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          inner.setAttribute('class', 'mini-tree-scaled');
+          inner.setAttribute('transform',
+            `translate(${cx*(1-s)},${by*(1-s) - lift}) scale(${s})`
+          );
+          while (this.firstChild) inner.appendChild(this.firstChild);
+          this.appendChild(inner);
+        }
+      } catch (_) {}
+    }
+
+    // ── 2. CLICK BINDING (conditional on finding the datum) ────────────────
     let datum = null;
     let node  = this.parentElement;
     while (node && !datum) {
@@ -403,30 +426,6 @@ function a2BindMiniTreeClicks() {
         e.stopPropagation();
         a2Init(nodeId).catch(console.error);
       });
-
-    // Wrap children in an inner <g> that applies the scale, instead of
-    // modifying the outer .mini-tree transform attribute (the library
-    // overwrites that on every update via D3 transitions). The wrapper
-    // shrinks the icon to ~22% of its library-generated size, anchored
-    // at the bottom-center of the bounding box so the connecting line
-    // stays attached to the card. We also lift it 8px above so the
-    // icon clears the card's foreignObject.
-    if (this.querySelector('.mini-tree-scaled')) return;
-    try {
-      const bbox = this.getBBox();
-      if (!bbox.width || !bbox.height) return; // not yet rendered
-      const s  = 0.22;
-      const cx = bbox.x + bbox.width  / 2;
-      const by = bbox.y + bbox.height;
-      const lift = 8;
-      const inner = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      inner.setAttribute('class', 'mini-tree-scaled');
-      inner.setAttribute('transform',
-        `translate(${cx*(1-s)},${by*(1-s) - lift}) scale(${s})`
-      );
-      while (this.firstChild) inner.appendChild(this.firstChild);
-      this.appendChild(inner);
-    } catch (_) {}
   });
 }
 
