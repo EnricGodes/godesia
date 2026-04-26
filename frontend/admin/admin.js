@@ -1358,16 +1358,49 @@ const Comparador = {
         const isOpen = detailRow.style.display !== 'none';
         detailRow.style.display = isOpen ? 'none' : '';
         btn.textContent = isOpen ? '▸ Veure' : '▾ Tancar';
+        // Build the detail HTML (and trigger image fetches via <img src>) only
+        // on first open — keeps the page light when many rows are collapsed.
         if (!isOpen && contentEl && !contentEl._loaded) {
             contentEl._loaded = true;
             const row = this._rows[id];
             if (!row) return;
             let details = {};
             try { details = JSON.parse(row.diff_details || '{}'); } catch (_) {}
-            const lines = Object.values(details).flat()
-                .map(item => `<div style="white-space:pre-wrap;margin-bottom:.35rem;">• ${esc(String(item))}</div>`);
-            contentEl.innerHTML = lines.join('') || '<em style="color:#9e9b94;">Sense detalls.</em>';
+            const sections = [];
+            for (const [key, items] of Object.entries(details)) {
+                if (!items || !items.length) continue;
+                sections.push(items.map(item => this._renderDetailItem(key, String(item))).join(''));
+            }
+            contentEl.innerHTML = sections.join('') || '<em style="color:#9e9b94;">Sense detalls.</em>';
         }
+    },
+
+    _renderDetailItem(key, text) {
+        const urlMatch = text.match(/https?:\/\/\S+/);
+        const url = urlMatch ? urlMatch[0] : null;
+        const label = url ? text.replace(/\s+—\s+https?:\/\/\S+\s*$/, '') : text;
+        if (key === 'photos' && url) {
+            return `<div style="display:flex;gap:.6rem;align-items:flex-start;margin-bottom:.6rem;">
+                <a href="${esc(url)}" target="_blank" rel="noopener" style="flex-shrink:0;">
+                    <img src="${esc(url)}" alt="" loading="lazy"
+                         style="max-height:96px;max-width:140px;border:1px solid #d8d4c7;border-radius:4px;background:#fff;display:block;"
+                         onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.textContent='⚠');"
+                    ><span style="display:none;color:#9e9b94;font-size:.7rem;"></span>
+                </a>
+                <div style="white-space:pre-wrap;flex:1;line-height:1.5;">• ${esc(label)}</div>
+            </div>`;
+        }
+        if (key === 'documents' && url) {
+            return `<div style="display:flex;gap:.6rem;align-items:center;margin-bottom:.5rem;">
+                <a href="${esc(url)}" target="_blank" rel="noopener"
+                   style="font-size:1.6rem;text-decoration:none;flex-shrink:0;">📄</a>
+                <div style="white-space:pre-wrap;flex:1;">
+                    <a href="${esc(url)}" target="_blank" rel="noopener"
+                       style="color:#2d4b33;font-weight:500;">${esc(label)}</a>
+                </div>
+            </div>`;
+        }
+        return `<div style="white-space:pre-wrap;margin-bottom:.35rem;">• ${esc(text)}</div>`;
     },
 
     async deleteRow(id) {
