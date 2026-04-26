@@ -93,9 +93,28 @@
     }
     .a2-zoom-btn:hover { background: #f1eee5; border-color: #2d4b33; }
 
-    /* ── Mini-tree indicator ── */
+    /* ── Mini-tree indicator ──
+       The library renders <div class="mini-tree"> inside the card foreignObject,
+       containing an <svg> sized 66×112px (positioned absolute, top:0 left:0)
+       with viewBox 0 0 72 125 and inline style attributes. We override its
+       size via CSS so the icon renders compact and sits above the card top. */
     #FamilyChart .mini-tree line { stroke: #8a8780; }
     #FamilyChart .mini-tree rect:not([fill="rgba(0,0,0,0)"]) { fill: #8a8780; }
+    #FamilyChart div.mini-tree {
+      position: absolute !important;
+      top: -22px !important;
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%) !important;
+      z-index: 0 !important;
+      pointer-events: auto;
+    }
+    #FamilyChart div.mini-tree svg {
+      width: 38px !important;
+      height: 22px !important;
+      position: static !important;
+      display: block;
+    }
 
     /* ── Sidebar ── */
     #a2-sidebar { font-family: Manrope, sans-serif; }
