@@ -84,6 +84,9 @@ async function a2Init(personId) {
     });
     a2ApplyDivorcedLines();
     a2BindMiniTreeClicks();
+    // Re-run after the library's transitions finish — getBBox can return
+    // empty values mid-animation, leaving the icon at full size.
+    setTimeout(a2BindMiniTreeClicks, 200);
   });
 
   a2Store.updateTree({ initial: true });
@@ -401,25 +404,28 @@ function a2BindMiniTreeClicks() {
         a2Init(nodeId).catch(console.error);
       });
 
-    // Scale down the SVG transform attribute directly (CSS transform would override
-    // the library's positioning translate and move the icon off-screen).
-    // We keep the bottom-center of the bounding box fixed so the connecting line
-    // to the card stays in place.
+    // Wrap children in an inner <g> that applies the scale, instead of
+    // modifying the outer .mini-tree transform attribute (the library
+    // overwrites that on every update via D3 transitions). The wrapper
+    // shrinks the icon to ~22% of its library-generated size, anchored
+    // at the bottom-center of the bounding box so the connecting line
+    // stays attached to the card. We also lift it 8px above so the
+    // icon clears the card's foreignObject.
+    if (this.querySelector('.mini-tree-scaled')) return;
     try {
-      const cur = this.getAttribute('transform') || '';
-      if (cur.includes('scale')) return; // already processed this render cycle
       const bbox = this.getBBox();
-      const s  = 0.32;
+      if (!bbox.width || !bbox.height) return; // not yet rendered
+      const s  = 0.22;
       const cx = bbox.x + bbox.width  / 2;
       const by = bbox.y + bbox.height;
-      // Parse the library's translate(dx, dy)
-      const m  = cur.match(/translate\(\s*([-\d.e]+)[,\s]+([-\d.e]+)\s*\)/);
-      const dx = m ? parseFloat(m[1]) : 0;
-      const dy = m ? parseFloat(m[2]) : 0;
-      // Combined: translate that keeps bottom-center at (dx+cx, dy+by), then scale
-      this.setAttribute('transform',
-        `translate(${dx + cx*(1-s)},${dy + by*(1-s)}) scale(${s})`
+      const lift = 8;
+      const inner = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      inner.setAttribute('class', 'mini-tree-scaled');
+      inner.setAttribute('transform',
+        `translate(${cx*(1-s)},${by*(1-s) - lift}) scale(${s})`
       );
+      while (this.firstChild) inner.appendChild(this.firstChild);
+      this.appendChild(inner);
     } catch (_) {}
   });
 }
