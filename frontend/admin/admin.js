@@ -56,7 +56,7 @@ document.addEventListener('keydown', e => {
 // Navigation
 // ---------------------------------------------------------------------------
 
-const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'tests'];
+const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'tests', 'config', 'comparador'];
 const initialized = {};
 
 function showSection(name) {
@@ -70,7 +70,8 @@ function showSection(name) {
     if (!initialized[name]) {
         initialized[name] = true;
         const ctrl = { status: Status, import: Import, suggestions: Suggestions,
-                       queries: Queries, geocoder: Geocoder, anecdotes: Anecdotes, tests: Tests }[name];
+                       queries: Queries, geocoder: Geocoder, anecdotes: Anecdotes, tests: Tests,
+                       config: Config, comparador: Comparador }[name];
         if (ctrl?.init) ctrl.init();
     }
 }
@@ -304,6 +305,22 @@ const Import = {
         } catch (e) { alert('Error: ' + e.message); }
     },
 };
+
+// Drag-drop for comparison GEDCOM file
+const cmpDrop = document.getElementById('cmp-drop');
+if (cmpDrop) {
+    cmpDrop.addEventListener('dragover', e => { e.preventDefault(); cmpDrop.classList.add('drag-over'); });
+    cmpDrop.addEventListener('dragleave', () => cmpDrop.classList.remove('drag-over'));
+    cmpDrop.addEventListener('drop', e => {
+        e.preventDefault();
+        cmpDrop.classList.remove('drag-over');
+        const f = e.dataTransfer.files[0];
+        if (f && f.name.endsWith('.ged')) {
+            document.getElementById('cmp-file').files = e.dataTransfer.files;
+            Comparador.onFileSelected(document.getElementById('cmp-file'));
+        }
+    });
+}
 
 // Drag-drop for GEDCOM file
 const gedDrop = document.getElementById('ged-drop');
@@ -1067,3 +1084,311 @@ Status.init();
         document.getElementById('badge-geo').textContent = geo.length || '';
     } catch {}
 })();
+
+// ---------------------------------------------------------------------------
+// Configuració
+// ---------------------------------------------------------------------------
+
+const Config = (() => {
+    let selectedId   = null;
+    let selectedName = null;
+    let searchTimer  = null;
+
+    async function init() {
+        const settings  = await apiFetch('/api/settings');
+        const currentId = settings.tree_default_person || 'I4';
+
+        // Show current person name
+        try {
+            const sr     = await apiFetch(`/api/search?q=${encodeURIComponent(currentId)}&limit=5`);
+            const person = sr.results?.find(p => p.id.replace(/@/g, '') === currentId);
+            document.getElementById('config-current').textContent =
+                `Persona actual: ${person ? person.name : currentId} (${currentId})`;
+        } catch (_) {
+            document.getElementById('config-current').textContent = `Persona actual: ${currentId}`;
+        }
+
+        const input   = document.getElementById('config-person-search');
+        const results = document.getElementById('config-person-results');
+        const saveBtn = document.getElementById('config-save-btn');
+
+        input.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            const q = input.value.trim();
+            if (q.length < 2) { results.style.display = 'none'; return; }
+            searchTimer = setTimeout(async () => {
+                const data = await apiFetch(`/api/search?q=${encodeURIComponent(q)}&limit=10`);
+                results.innerHTML = (data.results || []).map(r => {
+                    const cid   = r.id.replace(/@/g, '');
+                    const years = `${r.birth_year || '?'} – ${r.death_year || (r.is_alive ? 'viu/a' : '?')}`;
+                    return `<div style="padding:9px 14px;cursor:pointer;font-size:.875rem;
+                                border-bottom:1px solid #f1eee5;color:#1c1c17;"
+                                onmousedown="Config._select('${cid}','${esc(r.name)}')">
+                                ${esc(r.name)}
+                                <small style="color:#9e9b94;margin-left:6px;">${years}</small>
+                            </div>`;
+                }).join('') || '<div style="padding:10px 14px;color:#9e9b94;font-size:.875rem;">Sense resultats</div>';
+                results.style.display = 'block';
+            }, 250);
+        });
+
+        input.addEventListener('blur', () => {
+            setTimeout(() => { results.style.display = 'none'; }, 150);
+        });
+
+        saveBtn.addEventListener('click', async () => {
+            if (!selectedId) return;
+            await apiFetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: 'tree_default_person', value: selectedId })
+            });
+            document.getElementById('config-current').textContent =
+                `Persona actual: ${selectedName} (${selectedId})`;
+            const msg = document.getElementById('config-save-msg');
+            msg.style.display = 'inline';
+            setTimeout(() => { msg.style.display = 'none'; }, 2500);
+        });
+    }
+
+    function _select(id, name) {
+        selectedId   = id;
+        selectedName = name;
+        const selBox  = document.getElementById('config-selected');
+        const saveBtn = document.getElementById('config-save-btn');
+        selBox.textContent    = `Seleccionat: ${name} (${id})`;
+        selBox.style.display  = 'block';
+        saveBtn.disabled      = false;
+        saveBtn.style.opacity = '1';
+        document.getElementById('config-person-search').value = '';
+    }
+
+    return { init, _select };
+})();
+
+// ---------------------------------------------------------------------------
+// Comparador GEDCOM
+// ---------------------------------------------------------------------------
+
+const Comparador = {
+    _pollTimer: null,
+    _lastLogLen: 0,
+    _rows: {},
+
+    init() {
+        this.checkStatus();
+        this.loadResults();
+    },
+
+    onFileSelected(input) {
+        const label = document.getElementById('cmp-drop-label');
+        if (input.files[0]) {
+            label.innerHTML = `<strong>${esc(input.files[0].name)}</strong><br>
+                <small style="color:#9e9b94;">${fmtSize(input.files[0].size)}</small>`;
+        }
+    },
+
+    async checkStatus() {
+        try {
+            const d = await apiFetch('/api/admin/compare/status');
+            if (d.status === 'running') {
+                this._showLogCard();
+                this._updateStatus(d);
+                this._startPolling();
+            } else if (d.status === 'done' || d.status === 'error') {
+                this._showLogCard();
+                this._updateStatus(d);
+                document.getElementById('btn-clear-cmp').style.display = '';
+            }
+        } catch (_) {}
+    },
+
+    async start() {
+        const input = document.getElementById('cmp-file');
+        if (!input.files[0]) { alert('Selecciona un fitxer .ged primer.'); return; }
+        const btn = document.getElementById('btn-start-cmp');
+        btn.disabled = true;
+        btn.textContent = 'Iniciant…';
+
+        const fd = new FormData();
+        fd.append('file', input.files[0]);
+        try {
+            await apiFetch('/api/admin/compare/start', { method: 'POST', body: fd });
+            this._showLogCard();
+            this._lastLogLen = 0;
+            this._startPolling();
+        } catch (e) {
+            btn.disabled = false;
+            btn.textContent = 'Iniciar comparació';
+            alert('Error: ' + e.message);
+        }
+    },
+
+    _showLogCard() {
+        document.getElementById('cmp-log-card').style.display = '';
+    },
+
+    _startPolling() {
+        clearInterval(this._pollTimer);
+        this._pollTimer = setInterval(() => this._poll(), 2000);
+    },
+
+    async _poll() {
+        try {
+            const d = await apiFetch('/api/admin/compare/status');
+            this._updateStatus(d);
+            if (d.status !== 'running') {
+                clearInterval(this._pollTimer);
+                this._pollTimer = null;
+                const btn = document.getElementById('btn-start-cmp');
+                btn.disabled = false;
+                btn.textContent = 'Iniciar comparació';
+                if (d.status === 'done') {
+                    this.loadResults();
+                    document.getElementById('btn-clear-cmp').style.display = '';
+                }
+            }
+        } catch (_) {}
+    },
+
+    _updateStatus(d) {
+        const badge = document.getElementById('cmp-status-badge');
+        const cls   = { idle: '', running: 'badge-pending', done: 'badge-resolved', error: 'badge-error' };
+        const lbl   = { idle: '', running: 'En curs…', done: '✓ Completat', error: '✗ Error' };
+        badge.className = `badge ${cls[d.status] || ''}`;
+        badge.textContent = lbl[d.status] || d.status;
+
+        const pct = d.total > 0 ? Math.round((d.progress / d.total) * 100) : 0;
+        document.getElementById('cmp-progress-bar').style.width = pct + '%';
+        document.getElementById('cmp-progress-text').textContent =
+            d.total > 0 ? `${d.progress} / ${d.total} persones (${pct}%)` : '';
+
+        const box = document.getElementById('cmp-log');
+        const newLines = (d.log || []).slice(this._lastLogLen);
+        if (newLines.length) {
+            box.textContent += newLines.join('\n') + '\n';
+            box.scrollTop = box.scrollHeight;
+            this._lastLogLen = (d.log || []).length;
+        }
+    },
+
+    async loadResults() {
+        const section = document.getElementById('cmp-results-section');
+        const list    = document.getElementById('cmp-results-list');
+        try {
+            const d = await apiFetch('/api/admin/compare/results');
+            if (!d.rows || !d.rows.length) { section.style.display = 'none'; return; }
+
+            section.style.display = '';
+            const lastRun = (d.last_run || '').slice(0, 16).replace('T', ' ');
+            document.getElementById('cmp-results-meta').textContent =
+                `${d.total_count} diferències · última comparació: ${lastRun || '—'}`;
+            const badge = document.getElementById('badge-cmp');
+            badge.textContent = d.total_count || '';
+
+            const ICONS = {
+                dates: '📅 Dates', places: '📍 Llocs', notes: '📝 Notes',
+                photos: '📸 Fotos', name: '💬 Nom', nomatch: '❓ No trobat',
+                occupations: '💼 Oficis', residences: '🏠 Residències',
+            };
+
+            this._rows = {};
+            d.rows.forEach(r => { this._rows[r.id] = r; });
+
+            list.innerHTML = `<table class="admin-table">
+                <thead><tr>
+                    <th>Persona (BD)</th>
+                    <th>Coincidència GEDCOM</th>
+                    <th style="text-align:center;">Conf.</th>
+                    <th>Diferències</th>
+                    <th style="text-align:center;">Detall</th>
+                    <th></th>
+                </tr></thead>
+                <tbody>
+                ${d.rows.map(row => {
+                    const types  = (row.diff_types || '').split(',').filter(Boolean);
+                    const badges = types.map(t =>
+                        `<span class="badge ${t === 'nomatch' ? 'badge-error' : 'badge-pending'}"
+                               style="margin:1px 2px;font-size:.72rem;">${esc(ICONS[t] || t)}</span>`
+                    ).join('');
+                    const scoreColor = row.match_score >= 90 ? '#065f46'
+                                     : row.match_score >= 70 ? '#92400e' : '#991b1b';
+                    const personId = (row.db_person_id || '').replace(/@/g, '');
+                    return `
+                    <tr id="cmp-row-${row.id}">
+                        <td style="font-size:.84rem;">
+                            <a href="/dossier.html?id=${esc(personId)}" target="_blank"
+                               style="color:#2d4b33;font-weight:600;">${esc(row.db_person_name || row.db_person_id)}</a>
+                        </td>
+                        <td style="font-size:.82rem;color:#3d3d37;">${esc(row.ged_person_name || '—')}</td>
+                        <td style="text-align:center;">
+                            ${row.match_score > 0
+                                ? `<span style="font-weight:700;color:${scoreColor};">${row.match_score}%</span>`
+                                : '<span style="color:#c2c8bf;">—</span>'}
+                        </td>
+                        <td style="white-space:nowrap;">${badges}</td>
+                        <td style="text-align:center;">
+                            <button class="btn btn-secondary btn-sm"
+                                onclick="Comparador.toggleDetail(${row.id}, this)">▸ Veure</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="Comparador.deleteRow(${row.id})">✕</button>
+                        </td>
+                    </tr>
+                    <tr id="cmp-detail-${row.id}" style="display:none;">
+                        <td colspan="6"
+                            style="padding:.6rem 1.25rem;background:#f1eee5;font-size:.8rem;line-height:1.7;">
+                            <div id="cmp-detail-content-${row.id}"></div>
+                        </td>
+                    </tr>`;
+                }).join('')}
+                </tbody></table>`;
+        } catch (e) {
+            list.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
+        }
+    },
+
+    toggleDetail(id, btn) {
+        const detailRow = document.getElementById(`cmp-detail-${id}`);
+        const contentEl = document.getElementById(`cmp-detail-content-${id}`);
+        const isOpen = detailRow.style.display !== 'none';
+        detailRow.style.display = isOpen ? 'none' : '';
+        btn.textContent = isOpen ? '▸ Veure' : '▾ Tancar';
+        if (!isOpen && contentEl && !contentEl._loaded) {
+            contentEl._loaded = true;
+            const row = this._rows[id];
+            if (!row) return;
+            let details = {};
+            try { details = JSON.parse(row.diff_details || '{}'); } catch (_) {}
+            const lines = Object.values(details).flat()
+                .map(item => `<div>• ${esc(String(item))}</div>`);
+            contentEl.innerHTML = lines.join('') || '<em style="color:#9e9b94;">Sense detalls.</em>';
+        }
+    },
+
+    async deleteRow(id) {
+        try {
+            await apiFetch(`/api/admin/compare/result/${id}`, { method: 'DELETE' });
+            document.getElementById(`cmp-row-${id}`)?.remove();
+            document.getElementById(`cmp-detail-${id}`)?.remove();
+            const badge = document.getElementById('badge-cmp');
+            const n = parseInt(badge.textContent || '0') - 1;
+            badge.textContent = n > 0 ? n : '';
+        } catch (e) { alert(e.message); }
+    },
+
+    async clearAll() {
+        if (!confirm('Esborrar tots els resultats i reiniciar?')) return;
+        try {
+            await apiFetch('/api/admin/compare/results/all', { method: 'DELETE' });
+            document.getElementById('cmp-results-section').style.display = 'none';
+            document.getElementById('cmp-log-card').style.display = 'none';
+            document.getElementById('btn-clear-cmp').style.display = 'none';
+            document.getElementById('badge-cmp').textContent = '';
+            const btn = document.getElementById('btn-start-cmp');
+            btn.disabled = false;
+            btn.textContent = 'Iniciar comparació';
+            this._lastLogLen = 0;
+        } catch (e) { alert(e.message); }
+    },
+};

@@ -189,6 +189,11 @@ CREATE TABLE IF NOT EXISTS suggestions (
     created_at TEXT DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT
+);
+
 CREATE INDEX IF NOT EXISTS idx_people_birth_md ON people(birth_month, birth_day);
 CREATE INDEX IF NOT EXISTS idx_people_name ON people(name COLLATE NOCASE);
 CREATE INDEX IF NOT EXISTS idx_people_surname ON people(surname COLLATE NOCASE);
@@ -203,6 +208,19 @@ CREATE INDEX IF NOT EXISTS idx_occupations_person ON occupations(person_id);
 CREATE INDEX IF NOT EXISTS idx_residences_person ON residences(person_id);
 CREATE INDEX IF NOT EXISTS idx_notes_person ON notes(person_id);
 CREATE INDEX IF NOT EXISTS idx_burial_person ON burial(person_id);
+
+CREATE TABLE IF NOT EXISTS compare_results (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    db_person_id TEXT NOT NULL,
+    db_person_name TEXT,
+    ged_person_id TEXT,
+    ged_person_name TEXT,
+    match_score INTEGER DEFAULT 0,
+    diff_types TEXT,
+    diff_details TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_compare_results_person ON compare_results(db_person_id);
 """
 
 
@@ -357,6 +375,9 @@ def get_connection(db_path):
         "ALTER TABLE geocache ADD COLUMN validated INTEGER DEFAULT 0",
         "CREATE TABLE IF NOT EXISTS suggestions (id TEXT PRIMARY KEY, name TEXT, email TEXT, type TEXT, person_id TEXT, message TEXT, files_count INTEGER DEFAULT 0, submission_dir TEXT, created_at TEXT DEFAULT (datetime('now')))",
         "ALTER TABLE suggestions ADD COLUMN resolved_at TEXT",
+        "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)",
+        "CREATE TABLE IF NOT EXISTS compare_results (id INTEGER PRIMARY KEY AUTOINCREMENT, db_person_id TEXT NOT NULL, db_person_name TEXT, ged_person_id TEXT, ged_person_name TEXT, match_score INTEGER DEFAULT 0, diff_types TEXT, diff_details TEXT, created_at TEXT DEFAULT (datetime('now')))",
+        "CREATE INDEX IF NOT EXISTS idx_compare_results_person ON compare_results(db_person_id)",
     ]:
         try:
             conn.execute(stmt)
@@ -1857,6 +1878,13 @@ def get_tree_data_flat(conn, person_id, generations_up=3, generations_down=3):
         ).fetchall()
         node["data"]["divorced_spouses"] = [clean(s["sp_id"]) for s in divorced]
 
+    # Sort children by birth year (ascending, unknown years last)
+    for node in nodes.values():
+        node["rels"]["children"].sort(
+            key=lambda ch: nodes[ch]["data"]["birth_year"] or 9999
+            if ch in nodes else 9999
+        )
+
     return list(nodes.values())
 
 
@@ -1876,3 +1904,17 @@ def _person_to_node(person):
         "photo": p.get("photo_file"),
         "is_alive": bool(p.get("is_alive", 0)),
     }
+
+
+def get_setting(conn, key, default=None):
+    row = conn.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+    return row["value"] if row else default
+
+
+def set_setting(conn, key, value):
+    conn.execute(
+        "INSERT INTO settings (key, value) VALUES (?,?) "
+        "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+        (key, str(value))
+    )
+    conn.commit()

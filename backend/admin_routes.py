@@ -402,6 +402,419 @@ async def reset_import_job():
 
 
 # ---------------------------------------------------------------------------
+# GEDCOM Comparison
+# ---------------------------------------------------------------------------
+
+_cmp_job = {
+    "status": "idle",
+    "progress": 0,
+    "total": 0,
+    "log": [],
+    "started_at": None,
+    "finished_at": None,
+    "error": None,
+}
+_cmp_job_lock = threading.Lock()
+
+
+def _cmp_log(msg: str):
+    with _cmp_job_lock:
+        _cmp_job["log"].append(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
+
+
+def _normalize_name(text: str) -> str:
+    """NFD + strip combining chars + lowercase + collapse spaces."""
+    import unicodedata as _ud
+    if not text:
+        return ""
+    nfd = _ud.normalize("NFD", text)
+    stripped = "".join(c for c in nfd if _ud.category(c) != "Mn")
+    return " ".join(stripped.lower().split())
+
+
+def _ged_year(date_str: str) -> Optional[int]:
+    """Extract 4-digit year from a raw GEDCOM date string like '15 APR 1824'."""
+    if not date_str:
+        return None
+    for part in reversed(date_str.strip().split()):
+        if part.isdigit() and len(part) == 4:
+            return int(part)
+    return None
+
+
+def _ged_has_full_date(date_str: str) -> bool:
+    """True if the GEDCOM date has day + month + year (3 tokens, ignoring ABT/BEF/etc.)."""
+    if not date_str:
+        return False
+    s = date_str.strip()
+    for prefix in ("ABT", "BEF", "AFT", "EST", "CAL", "FROM", "TO", "BET"):
+        if s.upper().startswith(prefix):
+            s = s[len(prefix):].strip()
+    return len(s.split()) == 3
+
+
+def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
+                  ged: dict) -> tuple:
+    """Compare one DB person against one GEDCOM individual.
+    Returns (diff_types_list, diff_details_dict)."""
+    diff_types = []
+    details = {}
+
+    # ── Dates ─────────────────────────────────────────────────────────────
+    date_diffs = []
+    db_birth_year = db_person.get("birth_year")
+    db_birth_date = (db_person.get("birth_date") or "").strip()
+    ged_birth = ged.get("birth") or {}
+    ged_birth_date = (ged_birth.get("date") or "").strip()
+    db_birth_is_year_only = bool(db_birth_year) and (
+        not db_birth_date or db_birth_date == str(db_birth_year)
+    )
+    if db_birth_is_year_only and _ged_has_full_date(ged_birth_date):
+        date_diffs.append(f"Naixement: BD té '{db_birth_date or db_birth_year}', GEDCOM té '{ged_birth_date}'")
+
+    db_death_year = db_person.get("death_year")
+    db_death_date = (db_person.get("death_date") or "").strip()
+    ged_death = ged.get("death") or {}
+    ged_death_date = (ged_death.get("date") or "").strip()
+    db_death_is_year_only = bool(db_death_year) and (
+        not db_death_date or db_death_date == str(db_death_year)
+    )
+    if db_death_is_year_only and _ged_has_full_date(ged_death_date):
+        date_diffs.append(f"Defunció: BD té '{db_death_date or db_death_year}', GEDCOM té '{ged_death_date}'")
+
+    if date_diffs:
+        diff_types.append("dates")
+        details["dates"] = date_diffs
+
+    # ── Places ────────────────────────────────────────────────────────────
+    place_diffs = []
+    db_bp = (db_person.get("birth_place") or "").strip()
+    ged_bp = (ged_birth.get("place") or "").strip()
+    if ged_bp and (not db_bp or (ged_bp.lower() != db_bp.lower() and len(ged_bp) > len(db_bp))):
+        place_diffs.append(f"Lloc neix.: BD '{db_bp or '—'}' → GEDCOM '{ged_bp}'")
+
+    db_dp = (db_person.get("death_place") or "").strip()
+    ged_dp = (ged_death.get("place") or "").strip()
+    if ged_dp and (not db_dp or (ged_dp.lower() != db_dp.lower() and len(ged_dp) > len(db_dp))):
+        place_diffs.append(f"Lloc def.: BD '{db_dp or '—'}' → GEDCOM '{ged_dp}'")
+
+    if place_diffs:
+        diff_types.append("places")
+        details["places"] = place_diffs
+
+    # ── Notes ─────────────────────────────────────────────────────────────
+    ged_notes = ged.get("notes") or []
+    db_notes_set = {n.strip()[:120] for n in db_notes}
+    new_notes = [n for n in ged_notes if n.strip()[:120] not in db_notes_set]
+    if new_notes:
+        diff_types.append("notes")
+        details["notes"] = [f"Nova nota: {n[:300]}" for n in new_notes]
+
+    # ── Occupations ───────────────────────────────────────────────────────
+    ged_occs = ged.get("occupations") or []
+    db_occ_titles = {_normalize_name(o.get("title") or "") for o in db_occs}
+    new_occs = [o for o in ged_occs if _normalize_name(o.get("title") or "") not in db_occ_titles]
+    if new_occs:
+        diff_types.append("occupations")
+        details["occupations"] = [
+            f"Ocupació: {o.get('title', '')} ({o.get('date', '')} {o.get('place', '')})".strip()
+            for o in new_occs
+        ]
+
+    # ── Residences ────────────────────────────────────────────────────────
+    ged_res = ged.get("residences") or []
+    db_res_keys = {
+        _normalize_name(f"{r.get('city', '')} {r.get('date', '')}") for r in db_res
+    }
+    new_res = [
+        r for r in ged_res
+        if _normalize_name(f"{r.get('city', '')} {r.get('date', '')}") not in db_res_keys
+    ]
+    if new_res:
+        diff_types.append("residences")
+        details["residences"] = [
+            f"Residència: {r.get('address', '')} {r.get('city', '')} ({r.get('date', '')})".strip()
+            for r in new_res
+        ]
+
+    # ── Photos ────────────────────────────────────────────────────────────
+    ged_photos = [p for p in (ged.get("photos") or []) if p.get("url")]
+    if ged_photos:
+        diff_types.append("photos")
+        details["photos"] = [
+            f"Foto al GEDCOM: {p.get('title') or p.get('url', '')}"
+            for p in ged_photos[:5]
+        ]
+
+    # ── Name differences ──────────────────────────────────────────────────
+    name_diffs = []
+    db_given   = _normalize_name(db_person.get("given_name") or "")
+    ged_given  = _normalize_name(ged.get("given_name") or "")
+    db_surname = _normalize_name(db_person.get("surname") or "")
+    ged_surname= _normalize_name(ged.get("surname") or "")
+    db_nick    = _normalize_name(db_person.get("nickname") or "")
+    ged_nick   = _normalize_name(ged.get("nickname") or "")
+
+    if db_given and ged_given and db_given != ged_given:
+        name_diffs.append(f"Nom: BD '{db_person.get('given_name')}' vs GEDCOM '{ged.get('given_name')}'")
+    if db_surname and ged_surname and db_surname != ged_surname:
+        name_diffs.append(f"Cognom: BD '{db_person.get('surname')}' vs GEDCOM '{ged.get('surname')}'")
+    if ged_nick and not db_nick:
+        name_diffs.append(f"Malnom al GEDCOM: '{ged.get('nickname')}'")
+
+    if name_diffs:
+        diff_types.append("name")
+        details["name"] = name_diffs
+
+    return diff_types, details
+
+
+def _build_ged_index(individuals: dict) -> dict:
+    """Build normalized name → [ged_id, ...] lookup from all GEDCOM individuals."""
+    index: dict = {}
+    for ged_id, indi in individuals.items():
+        candidates = set()
+        full = _normalize_name(indi.get("name") or "")
+        if full:
+            candidates.add(full)
+        given   = _normalize_name(indi.get("given_name") or "")
+        surname = _normalize_name(indi.get("surname") or "")
+        if given and surname:
+            candidates.add(f"{given} {surname}")
+            candidates.add(f"{surname} {given}")
+        for name in candidates:
+            index.setdefault(name, []).append(ged_id)
+    return index
+
+
+def _match_person(db_person: dict, individuals: dict, ged_index: dict) -> tuple:
+    """Find best GEDCOM match for a DB person.
+    Returns (ged_id | None, score 0-100)."""
+    db_given   = _normalize_name(db_person.get("given_name") or "")
+    db_surname = _normalize_name(db_person.get("surname") or "")
+    db_full    = _normalize_name(db_person.get("name") or "")
+    db_year    = db_person.get("birth_year")
+
+    candidates: set = set()
+    for name in [db_full, f"{db_given} {db_surname}", f"{db_surname} {db_given}"]:
+        name = name.strip()
+        if name:
+            for gid in ged_index.get(name, []):
+                candidates.add(gid)
+
+    if not candidates:
+        return None, 0
+
+    best_gid, best_score = None, 0
+    for gid in candidates:
+        ged  = individuals[gid]
+        ged_year = _ged_year((ged.get("birth") or {}).get("date") or "")
+        ged_full = _normalize_name(ged.get("name") or "")
+
+        if db_year and ged_year:
+            if abs(db_year - ged_year) <= 5:
+                score = 100 if ged_full == db_full else 90
+            else:
+                score = 70
+        else:
+            score = 90 if ged_full == db_full else 70
+
+        if score > best_score:
+            best_score, best_gid = score, gid
+
+    return best_gid, best_score
+
+
+def _run_comparison(ged_path: str, db_path: str):
+    """Background thread: parse GEDCOM, compare with DB, save results. Never modifies people data."""
+    import sys as _sys
+    t_start = time.time()
+    try:
+        backend_dir = str(Path(db_path).parent)
+        if backend_dir not in _sys.path:
+            _sys.path.insert(0, backend_dir)
+
+        from gedcom_parser import parse_gedcom
+        from database import get_connection as _get_conn
+
+        _cmp_log(f"Iniciant comparació: {Path(ged_path).name}")
+
+        # 1. Parse GEDCOM (read-only, no DB touch)
+        _cmp_log("[1/4] Parsejant GEDCOM…")
+        data = parse_gedcom(ged_path)
+        individuals = data["individuals"]
+        _cmp_log(f"  {len(individuals):,} individus al GEDCOM")
+
+        # 2. Build name index
+        _cmp_log("[2/4] Construint índex de noms…")
+        ged_index = _build_ged_index(individuals)
+        _cmp_log(f"  {len(ged_index):,} entrades a l'índex")
+
+        # 3. Load all DB people + pre-fetch related tables (3 queries, not N×3)
+        _cmp_log("[3/4] Carregant dades de la BD…")
+        conn = _get_conn(db_path)
+        db_people = conn.execute(
+            "SELECT id, name, given_name, surname, nickname, "
+            "birth_date, birth_year, birth_place, "
+            "death_date, death_year, death_place "
+            "FROM people ORDER BY birth_year"
+        ).fetchall()
+
+        all_notes: dict = {}
+        for r in conn.execute("SELECT person_id, content FROM notes").fetchall():
+            all_notes.setdefault(r["person_id"], []).append(r["content"])
+
+        all_occs: dict = {}
+        for r in conn.execute("SELECT person_id, title, date, place FROM occupations").fetchall():
+            all_occs.setdefault(r["person_id"], []).append(dict(r))
+
+        all_res: dict = {}
+        for r in conn.execute(
+            "SELECT person_id, address, city, country, date FROM residences"
+        ).fetchall():
+            all_res.setdefault(r["person_id"], []).append(dict(r))
+
+        total = len(db_people)
+        with _cmp_job_lock:
+            _cmp_job["total"] = total
+        _cmp_log(f"  {total} persones a la BD")
+
+        # Clear previous results
+        conn.execute("DELETE FROM compare_results")
+        conn.commit()
+
+        # 4. Compare each DB person
+        _cmp_log("[4/4] Comparant persona a persona…")
+        meaningful = 0
+        for i, db_row in enumerate(db_people):
+            with _cmp_job_lock:
+                _cmp_job["progress"] = i + 1
+
+            db_person = dict(db_row)
+            pid = db_person["id"]
+
+            ged_id, score = _match_person(db_person, individuals, ged_index)
+
+            if ged_id is None:
+                diff_types = ["nomatch"]
+                diff_details = {"nomatch": ["Persona no trobada al GEDCOM"]}
+            else:
+                diff_types, diff_details = _compute_diff(
+                    db_person,
+                    all_notes.get(pid, []),
+                    all_occs.get(pid, []),
+                    all_res.get(pid, []),
+                    individuals[ged_id],
+                )
+
+            if diff_types:
+                conn.execute(
+                    "INSERT INTO compare_results "
+                    "(db_person_id, db_person_name, ged_person_id, ged_person_name, "
+                    "match_score, diff_types, diff_details) VALUES (?,?,?,?,?,?,?)",
+                    (
+                        pid,
+                        db_person.get("name"),
+                        ged_id,
+                        individuals[ged_id].get("name") if ged_id else None,
+                        score,
+                        ",".join(diff_types),
+                        json.dumps(diff_details, ensure_ascii=False),
+                    ),
+                )
+                meaningful += 1
+                if meaningful % 100 == 0:
+                    conn.commit()
+
+        conn.commit()
+        conn.close()
+
+        elapsed = _fmt_dur(time.time() - t_start)
+        _cmp_log(f"✓ Completat: {meaningful} diferències de {total} persones en {elapsed}")
+
+        with _cmp_job_lock:
+            _cmp_job["status"] = "done"
+            _cmp_job["finished_at"] = datetime.now().isoformat()
+            _cmp_job["progress"] = total
+
+    except Exception as exc:
+        with _cmp_job_lock:
+            _cmp_job["status"] = "error"
+            _cmp_job["error"] = str(exc)
+            _cmp_job["finished_at"] = datetime.now().isoformat()
+            _cmp_job["log"].append(f"ERROR: {exc}")
+            _cmp_job["log"].append(traceback.format_exc())
+
+
+@router.post("/compare/start")
+async def compare_start(file: UploadFile = File(...)):
+    """Upload a GEDCOM file and launch async comparison. Read-only — never modifies DB people."""
+    with _cmp_job_lock:
+        if _cmp_job["status"] == "running":
+            raise HTTPException(status_code=409, detail="Comparació ja en curs")
+        _cmp_job.update({
+            "status": "running", "progress": 0, "total": 0,
+            "log": [], "started_at": datetime.now().isoformat(),
+            "finished_at": None, "error": None,
+        })
+
+    uploads_dir = _base_dir / "data" / "uploads"
+    uploads_dir.mkdir(exist_ok=True)
+    safe_name = Path(file.filename or "compare.ged").name
+    ged_path = str(uploads_dir / safe_name)
+    content = await file.read()
+    with open(ged_path, "wb") as fh:
+        fh.write(content)
+
+    db_path = str(_base_dir / "data" / "godesia.db")
+    threading.Thread(target=_run_comparison, args=(ged_path, db_path), daemon=True).start()
+    return {"status": "started"}
+
+
+@router.get("/compare/status")
+async def compare_status():
+    with _cmp_job_lock:
+        return dict(_cmp_job)
+
+
+@router.get("/compare/results")
+async def compare_results_list():
+    db = _db()
+    try:
+        rows = db.execute(
+            "SELECT id, db_person_id, db_person_name, ged_person_id, ged_person_name, "
+            "match_score, diff_types, diff_details, created_at "
+            "FROM compare_results ORDER BY match_score ASC, id ASC"
+        ).fetchall()
+        last_run = db.execute("SELECT MAX(created_at) FROM compare_results").fetchone()[0]
+        return {"rows": [dict(r) for r in rows], "total_count": len(rows), "last_run": last_run}
+    except Exception:
+        return {"rows": [], "total_count": 0, "last_run": None}
+
+
+@router.delete("/compare/results/all")
+async def compare_delete_all():
+    db = _db()
+    deleted = db.execute("SELECT COUNT(*) FROM compare_results").fetchone()[0]
+    db.execute("DELETE FROM compare_results")
+    db.commit()
+    with _cmp_job_lock:
+        _cmp_job.update({
+            "status": "idle", "progress": 0, "total": 0,
+            "log": [], "started_at": None, "finished_at": None, "error": None,
+        })
+    return {"status": "ok", "deleted": deleted}
+
+
+@router.delete("/compare/result/{result_id}")
+async def compare_delete_result(result_id: int):
+    db = _db()
+    db.execute("DELETE FROM compare_results WHERE id = ?", (result_id,))
+    db.commit()
+    return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
 # Suggestions
 # ---------------------------------------------------------------------------
 

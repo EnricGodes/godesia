@@ -43,6 +43,13 @@
             <a data-section="tests">
                 <span class="nav-icon">▷</span> Tests
             </a>
+            <a data-section="config">
+                <span class="nav-icon">⚙</span> Configuració
+            </a>
+            <a data-section="comparador">
+                <span class="nav-icon">⇄</span> Comparador GEDCOM
+                <span class="nav-badge" id="badge-cmp"></span>
+            </a>
         </nav>
     </aside>
 
@@ -342,6 +349,88 @@
             </div>
 
             <div id="tests-list"></div>
+        </section>
+
+        <!-- CONFIGURACIÓ -->
+        <section id="s-config" class="admin-section">
+            <h1 class="section-title">Configuració</h1>
+            <p class="section-subtitle">Paràmetres generals de l'aplicació.</p>
+
+            <div class="card" style="max-width:480px;">
+                <h2 class="card-title">Persona principal de l'arbre</h2>
+                <p class="card-subtitle">Individu que apareix per defecte en obrir Árbol 2.</p>
+
+                <div id="config-current" style="margin-bottom:1rem;font-size:.875rem;color:#5a5a4e;"></div>
+
+                <div style="position:relative;margin-bottom:.75rem;">
+                    <input type="text" id="config-person-search"
+                        placeholder="Cerca un nom…" autocomplete="off"
+                        style="width:100%;padding:8px 12px;border:1px solid #c2c8bf;border-radius:8px;
+                               font-family:Manrope,sans-serif;font-size:.875rem;box-sizing:border-box;">
+                    <div id="config-person-results"
+                        style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
+                               background:#fff;border:1px solid #c2c8bf;border-radius:8px;
+                               box-shadow:0 6px 20px rgba(0,0,0,.1);max-height:220px;overflow-y:auto;z-index:50;">
+                    </div>
+                </div>
+
+                <div id="config-selected" style="display:none;margin-bottom:1rem;padding:10px 14px;
+                     background:#f1eee5;border-radius:8px;font-size:.875rem;color:#1c1c17;"></div>
+
+                <button id="config-save-btn" disabled
+                    style="padding:9px 20px;background:#2d4b33;color:#fff;border:none;border-radius:8px;
+                           cursor:pointer;font-family:Manrope,sans-serif;font-size:.875rem;font-weight:500;
+                           opacity:.5;">
+                    Guardar
+                </button>
+                <span id="config-save-msg"
+                      style="margin-left:12px;font-size:.8rem;color:#2d4b33;display:none;">✓ Guardat</span>
+            </div>
+        </section>
+
+        <!-- ── COMPARADOR ── -->
+        <section id="s-comparador" class="admin-section">
+            <h1 class="section-title">Comparador GEDCOM</h1>
+            <p class="section-subtitle">Compara un fitxer GEDCOM extern amb les dades de la BD. Només lectura — no modifica res.</p>
+
+            <!-- Upload card -->
+            <div class="info-card" id="cmp-form-card">
+                <h3>Fitxer GEDCOM per comparar</h3>
+                <div class="file-drop" id="cmp-drop" onclick="document.getElementById('cmp-file').click()" style="cursor:pointer;">
+                    <input type="file" id="cmp-file" accept=".ged" style="display:none" onchange="Comparador.onFileSelected(this)">
+                    <div id="cmp-drop-label">
+                        Clica o arrossega un fitxer <strong>.ged</strong><br>
+                        <small style="color:#9e9b94;">El fitxer s'utilitza només per comparar, no s'importa a la BD.</small>
+                    </div>
+                </div>
+                <div class="toolbar" style="margin-top:1rem;">
+                    <button class="btn btn-primary" id="btn-start-cmp" onclick="Comparador.start()">Iniciar comparació</button>
+                    <button class="btn btn-secondary btn-sm" id="btn-clear-cmp" onclick="Comparador.clearAll()" style="display:none;">Esborrar tot i reiniciar</button>
+                </div>
+            </div>
+
+            <!-- Log / progress card -->
+            <div class="info-card" id="cmp-log-card" style="display:none;">
+                <h3 style="display:flex;align-items:center;gap:.5rem;">
+                    Progrés <span class="badge" id="cmp-status-badge"></span>
+                </h3>
+                <div style="background:#d9d5cc;border-radius:4px;height:6px;margin:.6rem 0;overflow:hidden;">
+                    <div id="cmp-progress-bar" style="height:100%;background:#2d4b33;width:0%;transition:width .3s;"></div>
+                </div>
+                <div id="cmp-progress-text" style="font-size:.75rem;color:#727971;margin-bottom:.5rem;"></div>
+                <pre class="import-log" id="cmp-log" style="height:160px;"></pre>
+            </div>
+
+            <!-- Results -->
+            <div id="cmp-results-section" style="display:none;">
+                <div class="toolbar">
+                    <span style="font-size:.82rem;color:#727971;" id="cmp-results-meta"></span>
+                    <div class="toolbar-right">
+                        <button class="btn btn-secondary btn-sm" onclick="Comparador.loadResults()">↻ Actualitzar</button>
+                    </div>
+                </div>
+                <div id="cmp-results-list"></div>
+            </div>
         </section>
 
     </main>
