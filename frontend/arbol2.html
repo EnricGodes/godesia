@@ -93,9 +93,18 @@
     }
     .a2-zoom-btn:hover { background: #f1eee5; border-color: #2d4b33; }
 
-    /* ── Mini-tree indicator (library uses white strokes, override for light theme) ── */
+    /* ── Mini-tree indicator ── */
     #FamilyChart .mini-tree line { stroke: #8a8780; }
     #FamilyChart .mini-tree rect:not([fill="rgba(0,0,0,0)"]) { fill: #8a8780; }
+    /* Scale the mini-tree icon down to ~30% so it looks like two small compact
+       rectangles (similar to the family-chart demo). transform-box:fill-box makes
+       transform-origin relative to the element's own bounding box; 50% 100% = bottom
+       center, keeping the connecting line to the card in place. */
+    #FamilyChart .mini-tree {
+      transform-box: fill-box;
+      transform-origin: 50% 100%;
+      transform: scale(0.3);
+    }
 
     /* ── Sidebar ── */
     #a2-sidebar { font-family: Manrope, sans-serif; }
