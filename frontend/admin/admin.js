@@ -1290,6 +1290,7 @@ const Comparador = {
                 dates: '📅 Dates', places: '📍 Llocs', notes: '📝 Notes',
                 photos: '📸 Fotos', name: '💬 Nom', nomatch: '❓ No trobat',
                 occupations: '💼 Oficis', residences: '🏠 Residències',
+                events: '🗓 Esdeveniments',
             };
 
             this._rows = {};

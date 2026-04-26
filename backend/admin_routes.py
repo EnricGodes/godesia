@@ -432,6 +432,18 @@ def _normalize_name(text: str) -> str:
     return " ".join(stripped.lower().split())
 
 
+def _strip_nickname(text: str) -> str:
+    """Remove quoted and parenthetical nicknames from a given name.
+    'Dolores "Lolita"' → 'Dolores', 'Josep (Pepe)' → 'Josep'."""
+    import re
+    if not text:
+        return text
+    # Remove "..." and (...)
+    text = re.sub(r'"[^"]*"', '', text)
+    text = re.sub(r'\([^)]*\)', '', text)
+    return " ".join(text.split())
+
+
 def _ged_year(date_str: str) -> Optional[int]:
     """Extract 4-digit year from a raw GEDCOM date string like '15 APR 1824'."""
     if not date_str:
@@ -454,7 +466,7 @@ def _ged_has_full_date(date_str: str) -> bool:
 
 
 def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
-                  ged: dict) -> tuple:
+                  db_burials: list, db_events: list, ged: dict) -> tuple:
     """Compare one DB person against one GEDCOM individual.
     Returns (diff_types_list, diff_details_dict)."""
     diff_types = []
@@ -482,6 +494,26 @@ def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
     if db_death_is_year_only and _ged_has_full_date(ged_death_date):
         date_diffs.append(f"Defunció: BD té '{db_death_date or db_death_year}', GEDCOM té '{ged_death_date}'")
 
+    # ── Baptism date ──────────────────────────────────────────────────────
+    ged_bapt = ged.get("baptism") or {}
+    ged_bapt_date = (ged_bapt.get("date") or "").strip()
+    db_bapt_date  = (db_person.get("baptism_date") or "").strip()
+    if ged_bapt_date and not db_bapt_date:
+        date_diffs.append(f"Baptisme: BD no té data, GEDCOM té '{ged_bapt_date}'")
+    elif ged_bapt_date and db_bapt_date and _ged_has_full_date(ged_bapt_date) and not _ged_has_full_date(db_bapt_date):
+        date_diffs.append(f"Baptisme: BD té '{db_bapt_date}', GEDCOM té '{ged_bapt_date}'")
+
+    # ── Burial date ───────────────────────────────────────────────────────
+    ged_burials = ged.get("burial") or []
+    if isinstance(ged_burials, dict):
+        ged_burials = [ged_burials]
+    if ged_burials and not db_burials:
+        for gb in ged_burials:
+            gb_date = (gb.get("date") or "").strip()
+            gb_place = (gb.get("place") or gb.get("place_detail") or "").strip()
+            if gb_date or gb_place:
+                date_diffs.append(f"Enterrament: BD no té dades, GEDCOM té '{(gb_date + ' ' + gb_place).strip()}'")
+
     if date_diffs:
         diff_types.append("dates")
         details["dates"] = date_diffs
@@ -498,9 +530,59 @@ def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
     if ged_dp and (not db_dp or (ged_dp.lower() != db_dp.lower() and len(ged_dp) > len(db_dp))):
         place_diffs.append(f"Lloc def.: BD '{db_dp or '—'}' → GEDCOM '{ged_dp}'")
 
+    ged_bapt_place = (ged_bapt.get("place") or "").strip()
+    db_bapt_place  = (db_person.get("baptism_place") or "").strip()
+    if ged_bapt_place and (not db_bapt_place or (ged_bapt_place.lower() != db_bapt_place.lower() and len(ged_bapt_place) > len(db_bapt_place))):
+        place_diffs.append(f"Lloc baptisme: BD '{db_bapt_place or '—'}' → GEDCOM '{ged_bapt_place}'")
+
+    if ged_burials and not db_burials:
+        for gb in ged_burials:
+            gb_place = (gb.get("place") or gb.get("place_detail") or "").strip()
+            if gb_place:
+                place_diffs.append(f"Lloc enterrament: BD no té, GEDCOM té '{gb_place}'")
+    elif ged_burials and db_burials:
+        db_bur_places = {_normalize_name(b.get("place") or "") for b in db_burials}
+        for gb in ged_burials:
+            gb_place = _normalize_name(gb.get("place") or gb.get("place_detail") or "")
+            if gb_place and gb_place not in db_bur_places:
+                place_diffs.append(f"Lloc enterrament nou al GEDCOM: '{gb.get('place') or gb.get('place_detail')}'")
+
     if place_diffs:
         diff_types.append("places")
         details["places"] = place_diffs
+
+    # ── Events ────────────────────────────────────────────────────────────
+    ged_events = ged.get("events") or []
+    # Build a set of (tag, type, description) already in DB to detect new events
+    db_events_keys = {
+        (e.get("tag", ""), _normalize_name(e.get("type") or e.get("description") or ""))
+        for e in db_events
+    }
+    new_ged_events = []
+    for ge in ged_events:
+        key = (ge.get("tag", ""), _normalize_name(ge.get("type") or ge.get("description") or ""))
+        if key not in db_events_keys:
+            label = ge.get("type") or ge.get("tag") or "Esdeveniment"
+            parts = [label]
+            if ge.get("date"):
+                parts.append(ge["date"])
+            if ge.get("place"):
+                parts.append(ge["place"])
+            if ge.get("description") and ge.get("description") != label:
+                parts.append(ge["description"])
+            new_ged_events.append(": ".join(parts))
+    if new_ged_events:
+        diff_types.append("events")
+        details["events"] = new_ged_events
+
+    # ── Death cause ───────────────────────────────────────────────────────
+    ged_death_cause = (ged_death.get("cause") or "").strip()
+    db_death_cause  = (db_person.get("death_cause") or "").strip()
+    if ged_death_cause and not db_death_cause:
+        if "events" not in diff_types:
+            diff_types.append("events")
+            details["events"] = []
+        details.setdefault("events", []).append(f"Causa defunció al GEDCOM: '{ged_death_cause}'")
 
     # ── Notes ─────────────────────────────────────────────────────────────
     ged_notes = ged.get("notes") or []
@@ -574,14 +656,20 @@ def _build_ged_index(individuals: dict) -> dict:
     index: dict = {}
     for ged_id, indi in individuals.items():
         candidates = set()
-        full = _normalize_name(indi.get("name") or "")
-        if full:
-            candidates.add(full)
-        given   = _normalize_name(indi.get("given_name") or "")
-        surname = _normalize_name(indi.get("surname") or "")
-        if given and surname:
-            candidates.add(f"{given} {surname}")
-            candidates.add(f"{surname} {given}")
+        # Index both raw and nickname-stripped versions of each name form
+        for raw_given in [indi.get("given_name") or "", _strip_nickname(indi.get("given_name") or "")]:
+            raw_surname = indi.get("surname") or ""
+            given   = _normalize_name(raw_given)
+            surname = _normalize_name(raw_surname)
+            if given and surname:
+                candidates.add(f"{given} {surname}")
+                candidates.add(f"{surname} {given}")
+        # Also index the full name field (with and without nicknames)
+        raw_full = indi.get("name") or ""
+        for raw in [raw_full, _strip_nickname(raw_full)]:
+            full = _normalize_name(raw)
+            if full:
+                candidates.add(full)
         for name in candidates:
             index.setdefault(name, []).append(ged_id)
     return index
@@ -590,10 +678,14 @@ def _build_ged_index(individuals: dict) -> dict:
 def _match_person(db_person: dict, individuals: dict, ged_index: dict) -> tuple:
     """Find best GEDCOM match for a DB person.
     Returns (ged_id | None, score 0-100)."""
-    db_given   = _normalize_name(db_person.get("given_name") or "")
-    db_surname = _normalize_name(db_person.get("surname") or "")
-    db_full    = _normalize_name(db_person.get("name") or "")
-    db_year    = db_person.get("birth_year")
+    # Strip parenthetical nicknames from DB names too: 'Josep (Pepe)' → 'Josep'
+    raw_given   = db_person.get("given_name") or ""
+    raw_surname = db_person.get("surname") or ""
+    raw_full    = db_person.get("name") or ""
+    db_given    = _normalize_name(_strip_nickname(raw_given))
+    db_surname  = _normalize_name(raw_surname)
+    db_full     = _normalize_name(_strip_nickname(raw_full))
+    db_year     = db_person.get("birth_year")
 
     candidates: set = set()
     for name in [db_full, f"{db_given} {db_surname}", f"{db_surname} {db_given}"]:
@@ -656,7 +748,8 @@ def _run_comparison(ged_path: str, db_path: str):
         db_people = conn.execute(
             "SELECT id, name, given_name, surname, nickname, "
             "birth_date, birth_year, birth_place, "
-            "death_date, death_year, death_place "
+            "death_date, death_year, death_place, death_cause, "
+            "baptism_date, baptism_place "
             "FROM people ORDER BY birth_year"
         ).fetchall()
 
@@ -673,6 +766,16 @@ def _run_comparison(ged_path: str, db_path: str):
             "SELECT person_id, address, city, country, date FROM residences"
         ).fetchall():
             all_res.setdefault(r["person_id"], []).append(dict(r))
+
+        all_burials: dict = {}
+        for r in conn.execute("SELECT person_id, place, place_detail, date FROM burial").fetchall():
+            all_burials.setdefault(r["person_id"], []).append(dict(r))
+
+        all_events: dict = {}
+        for r in conn.execute(
+            "SELECT person_id, tag, type, description, date, place FROM events"
+        ).fetchall():
+            all_events.setdefault(r["person_id"], []).append(dict(r))
 
         total = len(db_people)
         with _cmp_job_lock:
@@ -704,6 +807,8 @@ def _run_comparison(ged_path: str, db_path: str):
                     all_notes.get(pid, []),
                     all_occs.get(pid, []),
                     all_res.get(pid, []),
+                    all_burials.get(pid, []),
+                    all_events.get(pid, []),
                     individuals[ged_id],
                 )
 
