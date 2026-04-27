@@ -444,6 +444,85 @@ def _strip_nickname(text: str) -> str:
     return " ".join(text.split())
 
 
+_NAME_VARIANT_PAIRS = [
+    ("joan", "juan"), ("joana", "juana"),
+    ("anna", "ana"),
+    ("pere", "pedro"),
+    ("jordi", "jorge"),
+    ("carme", "carmen"),
+    ("josep", "jose"), ("josepa", "josefa"),
+    ("francesc", "francisco"), ("francesca", "francisca"),
+    ("antoni", "antonio"), ("antonia", "antonia"),
+    ("miquel", "miguel"),
+    ("lluis", "luis"), ("lluisa", "luisa"),
+    ("joaquim", "joaquin"), ("joaquima", "joaquina"),
+    ("merce", "mercedes"),
+    ("concepcio", "concepcion"),
+    ("dolors", "dolores"),
+    ("cristofol", "cristobal"),
+    ("esteve", "esteban"),
+    ("vicens", "vicente"),
+    ("bernat", "bernardo"),
+    ("narcis", "narciso"),
+    ("isidre", "isidro"),
+    ("marti", "martin"),
+    ("domenec", "domingo"),
+    ("agusti", "agustin"),
+    ("rafel", "rafael"),
+    ("jaume", "jaime"),
+    ("guillem", "guillermo"),
+    ("felip", "felipe"),
+    ("ferran", "fernando"),
+    ("llorenc", "lorenzo"),
+    ("blai", "blas"),
+    ("raimon", "raimundo"),
+    ("enric", "enrique"),
+    ("salvador", "salvador"),
+    ("magdalena", "magdalena"),
+    ("teresa", "teresa"),
+]
+_NAME_DIMINUTIVES = {
+    "pep": "josep", "pepe": "josep",
+    "paco": "francesc", "cisco": "francesc", "kiko": "francesc", "fco": "francesc",
+    "toni": "antoni", "tonet": "antoni",
+    "quim": "joaquim",
+    "montse": "montserrat",
+    "tere": "teresa",
+    "lola": "dolors", "lolita": "dolors",
+    "concha": "concepcio", "conxita": "concepcio",
+    "lluiseta": "lluis",
+    "ma": "maria", "m": "maria",
+}
+_NAME_VARIANTS: dict = {}
+for _a, _b in _NAME_VARIANT_PAIRS:
+    _NAME_VARIANTS[_a] = _a
+    _NAME_VARIANTS[_b] = _a
+_NAME_VARIANTS.update(_NAME_DIMINUTIVES)
+
+_NAME_STOPWORDS = {"i", "y", "de", "del", "la", "el", "les", "los", "da", "do"}
+
+
+def _canonicalize_person_name(text: str) -> str:
+    """Canonical form for matching: strip nicknames → NFD/lowercase → drop
+    connectors (i/y/de/…) → drop 1-char tokens → map Catalan↔Spanish variants."""
+    if not text:
+        return ""
+    raw = _strip_nickname(text)
+    base = _normalize_name(raw)
+    if not base:
+        return ""
+    out_tokens = []
+    for tok in base.split():
+        if len(tok) <= 1:
+            continue
+        if tok in _NAME_STOPWORDS:
+            continue
+        out_tokens.append(_NAME_VARIANTS.get(tok, tok))
+    if not out_tokens:
+        return ""
+    return " ".join(out_tokens)
+
+
 def _ged_year(date_str: str) -> Optional[int]:
     """Extract 4-digit year from a raw GEDCOM date string like '15 APR 1824'."""
     if not date_str:
@@ -652,68 +731,84 @@ def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
 
 
 def _build_ged_index(individuals: dict) -> dict:
-    """Build normalized name → [ged_id, ...] lookup from all GEDCOM individuals."""
+    """Build canonical name → [ged_id, ...] lookup from all GEDCOM individuals."""
     index: dict = {}
     for ged_id, indi in individuals.items():
         candidates = set()
-        # Index both raw and nickname-stripped versions of each name form
-        for raw_given in [indi.get("given_name") or "", _strip_nickname(indi.get("given_name") or "")]:
-            raw_surname = indi.get("surname") or ""
-            given   = _normalize_name(raw_given)
-            surname = _normalize_name(raw_surname)
-            if given and surname:
-                candidates.add(f"{given} {surname}")
-                candidates.add(f"{surname} {given}")
-        # Also index the full name field (with and without nicknames)
-        raw_full = indi.get("name") or ""
-        for raw in [raw_full, _strip_nickname(raw_full)]:
-            full = _normalize_name(raw)
-            if full:
-                candidates.add(full)
+        given   = indi.get("given_name") or ""
+        surname = indi.get("surname") or ""
+        full    = indi.get("name") or ""
+
+        canon_given   = _canonicalize_person_name(given)
+        canon_surname = _canonicalize_person_name(surname)
+        canon_full    = _canonicalize_person_name(full)
+        if canon_full:
+            candidates.add(canon_full)
+        if canon_given and canon_surname:
+            candidates.add(f"{canon_given} {canon_surname}")
+            candidates.add(f"{canon_surname} {canon_given}")
+            first_given = canon_given.split()[0]
+            if first_given and first_given != canon_given:
+                candidates.add(f"{first_given} {canon_surname}")
+                candidates.add(f"{canon_surname} {first_given}")
         for name in candidates:
             index.setdefault(name, []).append(ged_id)
     return index
 
 
 def _match_person(db_person: dict, individuals: dict, ged_index: dict) -> tuple:
-    """Find best GEDCOM match for a DB person.
-    Returns (ged_id | None, score 0-100)."""
-    # Strip parenthetical nicknames from DB names too: 'Josep (Pepe)' → 'Josep'
-    raw_given   = db_person.get("given_name") or ""
-    raw_surname = db_person.get("surname") or ""
-    raw_full    = db_person.get("name") or ""
-    db_given    = _normalize_name(_strip_nickname(raw_given))
-    db_surname  = _normalize_name(raw_surname)
-    db_full     = _normalize_name(_strip_nickname(raw_full))
-    db_year     = db_person.get("birth_year")
+    """Find best GEDCOM match for a DB person. Returns (ged_id | None, score 0-100)."""
+    db_given_canon   = _canonicalize_person_name(db_person.get("given_name") or "")
+    db_surname_canon = _canonicalize_person_name(db_person.get("surname") or "")
+    db_full_canon    = _canonicalize_person_name(db_person.get("name") or "")
+    db_year          = db_person.get("birth_year")
+
+    probes = [db_full_canon]
+    if db_given_canon and db_surname_canon:
+        probes.append(f"{db_given_canon} {db_surname_canon}")
+        probes.append(f"{db_surname_canon} {db_given_canon}")
+        first_given = db_given_canon.split()[0] if db_given_canon else ""
+        if first_given and first_given != db_given_canon:
+            probes.append(f"{first_given} {db_surname_canon}")
+            probes.append(f"{db_surname_canon} {first_given}")
 
     candidates: set = set()
-    for name in [db_full, f"{db_given} {db_surname}", f"{db_surname} {db_given}"]:
-        name = name.strip()
-        if name:
-            for gid in ged_index.get(name, []):
-                candidates.add(gid)
+    for name in probes:
+        if not name:
+            continue
+        for gid in ged_index.get(name, []):
+            candidates.add(gid)
 
     if not candidates:
         return None, 0
 
+    multiple = len(candidates) > 1
     best_gid, best_score = None, 0
     for gid in candidates:
         ged  = individuals[gid]
         ged_year = _ged_year((ged.get("birth") or {}).get("date") or "")
-        ged_full = _normalize_name(ged.get("name") or "")
+        ged_full_canon = _canonicalize_person_name(ged.get("name") or "")
+        canon_match = bool(ged_full_canon) and ged_full_canon == db_full_canon
 
         if db_year and ged_year:
-            if abs(db_year - ged_year) <= 5:
-                score = 100 if ged_full == db_full else 90
+            year_delta = abs(db_year - ged_year)
+            if year_delta <= 2:
+                score = 100 if canon_match else 92
+            elif year_delta <= 5:
+                score = 90 if canon_match else 80
             else:
-                score = 70
+                score = 65 if not multiple else 0
         else:
-            score = 90 if ged_full == db_full else 70
+            if multiple:
+                score = 78 if canon_match else 60
+            else:
+                score = 88 if canon_match else 75
 
         if score > best_score:
             best_score, best_gid = score, gid
 
+    if best_score == 0:
+        return None, 0
     return best_gid, best_score
 
 
