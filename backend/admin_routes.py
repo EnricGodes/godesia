@@ -1073,8 +1073,12 @@ def _run_comparison(ged_path: str, db_path: str):
         conn.execute("DELETE FROM compare_results")
         conn.commit()
 
-        # 4. Compare each DB person
-        _cmp_log("[4/4] Comparant persona a persona…")
+        # 4. BD → GEDCOM: find diffs where GEDCOM has data the DB lacks.
+        #    We do NOT report DB people missing from the GEDCOM (that direction
+        #    is not useful). We DO track which GED IDs got matched so that
+        #    the next pass can find GEDCOM people absent from the DB.
+        _cmp_log("[4/5] Comparant BD → GEDCOM (dades que falten a la BD)…")
+        matched_ged_ids: set = set()
         meaningful = 0
         for i, db_row in enumerate(db_people):
             with _cmp_job_lock:
@@ -1091,23 +1095,24 @@ def _run_comparison(ged_path: str, db_path: str):
             ged_id, score = _match_person(db_person, individuals, ged_index)
 
             if ged_id is None:
-                diff_types = ["nomatch"]
-                diff_details = {"nomatch": ["Persona no trobada al GEDCOM"]}
-            else:
-                diff_types, diff_details = _compute_diff(
-                    db_person,
-                    all_notes.get(pid, []),
-                    all_occs.get(pid, []),
-                    all_res.get(pid, []),
-                    all_burials.get(pid, []),
-                    all_events.get(pid, []),
-                    all_photos.get(pid, []),
-                    all_marriages.get(pid, []),
-                    all_children.get(pid, []),
-                    individuals[ged_id],
-                    data.get("families") or {},
-                    individuals,
-                )
+                continue  # BD person not in GEDCOM: not interesting per user request
+
+            matched_ged_ids.add(ged_id)
+
+            diff_types, diff_details = _compute_diff(
+                db_person,
+                all_notes.get(pid, []),
+                all_occs.get(pid, []),
+                all_res.get(pid, []),
+                all_burials.get(pid, []),
+                all_events.get(pid, []),
+                all_photos.get(pid, []),
+                all_marriages.get(pid, []),
+                all_children.get(pid, []),
+                individuals[ged_id],
+                data.get("families") or {},
+                individuals,
+            )
 
             if diff_types:
                 conn.execute(
@@ -1118,7 +1123,7 @@ def _run_comparison(ged_path: str, db_path: str):
                         pid,
                         db_person.get("name"),
                         ged_id,
-                        individuals[ged_id].get("name") if ged_id else None,
+                        individuals[ged_id].get("name"),
                         score,
                         ",".join(diff_types),
                         json.dumps(diff_details, ensure_ascii=False),
@@ -1129,8 +1134,67 @@ def _run_comparison(ged_path: str, db_path: str):
                     conn.commit()
 
         conn.commit()
+        _cmp_log(f"  {meaningful} persones amb dades a actualitzar")
+
+        # 5. GEDCOM → BD: find GEDCOM people absent from the DB (new individuals
+        #    that should potentially be imported).
+        _cmp_log("[5/5] Cercant persones al GEDCOM que no estan a la BD…")
+        families = data.get("families") or {}
+        only_ged = 0
+        for ged_id, indi in individuals.items():
+            if ged_id in matched_ged_ids:
+                continue
+            ged_name = (indi.get("name") or "").strip()
+            if not ged_name:
+                continue
+
+            ged_birth = (indi.get("birth") or {}).get("date") or ""
+            ged_birth_place = (indi.get("birth") or {}).get("place") or ""
+            ged_death = (indi.get("death") or {}).get("date") or ""
+
+            details = []
+            if ged_birth:
+                loc = f", {ged_birth_place}" if ged_birth_place else ""
+                details.append(f"Neixement: {ged_birth}{loc}")
+            if ged_death:
+                details.append(f"Defunció: {ged_death}")
+            fam_child = indi.get("family_child") or []
+            if isinstance(fam_child, str):
+                fam_child = [fam_child]
+            for fid in fam_child[:1]:
+                fam = families.get(fid) or {}
+                husb = fam.get("husband")
+                wife = fam.get("wife")
+                if husb and husb in individuals:
+                    details.append(f"Pare: {individuals[husb].get('name', husb)}")
+                if wife and wife in individuals:
+                    details.append(f"Mare: {individuals[wife].get('name', wife)}")
+
+            diff_details = {"only_in_ged": details or ["Sense dades addicionals"]}
+            conn.execute(
+                "INSERT INTO compare_results "
+                "(db_person_id, db_person_name, ged_person_id, ged_person_name, "
+                "match_score, diff_types, diff_details) VALUES (?,?,?,?,?,?,?)",
+                (
+                    "",  # empty string satisfies NOT NULL; signals no DB person
+                    None,
+                    ged_id,
+                    ged_name,
+                    0,
+                    "only_in_ged",
+                    json.dumps(diff_details, ensure_ascii=False),
+                ),
+            )
+            only_ged += 1
+            if only_ged % 100 == 0:
+                conn.commit()
+
+        conn.commit()
+        _cmp_log(f"  {only_ged} persones noves al GEDCOM")
+
         conn.close()
 
+        meaningful += only_ged
         elapsed = _fmt_dur(time.time() - t_start)
         _cmp_log(f"✓ Completat: {meaningful} diferències de {total} persones en {elapsed}")
 
@@ -1186,7 +1250,9 @@ async def compare_results_list():
         rows = db.execute(
             "SELECT id, db_person_id, db_person_name, ged_person_id, ged_person_name, "
             "match_score, diff_types, diff_details, created_at "
-            "FROM compare_results ORDER BY match_score ASC, id ASC"
+            "FROM compare_results ORDER BY "
+            "(CASE WHEN diff_types = 'only_in_ged' THEN 0 ELSE 1 END) ASC, "
+            "match_score ASC, id ASC"
         ).fetchall()
         last_run = db.execute("SELECT MAX(created_at) FROM compare_results").fetchone()[0]
         return {"rows": [dict(r) for r in rows], "total_count": len(rows), "last_run": last_run}

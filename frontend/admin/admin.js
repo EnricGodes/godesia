@@ -1289,7 +1289,7 @@ const Comparador = {
             const ICONS = {
                 dates: '📅 Dates', places: '📍 Llocs', notes: '📝 Notes',
                 photos: '📸 Fotos', documents: '📄 Documents',
-                name: '💬 Nom', nomatch: '❓ No trobat',
+                name: '💬 Nom', only_in_ged: '🆕 Nou al GEDCOM',
                 occupations: '💼 Oficis', residences: '🏠 Residències',
                 events: '🗓 Esdeveniments',
                 sex: '⚧ Sexe', parents: '👪 Pares',
@@ -1311,20 +1311,25 @@ const Comparador = {
                 <tbody>
                 ${d.rows.map(row => {
                     const types  = (row.diff_types || '').split(',').filter(Boolean);
+                    const isNewInGed = types.includes('only_in_ged');
                     const badges = types.map(t =>
-                        `<span class="badge ${t === 'nomatch' ? 'badge-error' : 'badge-pending'}"
+                        `<span class="badge ${t === 'only_in_ged' ? 'badge-success' : 'badge-pending'}"
                                style="margin:1px 2px;font-size:.72rem;">${esc(ICONS[t] || t)}</span>`
                     ).join('');
                     const scoreColor = row.match_score >= 90 ? '#065f46'
                                      : row.match_score >= 70 ? '#92400e' : '#991b1b';
                     const personId = (row.db_person_id || '').replace(/@/g, '');
+                    const dbCell = isNewInGed
+                        ? `<span style="color:#c2c8bf;">—</span>`
+                        : `<a href="/dossier.html?id=${esc(personId)}" target="_blank"
+                              style="color:#2d4b33;font-weight:600;">${esc(row.db_person_name || row.db_person_id)}</a>`;
+                    const gedCell = isNewInGed
+                        ? `<strong style="color:#2d4b33;">${esc(row.ged_person_name || '—')}</strong>`
+                        : `<span style="font-size:.82rem;color:#3d3d37;">${esc(row.ged_person_name || '—')}</span>`;
                     return `
                     <tr id="cmp-row-${row.id}">
-                        <td style="font-size:.84rem;">
-                            <a href="/dossier.html?id=${esc(personId)}" target="_blank"
-                               style="color:#2d4b33;font-weight:600;">${esc(row.db_person_name || row.db_person_id)}</a>
-                        </td>
-                        <td style="font-size:.82rem;color:#3d3d37;">${esc(row.ged_person_name || '—')}</td>
+                        <td style="font-size:.84rem;">${dbCell}</td>
+                        <td>${gedCell}</td>
                         <td style="text-align:center;">
                             ${row.match_score > 0
                                 ? `<span style="font-weight:700;color:${scoreColor};">${row.match_score}%</span>`
