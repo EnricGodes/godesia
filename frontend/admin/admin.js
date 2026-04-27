@@ -1288,12 +1288,9 @@ const Comparador = {
 
             const ICONS = {
                 dates: '📅 Dates', places: '📍 Llocs', notes: '📝 Notes',
-                photos: '📸 Fotos', documents: '📄 Documents',
-                name: '💬 Nom', only_in_ged: '🆕 Nou al GEDCOM',
+                photos: '📸 Fotos', name: '💬 Nom', nomatch: '❓ No trobat',
                 occupations: '💼 Oficis', residences: '🏠 Residències',
                 events: '🗓 Esdeveniments',
-                sex: '⚧ Sexe', parents: '👪 Pares',
-                marriage: '💍 Matrimoni', children: '🧒 Fills',
             };
 
             this._rows = {};
@@ -1311,25 +1308,20 @@ const Comparador = {
                 <tbody>
                 ${d.rows.map(row => {
                     const types  = (row.diff_types || '').split(',').filter(Boolean);
-                    const isNewInGed = types.includes('only_in_ged');
                     const badges = types.map(t =>
-                        `<span class="badge ${t === 'only_in_ged' ? 'badge-success' : 'badge-pending'}"
+                        `<span class="badge ${t === 'nomatch' ? 'badge-error' : 'badge-pending'}"
                                style="margin:1px 2px;font-size:.72rem;">${esc(ICONS[t] || t)}</span>`
                     ).join('');
                     const scoreColor = row.match_score >= 90 ? '#065f46'
                                      : row.match_score >= 70 ? '#92400e' : '#991b1b';
                     const personId = (row.db_person_id || '').replace(/@/g, '');
-                    const dbCell = isNewInGed
-                        ? `<span style="color:#c2c8bf;">—</span>`
-                        : `<a href="/dossier.html?id=${esc(personId)}" target="_blank"
-                              style="color:#2d4b33;font-weight:600;">${esc(row.db_person_name || row.db_person_id)}</a>`;
-                    const gedCell = isNewInGed
-                        ? `<strong style="color:#2d4b33;">${esc(row.ged_person_name || '—')}</strong>`
-                        : `<span style="font-size:.82rem;color:#3d3d37;">${esc(row.ged_person_name || '—')}</span>`;
                     return `
                     <tr id="cmp-row-${row.id}">
-                        <td style="font-size:.84rem;">${dbCell}</td>
-                        <td>${gedCell}</td>
+                        <td style="font-size:.84rem;">
+                            <a href="/dossier.html?id=${esc(personId)}" target="_blank"
+                               style="color:#2d4b33;font-weight:600;">${esc(row.db_person_name || row.db_person_id)}</a>
+                        </td>
+                        <td style="font-size:.82rem;color:#3d3d37;">${esc(row.ged_person_name || '—')}</td>
                         <td style="text-align:center;">
                             ${row.match_score > 0
                                 ? `<span style="font-weight:700;color:${scoreColor};">${row.match_score}%</span>`
@@ -1363,49 +1355,16 @@ const Comparador = {
         const isOpen = detailRow.style.display !== 'none';
         detailRow.style.display = isOpen ? 'none' : '';
         btn.textContent = isOpen ? '▸ Veure' : '▾ Tancar';
-        // Build the detail HTML (and trigger image fetches via <img src>) only
-        // on first open — keeps the page light when many rows are collapsed.
         if (!isOpen && contentEl && !contentEl._loaded) {
             contentEl._loaded = true;
             const row = this._rows[id];
             if (!row) return;
             let details = {};
             try { details = JSON.parse(row.diff_details || '{}'); } catch (_) {}
-            const sections = [];
-            for (const [key, items] of Object.entries(details)) {
-                if (!items || !items.length) continue;
-                sections.push(items.map(item => this._renderDetailItem(key, String(item))).join(''));
-            }
-            contentEl.innerHTML = sections.join('') || '<em style="color:#9e9b94;">Sense detalls.</em>';
+            const lines = Object.values(details).flat()
+                .map(item => `<div>• ${esc(String(item))}</div>`);
+            contentEl.innerHTML = lines.join('') || '<em style="color:#9e9b94;">Sense detalls.</em>';
         }
-    },
-
-    _renderDetailItem(key, text) {
-        const urlMatch = text.match(/https?:\/\/\S+/);
-        const url = urlMatch ? urlMatch[0] : null;
-        const label = url ? text.replace(/\s+—\s+https?:\/\/\S+\s*$/, '') : text;
-        if (key === 'photos' && url) {
-            return `<div style="display:flex;gap:.6rem;align-items:flex-start;margin-bottom:.6rem;">
-                <a href="${esc(url)}" target="_blank" rel="noopener" style="flex-shrink:0;">
-                    <img src="${esc(url)}" alt="" loading="lazy"
-                         style="max-height:96px;max-width:140px;border:1px solid #d8d4c7;border-radius:4px;background:#fff;display:block;"
-                         onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.textContent='⚠');"
-                    ><span style="display:none;color:#9e9b94;font-size:.7rem;"></span>
-                </a>
-                <div style="white-space:pre-wrap;flex:1;line-height:1.5;">• ${esc(label)}</div>
-            </div>`;
-        }
-        if (key === 'documents' && url) {
-            return `<div style="display:flex;gap:.6rem;align-items:center;margin-bottom:.5rem;">
-                <a href="${esc(url)}" target="_blank" rel="noopener"
-                   style="font-size:1.6rem;text-decoration:none;flex-shrink:0;">📄</a>
-                <div style="white-space:pre-wrap;flex:1;">
-                    <a href="${esc(url)}" target="_blank" rel="noopener"
-                       style="color:#2d4b33;font-weight:500;">${esc(label)}</a>
-                </div>
-            </div>`;
-        }
-        return `<div style="white-space:pre-wrap;margin-bottom:.35rem;">• ${esc(text)}</div>`;
     },
 
     async deleteRow(id) {
