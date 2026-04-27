@@ -62,13 +62,20 @@ async function a2Init(personId) {
     cardInnerHtmlCreator: d => a2CardHtml(d),
     onCardClick: (_e, d) => {
       // Center view on clicked card without reorganizing the tree.
-      // Issue 7: must pass the *current* zoom transform (not scale:1) so that
-      // cardToMiddle computes the translation offset correctly when zoomed out.
+      // We bypass f3.handlers.cardToMiddle because it has a library bug: it
+      // omits the *k multiplier on the Y axis, so at any zoom != 1 the card
+      // ends up off-centre vertically. We replicate positionTree() directly.
       try {
-        const cont      = document.getElementById('FamilyChart');
-        const svg_dim   = cont.getBoundingClientRect();
-        const transform = f3.handlers.getCurrentZoom(a2Svg);
-        f3.handlers.cardToMiddle({ datum: d, svg: a2Svg, svg_dim, scale: transform.k, transition_time: 350 });
+        const cont    = document.getElementById('FamilyChart');
+        const svg_dim = cont.getBoundingClientRect();
+        const k       = f3.handlers.getCurrentZoom(a2Svg).k;
+        // d3.zoomIdentity.scale(k).translate(tx,ty) maps datum → screen as
+        // screen = k*(datum + t), so to centre: t = dim/(2k) - datum.
+        const tx = svg_dim.width  / (2 * k) - d.x;
+        const ty = svg_dim.height / (2 * k) - d.y;
+        const el = a2Svg.__zoomObj ? a2Svg : a2Svg.parentNode;
+        d3.select(el).transition().duration(350).delay(100)
+          .call(el.__zoomObj.transform, d3.zoomIdentity.scale(k).translate(tx, ty));
       } catch (_) {}
       a2OpenSidebar(d.data);
     },
