@@ -480,6 +480,10 @@ _NAME_VARIANT_PAIRS = [
     ("salvador", "salvador"),
     ("magdalena", "magdalena"),
     ("teresa", "teresa"),
+    ("artur", "arturo"),
+    ("elisabet", "elisabeth"),
+    ("ester", "esther"),
+    ("alex", "alexandre"),
 ]
 _NAME_DIMINUTIVES = {
     "pep": "josep", "pepe": "josep",
@@ -492,6 +496,9 @@ _NAME_DIMINUTIVES = {
     "concha": "concepcio", "conxita": "concepcio",
     "lluiseta": "lluis",
     "ma": "maria", "m": "maria",
+    "mª": "maria",
+    "nacho": "ignacio",
+    "alejandro": "alex",
 }
 _NAME_VARIANTS: dict = {}
 for _a, _b in _NAME_VARIANT_PAIRS:
@@ -730,6 +737,14 @@ def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
     return diff_types, details
 
 
+def _maria_suffix(canon_given: str) -> str:
+    """If a canonical given name starts with 'maria ' (compound female name),
+    return the rest. E.g. 'maria carmen' → 'carmen'. Otherwise empty string."""
+    if canon_given.startswith("maria "):
+        return canon_given[len("maria "):]
+    return ""
+
+
 def _build_ged_index(individuals: dict) -> dict:
     """Build canonical name → [ged_id, ...] lookup from all GEDCOM individuals."""
     index: dict = {}
@@ -751,6 +766,15 @@ def _build_ged_index(individuals: dict) -> dict:
             if first_given and first_given != canon_given:
                 candidates.add(f"{first_given} {canon_surname}")
                 candidates.add(f"{canon_surname} {first_given}")
+            # For compound "María X" names, also index without the "maría" prefix
+            # so "Mª Carmen Godes" matches a DB record with just "Carmen Godes"
+            suffix = _maria_suffix(canon_given)
+            if suffix:
+                candidates.add(f"{suffix} {canon_surname}")
+                candidates.add(f"{canon_surname} {suffix}")
+        # When GEDCOM has no given name (placeholder entry), also index by surname alone
+        if not canon_given and canon_surname:
+            candidates.add(canon_surname)
         for name in candidates:
             index.setdefault(name, []).append(ged_id)
     return index
@@ -771,6 +795,14 @@ def _match_person(db_person: dict, individuals: dict, ged_index: dict) -> tuple:
         if first_given and first_given != db_given_canon:
             probes.append(f"{first_given} {db_surname_canon}")
             probes.append(f"{db_surname_canon} {first_given}")
+        # For compound "María X" names, also probe without the "maría" prefix
+        suffix = _maria_suffix(db_given_canon)
+        if suffix:
+            probes.append(f"{suffix} {db_surname_canon}")
+            probes.append(f"{db_surname_canon} {suffix}")
+    # Last-resort probe: surname alone (handles GEDCOM entries with no given name)
+    if db_surname_canon:
+        probes.append(db_surname_canon)
 
     candidates: set = set()
     for name in probes:
