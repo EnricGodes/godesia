@@ -10,6 +10,7 @@ import re
 import shutil
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -18,6 +19,7 @@ from database import (
     get_dashboard_data, get_documents, get_person_dossier, convert_date_to_spanish,
     update_all_photo_files, get_photo_details,
     get_albums_list, get_album_photos, get_photos_people_list,
+    get_setting, set_setting,
 )
 from query_router import QueryRouter
 from query_engine import QueryEngine
@@ -564,6 +566,79 @@ async def submit_suggestion(
         db_conn.commit()
 
     return {"status": "ok", "id": submission_id}
+
+
+# ── Default photo ─────────────────────────────────────────────────────────────
+
+def _default_photo_filename(sex: str, birth_year: Optional[int], death_year: Optional[int]) -> str:
+    """Select the era-appropriate silhouette image based on sex and birth year."""
+    current_year = datetime.now().year
+    is_child = (
+        (birth_year and death_year and (death_year - birth_year) < 15)
+        or (birth_year and birth_year >= current_year - 15)
+    )
+    if birth_year:
+        if birth_year < 1875:
+            era = 1900
+        elif birth_year < 1900:
+            era = 1925
+        elif birth_year < 1925:
+            era = 1950
+        elif birth_year < 1950:
+            era = 1975
+        elif birth_year < 1975:
+            era = 2000
+        else:
+            era = 2025
+    else:
+        era = 2025
+    if is_child:
+        prefix = 'niño' if sex == 'M' else 'niña' if sex == 'F' else 'niño_neutro'
+    else:
+        prefix = 'hombre' if sex == 'M' else 'mujer' if sex == 'F' else 'adulto_neutro'
+    # Handle missing files
+    if prefix == 'niña' and era == 1900:
+        era = 1925
+    if prefix == 'adulto_neutro' and era == 2025:
+        era = 2026
+    return f"{prefix}_{era}.jpg"
+
+
+@app.get("/api/default-photo")
+async def api_default_photo(
+    sex: Optional[str] = None,
+    birth_year: Optional[int] = None,
+    death_year: Optional[int] = None,
+):
+    filename = _default_photo_filename(sex or '', birth_year, death_year)
+    return RedirectResponse(url=f"/img/{filename}", status_code=302)
+
+
+# ── Settings ──────────────────────────────────────────────────────────────────
+
+@app.get("/api/settings")
+async def api_get_settings():
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicialitzada")
+    return {
+        "tree_default_person": get_setting(db_conn, "tree_default_person", "I4"),
+    }
+
+
+class SettingBody(BaseModel):
+    key: str
+    value: str
+
+
+@app.post("/api/settings")
+async def api_post_settings(body: SettingBody):
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicialitzada")
+    allowed_keys = {"tree_default_person"}
+    if body.key not in allowed_keys:
+        raise HTTPException(status_code=400, detail=f"Clau no permesa: {body.key}")
+    set_setting(db_conn, body.key, body.value)
+    return {"ok": True, "key": body.key, "value": body.value}
 
 
 # Serve photos

@@ -1710,7 +1710,11 @@ def get_tree_data_flat(conn, person_id, generations_up=3, generations_down=3):
                 "death_date": row["death_date"] or "",
                 "is_alive": bool(row["is_alive"]),
                 "nickname": row["nickname"] or "",
-                "avatar": f"/photos/{row['photo_file']}" if row["photo_file"] else "",
+                "avatar": f"/photos/{row['photo_file']}" if row["photo_file"] else (
+                    f"/api/default-photo?sex={row['sex'] or ''}"
+                    + (f"&birth_year={row['birth_year']}" if row["birth_year"] else "")
+                    + (f"&death_year={row['death_year']}" if row["death_year"] else "")
+                ),
                 "db_id": row["id"],
             },
             "rels": {"parents": [], "spouses": [], "children": []},

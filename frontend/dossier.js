@@ -131,16 +131,10 @@ function renderDossier(data) {
     if (person.photo_file && person.photo_file.trim()) {
         document.querySelector('#hero-photo img').src = `/photos/${person.photo_file}`;
     } else {
-        const currentYear = new Date().getFullYear();
-        const isChild = (person.birth_year && person.death_year && (person.death_year - person.birth_year) < 15)
-            || (person.birth_year && person.birth_year >= currentYear - 15);
-        let fallbackImg;
-        if (isChild) {
-            fallbackImg = person.sex === 'M' ? '/img/nino.jpg' : person.sex === 'F' ? '/img/nina.jpg' : '/img/nino_neutro.jpg';
-        } else {
-            fallbackImg = person.sex === 'M' ? '/img/hombre.jpg' : person.sex === 'F' ? '/img/mujer.jpg' : '/img/neutro.jpg';
-        }
-        document.querySelector('#hero-photo img').src = fallbackImg;
+        let url = `/api/default-photo?sex=${person.sex || ''}`;
+        if (person.birth_year) url += `&birth_year=${person.birth_year}`;
+        if (person.death_year) url += `&death_year=${person.death_year}`;
+        document.querySelector('#hero-photo img').src = url;
     }
     document.getElementById('hero-name').textContent = displayName;
 
