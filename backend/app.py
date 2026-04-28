@@ -614,6 +614,21 @@ async def api_default_photo(
     return RedirectResponse(url=f"/img/{filename}", status_code=302)
 
 
+@app.get("/api/minibio/{person_id}")
+async def api_get_minibio(person_id: str):
+    p = Path(__file__).parent.parent / "data" / "minibios.json"
+    if not p.exists():
+        return {}
+    try:
+        items = json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    for m in items:
+        if m.get("id") == person_id:
+            return m
+    return {}
+
+
 # ── Settings ──────────────────────────────────────────────────────────────────
 
 @app.get("/api/settings")

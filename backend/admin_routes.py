@@ -1284,6 +1284,75 @@ async def delete_anecdote(anecdote_index: int):
 
 
 # ---------------------------------------------------------------------------
+# Minibios
+# ---------------------------------------------------------------------------
+
+def _minibios_path() -> Path:
+    return _base_dir / "data" / "minibios.json"
+
+
+def _read_minibios() -> list:
+    path = _minibios_path()
+    if not path.exists():
+        return []
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+
+
+def _write_minibios(data: list):
+    _minibios_path().write_text(
+        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+
+@router.get("/minibios")
+async def list_minibios():
+    return {"items": _read_minibios()}
+
+
+class MinibioBody(BaseModel):
+    id: str
+    nombre: str = ""
+    bio_es: str = ""
+    bio_ca: str = ""
+
+
+@router.post("/minibios")
+async def create_minibio(body: MinibioBody):
+    items = _read_minibios()
+    if any(m["id"] == body.id for m in items):
+        raise HTTPException(status_code=400, detail="ID ja existeix")
+    items.append({"id": body.id, "nombre": body.nombre, "bio_es": body.bio_es, "bio_ca": body.bio_ca})
+    _write_minibios(items)
+    return {"status": "ok"}
+
+
+@router.put("/minibios/{person_id}")
+async def update_minibio(person_id: str, body: MinibioBody):
+    items = _read_minibios()
+    for m in items:
+        if m["id"] == person_id:
+            m["nombre"] = body.nombre
+            m["bio_es"] = body.bio_es
+            m["bio_ca"] = body.bio_ca
+            _write_minibios(items)
+            return {"status": "ok"}
+    raise HTTPException(status_code=404, detail="No trobat")
+
+
+@router.delete("/minibios/{person_id}")
+async def delete_minibio(person_id: str):
+    items = _read_minibios()
+    new_items = [m for m in items if m["id"] != person_id]
+    if len(new_items) == len(items):
+        raise HTTPException(status_code=404, detail="No trobat")
+    _write_minibios(new_items)
+    return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
 # Server control
 # ---------------------------------------------------------------------------
 

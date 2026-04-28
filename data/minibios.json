@@ -1,0 +1,602 @@
+[
+  {
+    "id": "I1",
+    "nombre": "Pasqual Godes Gomis",
+    "bio_es": "Nació en 1824 en Castellón de la Plana y murió en 1891 en Barcelona; tuvo actividad profesional vinculada a tejedor, trabajador de Guasch Hermanos y tejedor de velos. Se casó con Rosa Caballeria Madiroles. Tuvo 9 hijos, entre ellos Dolors Godes Caballeria, Ana Godes Caballeria, Avelina Godes Caballeria y Vicente Godes Caballeria. Su traslado desde Castellón a Barcelona en 1852 sitúa a esta rama familiar en la ciudad en pleno siglo XIX artesanal e industrial.",
+    "bio_ca": "Va néixer el 1824 a Castellón de la Plana i va morir el 1891 a Barcelona; va tenir activitat professional vinculada a teixidor, treballador de Guasch Hermanos i teixidor de vels. Es va casar amb Rosa Caballeria Madiroles. Va tenir 9 fills, entre ells Dolors Godes Caballeria, Ana Godes Caballeria, Avelina Godes Caballeria i Vicente Godes Caballeria. El seu trasllat de Castelló a Barcelona el 1852 situa aquesta branca familiar a la ciutat en ple segle XIX artesanal i industrial."
+  },
+  {
+    "id": "I2",
+    "nombre": "Rosa Caballeria Madiroles",
+    "bio_es": "Nació en 1834 en Manlleu y murió en 1893 en Barcelona. Se casó con Pasqual Godes Gomis. Tuvo 9 hijos, entre ellos Dolors Godes Caballeria, Ana Godes Caballeria, Avelina Godes Caballeria y Vicente Godes Caballeria. Procedía de Manlleu y fue bautizada el mismo día de su nacimiento en Santa Maria, dentro de una familia de tejedores.",
+    "bio_ca": "Va néixer el 1834 a Manlleu i va morir el 1893 a Barcelona. Es va casar amb Pasqual Godes Gomis. Va tenir 9 fills, entre ells Dolors Godes Caballeria, Ana Godes Caballeria, Avelina Godes Caballeria i Vicente Godes Caballeria. Procedia de Manlleu i fou batejada el mateix dia del naixement a Santa Maria, dins d’una família de teixidors."
+  },
+  {
+    "id": "I3",
+    "nombre": "Josep Godes Caballeria",
+    "bio_es": "Nació en 1877 en Barcelona y murió en 1885 en Barcelona. Su biografía quedó truncada muy pronto: murió a los 4 años.",
+    "bio_ca": "Va néixer el 1877 a Barcelona i va morir el 1885 a Barcelona. La seva biografia va quedar truncada molt aviat: va morir als 4 anys."
+  },
+  {
+    "id": "I4",
+    "nombre": "Artur Godes Caballeria",
+    "bio_es": "Nació en 1868 en Barcelona y murió en 1925 en Barcelona; tuvo actividad profesional vinculada a tenor del Liceo y maestro de capilla en Santa Maria del Mar, maestro de capilla de la Bonanova y comprimario de ópera. Se casó con Emilia Hurtado Giró. Tuvo 7 hijos, entre ellos Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado y Mercedes Godes Hurtado. Su vida quedó muy ligada al Liceu, Santa Maria del Mar y la Bonanova; una anécdota familiar lo recuerda durante los disturbios del Liceu de 1893, saliendo a la Rambla con un estandarte sin saber cómo había llegado allí.",
+    "bio_ca": "Va néixer el 1868 a Barcelona i va morir el 1925 a Barcelona; va tenir activitat professional vinculada a tenor del Liceu i mestre de capella a Santa Maria del Mar, mestre de capella de la Bonanova i comprimari d’òpera. Es va casar amb Emilia Hurtado Giró. Va tenir 7 fills, entre ells Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado i Mercedes Godes Hurtado. La seva vida va quedar molt lligada al Liceu, Santa Maria del Mar i la Bonanova; una anècdota familiar el recorda durant els disturbis del Liceu de 1893, sortint a la Rambla amb un estendard sense saber com hi havia arribat."
+  },
+  {
+    "id": "I5",
+    "nombre": "Ramona Godes Caballeria",
+    "bio_es": "Nació en 1870 en Barcelona y murió en 1874 en Barcelona. Murió con solo 2 años, por lo que su presencia en la memoria familiar es la de una vida infantil muy breve.",
+    "bio_ca": "Va néixer el 1870 a Barcelona i va morir el 1874 a Barcelona. Va morir amb només 2 anys, de manera que la seva presència en la memòria familiar és la d’una vida infantil molt breu."
+  },
+  {
+    "id": "I6",
+    "nombre": "Mercè Godes Caballeria",
+    "bio_es": "Nació en 1874 en Barcelona y murió en 1962. Conocida como la tía Mercè, permaneció soltera y dedicó buena parte de su vida al cuidado y organización de la familia.",
+    "bio_ca": "Va néixer el 1874 a Barcelona i va morir el 1962. Coneguda com la tia Mercè, va romandre soltera i va dedicar bona part de la vida a la cura i organització de la família."
+  },
+  {
+    "id": "I7",
+    "nombre": "Pau Godes Caballeria",
+    "bio_es": "Nació en 1872 en Barcelona y murió en 1965 en Barcelona; tuvo actividad profesional vinculada a poeta, tenor en La Unión y jefe de estación en Sarrià. Se casó con Anna Terrats Bertrán. Tuvo 2 hijos: Pasqual Godes Terrats y Maria Godes Terrats. Inició la rama Godes de Sarrià, fue tenor en el terceto La Unión y también poeta; además trabajó en el tren de Sarrià.",
+    "bio_ca": "Va néixer el 1872 a Barcelona i va morir el 1965 a Barcelona; va tenir activitat professional vinculada a poeta, tenor a La Unión i cap d’estació a Sarrià. Es va casar amb Anna Terrats Bertrán. Va tenir 2 fills: Pasqual Godes Terrats i Maria Godes Terrats. Va iniciar la branca Godes de Sarrià, fou tenor al tercet La Unión i també poeta; a més, va treballar al tren de Sarrià."
+  },
+  {
+    "id": "I8",
+    "nombre": "Emilia Hurtado Giró",
+    "bio_es": "Nació en 1872 y murió en 1963 en Barcelona. Se casó con Artur Godes Caballeria. Tuvo 7 hijos, entre ellos Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado y Mercedes Godes Hurtado. La memoria familiar la presenta como una mujer prudente, muy vinculada al núcleo doméstico de los Godes Hurtado.",
+    "bio_ca": "Va néixer el 1872 i va morir el 1963 a Barcelona. Es va casar amb Artur Godes Caballeria. Va tenir 7 fills, entre ells Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado i Mercedes Godes Hurtado. La memòria familiar la presenta com una dona prudent, molt vinculada al nucli domèstic dels Godes Hurtado."
+  },
+  {
+    "id": "I9",
+    "nombre": "Anna Terrats Bertrán",
+    "bio_es": "Nació en 1871 en Igualada y murió en 1956 en Barcelona. Se casó con Pau Godes Caballeria. Tuvo 2 hijos: Pasqual Godes Terrats y Maria Godes Terrats.",
+    "bio_ca": "Va néixer el 1871 a Igualada i va morir el 1956 a Barcelona. Es va casar amb Pau Godes Caballeria. Va tenir 2 fills: Pasqual Godes Terrats i Maria Godes Terrats."
+  },
+  {
+    "id": "I10",
+    "nombre": "Emili Godes Hurtado",
+    "bio_es": "Nació en 1895 en Barcelona y murió en 1970 en Barcelona; tuvo actividad profesional vinculada a responsable de tienda fotográfica, jefe de laboratorio y fotógrafo. Se casó con Antònia Diago Almuzara. Tuvo 3 hijos: Montserrat Godes Diago, Jesus Godes Diago y Maria Rosa Godes Diago. Entró muy joven en el mundo de la fotografía, fue socio fundador de la Agrupació Fotogràfica de Catalunya y destacó en fotografía documental, científica, médica, publicitaria y cinematográfica.",
+    "bio_ca": "Va néixer el 1895 a Barcelona i va morir el 1970 a Barcelona; va tenir activitat professional vinculada a responsable de botiga fotogràfica, cap de laboratori i fotògraf. Es va casar amb Antònia Diago Almuzara. Va tenir 3 fills: Montserrat Godes Diago, Jesus Godes Diago i Maria Rosa Godes Diago. Va entrar molt jove en el món de la fotografia, fou soci fundador de l’Agrupació Fotogràfica de Catalunya i destacà en fotografia documental, científica, mèdica, publicitària i cinematogràfica."
+  },
+  {
+    "id": "I11",
+    "nombre": "Ernest Godes Hurtado",
+    "bio_es": "Nació en 1896 en Barcelona y murió en 1949 en Madrid; tuvo actividad profesional vinculada a gerente de los estibadores del puerto de Tarragona y propietario de una serrería. Se casó con Dolores Molina Beca. Tuvo 5 hijos, entre ellos Dolores Godes Molina, Ernesto Godes Molina, Mª Mercedes Godes Molina y Eloísa Godes Molina. Su itinerario vital fue especialmente móvil: Barcelona, Tarragona, Córdoba, Bilbao durante la Guerra Civil y finalmente Madrid, en la Gran Vía.",
+    "bio_ca": "Va néixer el 1896 a Barcelona i va morir el 1949 a Madrid; va tenir activitat professional vinculada a gerent dels estibadors del port de Tarragona i propietari d’una serradora. Es va casar amb Dolores Molina Beca. Va tenir 5 fills, entre ells Dolores Godes Molina, Ernesto Godes Molina, Mª Mercedes Godes Molina i Eloísa Godes Molina. El seu itinerari vital fou especialment mòbil: Barcelona, Tarragona, Còrdova, Bilbao durant la Guerra Civil i finalment Madrid, a la Gran Via."
+  },
+  {
+    "id": "I12",
+    "nombre": "Rosa Godes Hurtado",
+    "bio_es": "Nació en 1899 en Barcelona y murió en 1986 en Barcelona. Se casó con Joan Pujol Pont. Tuvo 1 hijo: Joan Pujol Godes. Se integró en una familia vinculada al mármol, la escultura y la decoración, con trabajos relacionados con obras modernistas como el Tibidabo.",
+    "bio_ca": "Va néixer el 1899 a Barcelona i va morir el 1986 a Barcelona. Es va casar amb Joan Pujol Pont. Va tenir 1 fill: Joan Pujol Godes. Es va integrar en una família vinculada al marbre, l’escultura i la decoració, amb treballs relacionats amb obres modernistes com el Tibidabo."
+  },
+  {
+    "id": "I13",
+    "nombre": "Mercedes Godes Hurtado",
+    "bio_es": "Nació en 1901 en Barcelona y murió en 1993 en Barcelona. Era recordada como una mujer lectora, inteligente y de simpatía encantadora; junto con su madre sostuvo la intendencia de Can Godes.",
+    "bio_ca": "Va néixer el 1901 a Barcelona i va morir el 1993 a Barcelona. Era recordada com una dona lectora, intel·ligent i d’una simpatia encantadora; juntament amb la seva mare va sostenir la intendència de Can Godes."
+  },
+  {
+    "id": "I14",
+    "nombre": "Josep Maria Godes Hurtado",
+    "bio_es": "Nació en 1908 en Barcelona y murió en 1993; tuvo actividad profesional vinculada a revelador fotográfico para la tienda Godes y empleado de Hojas Iberia-Filomatic. Se casó con Francesca Güell Llorente. Conocido como Bep, montó un laboratorio fotográfico en las golfas de la casa de Homero y revelaba para varios establecimientos de Barcelona. También fue un gran excursionista y esquiador, socio del Centre Excursionista de Catalunya.",
+    "bio_ca": "Va néixer el 1908 a Barcelona i va morir el 1993; va tenir activitat professional vinculada a revelador fotogràfic per a la botiga Godes i empleat d’Hojas Iberia-Filomatic. Es va casar amb Francesca Güell Llorente. Conegut com a Bep, va muntar un laboratori fotogràfic a les golfes de la casa d’Homer i revelava per a diversos establiments de Barcelona. També fou un gran excursionista i esquiador, soci del Centre Excursionista de Catalunya."
+  },
+  {
+    "id": "I15",
+    "nombre": "Ramón Godes Hurtado",
+    "bio_es": "Nació en 1913 en Barcelona y murió en 1969 en Barcelona; tuvo actividad profesional vinculada a empleado de banca en el Banco Central y trabajador de la Metro-Goldwyn-Mayer. Se casó con Ignacia Hospital Ruaix. Tuvo 2 hijos: Ignacia Godes Hospital y Ana Godes Hospital. Fue movilizado durante la Guerra Civil junto a sus hermanos Josep y Artur, y los tres lograron regresar a casa. Gran aficionado al tenis de mesa, en el Club de Tennis Barcino conoció a Nacha Hospital, a quien entrenó antes de casarse.",
+    "bio_ca": "Va néixer el 1913 a Barcelona i va morir el 1969 a Barcelona; va tenir activitat professional vinculada a empleat de banca al Banco Central i treballador de la Metro-Goldwyn-Mayer. Es va casar amb Ignacia Hospital Ruaix. Va tenir 2 fills: Ignacia Godes Hospital i Ana Godes Hospital. Fou mobilitzat durant la Guerra Civil juntament amb els seus germans Josep i Artur, i tots tres van aconseguir tornar a casa. Gran aficionat al tennis de taula, al Club de Tennis Barcino va conèixer Nacha Hospital, a qui entrenà abans de casar-s’hi."
+  },
+  {
+    "id": "I16",
+    "nombre": "Artur Godes Hurtado",
+    "bio_es": "Nació en 1917 en Barcelona y murió en 1993 en Barcelona. Se casó con Carmen Schmid Tarrida. Tuvo 2 hijos: Carmen Godes Schmid y Artur Godes Schmid. Fue movilizado durante la Guerra Civil, pasó por Córdoba y el frente de Teruel, y más tarde creó Cometas Halcón, con modelos como la Mosqueta y el Águila.",
+    "bio_ca": "Va néixer el 1917 a Barcelona i va morir el 1993 a Barcelona. Es va casar amb Carmen Schmid Tarrida. Va tenir 2 fills: Carmen Godes Schmid i Artur Godes Schmid. Fou mobilitzat durant la Guerra Civil, passà per Còrdova i pel front de Terol, i més tard va crear Cometas Halcón, amb models com la Mosqueta i l’Àguila."
+  },
+  {
+    "id": "I17",
+    "nombre": "Antònia Diago Almuzara",
+    "bio_es": "Nació en 1900 en Barcelona y murió en 1986 en Barcelona. Se casó con Emili Godes Hurtado. Tuvo 3 hijos: Montserrat Godes Diago, Jesus Godes Diago y Maria Rosa Godes Diago.",
+    "bio_ca": "Va néixer el 1900 a Barcelona i va morir el 1986 a Barcelona. Es va casar amb Emili Godes Hurtado. Va tenir 3 fills: Montserrat Godes Diago, Jesus Godes Diago i Maria Rosa Godes Diago."
+  },
+  {
+    "id": "I18",
+    "nombre": "Dolores Molina Beca",
+    "bio_es": "Nació en 1904 en Córdoba y murió en 1961 en Madrid. Se casó con Ernest Godes Hurtado. Tuvo 5 hijos, entre ellos Dolores Godes Molina, Ernesto Godes Molina, Mª Mercedes Godes Molina y Eloísa Godes Molina. La tradición familiar recuerda que tenía problemas cardíacos y que le habían pronosticado una vida corta si tenía hijos, aunque alcanzó los 61 años.",
+    "bio_ca": "Va néixer el 1904 a Córdoba i va morir el 1961 a Madrid. Es va casar amb Ernest Godes Hurtado. Va tenir 5 fills, entre ells Dolores Godes Molina, Ernesto Godes Molina, Mª Mercedes Godes Molina i Eloísa Godes Molina. La tradició familiar recorda que tenia problemes cardíacs i que li havien pronosticat una vida curta si tenia fills, tot i que va arribar als 61 anys."
+  },
+  {
+    "id": "I19",
+    "nombre": "Joan Pujol Pont",
+    "bio_es": "Nació en 1899 en Barcelona y murió en 1937 en Barcelona. Se casó con Rosa Godes Hurtado. Tuvo 1 hijo: Joan Pujol Godes. Pertenecía a una familia acomodada del mundo de la piedra, el mármol y la escultura, relacionada con trabajos decorativos del modernismo barcelonés.",
+    "bio_ca": "Va néixer el 1899 a Barcelona i va morir el 1937 a Barcelona. Es va casar amb Rosa Godes Hurtado. Va tenir 1 fill: Joan Pujol Godes. Pertanyia a una família benestant del món de la pedra, el marbre i l’escultura, relacionada amb treballs decoratius del modernisme barceloní."
+  },
+  {
+    "id": "I20",
+    "nombre": "Francesca Güell Llorente",
+    "bio_es": "Nació en 1922 y murió en 1981. Se casó con Josep Maria Godes Hurtado.",
+    "bio_ca": "Va néixer el 1922 i va morir el 1981. Es va casar amb Josep Maria Godes Hurtado."
+  },
+  {
+    "id": "I21",
+    "nombre": "Ignacia Hospital Ruaix",
+    "bio_es": "Nació en 1930 y murió en 2023. Se casó con Ramón Godes Hurtado. Tuvo 2 hijos: Ignacia Godes Hospital y Ana Godes Hospital.",
+    "bio_ca": "Va néixer el 1930 i va morir el 2023. Es va casar amb Ramón Godes Hurtado. Va tenir 2 fills: Ignacia Godes Hospital i Ana Godes Hospital."
+  },
+  {
+    "id": "I22",
+    "nombre": "Carmen Schmid Tarrida",
+    "bio_es": "Nació en 1925 y murió en 2023. Se casó con Artur Godes Hurtado. Tuvo 2 hijos: Carmen Godes Schmid y Artur Godes Schmid.",
+    "bio_ca": "Va néixer el 1925 i va morir el 2023. Es va casar amb Artur Godes Hurtado. Va tenir 2 fills: Carmen Godes Schmid i Artur Godes Schmid."
+  },
+  {
+    "id": "I23",
+    "nombre": "Pasqual Godes Terrats",
+    "bio_es": "Nació en 1898 en Barcelona y murió en 1944; fue músico y compositor. Se casó con Mercedes Martínez Manchón. Tuvo reconocimiento público en su época. Su matrimonio tuvo un final trágico: su esposa Mercedes murió al dar a luz y el bebé tampoco sobrevivió.",
+    "bio_ca": "Va néixer el 1898 a Barcelona i va morir el 1944; fou músic i compositor. Es va casar amb Mercedes Martínez Manchón. Tingué reconeixement públic en la seva època. El seu matrimoni tingué un final tràgic: la seva esposa Mercedes va morir en donar a llum i el nadó tampoc no va sobreviure."
+  },
+  {
+    "id": "I24",
+    "nombre": "Maria Godes Terrats",
+    "bio_es": "Nació en 1900 y murió en 1958 en Barcelona. Se casó con Josep Mestre Badia. Tuvo 1 hijo: Jesus Mestre Godes.",
+    "bio_ca": "Va néixer el 1900 i va morir el 1958 a Barcelona. Es va casar amb Josep Mestre Badia. Va tenir 1 fill: Jesus Mestre Godes."
+  },
+  {
+    "id": "I25",
+    "nombre": "Mercedes Martínez Manchón",
+    "bio_es": "Nació en 1905 y murió en 1929. Se casó con Pasqual Godes Terrats. Procedía de una familia de Hostafrancs propietaria del Palacio del Mueble de Aribau y del Cinema Boheme de la Creu Coberta.",
+    "bio_ca": "Va néixer el 1905 i va morir el 1929. Es va casar amb Pasqual Godes Terrats. Procedia d’una família d’Hostafrancs propietària del Palacio del Mueble d’Aribau i del Cinema Boheme de la Creu Coberta."
+  },
+  {
+    "id": "I26",
+    "nombre": "Josep Mestre Badia",
+    "bio_es": "Nació en 1900 y murió en 1925. Se casó con Maria Godes Terrats. Tuvo 1 hijo: Jesus Mestre Godes. Su matrimonio quedó marcado por la desgracia: mientras nacía su hijo Jesús, él estaba muriendo de tuberculosis y solo pudieron enseñarle el bebé desde la puerta.",
+    "bio_ca": "Va néixer el 1900 i va morir el 1925. Es va casar amb Maria Godes Terrats. Va tenir 1 fill: Jesus Mestre Godes. El seu matrimoni quedà marcat per la desgràcia: mentre naixia el seu fill Jesús, ell s’estava morint de tuberculosi i només li van poder ensenyar el nadó des de la porta."
+  },
+  {
+    "id": "I27",
+    "nombre": "[sin nombre]",
+    "bio_es": "Nació en 1929 y murió en 1929. Su vida quedó reducida a la infancia, con una presencia documental breve dentro de la familia.",
+    "bio_ca": "Va néixer el 1929 i va morir el 1929. La seva vida quedà reduïda a la infantesa, amb una presència documental breu dins la família."
+  },
+  {
+    "id": "I28",
+    "nombre": "Jesus Mestre Godes",
+    "bio_es": "Nació en 1925 y murió en 2023 en Barcelona. Se casó con Concepció Campi Roca. Tuvo 5 hijos, entre ellos Jesus Mestre i Campi, Oriol Mestre Campi, Anna Mestre Campi y Mireia Mestre i Campi. Fue historiador y uno de los grandes divulgadores de la historia de Catalunya, especialmente conocido por sus obras sobre cátaros y templarios; en 2014 recibió la Medalla de Honor de Barcelona.",
+    "bio_ca": "Va néixer el 1925 i va morir el 2023 a Barcelona. Es va casar amb Concepció Campi Roca. Va tenir 5 fills, entre ells Jesus Mestre i Campi, Oriol Mestre Campi, Anna Mestre Campi i Mireia Mestre i Campi. Fou historiador i un dels grans divulgadors de la història de Catalunya, especialment conegut per les seves obres sobre càtars i templers; el 2014 rebé la Medalla d’Honor de Barcelona."
+  },
+  {
+    "id": "I29",
+    "nombre": "Concepció Campi Roca",
+    "bio_es": "Nació en 1931 y murió en 2020 en Barcelona. Se casó con Jesus Mestre Godes. Tuvo 5 hijos, entre ellos Jesus Mestre i Campi, Oriol Mestre Campi, Anna Mestre Campi y Mireia Mestre i Campi.",
+    "bio_ca": "Va néixer el 1931 i va morir el 2020 a Barcelona. Es va casar amb Jesus Mestre Godes. Va tenir 5 fills, entre ells Jesus Mestre i Campi, Oriol Mestre Campi, Anna Mestre Campi i Mireia Mestre i Campi."
+  },
+  {
+    "id": "I30",
+    "nombre": "Jesus Mestre i Campi",
+    "bio_es": "Nació en 1955. Se casó con Mª Pau Farràs i Ribas. Tuvo 2 hijos: Neus Mestre i Farràs y Núria Mestre i Farràs.",
+    "bio_ca": "Va néixer el 1955. Es va casar amb Mª Pau Farràs i Ribas. Va tenir 2 fills: Neus Mestre i Farràs i Núria Mestre i Farràs."
+  },
+  {
+    "id": "I31",
+    "nombre": "Oriol Mestre Campi",
+    "bio_es": "Nació en 1957. Se casó con Mercè Rius Font. Tuvo 2 hijos: Maria Mestre Rius y Júlia Mestre Rius.",
+    "bio_ca": "Va néixer el 1957. Es va casar amb Mercè Rius Font. Va tenir 2 fills: Maria Mestre Rius i Júlia Mestre Rius."
+  },
+  {
+    "id": "I32",
+    "nombre": "Anna Mestre Campi",
+    "bio_es": "Nació en 1958. Se casó con Javier Rodríguez Morin. Tuvo 2 hijos: Alba Rodriguez Mestre y Martí Rodriguez i Mestre.",
+    "bio_ca": "Va néixer el 1958. Es va casar amb Javier Rodríguez Morin. Va tenir 2 fills: Alba Rodriguez Mestre i Martí Rodriguez i Mestre."
+  },
+  {
+    "id": "I33",
+    "nombre": "Marc Mestre Campi",
+    "bio_es": "Nació en 1972. Se casó con Isil Montaner Sànchez. Tuvo 2 hijos: Lluc Mestre Montaner y Joel Mestre Montaner.",
+    "bio_ca": "Va néixer el 1972. Es va casar amb Isil Montaner Sànchez. Va tenir 2 fills: Lluc Mestre Montaner i Joel Mestre Montaner."
+  },
+  {
+    "id": "I34",
+    "nombre": "Carmen Godes Schmid",
+    "bio_es": "Nació en 1951 en Barcelona. Se casó con Joan Nolla Hom. Tuvo 2 hijos: Joan Nolla Godes y Carla Nolla Godes.",
+    "bio_ca": "Va néixer el 1951 a Barcelona. Es va casar amb Joan Nolla Hom. Va tenir 2 fills: Joan Nolla Godes i Carla Nolla Godes."
+  },
+  {
+    "id": "I35",
+    "nombre": "Artur Godes Schmid",
+    "bio_es": "Nació en 1953 en Barcelona; fue Químico. Se casó con Inmaculada Torre Lloveras.",
+    "bio_ca": "Va néixer el 1953 a Barcelona; fou Químico. Es va casar amb Inmaculada Torre Lloveras."
+  },
+  {
+    "id": "I36",
+    "nombre": "Montserrat Godes Diago",
+    "bio_es": "Nació en 1921 en Barcelona y murió en 1995 en Barcelona. Se casó con Enric Cabestany Carreras. Tuvo 3 hijos: Enric Cabestany Godes, Xavier Cabestany Godes y Montserrat Cabestany Godes. Estudió Magisterio, un dato que la sitúa dentro de una generación familiar ya plenamente formada en la Barcelona del siglo XX.",
+    "bio_ca": "Va néixer el 1921 a Barcelona i va morir el 1995 a Barcelona. Es va casar amb Enric Cabestany Carreras. Va tenir 3 fills: Enric Cabestany Godes, Xavier Cabestany Godes i Montserrat Cabestany Godes. Va estudiar Magisteri, un detall que la situa dins d’una generació familiar ja plenament formada a la Barcelona del segle XX."
+  },
+  {
+    "id": "I37",
+    "nombre": "Jesus Godes Diago",
+    "bio_es": "Nació en 1923 en Barcelona y murió en 1980 en XXX; fue Tienda de fotografía Godes. Se casó con Anna Maria Faura Ramoneda. Tuvo 3 hijos: Emili Godes Faura, Jesus Godes Faura y Anna Maria Godes Faura.",
+    "bio_ca": "Va néixer el 1923 a Barcelona i va morir el 1980 a XXX; fou Tienda de fotografía Godes. Es va casar amb Anna Maria Faura Ramoneda. Va tenir 3 fills: Emili Godes Faura, Jesus Godes Faura i Anna Maria Godes Faura."
+  },
+  {
+    "id": "I38",
+    "nombre": "Maria Rosa Godes Diago",
+    "bio_es": "Nació en 1933 en Barcelona y murió en 2024 en Barcelona. Estuvo casada con Felip Puig de Canals y Albert Biosca Drets. Tuvo 3 hijos: Felip Puig Godes, Oriol Puig Godes y Jordi Puig Godes.",
+    "bio_ca": "Va néixer el 1933 a Barcelona i va morir el 2024 a Barcelona. Va estar casada amb Felip Puig de Canals i Albert Biosca Drets. Va tenir 3 fills: Felip Puig Godes, Oriol Puig Godes i Jordi Puig Godes."
+  },
+  {
+    "id": "I39",
+    "nombre": "Enric Cabestany Carreras",
+    "bio_es": "Nació en 1914 en Barcelona y murió en 2005 en Barcelona. Se casó con Montserrat Godes Diago. Tuvo 3 hijos: Enric Cabestany Godes, Xavier Cabestany Godes y Montserrat Cabestany Godes. Procedía de la familia Cabestany del balneario de Cardó, en Tarragona, y había nacido en México.",
+    "bio_ca": "Va néixer el 1914 a Barcelona i va morir el 2005 a Barcelona. Es va casar amb Montserrat Godes Diago. Va tenir 3 fills: Enric Cabestany Godes, Xavier Cabestany Godes i Montserrat Cabestany Godes. Procedia de la família Cabestany del balneari de Cardó, a Tarragona, i havia nascut a Mèxic."
+  },
+  {
+    "id": "I40",
+    "nombre": "Enric Cabestany Godes",
+    "bio_es": "Nació en 1951 en Barcelona. Se casó con Elisabet Pérez Amigó. Tuvo 4 hijos: Enric Cabestany Pérez, Albert Cabestany Pérez, Pere Cabestany Pérez y Elisabet Cabestany Pérez.",
+    "bio_ca": "Va néixer el 1951 a Barcelona. Es va casar amb Elisabet Pérez Amigó. Va tenir 4 fills: Enric Cabestany Pérez, Albert Cabestany Pérez, Pere Cabestany Pérez i Elisabet Cabestany Pérez."
+  },
+  {
+    "id": "I41",
+    "nombre": "Xavier Cabestany Godes",
+    "bio_es": "Nació en 1955 en Barcelona. Estuvo casado con Rita de la Cruz Ventura y Pilar Miras Virgili. Tuvo 2 hijos: Sergi Cabestany de la Cruz y Silvia Cabestany de la Cruz.",
+    "bio_ca": "Va néixer el 1955 a Barcelona. Va estar casat amb Rita de la Cruz Ventura i Pilar Miras Virgili. Va tenir 2 fills: Sergi Cabestany de la Cruz i Silvia Cabestany de la Cruz."
+  },
+  {
+    "id": "I42",
+    "nombre": "Montserrat Cabestany Godes",
+    "bio_es": "Nació en 1959 en Barcelona y murió en 2025. Se casó con Xavier Barahona Dalmau. Tuvo 2 hijos: Marc Barahona Cabestany y Àlex Barahona Cabestany.",
+    "bio_ca": "Va néixer el 1959 a Barcelona i va morir el 2025. Es va casar amb Xavier Barahona Dalmau. Va tenir 2 fills: Marc Barahona Cabestany i Àlex Barahona Cabestany."
+  },
+  {
+    "id": "I43",
+    "nombre": "Anna Maria Faura Ramoneda",
+    "bio_es": "Nació en 1929 y murió en 2021. Se casó con Jesus Godes Diago. Tuvo 3 hijos: Emili Godes Faura, Jesus Godes Faura y Anna Maria Godes Faura.",
+    "bio_ca": "Va néixer el 1929 i va morir el 2021. Es va casar amb Jesus Godes Diago. Va tenir 3 fills: Emili Godes Faura, Jesus Godes Faura i Anna Maria Godes Faura."
+  },
+  {
+    "id": "I44",
+    "nombre": "Felip Puig de Canals",
+    "bio_es": "Nació en 1931 y murió en 1986 en Barcelona; fue Gemmòleg. Empresari. Se casó con Maria Rosa Godes Diago. Tuvo 3 hijos: Felip Puig Godes, Oriol Puig Godes y Jordi Puig Godes.",
+    "bio_ca": "Va néixer el 1931 i va morir el 1986 a Barcelona; fou Gemmòleg. Empresari. Es va casar amb Maria Rosa Godes Diago. Va tenir 3 fills: Felip Puig Godes, Oriol Puig Godes i Jordi Puig Godes."
+  },
+  {
+    "id": "I45",
+    "nombre": "Albert Biosca Drets",
+    "bio_es": "Nació en 1914 y murió en 2008 en Barcelona; fue Empresari. Accionista-Propietari de Biosca & Botey. Se casó con Maria Rosa Godes Diago.",
+    "bio_ca": "Va néixer el 1914 i va morir el 2008 a Barcelona; fou Empresari. Accionista-Propietari de Biosca & Botey. Es va casar amb Maria Rosa Godes Diago."
+  },
+  {
+    "id": "I46",
+    "nombre": "Emili Godes Faura",
+    "bio_es": "Nació en 1951 en Barcelona. Se casó con Josepa Molins Plà. Tuvo 3 hijos: Emili Godes Molins, Cristina Godes Molins y Elisabet Godes Molins.",
+    "bio_ca": "Va néixer el 1951 a Barcelona. Es va casar amb Josepa Molins Plà. Va tenir 3 fills: Emili Godes Molins, Cristina Godes Molins i Elisabet Godes Molins."
+  },
+  {
+    "id": "I47",
+    "nombre": "Anna Maria Godes Faura",
+    "bio_es": "Nació en 1954 en Barcelona. Se casó con Jordi Fontanills Font. Tuvo 1 hijo: Judit Fontanills Godes.",
+    "bio_ca": "Va néixer el 1954 a Barcelona. Es va casar amb Jordi Fontanills Font. Va tenir 1 fill: Judit Fontanills Godes."
+  },
+  {
+    "id": "I48",
+    "nombre": "Elisabet Pérez Amigó",
+    "bio_es": "Nació en 1953 y murió en 2022. Se casó con Enric Cabestany Godes. Tuvo 4 hijos: Enric Cabestany Pérez, Albert Cabestany Pérez, Pere Cabestany Pérez y Elisabet Cabestany Pérez.",
+    "bio_ca": "Va néixer el 1953 i va morir el 2022. Es va casar amb Enric Cabestany Godes. Va tenir 4 fills: Enric Cabestany Pérez, Albert Cabestany Pérez, Pere Cabestany Pérez i Elisabet Cabestany Pérez."
+  },
+  {
+    "id": "I49",
+    "nombre": "Enric Cabestany Pérez",
+    "bio_es": "Nació en 1981. Se casó con Rita Almela Conesa. Tuvo 3 hijos: Mar Cabestany Almela, Enric Cabestany Almela y Anna Cabestany Almela.",
+    "bio_ca": "Va néixer el 1981. Es va casar amb Rita Almela Conesa. Va tenir 3 fills: Mar Cabestany Almela, Enric Cabestany Almela i Anna Cabestany Almela."
+  },
+  {
+    "id": "I50",
+    "nombre": "Albert Cabestany Pérez",
+    "bio_es": "Nació en 1982; fue Dentista. Se casó con Laia Pallejà Villalba. Tuvo 1 hijo: Bruna Cabestany Pallejà.",
+    "bio_ca": "Va néixer el 1982; fou Dentista. Es va casar amb Laia Pallejà Villalba. Va tenir 1 fill: Bruna Cabestany Pallejà."
+  },
+  {
+    "id": "I51",
+    "nombre": "Pere Cabestany Pérez",
+    "bio_es": "Nació en 1990. Se casó con Alexia Serena Aleu.",
+    "bio_ca": "Va néixer el 1990. Es va casar amb Alexia Serena Aleu."
+  },
+  {
+    "id": "I52",
+    "nombre": "Elisabet Cabestany Pérez",
+    "bio_es": "Nació en 1991.",
+    "bio_ca": "Va néixer el 1991."
+  },
+  {
+    "id": "I53",
+    "nombre": "Rita de la Cruz Ventura",
+    "bio_es": "Aparece documentado/a en la genealogía familiar; fue Executiva Banc de Sabadell. Se casó con Xavier Cabestany Godes. Tuvo 2 hijos: Sergi Cabestany de la Cruz y Silvia Cabestany de la Cruz.",
+    "bio_ca": "Apareix documentat/ada en la genealogia familiar; fou Executiva Banc de Sabadell. Es va casar amb Xavier Cabestany Godes. Va tenir 2 fills: Sergi Cabestany de la Cruz i Silvia Cabestany de la Cruz."
+  },
+  {
+    "id": "I54",
+    "nombre": "Sergi Cabestany de la Cruz",
+    "bio_es": "Nació en 1986. Se casó con Anna Casal Romero. Tuvo 2 hijos: Martí Cabestany Casal y Clàudia Cabestany Casal.",
+    "bio_ca": "Va néixer el 1986. Es va casar amb Anna Casal Romero. Va tenir 2 fills: Martí Cabestany Casal i Clàudia Cabestany Casal."
+  },
+  {
+    "id": "I55",
+    "nombre": "Silvia Cabestany de la Cruz",
+    "bio_es": "Nació en 1989.",
+    "bio_ca": "Va néixer el 1989."
+  },
+  {
+    "id": "I56",
+    "nombre": "Xavier Barahona Dalmau",
+    "bio_es": "Nació en 1959. Se casó con Montserrat Cabestany Godes. Tuvo 2 hijos: Marc Barahona Cabestany y Àlex Barahona Cabestany.",
+    "bio_ca": "Va néixer el 1959. Es va casar amb Montserrat Cabestany Godes. Va tenir 2 fills: Marc Barahona Cabestany i Àlex Barahona Cabestany."
+  },
+  {
+    "id": "I57",
+    "nombre": "Marc Barahona Cabestany",
+    "bio_es": "Nació en 1988. Se casó con Iris Lleixà Rubio. Tuvo 1 hijo: Jan Barahona Lleixà.",
+    "bio_ca": "Va néixer el 1988. Es va casar amb Iris Lleixà Rubio. Va tenir 1 fill: Jan Barahona Lleixà."
+  },
+  {
+    "id": "I58",
+    "nombre": "Àlex Barahona Cabestany",
+    "bio_es": "Nació en 1991; fue Chef-Cuiner, resident a Abu-Dhabi. Se casó con Marta Bueno.",
+    "bio_ca": "Va néixer el 1991; fou Chef-Cuiner, resident a Abu-Dhabi. Es va casar amb Marta Bueno."
+  },
+  {
+    "id": "I59",
+    "nombre": "Josepa Molins Plà",
+    "bio_es": "Nació en 1951. Se casó con Emili Godes Faura. Tuvo 3 hijos: Emili Godes Molins, Cristina Godes Molins y Elisabet Godes Molins. Conoció a Emili en 1978 y se casaron en 1983 en el Santuari de la Salut de Sabadell.",
+    "bio_ca": "Va néixer el 1951. Es va casar amb Emili Godes Faura. Va tenir 3 fills: Emili Godes Molins, Cristina Godes Molins i Elisabet Godes Molins. Va conèixer l’Emili el 1978 i es van casar el 1983 al Santuari de la Salut de Sabadell."
+  },
+  {
+    "id": "I60",
+    "nombre": "Emili Godes Molins",
+    "bio_es": "Nació en 1985. Se casó con Sara Abu-Sabbah Quilis. Tuvo 1 hijo: Nico Abu-Sabbah Godes.",
+    "bio_ca": "Va néixer el 1985. Es va casar amb Sara Abu-Sabbah Quilis. Va tenir 1 fill: Nico Abu-Sabbah Godes."
+  },
+  {
+    "id": "I61",
+    "nombre": "Cristina Godes Molins",
+    "bio_es": "Nació en 1986 y murió en 1986. Su vida quedó reducida a la infancia, con una presencia documental breve dentro de la familia.",
+    "bio_ca": "Va néixer el 1986 i va morir el 1986. La seva vida quedà reduïda a la infantesa, amb una presència documental breu dins la família."
+  },
+  {
+    "id": "I62",
+    "nombre": "Elisabet Godes Molins",
+    "bio_es": "Nació en 1988.",
+    "bio_ca": "Va néixer el 1988."
+  },
+  {
+    "id": "I63",
+    "nombre": "Jesus Godes Faura",
+    "bio_es": "Nació en 1953 en Barcelona. Se casó con Carme Nofre Solà. Tuvo 4 hijos: Carme \"Manen\" Godes Nofre, Mariona Godes Nofre, Anna Godes i Nofre y Carlota Godes Nofre.",
+    "bio_ca": "Va néixer el 1953 a Barcelona. Es va casar amb Carme Nofre Solà. Va tenir 4 fills: Carme \"Manen\" Godes Nofre, Mariona Godes Nofre, Anna Godes i Nofre i Carlota Godes Nofre."
+  },
+  {
+    "id": "I64",
+    "nombre": "Carme Nofre Solà",
+    "bio_es": "Nació en 1953. Se casó con Jesus Godes Faura. Tuvo 4 hijos: Carme \"Manen\" Godes Nofre, Mariona Godes Nofre, Anna Godes i Nofre y Carlota Godes Nofre.",
+    "bio_ca": "Va néixer el 1953. Es va casar amb Jesus Godes Faura. Va tenir 4 fills: Carme \"Manen\" Godes Nofre, Mariona Godes Nofre, Anna Godes i Nofre i Carlota Godes Nofre."
+  },
+  {
+    "id": "I65",
+    "nombre": "Carme \"Manen\" Godes Nofre",
+    "bio_es": "Nació en 1979. Se casó con Lluis Renom Blanchart. Tuvo 2 hijos: Claudia Renom Godes y Lluís Renom Godes.",
+    "bio_ca": "Va néixer el 1979. Es va casar amb Lluis Renom Blanchart. Va tenir 2 fills: Claudia Renom Godes i Lluís Renom Godes."
+  },
+  {
+    "id": "I66",
+    "nombre": "Lluis Renom Blanchart",
+    "bio_es": "Nació en 1977. Se casó con Carme \"Manen\" Godes Nofre. Tuvo 2 hijos: Claudia Renom Godes y Lluís Renom Godes.",
+    "bio_ca": "Va néixer el 1977. Es va casar amb Carme \"Manen\" Godes Nofre. Va tenir 2 fills: Claudia Renom Godes i Lluís Renom Godes."
+  },
+  {
+    "id": "I67",
+    "nombre": "Mariona Godes Nofre",
+    "bio_es": "Nació en 1983. Estuvo casada con Lucas Brandao y Javier Rodríguez Santos. Tuvo 2 hijos: Maria Godes Brandao y Triana Rodríguez Godes.",
+    "bio_ca": "Va néixer el 1983. Va estar casada amb Lucas Brandao i Javier Rodríguez Santos. Va tenir 2 fills: Maria Godes Brandao i Triana Rodríguez Godes."
+  },
+  {
+    "id": "I68",
+    "nombre": "Anna Godes i Nofre",
+    "bio_es": "Nació en 1984; fue Restaurant Verdaguer. Estuvo casada con Josep Pascó Soler y Oriol Fité Dalet. Tuvo 2 hijos: Júlia Pascó Godes y Àlex Fité Godes.",
+    "bio_ca": "Va néixer el 1984; fou Restaurant Verdaguer. Va estar casada amb Josep Pascó Soler i Oriol Fité Dalet. Va tenir 2 fills: Júlia Pascó Godes i Àlex Fité Godes."
+  },
+  {
+    "id": "I69",
+    "nombre": "Carlota Godes Nofre",
+    "bio_es": "Nació en 1990. Se casó con Alexandre Cuende Estévez. Tuvo 1 hijo: Mariona Cuende Godes.",
+    "bio_ca": "Va néixer el 1990. Es va casar amb Alexandre Cuende Estévez. Va tenir 1 fill: Mariona Cuende Godes."
+  },
+  {
+    "id": "I70",
+    "nombre": "Jordi Fontanills Font",
+    "bio_es": "Aparece documentado/a en la genealogía familiar. Se casó con Anna Maria Godes Faura. Tuvo 1 hijo: Judit Fontanills Godes.",
+    "bio_ca": "Apareix documentat/ada en la genealogia familiar. Es va casar amb Anna Maria Godes Faura. Va tenir 1 fill: Judit Fontanills Godes."
+  },
+  {
+    "id": "I71",
+    "nombre": "Judit Fontanills Godes",
+    "bio_es": "Nació en 1978. Se casó con Eduard Maltas Molist. Tuvo 1 hijo: Clara Maltas Fontanills.",
+    "bio_ca": "Va néixer el 1978. Es va casar amb Eduard Maltas Molist. Va tenir 1 fill: Clara Maltas Fontanills."
+  },
+  {
+    "id": "I72",
+    "nombre": "Eduard Maltas Molist",
+    "bio_es": "Nació en 1968. Se casó con Judit Fontanills Godes. Tuvo 1 hijo: Clara Maltas Fontanills.",
+    "bio_ca": "Va néixer el 1968. Es va casar amb Judit Fontanills Godes. Va tenir 1 fill: Clara Maltas Fontanills."
+  },
+  {
+    "id": "I73",
+    "nombre": "Felip Puig Godes",
+    "bio_es": "Nació en 1958 en Barcelona; es ingeniero civil y político catalán. Estuvo casado con Josepa Ninou Pere y Marta Puig-Ventura. Tuvo 3 hijos: Ariadna Puig Ninou, Eugènia Puig Ninou y Maria Puig Ninou. Ha sido conseller de Interior, además de Medio Ambiente, Política Territorial y Obras Públicas, y Empresa y Ocupación; su trayectoria va de la administración local al primer nivel del Govern de Catalunya.",
+    "bio_ca": "Va néixer el 1958 a Barcelona; és enginyer civil i polític català. Va estar casat amb Josepa Ninou Pere i Marta Puig-Ventura. Va tenir 3 fills: Ariadna Puig Ninou, Eugènia Puig Ninou i Maria Puig Ninou. Ha estat conseller d’Interior, a més de Medi Ambient, Política Territorial i Obres Públiques, i Empresa i Ocupació; la seva trajectòria va de l’administració local al primer nivell del Govern de Catalunya."
+  },
+  {
+    "id": "I74",
+    "nombre": "Joan Nolla Hom",
+    "bio_es": "Nació en 1947 y murió en 2001; fue Protèsic Dental. Se casó con Carmen Godes Schmid. Tuvo 2 hijos: Joan Nolla Godes y Carla Nolla Godes.",
+    "bio_ca": "Va néixer el 1947 i va morir el 2001; fou Protèsic Dental. Es va casar amb Carmen Godes Schmid. Va tenir 2 fills: Joan Nolla Godes i Carla Nolla Godes."
+  },
+  {
+    "id": "I75",
+    "nombre": "Joan Nolla Godes",
+    "bio_es": "Nació en 1976. Se casó con Elena Allueva.",
+    "bio_ca": "Va néixer el 1976. Es va casar amb Elena Allueva."
+  },
+  {
+    "id": "I76",
+    "nombre": "Carla Nolla Godes",
+    "bio_es": "Nació en 1981.",
+    "bio_ca": "Va néixer el 1981."
+  },
+  {
+    "id": "I77",
+    "nombre": "Ignacia Godes Hospital",
+    "bio_es": "Nació en 1966 en Barcelona; fue Escuela de Educación Infantil Tirol Barcelona. Se casó con Javier Millán Urgel. Tuvo 2 hijos: Helena Millán Godes y Carla Millán Godes.",
+    "bio_ca": "Va néixer el 1966 a Barcelona; fou Escuela de Educación Infantil Tirol Barcelona. Es va casar amb Javier Millán Urgel. Va tenir 2 fills: Helena Millán Godes i Carla Millán Godes."
+  },
+  {
+    "id": "I78",
+    "nombre": "Ana Godes Hospital",
+    "bio_es": "Nació en 1968 en Barcelona. Ha sido una de las grandes figuras españolas del tenis de mesa: olímpica en Barcelona 1992, más de 300 veces internacional y dominadora de la competición estatal en los años ochenta y noventa.",
+    "bio_ca": "Va néixer el 1968 a Barcelona. Ha estat una de les grans figures espanyoles del tennis de taula: olímpica a Barcelona 1992, més de 300 vegades internacional i dominadora de la competició estatal als anys vuitanta i noranta."
+  },
+  {
+    "id": "I79",
+    "nombre": "Javier Millán Urgel",
+    "bio_es": "Nació en 1965. Se casó con Ignacia Godes Hospital. Tuvo 2 hijos: Helena Millán Godes y Carla Millán Godes.",
+    "bio_ca": "Va néixer el 1965. Es va casar amb Ignacia Godes Hospital. Va tenir 2 fills: Helena Millán Godes i Carla Millán Godes."
+  },
+  {
+    "id": "I80",
+    "nombre": "Helena Millán Godes",
+    "bio_es": "Nació en 2007.",
+    "bio_ca": "Va néixer el 2007."
+  },
+  {
+    "id": "I81",
+    "nombre": "Joan Pujol Godes",
+    "bio_es": "Nació en 1925 en Barcelona y murió en 1999. Se casó con Obdúlia Pérez de la Concepción. Tuvo 3 hijos: Juan Francisco Pujol Pérez, Rosa Maria Pujol Pérez y Maria José Pujol Pérez.",
+    "bio_ca": "Va néixer el 1925 a Barcelona i va morir el 1999. Es va casar amb Obdúlia Pérez de la Concepción. Va tenir 3 fills: Juan Francisco Pujol Pérez, Rosa Maria Pujol Pérez i Maria José Pujol Pérez."
+  },
+  {
+    "id": "I82",
+    "nombre": "Obdúlia Pérez de la Concepción",
+    "bio_es": "Nació en 1930 en Tameiron - A Gudiña  (Orense) y murió en 2023 en Sant Pere de Ribes. Se casó con Joan Pujol Godes. Tuvo 3 hijos: Juan Francisco Pujol Pérez, Rosa Maria Pujol Pérez y Maria José Pujol Pérez. Procedía de Tameirón, en Ourense, incorporando una raíz gallega a esta rama familiar.",
+    "bio_ca": "Va néixer el 1930 a Tameiron - A Gudiña  (Orense) i va morir el 2023 a Sant Pere de Ribes. Es va casar amb Joan Pujol Godes. Va tenir 3 fills: Juan Francisco Pujol Pérez, Rosa Maria Pujol Pérez i Maria José Pujol Pérez. Procedia de Tameirón, a Ourense, incorporant una arrel gallega a aquesta branca familiar."
+  },
+  {
+    "id": "I83",
+    "nombre": "Rosa Maria Pujol Pérez",
+    "bio_es": "Nació en 1966; fue Advocada. Se casó con Joan Carles Bertran Alexandre. Tuvo 2 hijos: Carles Bertran Pujol y Marina Bertran Pujol.",
+    "bio_ca": "Va néixer el 1966; fou Advocada. Es va casar amb Joan Carles Bertran Alexandre. Va tenir 2 fills: Carles Bertran Pujol i Marina Bertran Pujol."
+  },
+  {
+    "id": "I84",
+    "nombre": "Juan Francisco Pujol Pérez",
+    "bio_es": "Nació en 1964; fue Funcionari Generalitat.",
+    "bio_ca": "Va néixer el 1964; fou Funcionari Generalitat."
+  },
+  {
+    "id": "I85",
+    "nombre": "Maria José Pujol Pérez",
+    "bio_es": "Nació en 1971.",
+    "bio_ca": "Va néixer el 1971."
+  },
+  {
+    "id": "I86",
+    "nombre": "Joan Carles Bertran Alexandre",
+    "bio_es": "Aparece documentado/a en la genealogía familiar. Se casó con Rosa Maria Pujol Pérez. Tuvo 2 hijos: Carles Bertran Pujol y Marina Bertran Pujol.",
+    "bio_ca": "Apareix documentat/ada en la genealogia familiar. Es va casar amb Rosa Maria Pujol Pérez. Va tenir 2 fills: Carles Bertran Pujol i Marina Bertran Pujol."
+  },
+  {
+    "id": "I87",
+    "nombre": "Carles Bertran Pujol",
+    "bio_es": "Aparece documentado/a en la genealogía familiar.",
+    "bio_ca": "Apareix documentat/ada en la genealogia familiar."
+  },
+  {
+    "id": "I88",
+    "nombre": "Josepa Ninou Pere",
+    "bio_es": "Nació en 1957; fue Generalitat. Se casó con Felip Puig Godes. Tuvo 3 hijos: Ariadna Puig Ninou, Eugènia Puig Ninou y Maria Puig Ninou.",
+    "bio_ca": "Va néixer el 1957; fou Generalitat. Es va casar amb Felip Puig Godes. Va tenir 3 fills: Ariadna Puig Ninou, Eugènia Puig Ninou i Maria Puig Ninou."
+  },
+  {
+    "id": "I89",
+    "nombre": "Ariadna Puig Ninou",
+    "bio_es": "Nació en 1987. Se casó con José María Sánchez Navarro. Tuvo 1 hijo: Antara Sánchez Puig.",
+    "bio_ca": "Va néixer el 1987. Es va casar amb José María Sánchez Navarro. Va tenir 1 fill: Antara Sánchez Puig."
+  },
+  {
+    "id": "I90",
+    "nombre": "Maria Puig Ninou",
+    "bio_es": "Aparece documentado/a en la genealogía familiar.",
+    "bio_ca": "Apareix documentat/ada en la genealogia familiar."
+  },
+  {
+    "id": "I91",
+    "nombre": "Eugènia Puig Ninou",
+    "bio_es": "Nació en 1995; fue Psicòloga.",
+    "bio_ca": "Va néixer el 1995; fou Psicòloga."
+  },
+  {
+    "id": "I92",
+    "nombre": "Oriol Puig Godes",
+    "bio_es": "Nació en 1960 en Barcelona; tuvo actividad profesional vinculada a Cap de servei al Departament d'Obres Públiques, Cap de servei al Departament de Medi Ambient y Director Servei Meterològic de Catalunya. Se casó con Nuria Olivella Busquets. Tuvo 3 hijos: Galceran Puig Olivella, Marta Puig Olivella y Marçal Puig Olivella.",
+    "bio_ca": "Va néixer el 1960 a Barcelona; va tenir activitat professional vinculada a Cap de servei al Departament d'Obres Públiques, Cap de servei al Departament de Medi Ambient i Director Servei Meterològic de Catalunya. Es va casar amb Nuria Olivella Busquets. Va tenir 3 fills: Galceran Puig Olivella, Marta Puig Olivella i Marçal Puig Olivella."
+  },
+  {
+    "id": "I93",
+    "nombre": "Nuria Olivella Busquets",
+    "bio_es": "Nació en 1967. Se casó con Oriol Puig Godes. Tuvo 3 hijos: Galceran Puig Olivella, Marta Puig Olivella y Marçal Puig Olivella.",
+    "bio_ca": "Va néixer el 1967. Es va casar amb Oriol Puig Godes. Va tenir 3 fills: Galceran Puig Olivella, Marta Puig Olivella i Marçal Puig Olivella."
+  },
+  {
+    "id": "I94",
+    "nombre": "Galceran Puig Olivella",
+    "bio_es": "Nació en 1995.",
+    "bio_ca": "Va néixer el 1995."
+  },
+  {
+    "id": "I95",
+    "nombre": "Marta Puig Olivella",
+    "bio_es": "Nació en 1998.",
+    "bio_ca": "Va néixer el 1998."
+  },
+  {
+    "id": "I96",
+    "nombre": "Marçal Puig Olivella",
+    "bio_es": "Nació en 2002.",
+    "bio_ca": "Va néixer el 2002."
+  },
+  {
+    "id": "I97",
+    "nombre": "Jordi Puig Godes",
+    "bio_es": "Nació en 1963 en Barcelona. Estuvo casado con Margarita Ruz Brea, Masha Petek y Anna Navarro de Pedro. Tuvo 1 hijo: Mariona Puig Ruz.",
+    "bio_ca": "Va néixer el 1963 a Barcelona. Va estar casat amb Margarita Ruz Brea, Masha Petek i Anna Navarro de Pedro. Va tenir 1 fill: Mariona Puig Ruz."
+  },
+  {
+    "id": "I98",
+    "nombre": "Margarita Ruz Brea",
+    "bio_es": "Nació en 1965. Se casó con Jordi Puig Godes. Tuvo 1 hijo: Mariona Puig Ruz.",
+    "bio_ca": "Va néixer el 1965. Es va casar amb Jordi Puig Godes. Va tenir 1 fill: Mariona Puig Ruz."
+  },
+  {
+    "id": "I99",
+    "nombre": "Mariona Puig Ruz",
+    "bio_es": "Nació en 2005.",
+    "bio_ca": "Va néixer el 2005."
+  },
+  {
+    "id": "I100",
+    "nombre": "Dolores Godes Molina",
+    "bio_es": "Nació en 1926 en Córdoba y murió en 1991. Se casó con Robert Lee Shahan.",
+    "bio_ca": "Va néixer el 1926 a Córdoba i va morir el 1991. Es va casar amb Robert Lee Shahan."
+  }
+]

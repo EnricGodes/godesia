@@ -56,7 +56,7 @@ document.addEventListener('keydown', e => {
 // Navigation
 // ---------------------------------------------------------------------------
 
-const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'tests', 'config', 'comparador'];
+const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'config', 'comparador'];
 const initialized = {};
 
 function showSection(name) {
@@ -70,7 +70,8 @@ function showSection(name) {
     if (!initialized[name]) {
         initialized[name] = true;
         const ctrl = { status: Status, import: Import, suggestions: Suggestions,
-                       queries: Queries, geocoder: Geocoder, anecdotes: Anecdotes, tests: Tests,
+                       queries: Queries, geocoder: Geocoder, anecdotes: Anecdotes,
+                       minibios: Minibios, tests: Tests,
                        config: Config, comparador: Comparador }[name];
         if (ctrl?.init) ctrl.init();
     }
@@ -943,6 +944,111 @@ const Anecdotes = {
         if (!confirm(`Eliminar anècdota #${index + 1}?`)) return;
         try {
             await apiFetch(`/api/admin/anecdotes/${index}`, { method: 'DELETE' });
+            await this.load();
+        } catch (e) { alert('Error eliminant: ' + e.message); }
+    },
+};
+
+// ---------------------------------------------------------------------------
+// Minibios section
+// ---------------------------------------------------------------------------
+
+const Minibios = {
+    _items: [],
+    _editId: null,  // null = new, string = editing existing
+
+    init() { this.load(); },
+
+    async load() {
+        const el = document.getElementById('mbio-list');
+        el.innerHTML = '<div class="empty-state">Carregant…</div>';
+        try {
+            const d = await apiFetch(`/api/admin/minibios?_t=${Date.now()}`);
+            this._items = d.items || [];
+            if (!this._items.length) {
+                el.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div>Cap minibio trobada.</div>';
+                return;
+            }
+            el.innerHTML = `<table class="admin-table">
+                <thead><tr>
+                    <th style="width:60px;">ID</th><th>Nom</th><th>Bio (es)</th><th></th>
+                </tr></thead>
+                <tbody>${this._items.map(m => `
+                    <tr>
+                        <td style="color:#727971;font-size:0.75rem;">${esc(m.id)}</td>
+                        <td style="font-size:0.82rem;font-weight:600;max-width:180px;">${esc((m.nombre || '').slice(0, 60))}${(m.nombre || '').length > 60 ? '…' : ''}</td>
+                        <td style="font-size:0.8rem;max-width:300px;color:#3d3d37;">${esc((m.bio_es || '').slice(0, 120))}${(m.bio_es || '').length > 120 ? '…' : ''}</td>
+                        <td>
+                            <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
+                                <button class="btn btn-secondary btn-sm" onclick="Minibios.openEdit(${JSON.stringify(m.id)})">✎</button>
+                                <button class="btn btn-danger btn-sm" onclick="Minibios.remove(${JSON.stringify(m.id)})">✕</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('')}</tbody>
+            </table>`;
+        } catch (e) {
+            el.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
+        }
+    },
+
+    openNew() {
+        this._editId = null;
+        document.getElementById('mbio-modal-title').textContent = 'Nova minibio';
+        document.getElementById('mbio-id').value = '';
+        document.getElementById('mbio-id').readOnly = false;
+        document.getElementById('mbio-nombre').value = '';
+        document.getElementById('mbio-bio-es').value = '';
+        document.getElementById('mbio-bio-ca').value = '';
+        openModal('mbio-modal');
+    },
+
+    openEdit(id) {
+        const m = this._items.find(x => x.id === id);
+        if (!m) { alert('Error: no s\'ha trobat la minibio. Recarrega la pàgina.'); return; }
+        this._editId = id;
+        document.getElementById('mbio-modal-title').textContent = `Editar minibio ${id}`;
+        document.getElementById('mbio-id').value = m.id;
+        document.getElementById('mbio-id').readOnly = true;
+        document.getElementById('mbio-nombre').value = m.nombre || '';
+        document.getElementById('mbio-bio-es').value = m.bio_es || '';
+        document.getElementById('mbio-bio-ca').value = m.bio_ca || '';
+        openModal('mbio-modal');
+    },
+
+    async save() {
+        const id = document.getElementById('mbio-id').value.trim();
+        if (!id) { alert('Cal especificar un ID'); return; }
+        const body = {
+            id,
+            nombre: document.getElementById('mbio-nombre').value.trim(),
+            bio_es: document.getElementById('mbio-bio-es').value.trim(),
+            bio_ca: document.getElementById('mbio-bio-ca').value.trim(),
+        };
+        try {
+            if (this._editId !== null) {
+                await apiFetch(`/api/admin/minibios/${encodeURIComponent(this._editId)}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+            } else {
+                await apiFetch('/api/admin/minibios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+            }
+            closeModal('mbio-modal');
+            this._editId = null;
+            await this.load();
+        } catch (e) { alert('Error guardant: ' + e.message); }
+    },
+
+    async remove(id) {
+        if (!confirm(`Eliminar minibio ${id}?`)) return;
+        try {
+            await apiFetch(`/api/admin/minibios/${encodeURIComponent(id)}`, { method: 'DELETE' });
             await this.load();
         } catch (e) { alert('Error eliminant: ' + e.message); }
     },

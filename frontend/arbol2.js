@@ -350,6 +350,8 @@ function a2OpenSidebar(storeItem) {
       ${birthLine ? a2Field('Naixement', birthLine) : ''}
       ${deathLine ? a2Field('Defunció',  deathLine) : ''}
 
+      <div id="sidebar-minibio" style="margin-top:12px;font-size:0.82rem;color:#3d3d37;line-height:1.5;"></div>
+
       <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;">
         <button onclick="a2CenterOn('${nodeId}')"
           style="width:100%;padding:9px;background:#2d4b33;color:#fff;border:none;
@@ -371,6 +373,17 @@ function a2OpenSidebar(storeItem) {
     </div>`;
 
   sidebar.style.display = 'block';
+
+  if (dosId) {
+    fetch(`/api/minibio/${encodeURIComponent(dosId)}`)
+      .then(r => r.json())
+      .then(m => {
+        const bio = m.bio_ca || m.bio_es || '';
+        const el = document.getElementById('sidebar-minibio');
+        if (el && bio) el.innerHTML = `<p style="margin:0;font-style:italic;">${bio}</p>`;
+      })
+      .catch(() => {});
+  }
 }
 
 function a2Field(label, value) {

@@ -40,6 +40,9 @@
             <a data-section="anecdotes">
                 <span class="nav-icon">✦</span> Anècdotes
             </a>
+            <a data-section="minibios">
+                <span class="nav-icon">📝</span> Minibios
+            </a>
             <a data-section="tests">
                 <span class="nav-icon">▷</span> Tests
             </a>
@@ -315,6 +318,49 @@
                     <div class="modal-actions">
                         <button class="btn btn-secondary" onclick="closeModal('anec-modal')">Cancel·lar</button>
                         <button class="btn btn-primary" onclick="Anecdotes.save()">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MINIBIOS -->
+        <section id="s-minibios" class="admin-section">
+            <h1 class="section-title">Minibios</h1>
+            <p class="section-subtitle">Edita les minibiografies de les persones de la família (en espanyol i català).</p>
+
+            <div class="toolbar">
+                <div></div>
+                <div class="toolbar-right">
+                    <button class="btn btn-primary btn-sm" onclick="Minibios.openNew()">+ Nova minibio</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Minibios.load()">↻ Actualitzar</button>
+                </div>
+            </div>
+
+            <div id="mbio-list"></div>
+
+            <!-- Minibio editor modal -->
+            <div class="modal-overlay" id="mbio-modal">
+                <div class="modal">
+                    <div class="modal-title" id="mbio-modal-title">Nova minibio</div>
+                    <div class="form-group">
+                        <label>ID (ex: I4)</label>
+                        <input type="text" class="form-input" id="mbio-id" placeholder="I4"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Nom complet</label>
+                        <input type="text" class="form-input" id="mbio-nombre" placeholder="Nom de la persona"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Bio en espanyol</label>
+                        <textarea class="form-textarea" id="mbio-bio-es" rows="5" placeholder="Biografia en español…"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Bio en català</label>
+                        <textarea class="form-textarea" id="mbio-bio-ca" rows="5" placeholder="Biografia en català…"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeModal('mbio-modal')">Cancel·lar</button>
+                        <button class="btn btn-primary" onclick="Minibios.save()">Guardar</button>
                     </div>
                 </div>
             </div>
