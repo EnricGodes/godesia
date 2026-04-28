@@ -1291,6 +1291,7 @@ const Comparador = {
                 photos: '📸 Fotos', name: '💬 Nom', nomatch: '❓ No trobat',
                 occupations: '💼 Oficis', residences: '🏠 Residències',
                 events: '🗓 Esdeveniments',
+                possible_match: '🔍 Possible',
             };
 
             this._rows = {};

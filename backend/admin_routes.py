@@ -872,10 +872,18 @@ def _run_comparison(ged_path: str, db_path: str):
         individuals = data["individuals"]
         _cmp_log(f"  {len(individuals):,} individus al GEDCOM")
 
-        # 2. Build name index
+        # 2. Build name index + fallback surname+year index
         _cmp_log("[2/4] Construint índex de noms…")
         ged_index = _build_ged_index(individuals)
         _cmp_log(f"  {len(ged_index):,} entrades a l'índex")
+        # Fallback index: (first_surname_canon, birth_year) → [ged_id]
+        ged_surname_year: dict = {}
+        for gid, indi in individuals.items():
+            sur = _canonicalize_person_name(indi.get("surname") or "")
+            first_sur = sur.split()[0] if sur else ""
+            yr = _ged_year((indi.get("birth") or {}).get("date") or "")
+            if first_sur and yr:
+                ged_surname_year.setdefault((first_sur, yr), []).append(gid)
 
         # 3. Load all DB people + pre-fetch related tables (3 queries, not N×3)
         _cmp_log("[3/4] Carregant dades de la BD…")
@@ -933,9 +941,28 @@ def _run_comparison(ged_path: str, db_path: str):
 
             ged_id, score = _match_person(db_person, individuals, ged_index)
 
+            # Second pass: first surname + birth year (score=50)
+            if ged_id is None and db_person.get("birth_year"):
+                db_sur0 = (_canonicalize_person_name(db_person.get("surname") or "") or "").split()
+                if db_sur0:
+                    candidates2 = ged_surname_year.get((db_sur0[0], db_person["birth_year"]), [])
+                    if len(candidates2) == 1:
+                        ged_id, score = candidates2[0], 50
+
             if ged_id is None:
                 diff_types = ["nomatch"]
                 diff_details = {"nomatch": ["Persona no trobada al GEDCOM"]}
+            elif score <= 55:
+                diff_types, diff_details = _compute_diff(
+                    db_person, all_notes.get(pid, []), all_occs.get(pid, []),
+                    all_res.get(pid, []), all_burials.get(pid, []),
+                    all_events.get(pid, []), individuals[ged_id],
+                )
+                if "possible_match" not in diff_types:
+                    diff_types = ["possible_match"] + diff_types
+                    diff_details["possible_match"] = [
+                        f"Coincidència per primer cognom + any de naixement. Nom GEDCOM: '{individuals[ged_id].get('name')}'"
+                    ]
             else:
                 diff_types, diff_details = _compute_diff(
                     db_person,
