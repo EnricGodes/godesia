@@ -484,6 +484,9 @@ _NAME_VARIANT_PAIRS = [
     ("elisabet", "elisabeth"),
     ("ester", "esther"),
     ("alex", "alexandre"),
+    ("pau", "pablo"),
+    ("ernest", "ernesto"),
+    ("ignacia", "ignasia"),
 ]
 _NAME_DIMINUTIVES = {
     "pep": "josep", "pepe": "josep",
@@ -498,7 +501,9 @@ _NAME_DIMINUTIVES = {
     "ma": "maria", "m": "maria",
     "mª": "maria",
     "nacho": "ignacio",
+    "nacha": "ignacia",
     "alejandro": "alex",
+    "vicenc": "vicens",
 }
 _NAME_VARIANTS: dict = {}
 for _a, _b in _NAME_VARIANT_PAIRS:
@@ -762,10 +767,12 @@ def _build_ged_index(individuals: dict) -> dict:
         if canon_given and canon_surname:
             candidates.add(f"{canon_given} {canon_surname}")
             candidates.add(f"{canon_surname} {canon_given}")
-            first_given = canon_given.split()[0]
-            if first_given and first_given != canon_given:
-                candidates.add(f"{first_given} {canon_surname}")
-                candidates.add(f"{canon_surname} {first_given}")
+            given_tokens = canon_given.split()
+            # Index each individual given-name token (handles "Niceto Enrique" → "Enrique")
+            for tok in given_tokens:
+                if tok != canon_given:
+                    candidates.add(f"{tok} {canon_surname}")
+                    candidates.add(f"{canon_surname} {tok}")
             # For compound "María X" names, also index without the "maría" prefix
             # so "Mª Carmen Godes" matches a DB record with just "Carmen Godes"
             suffix = _maria_suffix(canon_given)
@@ -791,10 +798,11 @@ def _match_person(db_person: dict, individuals: dict, ged_index: dict) -> tuple:
     if db_given_canon and db_surname_canon:
         probes.append(f"{db_given_canon} {db_surname_canon}")
         probes.append(f"{db_surname_canon} {db_given_canon}")
-        first_given = db_given_canon.split()[0] if db_given_canon else ""
-        if first_given and first_given != db_given_canon:
-            probes.append(f"{first_given} {db_surname_canon}")
-            probes.append(f"{db_surname_canon} {first_given}")
+        # Probe each individual given-name token (handles "Niceto Enrique" → "Enrique")
+        for tok in db_given_canon.split():
+            if tok != db_given_canon:
+                probes.append(f"{tok} {db_surname_canon}")
+                probes.append(f"{db_surname_canon} {tok}")
         # For compound "María X" names, also probe without the "maría" prefix
         suffix = _maria_suffix(db_given_canon)
         if suffix:
