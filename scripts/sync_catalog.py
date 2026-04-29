@@ -287,7 +287,10 @@ def parse_gedcom_people(lines):
 
             while i < len(lines):
                 next_line = lines[i].rstrip("\n")
-                if not next_line or next_line[0] == "0":
+                if not next_line:
+                    i += 1
+                    continue
+                if next_line[0] == "0":
                     break
 
                 match1 = re.match(r"^1\s+(\w+)(.*)", next_line)
@@ -425,7 +428,10 @@ def parse_gedcom_people(lines):
 
             while i < len(lines):
                 next_line = lines[i].rstrip("\n")
-                if not next_line or next_line[0] == "0":
+                if not next_line:
+                    i += 1
+                    continue
+                if next_line[0] == "0":
                     break
 
                 if "HUSB" in next_line:
