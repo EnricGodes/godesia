@@ -378,7 +378,7 @@ function a2OpenSidebar(storeItem) {
     fetch(`/api/minibio/${encodeURIComponent(dosId)}`)
       .then(r => r.json())
       .then(m => {
-        const bio = m.bio_ca || m.bio_es || '';
+        const bio = m.bio_es || m.bio_ca || '';
         const el = document.getElementById('sidebar-minibio');
         if (el && bio) el.innerHTML = `<p style="margin:0;font-style:italic;">${bio}</p>`;
       })

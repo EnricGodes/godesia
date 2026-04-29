@@ -176,10 +176,10 @@ function renderDossier(data) {
     `;
 
     // Minibio (async, fills #dossier-minibio if available)
-    fetch(`/api/minibio/${encodeURIComponent(person.id)}`)
+    fetch(`/api/minibio/${encodeURIComponent((person.id || '').replace(/@/g, ''))}`)
         .then(r => r.json())
         .then(m => {
-            const bio = m.bio_ca || m.bio_es || '';
+            const bio = m.bio_es || m.bio_ca || '';
             const el = document.getElementById('dossier-minibio');
             if (el && bio) {
                 el.innerHTML = `<div style="margin-top:1rem;padding:1rem 1.25rem;background:rgba(45,75,51,0.06);border-left:3px solid #2d4b33;border-radius:4px;font-size:0.95rem;line-height:1.65;color:#3d3d37;font-style:italic;">${bio}</div>`;

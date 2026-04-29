@@ -980,8 +980,8 @@ const Minibios = {
                         <td style="font-size:0.8rem;max-width:300px;color:#3d3d37;">${esc((m.bio_es || '').slice(0, 120))}${(m.bio_es || '').length > 120 ? '…' : ''}</td>
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
-                                <button class="btn btn-secondary btn-sm" onclick="Minibios.openEdit(${JSON.stringify(m.id)})">✎</button>
-                                <button class="btn btn-danger btn-sm" onclick="Minibios.remove(${JSON.stringify(m.id)})">✕</button>
+                                <button class="btn btn-secondary btn-sm" onclick="Minibios.openEdit('${m.id}')">✎</button>
+                                <button class="btn btn-danger btn-sm" onclick="Minibios.remove('${m.id}')">✕</button>
                             </div>
                         </td>
                     </tr>
