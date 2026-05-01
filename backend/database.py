@@ -1712,7 +1712,7 @@ def get_tree_data_flat(conn, person_id, generations_up=3, generations_down=3):
 
     FULL_SELECT = (
         "SELECT id, name, given_name, surname, nickname, sex, "
-        "birth_year, birth_date, birth_place, death_year, death_date, "
+        "birth_year, birth_date, birth_place, birth_city, death_year, death_date, "
         "father_id, mother_id, photo_file, is_alive FROM people WHERE id=?"
     )
 
@@ -1737,6 +1737,7 @@ def get_tree_data_flat(conn, person_id, generations_up=3, generations_down=3):
                 "birth_year": row["birth_year"],
                 "birth_date": row["birth_date"] or "",
                 "birth_place": row["birth_place"] or "",
+                "birth_city": row["birth_city"] or "",
                 "death_year": row["death_year"],
                 "death_date": row["death_date"] or "",
                 "is_alive": bool(row["is_alive"]),

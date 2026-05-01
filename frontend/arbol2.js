@@ -199,7 +199,7 @@ function a2DisplayYears(data) {
 function a2DisplayInfo(data) {
   if (!data) return '';
   const years = a2DisplayYears(data);
-  const place = data.birth_place || '';
+  const place = data.birth_city || data.birth_place || '';
   return place ? `${years} · ${place}` : years;
 }
 
@@ -317,7 +317,7 @@ function a2OpenSidebar(storeItem) {
   const given  = data['first name'] || '';
   const family = data['last name']  || '';
   const fullName  = [given, family].filter(Boolean).join(' ');
-  const birthLine = [data.birth_date, data.birth_place].filter(Boolean).join(' · ');
+  const birthLine = [data.birth_date, data.birth_city || data.birth_place].filter(Boolean).join(' · ');
   const deathLine = data.death_date || '';
 
   const sidebar = document.getElementById('a2-sidebar');
