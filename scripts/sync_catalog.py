@@ -32,6 +32,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 from gedcom_parser import clean_note_html
 from database import convert_date_to_spanish
+from geocode_utils import propagate_geocache
 
 
 DOC_TYPES = [
@@ -731,6 +732,9 @@ def main():
                     INSERT INTO residences (person_id, address, address2, city, country, date)
                     VALUES (?, ?, ?, ?, ?, ?)
                 """, (person_id, res["address"], res["address2"], res["city"], res["country"], res["date"]))
+        db_conn.commit()
+        geocoded = propagate_geocache(db_conn)
+        print(f"  Coordenadas restauradas en residencias: {geocoded} filas")
 
         cursor.execute("DELETE FROM notes")
         for person_id, note_list in notes.items():

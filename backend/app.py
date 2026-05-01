@@ -76,6 +76,20 @@ async def startup():
     except Exception as e:
         print(f"  Auto-heal de fotos falló: {e}")
 
+    # AUTO-HEAL: Push geocache lat/lng to residences/events if any rows have null coords.
+    # sync_catalog.py wipes and re-inserts residences without lat/lng; this restores them.
+    try:
+        from geocode_utils import propagate_geocache as _propagate_geocache
+        missing_geo = db_conn.execute(
+            "SELECT COUNT(*) FROM residences WHERE lat IS NULL"
+        ).fetchone()[0]
+        if missing_geo > 0:
+            propagated = _propagate_geocache(db_conn)
+            if propagated:
+                print(f"✓ Coordenadas restauradas en {propagated} residencias/eventos")
+    except Exception as e:
+        print(f"  Auto-heal de geocoordinadas falló: {e}")
+
     # Read GEDCOM export date from header (auto-detect most recent .ged file)
     ged_files = sorted((BASE_DIR / "docs").glob("*.ged"), key=lambda p: p.stat().st_mtime, reverse=True)
     gedcom_path = ged_files[0] if ged_files else None
