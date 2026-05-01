@@ -17,7 +17,7 @@ from pydantic import BaseModel
 from database import (
     get_connection, get_tree_data, get_tree_data_flat, get_birthdays_this_week, search_people,
     get_dashboard_data, get_documents, get_person_dossier, convert_date_to_spanish,
-    update_all_photo_files, get_photo_details,
+    update_all_photo_files, update_all_city_fields, get_photo_details,
     get_albums_list, get_album_photos, get_photos_people_list,
     get_setting, set_setting,
 )
@@ -89,6 +89,20 @@ async def startup():
                 print(f"✓ Coordenadas restauradas en {propagated} residencias/eventos")
     except Exception as e:
         print(f"  Auto-heal de geocoordinadas falló: {e}")
+
+    # AUTO-HEAL: Extract birth_city/death_city for people where they are NULL.
+    try:
+        missing_cities = db_conn.execute(
+            "SELECT COUNT(*) FROM people "
+            "WHERE (birth_city IS NULL AND birth_place IS NOT NULL) "
+            "   OR (death_city IS NULL AND death_place IS NOT NULL)"
+        ).fetchone()[0]
+        if missing_cities > 0:
+            city_updated = update_all_city_fields(db_conn)
+            if city_updated:
+                print(f"✓ Ciudades extraídas para {city_updated} personas")
+    except Exception as e:
+        print(f"  Auto-heal de ciudades falló: {e}")
 
     # Read GEDCOM export date from header (auto-detect most recent .ged file)
     ged_files = sorted((BASE_DIR / "docs").glob("*.ged"), key=lambda p: p.stat().st_mtime, reverse=True)

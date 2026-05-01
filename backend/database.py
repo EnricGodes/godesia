@@ -40,10 +40,12 @@ CREATE TABLE IF NOT EXISTS people (
     birth_month INTEGER,
     birth_year INTEGER,
     birth_place TEXT,
+    birth_city TEXT,
     birth_note TEXT,
     death_date TEXT,
     death_year INTEGER,
     death_place TEXT,
+    death_city TEXT,
     death_cause TEXT,
     death_note TEXT,
     death_age TEXT,
@@ -378,6 +380,8 @@ def get_connection(db_path):
         "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)",
         "CREATE TABLE IF NOT EXISTS compare_results (id INTEGER PRIMARY KEY AUTOINCREMENT, db_person_id TEXT NOT NULL, db_person_name TEXT, ged_person_id TEXT, ged_person_name TEXT, match_score INTEGER DEFAULT 0, diff_types TEXT, diff_details TEXT, created_at TEXT DEFAULT (datetime('now')))",
         "CREATE INDEX IF NOT EXISTS idx_compare_results_person ON compare_results(db_person_id)",
+        "ALTER TABLE people ADD COLUMN birth_city TEXT",
+        "ALTER TABLE people ADD COLUMN death_city TEXT",
     ]:
         try:
             conn.execute(stmt)
@@ -1335,6 +1339,33 @@ def get_photo_details(conn, photo_id):
         photo_dict["album_cover"] = None
 
     return photo_dict
+
+
+def update_all_city_fields(conn) -> int:
+    """Populate birth_city / death_city for people where they are NULL.
+
+    Uses extract_city_from_place() — purely local, no external APIs.
+    Called on startup as auto-heal and after each sync_catalog run.
+    Returns the number of rows updated.
+    """
+    from geocode_utils import extract_city_from_place
+    rows = conn.execute(
+        "SELECT id, birth_place, death_place FROM people "
+        "WHERE (birth_city IS NULL AND birth_place IS NOT NULL) "
+        "   OR (death_city IS NULL AND death_place IS NOT NULL)"
+    ).fetchall()
+    updated = 0
+    for row in rows:
+        new_bc = extract_city_from_place(row["birth_place"] or "") or None
+        new_dc = extract_city_from_place(row["death_place"] or "") or None
+        conn.execute(
+            "UPDATE people SET birth_city=?, death_city=? WHERE id=?",
+            (new_bc, new_dc, row["id"]),
+        )
+        updated += 1
+    if updated:
+        conn.commit()
+    return updated
 
 
 def update_all_photo_files(conn):

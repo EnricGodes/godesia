@@ -32,7 +32,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 from gedcom_parser import clean_note_html
 from database import convert_date_to_spanish
-from geocode_utils import propagate_geocache
+from geocode_utils import propagate_geocache, extract_city_from_place
 
 
 DOC_TYPES = [
@@ -280,8 +280,10 @@ def parse_gedcom_people(lines):
             person = {
                 "id": person_id, "name": "", "given_name": "", "surname": "",
                 "sex": None, "birth_date": None, "birth_day": None, "birth_month": None,
-                "birth_year": None, "birth_place": None, "death_date": None, "death_year": None,
-                "death_place": None, "death_cause": None, "death_note": None, "death_age": None,
+                "birth_year": None, "birth_place": None, "birth_city": None,
+                "death_date": None, "death_year": None,
+                "death_place": None, "death_city": None,
+                "death_cause": None, "death_note": None, "death_age": None,
                 "is_alive": 0, "_has_deat": False, "father_id": None, "mother_id": None, "photo_file": None, "photo_count": 0,
                 "updated_at": None
             }
@@ -328,6 +330,7 @@ def parse_gedcom_people(lines):
                                 person["birth_day"], person["birth_month"], person["birth_year"] = day, month, year
                             elif "PLAC" in birt_line:
                                 person["birth_place"] = birt_line.split("PLAC", 1)[1].strip()
+                                person["birth_city"] = extract_city_from_place(person["birth_place"])
                             j += 1
                     elif tag == "DEAT":
                         person["_has_deat"] = True
@@ -340,6 +343,7 @@ def parse_gedcom_people(lines):
                                 person["death_year"] = year
                             elif "PLAC" in deat_line:
                                 person["death_place"] = deat_line.split("PLAC", 1)[1].strip()
+                                person["death_city"] = extract_city_from_place(person["death_place"])
                             elif "CAUS" in deat_line:
                                 person["death_cause"] = deat_line.split("CAUS", 1)[1].strip()
                             elif "NOTE" in deat_line:
@@ -679,9 +683,9 @@ def main():
             cursor.execute("""
                 INSERT INTO people
                 (id, name, given_name, surname, sex, birth_date, birth_day, birth_month,
-                 birth_year, birth_place, death_date, death_year, death_place, death_cause,
-                 death_note, death_age, is_alive, father_id, mother_id, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 birth_year, birth_place, birth_city, death_date, death_year, death_place, death_city,
+                 death_cause, death_note, death_age, is_alive, father_id, mother_id, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET
                     name=excluded.name,
                     given_name=excluded.given_name,
@@ -692,9 +696,11 @@ def main():
                     birth_month=excluded.birth_month,
                     birth_year=excluded.birth_year,
                     birth_place=excluded.birth_place,
+                    birth_city=excluded.birth_city,
                     death_date=excluded.death_date,
                     death_year=excluded.death_year,
                     death_place=excluded.death_place,
+                    death_city=excluded.death_city,
                     death_cause=excluded.death_cause,
                     death_note=excluded.death_note,
                     death_age=excluded.death_age,
@@ -704,7 +710,8 @@ def main():
                     updated_at=excluded.updated_at
             """, (person_id, person["name"], person["given_name"], person["surname"], person["sex"],
                   person["birth_date"], person["birth_day"], person["birth_month"], person["birth_year"],
-                  person["birth_place"], person["death_date"], person["death_year"], person["death_place"],
+                  person["birth_place"], person["birth_city"],
+                  person["death_date"], person["death_year"], person["death_place"], person["death_city"],
                   person["death_cause"], person["death_note"], person["death_age"], person["is_alive"],
                   person["father_id"], person["mother_id"], person["updated_at"]))
 

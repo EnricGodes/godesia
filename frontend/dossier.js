@@ -139,7 +139,7 @@ function renderDossier(data) {
     document.getElementById('hero-name').textContent = displayName;
 
     const birthYear = person.birth_year || '?';
-    const birthPlace = person.birth_place || 'Barcelona, España';
+    const birthPlace = person.birth_city || person.birth_place || 'Barcelona, España';
     const vitalDatesEl = document.getElementById('vital-dates');
     vitalDatesEl.classList.remove('flex-wrap', 'items-center', 'gap-6');
     vitalDatesEl.classList.add('flex-col', 'gap-2');
@@ -267,7 +267,7 @@ function renderPerfil(data, displayName) {
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Nacimiento</dt>
                         <dd class="text-sm">
                             <span class="font-bold block">${person.birth_date || person.birth_year}</span>
-                            ${person.birth_place ? `<span class="italic opacity-80 text-xs">${person.birth_place}</span>` : ''}
+                            ${(person.birth_city || person.birth_place) ? `<span class="italic opacity-80 text-xs">${person.birth_city || person.birth_place}</span>` : ''}
                         </dd>
                     </div>
                     <div>
@@ -293,7 +293,7 @@ function renderPerfil(data, displayName) {
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Fallecimiento</dt>
                         <dd class="text-sm">
                             <span class="font-bold block">${person.death_date || person.death_year || '?'}${person.death_age ? ' (' + person.death_age + ' años)' : ''}</span>
-                            ${person.death_place ? `<span class="italic opacity-80 text-xs">${person.death_place}</span>` : ''}
+                            ${(person.death_city || person.death_place) ? `<span class="italic opacity-80 text-xs">${person.death_city || person.death_place}</span>` : ''}
                         </dd>
                     </div>
                     <div>
@@ -1550,10 +1550,10 @@ function renderResidences(residences, events, person) {
         }));
 
     // Birth place — always first, before any sort
-    const birthEntry = (person?.birth_place) ? [{
+    const birthEntry = (person?.birth_place || person?.birth_city) ? [{
         date: person.birth_date || '',
-        address: person.birth_place,
-        city: '',
+        address: person.birth_place || person.birth_city || '',
+        city: person.birth_city || '',
         country: '',
         lat: null,
         lng: null,

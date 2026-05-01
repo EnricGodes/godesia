@@ -138,6 +138,70 @@ def build_residence_raw(address: str, city: str, country: str) -> str:
     return ", ".join(parts)
 
 
+_PLACE_COUNTRIES = frozenset({
+    # Countries
+    "españa", "espanya", "spain",
+    "france", "francia",
+    "italia", "italy",
+    "estados unidos", "usa", "eeuu", "u.s.a.", "united states",
+    "reino unido", "uk", "united kingdom", "england", "inglaterra",
+    "alemania", "germany", "portugal", "cuba", "argentina",
+    "mexico", "méxico",
+    # Autonomous communities / regions (not cities)
+    "catalunya", "cataluña", "catalonia",
+    "euskadi", "país vasco", "basque country",
+    "andalucía", "andalucia",
+    "comunidad de madrid",
+    "galicia",
+})
+
+
+def extract_city_from_place(raw: str) -> str:
+    """Extract just the city/town name from a freeform GEDCOM PLAC string.
+
+    Uses normalize_place() to strip floor/apt notations and split embedded
+    city names (e.g. "30 4º Barcelona" → "30, Barcelona"). Then returns the
+    last non-country, non-numeric segment.
+
+    No external API calls — purely local, ~0 ms per call.
+
+    Examples:
+      "Fonollar, 30 4º Barcelona"     → "Barcelona"
+      "Jaume Giralt, 3 1º, Barcelona" → "Barcelona"
+      "Castellón de la Plana"         → "Castellón de la Plana"
+      "Barcelona"                     → "Barcelona"
+      "Bertran, 67 Barcelona"         → "Barcelona"
+    """
+    if not raw or not raw.strip():
+        return ""
+    normalized = normalize_place(raw)
+    if not normalized:
+        return raw.strip()
+
+    parts = [p.strip() for p in normalized.split(",") if p.strip()]
+    if not parts:
+        return ""
+
+    city_parts = [
+        p for p in parts
+        if p.lower() not in _PLACE_COUNTRIES and not re.match(r"^\d+$", p)
+    ]
+    if not city_parts:
+        return parts[-1] if parts else raw.strip()
+
+    # If the original has digits it's a street address → prefer a known city name
+    if any(c.isdigit() for c in normalized):
+        # Prefer the last part that is an exact _CITY_HINT match (most reliable)
+        hint_parts = [p for p in city_parts if _CITY_HINT.fullmatch(p)]
+        if hint_parts:
+            return hint_parts[-1]
+        # Fallback: last non-country, non-numeric part
+        return city_parts[-1]
+
+    # No digits → already a plain place name, return as-is
+    return normalized
+
+
 # ---------------------------------------------------------------------------
 # Nominatim
 # ---------------------------------------------------------------------------
