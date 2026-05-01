@@ -511,7 +511,7 @@ function renderFamilyTree(data) {
 
     html += `
         <div class="mt-12 text-center">
-            <a href="/tree.html?id=${dossierId(person.id)}" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s; display: inline-block;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+            <a href="/arbol2.html?id=${dossierId(person.id)}" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s; display: inline-block;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                 Ver árbol completo →
             </a>
         </div>

@@ -110,8 +110,7 @@
   }
 
   function renderNav() {
-    const arbolActive  = isActivePage('/tree.html')   ? ' bg-white/20 font-semibold' : '';
-    const arbol2Active = isActivePage('/arbol2.html')  ? ' bg-white/20 font-semibold' : '';
+    const arbolActive  = isActivePage('/arbol2.html')  ? ' bg-white/20 font-semibold' : '';
     const chatActive   = isActivePage('/chat.html')    ? ' bg-white/20 font-semibold' : '';
 
     const linkCls = 'whitespace-nowrap px-3 py-1.5 rounded-md text-sm font-medium text-white/90' +
@@ -130,8 +129,7 @@
 
           /* ── Col 2: Nav items ── */
           `<div class="flex items-center gap-0.5">` +
-            `<a href="/tree.html"   class="${linkCls}${arbolActive}">Árbol</a>` +
-            `<a href="/arbol2.html" class="${linkCls}${arbol2Active}">Árbol 2</a>` +
+            `<a href="/arbol2.html" class="${linkCls}${arbolActive}">Árbol</a>` +
             renderDropdown('ramas',      'Ramas familiares', RAMAS) +
             `<a href="/chat.html" class="${linkCls}${chatActive}">Consultas</a>` +
             renderDropdown('album',      'Álbum',            ALBUM) +
