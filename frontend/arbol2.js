@@ -89,6 +89,7 @@ async function a2Init(personId) {
       cardHtml:    true,
       cardHtmlDiv: htmlSvg,
     });
+    a2StraightLines();
     a2ApplyDivorcedLines();
     a2BindMiniTreeClicks();
     setTimeout(a2BindMiniTreeClicks, 200);
@@ -293,6 +294,24 @@ function a2AddParentSiblings(tree) {
 }
 
 // ─── Divorced lines ───────────────────────────────────────────────────────────
+
+function a2StraightLines() {
+  if (!a2Svg) return;
+  // family-chart generates waypoints already in right-angle form (LinkVertical:
+  // start → down to midY → across → down to end), but draws them with
+  // d3.curveMonotoneY which smooths the corners. We override every link path
+  // with curveLinear so the connectors are perfectly orthogonal.
+  const straightLine = d3.line().curve(d3.curveLinear);
+  d3.select(a2Svg).select('.links_view').selectAll('path.link').each(function(d) {
+    const pts = d && d.d;
+    if (!pts || !pts.length) return;
+    d3.select(this)
+      .interrupt('path')            // cancel the library's curve transition
+      .transition('path')
+      .duration(125)                // match the store's transition_time
+      .attr('d', straightLine(pts));
+  });
+}
 
 function a2ApplyDivorcedLines() {
   if (!a2Svg) return;
