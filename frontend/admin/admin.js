@@ -883,7 +883,7 @@ const Anecdotes = {
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
                                 <button class="btn btn-secondary btn-sm" onclick="Anecdotes.openEdit(${a.index})">✎</button>
-                                <button class="btn btn-danger btn-sm" onclick="Anecdotes.remove(${a.index})">✕</button>
+                                <button class="btn btn-danger btn-sm" id="anec-del-${a.index}" onclick="Anecdotes.confirmRemove(this, ${a.index})">✕</button>
                             </div>
                         </td>
                     </tr>
@@ -940,8 +940,24 @@ const Anecdotes = {
         } catch (e) { alert('Error guardant: ' + e.message); }
     },
 
+    confirmRemove(btn, index) {
+        if (btn.dataset.confirming) {
+            this.remove(index);
+        } else {
+            btn.dataset.confirming = '1';
+            btn.textContent = '¿Segur?';
+            btn.style.minWidth = '60px';
+            setTimeout(() => {
+                if (btn.dataset.confirming) {
+                    delete btn.dataset.confirming;
+                    btn.textContent = '✕';
+                    btn.style.minWidth = '';
+                }
+            }, 3000);
+        }
+    },
+
     async remove(index) {
-        if (!confirm(`Eliminar anècdota #${index + 1}?`)) return;
         try {
             await apiFetch(`/api/admin/anecdotes/${index}`, { method: 'DELETE' });
             await this.load();
@@ -981,7 +997,7 @@ const Minibios = {
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
                                 <button class="btn btn-secondary btn-sm" onclick="Minibios.openEdit('${m.id}')">✎</button>
-                                <button class="btn btn-danger btn-sm" onclick="Minibios.remove('${m.id}')">✕</button>
+                                <button class="btn btn-danger btn-sm" onclick="Minibios.confirmRemove(this, '${m.id}')">✕</button>
                             </div>
                         </td>
                     </tr>
@@ -1045,8 +1061,24 @@ const Minibios = {
         } catch (e) { alert('Error guardant: ' + e.message); }
     },
 
+    confirmRemove(btn, id) {
+        if (btn.dataset.confirming) {
+            this.remove(id);
+        } else {
+            btn.dataset.confirming = '1';
+            btn.textContent = '¿Segur?';
+            btn.style.minWidth = '60px';
+            setTimeout(() => {
+                if (btn.dataset.confirming) {
+                    delete btn.dataset.confirming;
+                    btn.textContent = '✕';
+                    btn.style.minWidth = '';
+                }
+            }, 3000);
+        }
+    },
+
     async remove(id) {
-        if (!confirm(`Eliminar minibio ${id}?`)) return;
         try {
             await apiFetch(`/api/admin/minibios/${encodeURIComponent(id)}`, { method: 'DELETE' });
             await this.load();
