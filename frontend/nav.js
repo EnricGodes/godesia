@@ -536,7 +536,7 @@
           `<a href="/docs.html#${t.type}" style="display:block;padding:8px 16px;font-size:13px;color:#1c1c17;text-decoration:none;white-space:nowrap;" onmouseover="this.style.background='#f1eee5'" onmouseout="this.style.background=''">${t.label}</a>`
         )
       ].join('');
-      menu.innerHTML = `<div style="padding:4px 0;">${links}</div>`;
+      menu.innerHTML = `<div class="bg-white rounded-xl shadow-xl py-1.5 border border-[#e5e2da]" style="min-width:11rem">${links}</div>`;
     }).catch(() => {});
   }
 

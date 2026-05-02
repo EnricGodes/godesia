@@ -1739,7 +1739,7 @@ def get_document_types(conn):
     rows = conn.execute("""
         SELECT doc_type, COUNT(*) as count, MIN(filename) as cover
         FROM photos
-        WHERE is_document = 1 AND filename NOT LIKE '%.pdf' AND is_cutout = 0
+        WHERE is_document = 1 AND is_cutout = 0
         GROUP BY doc_type
         ORDER BY count DESC
     """).fetchall()
@@ -1768,7 +1768,7 @@ def get_document_albums(conn):
                MIN(ph.filename) as cover
         FROM albums a
         JOIN photos ph ON ph.album_id = a.gedcom_id
-        WHERE ph.is_document = 1 AND ph.filename NOT LIKE '%.pdf' AND ph.is_cutout = 0
+        WHERE ph.is_document = 1 AND ph.is_cutout = 0
         GROUP BY a.gedcom_id
         ORDER BY count DESC
     """).fetchall()
@@ -1785,7 +1785,7 @@ def get_document_photos(conn, doc_type="__all__", q="", sort="date", person_id="
         m = _re.search(r'\d{4}', d)
         return int(m.group()) if m else None
 
-    where = ["ph.is_document = 1", "ph.filename NOT LIKE '%.pdf'", "ph.is_cutout = 0"]
+    where = ["ph.is_document = 1", "ph.is_cutout = 0"]
     params = []
 
     if doc_type and doc_type != "__all__":
@@ -1910,7 +1910,7 @@ def get_documents_people_list(conn):
         FROM people p
         JOIN photo_tags pt ON pt.person_id = p.id
         JOIN photos ph ON ph.id = pt.photo_id
-        WHERE ph.is_document = 1 AND ph.filename NOT LIKE '%.pdf' AND ph.is_cutout = 0
+        WHERE ph.is_document = 1 AND ph.is_cutout = 0
         GROUP BY p.id
         ORDER BY photo_count DESC
     """).fetchall()

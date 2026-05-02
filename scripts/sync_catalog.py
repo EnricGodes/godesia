@@ -49,7 +49,7 @@ DOC_TYPES = [
     ("invitacio",    r"invitaci|convit"),
     ("carta",        r"\bcarta\b"),
     ("dibuix",       r"dibuix|dibujo|drawing|croquis|esbo[çz]|sketch|plànol|plano"),
-    ("biografia",    r"AI Biography|biography\b"),
+    ("biografia",    r"AI Biography|biography\b|biograf"),
     ("document",     r"partida\b|acta\b|expedient|expediente|registre(?!.*foto)|documentaci[oó]|\[documentaci|\[diversos\]"),
 ]
 

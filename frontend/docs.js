@@ -180,27 +180,33 @@ function renderBentoGrid(container, photos, startIndex, append) {
         const lineClamp = sizeClass === 'bento-hero' ? 'line-clamp-4'
             : sizeClass === 'bento-med' ? 'line-clamp-2' : 'line-clamp-1';
         const idx = startIndex + i;
+        const isPdf = photo.filename.toLowerCase().endsWith('.pdf');
 
         const el = document.createElement('div');
         el.className = `group relative overflow-hidden heritage-border rounded-lg cursor-pointer ${sizeClass}`;
-        el.onclick = () => openPhotoFromDocs(idx);
+        el.onclick = () => isPdf ? window.open(`/photos/${photo.filename}`, '_blank') : openPhotoFromDocs(idx);
         el.setAttribute('tabindex', '0');
-        el.onkeydown = e => { if (e.key === 'Enter') openPhotoFromDocs(idx); };
+        el.onkeydown = e => { if (e.key === 'Enter') el.onclick(); };
 
         const typeLabel = STATE.activeDocType === '__all__' && photo.doc_type
             ? `<span class="doc-type-badge absolute top-2 left-2 z-10">${_docTypeLabel(photo.doc_type)}</span>`
             : '';
 
-        el.innerHTML = `
-            <img src="/photos/${photo.filename}" alt="${photo.title || ''}"
+        el.innerHTML = isPdf
+            ? `${typeLabel}
+               <div class="w-full h-full flex flex-col items-center justify-center bg-surface-container-high gap-2 p-3">
+                   <span class="material-symbols-outlined text-4xl text-outline">picture_as_pdf</span>
+                   <p class="text-[11px] text-outline text-center line-clamp-3">${photo.title || photo.filename}</p>
+               </div>`
+            : `<img src="/photos/${photo.filename}" alt="${photo.title || ''}"
                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                  loading="lazy"/>
-            ${typeLabel}
-            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3
-                        opacity-0 group-hover:opacity-100 transition-opacity">
-                ${photo.title ? `<p class="text-white text-[13px] font-bold ${lineClamp}">${photo.title}</p>` : ''}
-                ${photo.date ? `<span class="text-white/60 text-[11px]">${photo.date}</span>` : ''}
-            </div>`;
+               ${typeLabel}
+               <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3
+                           opacity-0 group-hover:opacity-100 transition-opacity">
+                   ${photo.title ? `<p class="text-white text-[13px] font-bold ${lineClamp}">${photo.title}</p>` : ''}
+                   ${photo.date ? `<span class="text-white/60 text-[11px]">${photo.date}</span>` : ''}
+               </div>`;
         grid.appendChild(el);
     });
 }
@@ -215,26 +221,32 @@ function renderUniformGrid(container, photos, startIndex, append) {
 
     photos.forEach((photo, i) => {
         const idx = startIndex + i;
+        const isPdf = photo.filename.toLowerCase().endsWith('.pdf');
         const el = document.createElement('div');
         el.className = 'group relative aspect-square overflow-hidden heritage-border rounded-lg cursor-pointer bg-surface-container-highest';
-        el.onclick = () => openPhotoFromDocs(idx);
+        el.onclick = () => isPdf ? window.open(`/photos/${photo.filename}`, '_blank') : openPhotoFromDocs(idx);
         el.setAttribute('tabindex', '0');
-        el.onkeydown = e => { if (e.key === 'Enter') openPhotoFromDocs(idx); };
+        el.onkeydown = e => { if (e.key === 'Enter') el.onclick(); };
 
         const typeLabel = STATE.activeDocType === '__all__' && photo.doc_type
             ? `<span class="doc-type-badge absolute top-2 left-2 z-10">${_docTypeLabel(photo.doc_type)}</span>`
             : '';
 
-        el.innerHTML = `
-            <img src="/photos/${photo.filename}" alt="${photo.title || ''}"
+        el.innerHTML = isPdf
+            ? `${typeLabel}
+               <div class="w-full h-full flex flex-col items-center justify-center gap-2 p-3">
+                   <span class="material-symbols-outlined text-4xl text-outline">picture_as_pdf</span>
+                   <p class="text-[11px] text-outline text-center line-clamp-3">${photo.title || photo.filename}</p>
+               </div>`
+            : `<img src="/photos/${photo.filename}" alt="${photo.title || ''}"
                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                  loading="lazy"/>
-            ${typeLabel}
-            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2
-                        opacity-0 group-hover:opacity-100 transition-opacity">
-                ${photo.title ? `<p class="text-white text-[11px] font-semibold line-clamp-1">${photo.title}</p>` : ''}
-                ${photo.date ? `<span class="text-white/60 text-[10px]">${photo.date}</span>` : ''}
-            </div>`;
+               ${typeLabel}
+               <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2
+                           opacity-0 group-hover:opacity-100 transition-opacity">
+                   ${photo.title ? `<p class="text-white text-[11px] font-semibold line-clamp-1">${photo.title}</p>` : ''}
+                   ${photo.date ? `<span class="text-white/60 text-[10px]">${photo.date}</span>` : ''}
+               </div>`;
         grid.appendChild(el);
     });
 }
