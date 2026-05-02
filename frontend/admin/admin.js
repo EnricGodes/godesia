@@ -56,7 +56,7 @@ document.addEventListener('keydown', e => {
 // Navigation
 // ---------------------------------------------------------------------------
 
-const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'config', 'comparador'];
+const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'config', 'comparador', 'classifier'];
 const initialized = {};
 
 function showSection(name) {
@@ -72,7 +72,8 @@ function showSection(name) {
         const ctrl = { status: Status, import: Import, suggestions: Suggestions,
                        queries: Queries, geocoder: Geocoder, anecdotes: Anecdotes,
                        minibios: Minibios, tests: Tests,
-                       config: Config, comparador: Comparador }[name];
+                       config: Config, comparador: Comparador,
+                       classifier: DocClassifier }[name];
         if (ctrl?.init) ctrl.init();
     }
 }
@@ -1532,3 +1533,291 @@ const Comparador = {
         } catch (e) { alert(e.message); }
     },
 };
+
+// ---------------------------------------------------------------------------
+// DocClassifier — Photo/Document Classification (4-phase pipeline)
+// ---------------------------------------------------------------------------
+
+const DOC_TYPE_OPTIONS = [
+    'matrimoni','defuncio','naixement','bautisme','certificat','padro',
+    'testament','arbre','transcripcio','poema','invitacio','carta','dibuix','biografia','document',
+];
+
+const DocClassifier = {
+    _pollTimer: null,
+    _offset: 0,
+    _total: 0,
+    BATCH_SIZE: 20,
+
+    async init() {
+        await this.loadStats();
+        await this.loadPendingQueue();
+        this.checkJobStatus();
+    },
+
+    async loadStats() {
+        try {
+            const d = await apiFetch('/api/admin/classifier/stats');
+            document.getElementById('clf-stat-total').textContent = (d.total || 0).toLocaleString();
+            document.getElementById('clf-stat-docs').textContent = (d.is_document || 0).toLocaleString();
+            document.getElementById('clf-stat-pending').textContent = (d.pending_review || 0).toLocaleString();
+
+            const badge = document.getElementById('badge-classifier');
+            badge.textContent = d.pending_review > 0 ? d.pending_review : '';
+
+            const modelEl = document.getElementById('clf-model-status');
+            modelEl.textContent = d.model_exists ? '✓ Model entrenat' : 'Zero-shot (sense model)';
+            modelEl.className = 'badge ' + (d.model_exists ? 'badge-resolved' : 'badge-pending');
+
+            const clipEl = document.getElementById('clf-clip-status');
+            clipEl.textContent = d.clip_available ? '✓ CLIP disponible' : '✗ CLIP no instal·lat (pip install open-clip-torch)';
+            clipEl.style.color = d.clip_available ? '#17341e' : '#991b1b';
+
+            const o = d.by_origin || {};
+            document.getElementById('clf-breakdown').innerHTML = `
+                <span class="badge" style="background:#e8f0e8;color:#17341e;">Tag: ${o.tag || 0}</span>
+                <span class="badge" style="background:#dbeafe;color:#1e3a8a;">Auto-CLIP: ${o.clip_auto || 0}</span>
+                <span class="badge badge-pending">Revisió: ${o.clip_pending || 0}</span>
+                <span class="badge badge-resolved">Humà: ${o.human || 0}</span>
+                <span class="badge" style="background:#f1eee5;color:#727971;">No processat: ${o.unprocessed || 0}</span>
+            `;
+        } catch (e) { console.error('clf stats error', e); }
+    },
+
+    async loadPendingQueue(append = false) {
+        if (!append) this._offset = 0;
+        const el = document.getElementById('clf-queue');
+        if (!append) el.innerHTML = '<div class="empty-state">Carregant…</div>';
+        try {
+            const d = await apiFetch(`/api/admin/classifier/pending?limit=${this.BATCH_SIZE}&offset=${this._offset}`);
+            this._total = d.total;
+            document.getElementById('clf-queue-count').textContent =
+                d.total > 0 ? `${d.total} fotos pendents de revisió` : 'No hi ha fotos pendents';
+
+            if (!d.items.length) {
+                if (!append) {
+                    el.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div>Cap foto pendent de revisió.</div>';
+                }
+                document.getElementById('clf-load-more').style.display = 'none';
+                return;
+            }
+
+            const html = d.items.map(item => this._renderCard(item)).join('');
+            if (append) {
+                el.insertAdjacentHTML('beforeend', html);
+            } else {
+                el.innerHTML = html;
+            }
+            this._offset += d.items.length;
+            document.getElementById('clf-load-more').style.display =
+                this._offset < this._total ? '' : 'none';
+        } catch (e) {
+            if (!append) el.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
+        }
+    },
+
+    _renderCard(item) {
+        const pct = Math.round((item.doc_confidence || 0) * 100);
+        const barColor = pct >= 75 ? '#17341e' : pct >= 35 ? '#b45309' : '#6b7280';
+        const typeOpts = DOC_TYPE_OPTIONS.map(t => `<option value="${t}">${t}</option>`).join('');
+        return `
+        <div class="clf-card" id="clf-card-${item.id}">
+            <div class="clf-thumb-wrap" onclick="DocClassifier.openPhotoModal('${esc(item.filename)}')">
+                <img src="/photos/${esc(item.filename)}" class="clf-thumb" loading="lazy"
+                     onerror="this.parentElement.innerHTML='<div style=\\'padding:.5rem;font-size:.7rem;color:#999;\\'>Sense previsualització</div>'"/>
+            </div>
+            <div class="clf-card-body">
+                <div class="clf-title" title="${esc(item.title || '')}">${esc((item.title || '(sense títol)').slice(0, 60))}</div>
+                <div class="clf-conf-bar-wrap">
+                    <div class="clf-conf-bar" style="width:${pct}%;background:${barColor};"></div>
+                </div>
+                <div class="clf-conf-label">Document: <strong>${pct}%</strong></div>
+                <div class="clf-actions">
+                    <select class="form-input clf-doctype-sel" id="clf-type-${item.id}"
+                            style="flex:1;min-width:0;font-size:.77rem;padding:3px 5px;">
+                        <option value="">— tipus —</option>
+                        ${typeOpts}
+                    </select>
+                </div>
+                <div class="clf-actions" style="margin-top:.4rem;">
+                    <button class="btn btn-sm" style="flex:1;background:#d1fae5;color:#065f46;border:none;font-size:.78rem;"
+                            onclick="DocClassifier.decide(${item.id}, 1)">✓ Document</button>
+                    <button class="btn btn-sm" style="flex:1;background:#fee2e2;color:#991b1b;border:none;font-size:.78rem;"
+                            onclick="DocClassifier.decide(${item.id}, 0)">✗ Foto</button>
+                </div>
+            </div>
+        </div>`;
+    },
+
+    async decide(photoId, isDoc) {
+        const typeEl = document.getElementById(`clf-type-${photoId}`);
+        const docType = isDoc ? (typeEl?.value || null) : null;
+        try {
+            await apiFetch('/api/admin/classifier/review', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ photo_id: photoId, is_document: isDoc, doc_type: docType }),
+            });
+            const card = document.getElementById(`clf-card-${photoId}`);
+            if (card) {
+                card.style.transition = 'opacity .3s';
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.remove();
+                    this._total = Math.max(0, this._total - 1);
+                    const el = document.getElementById('clf-queue-count');
+                    el.textContent = this._total > 0
+                        ? `${this._total} fotos pendents de revisió`
+                        : 'No hi ha fotos pendents';
+                }, 320);
+            }
+        } catch (e) { alert('Error: ' + e.message); }
+    },
+
+    openPhotoModal(filename) {
+        document.getElementById('clf-modal-img').src = `/photos/${filename}`;
+        openModal('clf-photo-modal');
+    },
+
+    async startClipScan() {
+        if (!confirm('Iniciar scan CLIP? Pot trigar uns minuts depenent del nombre de fotos.')) return;
+        try {
+            await apiFetch('/api/admin/classifier/run-clip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ limit: 0 }),
+            });
+            document.getElementById('clf-job-card').style.display = '';
+            this._startPolling();
+        } catch (e) { alert('Error: ' + e.message); }
+    },
+
+    _startPolling() {
+        clearInterval(this._pollTimer);
+        this._pollTimer = setInterval(() => this._poll(), 1500);
+    },
+
+    async _poll() {
+        try {
+            const d = await apiFetch('/api/admin/classifier/status');
+            this._updateJobStatus(d);
+            if (d.status !== 'running') {
+                clearInterval(this._pollTimer);
+                this._pollTimer = null;
+                if (d.status === 'done') {
+                    await this.loadStats();
+                    await this.loadPendingQueue();
+                }
+            }
+        } catch (_) {}
+    },
+
+    _updateJobStatus(d) {
+        const badgeMap = { idle: '', running: 'badge-pending', done: 'badge-resolved', error: 'badge-error' };
+        const labelMap = { idle: '—', running: 'En curs…', done: '✓ Completat', error: '✗ Error' };
+        const badge = document.getElementById('clf-job-badge');
+        badge.className = 'badge ' + (badgeMap[d.status] || '');
+        badge.textContent = labelMap[d.status] || d.status;
+
+        const pct = d.total > 0 ? Math.round((d.progress / d.total) * 100) : 0;
+        document.getElementById('clf-job-bar').style.width = pct + '%';
+        document.getElementById('clf-job-progress').textContent = d.total > 0
+            ? `${d.progress} / ${d.total} (${pct}%)  ·  docs auto: ${d.auto_doc}  ·  no-doc auto: ${d.auto_photo}  ·  revisió: ${d.pending}`
+            : '';
+
+        const logEl = document.getElementById('clf-job-log');
+        logEl.textContent = (d.log || []).slice(-15).join('\n');
+        logEl.scrollTop = logEl.scrollHeight;
+    },
+
+    async checkJobStatus() {
+        try {
+            const d = await apiFetch('/api/admin/classifier/status');
+            if (d.status === 'running' || d.status === 'done' || d.status === 'error') {
+                document.getElementById('clf-job-card').style.display = '';
+                this._updateJobStatus(d);
+                if (d.status === 'running') this._startPolling();
+            }
+        } catch (_) {}
+    },
+
+    async trainModel() {
+        const btn = document.getElementById('clf-btn-train');
+        btn.disabled = true;
+        btn.textContent = 'Entrenant…';
+        try {
+            const d = await apiFetch('/api/admin/classifier/train', { method: 'POST' });
+            if (d.ok) {
+                alert(
+                    `Model entrenat!\n` +
+                    `Mostres: ${d.n_samples} (${d.n_pos} docs · ${d.n_neg} no-docs)\n` +
+                    `Accuracy CV: ${(d.cv_accuracy * 100).toFixed(1)}% ± ${(d.cv_std * 100).toFixed(1)}%`
+                );
+                await this.loadStats();
+            } else {
+                alert('No s\'ha pogut entrenar el model:\n' + d.error);
+            }
+        } catch (e) { alert('Error: ' + e.message); }
+        finally {
+            btn.disabled = false;
+            btn.textContent = '⚙ Entrenar model (fase 3)';
+        }
+    },
+
+    async rerunTags() {
+        try {
+            const d = await apiFetch('/api/admin/classifier/reclassify-tags', { method: 'POST' });
+            alert(`Tags re-aplicats: ${d.updated} fotos marcades com a document (de ${d.total_checked} revisades).`);
+            await this.loadStats();
+        } catch (e) { alert('Error: ' + e.message); }
+    },
+};
+
+// CSS for classifier cards (injected so no separate .css file needed)
+(function injectClfStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .clf-card {
+            background: var(--surface, #fff);
+            border: 1px solid #e0ddd4;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .clf-thumb-wrap {
+            background: #f1eee5;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: zoom-in;
+        }
+        .clf-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .clf-card-body { padding: .65rem .75rem .75rem; }
+        .clf-title {
+            font-size: .79rem;
+            color: #3d3d37;
+            margin-bottom: .45rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .clf-conf-bar-wrap {
+            background: #e8e5dc;
+            border-radius: 4px;
+            height: 5px;
+            margin-bottom: .25rem;
+            overflow: hidden;
+        }
+        .clf-conf-bar { height: 100%; border-radius: 4px; }
+        .clf-conf-label { font-size: .71rem; color: #727971; margin-bottom: .55rem; }
+        .clf-actions { display: flex; gap: .35rem; align-items: center; }
+    `;
+    document.head.appendChild(style);
+}());

@@ -21,6 +21,18 @@ from pydantic import BaseModel
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
+# doc_classifier is imported lazily inside endpoints so the server starts even
+# if open_clip / torch are not yet installed.
+_doc_classifier_mod = None
+
+
+def _get_doc_classifier():
+    global _doc_classifier_mod
+    if _doc_classifier_mod is None:
+        import doc_classifier as _m  # noqa: PLC0415
+        _doc_classifier_mod = _m
+    return _doc_classifier_mod
+
 # Shared state — set by init_admin() called from app.py startup
 _db_conn = None
 _base_dir: Optional[Path] = None
@@ -415,6 +427,119 @@ _cmp_job = {
     "error": None,
 }
 _cmp_job_lock = threading.Lock()
+
+
+# ---------------------------------------------------------------------------
+# Document Classifier job state
+# ---------------------------------------------------------------------------
+
+_clip_job = {
+    "status": "idle",   # idle | running | done | error
+    "progress": 0,
+    "total": 0,
+    "log": [],
+    "auto_doc": 0,
+    "auto_photo": 0,
+    "pending": 0,
+    "started_at": None,
+    "finished_at": None,
+    "error": None,
+}
+_clip_job_lock = threading.Lock()
+
+
+def _clip_log(msg: str):
+    with _clip_job_lock:
+        _clip_job["log"].append(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
+
+
+def _run_clip_scan(db_path: Path, photos_dir: Path, limit: int):
+    """Background thread: CLIP-classify unprocessed photos and update doc_origin/doc_confidence."""
+    import sqlite3 as _sqlite3  # noqa: PLC0415
+
+    dc = _get_doc_classifier()
+
+    conn = _sqlite3.connect(str(db_path))
+    conn.row_factory = _sqlite3.Row
+
+    try:
+        query = """
+            SELECT id, filename FROM photos
+            WHERE doc_origin IS NULL
+              AND is_downloaded = 1
+              AND is_cutout = 0
+              AND filename NOT LIKE '%.pdf'
+        """
+        if limit and limit > 0:
+            query += f" LIMIT {int(limit)}"
+        rows = conn.execute(query).fetchall()
+
+        with _clip_job_lock:
+            _clip_job["total"] = len(rows)
+            _clip_job["progress"] = 0
+            _clip_job["auto_doc"] = 0
+            _clip_job["auto_photo"] = 0
+            _clip_job["pending"] = 0
+
+        _clip_log(f"Iniciant classificació de {len(rows)} fotos…")
+
+        # Warm up CLIP once before the loop
+        try:
+            dc._get_clip()
+            _clip_log("Model CLIP carregat.")
+        except ImportError:
+            raise RuntimeError("open-clip-torch no instal·lat. Executa: pip install open-clip-torch")
+
+        for i, row in enumerate(rows):
+            path = str(photos_dir / row["filename"])
+            score = dc.classify_image(path)
+
+            if score is None:
+                origin, is_doc = None, None
+            elif score >= dc.THRESH_AUTO_DOC:
+                origin, is_doc = "clip_auto", 1
+            elif score <= dc.THRESH_REVIEW_LOW:
+                origin, is_doc = "clip_auto", 0
+            else:
+                origin, is_doc = "clip_pending", 0
+
+            if origin is not None:
+                conn.execute(
+                    "UPDATE photos SET doc_origin=?, doc_confidence=?, is_document=COALESCE(?,is_document) WHERE id=?",
+                    (origin, score, is_doc, row["id"]),
+                )
+
+            with _clip_job_lock:
+                _clip_job["progress"] = i + 1
+                if origin == "clip_auto" and is_doc == 1:
+                    _clip_job["auto_doc"] += 1
+                elif origin == "clip_auto" and is_doc == 0:
+                    _clip_job["auto_photo"] += 1
+                elif origin == "clip_pending":
+                    _clip_job["pending"] += 1
+
+            if (i + 1) % 50 == 0:
+                conn.commit()
+                _clip_log(f"{i + 1}/{len(rows)} processades…")
+
+        conn.commit()
+        with _clip_job_lock:
+            _clip_job["status"] = "done"
+            _clip_job["finished_at"] = datetime.now().isoformat()
+        auto_doc = _clip_job["auto_doc"]
+        auto_photo = _clip_job["auto_photo"]
+        pending = _clip_job["pending"]
+        _clip_log(f"Completat. Documents auto: {auto_doc} | No-doc auto: {auto_photo} | Revisió: {pending}")
+
+    except Exception as exc:
+        conn.rollback()
+        with _clip_job_lock:
+            _clip_job["status"] = "error"
+            _clip_job["error"] = str(exc)
+            _clip_job["finished_at"] = datetime.now().isoformat()
+        _clip_log(f"ERROR: {exc}")
+    finally:
+        conn.close()
 
 
 def _cmp_log(msg: str):
@@ -1414,3 +1539,160 @@ async def db_info():
         "db_path": str(db_path),
         "last_modified": datetime.fromtimestamp(db_path.stat().st_mtime).isoformat() if db_path.exists() else None,
     }
+
+
+# ---------------------------------------------------------------------------
+# Document Classifier endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/classifier/stats")
+async def classifier_stats():
+    db = _db()
+    total = db.execute("SELECT COUNT(*) FROM photos").fetchone()[0]
+    is_document = db.execute("SELECT COUNT(*) FROM photos WHERE is_document=1").fetchone()[0]
+
+    origins = {}
+    for row in db.execute(
+        "SELECT COALESCE(doc_origin,'unprocessed') as o, COUNT(*) as n FROM photos GROUP BY o"
+    ).fetchall():
+        origins[row["o"]] = row["n"]
+    pending = origins.get("clip_pending", 0)
+
+    dc = _get_doc_classifier()
+    model_exists = dc.MODEL_PATH.exists()
+    clip_ok = dc.clip_available()
+
+    return {
+        "total": total,
+        "is_document": is_document,
+        "by_origin": origins,
+        "pending_review": pending,
+        "model_exists": model_exists,
+        "clip_available": clip_ok,
+    }
+
+
+@router.get("/classifier/pending")
+async def classifier_pending(limit: int = 20, offset: int = 0):
+    db = _db()
+    total = db.execute(
+        "SELECT COUNT(*) FROM photos WHERE doc_origin='clip_pending'"
+    ).fetchone()[0]
+    rows = db.execute(
+        """
+        SELECT id, filename, title, doc_confidence, doc_origin, is_document
+        FROM photos
+        WHERE doc_origin = 'clip_pending'
+        ORDER BY ABS(COALESCE(doc_confidence, 0.5) - 0.5) ASC
+        LIMIT ? OFFSET ?
+        """,
+        (limit, offset),
+    ).fetchall()
+    return {
+        "total": total,
+        "items": [dict(r) for r in rows],
+    }
+
+
+class ReviewBody(BaseModel):
+    photo_id: int
+    is_document: int
+    doc_type: Optional[str] = None
+
+
+class BatchReviewBody(BaseModel):
+    decisions: list[ReviewBody]
+
+
+@router.post("/classifier/review")
+async def classifier_review(body: ReviewBody):
+    db = _db()
+    db.execute(
+        "UPDATE photos SET is_document=?, doc_type=?, doc_origin='human' WHERE id=?",
+        (body.is_document, body.doc_type, body.photo_id),
+    )
+    db.commit()
+    return {"ok": True}
+
+
+@router.post("/classifier/review/batch")
+async def classifier_review_batch(body: BatchReviewBody):
+    db = _db()
+    for d in body.decisions:
+        db.execute(
+            "UPDATE photos SET is_document=?, doc_type=?, doc_origin='human' WHERE id=?",
+            (d.is_document, d.doc_type, d.photo_id),
+        )
+    db.commit()
+    return {"updated": len(body.decisions)}
+
+
+class ClipRunBody(BaseModel):
+    limit: int = 0
+
+
+@router.post("/classifier/run-clip")
+async def classifier_run_clip(body: ClipRunBody):
+    with _clip_job_lock:
+        if _clip_job["status"] == "running":
+            raise HTTPException(status_code=409, detail="Classificació ja en curs")
+        _clip_job.update({
+            "status": "running",
+            "progress": 0,
+            "total": 0,
+            "log": [],
+            "auto_doc": 0,
+            "auto_photo": 0,
+            "pending": 0,
+            "started_at": datetime.now().isoformat(),
+            "finished_at": None,
+            "error": None,
+        })
+
+    db_path = _base_dir / "data" / "godesia.db"
+    photos_dir = _base_dir / "data" / "photos"
+    t = threading.Thread(
+        target=_run_clip_scan,
+        args=(db_path, photos_dir, body.limit),
+        daemon=True,
+    )
+    t.start()
+    return {"status": "started"}
+
+
+@router.get("/classifier/status")
+async def classifier_status():
+    with _clip_job_lock:
+        return dict(_clip_job)
+
+
+@router.post("/classifier/train")
+async def classifier_train():
+    db = _db()
+    photos_dir = _base_dir / "data" / "photos"
+    dc = _get_doc_classifier()
+    result = dc.train_finetuned(db, photos_dir)
+    return result
+
+
+@router.post("/classifier/reclassify-tags")
+async def classifier_reclassify_tags():
+    sys.path.insert(0, str(_base_dir / "scripts"))
+    try:
+        from sync_catalog import classify_document  # noqa: PLC0415
+    except ImportError:
+        raise HTTPException(status_code=500, detail="sync_catalog.py no trobat a scripts/")
+
+    db = _db()
+    rows = db.execute("SELECT id, title FROM photos WHERE title IS NOT NULL AND title != ''").fetchall()
+    updated = 0
+    for row in rows:
+        is_doc, doc_type = classify_document(row["title"])
+        if is_doc:
+            db.execute(
+                "UPDATE photos SET is_document=1, doc_type=?, doc_origin='tag' WHERE id=?",
+                (doc_type, row["id"]),
+            )
+            updated += 1
+    db.commit()
+    return {"updated": updated, "total_checked": len(rows)}

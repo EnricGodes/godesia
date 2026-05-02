@@ -382,12 +382,20 @@ def get_connection(db_path):
         "CREATE INDEX IF NOT EXISTS idx_compare_results_person ON compare_results(db_person_id)",
         "ALTER TABLE people ADD COLUMN birth_city TEXT",
         "ALTER TABLE people ADD COLUMN death_city TEXT",
+        "ALTER TABLE photos ADD COLUMN doc_origin TEXT",
+        "ALTER TABLE photos ADD COLUMN doc_confidence REAL",
     ]:
         try:
             conn.execute(stmt)
             conn.commit()
         except Exception:
             pass
+    # Backfill: mark already-classified photos with doc_origin='tag'
+    try:
+        conn.execute("UPDATE photos SET doc_origin='tag' WHERE is_document=1 AND doc_origin IS NULL")
+        conn.commit()
+    except Exception:
+        pass
     return conn
 
 

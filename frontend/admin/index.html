@@ -53,6 +53,10 @@
                 <span class="nav-icon">⇄</span> Comparador GEDCOM
                 <span class="nav-badge" id="badge-cmp"></span>
             </a>
+            <a data-section="classifier">
+                <span class="nav-icon">◎</span> Classificador fotos
+                <span class="nav-badge" id="badge-classifier"></span>
+            </a>
         </nav>
     </aside>
 
@@ -500,6 +504,94 @@
                     </div>
                 </div>
                 <div id="cmp-results-list"></div>
+            </div>
+        </section>
+
+        <!-- CLASSIFICADOR FOTOS/DOCUMENTS -->
+        <section id="s-classifier" class="admin-section">
+            <h1 class="section-title">Classificador de fotos i documents</h1>
+            <p class="section-subtitle">Pipeline en 4 fases: tags de títol → CLIP zero-shot → revisió humana → model afinat.</p>
+
+            <!-- Stats -->
+            <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.25rem;">
+                <div class="stat-card">
+                    <div class="stat-value" id="clf-stat-total">—</div>
+                    <div class="stat-label">Total fotos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="clf-stat-docs">—</div>
+                    <div class="stat-label">Documents</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="clf-stat-pending">—</div>
+                    <div class="stat-label">Pendents revisió</div>
+                </div>
+            </div>
+
+            <!-- Status card -->
+            <div class="info-card" style="margin-bottom:1.25rem;">
+                <h3 style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+                    Estat del classificador
+                    <span id="clf-model-status" class="badge badge-pending" style="font-size:.75rem;">…</span>
+                    <span id="clf-clip-status" style="font-size:.78rem;margin-left:.5rem;"></span>
+                    <button class="btn btn-secondary btn-sm" onclick="DocClassifier.loadStats()" style="margin-left:auto;">↻</button>
+                </h3>
+                <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;" id="clf-breakdown"></div>
+            </div>
+
+            <!-- Phase actions -->
+            <div class="info-card" style="margin-bottom:1.25rem;">
+                <h3>Fases del pipeline</h3>
+                <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.75rem;">
+                    <button class="btn btn-secondary btn-sm" onclick="DocClassifier.rerunTags()">
+                        ① Re-aplicar tags títol
+                    </button>
+                    <button class="btn btn-primary btn-sm" id="clf-btn-scan" onclick="DocClassifier.startClipScan()">
+                        ② Iniciar scan CLIP
+                    </button>
+                    <button class="btn btn-secondary btn-sm" id="clf-btn-train" onclick="DocClassifier.trainModel()">
+                        ⚙ Entrenar model (fase 3)
+                    </button>
+                </div>
+            </div>
+
+            <!-- CLIP job progress (hidden until scan starts) -->
+            <div class="info-card" id="clf-job-card" style="display:none;margin-bottom:1.25rem;">
+                <h3 style="display:flex;align-items:center;gap:.5rem;">
+                    Progrés scan CLIP
+                    <span class="badge" id="clf-job-badge"></span>
+                </h3>
+                <div style="background:#d9d5cc;border-radius:4px;height:6px;margin:.5rem 0;overflow:hidden;">
+                    <div id="clf-job-bar" style="height:100%;background:#2d4b33;width:0%;transition:width .3s;"></div>
+                </div>
+                <div id="clf-job-progress" style="font-size:.75rem;color:#727971;margin-bottom:.5rem;"></div>
+                <pre class="import-log" id="clf-job-log" style="height:120px;font-size:.73rem;overflow-y:auto;"></pre>
+            </div>
+
+            <!-- Review queue -->
+            <div class="toolbar">
+                <span style="font-size:.82rem;color:#727971;" id="clf-queue-count">—</span>
+                <div class="toolbar-right">
+                    <button class="btn btn-secondary btn-sm" onclick="DocClassifier.loadPendingQueue()">↻ Actualitzar</button>
+                </div>
+            </div>
+
+            <div id="clf-queue" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin-top:1rem;"></div>
+
+            <div style="text-align:center;margin-top:1.25rem;">
+                <button class="btn btn-secondary" id="clf-load-more" style="display:none;"
+                        onclick="DocClassifier.loadPendingQueue(true)">Carregar més…</button>
+            </div>
+
+            <!-- Lightbox modal -->
+            <div class="modal-overlay" id="clf-photo-modal">
+                <div class="modal" style="max-width:90vw;padding:1rem;background:#1a1a17;">
+                    <img id="clf-modal-img" src="" alt=""
+                         style="max-width:100%;max-height:80vh;display:block;margin:0 auto;border-radius:6px;"/>
+                    <div style="text-align:center;margin-top:.75rem;">
+                        <button class="btn btn-secondary" onclick="closeModal('clf-photo-modal')">Tancar</button>
+                    </div>
+                </div>
             </div>
         </section>
 
