@@ -1715,6 +1715,196 @@ def get_album_photos(conn, album_id, q="", sort="date", person_id="", page=1, li
     }
 
 
+_DOC_TYPE_LABELS = {
+    'bautisme':     'Bautismos',
+    'matrimoni':    'Matrimonios',
+    'defuncio':     'Defunciones',
+    'naixement':    'Nacimientos',
+    'certificat':   'Certificados',
+    'padro':        'Padrones',
+    'testament':    'Testamentos',
+    'arbre':        'Árboles Genealógicos',
+    'transcripcio': 'Transcripciones',
+    'poema':        'Poemas',
+    'invitacio':    'Invitaciones',
+    'carta':        'Cartas',
+    'dibuix':       'Dibujos y Planos',
+    'biografia':    'Biografías',
+    'document':     'Documentos',
+}
+
+
+def get_document_types(conn):
+    """Return doc_type categories with counts and cover photo for the Documentos section."""
+    rows = conn.execute("""
+        SELECT doc_type, COUNT(*) as count, MIN(filename) as cover
+        FROM photos
+        WHERE is_document = 1 AND filename NOT LIKE '%.pdf' AND is_cutout = 0
+        GROUP BY doc_type
+        ORDER BY count DESC
+    """).fetchall()
+
+    total = sum(r["count"] for r in rows)
+    total_cover = rows[0]["cover"] if rows else None
+
+    types = [{"type": "__all__", "label": "Todos los documentos", "count": total, "cover": total_cover}]
+    for r in rows:
+        dt = r["doc_type"]
+        types.append({
+            "type": dt,
+            "label": _DOC_TYPE_LABELS.get(dt, dt or "Sin clasificar") if dt else "Sin clasificar",
+            "count": r["count"],
+            "cover": r["cover"],
+        })
+    return {"types": types}
+
+
+def get_document_photos(conn, doc_type="__all__", q="", sort="date", person_id="", page=1, limit=50):
+    """Return paginated documents (is_document=1) optionally filtered by doc_type."""
+    import re as _re
+
+    def _extract_year(d):
+        if not d:
+            return None
+        m = _re.search(r'\d{4}', d)
+        return int(m.group()) if m else None
+
+    where = ["ph.is_document = 1", "ph.filename NOT LIKE '%.pdf'", "ph.is_cutout = 0"]
+    params = []
+
+    if doc_type and doc_type != "__all__":
+        if doc_type == "__unclassified__":
+            where.append("ph.doc_type IS NULL")
+        else:
+            where.append("ph.doc_type = ?")
+            params.append(doc_type)
+
+    if person_id:
+        where.append("ph.id IN (SELECT photo_id FROM photo_tags WHERE person_id = ?)")
+        params.append(person_id)
+
+    if q:
+        where.append("""(
+            ph.title LIKE '%' || ? || '%'
+            OR ph.date LIKE '%' || ? || '%'
+            OR ph.place LIKE '%' || ? || '%'
+            OR ph.id IN (
+                SELECT pt2.photo_id FROM photo_tags pt2
+                JOIN people pe ON pe.id = pt2.person_id
+                WHERE pe.name LIKE '%' || ? || '%'
+            )
+        )""")
+        params.extend([q, q, q, q])
+
+    where_sql = " AND ".join(where)
+
+    total = conn.execute(
+        f"SELECT COUNT(DISTINCT ph.id) FROM photos ph WHERE {where_sql}", params
+    ).fetchone()[0]
+
+    if sort == "date":
+        id_date_rows = conn.execute(
+            f"SELECT ph.id, ph.date FROM photos ph WHERE {where_sql}", params
+        ).fetchall()
+        sorted_ids = [r["id"] for r in sorted(
+            id_date_rows,
+            key=lambda r: (
+                _extract_year(r["date"]) is None,
+                _extract_year(r["date"]) or 0,
+            )
+        )]
+        offset = (page - 1) * limit
+        page_ids = sorted_ids[offset: offset + limit]
+        if not page_ids:
+            rows = []
+        else:
+            phs = ",".join("?" * len(page_ids))
+            rows_unordered = {
+                r["id"]: r for r in conn.execute(f"""
+                    SELECT ph.id, ph.filename, ph.title, ph.date, ph.place, ph.doc_type, ph.inserted_at
+                    FROM photos ph WHERE ph.id IN ({phs})
+                """, page_ids).fetchall()
+            }
+            rows = [rows_unordered[pid] for pid in page_ids if pid in rows_unordered]
+    else:
+        sort_sql = {
+            "added": "ph.inserted_at DESC",
+            "title": "COALESCE(ph.title,'') ASC",
+        }.get(sort, "ph.id ASC")
+        offset = (page - 1) * limit
+        rows = conn.execute(f"""
+            SELECT DISTINCT ph.id, ph.filename, ph.title, ph.date, ph.place, ph.doc_type, ph.inserted_at
+            FROM photos ph
+            WHERE {where_sql}
+            ORDER BY {sort_sql}
+            LIMIT ? OFFSET ?
+        """, params + [limit, offset]).fetchall()
+
+    photo_ids = [r["id"] for r in rows]
+    people_by_photo = {}
+    if photo_ids:
+        phs = ",".join("?" * len(photo_ids))
+        for tr in conn.execute(f"""
+            SELECT pt.photo_id, pt.person_id, p.name, p.given_name, p.surname, p.photo_file
+            FROM photo_tags pt JOIN people p ON p.id = pt.person_id
+            WHERE pt.photo_id IN ({phs})
+            ORDER BY pt.photo_id, p.name
+        """, photo_ids).fetchall():
+            pid = tr["photo_id"]
+            if pid not in people_by_photo:
+                people_by_photo[pid] = []
+            if len(people_by_photo[pid]) < 5:
+                people_by_photo[pid].append({
+                    "person_id": tr["person_id"],
+                    "name": tr["name"],
+                    "given_name": tr["given_name"],
+                    "surname": tr["surname"],
+                    "photo_file": tr["photo_file"],
+                })
+
+    photos = [{
+        "id": r["id"],
+        "filename": r["filename"],
+        "title": r["title"],
+        "date": convert_date_to_spanish(r["date"]) if r["date"] else None,
+        "place": r["place"],
+        "doc_type": r["doc_type"],
+        "year": _extract_year(r["date"]),
+        "people": people_by_photo.get(r["id"], []),
+    } for r in rows]
+
+    return {
+        "doc_type": doc_type,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "photos": photos,
+    }
+
+
+def get_documents_people_list(conn):
+    """Return all people appearing in at least one document, ordered by doc count."""
+    rows = conn.execute("""
+        SELECT p.id, p.name, p.given_name, p.surname, p.nickname, p.photo_file,
+               COUNT(DISTINCT pt.photo_id) as photo_count
+        FROM people p
+        JOIN photo_tags pt ON pt.person_id = p.id
+        JOIN photos ph ON ph.id = pt.photo_id
+        WHERE ph.is_document = 1 AND ph.filename NOT LIKE '%.pdf' AND ph.is_cutout = 0
+        GROUP BY p.id
+        ORDER BY photo_count DESC
+    """).fetchall()
+    return {"people": [{
+        "id": r["id"],
+        "name": r["name"],
+        "given_name": r["given_name"],
+        "surname": r["surname"],
+        "nickname": r["nickname"],
+        "photo_file": r["photo_file"],
+        "photo_count": r["photo_count"],
+    } for r in rows]}
+
+
 def get_photos_people_list(conn):
     """Return all people appearing in at least one non-cutout photo, ordered by photo count."""
     rows = conn.execute("""

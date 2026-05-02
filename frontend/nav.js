@@ -31,17 +31,16 @@
   ];
 
   const DOCUMENTOS = [
-    { label: 'Bautismo',      href: null },
-    { label: 'Biografía',     href: null },
-    { label: 'Carta',         href: null },
-    { label: 'Cementerios',   href: null },
-    { label: 'Defunción',     href: null },
-    { label: 'Diversos',      href: null },
-    { label: 'Documentación', href: null },
-    { label: 'Matrimonio',    href: null },
-    { label: 'Nacimiento',    href: null },
-    { label: 'Obituario',     href: null },
-    { label: 'Padrón',        href: null },
+    { label: 'Todos los documentos', href: '/docs.html' },
+    { label: 'Bautismos',            href: '/docs.html#bautisme' },
+    { label: 'Biografías',           href: '/docs.html#biografia' },
+    { label: 'Cartas',               href: '/docs.html#carta' },
+    { label: 'Defunciones',          href: '/docs.html#defuncio' },
+    { label: 'Matrimonios',          href: '/docs.html#matrimoni' },
+    { label: 'Nacimientos',          href: '/docs.html#naixement' },
+    { label: 'Padrones',             href: '/docs.html#padro' },
+    { label: 'Testamentos',          href: '/docs.html#testament' },
+    { label: 'Documentos',           href: '/docs.html#document' },
   ];
 
   const DIVERSOS = [
