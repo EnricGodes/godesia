@@ -920,7 +920,7 @@ def get_dashboard_data(conn):
         AND ph.filename NOT LIKE '%.pdf'
         AND ph.is_personal_photo = 0
         AND ph.is_cutout = 0
-        AND ph.title NOT LIKE '%[%]%'
+        AND ph.is_document = 0
         ORDER BY RANDOM() LIMIT 8
     """).fetchall()
 
@@ -983,7 +983,7 @@ def get_dashboard_data(conn):
             JOIN photo_tags pt ON pt.photo_id = ph.id
             WHERE pt.person_id = ? AND ph.is_cutout = 0
             AND ph.filename NOT LIKE '%.pdf'
-            AND (ph.title IS NULL OR ph.title NOT LIKE '%[%]%')
+            AND ph.is_document = 0
             LIMIT 3
         """, (p["id"],)).fetchall()
         d["photos"] = [r["filename"] for r in extra]
@@ -1595,7 +1595,7 @@ def get_album_photos(conn, album_id, q="", sort="date", person_id="", page=1, li
 
     where = ["ph.filename NOT LIKE '%.pdf'", "ph.is_cutout = 0"]
     if not show_docs:
-        where.append("(ph.title IS NULL OR ph.title NOT LIKE '%[%]%')")
+        where.append("ph.is_document = 0")
     params = []
 
     if album_id == "__unassigned__":
