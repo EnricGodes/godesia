@@ -1376,10 +1376,12 @@ def _write_anecdotas(data: list):
 @router.get("/anecdotes")
 async def list_anecdotes(search: str = ""):
     items = _read_anecdotas()
+    # Assign real file indices BEFORE filtering, so DELETE/PUT target the correct row.
+    indexed = [{"index": i, **a} for i, a in enumerate(items)]
     if search:
         q = search.lower()
-        items = [a for a in items if q in (a.get("titulo") or "").lower() or q in (a.get("texto") or "").lower()]
-    return {"items": [{"index": i, **a} for i, a in enumerate(items)], "total": len(items)}
+        indexed = [a for a in indexed if q in (a.get("titulo") or "").lower() or q in (a.get("texto") or "").lower()]
+    return {"items": indexed, "total": len(indexed)}
 
 
 class AnecdoteBody(BaseModel):
