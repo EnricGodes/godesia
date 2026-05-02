@@ -321,6 +321,18 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Anecdote delete confirmation modal -->
+            <div class="modal-overlay" id="anec-del-modal">
+                <div class="modal" style="max-width:360px;">
+                    <div class="modal-title">Eliminar anècdota</div>
+                    <p style="margin:0.5rem 0 1.5rem;color:#3d3d37;">Segur que vols eliminar aquesta anècdota? Aquesta acció no es pot desfer.</p>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeModal('anec-del-modal')">Cancel·lar</button>
+                        <button class="btn btn-danger" onclick="Anecdotes.confirmDelete()">Sí, eliminar</button>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- MINIBIOS -->
@@ -361,6 +373,18 @@
                     <div class="modal-actions">
                         <button class="btn btn-secondary" onclick="closeModal('mbio-modal')">Cancel·lar</button>
                         <button class="btn btn-primary" onclick="Minibios.save()">Guardar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Minibio delete confirmation modal -->
+            <div class="modal-overlay" id="mbio-del-modal">
+                <div class="modal" style="max-width:360px;">
+                    <div class="modal-title">Eliminar minibio</div>
+                    <p style="margin:0.5rem 0 1.5rem;color:#3d3d37;">Segur que vols eliminar aquesta minibio? Aquesta acció no es pot desfer.</p>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeModal('mbio-del-modal')">Cancel·lar</button>
+                        <button class="btn btn-danger" onclick="Minibios.confirmDelete()">Sí, eliminar</button>
                     </div>
                 </div>
             </div>

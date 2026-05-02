@@ -842,7 +842,8 @@ const Geocoder = {
 const Anecdotes = {
     searchQuery: '',
     searchTimer: null,
-    _editIndex: null,  // null = new, number = editing existing
+    _editIndex: null,       // null = new, number = editing existing
+    _pendingDeleteIndex: null,
 
     init() { this.load(); },
 
@@ -883,7 +884,7 @@ const Anecdotes = {
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
                                 <button class="btn btn-secondary btn-sm" onclick="Anecdotes.openEdit(${a.index})">✎</button>
-                                <button class="btn btn-danger btn-sm" id="anec-del-${a.index}" onclick="Anecdotes.confirmRemove(this, ${a.index})">✕</button>
+                                <button class="btn btn-danger btn-sm" onclick="Anecdotes.confirmRemove(${a.index})">✕</button>
                             </div>
                         </td>
                     </tr>
@@ -940,28 +941,27 @@ const Anecdotes = {
         } catch (e) { alert('Error guardant: ' + e.message); }
     },
 
-    confirmRemove(btn, index) {
-        if (btn.dataset.confirming) {
-            this.remove(index);
-        } else {
-            btn.dataset.confirming = '1';
-            btn.textContent = '¿Segur?';
-            btn.style.minWidth = '60px';
-            setTimeout(() => {
-                if (btn.dataset.confirming) {
-                    delete btn.dataset.confirming;
-                    btn.textContent = '✕';
-                    btn.style.minWidth = '';
-                }
-            }, 3000);
-        }
+    confirmRemove(index) {
+        this._pendingDeleteIndex = index;
+        openModal('anec-del-modal');
+    },
+
+    async confirmDelete() {
+        const index = this._pendingDeleteIndex;
+        closeModal('anec-del-modal');
+        this._pendingDeleteIndex = null;
+        if (index === null) return;
+        await this.remove(index);
     },
 
     async remove(index) {
         try {
             await apiFetch(`/api/admin/anecdotes/${index}`, { method: 'DELETE' });
             await this.load();
-        } catch (e) { alert('Error eliminant: ' + e.message); }
+        } catch (e) {
+            console.error('Error eliminant anècdota:', e);
+            alert('Error eliminant: ' + e.message);
+        }
     },
 };
 
@@ -971,7 +971,8 @@ const Anecdotes = {
 
 const Minibios = {
     _items: [],
-    _editId: null,  // null = new, string = editing existing
+    _editId: null,           // null = new, string = editing existing
+    _pendingDeleteId: null,
 
     init() { this.load(); },
 
@@ -997,7 +998,7 @@ const Minibios = {
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
                                 <button class="btn btn-secondary btn-sm" onclick="Minibios.openEdit('${m.id}')">✎</button>
-                                <button class="btn btn-danger btn-sm" onclick="Minibios.confirmRemove(this, '${m.id}')">✕</button>
+                                <button class="btn btn-danger btn-sm" onclick="Minibios.confirmRemove('${m.id}')">✕</button>
                             </div>
                         </td>
                     </tr>
@@ -1061,28 +1062,27 @@ const Minibios = {
         } catch (e) { alert('Error guardant: ' + e.message); }
     },
 
-    confirmRemove(btn, id) {
-        if (btn.dataset.confirming) {
-            this.remove(id);
-        } else {
-            btn.dataset.confirming = '1';
-            btn.textContent = '¿Segur?';
-            btn.style.minWidth = '60px';
-            setTimeout(() => {
-                if (btn.dataset.confirming) {
-                    delete btn.dataset.confirming;
-                    btn.textContent = '✕';
-                    btn.style.minWidth = '';
-                }
-            }, 3000);
-        }
+    confirmRemove(id) {
+        this._pendingDeleteId = id;
+        openModal('mbio-del-modal');
+    },
+
+    async confirmDelete() {
+        const id = this._pendingDeleteId;
+        closeModal('mbio-del-modal');
+        this._pendingDeleteId = null;
+        if (id === null) return;
+        await this.remove(id);
     },
 
     async remove(id) {
         try {
             await apiFetch(`/api/admin/minibios/${encodeURIComponent(id)}`, { method: 'DELETE' });
             await this.load();
-        } catch (e) { alert('Error eliminant: ' + e.message); }
+        } catch (e) {
+            console.error('Error eliminant minibio:', e);
+            alert('Error eliminant: ' + e.message);
+        }
     },
 };
 
