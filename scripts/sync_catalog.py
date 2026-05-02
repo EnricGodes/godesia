@@ -50,7 +50,7 @@ DOC_TYPES = [
     ("carta",        r"\bcarta\b"),
     ("dibuix",       r"dibuix|dibujo|drawing|croquis|esbo[çz]|sketch|plànol|plano"),
     ("biografia",    r"AI Biography|biography\b"),
-    ("document",     r"partida\b|acta\b|expedient|expediente|registre(?!.*foto)|documentaci[oó]|\[documentaci"),
+    ("document",     r"partida\b|acta\b|expedient|expediente|registre(?!.*foto)|documentaci[oó]|\[documentaci|\[diversos\]"),
 ]
 
 def classify_document(title):

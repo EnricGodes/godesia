@@ -1706,10 +1706,10 @@ async def classifier_reclassify_tags():
         raise HTTPException(status_code=500, detail="sync_catalog.py no trobat a scripts/")
 
     db = _db()
-    # Only re-tag photos not yet reviewed by a human (or already tag-classified)
+    # Re-tag photos not yet human-reviewed; also resolve clip_pending when title matches clearly
     rows = db.execute(
         "SELECT id, title FROM photos WHERE title IS NOT NULL AND title != ''"
-        " AND (doc_origin IS NULL OR doc_origin = 'tag')"
+        " AND (doc_origin IS NULL OR doc_origin = 'tag' OR doc_origin = 'clip_pending')"
     ).fetchall()
     updated = 0
     for row in rows:
