@@ -173,7 +173,7 @@ function renderPhotoModal() {
 
     // Breadcrumb from album context (set by albums.js before opening modal)
     const ctx = window.__photoModalContext;
-    const breadcrumbHtml = ctx
+    const breadcrumbHtml = ctx?.albumTitle
         ? `<div style="font-size: 11px; color: #727971; margin-bottom: 16px;">
                <a href="/albums.html#${ctx.albumId}" style="color: #2D4B33; font-weight: 700; text-decoration: none;"
                   onmouseover="this.style.textDecoration='underline'"

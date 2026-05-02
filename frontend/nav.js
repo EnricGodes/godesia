@@ -522,12 +522,8 @@
     loadMentionAutocomplete(() => {
       new MentionAutocomplete('#gn-search-input');
     });
-  }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    // Actualiza el menú Documentos dinámicamente según los tipos reales con fotos
+    /* 8. Actualiza el menú Documentos dinámicamente según los tipos reales con fotos */
     fetch('/api/documents').then(r => r.json()).then(data => {
       const menu = document.getElementById('gn-menu-documentos');
       if (!menu || !data.types) return;
@@ -542,7 +538,11 @@
       ].join('');
       menu.innerHTML = `<div style="padding:4px 0;">${links}</div>`;
     }).catch(() => {});
+  }
 
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
     init();
   }
 }());
