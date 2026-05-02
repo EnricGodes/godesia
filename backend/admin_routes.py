@@ -467,7 +467,6 @@ def _run_clip_scan(db_path: Path, photos_dir: Path, limit: int):
             SELECT id, filename FROM photos
             WHERE doc_origin IS NULL
               AND is_downloaded = 1
-              AND is_cutout = 0
               AND filename NOT LIKE '%.pdf'
         """
         if limit and limit > 0:

@@ -41,7 +41,7 @@ DOC_TYPES = [
     ("defuncio",     r"defunci|defuncion|obituari|esquela|sepultur|obituar"),
     ("naixement",    r"naix[ae]ment|nasciment|partida.*naix|nacimiento"),
     ("certificat",   r"certific|solteria|llicencia|licencia"),
-    ("padro",        r"padro\b|padron\b|empadron|cens\b"),
+    ("padro",        r"padro\b|padr[oó]n\b|empadron|cens\b"),
     ("testament",    r"testament"),
     ("arbre",        r"arbre.*geneal|árbol.*geneal"),
     ("transcripcio", r"transcripci"),
@@ -50,7 +50,7 @@ DOC_TYPES = [
     ("carta",        r"\bcarta\b"),
     ("dibuix",       r"dibuix|dibujo|drawing|croquis|esbo[çz]|sketch|plànol|plano"),
     ("biografia",    r"AI Biography|biography\b"),
-    ("document",     r"partida\b|acta\b|expedient|expediente|registre(?!.*foto)"),
+    ("document",     r"partida\b|acta\b|expedient|expediente|registre(?!.*foto)|documentaci[oó]|\[documentaci"),
 ]
 
 def classify_document(title):
