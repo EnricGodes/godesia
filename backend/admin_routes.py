@@ -1706,13 +1706,25 @@ async def classifier_reclassify_tags():
         raise HTTPException(status_code=500, detail="sync_catalog.py no trobat a scripts/")
 
     db = _db()
-    rows = db.execute("SELECT id, title FROM photos WHERE title IS NOT NULL AND title != ''").fetchall()
+    # Only re-tag photos not yet reviewed by a human (or already tag-classified)
+    rows = db.execute(
+        "SELECT id, title FROM photos WHERE title IS NOT NULL AND title != ''"
+        " AND (doc_origin IS NULL OR doc_origin = 'tag')"
+    ).fetchall()
     updated = 0
     for row in rows:
         is_doc, doc_type = classify_document(row["title"])
         if is_doc:
             db.execute(
                 "UPDATE photos SET is_document=1, doc_type=?, doc_origin='tag' WHERE id=?",
+                (doc_type, row["id"]),
+            )
+            db.execute(
+                """INSERT INTO photo_classifications (filename, is_document, doc_type, doc_origin, doc_confidence)
+                   SELECT filename, 1, ?, 'tag', NULL FROM photos WHERE id=?
+                   ON CONFLICT(filename) DO UPDATE SET
+                     is_document=1, doc_type=excluded.doc_type, doc_origin='tag', updated_at=datetime('now')
+                   WHERE photo_classifications.doc_origin = 'tag' OR photo_classifications.doc_origin IS NULL""",
                 (doc_type, row["id"]),
             )
             updated += 1
