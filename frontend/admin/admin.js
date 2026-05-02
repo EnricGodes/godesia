@@ -1679,13 +1679,16 @@ const DocClassifier = {
         openModal('clf-photo-modal');
     },
 
-    async startClipScan() {
-        if (!confirm('Iniciar scan CLIP? Pot trigar uns minuts depenent del nombre de fotos.')) return;
+    async startClipScan(rescanPending = false) {
+        const msg = rescanPending
+            ? 'Re-classificar pendents amb el model actual? Sobreescriurà els scores anteriors.'
+            : 'Iniciar scan CLIP? Pot trigar uns minuts depenent del nombre de fotos.';
+        if (!confirm(msg)) return;
         try {
             await apiFetch('/api/admin/classifier/run-clip', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ limit: 0 }),
+                body: JSON.stringify({ limit: 0, rescan_pending: rescanPending }),
             });
             document.getElementById('clf-job-card').style.display = '';
             this._startPolling();

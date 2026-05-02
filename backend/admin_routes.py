@@ -453,7 +453,7 @@ def _clip_log(msg: str):
         _clip_job["log"].append(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
 
 
-def _run_clip_scan(db_path: Path, photos_dir: Path, limit: int):
+def _run_clip_scan(db_path: Path, photos_dir: Path, limit: int, rescan_pending: bool = False):
     """Background thread: CLIP-classify unprocessed photos and update doc_origin/doc_confidence."""
     import sqlite3 as _sqlite3  # noqa: PLC0415
 
@@ -463,9 +463,10 @@ def _run_clip_scan(db_path: Path, photos_dir: Path, limit: int):
     conn.row_factory = _sqlite3.Row
 
     try:
-        query = """
+        origin_filter = "doc_origin IS NULL OR doc_origin = 'clip_pending'" if rescan_pending else "doc_origin IS NULL"
+        query = f"""
             SELECT id, filename FROM photos
-            WHERE doc_origin IS NULL
+            WHERE ({origin_filter})
               AND is_downloaded = 1
               AND filename NOT LIKE '%.pdf'
         """
@@ -1651,6 +1652,7 @@ async def classifier_review_batch(body: BatchReviewBody):
 
 class ClipRunBody(BaseModel):
     limit: int = 0
+    rescan_pending: bool = False
 
 
 @router.post("/classifier/run-clip")
@@ -1675,7 +1677,7 @@ async def classifier_run_clip(body: ClipRunBody):
     photos_dir = _base_dir / "data" / "photos"
     t = threading.Thread(
         target=_run_clip_scan,
-        args=(db_path, photos_dir, body.limit),
+        args=(db_path, photos_dir, body.limit, body.rescan_pending),
         daemon=True,
     )
     t.start()
