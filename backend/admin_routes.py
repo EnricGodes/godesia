@@ -508,6 +508,14 @@ def _run_clip_scan(db_path: Path, photos_dir: Path, limit: int):
                     "UPDATE photos SET doc_origin=?, doc_confidence=?, is_document=COALESCE(?,is_document) WHERE id=?",
                     (origin, score, is_doc, row["id"]),
                 )
+                conn.execute(
+                    """INSERT INTO photo_classifications (filename, is_document, doc_type, doc_origin, doc_confidence, updated_at)
+                       VALUES (?, ?, NULL, ?, ?, datetime('now'))
+                       ON CONFLICT(filename) DO UPDATE SET
+                           is_document=excluded.is_document, doc_origin=excluded.doc_origin,
+                           doc_confidence=excluded.doc_confidence, updated_at=excluded.updated_at""",
+                    (row["filename"], is_doc or 0, origin, score),
+                )
 
             with _clip_job_lock:
                 _clip_job["progress"] = i + 1
@@ -1604,13 +1612,31 @@ class BatchReviewBody(BaseModel):
     decisions: list[ReviewBody]
 
 
+def _save_classification(db, photo_id: int, is_document: int, doc_type, doc_origin: str, doc_confidence=None):
+    """Write to both photos and the persistent photo_classifications table."""
+    row = db.execute("SELECT filename FROM photos WHERE id=?", (photo_id,)).fetchone()
+    if not row:
+        return
+    filename = row["filename"]
+    db.execute(
+        "UPDATE photos SET is_document=?, doc_type=?, doc_origin=?, doc_confidence=? WHERE id=?",
+        (is_document, doc_type, doc_origin, doc_confidence, photo_id),
+    )
+    db.execute(
+        """INSERT INTO photo_classifications (filename, is_document, doc_type, doc_origin, doc_confidence, updated_at)
+           VALUES (?, ?, ?, ?, ?, datetime('now'))
+           ON CONFLICT(filename) DO UPDATE SET
+               is_document=excluded.is_document, doc_type=excluded.doc_type,
+               doc_origin=excluded.doc_origin, doc_confidence=excluded.doc_confidence,
+               updated_at=excluded.updated_at""",
+        (filename, is_document, doc_type, doc_origin, doc_confidence),
+    )
+
+
 @router.post("/classifier/review")
 async def classifier_review(body: ReviewBody):
     db = _db()
-    db.execute(
-        "UPDATE photos SET is_document=?, doc_type=?, doc_origin='human' WHERE id=?",
-        (body.is_document, body.doc_type, body.photo_id),
-    )
+    _save_classification(db, body.photo_id, body.is_document, body.doc_type, "human")
     db.commit()
     return {"ok": True}
 
@@ -1619,10 +1645,7 @@ async def classifier_review(body: ReviewBody):
 async def classifier_review_batch(body: BatchReviewBody):
     db = _db()
     for d in body.decisions:
-        db.execute(
-            "UPDATE photos SET is_document=?, doc_type=?, doc_origin='human' WHERE id=?",
-            (d.is_document, d.doc_type, d.photo_id),
-        )
+        _save_classification(db, d.photo_id, d.is_document, d.doc_type, "human")
     db.commit()
     return {"updated": len(body.decisions)}
 

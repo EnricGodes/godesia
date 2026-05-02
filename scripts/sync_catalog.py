@@ -774,20 +774,6 @@ def main():
                         VALUES (?, ?)
                     """, (wife, chil_id))
 
-        # Preserve manual/CLIP classification before wiping photos table
-        saved_clf = {}
-        try:
-            for row in cursor.execute(
-                """SELECT filename, is_document, doc_type, doc_origin, doc_confidence
-                   FROM photos WHERE doc_origin IS NOT NULL"""
-            ).fetchall():
-                saved_clf[row[0]] = {
-                    "is_document": row[1], "doc_type": row[2],
-                    "doc_origin": row[3], "doc_confidence": row[4],
-                }
-        except Exception:
-            pass  # Table doesn't exist yet on first import
-
         # DROP + recreate fotos
         cursor.execute("DROP TABLE IF EXISTS photo_tags")
         cursor.execute("DROP TABLE IF EXISTS albums")
@@ -884,30 +870,34 @@ def main():
                 (album_id, album_info["title"])
             )
 
-        # Restore preserved classifications:
-        # - 'human': user reviewed → override everything (final authority)
-        # - 'clip_auto': CLIP high-confidence → restore score + is_document decision
-        # - 'clip_pending': CLIP ambiguous → restore score only (stays in review queue)
-        for filename, clf in saved_clf.items():
-            origin = clf["doc_origin"]
-            if origin == "human":
-                cursor.execute(
-                    """UPDATE photos SET is_document=?, doc_type=?, doc_origin='human', doc_confidence=?
-                       WHERE filename=?""",
-                    (clf["is_document"], clf["doc_type"], clf["doc_confidence"], filename),
-                )
-            elif origin == "clip_auto":
-                cursor.execute(
-                    """UPDATE photos SET doc_origin='clip_auto', doc_confidence=?,
-                       is_document=CASE WHEN is_document=0 THEN ? ELSE is_document END
-                       WHERE filename=?""",
-                    (clf["doc_confidence"], clf["is_document"], filename),
-                )
-            elif origin == "clip_pending":
-                cursor.execute(
-                    "UPDATE photos SET doc_origin='clip_pending', doc_confidence=? WHERE filename=?",
-                    (clf["doc_confidence"], filename),
-                )
+        # Restore classifications from photo_classifications (survives DROP TABLE)
+        # - 'human': override everything — user decision is final
+        # - 'clip_auto': restore score + is_document (high-confidence CLIP decision)
+        # - 'clip_pending': restore score only (stays in review queue, is_document stays 0)
+        try:
+            cursor.executescript("""
+                UPDATE photos SET
+                    is_document   = (SELECT pc.is_document   FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
+                    doc_type      = (SELECT pc.doc_type      FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
+                    doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
+                    doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human')
+                WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'human');
+
+                UPDATE photos SET
+                    doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto'),
+                    doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto'),
+                    is_document   = CASE WHEN is_document = 0
+                                    THEN (SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto')
+                                    ELSE is_document END
+                WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'clip_auto');
+
+                UPDATE photos SET
+                    doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending'),
+                    doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending')
+                WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'clip_pending');
+            """)
+        except Exception as e:
+            print(f"  [avís] No s'han pogut restaurar classificacions: {e}")
 
         # is_alive already computed per-person before UPSERT (respects DEAT Y flag)
 

@@ -223,6 +223,15 @@ CREATE TABLE IF NOT EXISTS compare_results (
     created_at TEXT DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_compare_results_person ON compare_results(db_person_id);
+
+CREATE TABLE IF NOT EXISTS photo_classifications (
+    filename      TEXT PRIMARY KEY,
+    is_document   INTEGER NOT NULL DEFAULT 0,
+    doc_type      TEXT,
+    doc_origin    TEXT NOT NULL,
+    doc_confidence REAL,
+    updated_at    TEXT DEFAULT (datetime('now'))
+);
 """
 
 
@@ -384,13 +393,32 @@ def get_connection(db_path):
         "ALTER TABLE people ADD COLUMN death_city TEXT",
         "ALTER TABLE photos ADD COLUMN doc_origin TEXT",
         "ALTER TABLE photos ADD COLUMN doc_confidence REAL",
+        """CREATE TABLE IF NOT EXISTS photo_classifications (
+               filename TEXT PRIMARY KEY,
+               is_document INTEGER NOT NULL DEFAULT 0,
+               doc_type TEXT,
+               doc_origin TEXT NOT NULL,
+               doc_confidence REAL,
+               updated_at TEXT DEFAULT (datetime('now'))
+           )""",
     ]:
         try:
             conn.execute(stmt)
             conn.commit()
         except Exception:
             pass
-    # Backfill: mark already-classified photos with doc_origin='tag'
+    # Backfill photo_classifications from existing photos.doc_origin data
+    try:
+        conn.execute("""
+            INSERT OR IGNORE INTO photo_classifications (filename, is_document, doc_type, doc_origin, doc_confidence)
+            SELECT filename, is_document, doc_type, doc_origin, doc_confidence
+            FROM photos
+            WHERE doc_origin IS NOT NULL
+        """)
+        conn.commit()
+    except Exception:
+        pass
+    # Also mark tag-classified photos that don't have doc_origin yet
     try:
         conn.execute("UPDATE photos SET doc_origin='tag' WHERE is_document=1 AND doc_origin IS NULL")
         conn.commit()
