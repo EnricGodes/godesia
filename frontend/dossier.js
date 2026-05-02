@@ -624,31 +624,50 @@ function renderPhotosGrid(photos) {
     renderBentoGrid(photos);
 }
 
-// Map tags to SVG icons
-// Map tags to icon SVG files in frontend/icons/
+// Map tags (bracket labels) or doc_type values to SVG icons and display labels
+const DOC_TYPE_META = {
+    // bracket tags (title-based, display as-is)
+    'Defunción':         { icon: '/icons/defuncion.svg' },
+    'Nacimiento':        { icon: '/icons/nacimiento.svg' },
+    'Bautismo':          { icon: '/icons/bautismo.svg' },
+    'Acta de Matrimonio':{ icon: '/icons/matrimonio.svg' },
+    'Matrimonio':        { icon: '/icons/matrimonio.svg' },
+    'Certificado':       { icon: '/icons/documentacion.svg' },
+    'Certificado Militar':{ icon: '/icons/militar.svg' },
+    'Militar':           { icon: '/icons/militar.svg' },
+    'Fotografia':        { icon: '/icons/foto.svg' },
+    'Foto':              { icon: '/icons/foto.svg' },
+    'Biografia':         { icon: '/icons/biografia.svg' },
+    'Acta':              { icon: '/icons/carta.svg' },
+    'Carta':             { icon: '/icons/carta.svg' },
+    'Cementerio':        { icon: '/icons/cementerio.svg' },
+    'Documentación':     { icon: '/icons/documentacion.svg' },
+    'Obituario':         { icon: '/icons/obituario.svg' },
+    'Padrón':            { icon: '/icons/padron.svg' },
+    'Diversos':          { icon: '/icons/diversos.svg' },
+    // doc_type values (DB, lowercase catalan) → label + icon
+    'bautisme':    { label: 'Bautismos',             icon: '/icons/bautismo.svg' },
+    'matrimoni':   { label: 'Matrimonios',            icon: '/icons/matrimonio.svg' },
+    'defuncio':    { label: 'Defunciones',            icon: '/icons/defuncion.svg' },
+    'naixement':   { label: 'Nacimientos',            icon: '/icons/nacimiento.svg' },
+    'certificat':  { label: 'Certificados',           icon: '/icons/documentacion.svg' },
+    'padro':       { label: 'Padrones',               icon: '/icons/padron.svg' },
+    'testament':   { label: 'Testamentos',            icon: '/icons/carta.svg' },
+    'arbre':       { label: 'Árboles Genealógicos',   icon: '/icons/carta.svg' },
+    'transcripcio':{ label: 'Transcripciones',        icon: '/icons/documentacion.svg' },
+    'poema':       { label: 'Poemas',                 icon: '/icons/documentacion.svg' },
+    'invitacio':   { label: 'Invitaciones',           icon: '/icons/documentacion.svg' },
+    'carta':       { label: 'Cartas',                 icon: '/icons/carta.svg' },
+    'dibuix':      { label: 'Dibujos y Planos',       icon: '/icons/documentacion.svg' },
+    'biografia':   { label: 'Biografías',             icon: '/icons/biografia.svg' },
+    'document':    { label: 'Documentos',             icon: '/icons/documentacion.svg' },
+};
+
 function getIconForTag(tag) {
-    const iconMap = {
-        'Defunción': '/icons/defuncion.svg',
-        'Nacimiento': '/icons/nacimiento.svg',
-        'Bautismo': '/icons/bautismo.svg',
-        'Acta de Matrimonio': '/icons/matrimonio.svg',
-        'Matrimonio': '/icons/matrimonio.svg',
-        'Certificado': '/icons/documentacion.svg',
-        'Certificado Militar': '/icons/militar.svg',
-        'Militar': '/icons/militar.svg',
-        'Fotografia': '/icons/foto.svg',
-        'Foto': '/icons/foto.svg',
-        'Biografia': '/icons/biografia.svg',
-        'Acta': '/icons/carta.svg',
-        'Carta': '/icons/carta.svg',
-        'Cementerio': '/icons/cementerio.svg',
-        'Documentación': '/icons/documentacion.svg',
-        'Obituario': '/icons/obituario.svg',
-        'Padrón': '/icons/padron.svg',
-        'Diversos': '/icons/diversos.svg',
-    };
-    return iconMap[tag] || '/icons/documentacion.svg';
+    return (DOC_TYPE_META[tag] || {}).icon || '/icons/documentacion.svg';
 }
+
+window.docTypeMeta = DOC_TYPE_META;
 
 function renderDocuments(data) {
     if (!data.documents || data.documents.length === 0) {
@@ -658,24 +677,26 @@ function renderDocuments(data) {
 
     document.getElementById('docs-section').style.display = 'block';
 
-    // Create grid of all documents with icons
     const documentCards = data.documents.map(doc => {
-        const iconPath = getIconForTag(doc.tag);
+        const label = doc.tag || (DOC_TYPE_META[doc.doc_type] || {}).label || 'Document';
+        const iconPath = getIconForTag(doc.tag) !== '/icons/documentacion.svg'
+            ? getIconForTag(doc.tag)
+            : getIconForTag(doc.doc_type);
         return `
-            <a href="/photos/${doc.filename}" target="_blank"
+            <div onclick="openPhotoModal(${doc.id})"
                class="border border-outline-variant/20 rounded-xl p-6 hover:shadow-md hover:border-primary/30 transition-all duration-200 group cursor-pointer">
                 <div class="flex items-start gap-4">
                     <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                        <img src="${iconPath}" alt="${doc.tag}" class="w-8 h-8" style="filter: drop-shadow(0 0 0); opacity: 1;">
+                        <img src="${iconPath}" alt="${label}" class="w-8 h-8" style="filter: drop-shadow(0 0 0); opacity: 1;">
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h4 class="font-bold text-sm text-on-surface mb-1 group-hover:text-primary transition-colors">${doc.tag}</h4>
-                        <p class="text-xs text-outline-variant truncate">${doc.title_clean}</p>
+                        <h4 class="font-bold text-sm text-on-surface mb-1 group-hover:text-primary transition-colors">${label}</h4>
+                        <p class="text-xs text-outline-variant truncate">${doc.title_clean || ''}</p>
                         ${doc.date ? `<p class="text-xs text-outline mt-2 font-medium">${doc.date}</p>` : ''}
                         ${doc.place ? `<p class="text-xs text-outline-variant mt-1">${doc.place}</p>` : ''}
                     </div>
                 </div>
-            </a>
+            </div>
         `;
     }).join('');
 

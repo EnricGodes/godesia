@@ -6,6 +6,24 @@
 let _currentPhotoData = null;
 let _sidebarVisible = true;
 
+const _DOC_TYPE_META = {
+    'bautisme':    { label: 'Bautismos',           icon: '/icons/bautismo.svg' },
+    'matrimoni':   { label: 'Matrimonios',          icon: '/icons/matrimonio.svg' },
+    'defuncio':    { label: 'Defunciones',          icon: '/icons/defuncion.svg' },
+    'naixement':   { label: 'Nacimientos',          icon: '/icons/nacimiento.svg' },
+    'certificat':  { label: 'Certificados',         icon: '/icons/documentacion.svg' },
+    'padro':       { label: 'Padrones',             icon: '/icons/padron.svg' },
+    'testament':   { label: 'Testamentos',          icon: '/icons/carta.svg' },
+    'arbre':       { label: 'Árboles Genealógicos', icon: '/icons/carta.svg' },
+    'transcripcio':{ label: 'Transcripciones',      icon: '/icons/documentacion.svg' },
+    'poema':       { label: 'Poemas',               icon: '/icons/documentacion.svg' },
+    'invitacio':   { label: 'Invitaciones',         icon: '/icons/documentacion.svg' },
+    'carta':       { label: 'Cartas',               icon: '/icons/carta.svg' },
+    'dibuix':      { label: 'Dibujos y Planos',     icon: '/icons/documentacion.svg' },
+    'biografia':   { label: 'Biografías',           icon: '/icons/biografia.svg' },
+    'document':    { label: 'Documentos',           icon: '/icons/documentacion.svg' },
+};
+
 function escHtml(s) {
     return String(s ?? '')
         .replace(/&/g, '&amp;')
@@ -207,13 +225,30 @@ function renderPhotoModal() {
            </div>`
         : '';
 
-    // Álbum
-    const albumHtml = p.album_title
+    // Álbums: MH album + virtual doc-type album
+    const albumItems = [];
+    if (p.album_title) {
+        albumItems.push(
+            `<a href="/albums.html#${p.album_id}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#2D4B33;font-weight:600;text-decoration:none;"
+                onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+               <span class="material-symbols-outlined" style="font-size:16px;color:#727971;">photo_album</span>
+               ${p.album_title}
+             </a>`
+        );
+    }
+    if (p.is_document && p.doc_type) {
+        const meta = _DOC_TYPE_META[p.doc_type] || (window.docTypeMeta || {})[p.doc_type] || { label: 'Documentos', icon: '/icons/documentacion.svg' };
+        albumItems.push(
+            `<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#2D4B33;font-weight:600;">
+               <img src="${meta.icon}" style="width:16px;height:16px;flex-shrink:0;" alt="">
+               ${meta.label}
+             </div>`
+        );
+    }
+    const albumHtml = albumItems.length
         ? `<div style="margin-bottom: 28px;">
-             <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">Álbum</h3>
-             <a href="/albums.html#${p.album_id}" style="font-size: 13px; color: #2D4B33; font-weight: 600; text-decoration: none;"
-                onmouseover="this.style.textDecoration='underline'"
-                onmouseout="this.style.textDecoration='none'">${p.album_title}</a>
+             <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">Álbums</h3>
+             <div style="display:flex;flex-direction:column;gap:8px;">${albumItems.join('')}</div>
            </div>`
         : '';
 

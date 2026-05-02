@@ -1259,27 +1259,26 @@ def get_person_dossier(conn, person_id):
     # Get nickname from people table (imported from GEDCOM NICK/_AKA fields)
     nickname = person_dict.get('nickname')
 
-    # Documents (fotos con título que contiene tags entre corchetes: [Defunción], [Nacimiento], etc.)
+    # Documents (fotos marcades is_document=1, vinculades a la persona)
     documents = conn.execute("""
-        SELECT ph.id, ph.filename, ph.title, ph.date, ph.place
+        SELECT ph.id, ph.filename, ph.title, ph.date, ph.place, ph.doc_type
         FROM photos ph
         JOIN photo_tags pt ON pt.photo_id = ph.id
-        WHERE pt.person_id = ? AND ph.title IS NOT NULL AND ph.title LIKE '%[%]%'
+        WHERE pt.person_id = ? AND ph.is_document = 1 AND ph.filename NOT LIKE '%.pdf'
         ORDER BY ph.date, ph.id
     """, (person_id,)).fetchall()
+    import re as _re
     documents_list = []
     for doc in documents:
         doc_dict = dict(doc)
-        # Extract tag from title: "Title here [Tag]" -> tag = "Tag", title = "Title here"
-        if '[' in doc_dict['title']:
-            import re
-            match = re.search(r'\[([^\]]+)\]$', doc_dict['title'])
-            if match:
-                doc_dict['tag'] = match.group(1)
-                doc_dict['title_clean'] = doc_dict['title'][:match.start()].strip()
-            else:
-                doc_dict['tag'] = ''
-                doc_dict['title_clean'] = doc_dict['title']
+        title = doc_dict.get('title') or ''
+        bracket_match = _re.search(r'\[([^\]]+)\]', title)
+        if bracket_match:
+            doc_dict['tag'] = bracket_match.group(1)
+            doc_dict['title_clean'] = _re.sub(r'\s*\[[^\]]+\]\s*', '', title).strip()
+        else:
+            doc_dict['tag'] = ''
+            doc_dict['title_clean'] = title
         documents_list.append(doc_dict)
 
     # Photos (all, no limit, excluding documents) — include id (for sorting), date fields, and position for face detection
@@ -1288,7 +1287,7 @@ def get_person_dossier(conn, person_id):
         SELECT ph.id, ph.filename, ph.title, ph.date, ph.place, pt.position
         FROM photos ph
         JOIN photo_tags pt ON pt.photo_id = ph.id
-        WHERE pt.person_id = ? AND ph.filename NOT LIKE '%.pdf' AND (ph.title IS NULL OR ph.title NOT LIKE '%[%]%')
+        WHERE pt.person_id = ? AND ph.filename NOT LIKE '%.pdf' AND ph.is_document = 0
         ORDER BY ph.date DESC
     """, (person_id,)).fetchall()
     photos_list = [dict(p) for p in photos]
@@ -1329,7 +1328,7 @@ def get_documents(conn, limit=1):
 def get_photo_details(conn, photo_id):
     """Return complete details for a photo including tagged people, notes, and album."""
     photo = conn.execute("""
-        SELECT id, filename, title, date, place, album_id, note
+        SELECT id, filename, title, date, place, album_id, note, is_document, doc_type
         FROM photos
         WHERE id = ?
     """, (photo_id,)).fetchone()
