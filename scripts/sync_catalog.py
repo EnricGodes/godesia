@@ -54,13 +54,20 @@ DOC_TYPES = [
 ]
 
 def classify_document(title):
-    """Returns (is_document, doc_type) based on title patterns."""
+    """Returns (is_document, doc_type) based on bracket tags in the title.
+    Only text inside [...] brackets is used to classify — never free-text keywords.
+    """
     if not title:
         return 0, None
+    brackets = re.findall(r'\[([^\]]+)\]', title)
+    if not brackets:
+        return 0, None
+    bracket_text = ' '.join(brackets)
     for doc_type, pattern in DOC_TYPES:
-        if re.search(pattern, title, re.IGNORECASE):
+        if re.search(pattern, bracket_text, re.IGNORECASE):
             return 1, doc_type
-    return 0, None
+    # Has brackets but type not recognized — still a document
+    return 1, 'document'
 
 
 def strip_html(text):
