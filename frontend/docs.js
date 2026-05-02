@@ -2,10 +2,12 @@
 
 const STATE = {
     docTypes: [],
+    docAlbums: [],
     allPeople: [],
     filteredPeople: [],
 
     activeDocType: '__all__',
+    activeAlbumId: null,
     activePersonId: null,
     searchQuery: '',
     sortBy: 'date',
@@ -28,36 +30,40 @@ const BENTO_PATTERN = [
 ];
 
 const DOC_TYPE_ICONS = {
-    'bautisme':     'church',
-    'matrimoni':    'favorite',
-    'defuncio':     'local_florist',
-    'naixement':    'child_care',
-    'certificat':   'workspace_premium',
-    'padro':        'home_pin',
-    'testament':    'history_edu',
-    'arbre':        'account_tree',
-    'transcripcio': 'text_snippet',
-    'poema':        'auto_stories',
-    'invitacio':    'mail',
-    'carta':        'mail',
-    'dibuix':       'draw',
-    'biografia':    'person',
-    'document':     'description',
+    'bautisme':        '/icons/bautismo.svg',
+    'matrimoni':       '/icons/matrimonio.svg',
+    'defuncio':        '/icons/defuncion.svg',
+    'naixement':       '/icons/nacimiento.svg',
+    'certificat':      '/icons/documentacion.svg',
+    'padro':           '/icons/padron.svg',
+    'testament':       '/icons/carta.svg',
+    'arbre':           '/icons/documentacion.svg',
+    'transcripcio':    '/icons/documentacion.svg',
+    'poema':           '/icons/documentacion.svg',
+    'invitacio':       '/icons/documentacion.svg',
+    'carta':           '/icons/carta.svg',
+    'dibuix':          '/icons/documentacion.svg',
+    'biografia':       '/icons/biografia.svg',
+    'document':        '/icons/documentacion.svg',
+    '__unclassified__':'/icons/diversos.svg',
 };
 
 // ─── Init ────────────────────────────────────────────────────────────────────
 
 async function init() {
-    const [typesRes, peopleRes] = await Promise.all([
+    const [typesRes, peopleRes, albumsRes] = await Promise.all([
         fetch('/api/documents').then(r => r.json()),
         fetch('/api/documents/people').then(r => r.json()),
+        fetch('/api/documents/albums').then(r => r.json()),
     ]);
 
     STATE.docTypes = typesRes.types || [];
+    STATE.docAlbums = albumsRes.albums || [];
     STATE.allPeople = peopleRes.people || [];
     STATE.filteredPeople = STATE.allPeople.slice();
 
     renderSidebarTypes();
+    renderSidebarDocAlbums();
     renderSidebarPeople(STATE.allPeople);
     setupPersonSearch();
     setupInfiniteScroll();
@@ -118,6 +124,7 @@ async function fetchPhotos(append = false) {
     });
     if (STATE.searchQuery) params.set('q', STATE.searchQuery);
     if (STATE.activePersonId) params.set('person_id', STATE.activePersonId);
+    if (STATE.activeAlbumId) params.set('album_id', STATE.activeAlbumId);
 
     try {
         const data = await fetch(`/api/documents/photos?${params}`).then(r => r.json());
@@ -258,18 +265,54 @@ function renderSidebarTypes() {
     const nav = document.getElementById('sidebar-type-list');
 
     nav.innerHTML = STATE.docTypes.map(t => {
-        const icon = t.type === '__all__' ? 'folder_open' : (DOC_TYPE_ICONS[t.type] || 'description');
+        const iconSrc = t.type === '__all__' ? null : (DOC_TYPE_ICONS[t.type] || '/icons/documentacion.svg');
         const isActive = t.type === STATE.activeDocType;
+        const iconHtml = iconSrc
+            ? `<img src="${iconSrc}" style="width:16px;height:16px;flex-shrink:0;opacity:0.6;" alt="">`
+            : `<span class="material-symbols-outlined text-sm text-outline">folder_open</span>`;
         return `
         <a class="sidebar-type-link ${isActive ? 'active' : ''}" data-type="${t.type}"
            onclick="selectDocType('${t.type}')">
             <span class="flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-sm text-outline">${icon}</span>
+                ${iconHtml}
                 <span class="truncate${t.type === '__all__' ? ' font-semibold' : ''}">${t.label}</span>
             </span>
             <span class="text-[10px] text-outline shrink-0 ml-1">${t.count}</span>
         </a>`;
     }).join('');
+}
+
+function renderSidebarDocAlbums() {
+    const container = document.getElementById('sidebar-album-section');
+    if (!container) return;
+    if (STATE.docAlbums.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+    container.classList.remove('hidden');
+    const list = document.getElementById('sidebar-album-list');
+    list.innerHTML = STATE.docAlbums.map(a => {
+        const isActive = STATE.activeAlbumId === a.id;
+        return `
+        <a class="sidebar-type-link ${isActive ? 'active' : ''}" data-album-id="${a.id}"
+           onclick="selectDocAlbum('${a.id}')">
+            <span class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-outline">photo_library</span>
+                <span class="truncate">${a.title}</span>
+            </span>
+            <span class="text-[10px] text-outline shrink-0 ml-1">${a.count}</span>
+        </a>`;
+    }).join('');
+}
+
+function selectDocAlbum(albumId) {
+    STATE.activeAlbumId = STATE.activeAlbumId === albumId ? null : albumId;
+    document.querySelectorAll('[data-album-id]').forEach(el => {
+        el.classList.toggle('active', el.dataset.albumId === STATE.activeAlbumId);
+    });
+    STATE.page = 1;
+    STATE.photos = [];
+    fetchPhotos(false);
 }
 
 function renderSidebarPeople(people) {

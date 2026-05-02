@@ -527,6 +527,22 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
+    // Actualiza el menú Documentos dinámicamente según los tipos reales con fotos
+    fetch('/api/documents').then(r => r.json()).then(data => {
+      const menu = document.getElementById('gn-menu-documentos');
+      if (!menu || !data.types) return;
+      const items = data.types.filter(t => t.type !== '__all__');
+      if (!items.length) return;
+      const links = [
+        `<a href="/docs.html" style="display:block;padding:8px 16px;font-size:13px;color:#1c1c17;text-decoration:none;white-space:nowrap;" onmouseover="this.style.background='#f1eee5'" onmouseout="this.style.background=''">Todos los documentos</a>`,
+        `<div style="border-top:1px solid #e5e2da;margin:4px 0;"></div>`,
+        ...items.map(t =>
+          `<a href="/docs.html#${t.type}" style="display:block;padding:8px 16px;font-size:13px;color:#1c1c17;text-decoration:none;white-space:nowrap;" onmouseover="this.style.background='#f1eee5'" onmouseout="this.style.background=''">${t.label}</a>`
+        )
+      ].join('');
+      menu.innerHTML = `<div style="padding:4px 0;">${links}</div>`;
+    }).catch(() => {});
+
     init();
   }
 }());

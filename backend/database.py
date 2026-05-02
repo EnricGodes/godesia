@@ -1750,17 +1750,33 @@ def get_document_types(conn):
     types = [{"type": "__all__", "label": "Todos los documentos", "count": total, "cover": total_cover}]
     for r in rows:
         dt = r["doc_type"]
+        type_key = dt if dt else "__unclassified__"
         types.append({
-            "type": dt,
-            "label": _DOC_TYPE_LABELS.get(dt, dt or "Sin clasificar") if dt else "Sin clasificar",
+            "type": type_key,
+            "label": _DOC_TYPE_LABELS.get(dt, "Diversos") if dt else "Diversos",
             "count": r["count"],
             "cover": r["cover"],
         })
     return {"types": types}
 
 
-def get_document_photos(conn, doc_type="__all__", q="", sort="date", person_id="", page=1, limit=50):
-    """Return paginated documents (is_document=1) optionally filtered by doc_type."""
+def get_document_albums(conn):
+    """Return albums that have at least one document, with count and cover."""
+    rows = conn.execute("""
+        SELECT a.gedcom_id as id, a.title,
+               COUNT(DISTINCT ph.id) as count,
+               MIN(ph.filename) as cover
+        FROM albums a
+        JOIN photos ph ON ph.album_id = a.gedcom_id
+        WHERE ph.is_document = 1 AND ph.filename NOT LIKE '%.pdf' AND ph.is_cutout = 0
+        GROUP BY a.gedcom_id
+        ORDER BY count DESC
+    """).fetchall()
+    return {"albums": [dict(r) for r in rows]}
+
+
+def get_document_photos(conn, doc_type="__all__", q="", sort="date", person_id="", album_id="", page=1, limit=50):
+    """Return paginated documents (is_document=1) optionally filtered by doc_type and/or album."""
     import re as _re
 
     def _extract_year(d):
@@ -1778,6 +1794,10 @@ def get_document_photos(conn, doc_type="__all__", q="", sort="date", person_id="
         else:
             where.append("ph.doc_type = ?")
             params.append(doc_type)
+
+    if album_id:
+        where.append("ph.album_id = ?")
+        params.append(album_id)
 
     if person_id:
         where.append("ph.id IN (SELECT photo_id FROM photo_tags WHERE person_id = ?)")

@@ -236,13 +236,14 @@ function renderPhotoModal() {
              </a>`
         );
     }
-    if (p.is_document && p.doc_type) {
-        const meta = _DOC_TYPE_META[p.doc_type] || (window.docTypeMeta || {})[p.doc_type] || { label: 'Documentos', icon: '/icons/documentacion.svg' };
+    if (p.is_document) {
+        const meta = _DOC_TYPE_META[p.doc_type] || { label: 'Diversos', icon: '/icons/diversos.svg' };
         albumItems.push(
-            `<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#2D4B33;font-weight:600;">
+            `<a href="/docs.html#${p.doc_type || '__unclassified__'}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#2D4B33;font-weight:600;text-decoration:none;"
+                onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
                <img src="${meta.icon}" style="width:16px;height:16px;flex-shrink:0;" alt="">
                ${meta.label}
-             </div>`
+             </a>`
         );
     }
     const albumHtml = albumItems.length

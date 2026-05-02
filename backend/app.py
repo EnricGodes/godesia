@@ -19,7 +19,7 @@ from database import (
     get_dashboard_data, get_documents, get_person_dossier, convert_date_to_spanish,
     update_all_photo_files, update_all_city_fields, get_photo_details,
     get_albums_list, get_album_photos, get_photos_people_list,
-    get_document_types, get_document_photos, get_documents_people_list,
+    get_document_types, get_document_photos, get_document_albums, get_documents_people_list,
     get_setting, set_setting,
 )
 from query_router import QueryRouter
@@ -413,12 +413,20 @@ async def documents_people():
     return get_documents_people_list(db_conn)
 
 
+@app.get("/api/documents/albums")
+async def documents_albums():
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    return get_document_albums(db_conn)
+
+
 @app.get("/api/documents/photos")
 async def documents_photos(
     doc_type: str = Query("__all__"),
     q: str = Query(""),
     sort: str = Query("date"),
     person_id: str = Query(""),
+    album_id: str = Query(""),
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=200),
 ):
@@ -427,7 +435,7 @@ async def documents_photos(
     if person_id and not person_id.startswith("@"):
         person_id = f"@{person_id}@"
     return get_document_photos(db_conn, doc_type=doc_type, q=q, sort=sort,
-                               person_id=person_id, page=page, limit=limit)
+                               person_id=person_id, album_id=album_id, page=page, limit=limit)
 
 
 # ---------------------------------------------------------------------------
