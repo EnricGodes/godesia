@@ -569,8 +569,10 @@ async def pending_photos():
             h = _extract_hash(fn)
             if h and h in known_hashes:
                 continue
-            # Skip cutouts (face crops) - only want full photos/documents
-            if photo.get("is_cutout") and not photo.get("is_parent_photo"):
+            # Skip face/portrait cutouts — only want full photos and documents
+            if photo.get("is_cutout"):
+                continue
+            if photo.get("is_prim_cutout") and not photo.get("is_parent_photo"):
                 continue
             pending.append({
                 "filename": fn,
@@ -596,13 +598,14 @@ async def download_photo(body: DownloadPhotoRequest):
 
     if dest.exists():
         status = "skipped_exists"
+        raw_data = dest.read_bytes()
     else:
         # Download
         try:
             req = urllib.request.Request(body.url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=30) as resp:
-                data = resp.read()
-            dest.write_bytes(data)
+                raw_data = resp.read()
+            dest.write_bytes(raw_data)
             status = "downloaded"
         except urllib.error.HTTPError as e:
             if e.code in (401, 403):
@@ -610,6 +613,35 @@ async def download_photo(body: DownloadPhotoRequest):
             raise HTTPException(502, f"Error HTTP {e.code} en descarregar {body.filename}")
         except Exception as exc:
             raise HTTPException(502, f"Error de xarxa: {exc}")
+
+    # Save human-readable copy to docs/fotos-palazuelos/
+    try:
+        legible_dir = _base_dir / "docs" / "fotos-palazuelos"
+        legible_dir.mkdir(exist_ok=True)
+        # Extract year from title (first 4-digit number)
+        year_m = re.search(r'\b(1[6-9]\d{2}|20\d{2})\b', body.title or "")
+        year_str = year_m.group(1) if year_m else "0000"
+        # Person name: look up godes person name
+        person_name = ""
+        try:
+            row = _db_conn.execute("SELECT name FROM people WHERE id=?", (body.godes_person_id,)).fetchone()
+            if row:
+                person_name = (row[0] or "").strip().replace("/", "-").replace("\\", "-")
+        except Exception:
+            pass
+        suffix = body.filename.rsplit(".", 1)[-1].lower()
+        legible_name = f"{year_str}-{person_name}.{suffix}" if person_name else f"{year_str}-{body.filename}"
+        legible_dest = legible_dir / legible_name
+        # Avoid clobbering if multiple photos with same year+name
+        if legible_dest.exists():
+            stem = legible_dest.stem
+            i = 2
+            while legible_dest.exists():
+                legible_dest = legible_dir / f"{stem}-{i}.{suffix}"
+                i += 1
+        legible_dest.write_bytes(raw_data)
+    except Exception:
+        pass  # legible copy is best-effort, don't fail the main download
 
     # Infer document classification from title
     is_document = body.is_document

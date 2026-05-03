@@ -628,19 +628,15 @@
 
             <!-- Map table -->
             <div id="palaz-map-section" style="display:none;">
-                <div class="toolbar" style="margin-bottom:.5rem;">
-                    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
-                        <select id="palaz-filter-status" class="form-select" style="font-size:.8rem;padding:.3rem .6rem;"
-                                onchange="Palazuelos.filterMap()">
-                            <option value="">Tots</option>
-                            <option value="confirmed">Confirmats (≥80)</option>
-                            <option value="review">Revisió (40-79)</option>
-                            <option value="nomatch">Sense match</option>
-                        </select>
+                <div class="toolbar" style="margin-bottom:.5rem;flex-wrap:wrap;gap:.5rem;">
+                    <div style="display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;">
+                        <button id="palaz-btn-tots" class="btn btn-primary btn-sm" onclick="Palazuelos.setFilter('')">Tots <span id="palaz-cnt-tots">0</span></button>
+                        <button id="palaz-btn-confirmed" class="btn btn-secondary btn-sm" onclick="Palazuelos.setFilter('confirmed')">Confirmats <span id="palaz-cnt-confirmed">0</span></button>
+                        <button id="palaz-btn-review" class="btn btn-secondary btn-sm" onclick="Palazuelos.setFilter('review')">Revisió <span id="palaz-cnt-review">0</span></button>
+                        <button id="palaz-btn-nomatch" class="btn btn-secondary btn-sm" onclick="Palazuelos.setFilter('nomatch')">Sense match <span id="palaz-cnt-nomatch">0</span></button>
                         <input id="palaz-filter-q" type="text" placeholder="Filtrar per nom..."
-                               style="font-size:.8rem;padding:.3rem .6rem;border:1px solid #c2c8bf;border-radius:4px;width:180px;"
+                               style="font-size:.8rem;padding:.3rem .6rem;border:1px solid #c2c8bf;border-radius:4px;width:160px;margin-left:.35rem;"
                                oninput="Palazuelos.filterMap()"/>
-                        <span id="palaz-map-count" style="font-size:.8rem;color:#727971;"></span>
                     </div>
                     <div class="toolbar-right">
                         <button class="btn btn-secondary btn-sm" onclick="Palazuelos.loadMap()">↻ Actualitzar</button>
@@ -656,7 +652,7 @@
                             <th style="width:60px;">Conf.</th>
                             <th style="width:90px;">Estat</th>
                             <th style="width:200px;">Correcció manual</th>
-                            <th style="width:80px;"></th>
+                            <th style="width:110px;"></th>
                         </tr>
                     </thead>
                     <tbody id="palaz-map-body"></tbody>
