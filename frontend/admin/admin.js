@@ -56,7 +56,7 @@ document.addEventListener('keydown', e => {
 // Navigation
 // ---------------------------------------------------------------------------
 
-const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'config', 'comparador', 'classifier'];
+const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'config', 'comparador', 'classifier', 'palazuelos'];
 const initialized = {};
 
 function showSection(name) {
@@ -73,8 +73,9 @@ function showSection(name) {
                        queries: Queries, geocoder: Geocoder, anecdotes: Anecdotes,
                        minibios: Minibios, tests: Tests,
                        config: Config, comparador: Comparador,
-                       classifier: DocClassifier }[name];
+                       classifier: DocClassifier, palazuelos: Palazuelos }[name];
         if (ctrl?.init) ctrl.init();
+        else if (ctrl?.onActivate) ctrl.onActivate();
     }
 }
 
@@ -1824,3 +1825,320 @@ const DocClassifier = {
     `;
     document.head.appendChild(style);
 }());
+
+// ---------------------------------------------------------------------------
+// Palazuelos sync module
+// ---------------------------------------------------------------------------
+
+const Palazuelos = (() => {
+    let _mapData = [];       // full map from server
+    let _pendingPhotos = []; // photos to download
+    let _pollTimer = null;
+
+    // ── Build map ────────────────────────────────────────────────────────────
+
+    async function buildMap() {
+        document.getElementById('btn-build-map').disabled = true;
+        document.getElementById('palaz-build-status').textContent = 'Iniciant…';
+        document.getElementById('palaz-build-progress').style.display = '';
+        document.getElementById('palaz-build-log').textContent = '';
+
+        try {
+            await apiFetch('/api/admin/palazuelos/build-map', { method: 'POST' });
+            _pollBuild();
+        } catch (e) {
+            document.getElementById('palaz-build-status').textContent = `Error: ${e.message}`;
+            document.getElementById('btn-build-map').disabled = false;
+        }
+    }
+
+    function _pollBuild() {
+        _pollTimer = setInterval(async () => {
+            try {
+                const d = await apiFetch('/api/admin/palazuelos/build-map/status');
+                const bar = document.getElementById('palaz-progress-bar');
+                const pct = d.total > 0 ? Math.round(d.progress / d.total * 100) : 0;
+                bar.style.width = pct + '%';
+                document.getElementById('palaz-build-log').textContent = d.log.join('\n');
+                document.getElementById('palaz-build-status').textContent =
+                    d.status === 'running' ? `${d.progress}/${d.total} persones…` :
+                    d.status === 'done' ? `Fet — ${d.result?.matched_auto ?? 0} auto, ${d.result?.needs_review ?? 0} revisió, ${d.result?.no_match ?? 0} sense match` :
+                    d.status === 'error' ? 'Error (veure log)' : d.status;
+
+                if (d.status !== 'running') {
+                    clearInterval(_pollTimer);
+                    _pollTimer = null;
+                    document.getElementById('btn-build-map').disabled = false;
+                    if (d.status === 'done') loadMap();
+                }
+            } catch (e) {
+                clearInterval(_pollTimer);
+                _pollTimer = null;
+                document.getElementById('btn-build-map').disabled = false;
+            }
+        }, 800);
+    }
+
+    // ── Map table ─────────────────────────────────────────────────────────────
+
+    async function loadMap() {
+        try {
+            const d = await apiFetch('/api/admin/palazuelos/map');
+            _mapData = d.entries || [];
+            document.getElementById('palaz-map-section').style.display = '';
+            renderMap(_mapData);
+            const badge = document.getElementById('badge-palazuelos');
+            const needsReview = _mapData.filter(e => !e.palaz_id || (e.confidence < 80 && e.match_type !== 'manual')).length;
+            if (badge) badge.textContent = needsReview > 0 ? needsReview : '';
+        } catch (e) {
+            console.error('loadMap:', e);
+        }
+    }
+
+    function filterMap() {
+        const sf = document.getElementById('palaz-filter-status').value;
+        const q = (document.getElementById('palaz-filter-q').value || '').toLowerCase();
+        const filtered = _mapData.filter(e => {
+            if (sf === 'confirmed' && (e.confidence < 80 || !e.palaz_id)) return false;
+            if (sf === 'review' && (e.confidence >= 80 || !e.palaz_id || e.match_type === 'manual')) return false;
+            if (sf === 'nomatch' && e.palaz_id) return false;
+            if (q && !((e.godes_name || '').toLowerCase().includes(q)) &&
+                     !((e.palaz_name || '').toLowerCase().includes(q))) return false;
+            return true;
+        });
+        renderMap(filtered);
+    }
+
+    function _statusBadge(e) {
+        if (e.match_type === 'rejected') return '<span class="badge" style="background:#d32f2f;">Rebutjat</span>';
+        if (e.match_type === 'manual') return '<span class="badge" style="background:#1565c0;">Manual</span>';
+        if (!e.palaz_id) return '<span class="badge" style="background:#9e9b94;">Sense match</span>';
+        if (e.confidence >= 80) return `<span class="badge" style="background:#2d4b33;">Auto</span>`;
+        return `<span class="badge" style="background:#e65100;">Revisió</span>`;
+    }
+
+    function renderMap(entries) {
+        const tbody = document.getElementById('palaz-map-body');
+        document.getElementById('palaz-map-count').textContent = `${entries.length} entrades`;
+
+        if (!entries.length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9e9b94;padding:2rem;">Cap entrada</td></tr>';
+            return;
+        }
+
+        const rows = entries.map(e => {
+            const rowBg = !e.palaz_id ? '#fff8f6' :
+                          e.match_type === 'rejected' ? '#fef0f0' :
+                          e.confidence >= 80 ? '' : '#fffde7';
+            const years = [e.birth_year, e.death_year].filter(Boolean).join('–') || '—';
+            return `<tr style="background:${rowBg};" data-godes-id="${esc(e.godes_id)}">
+                <td><strong>${esc(e.godes_name)}</strong><br><small style="color:#9e9b94;">${esc(e.godes_id)}</small></td>
+                <td style="font-size:.8rem;color:#727971;">${esc(years)}</td>
+                <td>${e.palaz_id ? `<strong>${esc(e.palaz_name)}</strong><br><small style="color:#9e9b94;">${esc(e.palaz_id)}</small>` : '<span style="color:#bbb;">—</span>'}</td>
+                <td style="font-weight:700;color:${e.confidence >= 80 ? '#2d4b33' : e.confidence >= 50 ? '#e65100' : '#d32f2f'};">${e.confidence || 0}</td>
+                <td>${_statusBadge(e)}</td>
+                <td>
+                    <div style="position:relative;">
+                        <input type="text" class="palaz-typeahead-input" placeholder="Cercar a Palazuelos…"
+                               style="width:100%;font-size:.75rem;padding:.25rem .4rem;border:1px solid #c2c8bf;border-radius:4px;"
+                               data-godes-id="${esc(e.godes_id)}"
+                               oninput="Palazuelos.onTypeahead(this)"
+                               onblur="Palazuelos.hideDropdown(this)"/>
+                        <div class="palaz-typeahead-dropdown" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #c2c8bf;border-radius:4px;z-index:100;max-height:160px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1);"></div>
+                    </div>
+                </td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" onclick="Palazuelos.rejectMatch('${esc(e.godes_id)}')" title="Marcar com a rebutjat">✕</button>
+                </td>
+            </tr>`;
+        }).join('');
+
+        tbody.innerHTML = rows;
+    }
+
+    // ── Typeahead ─────────────────────────────────────────────────────────────
+
+    let _taTimer = null;
+
+    async function onTypeahead(input) {
+        clearTimeout(_taTimer);
+        const q = input.value.trim();
+        const dropdown = input.nextElementSibling;
+        if (q.length < 2) { dropdown.style.display = 'none'; return; }
+
+        _taTimer = setTimeout(async () => {
+            try {
+                const d = await apiFetch(`/api/admin/palazuelos/candidates?q=${encodeURIComponent(q)}&limit=10`);
+                const cands = d.candidates || [];
+                if (!cands.length) { dropdown.style.display = 'none'; return; }
+                dropdown.innerHTML = cands.map(c => {
+                    const years = [c.birth_year, c.death_year].filter(Boolean).join('–') || '';
+                    return `<div class="palaz-ta-item" style="padding:.35rem .6rem;cursor:pointer;font-size:.76rem;border-bottom:1px solid #f1eee5;"
+                                 onmousedown="Palazuelos.selectCandidate(event, '${esc(input.dataset.godesId)}', '${esc(c.palaz_id)}', '${esc(c.name)}')"
+                                 onmouseover="this.style.background='#f1eee5'" onmouseout="this.style.background=''">
+                                <strong>${esc(c.name)}</strong>
+                                ${years ? `<span style="color:#9e9b94;margin-left:.5rem;">${esc(years)}</span>` : ''}
+                                <span style="color:#9e9b94;float:right;">${c.score}%</span>
+                            </div>`;
+                }).join('');
+                dropdown.style.display = '';
+            } catch (e) { dropdown.style.display = 'none'; }
+        }, 300);
+    }
+
+    function hideDropdown(input) {
+        setTimeout(() => {
+            const dropdown = input.nextElementSibling;
+            if (dropdown) dropdown.style.display = 'none';
+        }, 200);
+    }
+
+    async function selectCandidate(evt, godesId, palazId, palazName) {
+        evt.preventDefault();
+        try {
+            await apiFetch(`/api/admin/palazuelos/map/${encodeURIComponent(godesId)}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ palaz_id: palazId, palaz_name: palazName, match_type: 'manual', confidence: 100 }),
+            });
+            await loadMap();
+        } catch (e) {
+            alert('Error desant la correspondència: ' + e.message);
+        }
+    }
+
+    async function rejectMatch(godesId) {
+        try {
+            await apiFetch(`/api/admin/palazuelos/map/${encodeURIComponent(godesId)}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ palaz_id: null, palaz_name: null, match_type: 'rejected' }),
+            });
+            await loadMap();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+
+    // ── Pending photos ────────────────────────────────────────────────────────
+
+    async function loadPendingPhotos() {
+        document.getElementById('palaz-photos-loading').style.display = '';
+        document.getElementById('palaz-photos-empty').style.display = 'none';
+        document.getElementById('palaz-photos-list').innerHTML = '';
+        document.getElementById('btn-download-selected').style.display = 'none';
+        _pendingPhotos = [];
+
+        try {
+            const d = await apiFetch('/api/admin/palazuelos/pending-photos');
+            _pendingPhotos = d.photos || [];
+            document.getElementById('palaz-photos-loading').style.display = 'none';
+
+            if (!_pendingPhotos.length) {
+                document.getElementById('palaz-photos-empty').style.display = '';
+                return;
+            }
+
+            // Group by godes person
+            const byPerson = {};
+            for (const p of _pendingPhotos) {
+                const k = p.godes_person_id;
+                if (!byPerson[k]) byPerson[k] = { name: p.palaz_person_name || p.godes_person_id, photos: [] };
+                byPerson[k].photos.push(p);
+            }
+
+            let html = '';
+            for (const [gId, grp] of Object.entries(byPerson)) {
+                html += `<div style="margin-bottom:1.25rem;">
+                    <div style="font-weight:700;font-size:.85rem;margin-bottom:.5rem;color:#2d4b33;">
+                        ${esc(grp.name)} <span style="color:#9e9b94;font-weight:400;">(${esc(gId)})</span>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:.5rem;">`;
+                for (const ph of grp.photos) {
+                    const isPdf = ph.filename?.endsWith('.pdf');
+                    const thumb = isPdf ? '' : `<img src="${esc(ph.url)}" alt="" loading="lazy"
+                            style="width:80px;height:60px;object-fit:cover;border-radius:4px;display:block;margin-bottom:.25rem;"
+                            onerror="this.style.display='none'"/>`;
+                    html += `<label style="display:flex;flex-direction:column;align-items:center;cursor:pointer;padding:.4rem;border:1px solid #e5e2da;border-radius:6px;background:#fff;max-width:120px;font-size:.7rem;text-align:center;"
+                                    title="${esc(ph.filename)}">
+                                <input type="checkbox" class="palaz-photo-check" data-idx="${_pendingPhotos.indexOf(ph)}"
+                                       style="margin-bottom:.25rem;" onchange="Palazuelos.updateSelCount()"/>
+                                ${isPdf ? '<span style="font-size:2rem;">📄</span>' : thumb}
+                                <span style="color:#424842;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;">${esc(ph.title || ph.filename)}</span>
+                            </label>`;
+                }
+                html += `</div></div>`;
+            }
+
+            document.getElementById('palaz-photos-list').innerHTML = html;
+            document.getElementById('btn-download-selected').style.display = '';
+            updateSelCount();
+        } catch (e) {
+            document.getElementById('palaz-photos-loading').style.display = 'none';
+            alert('Error: ' + e.message);
+        }
+    }
+
+    function updateSelCount() {
+        const n = document.querySelectorAll('.palaz-photo-check:checked').length;
+        document.getElementById('palaz-sel-count').textContent = n || 'totes';
+        document.getElementById('btn-download-selected').style.display = _pendingPhotos.length ? '' : 'none';
+    }
+
+    async function downloadSelected() {
+        const checked = [...document.querySelectorAll('.palaz-photo-check:checked')];
+        const toDownload = checked.length
+            ? checked.map(cb => _pendingPhotos[parseInt(cb.dataset.idx)])
+            : _pendingPhotos;
+
+        if (!toDownload.length) { alert('No hi ha fotos seleccionades.'); return; }
+
+        const log = document.getElementById('palaz-download-log');
+        log.style.display = '';
+        log.textContent = '';
+        document.getElementById('btn-download-selected').disabled = true;
+
+        let ok = 0, err = 0;
+        for (const ph of toDownload) {
+            log.textContent += `Descarregant ${ph.filename}…\n`;
+            log.scrollTop = log.scrollHeight;
+            try {
+                const res = await apiFetch('/api/admin/palazuelos/download-photo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        photo_rin: ph.photo_rin || '',
+                        url: ph.url,
+                        filename: ph.filename,
+                        title: ph.title || '',
+                        palaz_person_id: ph.palaz_person_id,
+                        godes_person_id: ph.godes_person_id,
+                    }),
+                });
+                log.textContent += `  ✓ ${res.status} (photo_id: ${res.photo_id})\n`;
+                ok++;
+            } catch (e) {
+                log.textContent += `  ✗ Error: ${e.message}\n`;
+                err++;
+                if (e.message.includes('expirada')) {
+                    log.textContent += '  ⚠ Re-exporta el GEDCOM de Palazuelos a MyHeritage i torna a intentar-ho.\n';
+                    break;
+                }
+            }
+            log.scrollTop = log.scrollHeight;
+        }
+
+        log.textContent += `\nFet: ${ok} descarregades, ${err} errors.`;
+        document.getElementById('btn-download-selected').disabled = false;
+        if (ok > 0) loadPendingPhotos();
+    }
+
+    // ── Init (called when section becomes active) ─────────────────────────────
+
+    function onActivate() {
+        loadMap();
+    }
+
+    return { buildMap, loadMap, filterMap, onTypeahead, hideDropdown, selectCandidate,
+             rejectMatch, loadPendingPhotos, updateSelCount, downloadSelected, onActivate };
+})();

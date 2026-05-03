@@ -232,6 +232,27 @@ CREATE TABLE IF NOT EXISTS photo_classifications (
     doc_confidence REAL,
     updated_at    TEXT DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS palazuelos_map (
+    godes_id TEXT PRIMARY KEY,
+    palaz_id TEXT,
+    palaz_name TEXT,
+    confidence INTEGER DEFAULT 0,
+    match_type TEXT DEFAULT 'auto',
+    updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS palazuelos_imports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    palaz_photo_rin TEXT,
+    original_filename TEXT UNIQUE,
+    palaz_person_id TEXT,
+    godes_person_id TEXT,
+    godes_photo_id INTEGER,
+    title TEXT,
+    downloaded_at TEXT DEFAULT (datetime('now')),
+    status TEXT DEFAULT 'downloaded'
+);
 """
 
 

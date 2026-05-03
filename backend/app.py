@@ -26,6 +26,7 @@ from query_router import QueryRouter
 from query_engine import QueryEngine
 import test_bank
 from admin_routes import router as admin_router, init_admin, init_log_capture
+from palazuelos_routes import router as palazuelos_router, init_palazuelos
 
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -36,6 +37,7 @@ SUGGESTIONS_DIR = DATA_DIR / "suggestions"
 
 app = FastAPI(title="Godesia", description="Consulta genealógica en lenguaje natural")
 app.include_router(admin_router)
+app.include_router(palazuelos_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -121,6 +123,7 @@ async def startup():
             print(f"  Error leyendo fecha GEDCOM: {e}")
 
     init_admin(db_conn, BASE_DIR)
+    init_palazuelos(db_conn, BASE_DIR)
 
     # LLM engine (optional, only if API key is set)
     if os.environ.get("ANTHROPIC_API_KEY"):

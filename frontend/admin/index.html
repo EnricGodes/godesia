@@ -57,6 +57,10 @@
                 <span class="nav-icon">◎</span> Classificador fotos
                 <span class="nav-badge" id="badge-classifier"></span>
             </a>
+            <a data-section="palazuelos">
+                <span class="nav-icon">⇅</span> Sync Palazuelos
+                <span class="nav-badge" id="badge-palazuelos"></span>
+            </a>
         </nav>
     </aside>
 
@@ -596,6 +600,87 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <!-- ── SYNC PALAZUELOS ── -->
+        <section id="s-palazuelos" class="admin-section">
+            <h1 class="section-title">Sync Palazuelos → Godes</h1>
+            <p class="section-subtitle">Relaciona individus dels dos arbres i descarrega fotos de Palazuelos que no estan a Godes.</p>
+
+            <!-- Build map card -->
+            <div class="info-card">
+                <h3>1. Construir mapa de correspondències</h3>
+                <p style="font-size:.82rem;color:#727971;margin-bottom:.75rem;">
+                    Llegeix <code>docs/palazuelos.ged</code> i cerca la millor correspondència per cada persona de Godes.
+                    Les correccions manuals es preserven.
+                </p>
+                <div class="toolbar">
+                    <button class="btn btn-primary" id="btn-build-map" onclick="Palazuelos.buildMap()">Construir mapa</button>
+                    <span id="palaz-build-status" style="font-size:.82rem;color:#727971;margin-left:.75rem;"></span>
+                </div>
+                <div id="palaz-build-progress" style="display:none;margin-top:.75rem;">
+                    <div style="background:#d9d5cc;border-radius:4px;height:6px;overflow:hidden;">
+                        <div id="palaz-progress-bar" style="height:100%;background:#2d4b33;width:0%;transition:width .3s;"></div>
+                    </div>
+                    <pre class="import-log" id="palaz-build-log" style="height:120px;margin-top:.5rem;"></pre>
+                </div>
+            </div>
+
+            <!-- Map table -->
+            <div id="palaz-map-section" style="display:none;">
+                <div class="toolbar" style="margin-bottom:.5rem;">
+                    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+                        <select id="palaz-filter-status" class="form-select" style="font-size:.8rem;padding:.3rem .6rem;"
+                                onchange="Palazuelos.filterMap()">
+                            <option value="">Tots</option>
+                            <option value="confirmed">Confirmats (≥80)</option>
+                            <option value="review">Revisió (40-79)</option>
+                            <option value="nomatch">Sense match</option>
+                        </select>
+                        <input id="palaz-filter-q" type="text" placeholder="Filtrar per nom..."
+                               style="font-size:.8rem;padding:.3rem .6rem;border:1px solid #c2c8bf;border-radius:4px;width:180px;"
+                               oninput="Palazuelos.filterMap()"/>
+                        <span id="palaz-map-count" style="font-size:.8rem;color:#727971;"></span>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="btn btn-secondary btn-sm" onclick="Palazuelos.loadMap()">↻ Actualitzar</button>
+                    </div>
+                </div>
+
+                <table class="admin-table" id="palaz-map-table">
+                    <thead>
+                        <tr>
+                            <th>Godes</th>
+                            <th>Anys</th>
+                            <th>Palazuelos</th>
+                            <th style="width:60px;">Conf.</th>
+                            <th style="width:90px;">Estat</th>
+                            <th style="width:200px;">Correcció manual</th>
+                            <th style="width:80px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="palaz-map-body"></tbody>
+                </table>
+            </div>
+
+            <!-- Pending photos -->
+            <div class="info-card" style="margin-top:1.5rem;" id="palaz-photos-card">
+                <h3>2. Fotos pendents de descarregar</h3>
+                <p style="font-size:.82rem;color:#727971;margin-bottom:.75rem;">
+                    Fotos de Palazuelos no presents a Godes, per als parells confirmats.
+                </p>
+                <div class="toolbar" style="margin-bottom:.75rem;">
+                    <button class="btn btn-secondary" onclick="Palazuelos.loadPendingPhotos()">Detectar fotos pendents</button>
+                    <button class="btn btn-primary" id="btn-download-selected" onclick="Palazuelos.downloadSelected()" style="display:none;">
+                        Descarregar seleccionades (<span id="palaz-sel-count">0</span>)
+                    </button>
+                </div>
+                <div id="palaz-photos-loading" style="display:none;color:#727971;font-size:.82rem;">Carregant…</div>
+                <div id="palaz-photos-empty" style="display:none;color:#727971;font-size:.82rem;">Cap foto nova trobada per als parells confirmats.</div>
+                <div id="palaz-photos-list"></div>
+                <pre class="import-log" id="palaz-download-log" style="display:none;height:120px;margin-top:.75rem;"></pre>
+            </div>
+
         </section>
 
     </main>
