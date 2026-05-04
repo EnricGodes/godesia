@@ -570,9 +570,7 @@ async def pending_photos():
             if h and h in known_hashes:
                 continue
             # Skip face/portrait cutouts — only want full photos and documents
-            if photo.get("is_cutout"):
-                continue
-            if photo.get("is_prim_cutout") and not photo.get("is_parent_photo"):
+            if photo.get("is_cutout") or photo.get("is_prim_cutout"):
                 continue
             pending.append({
                 "filename": fn,
@@ -587,7 +585,29 @@ async def pending_photos():
                 "is_parent_photo": photo.get("is_parent_photo", False),
             })
 
-    return {"photos": pending, "total": len(pending)}
+    # Fetch existing photos from Godes DB per confirmed person
+    godes_ids = list({row[0] for row in pairs})
+    existing_by_person: dict = {}
+    if godes_ids:
+        placeholders = ",".join("?" * len(godes_ids))
+        ex_rows = db.execute(f"""
+            SELECT pt.person_id, p.id, p.filename, p.title, p.is_document
+            FROM photo_tags pt
+            JOIN photos p ON pt.photo_id = p.id
+            WHERE pt.person_id IN ({placeholders})
+              AND p.is_cutout = 0
+            ORDER BY pt.person_id, p.id
+        """, godes_ids).fetchall()
+        for er in ex_rows:
+            pid = er[0]
+            existing_by_person.setdefault(pid, []).append({
+                "photo_id": er[1],
+                "filename": er[2],
+                "title": er[3],
+                "is_document": bool(er[4]),
+            })
+
+    return {"photos": pending, "total": len(pending), "existing_by_person": existing_by_person}
 
 
 @router.post("/download-photo")

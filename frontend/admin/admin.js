@@ -1878,7 +1878,8 @@ const Palazuelos = (() => {
     // ── Map table ─────────────────────────────────────────────────────────────
 
     function _cat(e) {
-        if (e.match_type === 'rejected' || !e.palaz_id) return 'nomatch';
+        if (e.match_type === 'rejected') return 'rejected';
+        if (!e.palaz_id) return 'nomatch';
         if (e.match_type === 'manual' || e.confidence >= 80) return 'confirmed';
         return 'review';
     }
@@ -1888,11 +1889,13 @@ const Palazuelos = (() => {
         const confirmed = _mapData.filter(e => _cat(e) === 'confirmed').length;
         const review = _mapData.filter(e => _cat(e) === 'review').length;
         const nomatch = _mapData.filter(e => _cat(e) === 'nomatch').length;
+        const rejected = _mapData.filter(e => _cat(e) === 'rejected').length;
         document.getElementById('palaz-cnt-tots').textContent = tots;
         document.getElementById('palaz-cnt-confirmed').textContent = confirmed;
         document.getElementById('palaz-cnt-review').textContent = review;
         document.getElementById('palaz-cnt-nomatch').textContent = nomatch;
-        // Badge: entries needing attention
+        document.getElementById('palaz-cnt-rejected').textContent = rejected;
+        // Badge: entries needing attention (review + no-match, not rejected — those are handled)
         const badge = document.getElementById('badge-palazuelos');
         if (badge) badge.textContent = (review + nomatch) > 0 ? review + nomatch : '';
     }
@@ -1900,7 +1903,7 @@ const Palazuelos = (() => {
     function setFilter(f) {
         _activeFilter = f;
         // Button active state
-        ['tots','confirmed','review','nomatch'].forEach(k => {
+        ['tots','confirmed','review','nomatch','rejected'].forEach(k => {
             const btn = document.getElementById(`palaz-btn-${k}`);
             if (!btn) return;
             const isActive = (k === (f || 'tots'));
@@ -1939,7 +1942,8 @@ const Palazuelos = (() => {
     }
 
     function _renderRow(e) {
-        const rowBg = !e.palaz_id || e.match_type === 'rejected' ? '#fff8f6' :
+        const rowBg = e.match_type === 'rejected' ? '#f5f5f5' :
+                      !e.palaz_id ? '#fff8f6' :
                       e.match_type === 'manual' || e.confidence >= 80 ? '' : '#fffde7';
         const years = [e.birth_year, e.death_year].filter(Boolean).join('–') || '—';
         const cat = _cat(e);
@@ -2071,6 +2075,7 @@ const Palazuelos = (() => {
         try {
             const d = await apiFetch('/api/admin/palazuelos/pending-photos');
             _pendingPhotos = d.photos || [];
+            const existingByPerson = d.existing_by_person || {};
             document.getElementById('palaz-photos-loading').style.display = 'none';
             if (!_pendingPhotos.length) { document.getElementById('palaz-photos-empty').style.display = ''; return; }
 
@@ -2082,10 +2087,12 @@ const Palazuelos = (() => {
             }
             let html = '';
             for (const [gId, grp] of Object.entries(byPerson)) {
-                html += `<div style="margin-bottom:1.25rem;">
+                html += `<div style="margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid #e5e2da;">
                     <div style="font-weight:700;font-size:.85rem;margin-bottom:.5rem;color:#2d4b33;">
                         ${esc(grp.name)} <span style="color:#9e9b94;font-weight:400;">(${esc(gId)})</span>
-                    </div><div style="display:flex;flex-wrap:wrap;gap:.5rem;">`;
+                    </div>`;
+                // Pending photos (selectable)
+                html += `<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;">`;
                 for (const ph of grp.photos) {
                     const isPdf = (ph.filename || '').endsWith('.pdf');
                     const thumb = isPdf ? '<span style="font-size:2rem;display:block;margin-bottom:.25rem;">📄</span>' :
@@ -2100,7 +2107,28 @@ const Palazuelos = (() => {
                                 <span style="color:#424842;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;">${esc(ph.title || ph.filename)}</span>
                             </label>`;
                 }
-                html += `</div></div>`;
+                html += `</div>`;
+                // Existing DB photos (non-selectable)
+                const existing = existingByPerson[gId] || [];
+                if (existing.length) {
+                    html += `<div style="font-size:.72rem;color:#9e9b94;margin-bottom:.3rem;">Ja tens:</div>`;
+                    html += `<div style="display:flex;flex-wrap:wrap;gap:.4rem;">`;
+                    for (const ex of existing) {
+                        const isPdf = (ex.filename || '').endsWith('.pdf');
+                        const thumb = isPdf
+                            ? '<span style="font-size:1.5rem;display:block;margin-bottom:.2rem;">📄</span>'
+                            : `<img src="/photos/${esc(ex.filename)}" alt="" loading="lazy"
+                                   style="width:60px;height:45px;object-fit:cover;border-radius:3px;display:block;margin-bottom:.2rem;opacity:.75;"
+                                   onerror="this.style.display='none'"/>`;
+                        html += `<div style="display:flex;flex-direction:column;align-items:center;padding:.3rem;border:1px solid #e5e2da;border-radius:5px;background:#f8f6f2;max-width:90px;font-size:.65rem;text-align:center;opacity:.85;"
+                                      title="${esc(ex.filename)}">
+                                    ${thumb}
+                                    <span style="color:#9e9b94;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;">${esc(ex.title || ex.filename)}</span>
+                                </div>`;
+                    }
+                    html += `</div>`;
+                }
+                html += `</div>`;
             }
             document.getElementById('palaz-photos-list').innerHTML = html;
             document.getElementById('btn-download-selected').style.display = '';
