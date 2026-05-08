@@ -1343,6 +1343,22 @@ const Comparador = {
         } catch (_) {}
     },
 
+    async startPalazuelos() {
+        const btn = document.getElementById('btn-start-cmp-palaz');
+        btn.disabled = true;
+        btn.textContent = 'Iniciant…';
+        try {
+            await apiFetch('/api/admin/compare/start-palazuelos', { method: 'POST' });
+            this._showLogCard();
+            this._lastLogLen = 0;
+            this._startPolling();
+        } catch (e) {
+            btn.disabled = false;
+            btn.textContent = '▶ Comparar amb Palazuelos';
+            alert('Error: ' + e.message);
+        }
+    },
+
     async start() {
         const input = document.getElementById('cmp-file');
         if (!input.files[0]) { alert('Selecciona un fitxer .ged primer.'); return; }
@@ -1359,7 +1375,7 @@ const Comparador = {
             this._startPolling();
         } catch (e) {
             btn.disabled = false;
-            btn.textContent = 'Iniciar comparació';
+            btn.textContent = 'Iniciar comparació per nom';
             alert('Error: ' + e.message);
         }
     },
@@ -1381,8 +1397,9 @@ const Comparador = {
                 clearInterval(this._pollTimer);
                 this._pollTimer = null;
                 const btn = document.getElementById('btn-start-cmp');
-                btn.disabled = false;
-                btn.textContent = 'Iniciar comparació';
+                if (btn) { btn.disabled = false; btn.textContent = 'Iniciar comparació per nom'; }
+                const btnP = document.getElementById('btn-start-cmp-palaz');
+                if (btnP) { btnP.disabled = false; btnP.textContent = '▶ Comparar amb Palazuelos'; }
                 if (d.status === 'done') {
                     this.loadResults();
                     document.getElementById('btn-clear-cmp').style.display = '';

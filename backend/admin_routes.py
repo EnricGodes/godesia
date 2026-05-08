@@ -985,7 +985,7 @@ def _match_person(db_person: dict, individuals: dict, ged_index: dict) -> tuple:
     return best_gid, best_score
 
 
-def _run_comparison(ged_path: str, db_path: str):
+def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = False):
     """Background thread: parse GEDCOM, compare with DB, save results. Never modifies people data."""
     import sys as _sys
     t_start = time.time()
@@ -997,7 +997,8 @@ def _run_comparison(ged_path: str, db_path: str):
         from gedcom_parser import parse_gedcom
         from database import get_connection as _get_conn
 
-        _cmp_log(f"Iniciant comparació: {Path(ged_path).name}")
+        _cmp_log(f"Iniciant comparació: {Path(ged_path).name}"
+                 + (" [mapa Palazuelos]" if use_palazuelos_map else ""))
 
         # 1. Parse GEDCOM (read-only, no DB touch)
         _cmp_log("[1/4] Parsejant GEDCOM…")
@@ -1005,18 +1006,23 @@ def _run_comparison(ged_path: str, db_path: str):
         individuals = data["individuals"]
         _cmp_log(f"  {len(individuals):,} individus al GEDCOM")
 
-        # 2. Build name index + fallback surname+year index
-        _cmp_log("[2/4] Construint índex de noms…")
-        ged_index = _build_ged_index(individuals)
-        _cmp_log(f"  {len(ged_index):,} entrades a l'índex")
-        # Fallback index: (first_surname_canon, birth_year) → [ged_id]
-        ged_surname_year: dict = {}
-        for gid, indi in individuals.items():
-            sur = _canonicalize_person_name(indi.get("surname") or "")
-            first_sur = sur.split()[0] if sur else ""
-            yr = _ged_year((indi.get("birth") or {}).get("date") or "")
-            if first_sur and yr:
-                ged_surname_year.setdefault((first_sur, yr), []).append(gid)
+        # 2. Build index (only needed for name-based mode)
+        if use_palazuelos_map:
+            _cmp_log("[2/4] Carregant mapa Palazuelos des de la BD…")
+            ged_index = {}
+            ged_surname_year = {}
+        else:
+            _cmp_log("[2/4] Construint índex de noms…")
+            ged_index = _build_ged_index(individuals)
+            _cmp_log(f"  {len(ged_index):,} entrades a l'índex")
+            # Fallback index: (first_surname_canon, birth_year) → [ged_id]
+            ged_surname_year: dict = {}
+            for gid, indi in individuals.items():
+                sur = _canonicalize_person_name(indi.get("surname") or "")
+                first_sur = sur.split()[0] if sur else ""
+                yr = _ged_year((indi.get("birth") or {}).get("date") or "")
+                if first_sur and yr:
+                    ged_surname_year.setdefault((first_sur, yr), []).append(gid)
 
         # 3. Load all DB people + pre-fetch related tables (3 queries, not N×3)
         _cmp_log("[3/4] Carregant dades de la BD…")
@@ -1058,6 +1064,22 @@ def _run_comparison(ged_path: str, db_path: str):
             _cmp_job["total"] = total
         _cmp_log(f"  {total} persones a la BD")
 
+        # Load palazuelos_map if needed
+        palazuelos_map_data: dict = {}
+        if use_palazuelos_map:
+            try:
+                map_rows = conn.execute(
+                    "SELECT godes_id, palaz_id, confidence, match_type FROM palazuelos_map"
+                ).fetchall()
+                for mr in map_rows:
+                    palazuelos_map_data[mr[0]] = {
+                        "palaz_id": mr[1], "confidence": mr[2], "match_type": mr[3]
+                    }
+                _cmp_log(f"  {len(palazuelos_map_data):,} entrades al mapa Palazuelos")
+            except Exception as e:
+                _cmp_log(f"  Avís: no s'ha pogut carregar el mapa ({e}), fent servir matching per nom")
+                use_palazuelos_map = False
+
         # Clear previous results
         conn.execute("DELETE FROM compare_results")
         conn.commit()
@@ -1072,20 +1094,35 @@ def _run_comparison(ged_path: str, db_path: str):
             db_person = dict(db_row)
             pid = db_person["id"]
 
-            ged_id, score = _match_person(db_person, individuals, ged_index)
-
-            # Second pass: first surname + birth year (score=50)
-            if ged_id is None and db_person.get("birth_year"):
-                db_sur0 = (_canonicalize_person_name(db_person.get("surname") or "") or "").split()
-                if db_sur0:
-                    candidates2 = ged_surname_year.get((db_sur0[0], db_person["birth_year"]), [])
-                    if len(candidates2) == 1:
-                        ged_id, score = candidates2[0], 50
+            if use_palazuelos_map:
+                # --- Map-based matching ---
+                palaz_entry = palazuelos_map_data.get(pid)
+                if palaz_entry is None:
+                    # Person not in map at all → treat as nomatch
+                    ged_id, score = None, 0
+                elif palaz_entry["match_type"] == "rejected":
+                    # Explicitly confirmed as absent from Palazuelos → skip entirely
+                    continue
+                elif palaz_entry["palaz_id"] and palaz_entry["palaz_id"] in individuals:
+                    ged_id = palaz_entry["palaz_id"]
+                    score = palaz_entry.get("confidence") or 100
+                else:
+                    ged_id, score = None, 0
+            else:
+                # --- Name-based matching (original behaviour) ---
+                ged_id, score = _match_person(db_person, individuals, ged_index)
+                # Second pass: first surname + birth year (score=50)
+                if ged_id is None and db_person.get("birth_year"):
+                    db_sur0 = (_canonicalize_person_name(db_person.get("surname") or "") or "").split()
+                    if db_sur0:
+                        candidates2 = ged_surname_year.get((db_sur0[0], db_person["birth_year"]), [])
+                        if len(candidates2) == 1:
+                            ged_id, score = candidates2[0], 50
 
             if ged_id is None:
                 diff_types = ["nomatch"]
                 diff_details = {"nomatch": ["Persona no trobada al GEDCOM"]}
-            elif score <= 55:
+            elif not use_palazuelos_map and score <= 55:
                 diff_types, diff_details = _compute_diff(
                     db_person, all_notes.get(pid, []), all_occs.get(pid, []),
                     all_res.get(pid, []), all_burials.get(pid, []),
@@ -1144,6 +1181,29 @@ def _run_comparison(ged_path: str, db_path: str):
             _cmp_job["finished_at"] = datetime.now().isoformat()
             _cmp_job["log"].append(f"ERROR: {exc}")
             _cmp_job["log"].append(traceback.format_exc())
+
+
+@router.post("/compare/start-palazuelos")
+async def compare_start_palazuelos():
+    """Start comparison using docs/palazuelos.ged + palazuelos_map (no upload needed)."""
+    with _cmp_job_lock:
+        if _cmp_job["status"] == "running":
+            raise HTTPException(status_code=409, detail="Comparació ja en curs")
+        _cmp_job.update({
+            "status": "running", "progress": 0, "total": 0,
+            "log": [], "started_at": datetime.now().isoformat(),
+            "finished_at": None, "error": None,
+        })
+
+    ged_path = str(_base_dir / "docs" / "palazuelos.ged")
+    if not Path(ged_path).exists():
+        with _cmp_job_lock:
+            _cmp_job["status"] = "idle"
+        raise HTTPException(404, "docs/palazuelos.ged no trobat. Exporta el GEDCOM des de MyHeritage.")
+
+    db_path = str(_base_dir / "data" / "godesia.db")
+    threading.Thread(target=_run_comparison, args=(ged_path, db_path, True), daemon=True).start()
+    return {"status": "started"}
 
 
 @router.post("/compare/start")

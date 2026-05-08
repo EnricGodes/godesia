@@ -469,22 +469,34 @@
         <!-- ── COMPARADOR ── -->
         <section id="s-comparador" class="admin-section">
             <h1 class="section-title">Comparador GEDCOM</h1>
-            <p class="section-subtitle">Compara un fitxer GEDCOM extern amb les dades de la BD. Només lectura — no modifica res.</p>
+            <p class="section-subtitle">Compara el GEDCOM de Palazuelos amb les dades de la BD usant el mapa d'individuals ja establert. Només lectura — no modifica res.</p>
 
-            <!-- Upload card -->
+            <!-- Palazuelos map card (primary) -->
             <div class="info-card" id="cmp-form-card">
-                <h3>Fitxer GEDCOM per comparar</h3>
-                <div class="file-drop" id="cmp-drop" onclick="document.getElementById('cmp-file').click()" style="cursor:pointer;">
-                    <input type="file" id="cmp-file" accept=".ged" style="display:none" onchange="Comparador.onFileSelected(this)">
-                    <div id="cmp-drop-label">
-                        Clica o arrossega un fitxer <strong>.ged</strong><br>
-                        <small style="color:#9e9b94;">El fitxer s'utilitza només per comparar, no s'importa a la BD.</small>
-                    </div>
-                </div>
-                <div class="toolbar" style="margin-top:1rem;">
-                    <button class="btn btn-primary" id="btn-start-cmp" onclick="Comparador.start()">Iniciar comparació</button>
+                <h3>Comparar amb Palazuelos</h3>
+                <p style="font-size:.82rem;color:#727971;margin:.25rem 0 .75rem;">
+                    Utilitza el mapa Godes↔Palazuelos ja establert i el fitxer <code>docs/palazuelos.ged</code>.
+                    Els individus marcats com a "Rebutjat" s'exclouen de la comparació.
+                </p>
+                <div class="toolbar" style="margin-top:.5rem;flex-wrap:wrap;gap:.5rem;">
+                    <button class="btn btn-primary" id="btn-start-cmp-palaz" onclick="Comparador.startPalazuelos()">▶ Comparar amb Palazuelos</button>
                     <button class="btn btn-secondary btn-sm" id="btn-clear-cmp" onclick="Comparador.clearAll()" style="display:none;">Esborrar tot i reiniciar</button>
                 </div>
+                <details style="margin-top:1rem;">
+                    <summary style="font-size:.78rem;color:#9e9b94;cursor:pointer;">Comparar amb un altre fitxer GEDCOM…</summary>
+                    <div style="margin-top:.75rem;">
+                        <div class="file-drop" id="cmp-drop" onclick="document.getElementById('cmp-file').click()" style="cursor:pointer;">
+                            <input type="file" id="cmp-file" accept=".ged" style="display:none" onchange="Comparador.onFileSelected(this)">
+                            <div id="cmp-drop-label">
+                                Clica o arrossega un fitxer <strong>.ged</strong><br>
+                                <small style="color:#9e9b94;">Matching per nom. El fitxer s'utilitza només per comparar, no s'importa a la BD.</small>
+                            </div>
+                        </div>
+                        <div class="toolbar" style="margin-top:.75rem;">
+                            <button class="btn btn-secondary" id="btn-start-cmp" onclick="Comparador.start()">Iniciar comparació per nom</button>
+                        </div>
+                    </div>
+                </details>
             </div>
 
             <!-- Log / progress card -->
