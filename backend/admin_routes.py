@@ -784,6 +784,8 @@ def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
     }
     new_ged_events = []
     for ge in ged_events:
+        if ge.get("type") == "_UPD":  # last-update timestamp — not genealogically relevant
+            continue
         key = (ge.get("tag", ""), _normalize_name(ge.get("type") or ge.get("description") or ""))
         if key not in db_events_keys:
             label = ge.get("type") or ge.get("tag") or "Esdeveniment"
