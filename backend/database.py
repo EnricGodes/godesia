@@ -458,6 +458,32 @@ def init_db(conn):
     except Exception:
         pass  # Column already exists
     conn.commit()
+    _seed_palazuelos_map(conn)
+
+
+def _seed_palazuelos_map(conn):
+    """If palazuelos_map is empty, seed manual+rejected entries from the JSON backup."""
+    import json
+    from pathlib import Path
+    try:
+        count = conn.execute("SELECT COUNT(*) FROM palazuelos_map WHERE match_type IN ('manual','rejected')").fetchone()[0]
+        if count > 0:
+            return  # Already has human decisions — don't overwrite
+        json_path = Path(__file__).parent.parent / "data" / "palazuelos_map.json"
+        if not json_path.exists():
+            return
+        entries = json.loads(json_path.read_text(encoding="utf-8"))
+        for e in entries:
+            if e.get("match_type") not in ("manual", "rejected"):
+                continue
+            conn.execute("""
+                INSERT OR IGNORE INTO palazuelos_map (godes_id, palaz_id, palaz_name, confidence, match_type, updated_at)
+                VALUES (?, ?, ?, ?, ?, datetime('now'))
+            """, (e["godes_id"], e.get("palaz_id"), e.get("palaz_name"),
+                  e.get("confidence", 0), e["match_type"]))
+        conn.commit()
+    except Exception:
+        pass  # Never break startup
 
 
 # --- Query helpers ---

@@ -1,0 +1,3845 @@
+[
+  {
+    "godes_id": "@I105@",
+    "palaz_id": "@I757@",
+    "palaz_name": "Robert Lee \"Bob\" Sahan",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I109@",
+    "palaz_id": "@I760@",
+    "palaz_name": "Esther Ballart Hernández",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I115@",
+    "palaz_id": "@I761@",
+    "palaz_name": "Mª Isabel \"Maribel\" Vicente Oliva",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I121@",
+    "palaz_id": "@I444@",
+    "palaz_name": "Marina Bertran Pujol",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I122@",
+    "palaz_id": "@I839@",
+    "palaz_name": "Josep Pascó i Soler",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I131@",
+    "palaz_id": "@I1468@",
+    "palaz_name": "Pau Farràs i Ribas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I133@",
+    "palaz_id": "@I1464@",
+    "palaz_name": "Mercé Rius Font",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I136@",
+    "palaz_id": "@I1463@",
+    "palaz_name": "Javier Rodríguez Morin",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I140@",
+    "palaz_id": "@I1465@",
+    "palaz_name": "Xavier Sisternas Surís",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I143@",
+    "palaz_id": "@I1479@",
+    "palaz_name": "Isil Montaner Sànchez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I147@",
+    "palaz_id": "@I830@",
+    "palaz_name": "Lucas Brandao",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I148@",
+    "palaz_id": "@I1250@",
+    "palaz_name": "Rosa Segura Falomir",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I149@",
+    "palaz_id": "@I1249@",
+    "palaz_name": "Francesc Godes Martí",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I151@",
+    "palaz_id": "@I1252@",
+    "palaz_name": "Francesca Martí Blasco",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I153@",
+    "palaz_id": "@I783@",
+    "palaz_name": "Mª Mercedes \"Merche\" Mateo Valls",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I155@",
+    "palaz_id": "@I1480@",
+    "palaz_name": "Joaquima Moya",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I156@",
+    "palaz_id": "@I1254@",
+    "palaz_name": "Josepa Sebastià Martí",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I158@",
+    "palaz_id": "@I1256@",
+    "palaz_name": "Anna Sabater",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I161@",
+    "palaz_id": "@I781@",
+    "palaz_name": "Marta Puig-Ventura",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I163@",
+    "palaz_id": "@I840@",
+    "palaz_name": "Oriol Fité Dalet",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I21@",
+    "palaz_id": "@I692@",
+    "palaz_name": "María Ignàsia \"Nacha\" Hospital Ruaix",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I23@",
+    "palaz_id": "@I1059@",
+    "palaz_name": "Pasqual Artur Godes Tarrats",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I24@",
+    "palaz_id": "@I1060@",
+    "palaz_name": "María Godes Tarrats",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I27@",
+    "palaz_id": "@I1068@",
+    "palaz_name": "Godes Martínez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I34@",
+    "palaz_id": "@I300@",
+    "palaz_name": "Mª Carmen Godes Schmid",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500004@",
+    "palaz_id": "@I501217@",
+    "palaz_name": "Dolores Canabes",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500008@",
+    "palaz_id": "@I688@",
+    "palaz_name": "María Abelló Monrós",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500022@",
+    "palaz_id": "@I150@",
+    "palaz_name": "Francisco Rusca",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500023@",
+    "palaz_id": "@I151@",
+    "palaz_name": "María Ponsá",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500027@",
+    "palaz_id": "@I146@",
+    "palaz_name": "María Angela Ortodó Duró",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500028@",
+    "palaz_id": "@I147@",
+    "palaz_name": "Pau Ortodó Duró",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500029@",
+    "palaz_id": "@I148@",
+    "palaz_name": "Antonia Ortodó Duró",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500030@",
+    "palaz_id": "@I146@",
+    "palaz_name": "María Angela Ortodó Duró",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500031@",
+    "palaz_id": "@I209@",
+    "palaz_name": "Ignasi Duró Guitart",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500032@",
+    "palaz_id": "@I145@",
+    "palaz_name": "María Duró Porta",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500042@",
+    "palaz_id": "@I152@",
+    "palaz_name": "María Rusca Ponsa",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500043@",
+    "palaz_id": "@I279@",
+    "palaz_name": "Josep Ortodó Cerres",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500044@",
+    "palaz_id": "@I280@",
+    "palaz_name": "Margarida Albós",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500045@",
+    "palaz_id": "@I107@",
+    "palaz_name": "Jean Jayme",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500046@",
+    "palaz_id": "@I108@",
+    "palaz_name": "Jeanne Lacoste",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500056@",
+    "palaz_id": "@I1023@",
+    "palaz_name": "Rosa Estil·les Vidal",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500061@",
+    "palaz_id": "@I1409@",
+    "palaz_name": "Antonia Sucias Cabra",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500063@",
+    "palaz_id": "@I665@",
+    "palaz_name": "Josep Sagarra Capellades",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500064@",
+    "palaz_id": "@I1471@",
+    "palaz_name": "Asunción Parcerisa Aleix",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500065@",
+    "palaz_id": "@I905@",
+    "palaz_name": "Mercedes Sagarra Parcerisas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500070@",
+    "palaz_id": "@I1103@",
+    "palaz_name": "Josep Mª Cabestany Carreras",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500071@",
+    "palaz_id": "@I1104@",
+    "palaz_name": "Lluís Cabestany Carreras",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500072@",
+    "palaz_id": "@I1106@",
+    "palaz_name": "Maria Teresa Cabestany Carreras",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500073@",
+    "palaz_id": "@I502067@",
+    "palaz_name": "Maria Dolores Cabestany Carreras",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500077@",
+    "palaz_id": "@I1481@",
+    "palaz_name": "Rosa María Gallardo Cidoncha",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500079@",
+    "palaz_id": "@I1482@",
+    "palaz_name": "Jesús San Mateo Meana",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500086@",
+    "palaz_id": "@I340@",
+    "palaz_name": "Andreu Ortadó",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500087@",
+    "palaz_id": "@I341@",
+    "palaz_name": "Margarita Cerres",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500098@",
+    "palaz_id": "@I1224@",
+    "palaz_name": "Eduardo Lagunilla Solórzano",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500106@",
+    "palaz_id": "@I208@",
+    "palaz_name": "Jacint Ortodó Cerqueda",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500108@",
+    "palaz_id": "@I1117@",
+    "palaz_name": "Salvador Cabestany Gassol",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500109@",
+    "palaz_id": "@I1118@",
+    "palaz_name": "Ana Marqués Valentí",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500118@",
+    "palaz_id": "@I1374@",
+    "palaz_name": "Magín Cabestany Ninot",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500119@",
+    "palaz_id": "@I1375@",
+    "palaz_name": "Francisca Gassol",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500120@",
+    "palaz_id": "@I1383@",
+    "palaz_name": "Martí Marqués",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500121@",
+    "palaz_id": "@I1373@",
+    "palaz_name": "Rosa Valentí Ribas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500123@",
+    "palaz_id": "@I500116@",
+    "palaz_name": "Laia Pallejà Villalba",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500125@",
+    "palaz_id": "@I1120@",
+    "palaz_name": "Ana Cabestany Marqués",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500127@",
+    "palaz_id": "@I1457@",
+    "palaz_name": "Francisca Barceló Llorens",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500128@",
+    "palaz_id": "@I501263@",
+    "palaz_name": "Pau Cardoner Bordes",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500130@",
+    "palaz_id": "@I501260@",
+    "palaz_name": "Guadalupe Molina Gallardo",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500131@",
+    "palaz_id": "@I501261@",
+    "palaz_name": "Fernando Ferrer Ylarri",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500133@",
+    "palaz_id": "@I501265@",
+    "palaz_name": "Ferrer Godes",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500134@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500135@",
+    "palaz_id": "@I501225@",
+    "palaz_name": "Jaime Caballería Plá",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500136@",
+    "palaz_id": "@I501226@",
+    "palaz_name": "Mariana Madiroles Caralt",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500139@",
+    "palaz_id": "@I501267@",
+    "palaz_name": "Atanasio Diago Lozano",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500140@",
+    "palaz_id": "@I501268@",
+    "palaz_name": "Antonia Marín",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500154@",
+    "palaz_id": "@I501221@",
+    "palaz_name": "Jaime Llafrenca Serra",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500155@",
+    "palaz_id": "@I501218@",
+    "palaz_name": "Antonio Estapé Sors",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500156@",
+    "palaz_id": "@I501219@",
+    "palaz_name": "Antonia Durán",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500159@",
+    "palaz_id": "@I5@",
+    "palaz_name": "Martín Palazuelos Hernando",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500163@",
+    "palaz_id": "@I654@",
+    "palaz_name": "James Karl \"Jimmy\" Ryan",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500167@",
+    "palaz_id": "@I586@",
+    "palaz_name": "Sandra Beatriz González Llaneza",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500169@",
+    "palaz_id": "@I501370@",
+    "palaz_name": "Pau Cavallería",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500170@",
+    "palaz_id": "@I501371@",
+    "palaz_name": "Josepa Plá",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500171@",
+    "palaz_id": "@I501368@",
+    "palaz_name": "Joseph Madiroles",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500172@",
+    "palaz_id": "@I501367@",
+    "palaz_name": "Teresa Caralt",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500174@",
+    "palaz_id": "@I705@",
+    "palaz_name": "Rosa",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500175@",
+    "palaz_id": "@I501496@",
+    "palaz_name": "Antonio Ferrer",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500176@",
+    "palaz_id": "@I501497@",
+    "palaz_name": "Eulalia Caparà",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500177@",
+    "palaz_id": "@I501498@",
+    "palaz_name": "Saturnina Ferrer Caparà",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500178@",
+    "palaz_id": "@I501389@",
+    "palaz_name": "Francisco Camillas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500179@",
+    "palaz_id": "@I501216@",
+    "palaz_name": "Ramón Monrós",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500180@",
+    "palaz_id": "@I501217@",
+    "palaz_name": "Dolores Canabes",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500182@",
+    "palaz_id": "@I372@",
+    "palaz_name": "Aaron Pérez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500183@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500184@",
+    "palaz_id": "@I501404@",
+    "palaz_name": "Maciá Giró",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500185@",
+    "palaz_id": "@I501405@",
+    "palaz_name": "Eulalia Novell",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500186@",
+    "palaz_id": "@I507510@",
+    "palaz_name": "Pau Estil.las Brunet",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500187@",
+    "palaz_id": "@I501407@",
+    "palaz_name": "Maria Vidal",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500188@",
+    "palaz_id": "@I501410@",
+    "palaz_name": "Teresa Estil·les Vidal",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500189@",
+    "palaz_id": "@I501409@",
+    "palaz_name": "Josepa Giró Estil·les",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500190@",
+    "palaz_id": "@I501408@",
+    "palaz_name": "Maria Eulala Giró Estil·les",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500191@",
+    "palaz_id": "@I500121@",
+    "palaz_name": "Planas Campos",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500192@",
+    "palaz_id": "@I500123@",
+    "palaz_name": "Planas Garrido",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500193@",
+    "palaz_id": "@I500123@",
+    "palaz_name": "Planas Garrido",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500196@",
+    "palaz_id": "@I501525@",
+    "palaz_name": "Inmaculada Torre Lloveras",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500201@",
+    "palaz_id": "@I1544@",
+    "palaz_name": "Elsa Schmid Tarrida",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500202@",
+    "palaz_id": "@I502672@",
+    "palaz_name": "Ricardo Quemades Tello",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500203@",
+    "palaz_id": "@I502674@",
+    "palaz_name": "Ricardo Quemades Schmid",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500204@",
+    "palaz_id": "@I502675@",
+    "palaz_name": "Anna Quemades Schmid",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500205@",
+    "palaz_id": "@I509029@",
+    "palaz_name": "Cayetano Tarrida de Agüero",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500206@",
+    "palaz_id": "@I509030@",
+    "palaz_name": "María del Mármol del Castillo",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500208@",
+    "palaz_id": "@I509032@",
+    "palaz_name": "Bruno Randt Pump",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500209@",
+    "palaz_id": "@I505762@",
+    "palaz_name": "Anna Casal Romero",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500212@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500213@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500214@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500215@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500216@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500217@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500218@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500219@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500220@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500221@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500222@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500223@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500224@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500225@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500226@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500227@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500229@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500230@",
+    "palaz_id": "@I503@",
+    "palaz_name": "Teo Fité",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500231@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500232@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500233@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500234@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500235@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500236@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500237@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500238@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500239@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500240@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500241@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500242@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500243@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500244@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500245@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500246@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500247@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500248@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500249@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500250@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500251@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500252@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500253@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500254@",
+    "palaz_id": "@I1250@",
+    "palaz_name": "Rosa Segura Falomir",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500255@",
+    "palaz_id": "@I502544@",
+    "palaz_name": "Agustin Gomis Ribera",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500256@",
+    "palaz_id": "@I502545@",
+    "palaz_name": "Mariana Fitó Vila",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500257@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500258@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500259@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500260@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500261@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500262@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500263@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500264@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500265@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500266@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500267@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500268@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500269@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500270@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500271@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500274@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500275@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500276@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500277@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500278@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500279@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500280@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500281@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500282@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500283@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500284@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500285@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500286@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500287@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500288@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500289@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500290@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500291@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500292@",
+    "palaz_id": "@I500699@",
+    "palaz_name": "Antonio Alonso",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500293@",
+    "palaz_id": "@I500649@",
+    "palaz_name": "María Fabregat",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500294@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500295@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500296@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500297@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500298@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500299@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500300@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500301@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500302@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500303@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500304@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500305@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500306@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500307@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500308@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500309@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500310@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500311@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500312@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500313@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500314@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500315@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500316@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500317@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500320@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500321@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500322@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500323@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500324@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500325@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500326@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500327@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500328@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500329@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500330@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500331@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500332@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500333@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500334@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500335@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500336@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500337@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500338@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500339@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500340@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500341@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500342@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500343@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500344@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500345@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500346@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500347@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500348@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500349@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500351@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500352@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500353@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500354@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500355@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500356@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500357@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500358@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500359@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500360@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500361@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500362@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500364@",
+    "palaz_id": "@I502295@",
+    "palaz_name": "Javier Rodríguez Santos",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500368@",
+    "palaz_id": "@I501191@",
+    "palaz_name": "Juan Ribas Llop",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500372@",
+    "palaz_id": "@I505768@",
+    "palaz_name": "Iris Lleixà Rubio",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500373@",
+    "palaz_id": "@I501878@",
+    "palaz_name": "Carlos Pérez Mier",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500375@",
+    "palaz_id": "@I501880@",
+    "palaz_name": "Carlos Manuel Pérez Acebo",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500396@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500397@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500398@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500400@",
+    "palaz_id": "@I501398@",
+    "palaz_name": "Francisco Almuzara",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500401@",
+    "palaz_id": "@I501399@",
+    "palaz_name": "Juana Pueyo",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500403@",
+    "palaz_id": "@I502218@",
+    "palaz_name": "Juan Ardanuy",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500404@",
+    "palaz_id": "@I502219@",
+    "palaz_name": "Mariana Castillon",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500406@",
+    "palaz_id": "@I504791@",
+    "palaz_name": "Manuel Molina Fernández",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500407@",
+    "palaz_id": "@I504792@",
+    "palaz_name": "Eloisa Molina Fernández",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500408@",
+    "palaz_id": "@I504795@",
+    "palaz_name": "Asensio Guevara",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500409@",
+    "palaz_id": "@I504796@",
+    "palaz_name": "Molina Asensio",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500410@",
+    "palaz_id": "@I504793@",
+    "palaz_name": "Teixidor",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500411@",
+    "palaz_id": "@I504794@",
+    "palaz_name": "Molina Teixidor",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500419@",
+    "palaz_id": "@I502231@",
+    "palaz_name": "Antonia Quintana Carratalá",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500420@",
+    "palaz_id": "@I502251@",
+    "palaz_name": "Antonia Milá Moré",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500422@",
+    "palaz_id": "@I502249@",
+    "palaz_name": "Antònia Carratalá Olives",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500423@",
+    "palaz_id": "@I502250@",
+    "palaz_name": "María Quintana Carratalá",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500426@",
+    "palaz_id": "@I501481@",
+    "palaz_name": "Dolores Espinosa de los Monteros y Curado",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500427@",
+    "palaz_id": "@I501482@",
+    "palaz_name": "Celso Beca Yanguas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500428@",
+    "palaz_id": "@I501483@",
+    "palaz_name": "Mariano Beca Espinosa de los Monteros",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500429@",
+    "palaz_id": "@I501484@",
+    "palaz_name": "Sofía Méndez de San Julián y Linares",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500430@",
+    "palaz_id": "@I502253@",
+    "palaz_name": "José Porté",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500431@",
+    "palaz_id": "@I502254@",
+    "palaz_name": "Teresa Garanto",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500432@",
+    "palaz_id": "@I502281@",
+    "palaz_name": "Carmen Benseny Ortega",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500435@",
+    "palaz_id": "@I502247@",
+    "palaz_name": "Ricardo Dominguez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500445@",
+    "palaz_id": "@I501375@",
+    "palaz_name": "Macaria Perez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500451@",
+    "palaz_id": "@I502320@",
+    "palaz_name": "Antonio Miguel",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500452@",
+    "palaz_id": "@I502321@",
+    "palaz_name": "Antonia Estevez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500453@",
+    "palaz_id": "@I502315@",
+    "palaz_name": "María Almuzara Pueyo",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500454@",
+    "palaz_id": "@I502316@",
+    "palaz_name": "Blasa Almuzara Pueyo",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500460@",
+    "palaz_id": "@I502284@",
+    "palaz_name": "Francisca Manero Navarro",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500461@",
+    "palaz_id": "@I502287@",
+    "palaz_name": "Carlos Luis Diago Manero",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500463@",
+    "palaz_id": "@I502286@",
+    "palaz_name": "Josep Maria Penin Manero",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500464@",
+    "palaz_id": "@I502280@",
+    "palaz_name": "Ignacia Ferre Brull",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500465@",
+    "palaz_id": "@I502292@",
+    "palaz_name": "Andreu Andrade Pastor",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500467@",
+    "palaz_id": "@I505399@",
+    "palaz_name": "Soledad",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500468@",
+    "palaz_id": "@I502288@",
+    "palaz_name": "Aquilino Cabrera Garcia",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500469@",
+    "palaz_id": "@I502289@",
+    "palaz_name": "Montserrat Cabrera Figuerola",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500470@",
+    "palaz_id": "@I502290@",
+    "palaz_name": "Francesc Clemente Clemente",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500472@",
+    "palaz_id": "@I502301@",
+    "palaz_name": "Gerardo Rojas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500473@",
+    "palaz_id": "@I502302@",
+    "palaz_name": "Josep Anton Rojas Diago",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500475@",
+    "palaz_id": "@I502304@",
+    "palaz_name": "María del Carmen Tello Plana",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500476@",
+    "palaz_id": "@I502305@",
+    "palaz_name": "Manel Diago Tello",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500477@",
+    "palaz_id": "@I502306@",
+    "palaz_name": "Xavier Diago Tello",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500479@",
+    "palaz_id": "@I501475@",
+    "palaz_name": "Rosario de Canals Reynals",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500480@",
+    "palaz_id": "@I501476@",
+    "palaz_name": "Maria Roser Puig i de Canals",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500481@",
+    "palaz_id": "@I501477@",
+    "palaz_name": "Mercè Puig de Canals",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500482@",
+    "palaz_id": "@I501460@",
+    "palaz_name": "Victoria Planas Ribas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500485@",
+    "palaz_id": "@I501360@",
+    "palaz_name": "Gregario Ribas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500486@",
+    "palaz_id": "@I501361@",
+    "palaz_name": "Teresa Llop",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500487@",
+    "palaz_id": "@I501362@",
+    "palaz_name": "Miguel Grau",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500488@",
+    "palaz_id": "@I501363@",
+    "palaz_name": "Antonia Franquet",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500489@",
+    "palaz_id": "@I501401@",
+    "palaz_name": "Antonio Bagés Escofet",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500490@",
+    "palaz_id": "@I501402@",
+    "palaz_name": "Eulalia Carbó Rabella",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500491@",
+    "palaz_id": "@I501403@",
+    "palaz_name": "Angela Bagés Carbó",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500492@",
+    "palaz_id": "@I501233@",
+    "palaz_name": "Jaime Terrats Freixas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500493@",
+    "palaz_id": "@I501234@",
+    "palaz_name": "Maria Bertran",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500494@",
+    "palaz_id": "@I501391@",
+    "palaz_name": "Juan Terrats",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500495@",
+    "palaz_id": "@I501392@",
+    "palaz_name": "Mariagna Freixas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500496@",
+    "palaz_id": "@I501393@",
+    "palaz_name": "Pedro Bertran",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500497@",
+    "palaz_id": "@I501394@",
+    "palaz_name": "Rosa ¿Senba?",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500498@",
+    "palaz_id": "@I501390@",
+    "palaz_name": "Isidro Tarrats Bertrán",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500499@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500502@",
+    "palaz_id": "@I501254@",
+    "palaz_name": "José Pujol",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500503@",
+    "palaz_id": "@I501255@",
+    "palaz_name": "Angela López Martínez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500505@",
+    "palaz_id": "@I501257@",
+    "palaz_name": "Mariano Pont Costal",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500506@",
+    "palaz_id": "@I501258@",
+    "palaz_name": "Maria Bartrina Sastre",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500513@",
+    "palaz_id": "@I504762@",
+    "palaz_name": "María Carmen Clemente Cabrera",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500515@",
+    "palaz_id": "@I502353@",
+    "palaz_name": "Mariana Diago Novales",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500522@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500523@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500524@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500525@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500526@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500527@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500528@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500529@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500530@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500531@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500532@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500533@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500534@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500536@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500541@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500542@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500543@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500544@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500545@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500546@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500547@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500548@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500549@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500550@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500551@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500552@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500553@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500554@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500555@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500556@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500557@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500558@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500559@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500560@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500561@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500562@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500563@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500564@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500565@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500566@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500567@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500568@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500569@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500570@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500574@",
+    "palaz_id": "@I1258@",
+    "palaz_name": "Leopoldo Vasquez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500575@",
+    "palaz_id": "@I1259@",
+    "palaz_name": "Balbina Rojas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500578@",
+    "palaz_id": "@I504753@",
+    "palaz_name": "Jose Maria Sánchez Navarro",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500581@",
+    "palaz_id": "@I56@",
+    "palaz_name": "Louis Guth",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500582@",
+    "palaz_id": "@I57@",
+    "palaz_name": "Clotilde Köenig",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500585@",
+    "palaz_id": "@I502100@",
+    "palaz_name": "Benito Mª de la Piedad Ramón Salvador de Plandolit Guiteras",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500597@",
+    "palaz_id": "@I1015@",
+    "palaz_name": "Jaume Faura Bordas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500601@",
+    "palaz_id": "@I504@",
+    "palaz_name": "Júlia Pascó Godes",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500621@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500622@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500623@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500624@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500625@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500626@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500627@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500634@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500635@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500636@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500637@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500638@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500639@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500640@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500641@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500642@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500643@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500644@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500645@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500647@",
+    "palaz_id": "@I500132@",
+    "palaz_name": "Josefa Solórzano Boenechea",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500653@",
+    "palaz_id": "@I505846@",
+    "palaz_name": "Anne Marie Zimmer",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500656@",
+    "palaz_id": "@I16@",
+    "palaz_name": "Gregoria Hernando Bartolomé",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500660@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500661@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500663@",
+    "palaz_id": "@I1476@",
+    "palaz_name": "Gloria Kassner Scheppelmann",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500671@",
+    "palaz_id": "@I504790@",
+    "palaz_name": "Francisco Fernández Arias",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500672@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500673@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500674@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500675@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500676@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500679@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500680@",
+    "palaz_id": "@I56@",
+    "palaz_name": "Louis Guth",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500681@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500682@",
+    "palaz_id": "@I502377@",
+    "palaz_name": "Juan Jose Antonio Compte Badiella",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500683@",
+    "palaz_id": "@I502378@",
+    "palaz_name": "Santiago Aurelio Compte Diago",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500686@",
+    "palaz_id": "@I500118@",
+    "palaz_name": "Pilar Trius Sáiz",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500687@",
+    "palaz_id": "@I502099@",
+    "palaz_name": "María Pilar Lagunilla Trius",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500688@",
+    "palaz_id": "@I502097@",
+    "palaz_name": "Mª del Carmen Dacosta Grande",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500689@",
+    "palaz_id": "@I502098@",
+    "palaz_name": "Joaquín Lagunilla Dacosta",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500690@",
+    "palaz_id": "@I747@",
+    "palaz_name": "Carme Cuevas Ametller",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500691@",
+    "palaz_id": "@I502348@",
+    "palaz_name": "Diago",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500692@",
+    "palaz_id": "@I502349@",
+    "palaz_name": "Lozano",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500693@",
+    "palaz_id": "@I502350@",
+    "palaz_name": "Esteban Diago Lozano",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500694@",
+    "palaz_id": "@I502393@",
+    "palaz_name": "Julian Diago Lozano",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500697@",
+    "palaz_id": "@I503674@",
+    "palaz_name": "Dolores de Pazos",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500705@",
+    "palaz_id": "@I503649@",
+    "palaz_name": "Miguel Molina Múgica",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500706@",
+    "palaz_id": "@I503650@",
+    "palaz_name": "Pretola Bernarda Salazar González",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500708@",
+    "palaz_id": "@I503643@",
+    "palaz_name": "Sebastián Hernández Cerdán",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500714@",
+    "palaz_id": "@I503679@",
+    "palaz_name": "Juan de la Cruz Mediero Molina",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500715@",
+    "palaz_id": "@I504204@",
+    "palaz_name": "Luisa Pérez Duro",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500717@",
+    "palaz_id": "@I504203@",
+    "palaz_name": "Josefa Hernández Sánchez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500718@",
+    "palaz_id": "@I505037@",
+    "palaz_name": "Alexia Serena Aleu",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500719@",
+    "palaz_id": "@I505036@",
+    "palaz_name": "Masha Petek",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500720@",
+    "palaz_id": "@I505039@",
+    "palaz_name": "Narciso Puig Valls",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500721@",
+    "palaz_id": "@I505040@",
+    "palaz_name": "Mercedes Rigau Sellés",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500722@",
+    "palaz_id": "@I505041@",
+    "palaz_name": "Carmen Puig Rigau",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500723@",
+    "palaz_id": "@I505042@",
+    "palaz_name": "Antonio Miquel Font",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500724@",
+    "palaz_id": "@I505043@",
+    "palaz_name": "Antonia López Bosch",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500727@",
+    "palaz_id": "@I505138@",
+    "palaz_name": "Maltas Famadas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500729@",
+    "palaz_id": "@I505140@",
+    "palaz_name": "Joan Maltas i Torras",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500730@",
+    "palaz_id": "@I505141@",
+    "palaz_name": "Quimeta Famadas i Carles",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500733@",
+    "palaz_id": "@I505142@",
+    "palaz_name": "Francesc Maltas Famadas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500734@",
+    "palaz_id": "@I505149@",
+    "palaz_name": "Eduard Molist Figueres",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500735@",
+    "palaz_id": "@I505150@",
+    "palaz_name": "Dolors Carreras Pujol",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500749@",
+    "palaz_id": "@I505413@",
+    "palaz_name": "Conesa Aylagas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500757@",
+    "palaz_id": "@I505416@",
+    "palaz_name": "Vicente Aylagas Romero",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500759@",
+    "palaz_id": "@I505429@",
+    "palaz_name": "José Almela Diago",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500768@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500769@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500770@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500771@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500772@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500773@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500774@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500775@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500776@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500777@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500778@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500779@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500780@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500783@",
+    "palaz_id": "@I505761@",
+    "palaz_name": "Sara Abu-Sabbah Quilis",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500784@",
+    "palaz_id": "@I505766@",
+    "palaz_name": "Pilar Miras Virgili",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500785@",
+    "palaz_id": "@I505767@",
+    "palaz_name": "Marta Bueno",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500786@",
+    "palaz_id": "@I505765@",
+    "palaz_name": "Alexandre Cuende Estévez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500787@",
+    "palaz_id": "@I505764@",
+    "palaz_name": "Anna Navarro de Pedro",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500788@",
+    "palaz_id": "@I1456@",
+    "palaz_name": "Carmen Quintana Barberà",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500789@",
+    "palaz_id": "@I505506@",
+    "palaz_name": "María Dolores Torras Pla",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500790@",
+    "palaz_id": "@I505421@",
+    "palaz_name": "Conesa Masnou",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500792@",
+    "palaz_id": "@I505771@",
+    "palaz_name": "Jorge Mario Garzón Rey",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500793@",
+    "palaz_id": "@I505772@",
+    "palaz_name": "Elena Allueva",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500794@",
+    "palaz_id": "@I505770@",
+    "palaz_name": "Martí Plomer Sánchez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500795@",
+    "palaz_id": "@I502257@",
+    "palaz_name": "Tomàs Carratalá",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500796@",
+    "palaz_id": "@I502258@",
+    "palaz_name": "Antònia Olives",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500797@",
+    "palaz_id": "@I502256@",
+    "palaz_name": "Antònia Aragonés Català",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500798@",
+    "palaz_id": "@I502255@",
+    "palaz_name": "Sebastià Quintana Mercadal",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500799@",
+    "palaz_id": "@I502260@",
+    "palaz_name": "Antònia Mercadal Marquès",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500800@",
+    "palaz_id": "@I502259@",
+    "palaz_name": "Sebastià Quintana Castell",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500801@",
+    "palaz_id": "@I502261@",
+    "palaz_name": "Sebastia Quintana Casasnovas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500802@",
+    "palaz_id": "@I502262@",
+    "palaz_name": "Joana Castell Vilá",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500805@",
+    "palaz_id": "@I502265@",
+    "palaz_name": "Bartomeu Quintana Castelll",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500806@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500807@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500808@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500809@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500810@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500811@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500812@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500813@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500814@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500815@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500816@",
+    "palaz_id": "@I502269@",
+    "palaz_name": "Àngela Casasnovas Piris",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500817@",
+    "palaz_id": "@I502266@",
+    "palaz_name": "Bartomeu Quintana Canovas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500818@",
+    "palaz_id": "@I502267@",
+    "palaz_name": "Sebastià Quintana",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500819@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500820@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500821@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500822@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500823@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500824@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500825@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500826@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500827@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500828@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500829@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500830@",
+    "palaz_id": "@I505969@",
+    "palaz_name": "José Salvador Montoliu",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500831@",
+    "palaz_id": "@I505970@",
+    "palaz_name": "Marta Alvarez Pérez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500832@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500833@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500834@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500835@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500836@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500837@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500838@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500839@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500840@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500841@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500842@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500846@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500847@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500848@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500849@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500850@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500851@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I500853@",
+    "palaz_id": "@I503647@",
+    "palaz_name": "Sebastián Hernández",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500854@",
+    "palaz_id": "@I503648@",
+    "palaz_name": "María Cerdán",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500855@",
+    "palaz_id": "@I503645@",
+    "palaz_name": "Salvador Fuentes Alcazar",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I500856@",
+    "palaz_id": "@I503646@",
+    "palaz_name": "Beatriz Martínez Puente",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I53@",
+    "palaz_id": "@I714@",
+    "palaz_name": "Rita de la Cruz",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I56@",
+    "palaz_id": "@I715@",
+    "palaz_name": "Xavier Barahona Dalmau",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I59@",
+    "palaz_id": "@I746@",
+    "palaz_name": "Josepa \"Pepa\" Molins Plà",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I64@",
+    "palaz_id": "@I780@",
+    "palaz_name": "Carmen Nofre Solà",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I66@",
+    "palaz_id": "@I831@",
+    "palaz_name": "Lluís Renom Blanchart",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I70@",
+    "palaz_id": "@I745@",
+    "palaz_name": "Jordi Fontanills Font",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I78@",
+    "palaz_id": "@I298@",
+    "palaz_name": "Ana Mª Godes Hospital",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I79@",
+    "palaz_id": "@I755@",
+    "palaz_name": "Javier Millán Urgel",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I83@",
+    "palaz_id": "@I364@",
+    "palaz_name": "Rosa Pujol Pérez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I84@",
+    "palaz_id": "@I365@",
+    "palaz_name": "Joan Pujol Pérez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I86@",
+    "palaz_id": "@I759@",
+    "palaz_name": "Joan Carles Bertran Alexandre",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I87@",
+    "palaz_id": "@I443@",
+    "palaz_name": "Carles Bertran Pujol",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I88888888@",
+    "palaz_id": "@I88888888@",
+    "palaz_name": "Unassociated photos",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I88@",
+    "palaz_id": "@I743@",
+    "palaz_name": "Josepa Ninou Pere",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I90@",
+    "palaz_id": "@I418@",
+    "palaz_name": "María Puig Ninou",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I91@",
+    "palaz_id": "@I416@",
+    "palaz_name": "Eugènia Puig Ninou",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I93@",
+    "palaz_id": "@I744@",
+    "palaz_name": "Núria Olivella Busquets",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I98@",
+    "palaz_id": "@I782@",
+    "palaz_name": "Margarita Ruz Brea",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I9@",
+    "palaz_id": "@I1448@",
+    "palaz_name": "Ana Tarrats Bertrán",
+    "confidence": 100,
+    "match_type": "manual"
+  }
+]

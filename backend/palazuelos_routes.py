@@ -372,6 +372,7 @@ def _run_build_map(ged_path: str, db_path: str):
             "total": len(godes_people),
         }
         _jlog(f"Fet en {elapsed}s — auto:{matched_auto}, revisió:{needs_review}, sense match:{no_match}")
+        _export_map_json()
         with _job_lock:
             _job.update({"status": "done", "result": result})
 
@@ -381,6 +382,31 @@ def _run_build_map(ged_path: str, db_path: str):
         _jlog(traceback.format_exc())
         with _job_lock:
             _job["status"] = "error"
+
+
+# ---------------------------------------------------------------------------
+# JSON backup helpers
+# ---------------------------------------------------------------------------
+
+def _export_map_json():
+    """Export manual+rejected entries to data/palazuelos_map.json as a permanent backup seed."""
+    if not _db_conn or not _base_dir:
+        return
+    try:
+        rows = _db_conn.execute("""
+            SELECT godes_id, palaz_id, palaz_name, confidence, match_type
+            FROM palazuelos_map
+            WHERE match_type IN ('manual', 'rejected')
+            ORDER BY godes_id
+        """).fetchall()
+        entries = [dict(r) for r in rows]
+        json_path = _base_dir / "data" / "palazuelos_map.json"
+        json_path.write_text(
+            json.dumps(entries, ensure_ascii=False, indent=2),
+            encoding="utf-8"
+        )
+    except Exception:
+        pass  # best-effort — never break the main operation
 
 
 # ---------------------------------------------------------------------------
@@ -421,6 +447,18 @@ async def build_map():
     t = threading.Thread(target=_run_build_map, args=(str(ged_path), db_path), daemon=True)
     t.start()
     return {"status": "started"}
+
+
+@router.post("/export-map")
+async def export_map():
+    """Export manual+rejected entries to data/palazuelos_map.json."""
+    _export_map_json()
+    json_path = _base_dir / "data" / "palazuelos_map.json"
+    count = 0
+    if json_path.exists():
+        import json as _json
+        count = len(_json.loads(json_path.read_text(encoding="utf-8")))
+    return {"ok": True, "entries": count, "path": str(json_path)}
 
 
 @router.get("/build-map/status")
@@ -480,6 +518,7 @@ async def update_map(godes_id: str, body: UpdateMapRequest):
     """, (godes_id, body.palaz_id, body.palaz_name,
           body.confidence, body.match_type))
     db.commit()
+    _export_map_json()
     return {"ok": True}
 
 

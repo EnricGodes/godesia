@@ -1,145 +1,5 @@
 [
   {
-    "titulo": "¿Sabías que Jordi Hurtado Abelló murió con solo 18 años en la Guerra Civil?",
-    "texto": "Falleció en el campo de concentración de San Marcos de León, el 1 de septiembre de 1938. En el recuerdo familiar quedó su grito final: “Visca Catalunya!”.",
-    "cta": "Saber más sobre Jordi Hurtado Abelló"
-  },
-  {
-    "titulo": "¿Sabías que Emili Godes Hurtado fue uno de los grandes fotógrafos de la familia?",
-    "texto": "Entró muy joven en el oficio, fue encargado de Casa Cuyàs, se convirtió en socio fundador de la Agrupació Fotogràfica de Catalunya y destacó especialmente en macrofotografía.",
-    "cta": "Saber más sobre Emili Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que Pasqual Godes Terrats fue un músico y compositor muy reconocido en su tiempo?",
-    "texto": "Su carrera quedó marcada por una biografía intensa y breve: enviudó muy joven y murió con solo 46 años.",
-    "cta": "Saber más sobre Pasqual Godes Terrats"
-  },
-  {
-    "titulo": "¿Sabías que la tragedia golpeó a Pasqual Godes Terrats el mismo día del parto?",
-    "texto": "Su esposa, Mercedes Martínez Manchón, murió el 13 de diciembre de 1929, y la hija de ambos nació y murió ese mismo día.",
-    "cta": "Saber más sobre Pasqual Godes Terrats"
-  },
-  {
-    "titulo": "¿Sabías que Jesús Mestre Godes comenzó su verdadera carrera literaria a los 69 años?",
-    "texto": "Su primer libro en una editorial comercial apareció cuando ya estaba jubilado, y desde entonces desarrolló una obra sorprendente y muy influyente.",
-    "cta": "Saber más sobre Jesús Mestre Godes"
-  },
-  {
-    "titulo": "¿Sabías que Jesús Mestre Godes llegó a publicar 25 libros?",
-    "texto": "Nada menos que 23 de ellos los escribió en apenas una década, entre 1994 y 2004, en un estallido creativo extraordinario.",
-    "cta": "Saber más sobre Jesús Mestre Godes"
-  },
-  {
-    "titulo": "¿Sabías que Jesús Mestre Godes recibió la Medalla de Honor de Barcelona?",
-    "texto": "La recibió en 2014, como reconocimiento a una trayectoria que lo convirtió en uno de los grandes divulgadores históricos en catalán.",
-    "cta": "Saber más sobre Jesús Mestre Godes"
-  },
-  {
-    "titulo": "¿Sabías que Felip Puig Godes llegó a ocupar cuatro conselleries de la Generalitat?",
-    "texto": "Pasó por Medi Ambient, Política Territorial i Obres Públiques, Interior y Empresa i Ocupació, además de ser diputado y alto cargo institucional.",
-    "cta": "Saber más sobre Felip Puig Godes"
-  },
-  {
-    "titulo": "¿Sabías que Ana Godes Hospital fue una gran campeona del tenis de mesa español?",
-    "texto": "Ganó 23 títulos de campeona de España absoluta y 13 campeonatos de Catalunya, además de competir a nivel europeo desde muy joven.",
-    "cta": "Saber más sobre Ana Godes Hospital"
-  },
-  {
-    "titulo": "¿Sabías que en una misma familia coincidieron dos generaciones brillantes del tenis de mesa?",
-    "texto": "La madre, Ignacia “Nacha” Hospital, ya tenía un palmarés impresionante, y su hija Ana Godes Hospital siguió el mismo camino hasta convertirse en una de las grandes jugadoras del país.",
-    "cta": "Saber más sobre Ana Godes Hospital"
-  },
-  {
-    "titulo": "¿Sabías que Ramón Godes Hurtado trabajó para la Metro-Goldwyn-Mayer?",
-    "texto": "Desarrolló toda su vida profesional en las oficinas barcelonesas de la gran productora americana y, además, fue un gran aficionado al tenis de mesa.",
-    "cta": "Saber más sobre Ramón Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que Josep Maria Godes Hurtado montó un laboratorio fotográfico en las golfas de su casa?",
-    "texto": "Desde allí daba servicio de revelado en blanco y negro a distintos establecimientos de Barcelona, entre ellos la conocida tienda Godes del Passeig de Gràcia.",
-    "cta": "Saber más sobre Josep Maria Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que Teresa Godes Domenech dedicó más de cuatro décadas a la enseñanza?",
-    "texto": "Se formó como maestra a comienzos del siglo XX, pasó por distintos destinos y vivió en primera línea la República, la Guerra Civil y la posguerra sin abandonar la docencia.",
-    "cta": "Saber más sobre Teresa Godes Domenech"
-  },
-  {
-    "titulo": "¿Sabías que Josep Sagarra Agost ganó un reconocimiento en la Exposición Universal de 1888?",
-    "texto": "Una de sus obras, una mesita de hierro forjada pieza a pieza, fue premiada, reflejando una trayectoria hecha de trabajo, oficio y aprendizaje nocturno en Llotja mientras trabajaba en La Maquinista.",
-    "cta": "Saber más sobre Josep Sagarra Agost"
-  },
-  {
-    "titulo": "¿Sabías que Rosa Godes Hurtado quedó ligada a una saga de mármoles, escultura y decoración?",
-    "texto": "Al casarse con Joan Pujol i Pont entró en una familia vinculada a talleres que colaboraron con grandes proyectos barceloneses.",
-    "cta": "Saber más sobre Rosa Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que la familia política de Rosa Godes Hurtado trabajó con Enric Sagnier?",
-    "texto": "Entre sus colaboraciones figuran obras tan emblemáticas como el Temple Expiatori del Tibidabo y la finca El Pinar de Barcelona.",
-    "cta": "Saber más sobre Rosa Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que Ernest Godes Hurtado tuvo una vida profesional muy cambiante?",
-    "texto": "Pasó del mundo portuario a una serrería, y más tarde al sector de los seguros, en una trayectoria poco común y muy versátil.",
-    "cta": "Saber más sobre Ernest Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que Ernest Godes Hurtado dirigió a los estibadores del puerto de Tarragona?",
-    "texto": "Fue gerente en ese ámbito antes de abrir otras etapas profesionales en su vida.",
-    "cta": "Saber más sobre Ernest Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que la Guerra Civil obligó a Ernest Godes Hurtado a cambiar de ciudad?",
-    "texto": "Un bombardeo destruyó su casa y la familia tuvo que rehacerse lejos de su primera residencia.",
-    "cta": "Saber más sobre Ernest Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que Ramón Godes Hurtado trabajó toda su vida con el gran cine americano?",
-    "texto": "Desarrolló su carrera en las oficinas barcelonesas de la Metro-Goldwyn-Mayer, una presencia muy singular dentro de la familia.",
-    "cta": "Saber más sobre Ramón Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que el tenis de mesa unió a Ramón Godes Hurtado con Nacha Hospital?",
-    "texto": "Él era gran aficionado y entrenador; ella acabaría siendo una figura destacada de ese deporte.",
-    "cta": "Saber más sobre Ramón Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que tres hermanos Godes Hurtado regresaron vivos del frente?",
-    "texto": "Josep Maria, Ramón y Artur fueron movilizados durante la guerra y, pese a todo, los tres volvieron a casa.",
-    "cta": "Saber más sobre los hermanos Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que Josep Maria Godes Hurtado trabajó en la empresa que acabaría asociándose a Filomatic?",
-    "texto": "Pasó por Hojas Iberia, en el ámbito de las hojas de afeitar, en un momento de fuerte desarrollo industrial.",
-    "cta": "Saber más sobre Josep Maria Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que Josep Maria Godes Hurtado montó un laboratorio de revelado en casa?",
-    "texto": "Desde las golfas del piso familiar daba servicio fotográfico en blanco y negro a varios establecimientos de Barcelona.",
-    "cta": "Saber más sobre Josep Maria Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que una tienda familiar de fotografía se abastecía desde una buhardilla doméstica?",
-    "texto": "Ese pequeño laboratorio casero revelaba material también para la tienda Godes del Passeig de Gràcia.",
-    "cta": "Saber más sobre Josep Maria Godes Hurtado"
-  },
-  {
-    "titulo": "¿Sabías que Pau Godes Caballeria está en el origen de la rama Godes de Sarrià?",
-    "texto": "Su figura aparece como punto de arranque de una línea familiar muy identificada con ese barrio.",
-    "cta": "Saber más sobre Pau Godes Caballeria"
-  },
-  {
-    "titulo": "¿Sabías que Pau Godes Caballeria combinó poesía, música y ferrocarril?",
-    "texto": "Fue tenor del terceto La Unión, escribió versos y trabajó en el tren de Sarrià.",
-    "cta": "Saber más sobre Pau Godes Caballeria"
-  },
-  {
-    "titulo": "¿Sabías que el tren de Sarrià forma parte directa de la memoria familiar?",
-    "texto": "Uno de los Godes más recordados trabajó allí durante años, dejando una huella muy concreta en la Barcelona cotidiana.",
-    "cta": "Saber más sobre Pau Godes Caballeria"
-  },
-  {
     "titulo": "¿Sabías que Artur Godes Caballeria no fue solo tenor, sino también hombre de repertorio?",
     "texto": "Participó en numerosos segundos papeles dentro de compañías de ópera italiana, una labor menos visible pero esencial.",
     "cta": "Saber más sobre Artur Godes Caballeria"
@@ -155,11 +15,6 @@
     "cta": "Saber más sobre Montserrat Hurtado Abelló"
   },
   {
-    "titulo": "¿Sabías que un hijo de Montserrat Hurtado Abelló cambió la ciudad por la montaña?",
-    "texto": "César Pérez Hurtado se instaló en Sort, atraído por una vida más aventurera y ligada a la naturaleza.",
-    "cta": "Saber más sobre César Pérez Hurtado"
-  },
-  {
     "titulo": "¿Sabías que César Pérez Hurtado abrió rutas de escalada?",
     "texto": "Su perfil se asocia al mundo de la montaña y a una forma de vida muy distinta de la urbana.",
     "cta": "Saber más sobre César Pérez Hurtado"
@@ -168,26 +23,6 @@
     "titulo": "¿Sabías que en la familia hay una anécdota de lotería casi legendaria?",
     "texto": "Montserrat Hurtado solía comprar décimos con el número 08036, su código postal del Eixample; justo el año que no pudo hacerlo, ese número fue premiado.",
     "cta": "Saber más sobre Montserrat Hurtado Abelló"
-  },
-  {
-    "titulo": "¿Sabías que Teresa Godes Domenech dedicó más de cuarenta años a enseñar?",
-    "texto": "Su trayectoria docente atravesó monarquía, República, guerra y posguerra sin apartarse de la escuela.",
-    "cta": "Saber más sobre Teresa Godes Domenech"
-  },
-  {
-    "titulo": "¿Sabías que Teresa Godes Domenech pasó por Morella, Cuenca, el Baix Penedès y Almassora?",
-    "texto": "Su carrera como maestra la llevó por varios destinos antes de jubilarse.",
-    "cta": "Saber más sobre Teresa Godes Domenech"
-  },
-  {
-    "titulo": "¿Sabías que Teresa Godes Domenech fue depurada tras la guerra y aun así siguió en la enseñanza?",
-    "texto": "Logró mantener su puesto en un contexto durísimo para el magisterio.",
-    "cta": "Saber más sobre Teresa Godes Domenech"
-  },
-  {
-    "titulo": "¿Sabías que una escuela acabó llevando el nombre de Teresa Godes Domenech?",
-    "texto": "Fue una forma de reconocer a quien alfabetizó a generaciones enteras en un pequeño pueblo.",
-    "cta": "Saber más sobre Teresa Godes Domenech"
   },
   {
     "titulo": "¿Sabías que Josep Sagarra Agost empezó desde una situación muy humilde?",
@@ -438,10 +273,5 @@
     "titulo": "¿Sabías que varias ramas muestran una fuerte movilidad entre Barcelona, Castellón, Córdoba y Cuba?",
     "texto": "La familia no fue estática: hay un movimiento constante entre ciudades, puertos y destinos muy distintos.",
     "cta": "Saber más sobre la geografía familiar"
-  },
-  {
-    "titulo": "¿Sabías que una de las grandes historias de la familia es su capacidad de reinventarse?",
-    "texto": "De tejedores, litógrafos y joyeros a fotógrafos, docentes, médicos, políticos, deportistas y creativos: pocas sagas muestran una transformación tan visible.",
-    "cta": "Saber más sobre la evolución de la familia"
   }
 ]
