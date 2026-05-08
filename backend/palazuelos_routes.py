@@ -555,6 +555,28 @@ async def search_candidates(q: str = "", limit: int = 15):
     return {"candidates": results[:limit]}
 
 
+@router.get("/thumb")
+async def photo_thumb(url: str):
+    """Proxy a Palazuelos CDN image through the backend (CDN requires auth the browser lacks)."""
+    from fastapi.responses import Response as FastResponse
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+                "Referer": "https://www.myheritage.es/",
+            }
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = resp.read()
+            ct = resp.headers.get("Content-Type", "image/jpeg")
+        return FastResponse(content=data, media_type=ct)
+    except urllib.error.HTTPError as e:
+        raise HTTPException(e.code, f"CDN error {e.code}")
+    except Exception as exc:
+        raise HTTPException(502, str(exc))
+
+
 @router.get("/pending-photos")
 async def pending_photos():
     """Return photos in Palazuelos not yet in Godes DB, for confirmed pairs."""
@@ -563,12 +585,16 @@ async def pending_photos():
     if not ged_path.exists():
         raise HTTPException(404, "palazuelos.ged no trobat")
 
-    # Get confirmed pairs
+    # Get confirmed pairs — skip synthetic/self-referential entries like @I88888888@
     try:
         pairs = db.execute("""
-            SELECT godes_id, palaz_id, palaz_name
-            FROM palazuelos_map
-            WHERE palaz_id IS NOT NULL AND match_type != 'rejected'
+            SELECT pm.godes_id, pm.palaz_id, pm.palaz_name
+            FROM palazuelos_map pm
+            JOIN people p ON pm.godes_id = p.id
+            WHERE pm.palaz_id IS NOT NULL
+              AND pm.match_type != 'rejected'
+              AND pm.palaz_id != pm.godes_id
+              AND pm.godes_id NOT LIKE '@I8888%'
         """).fetchall()
     except Exception:
         return {"photos": []}
@@ -594,6 +620,31 @@ async def pending_photos():
 
     # Parse Palazuelos photos
     palaz_photos = _parse_palaz_photos(str(ged_path))
+
+    # Detect CDN URL expiry (all URLs share the same expiry timestamp)
+    cdn_expired = False
+    cdn_expiry_date = None
+    for person_photos in palaz_photos.values():
+        for ph in person_photos:
+            url = ph.get("url", "")
+            m = re.search(r'e=(\d+)', url)
+            if not m:
+                # Try base64-decoded segment
+                try:
+                    import base64 as _b64
+                    seg = url.split("/")[5] if url.count("/") >= 5 else ""
+                    decoded = _b64.b64decode(seg + "==").decode("latin-1")
+                    m = re.search(r'e=(\d+)', decoded)
+                except Exception:
+                    pass
+            if m:
+                import time as _time
+                expiry_ts = int(m.group(1))
+                cdn_expiry_date = datetime.fromtimestamp(expiry_ts).strftime("%Y-%m-%d")
+                cdn_expired = expiry_ts < _time.time()
+            break
+        if cdn_expiry_date:
+            break
 
     pending = []
     for row in pairs:
@@ -646,7 +697,13 @@ async def pending_photos():
                 "is_document": bool(er[4]),
             })
 
-    return {"photos": pending, "total": len(pending), "existing_by_person": existing_by_person}
+    return {
+        "photos": pending,
+        "total": len(pending),
+        "existing_by_person": existing_by_person,
+        "cdn_expired": cdn_expired,
+        "cdn_expiry_date": cdn_expiry_date,
+    }
 
 
 @router.post("/download-photo")

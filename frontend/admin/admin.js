@@ -2076,8 +2076,20 @@ const Palazuelos = (() => {
             const d = await apiFetch('/api/admin/palazuelos/pending-photos');
             _pendingPhotos = d.photos || [];
             const existingByPerson = d.existing_by_person || {};
+            const cdnExpired = d.cdn_expired || false;
+            const cdnExpiryDate = d.cdn_expiry_date || '';
             document.getElementById('palaz-photos-loading').style.display = 'none';
             if (!_pendingPhotos.length) { document.getElementById('palaz-photos-empty').style.display = ''; return; }
+            // CDN expiry warning
+            const warnEl = document.getElementById('palaz-cdn-warning');
+            if (warnEl) {
+                if (cdnExpired) {
+                    warnEl.style.display = '';
+                    warnEl.textContent = `⚠️ Les URLs del GEDCOM Palazuelos van caducar el ${cdnExpiryDate}. Les miniatures i les descàrregues no funcionaran fins que re-exportis palazuelos.ged des de MyHeritage.`;
+                } else {
+                    warnEl.style.display = 'none';
+                }
+            }
 
             const byPerson = {};
             for (const p of _pendingPhotos) {
@@ -2095,10 +2107,14 @@ const Palazuelos = (() => {
                 html += `<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;">`;
                 for (const ph of grp.photos) {
                     const isPdf = (ph.filename || '').endsWith('.pdf');
-                    const thumb = isPdf ? '<span style="font-size:2rem;display:block;margin-bottom:.25rem;">📄</span>' :
-                        `<img src="${esc(ph.url)}" alt="" loading="lazy"
-                              style="width:80px;height:60px;object-fit:cover;border-radius:4px;display:block;margin-bottom:.25rem;"
-                              onerror="this.style.display='none'"/>`;
+                    const proxyUrl = `/api/admin/palazuelos/thumb?url=${encodeURIComponent(ph.url)}`;
+                    const thumb = isPdf
+                        ? '<span style="font-size:2rem;display:block;margin-bottom:.25rem;">📄</span>'
+                        : cdnExpired
+                            ? '<span style="font-size:1.8rem;display:block;margin-bottom:.25rem;opacity:.4;">📷</span>'
+                            : `<img src="${proxyUrl}" alt="" loading="lazy"
+                                  style="width:80px;height:60px;object-fit:cover;border-radius:4px;display:block;margin-bottom:.25rem;"
+                                  onerror="this.outerHTML='<span style=\\'font-size:1.8rem;display:block;margin-bottom:.25rem;opacity:.4;\\'>📷</span>'"  />`;
                     html += `<label style="display:flex;flex-direction:column;align-items:center;cursor:pointer;padding:.4rem;border:1px solid #e5e2da;border-radius:6px;background:#fff;max-width:120px;font-size:.7rem;text-align:center;"
                                     title="${esc(ph.filename)}">
                                 <input type="checkbox" class="palaz-photo-check" data-idx="${_pendingPhotos.indexOf(ph)}"
