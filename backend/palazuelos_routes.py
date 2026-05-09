@@ -22,6 +22,17 @@ from admin_routes import (
 
 router = APIRouter(prefix="/api/admin/palazuelos", tags=["palazuelos"])
 
+
+def _fix_encoding(text: str) -> str:
+    """Repair mojibake: text was UTF-8 bytes read as latin-1."""
+    if not text:
+        return text
+    try:
+        fixed = text.encode('latin-1').decode('utf-8')
+        return fixed if fixed != text else text
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return text
+
 _db_conn = None
 _base_dir: Optional[Path] = None
 
@@ -754,6 +765,7 @@ async def download_photo(body: DownloadPhotoRequest):
     db = _db()
     photos_dir = _base_dir / "data" / "photos"
     dest = photos_dir / body.filename
+    body.title = _fix_encoding(body.title or "") or body.title
 
     if dest.exists():
         status = "skipped_exists"
