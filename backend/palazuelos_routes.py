@@ -54,7 +54,7 @@ def _extract_hash(filename: str) -> Optional[str]:
 
 def _parse_palaz_photos(ged_path: str) -> dict:
     """Parse OBJE blocks per individual. Returns {palaz_id: [photo_dict, ...]}."""
-    with open(ged_path, 'r', encoding='latin-1') as f:
+    with open(ged_path, 'r', encoding='utf-8-sig') as f:
         content = f.read().replace('\r\n', '\n').replace('\r', '\n')
 
     photos_by_indi: dict = {}
