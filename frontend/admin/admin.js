@@ -1564,12 +1564,12 @@ function _guessDocType(title) {
         .replace(/[^a-z0-9]+/g, ' ')                       // non-alphanum → space
         .trim();
     const m = (re) => re.test(t);
-    if (m(/defunci|esquela|obituari|necrologica|cementir|cementerio|cemetery|sepultura|sepulture|sepulcre|sepulcro|\bnicho\b|\bnixol\b|\bnínxol\b|\btumba\b|\bfossa\b|\bossari\b|sepeli|sepelio|inhumaci|funeral|requiem|panteon|\bmort\b|\bdeath\b|fallec|deceso/)) return 'defuncio';
+    if (m(/defunci|esquela|obituari|necrologica|cementir|cementerio|cemetery|enterrament|enterramiento|sepultura|sepulture|sepulcre|sepulcro|\bnicho\b|\bnixol\b|\bnínxol\b|\btumba\b|\bfossa\b|\bossari\b|sepeli|sepelio|inhumaci|funeral|requiem|panteon|\bmort\b|\bdeath\b|fallec|deceso/)) return 'defuncio';
     if (m(/bautis|bautiz|bateig|baptis|christening|\bpila\b/)) return 'bautisme';
     if (m(/naix|neix|naxie|nacimien|nacidos|\bbirth\b|\bborn\b/)) return 'naixement';
     if (m(/matrimoni|matrimony|casament|\bboda\b|\bnoces\b|nupci|mariage|\bmarriage\b/)) return 'matrimoni';
     if (m(/certificat|certifica|certificate|\bacta\b|\bacte\b/)) return 'certificat';
-    if (m(/\bpadro\b|padron|empadronament|\bcenso\b/)) return 'padro';
+    if (m(/\bpadr|padron|empadronament|\bcenso\b|\bcens\b/)) return 'padro';
     if (m(/testament|testamento|herencia|codicil/)) return 'testament';
     if (m(/genealogi|\barbre\b|\barbol\b|\btree\b/)) return 'arbre';
     if (m(/transcripcio|transcripcion|transcript/)) return 'transcripcio';
