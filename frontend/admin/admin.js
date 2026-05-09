@@ -2126,12 +2126,14 @@ const Palazuelos = (() => {
                 for (const ph of grp.photos) {
                     const isPdf = (ph.filename || '').endsWith('.pdf');
                     const proxyUrl = `/api/admin/palazuelos/thumb?url=${encodeURIComponent(ph.url)}`;
+                    const clickable = !isPdf && !cdnExpired;
+                    const thumbClick = clickable ? `onclick="event.preventDefault();Palazuelos.openPhotoModal('${proxyUrl}','${esc(ph.title||ph.filename)}')" style="cursor:zoom-in;"` : '';
                     const thumb = isPdf
                         ? '<span style="font-size:2rem;display:block;margin-bottom:.25rem;">📄</span>'
                         : cdnExpired
                             ? '<span style="font-size:1.8rem;display:block;margin-bottom:.25rem;opacity:.4;">📷</span>'
-                            : `<img src="${proxyUrl}" alt="" loading="lazy"
-                                  style="width:80px;height:60px;object-fit:cover;border-radius:4px;display:block;margin-bottom:.25rem;"
+                            : `<img src="${proxyUrl}" alt="" loading="lazy" ${thumbClick}
+                                  style="width:80px;height:60px;object-fit:cover;border-radius:4px;display:block;margin-bottom:.25rem;${clickable?'cursor:zoom-in;':''}"
                                   onerror="this.outerHTML='<span style=\\'font-size:1.8rem;display:block;margin-bottom:.25rem;opacity:.4;\\'>📷</span>'"  />`;
                     html += `<label style="display:flex;flex-direction:column;align-items:center;cursor:pointer;padding:.4rem;border:1px solid #e5e2da;border-radius:6px;background:#fff;max-width:120px;font-size:.7rem;text-align:center;"
                                     title="${esc(ph.filename)}">
@@ -2149,10 +2151,12 @@ const Palazuelos = (() => {
                     html += `<div style="display:flex;flex-wrap:wrap;gap:.4rem;">`;
                     for (const ex of existing) {
                         const isPdf = (ex.filename || '').endsWith('.pdf');
+                        const exSrc = `/photos/${esc(ex.filename)}`;
+                        const exClick = !isPdf ? `onclick="Palazuelos.openPhotoModal('${exSrc}','${esc(ex.title||ex.filename)}')"` : '';
                         const thumb = isPdf
                             ? '<span style="font-size:1.5rem;display:block;margin-bottom:.2rem;">📄</span>'
-                            : `<img src="/photos/${esc(ex.filename)}" alt="" loading="lazy"
-                                   style="width:60px;height:45px;object-fit:cover;border-radius:3px;display:block;margin-bottom:.2rem;opacity:.75;"
+                            : `<img src="${exSrc}" alt="" loading="lazy" ${exClick}
+                                   style="width:60px;height:45px;object-fit:cover;border-radius:3px;display:block;margin-bottom:.2rem;opacity:.75;${!isPdf?'cursor:zoom-in;':''}"
                                    onerror="this.style.display='none'"/>`;
                         html += `<div style="display:flex;flex-direction:column;align-items:center;padding:.3rem;border:1px solid #e5e2da;border-radius:5px;background:#f8f6f2;max-width:90px;font-size:.65rem;text-align:center;opacity:.85;"
                                       title="${esc(ex.filename)}">
@@ -2223,9 +2227,16 @@ const Palazuelos = (() => {
         if (ok > 0) loadPendingPhotos();
     }
 
+    function openPhotoModal(src, title) {
+        const img = document.getElementById('clf-modal-img');
+        img.src = src;
+        img.title = title || '';
+        openModal('clf-photo-modal');
+    }
+
     function onActivate() { loadMap(); }
 
     return { buildMap, loadMap, filterMap, setFilter, onTypeahead, hideDropdown,
              selectCandidate, confirmMatch, rejectMatch,
-             loadPendingPhotos, updateSelCount, downloadSelected, onActivate };
+             loadPendingPhotos, updateSelCount, downloadSelected, openPhotoModal, onActivate };
 })();
