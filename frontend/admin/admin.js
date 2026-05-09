@@ -1556,6 +1556,29 @@ const Comparador = {
 // DocClassifier — Photo/Document Classification (4-phase pipeline)
 // ---------------------------------------------------------------------------
 
+function _guessDocType(title) {
+    if (!title) return null;
+    const t = title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const m = (re) => re.test(t);
+    if (m(/\b(esquela|defunci[oó]|defuncion|obituari|cementiri|cemetery|mort|death|fallec|deceso|sepeli|sepelio|inhumaci|fune?ral|requiem)\b/)) return 'defuncio';
+    if (m(/\b(naixement|naxiement|neixament|nacimient|nacidos?|nacido|naix|birth|bautizo|bateig|baptis[mt]|christening|pila)\b/)) {
+        if (m(/\b(bautizo|bateig|baptis[mt]|christening|pila)\b/)) return 'bautisme';
+        return 'naixement';
+    }
+    if (m(/\b(matrimoni|matrimon[iy]|boda|casament|mariage|marriage|noces|nupci)\b/)) return 'matrimoni';
+    if (m(/\b(certificat|certifica|certificate|acta|acte)\b/)) return 'certificat';
+    if (m(/\b(padr[oó]|padron|censo|empadronament)\b/)) return 'padro';
+    if (m(/\b(testament|testamento|herencia|herència|codicil)\b/)) return 'testament';
+    if (m(/\b(arbre|arbol|tree|genealogi)\b/)) return 'arbre';
+    if (m(/\b(transcripcio|transcripci[oó]n|transcript)\b/)) return 'transcripcio';
+    if (m(/\b(poema|poesia|poem)\b/)) return 'poema';
+    if (m(/\b(invitaci[oó]|invitation)\b/)) return 'invitacio';
+    if (m(/\b(carta|letter|epistol)\b/)) return 'carta';
+    if (m(/\b(dibuix|dibujo|drawing|il·lustraci)\b/)) return 'dibuix';
+    if (m(/\b(biografia|biografi|biography)\b/)) return 'biografia';
+    return null;
+}
+
 const DOC_TYPE_OPTIONS = [
     'matrimoni','defuncio','naixement','bautisme','certificat','padro',
     'testament','arbre','transcripcio','poema','invitacio','carta','dibuix','biografia','document',
@@ -1637,7 +1660,13 @@ const DocClassifier = {
     _renderCard(item) {
         const pct = Math.round((item.doc_confidence || 0) * 100);
         const barColor = pct >= 75 ? '#17341e' : pct >= 35 ? '#b45309' : '#6b7280';
-        const typeOpts = DOC_TYPE_OPTIONS.map(t => `<option value="${t}">${t}</option>`).join('');
+        const guessed = _guessDocType(item.title);
+        const typeOpts = DOC_TYPE_OPTIONS.map(t =>
+            `<option value="${t}" ${t === guessed ? 'selected' : ''}>${t}</option>`
+        ).join('');
+        const guessHint = guessed
+            ? `<div style="font-size:.7rem;color:#065f46;margin-bottom:.2rem;">🤖 ${guessed}</div>`
+            : '';
         return `
         <div class="clf-card" id="clf-card-${item.id}">
             <div class="clf-thumb-wrap" onclick="DocClassifier.openPhotoModal('${esc(item.filename)}')">
@@ -1652,7 +1681,7 @@ const DocClassifier = {
                 </div>
                 <div class="clf-conf-label">Document: <strong>${pct}%</strong></div>
                 <div class="clf-actions">
-                    <select class="form-input clf-doctype-sel" id="clf-type-${item.id}"
+                    ${guessHint}<select class="form-input clf-doctype-sel" id="clf-type-${item.id}"
                             style="flex:1;min-width:0;font-size:.77rem;padding:3px 5px;">
                         <option value="">— tipus —</option>
                         ${typeOpts}
