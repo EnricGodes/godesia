@@ -1652,10 +1652,14 @@ async def classifier_pending(limit: int = 20, offset: int = 0):
     ).fetchone()[0]
     rows = db.execute(
         """
-        SELECT id, filename, title, doc_confidence, doc_origin, is_document
-        FROM photos
-        WHERE doc_origin = 'clip_pending'
-        ORDER BY ABS(COALESCE(doc_confidence, 0.5) - 0.5) ASC
+        SELECT p.id, p.filename, p.title, p.doc_confidence, p.doc_origin, p.is_document,
+               GROUP_CONCAT(pe.name, ', ') as persons
+        FROM photos p
+        LEFT JOIN photo_tags pt ON pt.photo_id = p.id
+        LEFT JOIN people pe ON pe.id = pt.person_id
+        WHERE p.doc_origin = 'clip_pending'
+        GROUP BY p.id
+        ORDER BY ABS(COALESCE(p.doc_confidence, 0.5) - 0.5) ASC
         LIMIT ? OFFSET ?
         """,
         (limit, offset),

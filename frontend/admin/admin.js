@@ -1646,6 +1646,7 @@ const DocClassifier = {
             </div>
             <div class="clf-card-body">
                 <div class="clf-title" title="${esc(item.title || '')}">${esc((item.title || '(sense títol)').slice(0, 60))}</div>
+                ${item.persons ? `<div style="font-size:.72rem;color:#2d4b33;margin-bottom:.3rem;opacity:.8;">👤 ${esc(item.persons)}</div>` : ''}
                 <div class="clf-conf-bar-wrap">
                     <div class="clf-conf-bar" style="width:${pct}%;background:${barColor};"></div>
                 </div>

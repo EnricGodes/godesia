@@ -778,7 +778,7 @@ async def download_photo(body: DownloadPhotoRequest):
     else:
         cur = db.execute("""
             INSERT INTO photos (filename, title, is_document, doc_type, doc_origin, is_cutout, is_prim_cutout)
-            VALUES (?, ?, ?, ?, 'palazuelos', 0, 0)
+            VALUES (?, ?, ?, ?, 'clip_pending', 0, 0)
         """, (body.filename, body.title or "", 1 if is_document else 0, doc_type))
         photo_id = cur.lastrowid
         db.commit()
