@@ -314,18 +314,18 @@ function renderPerfil(data, displayName) {
                 ${data.burial && data.burial.length > 0 ? `
                 <div class="pt-6 border-t border-outline-variant/30">
                     <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-4">Localización Exacta Sepultura</dt>
-                    <dd class="grid grid-cols-2 gap-4 text-xs">
+                    <dd class="space-y-3 text-xs">
                         ${data.burial.map((b, i) => `
                             ${b.place ? `
-                            <div class="p-3 bg-white/50 rounded">
+                            <div>
                                 <span class="block text-outline font-bold mb-1">Cementerio</span>
                                 <span class="text-xs">${b.place}</span>
                             </div>
                             ` : ''}
                             ${b.place_detail ? `
-                            <div class="p-3 bg-white/50 rounded">
+                            <div>
                                 <span class="block text-outline font-bold mb-1">Referencia</span>
-                                <span class="text-xs">${b.place_detail}</span>
+                                <span class="text-xs break-words">${b.place_detail}</span>
                             </div>
                             ` : ''}
                         `).join('')}
