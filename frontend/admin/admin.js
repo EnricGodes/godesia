@@ -1851,6 +1851,7 @@ const DocClassifier = {
 const Palazuelos = (() => {
     let _mapData = [];
     let _pendingPhotos = [];
+    let _existingPhotos = [];
     let _pollTimer = null;
     let _activeFilter = '';
 
@@ -2090,6 +2091,7 @@ const Palazuelos = (() => {
         document.getElementById('palaz-photos-list').innerHTML = '';
         document.getElementById('btn-download-selected').style.display = 'none';
         _pendingPhotos = [];
+        _existingPhotos = [];
         try {
             const d = await apiFetch('/api/admin/palazuelos/pending-photos');
             _pendingPhotos = d.photos || [];
@@ -2133,22 +2135,27 @@ const Palazuelos = (() => {
                 for (const ph of grp.photos) {
                     const isPdf = (ph.filename || '').endsWith('.pdf');
                     const proxyUrl = `/api/admin/palazuelos/thumb?url=${encodeURIComponent(ph.url)}`;
+                    const idx = _pendingPhotos.indexOf(ph);
                     const clickable = !isPdf && !cdnExpired;
-                    const thumbClick = clickable ? `onclick="event.preventDefault();Palazuelos.openPhotoModal('${proxyUrl}','${esc(ph.title||ph.filename)}')"` : '';
-                    const thumb = isPdf
-                        ? '<span style="font-size:2rem;display:block;margin-bottom:.25rem;">📄</span>'
+                    const thumbInner = isPdf
+                        ? '<span style="font-size:2rem;">📄</span>'
                         : cdnExpired
-                            ? '<span style="font-size:1.8rem;display:block;margin-bottom:.25rem;opacity:.4;">📷</span>'
-                            : `<img src="${proxyUrl}" alt="" loading="lazy" ${thumbClick}
-                                  style="width:80px;height:60px;object-fit:cover;border-radius:4px;display:block;margin-bottom:.25rem;${clickable?'cursor:zoom-in;':''}"
-                                  onerror="this.outerHTML='<span style=\\'font-size:1.8rem;display:block;margin-bottom:.25rem;opacity:.4;\\'>📷</span>'"  />`;
-                    html += `<label style="display:flex;flex-direction:column;align-items:center;cursor:pointer;padding:.4rem;border:1px solid #e5e2da;border-radius:6px;background:#fff;max-width:120px;font-size:.7rem;text-align:center;"
-                                    title="${esc(ph.filename)}">
-                                <input type="checkbox" class="palaz-photo-check" data-idx="${_pendingPhotos.indexOf(ph)}"
-                                       style="margin-bottom:.25rem;" onchange="Palazuelos.updateSelCount()"/>
-                                ${thumb}
-                                <span style="color:#424842;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;">${esc(ph.title || ph.filename)}</span>
-                            </label>`;
+                            ? '<span style="font-size:1.8rem;opacity:.4;">📷</span>'
+                            : `<img src="${proxyUrl}" alt="" loading="lazy"
+                                  style="width:80px;height:60px;object-fit:cover;border-radius:4px;display:block;"
+                                  onerror="this.outerHTML='<span style=\\'font-size:1.8rem;opacity:.4;\\'>📷</span>'" />`;
+                    html += `<div style="display:flex;flex-direction:column;align-items:center;padding:.4rem;border:1px solid #e5e2da;border-radius:6px;background:#fff;max-width:120px;font-size:.7rem;text-align:center;">
+                                <label style="display:flex;align-items:center;gap:.3rem;margin-bottom:.3rem;cursor:pointer;">
+                                    <input type="checkbox" class="palaz-photo-check" data-idx="${idx}"
+                                           onchange="Palazuelos.updateSelCount()"/>
+                                </label>
+                                <div data-palaz-idx="${idx}"
+                                     style="margin-bottom:.25rem;${clickable ? 'cursor:zoom-in;' : ''}"
+                                     ${clickable ? `onclick="Palazuelos.openPhotoByIdx(${idx})"` : ''}>
+                                    ${thumbInner}
+                                </div>
+                                <span style="color:#424842;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;" title="${esc(ph.title || ph.filename)}">${esc(ph.title || ph.filename)}</span>
+                            </div>`;
                 }
                 html += `</div>`;
                 // Existing DB photos (non-selectable)
@@ -2156,17 +2163,20 @@ const Palazuelos = (() => {
                 if (existing.length) {
                     html += `<div style="font-size:.72rem;color:#9e9b94;margin-bottom:.3rem;">Ja tens:</div>`;
                     html += `<div style="display:flex;flex-wrap:wrap;gap:.4rem;">`;
+                    const exBase = _existingPhotos.length;
                     for (const ex of existing) {
                         const isPdf = (ex.filename || '').endsWith('.pdf');
                         const exSrc = `/photos/${esc(ex.filename)}`;
-                        const exClick = !isPdf ? `onclick="Palazuelos.openPhotoModal('${exSrc}','${esc(ex.title||ex.filename)}')"` : '';
+                        const exIdx = _existingPhotos.length;
+                        _existingPhotos.push({ src: exSrc, title: ex.title || ex.filename });
                         const thumb = isPdf
                             ? '<span style="font-size:1.5rem;display:block;margin-bottom:.2rem;">📄</span>'
-                            : `<img src="${exSrc}" alt="" loading="lazy" ${exClick}
-                                   style="width:60px;height:45px;object-fit:cover;border-radius:3px;display:block;margin-bottom:.2rem;opacity:.75;${!isPdf?'cursor:zoom-in;':''}"
+                            : `<img src="${exSrc}" alt="" loading="lazy"
+                                   style="width:60px;height:45px;object-fit:cover;border-radius:3px;display:block;margin-bottom:.2rem;opacity:.75;${!isPdf ? 'cursor:zoom-in;' : ''}"
                                    onerror="this.style.display='none'"/>`;
                         html += `<div style="display:flex;flex-direction:column;align-items:center;padding:.3rem;border:1px solid #e5e2da;border-radius:5px;background:#f8f6f2;max-width:90px;font-size:.65rem;text-align:center;opacity:.85;"
-                                      title="${esc(ex.filename)}">
+                                      title="${esc(ex.title || ex.filename)}"
+                                      ${!isPdf ? `onclick="Palazuelos.openExistingByIdx(${exIdx})" style="cursor:zoom-in;"` : ''}>
                                     ${thumb}
                                     <span style="color:#9e9b94;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80px;">${esc(ex.title || ex.filename)}</span>
                                 </div>`;
@@ -2234,6 +2244,19 @@ const Palazuelos = (() => {
         if (ok > 0) loadPendingPhotos();
     }
 
+    function openPhotoByIdx(idx) {
+        const ph = _pendingPhotos[idx];
+        if (!ph) return;
+        const proxyUrl = `/api/admin/palazuelos/thumb?url=${encodeURIComponent(ph.url)}`;
+        openPhotoModal(proxyUrl, ph.title || ph.filename);
+    }
+
+    function openExistingByIdx(idx) {
+        const ex = _existingPhotos[idx];
+        if (!ex) return;
+        openPhotoModal(ex.src, ex.title);
+    }
+
     async function dismissPersonPhotos(godesId, rinsJson) {
         let rins;
         try { rins = JSON.parse(rinsJson); } catch { rins = []; }
@@ -2261,5 +2284,5 @@ const Palazuelos = (() => {
     return { buildMap, loadMap, filterMap, setFilter, onTypeahead, hideDropdown,
              selectCandidate, confirmMatch, rejectMatch,
              loadPendingPhotos, updateSelCount, downloadSelected,
-             dismissPersonPhotos, openPhotoModal, onActivate };
+             dismissPersonPhotos, openPhotoByIdx, openExistingByIdx, openPhotoModal, onActivate };
 })();
