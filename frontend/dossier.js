@@ -175,18 +175,6 @@ function renderDossier(data) {
         ` : ''}
     `;
 
-    // Minibio (async, fills #dossier-minibio if available)
-    fetch(`/api/minibio/${encodeURIComponent((person.id || '').replace(/@/g, ''))}`)
-        .then(r => r.json())
-        .then(m => {
-            const bio = m.bio_es || m.bio_ca || '';
-            const el = document.getElementById('dossier-minibio');
-            if (el && bio) {
-                el.innerHTML = `<div style="margin-top:1rem;padding:1rem 1.25rem;background:rgba(45,75,51,0.06);border-left:3px solid #2d4b33;border-radius:4px;font-size:0.95rem;line-height:1.65;color:#3d3d37;font-style:italic;">${bio}</div>`;
-            }
-        })
-        .catch(() => {});
-
     // 2. PERFIL BÁSICO
     renderPerfil(data, displayName);
     renderVitalMap(data.vital_points || []);
@@ -242,31 +230,31 @@ function renderPerfil(data, displayName) {
     }
 
     const html = `
-        <div class="space-y-8" id="card-minibio">
+        <div class="flex flex-col space-y-8" id="card-minibio">
             <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                 <span class="material-symbols-outlined">history_edu</span>
                 Minibiografia
             </h2>
-            <div class="bg-surface-container-low p-8 rounded-xl heritage-border min-h-[280px] flex items-start">
+            <div class="flex-1 bg-surface-container-low p-8 rounded-xl heritage-border">
                 <div id="card-minibio-text" class="text-sm text-on-surface-variant italic opacity-70">Carregant...</div>
             </div>
         </div>
-        <div class="space-y-8">
+        <div class="flex flex-col space-y-8">
             <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                 <span class="material-symbols-outlined">explore</span>
                 Mapa Vital
             </h2>
-            <div class="bg-surface-container-low p-4 rounded-xl heritage-border min-h-[280px]">
-                <div id="vital-map" class="w-full heritage-border shadow-sm"></div>
-                <div id="vital-map-empty" style="display:none;" class="flex items-center justify-center h-64 text-sm text-on-surface-variant italic opacity-70">Sense dades geogràfiques</div>
+            <div class="flex-1 bg-surface-container-low p-4 rounded-xl heritage-border flex flex-col">
+                <div id="vital-map" class="w-full heritage-border shadow-sm flex-1"></div>
+                <div id="vital-map-empty" style="display:none;" class="flex items-center justify-center flex-1 text-sm text-on-surface-variant italic opacity-70">Sense dades geogràfiques</div>
             </div>
         </div>
-        <div class="space-y-8">
+        <div class="flex flex-col space-y-8">
             <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                 <span class="material-symbols-outlined">fingerprint</span>
                 Perfil de Registro
             </h2>
-            <div class="bg-surface-container-low p-8 rounded-xl heritage-border space-y-6 min-h-[280px]">
+            <div class="flex-1 bg-surface-container-low p-8 rounded-xl heritage-border space-y-6">
                 <div class="grid grid-cols-2 gap-8">
                     <div>
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Nombre Completo</dt>
@@ -302,12 +290,12 @@ function renderPerfil(data, displayName) {
             </div>
         </div>
         ${person.death_date || person.death_year || !person.is_alive ? `
-        <div class="space-y-8">
+        <div class="flex flex-col space-y-8">
             <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                 <span class="material-symbols-outlined">account_balance</span>
                 Defunción y Sepelio
             </h2>
-            <div class="bg-surface-container-highest/30 p-8 rounded-xl heritage-border space-y-6 min-h-[280px]">
+            <div class="flex-1 bg-surface-container-highest/30 p-8 rounded-xl heritage-border space-y-6">
                 <div class="grid grid-cols-2 gap-8">
                     <div>
                         <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Fallecimiento</dt>
@@ -396,9 +384,10 @@ function renderVitalMap(points) {
 
     setTimeout(() => {
         const map = L.map('vital-map', { scrollWheelZoom: false });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 18,
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19,
         }).addTo(map);
 
         // Jitter markers sharing identical coords
@@ -1729,9 +1718,10 @@ function renderResidences(residences, events, person) {
     // Defer Leaflet init until after browser reflows the newly-visible section
     setTimeout(() => {
         const map = L.map('residences-map', { scrollWheelZoom: true });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 18,
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19,
         }).addTo(map);
 
         const markerHtml = (n, isBirth) => isBirth

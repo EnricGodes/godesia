@@ -27,7 +27,7 @@ from query_engine import QueryEngine
 import test_bank
 from admin_routes import router as admin_router, init_admin, init_log_capture
 from palazuelos_routes import router as palazuelos_router, init_palazuelos
-from geocode_utils import normalize_place, build_queries
+from geocode_utils import normalize_place, build_queries, geocode_with_cache
 
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -274,11 +274,9 @@ async def dossier(person_id: str):
 def _lookup_geocache(conn, raw_place: str):
     if not raw_place or not raw_place.strip():
         return None
-    norm = normalize_place(raw_place)
-    for q in build_queries(norm):
-        row = conn.execute("SELECT lat, lng FROM geocache WHERE query=?", (q,)).fetchone()
-        if row:
-            return {"lat": row["lat"], "lng": row["lng"]}
+    lat, lng = geocode_with_cache(conn, raw_place)
+    if lat is not None:
+        return {"lat": lat, "lng": lng}
     return None
 
 
