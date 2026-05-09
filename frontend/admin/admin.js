@@ -2127,7 +2127,7 @@ const Palazuelos = (() => {
                     const isPdf = (ph.filename || '').endsWith('.pdf');
                     const proxyUrl = `/api/admin/palazuelos/thumb?url=${encodeURIComponent(ph.url)}`;
                     const clickable = !isPdf && !cdnExpired;
-                    const thumbClick = clickable ? `onclick="event.preventDefault();Palazuelos.openPhotoModal('${proxyUrl}','${esc(ph.title||ph.filename)}')" style="cursor:zoom-in;"` : '';
+                    const thumbClick = clickable ? `onclick="event.preventDefault();Palazuelos.openPhotoModal('${proxyUrl}','${esc(ph.title||ph.filename)}')"` : '';
                     const thumb = isPdf
                         ? '<span style="font-size:2rem;display:block;margin-bottom:.25rem;">📄</span>'
                         : cdnExpired
