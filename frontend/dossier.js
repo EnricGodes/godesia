@@ -757,7 +757,20 @@ function renderDocuments(data) {
 
     document.getElementById('docs-section').style.display = 'block';
 
-    const documentCards = data.documents.map(doc => {
+    const VITAL_ORDER = {
+        'naixement': 0, 'nacimiento': 0,
+        'bautisme': 1, 'bautismo': 1,
+        'matrimoni': 2, 'matrimonio': 2,
+        'certificat': 3, 'padro': 3, 'padron': 3, 'testament': 3,
+        'transcripcio': 3, 'arbre': 3, 'poema': 3, 'carta': 3,
+        'invitacio': 3, 'dibuix': 3, 'biografia': 3, 'document': 3,
+        'militar': 3,
+        'defuncio': 4, 'defuncion': 4,
+    };
+    const docOrder = d => VITAL_ORDER[d.doc_type] ?? VITAL_ORDER[d.tag?.toLowerCase()] ?? 3;
+    const sorted = [...data.documents].sort((a, b) => docOrder(a) - docOrder(b));
+
+    const documentCards = sorted.map(doc => {
         const label = doc.tag || (DOC_TYPE_META[doc.doc_type] || {}).label || 'Document';
         const iconPath = getIconForTag(doc.tag) !== '/icons/documentacion.svg'
             ? getIconForTag(doc.tag)
