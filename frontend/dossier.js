@@ -244,9 +244,9 @@ function renderPerfil(data, displayName) {
                 <span class="material-symbols-outlined">explore</span>
                 Mapa Vital
             </h2>
-            <div class="flex-1 bg-surface-container-low p-4 rounded-xl heritage-border flex flex-col">
-                <div id="vital-map" class="w-full heritage-border shadow-sm flex-1"></div>
-                <div id="vital-map-empty" style="display:none;" class="flex items-center justify-center flex-1 text-sm text-on-surface-variant italic opacity-70">Sense dades geogràfiques</div>
+            <div class="flex-1 bg-surface-container-low p-4 rounded-xl heritage-border">
+                <div id="vital-map" class="w-full heritage-border shadow-sm"></div>
+                <div id="vital-map-empty" style="display:none;" class="flex items-center justify-center h-64 text-sm text-on-surface-variant italic opacity-70">Sense dades geogràfiques</div>
             </div>
         </div>
         <div class="flex flex-col space-y-8">

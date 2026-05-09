@@ -274,7 +274,7 @@ async def dossier(person_id: str):
 def _lookup_geocache(conn, raw_place: str):
     if not raw_place or not raw_place.strip():
         return None
-    lat, lng = geocode_with_cache(conn, raw_place)
+    lat, lng = geocode_with_cache(conn, raw_place, cache_only=True)
     if lat is not None:
         return {"lat": lat, "lng": lng}
     return None
