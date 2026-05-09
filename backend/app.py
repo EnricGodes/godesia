@@ -27,6 +27,7 @@ from query_engine import QueryEngine
 import test_bank
 from admin_routes import router as admin_router, init_admin, init_log_capture
 from palazuelos_routes import router as palazuelos_router, init_palazuelos
+from geocode_utils import normalize_place, build_queries
 
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -266,7 +267,45 @@ async def dossier(person_id: str):
         dossier_data["gedcom_date"] = convert_date_to_spanish(person_updated_at)
     else:
         dossier_data["gedcom_date"] = gedcom_export_date or ""
+    dossier_data["vital_points"] = _build_vital_points(db_conn, dossier_data)
     return dossier_data
+
+
+def _lookup_geocache(conn, raw_place: str):
+    if not raw_place or not raw_place.strip():
+        return None
+    norm = normalize_place(raw_place)
+    for q in build_queries(norm):
+        row = conn.execute("SELECT lat, lng FROM geocache WHERE query=?", (q,)).fetchone()
+        if row:
+            return {"lat": row["lat"], "lng": row["lng"]}
+    return None
+
+
+def _build_vital_points(conn, dossier_data: dict) -> list:
+    person = dossier_data.get("person", {})
+    points = []
+    coords = _lookup_geocache(conn, person.get("birth_place"))
+    if coords:
+        points.append({"type": "birth", "label": person["birth_place"], **coords})
+    seen_marriage = set()
+    for sp in dossier_data.get("spouses", []):
+        mp = sp.get("marriage_place")
+        if mp and mp not in seen_marriage:
+            seen_marriage.add(mp)
+            coords = _lookup_geocache(conn, mp)
+            if coords:
+                points.append({"type": "marriage", "label": mp, **coords})
+    coords = _lookup_geocache(conn, person.get("death_place"))
+    if coords:
+        points.append({"type": "death", "label": person["death_place"], **coords})
+    for b in dossier_data.get("burial", []):
+        bp = b.get("place")
+        if bp:
+            coords = _lookup_geocache(conn, bp)
+            if coords:
+                points.append({"type": "burial", "label": bp, **coords})
+    return points
 
 
 @app.get("/api/photo/{photo_id}")
