@@ -618,6 +618,21 @@ async def pending_photos():
     except Exception:
         pass
 
+    # Build set of dismissed photo_rins
+    dismissed_rins: set = set()
+    try:
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS palazuelos_dismissed (
+                photo_rin TEXT PRIMARY KEY,
+                godes_person_id TEXT,
+                dismissed_at TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        dis_rows = db.execute("SELECT photo_rin FROM palazuelos_dismissed").fetchall()
+        dismissed_rins = {r[0] for r in dis_rows}
+    except Exception:
+        pass
+
     # Parse Palazuelos photos
     palaz_photos = _parse_palaz_photos(str(ged_path))
 
@@ -655,6 +670,9 @@ async def pending_photos():
             if not fn:
                 continue
             if fn in already_imported:
+                continue
+            rin = photo.get("photo_rin", "")
+            if rin and rin in dismissed_rins:
                 continue
             h = _extract_hash(fn)
             if h and h in known_hashes:
@@ -704,6 +722,31 @@ async def pending_photos():
         "cdn_expired": cdn_expired,
         "cdn_expiry_date": cdn_expiry_date,
     }
+
+
+class DismissPhotosRequest(BaseModel):
+    godes_person_id: str
+    photo_rins: list
+
+
+@router.post("/dismiss-photos")
+async def dismiss_photos(body: DismissPhotosRequest):
+    db = _db()
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS palazuelos_dismissed (
+            photo_rin TEXT PRIMARY KEY,
+            godes_person_id TEXT,
+            dismissed_at TEXT DEFAULT (datetime('now'))
+        )
+    """)
+    for rin in body.photo_rins:
+        if rin:
+            db.execute(
+                "INSERT OR IGNORE INTO palazuelos_dismissed (photo_rin, godes_person_id) VALUES (?, ?)",
+                (rin, body.godes_person_id),
+            )
+    db.commit()
+    return {"dismissed": len(body.photo_rins)}
 
 
 @router.post("/download-photo")

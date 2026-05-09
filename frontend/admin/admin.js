@@ -2117,9 +2117,16 @@ const Palazuelos = (() => {
             }
             let html = '';
             for (const [gId, grp] of Object.entries(byPerson)) {
+                const grpRins = grp.photos.map(p => p.photo_rin).filter(Boolean);
+                const grpRinsJson = esc(JSON.stringify(grpRins));
                 html += `<div style="margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid #e5e2da;">
-                    <div style="font-weight:700;font-size:.85rem;margin-bottom:.5rem;color:#2d4b33;">
-                        ${esc(grp.name)} <span style="color:#9e9b94;font-weight:400;">(${esc(gId)})</span>
+                    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;">
+                        <span style="font-weight:700;font-size:.85rem;color:#2d4b33;">
+                            ${esc(grp.name)} <span style="color:#9e9b94;font-weight:400;">(${esc(gId)})</span>
+                        </span>
+                        <button onclick="Palazuelos.dismissPersonPhotos('${esc(gId)}','${grpRinsJson}')"
+                                style="font-size:.7rem;padding:.15rem .5rem;border:1px solid #d1c4b0;border-radius:4px;background:#faf7f2;color:#9e7a5a;cursor:pointer;"
+                                title="Descartar aquestes fotos (si n'apareixen de noves, es mostraran)">Descartar</button>
                     </div>`;
                 // Pending photos (selectable)
                 html += `<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;">`;
@@ -2227,6 +2234,21 @@ const Palazuelos = (() => {
         if (ok > 0) loadPendingPhotos();
     }
 
+    async function dismissPersonPhotos(godesId, rinsJson) {
+        let rins;
+        try { rins = JSON.parse(rinsJson); } catch { rins = []; }
+        if (!rins.length) return;
+        if (!confirm(`Descartar ${rins.length} foto(s) d'aquesta persona? Si n'apareixen de noves es mostraran igualment.`)) return;
+        try {
+            await apiFetch('/api/admin/palazuelos/dismiss-photos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ godes_person_id: godesId, photo_rins: rins }),
+            });
+            loadPendingPhotos();
+        } catch (e) { alert('Error: ' + e.message); }
+    }
+
     function openPhotoModal(src, title) {
         const img = document.getElementById('clf-modal-img');
         img.src = src;
@@ -2238,5 +2260,6 @@ const Palazuelos = (() => {
 
     return { buildMap, loadMap, filterMap, setFilter, onTypeahead, hideDropdown,
              selectCandidate, confirmMatch, rejectMatch,
-             loadPendingPhotos, updateSelCount, downloadSelected, openPhotoModal, onActivate };
+             loadPendingPhotos, updateSelCount, downloadSelected,
+             dismissPersonPhotos, openPhotoModal, onActivate };
 })();
