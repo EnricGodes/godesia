@@ -602,16 +602,6 @@
                         onclick="DocClassifier.loadPendingQueue(true)">Carregar més…</button>
             </div>
 
-            <!-- Lightbox modal -->
-            <div class="modal-overlay" id="clf-photo-modal">
-                <div class="modal" style="max-width:90vw;padding:1rem;background:#1a1a17;">
-                    <img id="clf-modal-img" src="" alt=""
-                         style="max-width:100%;max-height:80vh;display:block;margin:0 auto;border-radius:6px;"/>
-                    <div style="text-align:center;margin-top:.75rem;">
-                        <button class="btn btn-secondary" onclick="closeModal('clf-photo-modal')">Tancar</button>
-                    </div>
-                </div>
-            </div>
         </section>
 
         <!-- ── SYNC PALAZUELOS ── -->
@@ -694,6 +684,17 @@
         </section>
 
     </main>
+</div>
+
+<!-- Lightbox modal — fora de totes les seccions perquè sigui visible des de qualsevol -->
+<div class="modal-overlay" id="clf-photo-modal" onclick="closeModal('clf-photo-modal')">
+    <div class="modal" style="max-width:90vw;padding:1rem;background:#1a1a17;" onclick="event.stopPropagation()">
+        <img id="clf-modal-img" src="" alt=""
+             style="max-width:100%;max-height:80vh;display:block;margin:0 auto;border-radius:6px;"/>
+        <div style="text-align:center;margin-top:.75rem;">
+            <button class="btn btn-secondary" onclick="closeModal('clf-photo-modal')">Tancar</button>
+        </div>
+    </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
