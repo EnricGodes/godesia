@@ -763,9 +763,10 @@ async def download_photo(body: DownloadPhotoRequest):
     is_document = body.is_document
     doc_type = body.doc_type
     if is_document is None and body.title:
-        from scripts.sync_catalog import classify_document  # type: ignore
         try:
-            is_doc_val, dt = classify_document(body.title)
+            import importlib
+            sc = importlib.import_module("scripts.sync_catalog")
+            is_doc_val, dt = sc.classify_document(body.title)
             is_document = bool(is_doc_val)
             doc_type = dt
         except Exception:
