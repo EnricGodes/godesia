@@ -1564,7 +1564,7 @@ function _guessDocType(title) {
         .replace(/[^a-z0-9]+/g, ' ')                       // non-alphanum → space
         .trim();
     const m = (re) => re.test(t);
-    if (m(/defunci|esquela|obituari|cementeri|cementerio|cemetery|sepultura|sepulture|sepulcre|sepulcro|\bnicho\b|\bnixol\b|\bnínxol\b|\btumba\b|\bfossa\b|\bossari\b|sepeli|sepelio|inhumaci|funeral|requiem|panteon|\bmort\b|\bdeath\b|fallec|deceso/)) return 'defuncio';
+    if (m(/defunci|esquela|obituari|necrologica|cementir|cementerio|cemetery|sepultura|sepulture|sepulcre|sepulcro|\bnicho\b|\bnixol\b|\bnínxol\b|\btumba\b|\bfossa\b|\bossari\b|sepeli|sepelio|inhumaci|funeral|requiem|panteon|\bmort\b|\bdeath\b|fallec|deceso/)) return 'defuncio';
     if (m(/bautiz|bateig|baptis|christening|\bpila\b/)) return 'bautisme';
     if (m(/naix|neix|naxie|nacimien|nacidos|\bbirth\b|\bborn\b/)) return 'naixement';
     if (m(/matrimoni|matrimony|casament|\bboda\b|\bnoces\b|nupci|mariage|\bmarriage\b/)) return 'matrimoni';
