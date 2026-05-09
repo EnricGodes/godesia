@@ -1560,22 +1560,20 @@ function _guessDocType(title) {
     if (!title) return null;
     const t = title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
     const m = (re) => re.test(t);
-    if (m(/\b(esquela|defunci[oó]|defuncion|obituari|cementiri|cemetery|mort|death|fallec|deceso|sepeli|sepelio|inhumaci|fune?ral|requiem)\b/)) return 'defuncio';
-    if (m(/\b(naixement|naxiement|neixament|nacimient|nacidos?|nacido|naix|birth|bautizo|bateig|baptis[mt]|christening|pila)\b/)) {
-        if (m(/\b(bautizo|bateig|baptis[mt]|christening|pila)\b/)) return 'bautisme';
-        return 'naixement';
-    }
-    if (m(/\b(matrimoni|matrimon[iy]|boda|casament|mariage|marriage|noces|nupci)\b/)) return 'matrimoni';
-    if (m(/\b(certificat|certifica|certificate|acta|acte)\b/)) return 'certificat';
-    if (m(/\b(padr[oó]|padron|censo|empadronament)\b/)) return 'padro';
-    if (m(/\b(testament|testamento|herencia|herència|codicil)\b/)) return 'testament';
-    if (m(/\b(arbre|arbol|tree|genealogi)\b/)) return 'arbre';
-    if (m(/\b(transcripcio|transcripci[oó]n|transcript)\b/)) return 'transcripcio';
-    if (m(/\b(poema|poesia|poem)\b/)) return 'poema';
-    if (m(/\b(invitaci[oó]|invitation)\b/)) return 'invitacio';
-    if (m(/\b(carta|letter|epistol)\b/)) return 'carta';
-    if (m(/\b(dibuix|dibujo|drawing|il·lustraci)\b/)) return 'dibuix';
-    if (m(/\b(biografia|biografi|biography)\b/)) return 'biografia';
+    if (m(/defunci|esquela|obituari|cementeri|cementerio|cemetery|sepeli|sepelio|inhumaci|funeral|requiem|(^|\W)(mort|death|fallec|deceso)(\W|$)/)) return 'defuncio';
+    if (m(/bautiz|bateig|baptis|christening|(^|\W)pila(\W|$)/)) return 'bautisme';
+    if (m(/naix|neix|naxie|nacimien|nacidos?|(^|\W)(birth|born)(\W|$)/)) return 'naixement';
+    if (m(/matrimoni|matrimony|casament|(^|\W)(boda|noces|nupci|mariage|marriage)(\W|$)/)) return 'matrimoni';
+    if (m(/certificat|certifica|certificate|(^|\W)(acta|acte)(\W|$)/)) return 'certificat';
+    if (m(/padro\b|padron|empadronament|(^|\W)censo(\W|$)/)) return 'padro';
+    if (m(/testament|testamento|(^|\W)(herencia|herencia|codicil)(\W|$)/)) return 'testament';
+    if (m(/genealogi|(^|\W)(arbre|arbol|tree)(\W|$)/)) return 'arbre';
+    if (m(/transcripcio|transcripcion|transcript/)) return 'transcripcio';
+    if (m(/(^|\W)(poema|poesia|poem)(\W|$)/)) return 'poema';
+    if (m(/invitaci/)) return 'invitacio';
+    if (m(/(^|\W)(carta|letter|epistol)(\W|$)/)) return 'carta';
+    if (m(/(^|\W)(dibuix|dibujo|drawing)(\W|$)/)) return 'dibuix';
+    if (m(/biografia|biografi|biography/)) return 'biografia';
     return null;
 }
 
