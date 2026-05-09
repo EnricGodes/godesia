@@ -2261,7 +2261,6 @@ const Palazuelos = (() => {
         let rins;
         try { rins = JSON.parse(rinsJson); } catch { rins = []; }
         if (!rins.length) return;
-        if (!confirm(`Descartar ${rins.length} foto(s) d'aquesta persona? Si n'apareixen de noves es mostraran igualment.`)) return;
         try {
             await apiFetch('/api/admin/palazuelos/dismiss-photos', {
                 method: 'POST',
