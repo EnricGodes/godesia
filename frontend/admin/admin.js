@@ -2157,6 +2157,9 @@ const Palazuelos = (() => {
                         <span style="font-weight:700;font-size:.85rem;color:#2d4b33;">
                             ${esc(grp.name)} <span style="color:#9e9b94;font-weight:400;">(${esc(gId)})</span>
                         </span>
+                        <button onclick="Palazuelos.selectPersonPhotos('${esc(gId)}')"
+                                style="font-size:.7rem;padding:.15rem .5rem;border:1px solid #b0c4b1;border-radius:4px;background:#f0f6f0;color:#2d6a4f;cursor:pointer;"
+                                title="Seleccionar totes les fotos d'aquesta persona">Sel·leccionar totes</button>
                         <button onclick="Palazuelos.dismissPersonPhotos('${esc(gId)}','${grpRinsJson}')"
                                 style="font-size:.7rem;padding:.15rem .5rem;border:1px solid #d1c4b0;border-radius:4px;background:#faf7f2;color:#9e7a5a;cursor:pointer;"
                                 title="Descartar aquestes fotos (si n'apareixen de noves, es mostraran)">Descartar</button>
@@ -2288,6 +2291,17 @@ const Palazuelos = (() => {
         openPhotoModal(ex.src, ex.title);
     }
 
+    function selectPersonPhotos(godesId) {
+        const indices = _pendingPhotos
+            .map((p, i) => ({ p, i }))
+            .filter(({ p }) => p.godes_person_id === godesId)
+            .map(({ i }) => i);
+        document.querySelectorAll('.palaz-photo-check').forEach(cb => {
+            if (indices.includes(Number(cb.dataset.idx))) cb.checked = true;
+        });
+        updateSelCount();
+    }
+
     async function dismissPersonPhotos(godesId, rinsJson) {
         let rins;
         try { rins = JSON.parse(rinsJson); } catch { rins = []; }
@@ -2314,5 +2328,5 @@ const Palazuelos = (() => {
     return { buildMap, loadMap, filterMap, setFilter, onTypeahead, hideDropdown,
              selectCandidate, confirmMatch, rejectMatch,
              loadPendingPhotos, updateSelCount, downloadSelected,
-             dismissPersonPhotos, openPhotoByIdx, openExistingByIdx, openPhotoModal, onActivate };
+             dismissPersonPhotos, selectPersonPhotos, openPhotoByIdx, openExistingByIdx, openPhotoModal, onActivate };
 })();
