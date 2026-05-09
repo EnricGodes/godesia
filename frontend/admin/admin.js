@@ -1558,21 +1558,25 @@ const Comparador = {
 
 function _guessDocType(title) {
     if (!title) return null;
-    const t = title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    // Normalize: lowercase, strip diacritics, strip non-alphanumeric (cleans mojibake artifacts like Ã³ → a3 → space)
+    const t = title.toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')  // strip combining chars
+        .replace(/[^a-z0-9]+/g, ' ')                       // non-alphanum → space
+        .trim();
     const m = (re) => re.test(t);
-    if (m(/defunci|esquela|obituari|cementeri|cementerio|cemetery|sepeli|sepelio|inhumaci|funeral|requiem|(^|\W)(mort|death|fallec|deceso)(\W|$)/)) return 'defuncio';
-    if (m(/bautiz|bateig|baptis|christening|(^|\W)pila(\W|$)/)) return 'bautisme';
-    if (m(/naix|neix|naxie|nacimien|nacidos?|(^|\W)(birth|born)(\W|$)/)) return 'naixement';
-    if (m(/matrimoni|matrimony|casament|(^|\W)(boda|noces|nupci|mariage|marriage)(\W|$)/)) return 'matrimoni';
-    if (m(/certificat|certifica|certificate|(^|\W)(acta|acte)(\W|$)/)) return 'certificat';
-    if (m(/padro\b|padron|empadronament|(^|\W)censo(\W|$)/)) return 'padro';
-    if (m(/testament|testamento|(^|\W)(herencia|herencia|codicil)(\W|$)/)) return 'testament';
-    if (m(/genealogi|(^|\W)(arbre|arbol|tree)(\W|$)/)) return 'arbre';
+    if (m(/defunci|esquela|obituari|cementeri|cementerio|cemetery|sepeli|sepelio|inhumaci|funeral|requiem|panteon|\bmort\b|\bdeath\b|fallec|deceso/)) return 'defuncio';
+    if (m(/bautiz|bateig|baptis|christening|\bpila\b/)) return 'bautisme';
+    if (m(/naix|neix|naxie|nacimien|nacidos|\bbirth\b|\bborn\b/)) return 'naixement';
+    if (m(/matrimoni|matrimony|casament|\bboda\b|\bnoces\b|nupci|mariage|\bmarriage\b/)) return 'matrimoni';
+    if (m(/certificat|certifica|certificate|\bacta\b|\bacte\b/)) return 'certificat';
+    if (m(/\bpadro\b|padron|empadronament|\bcenso\b/)) return 'padro';
+    if (m(/testament|testamento|herencia|codicil/)) return 'testament';
+    if (m(/genealogi|\barbre\b|\barbol\b|\btree\b/)) return 'arbre';
     if (m(/transcripcio|transcripcion|transcript/)) return 'transcripcio';
-    if (m(/(^|\W)(poema|poesia|poem)(\W|$)/)) return 'poema';
+    if (m(/\bpoema\b|\bpoesia\b|\bpoem\b/)) return 'poema';
     if (m(/invitaci/)) return 'invitacio';
-    if (m(/(^|\W)(carta|letter|epistol)(\W|$)/)) return 'carta';
-    if (m(/(^|\W)(dibuix|dibujo|drawing)(\W|$)/)) return 'dibuix';
+    if (m(/\bcarta\b|\bletter\b|epistol/)) return 'carta';
+    if (m(/\bdibuix\b|\bdibujo\b|\bdrawing\b/)) return 'dibuix';
     if (m(/biografia|biografi|biography/)) return 'biografia';
     return null;
 }
