@@ -834,6 +834,25 @@ const Geocoder = {
         saveBtn.disabled = false;
         saveBtn.textContent = 'Guardar';
     },
+
+    async runVital() {
+        const btn = document.getElementById('geo-run-vital-btn');
+        const msg = document.getElementById('geo-run-vital-msg');
+        if (btn) { btn.disabled = true; btn.textContent = 'Geocodificant...'; }
+        if (msg) msg.textContent = 'Iniciant... pot trigar uns minuts (1s per lloc via Nominatim)';
+        try {
+            const d = await apiFetch('/api/admin/geocoder/run-vital', { method: 'POST' });
+            if (d.status === 'already_running') {
+                if (msg) msg.textContent = 'Ja hi ha una geocodificació en curs.';
+            } else {
+                if (msg) msg.textContent = 'Geocodificació iniciada en segon pla. Torna a carregar la pàgina en uns minuts.';
+            }
+        } catch (e) {
+            if (msg) msg.textContent = 'Error: ' + e.message;
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = 'Geocodificar llocs vitals'; }
+        }
+    },
 };
 
 // ---------------------------------------------------------------------------

@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from database import get_connection, init_db, parse_gedcom_date, convert_date_to_spanish, update_all_photo_files
 from geocode_utils import geocode_with_cache, build_residence_raw, GEOCODEABLE_TAGS, GEOCODEABLE_TYPES
+from geocode_vital_places import seed_vital_places
 
 
 def migrate(json_path, db_path):
@@ -248,6 +249,10 @@ def migrate(json_path, db_path):
     print(f"  Matrimonios: {marriages}")
     print(f"  Relaciones padre-hijo: {children_count}")
     print(f"  BD guardada en: {db_path}")
+
+    print("Sembrant llocs vitals al geocache...")
+    seeded = seed_vital_places(conn)
+    print(f"  {seeded} nous llocs pendents afegits al geocache")
 
     conn.close()
 

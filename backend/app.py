@@ -483,6 +483,7 @@ async def documents_photos(
 # ---------------------------------------------------------------------------
 
 from geocode_utils import nominatim_search, propagate_geocache
+from geocode_vital_places import seed_vital_places, geocode_vital_places as _geocode_vital_places
 
 
 class GeoResolveRequest(BaseModel):
@@ -615,6 +616,38 @@ async def geocoder_resolve(req: GeoResolveRequest):
     db_conn.commit()
     updated = propagate_geocache(db_conn)
     return {"status": "ok", "propagated": updated}
+
+
+_vital_geocoding_status = {"running": False, "resolved": 0, "total": 0, "done": False}
+
+def _run_vital_geocoding():
+    global _vital_geocoding_status
+    _vital_geocoding_status = {"running": True, "resolved": 0, "total": 0, "done": False}
+    try:
+        seed_vital_places(db_conn)
+        total = db_conn.execute("SELECT COUNT(*) FROM geocache WHERE lat IS NULL").fetchone()[0]
+        _vital_geocoding_status["total"] = total
+        resolved = _geocode_vital_places(db_conn)
+        propagate_geocache(db_conn)
+        _vital_geocoding_status["resolved"] = resolved
+    finally:
+        _vital_geocoding_status["running"] = False
+        _vital_geocoding_status["done"] = True
+
+
+@app.post("/api/admin/geocoder/run-vital")
+async def geocoder_run_vital():
+    from fastapi.concurrency import run_in_threadpool
+    if _vital_geocoding_status.get("running"):
+        return {"status": "already_running"}
+    import threading
+    threading.Thread(target=_run_vital_geocoding, daemon=True).start()
+    return {"status": "started"}
+
+
+@app.get("/api/admin/geocoder/vital-status")
+async def geocoder_vital_status():
+    return _vital_geocoding_status
 
 
 @app.post("/api/suggestions")
