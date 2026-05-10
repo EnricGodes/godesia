@@ -65,7 +65,7 @@ def _extract_hash(filename: str) -> Optional[str]:
 
 def _parse_palaz_photos(ged_path: str) -> dict:
     """Parse OBJE blocks per individual. Returns {palaz_id: [photo_dict, ...]}."""
-    with open(ged_path, 'r', encoding='utf-8-sig') as f:
+    with open(ged_path, 'r', encoding='utf-8-sig', errors='replace') as f:
         content = f.read().replace('\r\n', '\n').replace('\r', '\n')
 
     photos_by_indi: dict = {}
@@ -688,9 +688,7 @@ async def pending_photos():
             h = _extract_hash(fn)
             if h and h in known_hashes:
                 continue
-            # Skip face/portrait cutouts — only want full photos and documents
-            if photo.get("is_cutout") or photo.get("is_prim_cutout"):
-                continue
+
             pending.append({
                 "filename": fn,
                 "url": photo.get("url", ""),
