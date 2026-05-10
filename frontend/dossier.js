@@ -407,7 +407,7 @@ function renderVitalMap(points) {
             const marker = L.marker([p.lat, p.lng], {
                 icon: L.divIcon({ className: '', html: markerHtml, iconSize: [32, 32], iconAnchor: [16, 16] })
             }).addTo(map);
-            const typeLabel = { birth: 'Naixement', marriage: 'Matrimoni', death: 'Defunció', burial: 'Sepultura' }[p.type] || p.type;
+            const typeLabel = { birth: 'Nacimiento', marriage: 'Matrimonio', death: 'Defunción', burial: 'Sepultura' }[p.type] || p.type;
             marker.bindPopup(`<b style="color:#2D4B33;font-size:13px">${typeLabel}</b><div style="font-size:11px;color:#727971;margin-top:4px">${p.label}</div>`, { maxWidth: 240 });
             bounds.push([p.lat, p.lng]);
         });
