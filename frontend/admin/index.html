@@ -670,11 +670,15 @@
                 <p style="font-size:.82rem;color:#727971;margin-bottom:.75rem;">
                     Fotos de Palazuelos no presents a Godes, per als parells confirmats.
                 </p>
-                <div class="toolbar" style="margin-bottom:.75rem;">
+                <div class="toolbar" style="margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem;">
                     <button class="btn btn-secondary" onclick="Palazuelos.loadPendingPhotos()">Detectar fotos pendents</button>
                     <button class="btn btn-primary" id="btn-download-selected" onclick="Palazuelos.downloadSelected()" style="display:none;">
                         Descarregar seleccionades (<span id="palaz-sel-count">0</span>)
                     </button>
+                    <button class="btn btn-secondary btn-sm" onclick="Palazuelos.backfillTags()" title="Assigna les fotos ja descarregades a totes les persones que les tenen al GEDCOM">
+                        ↔ Reparar tags de fotos
+                    </button>
+                    <span id="palaz-backfill-status" style="font-size:.8rem;color:#727971;"></span>
                 </div>
                 <div id="palaz-cdn-warning" style="display:none;background:#fff3e0;border:1px solid #ffb74d;border-radius:6px;padding:.6rem .85rem;margin-bottom:.75rem;font-size:.8rem;color:#e65100;"></div>
                 <div id="palaz-photos-loading" style="display:none;color:#727971;font-size:.82rem;">Carregant…</div>

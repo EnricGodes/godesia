@@ -2342,10 +2342,22 @@ const Palazuelos = (() => {
         openModal('clf-photo-modal');
     }
 
+    async function backfillTags() {
+        const statusEl = document.getElementById('palaz-backfill-status');
+        statusEl.textContent = 'Reparant…';
+        try {
+            const res = await apiFetch('/api/admin/palazuelos/backfill-tags', { method: 'POST' });
+            statusEl.textContent = `✓ ${res.tagged} nous tags creats (${res.processed} fotos processades)`;
+        } catch (e) {
+            statusEl.textContent = 'Error: ' + e.message;
+        }
+    }
+
     function onActivate() { loadMap(); }
 
     return { buildMap, loadMap, filterMap, setFilter, onTypeahead, hideDropdown,
              selectCandidate, confirmMatch, rejectMatch,
              loadPendingPhotos, updateSelCount, downloadSelected,
-             dismissPersonPhotos, selectPersonPhotos, openPhotoByIdx, openExistingByIdx, openPhotoModal, onActivate };
+             dismissPersonPhotos, selectPersonPhotos, openPhotoByIdx, openExistingByIdx, openPhotoModal,
+             backfillTags, onActivate };
 })();

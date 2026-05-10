@@ -207,6 +207,54 @@ def _score_pair(godes: dict, palaz: dict, palaz_fams: dict, palaz_indis: dict) -
 
 
 # ---------------------------------------------------------------------------
+# Multi-person photo tagging helpers
+# ---------------------------------------------------------------------------
+
+def _build_rin_index(palaz_photos: dict) -> dict:
+    """Build inverse index: {photo_rin → [palaz_id, ...]} from _parse_palaz_photos() output."""
+    idx: dict = {}
+    for palaz_id, photos in palaz_photos.items():
+        for ph in photos:
+            rin = ph.get("photo_rin")
+            if rin:
+                idx.setdefault(rin, []).append(palaz_id)
+    return idx
+
+
+def _load_palaz_map_dict(db) -> dict:
+    """Return {palaz_id → godes_id} for all confirmed (non-rejected) matches."""
+    try:
+        rows = db.execute(
+            "SELECT palaz_id, godes_id FROM palazuelos_map WHERE palaz_id IS NOT NULL AND match_type != 'rejected'"
+        ).fetchall()
+        return {r[0]: r[1] for r in rows}
+    except Exception:
+        return {}
+
+
+def _auto_tag_all_matched(db, rin_index: dict, palaz_map: dict, photo_rin: str, photo_id: int) -> int:
+    """Create photo_tags for all Godes persons that have photo_rin in their GEDCOM OBJE.
+
+    Returns the number of new tags inserted.
+    """
+    palaz_ids = rin_index.get(photo_rin, [])
+    tagged = 0
+    for palaz_id in palaz_ids:
+        godes_id = palaz_map.get(palaz_id)
+        if not godes_id:
+            continue
+        cur = db.execute(
+            "INSERT OR IGNORE INTO photo_tags (photo_id, person_id) VALUES (?,?)",
+            (photo_id, godes_id)
+        )
+        if cur.rowcount:
+            tagged += 1
+    if tagged:
+        db.commit()
+    return tagged
+
+
+# ---------------------------------------------------------------------------
 # Background build-map job
 # ---------------------------------------------------------------------------
 
@@ -849,6 +897,18 @@ async def download_photo(body: DownloadPhotoRequest):
         )
         db.commit()
 
+    # Auto-tag all other matched Godes persons who share this photo in the GEDCOM
+    if body.photo_rin:
+        try:
+            ged_path = _default_ged_path()
+            if ged_path.exists():
+                palaz_photos = _parse_palaz_photos(str(ged_path))
+                rin_index = _build_rin_index(palaz_photos)
+                palaz_map = _load_palaz_map_dict(db)
+                _auto_tag_all_matched(db, rin_index, palaz_map, body.photo_rin, photo_id)
+        except Exception:
+            pass  # best-effort, don't fail the main download
+
     # Log import
     try:
         db.execute("""
@@ -875,3 +935,29 @@ async def download_photo(body: DownloadPhotoRequest):
         pass
 
     return {"photo_id": photo_id, "filename": body.filename, "status": status}
+
+
+@router.post("/backfill-tags")
+async def backfill_photo_tags():
+    """Auto-tag all Godes persons for all already-imported photos that share a GEDCOM photo_rin."""
+    db = _db()
+    ged_path = _default_ged_path()
+    if not ged_path.exists():
+        raise HTTPException(404, "palazuelos.ged no trobat")
+
+    palaz_photos = _parse_palaz_photos(str(ged_path))
+    rin_index = _build_rin_index(palaz_photos)
+    palaz_map = _load_palaz_map_dict(db)
+
+    try:
+        rows = db.execute(
+            "SELECT DISTINCT palaz_photo_rin, godes_photo_id FROM palazuelos_imports WHERE godes_photo_id IS NOT NULL AND palaz_photo_rin IS NOT NULL"
+        ).fetchall()
+    except Exception:
+        return {"tagged": 0, "processed": 0}
+
+    total_tagged = 0
+    for photo_rin, photo_id in rows:
+        total_tagged += _auto_tag_all_matched(db, rin_index, palaz_map, photo_rin, photo_id)
+
+    return {"tagged": total_tagged, "processed": len(rows)}
