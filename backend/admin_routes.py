@@ -832,11 +832,11 @@ def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
     # ── Residences ────────────────────────────────────────────────────────
     ged_res = ged.get("residences") or []
     db_res_keys = {
-        _normalize_name(f"{r.get('city', '')} {r.get('date', '')}") for r in db_res
+        _normalize_name(f"{r.get('city') or ''} {r.get('date') or ''}") for r in db_res
     }
     new_res = [
         r for r in ged_res
-        if _normalize_name(f"{r.get('city', '')} {r.get('date', '')}") not in db_res_keys
+        if _normalize_name(f"{r.get('city') or ''} {r.get('date') or ''}") not in db_res_keys
     ]
     if new_res:
         diff_types.append("residences")
@@ -924,11 +924,6 @@ def _build_ged_index(individuals: dict) -> dict:
 
 def _match_person(db_person: dict, individuals: dict, ged_index: dict) -> tuple:
     """Find best GEDCOM match for a DB person. Returns (ged_id | None, score 0-100)."""
-    # Direct ID match: DB uses GEDCOM IDs as primary key — skip name-based fuzzy matching
-    db_id = db_person.get("id") or ""
-    if db_id and db_id in individuals:
-        return db_id, 100
-
     db_given_canon   = _canonicalize_person_name(db_person.get("given_name") or "")
     db_surname_canon = _canonicalize_person_name(db_person.get("surname") or "")
     db_full_canon    = _canonicalize_person_name(db_person.get("name") or "")
@@ -1104,22 +1099,18 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
 
             if use_palazuelos_map:
                 # --- Map-based matching ---
-                # Direct ID match takes priority over the map (avoids wrong mappings)
-                if pid in individuals:
-                    ged_id, score = pid, 100
+                palaz_entry = palazuelos_map_data.get(pid)
+                if palaz_entry is None:
+                    # Person not in map at all → treat as nomatch
+                    ged_id, score = None, 0
+                elif palaz_entry["match_type"] == "rejected":
+                    # Explicitly confirmed as absent from Palazuelos → skip entirely
+                    continue
+                elif palaz_entry["palaz_id"] and palaz_entry["palaz_id"] in individuals:
+                    ged_id = palaz_entry["palaz_id"]
+                    score = palaz_entry.get("confidence") or 100
                 else:
-                    palaz_entry = palazuelos_map_data.get(pid)
-                    if palaz_entry is None:
-                        # Person not in map at all → treat as nomatch
-                        ged_id, score = None, 0
-                    elif palaz_entry["match_type"] == "rejected":
-                        # Explicitly confirmed as absent from Palazuelos → skip entirely
-                        continue
-                    elif palaz_entry["palaz_id"] and palaz_entry["palaz_id"] in individuals:
-                        ged_id = palaz_entry["palaz_id"]
-                        score = palaz_entry.get("confidence") or 100
-                    else:
-                        ged_id, score = None, 0
+                    ged_id, score = None, 0
             else:
                 # --- Name-based matching (original behaviour) ---
                 ged_id, score = _match_person(db_person, individuals, ged_index)
