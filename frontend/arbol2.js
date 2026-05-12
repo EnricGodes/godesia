@@ -90,6 +90,7 @@ async function a2Init(personId) {
       cardHtmlDiv: htmlSvg,
     });
     a2ApplyDivorcedLines();
+    a2OffsetMultipleSpouseLines();
     a2BindMiniTreeClicks();
     setTimeout(a2BindMiniTreeClicks, 200);
   });
@@ -303,6 +304,40 @@ function a2ApplyDivorcedLines() {
     if (srcData && tgtId && (srcData.divorced_spouses || []).includes(tgtId)) {
       d3.select(this).style('stroke-dasharray', '8,5').style('stroke-opacity', '0.65');
     }
+  });
+}
+
+function a2OffsetMultipleSpouseLines() {
+  if (!a2Svg) return;
+  const STEP = 14; // px between parallel spouse lines
+
+  // Group spouse paths by source node id
+  const groups = new Map(); // srcId → [{el, d}]
+  let total = 0;
+  d3.select(a2Svg).select('.links_view').selectAll('path.link').each(function(d) {
+    total++;
+    if (!d || !d.spouse) return;
+    const srcId = d.source?.data?.id;
+    console.log('[offset] spouse path, srcId=', srcId, 'pathD=', this.getAttribute('d')?.slice(0,60));
+    if (!srcId) return;
+    if (!groups.has(srcId)) groups.set(srcId, []);
+    groups.get(srcId).push({ el: this, d });
+  });
+  console.log('[offset] total paths=', total, 'groups=', groups.size);
+
+  groups.forEach(links => {
+    if (links.length < 2) return;
+    const n = links.length;
+    links.forEach(({ el }, i) => {
+      const offset = (i - (n - 1) / 2) * STEP;
+      if (offset === 0) return;
+      const path = el.getAttribute('d') || '';
+      // Path is "M x1,y1 L x2,y2" — shift both y values
+      const shifted = path.replace(/([ML])\s*([-\d.]+),([-\d.]+)/g, (_, cmd, x, y) => {
+        return `${cmd}${x},${parseFloat(y) + offset}`;
+      });
+      el.setAttribute('d', shifted);
+    });
   });
 }
 
