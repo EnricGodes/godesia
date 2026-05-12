@@ -996,6 +996,7 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
     """Background thread: parse GEDCOM, compare with DB, save results. Never modifies people data."""
     import sys as _sys
     t_start = time.time()
+    conn = None
     try:
         backend_dir = str(Path(db_path).parent)
         if backend_dir not in _sys.path:
@@ -1171,7 +1172,6 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
                     conn.commit()
 
         conn.commit()
-        conn.close()
 
         elapsed = _fmt_dur(time.time() - t_start)
         _cmp_log(f"✓ Completat: {meaningful} diferències de {total} persones en {elapsed}")
@@ -1188,6 +1188,9 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
             _cmp_job["finished_at"] = datetime.now().isoformat()
             _cmp_job["log"].append(f"ERROR: {exc}")
             _cmp_job["log"].append(traceback.format_exc())
+    finally:
+        if conn:
+            conn.close()
 
 
 @router.post("/compare/start-palazuelos")

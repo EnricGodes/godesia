@@ -1453,9 +1453,14 @@ const Comparador = {
         const list    = document.getElementById('cmp-results-list');
         try {
             const d = await apiFetch('/api/admin/compare/results');
-            if (!d.rows || !d.rows.length) { section.style.display = 'none'; return; }
+            if (!d.rows || !d.rows.length) {
+                section.style.display = 'none';
+                document.getElementById('btn-clear-cmp').style.display = 'none';
+                return;
+            }
 
             section.style.display = '';
+            document.getElementById('btn-clear-cmp').style.display = '';
             const lastRun = (d.last_run || '').slice(0, 16).replace('T', ' ');
             document.getElementById('cmp-results-meta').textContent =
                 `${d.total_count} diferències · última comparació: ${lastRun || '—'}`;
