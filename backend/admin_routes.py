@@ -924,6 +924,11 @@ def _build_ged_index(individuals: dict) -> dict:
 
 def _match_person(db_person: dict, individuals: dict, ged_index: dict) -> tuple:
     """Find best GEDCOM match for a DB person. Returns (ged_id | None, score 0-100)."""
+    # Direct ID match: DB uses GEDCOM IDs as primary key — skip name-based fuzzy matching
+    db_id = db_person.get("id") or ""
+    if db_id and db_id in individuals:
+        return db_id, 100
+
     db_given_canon   = _canonicalize_person_name(db_person.get("given_name") or "")
     db_surname_canon = _canonicalize_person_name(db_person.get("surname") or "")
     db_full_canon    = _canonicalize_person_name(db_person.get("name") or "")
