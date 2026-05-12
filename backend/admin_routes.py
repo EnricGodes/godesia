@@ -1104,18 +1104,22 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
 
             if use_palazuelos_map:
                 # --- Map-based matching ---
-                palaz_entry = palazuelos_map_data.get(pid)
-                if palaz_entry is None:
-                    # Person not in map at all → treat as nomatch
-                    ged_id, score = None, 0
-                elif palaz_entry["match_type"] == "rejected":
-                    # Explicitly confirmed as absent from Palazuelos → skip entirely
-                    continue
-                elif palaz_entry["palaz_id"] and palaz_entry["palaz_id"] in individuals:
-                    ged_id = palaz_entry["palaz_id"]
-                    score = palaz_entry.get("confidence") or 100
+                # Direct ID match takes priority over the map (avoids wrong mappings)
+                if pid in individuals:
+                    ged_id, score = pid, 100
                 else:
-                    ged_id, score = None, 0
+                    palaz_entry = palazuelos_map_data.get(pid)
+                    if palaz_entry is None:
+                        # Person not in map at all → treat as nomatch
+                        ged_id, score = None, 0
+                    elif palaz_entry["match_type"] == "rejected":
+                        # Explicitly confirmed as absent from Palazuelos → skip entirely
+                        continue
+                    elif palaz_entry["palaz_id"] and palaz_entry["palaz_id"] in individuals:
+                        ged_id = palaz_entry["palaz_id"]
+                        score = palaz_entry.get("confidence") or 100
+                    else:
+                        ged_id, score = None, 0
             else:
                 # --- Name-based matching (original behaviour) ---
                 ged_id, score = _match_person(db_person, individuals, ged_index)
