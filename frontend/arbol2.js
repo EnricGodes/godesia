@@ -89,8 +89,10 @@ async function a2Init(personId) {
       cardHtml:    true,
       cardHtmlDiv: htmlSvg,
     });
-    a2ApplyDivorcedLines();
-    a2OffsetMultipleSpouseLines();
+    setTimeout(() => {
+      a2ApplyDivorcedLines();
+      a2OffsetMultipleSpouseLines();
+    }, 300);
     a2BindMiniTreeClicks();
     setTimeout(a2BindMiniTreeClicks, 200);
   });
@@ -313,17 +315,13 @@ function a2OffsetMultipleSpouseLines() {
 
   // Group spouse paths by source node id
   const groups = new Map(); // srcId → [{el, d}]
-  let total = 0;
   d3.select(a2Svg).select('.links_view').selectAll('path.link').each(function(d) {
-    total++;
     if (!d || !d.spouse) return;
     const srcId = d.source?.data?.id;
-    console.log('[offset] spouse path, srcId=', srcId, 'pathD=', this.getAttribute('d')?.slice(0,60));
     if (!srcId) return;
     if (!groups.has(srcId)) groups.set(srcId, []);
     groups.get(srcId).push({ el: this, d });
   });
-  console.log('[offset] total paths=', total, 'groups=', groups.size);
 
   groups.forEach(links => {
     if (links.length < 2) return;
