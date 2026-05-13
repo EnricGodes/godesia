@@ -312,13 +312,12 @@ function a2ApplyDivorcedLines() {
 }
 
 function a2OffsetSpouseNodes(tree) {
-  // When a person has multiple spouses, their cards (and connector lines) overlap.
-  // Fix: before f3.view() animates, shift the y-coordinate of each spouse node
-  // so multiple spouses of the same person are staggered vertically.
+  // When a person has multiple spouses, their connector lines overlap.
+  // Fix: set lineYOffset on each spouse node — the card stays at natural y,
+  // but the connecting line is routed at a different y level.
   if (!tree || !Array.isArray(tree.data)) return;
-  const STEP = 18; // px between parallel spouse cards/lines
+  const STEP = 14; // px between parallel lines
 
-  // Group spouse nodes by the id of the person they're a spouse of
   const groups = new Map(); // mainId → [spouseNode, ...]
   tree.data.forEach(d => {
     if (!d.spouse) return;
@@ -332,7 +331,7 @@ function a2OffsetSpouseNodes(tree) {
     if (spouses.length < 2) return;
     const n = spouses.length;
     spouses.forEach((d, i) => {
-      d.y += (i - (n - 1) / 2) * STEP;
+      d.lineYOffset = (i - (n - 1) / 2) * STEP;
     });
   });
 }

@@ -1205,11 +1205,12 @@
                 links.push(createSpouseLink(d, d.coparent));
             }
             function createSpouseLink(d, spouse) {
-                // Step path: go vertically to spouse.y first, then horizontally.
-                // This keeps lines straight when spouses are at different y offsets.
+                // Route line at lineYOffset level so multiple spouses don't overlap,
+                // while keeping the spouse card at its natural y position.
+                const lineY = spouse.y + (spouse.lineYOffset || 0);
                 const spousePath = is_horizontal
                     ? [[d.x, d.y], [spouse.x, d.y], [spouse.x, spouse.y]]
-                    : [[d.x, d.y], [d.x, spouse.y], [spouse.x, spouse.y]];
+                    : [[d.x, d.y], [d.x, lineY], [spouse.x, lineY]];
                 return {
                     d: spousePath,
                     _d: () => [
