@@ -1205,10 +1205,15 @@
                 links.push(createSpouseLink(d, d.coparent));
             }
             function createSpouseLink(d, spouse) {
+                // Step path: go vertically to spouse.y first, then horizontally.
+                // This keeps lines straight when spouses are at different y offsets.
+                const spousePath = is_horizontal
+                    ? [[d.x, d.y], [spouse.x, d.y], [spouse.x, spouse.y]]
+                    : [[d.x, d.y], [d.x, spouse.y], [spouse.x, spouse.y]];
                 return {
-                    d: [[d.x, d.y], [spouse.x, spouse.y]],
+                    d: spousePath,
                     _d: () => [
-                        d.is_ancestry ? [_or(d, 'x') - .0001, _or(d, 'y')] : [d.x, d.y], // add -.0001 to line to have some length if d.x === spouse.x
+                        d.is_ancestry ? [_or(d, 'x') - .0001, _or(d, 'y')] : [d.x, d.y],
                         d.is_ancestry ? [_or(spouse, 'x'), _or(spouse, 'y')] : [d.x - .0001, d.y]
                     ],
                     curve: false,

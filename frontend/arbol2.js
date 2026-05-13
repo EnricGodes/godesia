@@ -300,8 +300,12 @@ function a2ApplyDivorcedLines() {
   d3.select(a2Svg).select('.links_view').selectAll('path.link').each(function(d) {
     if (!d || !d.spouse) return;
     const srcData = d.source?.data?.data;
+    const tgtData = d.target?.data?.data;
     const tgtId   = d.target?.data?.id;
-    if (srcData && tgtId && (srcData.divorced_spouses || []).includes(tgtId)) {
+    const srcId   = d.source?.data?.id;
+    const divorced = (srcData?.divorced_spouses || []).includes(tgtId)
+                  || (tgtData?.divorced_spouses || []).includes(srcId);
+    if (divorced) {
       d3.select(this).style('stroke-dasharray', '8,5').style('stroke-opacity', '0.65');
     }
   });
