@@ -90,7 +90,8 @@ async function a2Init(personId) {
       cardHtml:    true,
       cardHtmlDiv: htmlSvg,
     });
-    setTimeout(a2ApplyDivorcedLines, 300);
+    setTimeout(a2ApplyDivorcedLines, 400);
+    setTimeout(a2ApplyDivorcedLines, 900);
     a2BindMiniTreeClicks();
     setTimeout(a2BindMiniTreeClicks, 200);
   });
