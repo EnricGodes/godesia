@@ -84,15 +84,13 @@ async function a2Init(personId) {
   a2Store.setOnUpdate(props => {
     const tree = a2Store.getTree();
     a2AddParentSiblings(tree);
+    a2OffsetSpouseNodes(tree);  // offset before view so D3 animates to correct pos
     f3.view(tree, a2Svg, Card, {
       ...(props || {}),
       cardHtml:    true,
       cardHtmlDiv: htmlSvg,
     });
-    setTimeout(() => {
-      a2ApplyDivorcedLines();
-      a2OffsetMultipleSpouseLines();
-    }, 300);
+    setTimeout(a2ApplyDivorcedLines, 300);
     a2BindMiniTreeClicks();
     setTimeout(a2BindMiniTreeClicks, 200);
   });
@@ -309,32 +307,28 @@ function a2ApplyDivorcedLines() {
   });
 }
 
-function a2OffsetMultipleSpouseLines() {
-  if (!a2Svg) return;
-  const STEP = 14; // px between parallel spouse lines
+function a2OffsetSpouseNodes(tree) {
+  // When a person has multiple spouses, their cards (and connector lines) overlap.
+  // Fix: before f3.view() animates, shift the y-coordinate of each spouse node
+  // so multiple spouses of the same person are staggered vertically.
+  if (!tree || !Array.isArray(tree.data)) return;
+  const STEP = 18; // px between parallel spouse cards/lines
 
-  // Group spouse paths by source node id
-  const groups = new Map(); // srcId → [{el, d}]
-  d3.select(a2Svg).select('.links_view').selectAll('path.link').each(function(d) {
-    if (!d || !d.spouse) return;
-    const srcId = d.source?.data?.id;
-    if (!srcId) return;
-    if (!groups.has(srcId)) groups.set(srcId, []);
-    groups.get(srcId).push({ el: this, d });
+  // Group spouse nodes by the id of the person they're a spouse of
+  const groups = new Map(); // mainId → [spouseNode, ...]
+  tree.data.forEach(d => {
+    if (!d.spouse) return;
+    const mainId = d.spouse.data?.id;
+    if (!mainId) return;
+    if (!groups.has(mainId)) groups.set(mainId, []);
+    groups.get(mainId).push(d);
   });
 
-  groups.forEach(links => {
-    if (links.length < 2) return;
-    const n = links.length;
-    links.forEach(({ el }, i) => {
-      const offset = (i - (n - 1) / 2) * STEP;
-      if (offset === 0) return;
-      const path = el.getAttribute('d') || '';
-      // Path is "M x1,y1 L x2,y2" — shift both y values
-      const shifted = path.replace(/([ML])\s*([-\d.]+),([-\d.]+)/g, (_, cmd, x, y) => {
-        return `${cmd}${x},${parseFloat(y) + offset}`;
-      });
-      el.setAttribute('d', shifted);
+  groups.forEach(spouses => {
+    if (spouses.length < 2) return;
+    const n = spouses.length;
+    spouses.forEach((d, i) => {
+      d.y += (i - (n - 1) / 2) * STEP;
     });
   });
 }
