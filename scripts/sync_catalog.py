@@ -111,9 +111,13 @@ class PhotoRecord:
 
 
 def find_gedcom(base_dir):
-    """Busca el GEDCOM más reciente en docs/."""
+    """Busca el GEDCOM principal de la familia Godes en docs/.
+
+    Excluye palazuelos.ged (datos auxiliares para el comparador).
+    Si hay varios, coge el más reciente.
+    """
     docs_dir = base_dir / "docs"
-    ged_files = list(docs_dir.glob("*.ged"))
+    ged_files = [p for p in docs_dir.glob("*.ged") if p.name != "palazuelos.ged"]
     if not ged_files:
         return None
     return max(ged_files, key=lambda p: p.stat().st_mtime)
