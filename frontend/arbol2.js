@@ -298,18 +298,27 @@ function a2AddParentSiblings(tree) {
 
 function a2ApplyDivorcedLines() {
   if (!a2Svg) return;
+  let spouseCount = 0, divorcedCount = 0;
   d3.select(a2Svg).select('.links_view').selectAll('path.link').each(function(d) {
     if (!d || !d.spouse) return;
+    spouseCount++;
     const srcData = d.source?.data?.data;
     const tgtData = d.target?.data?.data;
     const tgtId   = d.target?.data?.id;
     const srcId   = d.source?.data?.id;
+    if (spouseCount <= 2) {
+      console.log('[divorce] srcId=', srcId, 'tgtId=', tgtId,
+                  'src.divorced=', srcData?.divorced_spouses,
+                  'tgt.divorced=', tgtData?.divorced_spouses);
+    }
     const divorced = (srcData?.divorced_spouses || []).includes(tgtId)
                   || (tgtData?.divorced_spouses || []).includes(srcId);
     if (divorced) {
+      divorcedCount++;
       d3.select(this).style('stroke-dasharray', '8,5').style('stroke-opacity', '0.65');
     }
   });
+  console.log('[divorce] spouseLinks=', spouseCount, 'divorced=', divorcedCount);
 }
 
 function a2OffsetSpouseNodes(tree) {
