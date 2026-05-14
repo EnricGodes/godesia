@@ -435,7 +435,7 @@ def parse_gedcom_people(lines):
             fam_id = match.group(1)
             husb_id = None
             wife_id = None
-            marr_data = {"date": None, "place": None}
+            marr_data = {"date": None, "place": None, "divorced": False}
             chil_list = []
 
             while i < len(lines):
@@ -467,11 +467,17 @@ def parse_gedcom_people(lines):
                         elif "PLAC" in marr_line:
                             marr_data["place"] = marr_line.split("PLAC", 1)[1].strip()
                         j += 1
+                elif next_line.startswith("1 DIV"):
+                    marr_data["divorced"] = True
 
                 i += 1
 
             if husb_id and wife_id:
-                marriages[fam_id] = {"husb": husb_id, "wife": wife_id, "date": marr_data["date"], "place": marr_data["place"]}
+                marriages[fam_id] = {
+                    "husb": husb_id, "wife": wife_id,
+                    "date": marr_data["date"], "place": marr_data["place"],
+                    "divorced": marr_data.get("divorced", False),
+                }
 
             for chil_id in chil_list:
                 children[fam_id].append(chil_id)
@@ -726,9 +732,10 @@ def main():
         cursor.execute("DELETE FROM marriages")
         for fam_id, marr in marriages.items():
             cursor.execute("""
-                INSERT INTO marriages (person1_id, person2_id, date, place)
-                VALUES (?, ?, ?, ?)
-            """, (marr["husb"], marr["wife"], marr["date"], marr["place"]))
+                INSERT INTO marriages (person1_id, person2_id, date, place, divorce_note)
+                VALUES (?, ?, ?, ?, ?)
+            """, (marr["husb"], marr["wife"], marr["date"], marr["place"],
+                  "Y" if marr.get("divorced") else None))
 
         # DELETE + re-insert ocupaciones, residencias, notas (1-to-many)
         cursor.execute("DELETE FROM occupations")
