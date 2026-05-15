@@ -11,7 +11,7 @@ const STATE = {
     activePersonId: null,
     searchQuery: '',
     sortBy: 'date',
-    viewMode: 'bento',
+    viewMode: 'grid',
 
     photos: [],
     total: 0,
