@@ -1832,7 +1832,7 @@ def get_document_photos(conn, doc_type="__all__", q="", sort="date", person_id="
         m = _re.search(r'\d{4}', d)
         return int(m.group()) if m else None
 
-    where = ["ph.is_document = 1", "ph.is_cutout = 0"]
+    where = ["ph.is_document = 1"]
     params = []
 
     if doc_type and doc_type != "__all__":
