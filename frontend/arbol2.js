@@ -86,6 +86,7 @@ async function a2Init(personId) {
     a2OffsetSpouseNodes(tree);  // offset before view so D3 animates to correct pos
     f3.view(tree, a2Svg, Card, {
       ...(props || {}),
+      transition_time: 0,
       cardHtml:    true,
       cardHtmlDiv: htmlSvg,
     });
