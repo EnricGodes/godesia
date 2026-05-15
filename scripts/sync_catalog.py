@@ -271,6 +271,28 @@ def parse_gedcom_photos(lines):
     return photos, indi_obje_blocks
 
 
+def parse_extra_gedcom_photos(gedcom_path, palaz_to_godes_map):
+    """Parsea OBJE de un GEDCOM secundario (Palazuelos) y remapea sus IDs INDI al espacio Godes.
+
+    palaz_to_godes_map: dict {palaz_indi_id → godes_indi_id}. Tags de personas sin
+    equivalente en el árbol Godes se descartan; la foto se conserva sin esos tags.
+    """
+    with open(gedcom_path, "r", encoding="utf-8", errors="replace") as f:
+        lines = f.readlines()
+    albums = parse_gedcom_albums(lines)
+    photos, _ = parse_gedcom_photos(lines)
+
+    for photo in photos.values():
+        remapped = {}
+        for palaz_id, info in photo.tagged_people.items():
+            godes_id = palaz_to_godes_map.get(palaz_id)
+            if godes_id:
+                remapped[godes_id] = info
+        photo.tagged_people = remapped
+
+    return photos, albums
+
+
 def parse_gedcom_people(lines):
     """Parsea INDI records. Retorna dict de person_id -> person_data."""
     people = {}
@@ -619,6 +641,32 @@ def main():
     photos, indi_obje_blocks = parse_gedcom_photos(lines)
     print(f"  Fotos únicas: {len(photos)}")
     print(f"  Álbumes: {len(albums)}")
+
+    print("\nFase 2b: Parseando GEDCOM auxiliar (Palazuelos)...")
+    extra_ged = base / "docs" / "palazuelos.ged"
+    if extra_ged.exists():
+        db_tmp = sqlite3.connect(db_path)
+        palaz_map = dict(db_tmp.execute(
+            "SELECT palaz_id, godes_id FROM palazuelos_map WHERE palaz_id IS NOT NULL AND palaz_id != ''"
+        ).fetchall())
+        db_tmp.close()
+
+        extra_photos, extra_albums = parse_extra_gedcom_photos(extra_ged, palaz_map)
+
+        added = 0
+        for fname, photo in extra_photos.items():
+            if fname not in photos:
+                photos[fname] = photo
+                added += 1
+        for aid, ainfo in extra_albums.items():
+            if aid not in albums:
+                albums[aid] = ainfo
+
+        print(f"  Mapeo palaz→godes: {len(palaz_map)} personas")
+        print(f"  Fotos extra (Palazuelos): {added}")
+        print(f"  Total tras merge: {len(photos)}")
+    else:
+        print("  (palazuelos.ged no encontrado, se omite)")
 
     print("\nFase 3: Resolviendo relaciones padre-hijo...")
     resolve_parent_child(photos, indi_obje_blocks)
