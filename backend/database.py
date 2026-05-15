@@ -2127,18 +2127,19 @@ def get_tree_data_flat(conn, person_id, generations_up=3, generations_down=3):
                     sp_node["rels"]["spouses"].append(cid)
 
     # Cleanup: fix bidirectional parent-child links for all included nodes.
-    # This is necessary because children visited via "down" BFS skip ancestor
-    # expansion, so their second parent (the spouse) won't be linked automatically.
+    # Always register parent IDs in rels.parents even when the parent node is not
+    # in the tree — this makes isAllRelativeDisplayed() return false for nodes
+    # with parents outside the rendered tree, so the mini-tree icon appears.
     for cid, node in list(nodes.items()):
         row = conn.execute(FULL_SELECT, (f"@{cid}@",)).fetchone()
         if not row:
             continue
         for par_id in filter(None, [row["father_id"], row["mother_id"]]):
             par_cid = clean(par_id)
+            if par_cid not in node["rels"]["parents"]:
+                node["rels"]["parents"].append(par_cid)
             if par_cid in nodes:
                 par_node = nodes[par_cid]
-                if par_cid not in node["rels"]["parents"]:
-                    node["rels"]["parents"].append(par_cid)
                 if cid not in par_node["rels"]["children"]:
                     par_node["rels"]["children"].append(cid)
 
