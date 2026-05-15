@@ -37,7 +37,7 @@ async function a2Init(personId) {
     main_id: store_main_id,
     node_separation: 260,   // wider spacing for 220px cards
     level_separation: 240,  // vertical gap: 240 - 132px card = 108px for connectors + mini-tree
-    transition_time: 125,   // x8 faster than default
+    transition_time: 0,     // no entry animation — tree appears fully built
     // Render the main person's siblings via the library's setupSiblings.
     // Without this the parents end up with a mini-tree icon because their
     // children (the main's siblings) are missing from the tree.
@@ -90,23 +90,26 @@ async function a2Init(personId) {
       cardHtml:    true,
       cardHtmlDiv: htmlSvg,
     });
-    setTimeout(a2ApplyDivorcedLines, 400);
-    setTimeout(a2ApplyDivorcedLines, 900);
+    setTimeout(a2ApplyDivorcedLines, 50);
+    setTimeout(a2ApplyDivorcedLines, 200);
     a2BindMiniTreeClicks();
     setTimeout(a2BindMiniTreeClicks, 200);
   });
 
   a2Store.updateTree({ initial: true });
 
-  // After initial scatter animation, center view on originally requested person
+  // Center view on requested person and apply default zoom-out (2 clicks out = 0.77²)
   setTimeout(() => {
     if (!a2Store || !a2Svg) return;
     try {
       const svg_dim = cont.getBoundingClientRect();
       const datum   = a2FindDatumById(a2MainId) || a2Store.getTreeMainDatum();
-      f3.handlers.cardToMiddle({ datum, svg: a2Svg, svg_dim, scale: 1, transition_time: 300 });
+      f3.handlers.cardToMiddle({ datum, svg: a2Svg, svg_dim, scale: 1, transition_time: 0 });
+      // Apply 2 zoom-out steps (factor 0.77 each = ~0.59x total)
+      f3.handlers.manualZoom({ amount: 0.77, svg: a2Svg, transition_time: 0 });
+      f3.handlers.manualZoom({ amount: 0.77, svg: a2Svg, transition_time: 0 });
     } catch (_) {}
-  }, 180);
+  }, 50);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
