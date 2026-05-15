@@ -1631,7 +1631,9 @@ async def classifier_stats():
         "SELECT COALESCE(doc_origin,'unprocessed') as o, COUNT(*) as n FROM photos GROUP BY o"
     ).fetchall():
         origins[row["o"]] = row["n"]
-    pending = origins.get("clip_pending", 0)
+    pending = db.execute(
+        "SELECT COUNT(*) FROM photos WHERE doc_origin='clip_pending' OR (is_document=1 AND (doc_type IS NULL OR doc_type='') AND doc_origin != 'human')"
+    ).fetchone()[0]
 
     dc = _get_doc_classifier()
     model_exists = dc.MODEL_PATH.exists()
@@ -1650,19 +1652,21 @@ async def classifier_stats():
 @router.get("/classifier/pending")
 async def classifier_pending(limit: int = 20, offset: int = 0):
     db = _db()
-    total = db.execute(
-        "SELECT COUNT(*) FROM photos WHERE doc_origin='clip_pending'"
-    ).fetchone()[0]
+    _pending_where = """
+        p.doc_origin = 'clip_pending'
+        OR (p.is_document = 1 AND (p.doc_type IS NULL OR p.doc_type = '') AND p.doc_origin != 'human')
+    """
+    total = db.execute(f"SELECT COUNT(*) FROM photos p WHERE {_pending_where}").fetchone()[0]
     rows = db.execute(
-        """
-        SELECT p.id, p.filename, p.title, p.doc_confidence, p.doc_origin, p.is_document,
+        f"""
+        SELECT p.id, p.filename, p.title, p.doc_confidence, p.doc_origin, p.is_document, p.doc_type,
                GROUP_CONCAT(pe.name, ', ') as persons
         FROM photos p
         LEFT JOIN photo_tags pt ON pt.photo_id = p.id
         LEFT JOIN people pe ON pe.id = pt.person_id
-        WHERE p.doc_origin = 'clip_pending'
+        WHERE {_pending_where}
         GROUP BY p.id
-        ORDER BY ABS(COALESCE(p.doc_confidence, 0.5) - 0.5) ASC
+        ORDER BY p.is_document DESC, ABS(COALESCE(p.doc_confidence, 0.5) - 0.5) ASC
         LIMIT ? OFFSET ?
         """,
         (limit, offset),
