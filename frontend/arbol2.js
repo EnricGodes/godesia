@@ -74,8 +74,7 @@ async function a2Init(personId) {
         const tx = svg_dim.width  / (2 * k) - d.x;
         const ty = svg_dim.height / (2 * k) - d.y;
         const el = a2Svg.__zoomObj ? a2Svg : a2Svg.parentNode;
-        d3.select(el).transition().duration(350).delay(100)
-          .call(el.__zoomObj.transform, d3.zoomIdentity.scale(k).translate(tx, ty));
+        d3.select(el).call(el.__zoomObj.transform, d3.zoomIdentity.scale(k).translate(tx, ty));
       } catch (_) {}
       a2OpenSidebar(d.data);
     },
