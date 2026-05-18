@@ -1,33 +1,37 @@
 #!/usr/bin/env python3
-"""Upload untracked/new photos to the Railway volume via the admin endpoint."""
+"""
+Upload all local photos to the Railway volume via the admin endpoint.
+The endpoint skips files that already exist, so re-running is safe.
 
-import sys
+Usage:
+    python3 scripts/upload_photos_to_railway.py           # sube todas las fotos
+    python3 scripts/upload_photos_to_railway.py --new-only  # solo las no trackeadas por git
+"""
+
+import argparse
 import subprocess
+import sys
 import requests
 from pathlib import Path
 
 BASE_URL = "https://godesia.up.railway.app"
 ENDPOINT = f"{BASE_URL}/api/admin/upload-photos"
 PHOTOS_DIR = Path(__file__).parent.parent / "data" / "photos"
-BATCH_SIZE = 20  # files per request
+BATCH_SIZE = 10  # conservador para no exceder límites de tamaño de request
 
 
-def get_remote_files() -> set:
-    """Fetch list of files already on Railway."""
-    r = requests.get(f"{BASE_URL}/photos/", timeout=30)
-    # Can't list static dir — we'll rely on the endpoint's skip logic
-    return set()
+def get_all_photos() -> list[Path]:
+    return sorted(p for p in PHOTOS_DIR.iterdir() if p.suffix.lower() in (".jpg", ".jpeg", ".png"))
 
 
 def get_new_photos() -> list[Path]:
-    """Return photos not yet tracked by git (untracked in data/photos/)."""
+    """Return only photos not yet tracked by git."""
     result = subprocess.run(
         ["git", "ls-files", "--others", "--exclude-standard", "data/photos/"],
         capture_output=True, text=True,
         cwd=PHOTOS_DIR.parent.parent
     )
-    files = [PHOTOS_DIR.parent.parent / p.strip() for p in result.stdout.splitlines() if p.strip()]
-    return files
+    return [PHOTOS_DIR.parent.parent / p.strip() for p in result.stdout.splitlines() if p.strip()]
 
 
 def upload_batch(paths: list[Path]) -> dict:
@@ -38,9 +42,13 @@ def upload_batch(paths: list[Path]) -> dict:
 
 
 def main():
-    photos = get_new_photos()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--new-only", action="store_true", help="Solo fotos no trackeadas por git")
+    args = parser.parse_args()
+
+    photos = get_new_photos() if args.new_only else get_all_photos()
     if not photos:
-        print("No hay fotos nuevas para subir.")
+        print("No hay fotos para subir.")
         return
 
     print(f"Fotos a subir: {len(photos)}")
