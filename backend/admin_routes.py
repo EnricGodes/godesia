@@ -1807,3 +1807,27 @@ async def classifier_reclassify_tags():
             updated += 1
     db.commit()
     return {"updated": updated, "total_checked": len(rows)}
+
+
+# ---------------------------------------------------------------------------
+# Photo volume upload utility
+# ---------------------------------------------------------------------------
+
+@router.post("/upload-photos")
+async def upload_photos(files: list[UploadFile] = File(...)):
+    """Bulk upload photos to the data/photos directory (for volume sync)."""
+    photos_dir = _base_dir / "data" / "photos"
+    photos_dir.mkdir(parents=True, exist_ok=True)
+
+    saved = []
+    skipped = []
+    for f in files:
+        dest = photos_dir / f.filename
+        if dest.exists():
+            skipped.append(f.filename)
+        else:
+            content = await f.read()
+            dest.write_bytes(content)
+            saved.append(f.filename)
+
+    return {"saved": len(saved), "skipped": len(skipped), "files": saved}
