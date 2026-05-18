@@ -1,5 +1,6 @@
 .cursor/mcp.json
 data/family_tree.json
+data/photos/
 __pycache__/
 *.pyc
 .env
