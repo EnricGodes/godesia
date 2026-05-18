@@ -253,6 +253,49 @@ def _run_fast_import(ged_path: str, db_path: str):
         _log_job(traceback.format_exc())
 
 
+def _upload_new_photos(base_dir: Path):
+    """Upload photos not yet in the Railway volume after a GEDCOM import."""
+    import requests as _requests  # noqa: PLC0415
+
+    photos_dir = base_dir / "data" / "photos"
+    repo_root = base_dir
+
+    result = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard", "data/photos/"],
+        capture_output=True, text=True, cwd=str(repo_root),
+    )
+    new_files = [photos_dir / p.split("/")[-1] for p in result.stdout.splitlines() if p.strip()]
+
+    if not new_files:
+        _log_job("📷 Cap foto nova per pujar al volum.")
+        return
+
+    _log_job(f"📷 Pujant {len(new_files)} fotos noves al volum Railway…")
+    BATCH = 20
+    saved = skipped = errors = 0
+
+    # Determine the base URL — use RAILWAY_PUBLIC_DOMAIN if available (prod), else localhost
+    import os as _os  # noqa: PLC0415
+    host = _os.environ.get("RAILWAY_PUBLIC_DOMAIN")
+    base_url = f"https://{host}" if host else "http://localhost:8000"
+    endpoint = f"{base_url}/api/admin/upload-photos"
+
+    for i in range(0, len(new_files), BATCH):
+        batch = new_files[i:i + BATCH]
+        files = [("files", (p.name, p.read_bytes(), "image/jpeg")) for p in batch if p.exists()]
+        try:
+            r = _requests.post(endpoint, files=files, timeout=120)
+            r.raise_for_status()
+            data = r.json()
+            saved += data.get("saved", 0)
+            skipped += data.get("skipped", 0)
+        except Exception as exc:
+            errors += len(batch)
+            _log_job(f"  ⚠ Error al lot {i}-{i+BATCH}: {exc}")
+
+    _log_job(f"📷 Fotos: {saved} pujades, {skipped} ja existien, {errors} errors.")
+
+
 def _run_full_import(ged_path: str, base_dir: Path, skip_download: bool):
     import select as _select
     MAX_SECS = 600  # 10 min hard limit
@@ -328,6 +371,7 @@ def _run_full_import(ged_path: str, base_dir: Path, skip_download: bool):
             _job["status"] = "done"
             _job["finished_at"] = datetime.now().isoformat()
         _log_job(f"✓ Importació completa en {_fmt_dur(time.time() - t_start)}")
+        _upload_new_photos(base_dir)
     except Exception as e:
         with _job_lock:
             _job["status"] = "error"
