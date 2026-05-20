@@ -54,20 +54,23 @@ DOC_TYPES = [
 ]
 
 def classify_document(title):
-    """Returns (is_document, doc_type) based on bracket tags in the title.
-    Only text inside [...] brackets is used to classify — never free-text keywords.
+    """Returns (is_document, doc_type) based on title keywords.
+
+    Priority 1: text inside [...] brackets (explicit tags).
+    Priority 2: free-text keyword match on the full title (catches Palazuelos-style
+                descriptive titles that have no bracket tags).
     """
     if not title:
         return 0, None
     brackets = re.findall(r'\[([^\]]+)\]', title)
-    if not brackets:
-        return 0, None
-    bracket_text = ' '.join(brackets)
+    search_text = ' '.join(brackets) if brackets else title
     for doc_type, pattern in DOC_TYPES:
-        if re.search(pattern, bracket_text, re.IGNORECASE):
+        if re.search(pattern, search_text, re.IGNORECASE):
             return 1, doc_type
     # Has brackets but type not recognized — still a document
-    return 1, 'document'
+    if brackets:
+        return 1, 'document'
+    return 0, None
 
 
 def strip_html(text):
@@ -662,9 +665,13 @@ def main():
 
         added = 0
         skipped_blocked = 0
+        skipped_no_godes = 0
         for fname, photo in extra_photos.items():
             if fname in blocked:
                 skipped_blocked += 1
+                continue
+            if not photo.tagged_people:
+                skipped_no_godes += 1
                 continue
             if fname not in photos:
                 photos[fname] = photo
@@ -682,6 +689,7 @@ def main():
                 main_dropped += 1
 
         print(f"  Mapeo palaz→godes: {len(palaz_map)} personas")
+        print(f"  Saltades sense match Godes: {skipped_no_godes}")
         print(f"  Fotos extra (Palazuelos): {added}")
         print(f"  Saltadas por blocklist dedup: {skipped_blocked} (Palazuelos) + {main_dropped} (Godes)")
         print(f"  Total tras merge: {len(photos)}")
