@@ -649,12 +649,23 @@ def main():
         palaz_map = dict(db_tmp.execute(
             "SELECT palaz_id, godes_id FROM palazuelos_map WHERE palaz_id IS NOT NULL AND palaz_id != ''"
         ).fetchall())
+        # Persistent dedup decisions — survive DROP TABLE photos in Phase 7
+        try:
+            blocked = {r[0] for r in db_tmp.execute(
+                "SELECT filename FROM photo_dedup_blocklist"
+            )}
+        except sqlite3.OperationalError:
+            blocked = set()
         db_tmp.close()
 
         extra_photos, extra_albums = parse_extra_gedcom_photos(extra_ged, palaz_map)
 
         added = 0
+        skipped_blocked = 0
         for fname, photo in extra_photos.items():
+            if fname in blocked:
+                skipped_blocked += 1
+                continue
             if fname not in photos:
                 photos[fname] = photo
                 added += 1
@@ -662,8 +673,17 @@ def main():
             if aid not in albums:
                 albums[aid] = ainfo
 
+        # Also drop any photos from the main GEDCOM that the user previously
+        # marked as duplicates (some Godes photos may lose to Palazuelos copies).
+        main_dropped = 0
+        for fname in list(photos.keys()):
+            if fname in blocked:
+                del photos[fname]
+                main_dropped += 1
+
         print(f"  Mapeo palaz→godes: {len(palaz_map)} personas")
         print(f"  Fotos extra (Palazuelos): {added}")
+        print(f"  Saltadas por blocklist dedup: {skipped_blocked} (Palazuelos) + {main_dropped} (Godes)")
         print(f"  Total tras merge: {len(photos)}")
     else:
         print("  (palazuelos.ged no encontrado, se omite)")
@@ -710,6 +730,44 @@ def main():
                     print(f"  Progreso: {i}/{len(futures)} ({downloaded} OK, {failed} errores)")
 
         print(f"  Completado: {downloaded} descargadas, {failed} errores")
+
+        # Defensa post-descarga: hash de los ficheros nuevos contra los que ya
+        # estaban en disco. Si SHA256 coincide → blocklist + borrar el nuevo.
+        try:
+            import hashlib
+            db_chk = sqlite3.connect(db_path)
+            db_chk.row_factory = sqlite3.Row
+            # Build map from sha256 → kept filename (using existing photos table)
+            existing = {}
+            for r in db_chk.execute("SELECT filename, sha256 FROM photos WHERE sha256 IS NOT NULL"):
+                existing.setdefault(r["sha256"], r["filename"])
+            auto_blocked = 0
+            for filename, _url in need_download:
+                fpath = photos_dir / filename
+                if not fpath.exists():
+                    continue
+                h = hashlib.sha256()
+                with fpath.open("rb") as fh:
+                    for chunk in iter(lambda: fh.read(65536), b""):
+                        h.update(chunk)
+                sha = h.hexdigest()
+                if sha in existing and existing[sha] != filename:
+                    # Identical bytes already on disk → block this copy
+                    db_chk.execute(
+                        """INSERT OR IGNORE INTO photo_dedup_blocklist
+                           (filename, sha256, kept_filename, reason)
+                           VALUES (?, ?, ?, 'sha256_post_download')""",
+                        (filename, sha, existing[sha]),
+                    )
+                    fpath.unlink(missing_ok=True)
+                    photos.pop(filename, None)
+                    auto_blocked += 1
+            db_chk.commit()
+            db_chk.close()
+            if auto_blocked:
+                print(f"  Auto-bloqueadas por SHA256 post-descarga: {auto_blocked}")
+        except sqlite3.OperationalError:
+            pass  # photo_dedup_blocklist not yet migrated
 
     if not args.dry_run:
         print("\nFase 7: Escribiendo en base de datos...")

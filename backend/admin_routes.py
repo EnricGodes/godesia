@@ -1846,3 +1846,264 @@ async def upload_photos(files: list[UploadFile] = File(...)):
             saved.append(f.filename)
 
     return {"saved": len(saved), "skipped": len(skipped), "files": saved}
+
+
+# ---------------------------------------------------------------------------
+# Dedup of duplicate photos (Godes ↔ Palazuelos merge artifacts)
+# ---------------------------------------------------------------------------
+
+
+def _delete_photo_record(db, photo_id: int, kept_filename: str, person_id: str, reason: str,
+                         kept_photo_id: Optional[int] = None):
+    """Remove a duplicate photo: DB rows, physical file, register in blocklist.
+    If kept_photo_id is given, reparent any cutouts that pointed to photo_id."""
+    row = db.execute("SELECT filename, sha256 FROM photos WHERE id=?", (photo_id,)).fetchone()
+    if not row:
+        return False
+    filename = row["filename"]
+    sha = row["sha256"]
+    if kept_photo_id:
+        db.execute(
+            "UPDATE photos SET parent_photo_id=? WHERE parent_photo_id=?",
+            (kept_photo_id, photo_id),
+        )
+    db.execute("DELETE FROM photo_tags WHERE photo_id=?", (photo_id,))
+    db.execute("DELETE FROM photos WHERE id=?", (photo_id,))
+    db.execute(
+        """INSERT INTO photo_dedup_blocklist (filename, sha256, kept_filename, person_id, reason)
+           VALUES (?, ?, ?, ?, ?)
+           ON CONFLICT(filename) DO UPDATE SET
+               sha256=excluded.sha256, kept_filename=excluded.kept_filename,
+               person_id=excluded.person_id, reason=excluded.reason,
+               decided_at=datetime('now')""",
+        (filename, sha, kept_filename, person_id, reason),
+    )
+    fpath = _base_dir / "data" / "photos" / filename
+    try:
+        fpath.unlink(missing_ok=True)
+    except Exception:
+        pass
+    return True
+
+
+@router.post("/dedup/run")
+async def dedup_run():
+    """Run detection across all people. Auto-apply Bucket A (sha256-exact).
+    Bucket B/C land in dedup_candidates for manual review."""
+    try:
+        from dedup_detect import detect_for_person, ensure_candidates_table  # noqa: PLC0415
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"dedup_detect import failed: {e}")
+
+    db = _db()
+    keep_pairs = set()
+    for a, b in db.execute("SELECT photo_id_a, photo_id_b FROM photo_dedup_keep_pairs"):
+        keep_pairs.add((min(a, b), max(a, b)))
+
+    ensure_candidates_table(db)
+
+    persons = [r[0] for r in db.execute("SELECT DISTINCT person_id FROM photo_tags")]
+    auto_applied = 0
+    pending = 0
+    by_bucket = {"A": 0, "B": 0, "C": 0}
+
+    for pid in persons:
+        pairs = detect_for_person(db, pid)
+        for bucket, winner, loser, ws, ls, metric in pairs:
+            pair_key = (min(winner["id"], loser["id"]), max(winner["id"], loser["id"]))
+            if pair_key in keep_pairs:
+                continue
+            by_bucket[bucket] += 1
+            if bucket == "A":
+                # Auto-apply byte-identical or visually-identical duplicates
+                reason = "sha256_exact" if metric == "sha256_exact" else f"auto_{metric}"
+                if _delete_photo_record(db, loser["id"], winner["filename"], pid,
+                                        reason, kept_photo_id=winner["id"]):
+                    auto_applied += 1
+            else:
+                db.execute("""
+                    INSERT INTO dedup_candidates
+                    (person_id, bucket, kept_photo_id, drop_photo_id, kept_score, drop_score, metric)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (pid, bucket, winner["id"], loser["id"], ws, ls, metric))
+                pending += 1
+
+    db.commit()
+
+    # Re-sync profile photos in case a deleted photo was someone's avatar
+    if auto_applied:
+        try:
+            from database import update_all_photo_files  # noqa: PLC0415
+            update_all_photo_files(db)
+        except Exception:
+            pass
+
+    return {
+        "ok": True,
+        "auto_applied_sha256": auto_applied,
+        "pending_review": pending,
+        "buckets": by_bucket,
+    }
+
+
+@router.get("/dedup/pending")
+async def dedup_pending(person_id: Optional[str] = None, limit: int = 200):
+    """List pending duplicate candidates for manual review."""
+    db = _db()
+    fields = (
+        "id, filename, title, date, place, filesize, is_document, doc_type, "
+        "doc_origin, photo_rin, width, height, sha256, phash, is_cutout, "
+        "parent_photo_id, note, transcription"
+    )
+    where = "WHERE c.status='pending'"
+    params: list = []
+    if person_id:
+        where += " AND c.person_id=?"
+        params.append(person_id)
+    params.append(limit)
+    rows = db.execute(f"""
+        SELECT c.id AS cid, c.person_id, c.bucket, c.metric, c.kept_score, c.drop_score,
+               c.kept_photo_id, c.drop_photo_id
+        FROM dedup_candidates c
+        {where}
+        ORDER BY c.bucket, c.person_id, c.id
+        LIMIT ?
+    """, params).fetchall()
+
+    def photo_dict(pid):
+        r = db.execute(f"SELECT {fields} FROM photos WHERE id=?", (pid,)).fetchone()
+        return dict(r) if r else None
+
+    person_name = db.execute(
+        "SELECT id, name FROM people"
+    ).fetchall()
+    name_map = {r["id"]: r["name"] for r in person_name}
+
+    out = []
+    for r in rows:
+        out.append({
+            "candidate_id": r["cid"],
+            "person_id": r["person_id"],
+            "person_name": name_map.get(r["person_id"], ""),
+            "bucket": r["bucket"],
+            "metric": r["metric"],
+            "kept_score": r["kept_score"],
+            "drop_score": r["drop_score"],
+            "keep": photo_dict(r["kept_photo_id"]),
+            "drop": photo_dict(r["drop_photo_id"]),
+        })
+    return {"pairs": out, "count": len(out)}
+
+
+class DedupDecideBody(BaseModel):
+    candidate_id: int
+    action: str  # "confirm" | "reject" | "swap"
+
+
+@router.post("/dedup/decide")
+async def dedup_decide(body: DedupDecideBody):
+    """Confirm a deletion, reject (keep both), or swap which one to drop."""
+    db = _db()
+    row = db.execute(
+        "SELECT person_id, kept_photo_id, drop_photo_id, status FROM dedup_candidates WHERE id=?",
+        (body.candidate_id,),
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="candidate not found")
+    if row["status"] != "pending":
+        raise HTTPException(status_code=409, detail=f"already {row['status']}")
+
+    kept_id = row["kept_photo_id"]
+    drop_id = row["drop_photo_id"]
+    person_id = row["person_id"]
+
+    if body.action == "swap":
+        kept_id, drop_id = drop_id, kept_id
+
+    if body.action in ("confirm", "swap"):
+        kept_row = db.execute("SELECT filename FROM photos WHERE id=?", (kept_id,)).fetchone()
+        if not kept_row:
+            raise HTTPException(status_code=410, detail="kept photo no longer exists")
+        ok = _delete_photo_record(db, drop_id, kept_row["filename"], person_id,
+                                  "manual_review", kept_photo_id=kept_id)
+        db.execute("UPDATE dedup_candidates SET status='applied' WHERE id=?", (body.candidate_id,))
+        db.commit()
+        # Refresh profile photos
+        try:
+            from database import update_all_photo_files  # noqa: PLC0415
+            update_all_photo_files(db)
+        except Exception:
+            pass
+        return {"ok": ok, "action": body.action, "deleted_photo_id": drop_id}
+
+    elif body.action == "reject":
+        a, b = min(kept_id, drop_id), max(kept_id, drop_id)
+        db.execute(
+            """INSERT OR IGNORE INTO photo_dedup_keep_pairs (photo_id_a, photo_id_b, person_id)
+               VALUES (?, ?, ?)""",
+            (a, b, person_id),
+        )
+        db.execute("UPDATE dedup_candidates SET status='rejected' WHERE id=?", (body.candidate_id,))
+        db.commit()
+        return {"ok": True, "action": "reject"}
+
+    raise HTTPException(status_code=400, detail="invalid action")
+
+
+@router.post("/photos/cleanup-orphans")
+async def photos_cleanup_orphans(dry_run: bool = False):
+    """Delete files in data/photos/ that have no row in the photos table.
+
+    Used after dedup to make the volume match the DB. With dry_run=true,
+    only reports the files that would be deleted.
+    """
+    db = _db()
+    photos_dir = _base_dir / "data" / "photos"
+    if not photos_dir.exists():
+        raise HTTPException(status_code=404, detail="photos dir missing")
+
+    in_db = {r[0] for r in db.execute("SELECT filename FROM photos")}
+    on_disk = {p.name for p in photos_dir.iterdir() if p.is_file()}
+    orphans = sorted(on_disk - in_db)
+    missing = sorted(in_db - on_disk)
+
+    deleted = []
+    errors = []
+    if not dry_run:
+        for fname in orphans:
+            try:
+                (photos_dir / fname).unlink()
+                deleted.append(fname)
+            except Exception as e:
+                errors.append({"file": fname, "error": str(e)})
+
+    return {
+        "dry_run": dry_run,
+        "files_on_disk": len(on_disk),
+        "rows_in_db": len(in_db),
+        "orphans_found": len(orphans),
+        "missing_from_disk": len(missing),
+        "deleted": len(deleted),
+        "errors": errors,
+        "sample_orphans": orphans[:10],
+        "sample_missing": missing[:10],
+    }
+
+
+@router.get("/dedup/stats")
+async def dedup_stats():
+    """Summary counts for the admin UI."""
+    db = _db()
+    try:
+        pending = db.execute(
+            "SELECT bucket, COUNT(*) FROM dedup_candidates WHERE status='pending' GROUP BY bucket"
+        ).fetchall()
+        blocked = db.execute("SELECT COUNT(*) FROM photo_dedup_blocklist").fetchone()[0]
+        kept = db.execute("SELECT COUNT(*) FROM photo_dedup_keep_pairs").fetchone()[0]
+    except Exception:
+        return {"pending": {}, "blocked": 0, "kept_pairs": 0}
+    return {
+        "pending": {r[0]: r[1] for r in pending},
+        "blocked": blocked,
+        "kept_pairs": kept,
+    }

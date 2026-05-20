@@ -422,6 +422,27 @@ def get_connection(db_path):
                doc_confidence REAL,
                updated_at TEXT DEFAULT (datetime('now'))
            )""",
+        "ALTER TABLE photos ADD COLUMN sha256 TEXT",
+        "ALTER TABLE photos ADD COLUMN phash TEXT",
+        "ALTER TABLE photos ADD COLUMN width INTEGER",
+        "ALTER TABLE photos ADD COLUMN height INTEGER",
+        "CREATE INDEX IF NOT EXISTS idx_photos_sha256 ON photos(sha256)",
+        "CREATE INDEX IF NOT EXISTS idx_photos_phash ON photos(phash)",
+        """CREATE TABLE IF NOT EXISTS photo_dedup_blocklist (
+               filename TEXT PRIMARY KEY,
+               sha256 TEXT,
+               kept_filename TEXT NOT NULL,
+               person_id TEXT,
+               reason TEXT,
+               decided_at TEXT DEFAULT (datetime('now'))
+           )""",
+        """CREATE TABLE IF NOT EXISTS photo_dedup_keep_pairs (
+               photo_id_a INTEGER NOT NULL,
+               photo_id_b INTEGER NOT NULL,
+               person_id TEXT,
+               decided_at TEXT DEFAULT (datetime('now')),
+               PRIMARY KEY (photo_id_a, photo_id_b)
+           )""",
     ]:
         try:
             conn.execute(stmt)

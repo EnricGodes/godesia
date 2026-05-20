@@ -56,7 +56,7 @@ document.addEventListener('keydown', e => {
 // Navigation
 // ---------------------------------------------------------------------------
 
-const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'config', 'comparador', 'classifier', 'palazuelos'];
+const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'config', 'comparador', 'classifier', 'palazuelos', 'dedup'];
 const initialized = {};
 
 function showSection(name) {
@@ -73,7 +73,8 @@ function showSection(name) {
                        queries: Queries, geocoder: Geocoder, anecdotes: Anecdotes,
                        minibios: Minibios, tests: Tests,
                        config: Config, comparador: Comparador,
-                       classifier: DocClassifier, palazuelos: Palazuelos }[name];
+                       classifier: DocClassifier, palazuelos: Palazuelos,
+                       dedup: Dedup }[name];
         if (ctrl?.init) ctrl.init();
         else if (ctrl?.onActivate) ctrl.onActivate();
     }
@@ -2365,4 +2366,155 @@ const Palazuelos = (() => {
              loadPendingPhotos, updateSelCount, downloadSelected,
              dismissPersonPhotos, selectPersonPhotos, openPhotoByIdx, openExistingByIdx, openPhotoModal,
              backfillTags, onActivate };
+})();
+
+// ---------------------------------------------------------------------------
+// Dedup — review duplicate photos detected per person
+// ---------------------------------------------------------------------------
+
+const Dedup = (() => {
+    let bucketFilter = '';
+
+    async function init() {
+        await loadStats();
+        await loadPending();
+    }
+
+    async function loadStats() {
+        try {
+            const d = await apiFetch('/api/admin/dedup/stats');
+            const b = d.pending?.B || 0;
+            const c = d.pending?.C || 0;
+            document.getElementById('dedup-stat-pending-b').textContent = b;
+            document.getElementById('dedup-stat-pending-c').textContent = c;
+            document.getElementById('dedup-stat-blocked').textContent = d.blocked || 0;
+            document.getElementById('dedup-stat-kept').textContent = d.kept_pairs || 0;
+            const badge = document.getElementById('badge-dedup');
+            const total = b + c;
+            badge.textContent = total > 0 ? total : '';
+        } catch (e) { console.error('dedup stats', e); }
+    }
+
+    async function run() {
+        const status = document.getElementById('dedup-run-status');
+        status.textContent = 'Escanejant…';
+        try {
+            const d = await apiFetch('/api/admin/dedup/run', { method: 'POST' });
+            status.textContent = `✓ Auto-aplicades ${d.auto_applied_sha256} (SHA256). Pendents revisió: ${d.pending_review} (B=${d.buckets.B}, C=${d.buckets.C}).`;
+            await loadStats();
+            await loadPending();
+        } catch (e) {
+            status.textContent = 'Error: ' + e.message;
+        }
+    }
+
+    function setFilter(b) {
+        bucketFilter = b;
+        document.querySelectorAll('#s-dedup .toolbar button').forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-secondary');
+        });
+        const id = b === '' ? 'dedup-btn-all' : `dedup-btn-${b}`;
+        const el = document.getElementById(id);
+        if (el) { el.classList.remove('btn-secondary'); el.classList.add('btn-primary'); }
+        loadPending();
+    }
+
+    function fieldBadge(label, value) {
+        const ok = value !== null && value !== '' && value !== undefined;
+        const color = ok ? '#17341e' : '#9aa19a';
+        const bg = ok ? '#e8f0e8' : '#f1eee5';
+        const display = ok ? String(value).slice(0, 30) : '—';
+        return `<span class="badge" style="background:${bg};color:${color};margin:2px;font-size:.7rem;" title="${esc(String(value || ''))}">${label}: ${esc(display)}</span>`;
+    }
+
+    function photoCard(p, isWinner, candidateId, action) {
+        if (!p) return '<div class="info-card">Foto eliminada</div>';
+        const border = isWinner ? '2px solid #2d4b33' : '2px dashed #b8442b';
+        const badge = isWinner
+            ? '<span class="badge badge-resolved">CONSERVAR</span>'
+            : '<span class="badge" style="background:#fde2dd;color:#7a2814;">ELIMINAR</span>';
+        const isPdf = (p.filename || '').toLowerCase().endsWith('.pdf');
+        const thumb = isPdf
+            ? `<div style="height:180px;display:flex;align-items:center;justify-content:center;background:#f1eee5;color:#727971;font-size:1.5rem;">📄 PDF</div>`
+            : `<img src="/photos/${encodeURIComponent(p.filename)}" style="width:100%;max-height:240px;object-fit:contain;background:#1a1a1a;" loading="lazy"/>`;
+        return `
+            <div class="info-card" style="border:${border};padding:.5rem;flex:1;min-width:260px;">
+                <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;">
+                    ${badge}
+                    <span style="font-size:.72rem;color:#727971;">#${p.id}</span>
+                </div>
+                ${thumb}
+                <div style="margin-top:.4rem;font-size:.78rem;font-weight:600;">${esc(p.title || '(sense títol)')}</div>
+                <div style="margin-top:.3rem;display:flex;flex-wrap:wrap;">
+                    ${fieldBadge('date', p.date)}
+                    ${fieldBadge('place', p.place)}
+                    ${fieldBadge('doc', p.is_document ? (p.doc_type || 'doc') : 'foto')}
+                    ${fieldBadge('rin', p.photo_rin)}
+                    ${fieldBadge('dim', p.width && p.height ? `${p.width}x${p.height}` : null)}
+                    ${fieldBadge('size', p.filesize ? Math.round(p.filesize/1024) + 'KB' : null)}
+                    ${fieldBadge('origin', p.doc_origin)}
+                </div>
+                <div style="font-size:.7rem;color:#727971;margin-top:.3rem;word-break:break-all;">${esc(p.filename)}</div>
+                ${!isWinner ? `<div style="margin-top:.4rem;"><button class="btn btn-secondary btn-sm" onclick="Dedup.decide(${candidateId}, 'swap')">↔ Conservar aquesta en canvi</button></div>` : ''}
+            </div>
+        `;
+    }
+
+    async function loadPending() {
+        const list = document.getElementById('dedup-pending-list');
+        list.innerHTML = '<div class="empty-state">Carregant…</div>';
+        const personFilter = document.getElementById('dedup-filter-person').value.trim();
+        const qs = new URLSearchParams();
+        qs.set('limit', 300);
+        if (personFilter) qs.set('person_id', personFilter);
+        try {
+            const d = await apiFetch(`/api/admin/dedup/pending?${qs}`);
+            let pairs = d.pairs || [];
+            if (bucketFilter) pairs = pairs.filter(p => p.bucket === bucketFilter);
+            if (!pairs.length) {
+                list.innerHTML = '<div class="empty-state">Cap parell pendent.</div>';
+                return;
+            }
+            list.innerHTML = pairs.map(pair => `
+                <div class="info-card" style="margin-bottom:1rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;flex-wrap:wrap;gap:.5rem;">
+                        <div>
+                            <span class="badge ${pair.bucket === 'B' ? 'badge-pending' : ''}" style="background:${pair.bucket === 'B' ? '#fef3c7' : '#e0e7ff'};color:#1f2937;">Bucket ${pair.bucket}</span>
+                            <span style="font-size:.82rem;font-weight:600;margin-left:.5rem;">${esc(pair.person_name || pair.person_id)}</span>
+                            <span style="font-size:.72rem;color:#727971;margin-left:.5rem;">${esc(pair.person_id)}  ·  ${esc(pair.metric)}  ·  score ${pair.kept_score} vs ${pair.drop_score}</span>
+                        </div>
+                        <div style="display:flex;gap:.4rem;">
+                            <button class="btn btn-primary btn-sm" onclick="Dedup.decide(${pair.candidate_id}, 'confirm')">✓ Eliminar duplicat</button>
+                            <button class="btn btn-secondary btn-sm" onclick="Dedup.decide(${pair.candidate_id}, 'reject')">↔ Conservar ambdues</button>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+                        ${photoCard(pair.keep, true, pair.candidate_id, 'swap')}
+                        ${photoCard(pair.drop, false, pair.candidate_id, 'swap')}
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            list.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
+        }
+    }
+
+    async function decide(candidateId, action) {
+        try {
+            await apiFetch('/api/admin/dedup/decide', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ candidate_id: candidateId, action }),
+            });
+            await loadStats();
+            await loadPending();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+
+    function onActivate() { loadStats(); loadPending(); }
+
+    return { init, loadStats, loadPending, run, setFilter, decide, onActivate };
 })();

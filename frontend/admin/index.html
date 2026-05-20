@@ -61,6 +61,10 @@
                 <span class="nav-icon">⇅</span> Sync Palazuelos
                 <span class="nav-badge" id="badge-palazuelos"></span>
             </a>
+            <a data-section="dedup">
+                <span class="nav-icon">⊟</span> Dedup fotos
+                <span class="nav-badge" id="badge-dedup"></span>
+            </a>
         </nav>
     </aside>
 
@@ -687,6 +691,55 @@
                 <pre class="import-log" id="palaz-download-log" style="display:none;height:120px;margin-top:.75rem;"></pre>
             </div>
 
+        </section>
+
+        <!-- ── DEDUP FOTOS ── -->
+        <section id="s-dedup" class="admin-section">
+            <h1 class="section-title">Deduplicació de fotos</h1>
+            <p class="section-subtitle">Detecta i elimina fotos duplicades del merge Godes ↔ Palazuelos. Bucket A (SHA256 idèntic) s'auto-aplica; B i C requereixen revisió.</p>
+
+            <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.25rem;">
+                <div class="stat-card">
+                    <div class="stat-value" id="dedup-stat-pending-b">—</div>
+                    <div class="stat-label">Bucket B pendents</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="dedup-stat-pending-c">—</div>
+                    <div class="stat-label">Bucket C pendents</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="dedup-stat-blocked">—</div>
+                    <div class="stat-label">Eliminades (blocklist)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="dedup-stat-kept">—</div>
+                    <div class="stat-label">Parells preservats</div>
+                </div>
+            </div>
+
+            <div class="info-card" style="margin-bottom:1.25rem;">
+                <h3>Accions</h3>
+                <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.75rem;">
+                    <button class="btn btn-primary btn-sm" onclick="Dedup.run()">↻ Re-escanejar i auto-aplicar SHA256</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Dedup.loadPending()">⟳ Recarregar pendents</button>
+                </div>
+                <div id="dedup-run-status" style="margin-top:.5rem;font-size:.82rem;color:#727971;"></div>
+            </div>
+
+            <div class="toolbar" style="margin-bottom:.75rem;">
+                <div style="display:flex;gap:.35rem;flex-wrap:wrap;">
+                    <button class="btn btn-primary btn-sm" id="dedup-btn-all" onclick="Dedup.setFilter('')">Tots</button>
+                    <button class="btn btn-secondary btn-sm" id="dedup-btn-B" onclick="Dedup.setFilter('B')">Bucket B</button>
+                    <button class="btn btn-secondary btn-sm" id="dedup-btn-C" onclick="Dedup.setFilter('C')">Bucket C</button>
+                </div>
+                <div class="toolbar-right">
+                    <input type="text" id="dedup-filter-person" placeholder="Filtrar per person_id (@I…@)"
+                           style="padding:.4rem .6rem;border:1px solid #d9d5cc;border-radius:4px;font-size:.85rem;"/>
+                    <button class="btn btn-secondary btn-sm" onclick="Dedup.loadPending()">Aplicar</button>
+                </div>
+            </div>
+
+            <div id="dedup-pending-list"></div>
         </section>
 
     </main>
