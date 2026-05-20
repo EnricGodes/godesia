@@ -2050,46 +2050,6 @@ async def dedup_decide(body: DedupDecideBody):
     raise HTTPException(status_code=400, detail="invalid action")
 
 
-@router.post("/photos/cleanup-orphans")
-async def photos_cleanup_orphans(dry_run: bool = False):
-    """Delete files in data/photos/ that have no row in the photos table.
-
-    Used after dedup to make the volume match the DB. With dry_run=true,
-    only reports the files that would be deleted.
-    """
-    db = _db()
-    photos_dir = _base_dir / "data" / "photos"
-    if not photos_dir.exists():
-        raise HTTPException(status_code=404, detail="photos dir missing")
-
-    in_db = {r[0] for r in db.execute("SELECT filename FROM photos")}
-    on_disk = {p.name for p in photos_dir.iterdir() if p.is_file()}
-    orphans = sorted(on_disk - in_db)
-    missing = sorted(in_db - on_disk)
-
-    deleted = []
-    errors = []
-    if not dry_run:
-        for fname in orphans:
-            try:
-                (photos_dir / fname).unlink()
-                deleted.append(fname)
-            except Exception as e:
-                errors.append({"file": fname, "error": str(e)})
-
-    return {
-        "dry_run": dry_run,
-        "files_on_disk": len(on_disk),
-        "rows_in_db": len(in_db),
-        "orphans_found": len(orphans),
-        "missing_from_disk": len(missing),
-        "deleted": len(deleted),
-        "errors": errors,
-        "sample_orphans": orphans[:10],
-        "sample_missing": missing[:10],
-    }
-
-
 @router.get("/dedup/stats")
 async def dedup_stats():
     """Summary counts for the admin UI."""
