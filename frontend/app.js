@@ -70,16 +70,22 @@ function closePersonPanel() {
 }
 
 // --- Chat ---
-function addMessage(content, role, photosHtml = "", sourceTag = "") {
+function addMessage(content, role, sourceTag = "") {
   const div = document.createElement("div");
   div.className = `message ${role}`;
   div.innerHTML = `
     <div class="message-content">
       ${sourceTag}
       <p>${content.replace(/\n/g, "<br>")}</p>
-      ${photosHtml}
     </div>
   `;
+  // Style dossier links as pills that open the person panel
+  div.querySelectorAll('a[href*="/dossier.html"]').forEach(a => {
+    const id = new URL(a.href, location.origin).searchParams.get('id');
+    if (!id) return;
+    a.classList.add('person-pill');
+    a.addEventListener('click', e => { e.preventDefault(); showPersonPanel(id); });
+  });
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
@@ -123,9 +129,14 @@ async function confirmLLM(btn, encodedQuestion) {
 
     const data = await res.json();
     const peopleLlm = data.people_with_photos || [];
-    const pillsLlm = buildPeoplePills(peopleLlm);
     const sourceTag = '<span class="source-tag llm">IA</span>';
-    container.innerHTML = `${sourceTag}<p>${data.answer.replace(/\n/g, "<br>")}</p>${pillsLlm}`;
+    container.innerHTML = `${sourceTag}<p>${data.answer.replace(/\n/g, "<br>")}</p>`;
+    container.querySelectorAll('a[href*="/dossier.html"]').forEach(a => {
+      const id = new URL(a.href, location.origin).searchParams.get('id');
+      if (!id) return;
+      a.classList.add('person-pill');
+      a.addEventListener('click', e => { e.preventDefault(); showPersonPanel(id); });
+    });
 
     if (peopleLlm.length === 1) {
       showPersonPanel(peopleLlm[0].id.replace(/@/g, ''));
@@ -168,15 +179,6 @@ function removeLoading() {
   if (el) el.remove();
 }
 
-function buildPeoplePills(people) {
-  if (!people || people.length === 0) return "";
-  const pills = people.map(p => {
-    const id = p.id.replace(/@/g, '');
-    const name = p.name.trim();
-    return `<button class="person-pill" onclick="showPersonPanel('${id}')">${name}</button>`;
-  }).join("");
-  return `<div class="person-pills">${pills}</div>`;
-}
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -213,8 +215,7 @@ form.addEventListener("submit", async (e) => {
 
     // Direct DB answer
     const people = data.people_with_photos || [];
-    const pillsHtml = buildPeoplePills(people);
-    addMessage(data.answer, "assistant", pillsHtml);
+    addMessage(data.answer, "assistant");
 
     // Auto-open panel if exactly 1 person, otherwise close
     if (people.length === 1) {
