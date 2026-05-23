@@ -5,38 +5,68 @@ const sendBtn = document.getElementById("send-btn");
 
 let conversationHistory = [];
 
-// --- Birthday widget ---
-async function loadBirthdays() {
+// --- Person panel ---
+async function showPersonPanel(personId) {
+  const panel = document.getElementById('person-panel');
+  const content = document.getElementById('person-panel-content');
+  panel.classList.add('open');
+  content.innerHTML = '<div class="panel-loading"><span></span><span></span><span></span></div>';
+
   try {
-    const res = await fetch("/api/birthdays");
-    if (!res.ok) return;
-    const data = await res.json();
-    if (!data.birthdays || data.birthdays.length === 0) return;
+    const res = await fetch(`/api/dossier/${encodeURIComponent(personId)}`);
+    if (!res.ok) { panel.classList.remove('open'); return; }
+    const d = await res.json();
+    const p = d.person;
 
-    const widget = document.getElementById("birthday-widget");
-    const list = document.getElementById("birthday-list");
-    widget.style.display = "block";
+    const photoSrc = p.photo_file ? `/photos/${p.photo_file}` : null;
+    const initials = (p.given_name || p.name || '?')[0].toUpperCase();
 
-    list.innerHTML = data.birthdays
-      .map((b) => {
-        const photoHtml = b.photo
-          ? `<img src="/photos/${b.photo}" alt="${b.name}" onerror="this.style.display='none'">`
-          : `<div class="no-photo">${b.name.charAt(0)}</div>`;
-        const ageText = b.age ? `${b.age} anys` : "";
-        const aliveTag = b.is_alive ? '<span class="alive-tag">viu/a</span>' : "";
-        const todayClass = b.is_today ? "today" : "";
-        return `
-        <div class="birthday-card ${todayClass}">
-          ${photoHtml}
-          <div class="birthday-name">${b.name}</div>
-          <div class="birthday-date">${b.date_label} ${ageText}</div>
-          ${aliveTag}
-        </div>`;
-      })
-      .join("");
-  } catch (e) {
-    // silently fail
+    let years = '';
+    if (p.birth_year && p.death_year) years = `${p.birth_year} – ${p.death_year}`;
+    else if (p.birth_year && p.is_alive) years = `n. ${p.birth_year}`;
+    else if (p.birth_year) years = `${p.birth_year} – ?`;
+
+    const birthLine = [p.birth_date, p.birth_city || p.birth_place].filter(Boolean).join(', ');
+    const deathLine = [p.death_date, p.death_city || p.death_place].filter(Boolean).join(', ');
+
+    const fatherHtml = d.father ? `<a href="/dossier.html?id=${encodeURIComponent(d.father.id)}">${d.father.name}</a>` : '';
+    const motherHtml = d.mother ? `<a href="/dossier.html?id=${encodeURIComponent(d.mother.id)}">${d.mother.name}</a>` : '';
+    const parentsHtml = [fatherHtml, motherHtml].filter(Boolean).join(' · ');
+
+    const spousesHtml = (d.spouses || []).map(s =>
+      `<a href="/dossier.html?id=${encodeURIComponent(s.id)}">${s.name}</a>`
+    ).join(' · ');
+
+    const cleanId = personId.replace(/@/g, '');
+
+    content.innerHTML = `
+      <div class="panel-header">
+        ${photoSrc
+          ? `<img class="panel-photo" src="${photoSrc}" alt="${p.name}" onerror="this.src=''; this.outerHTML='<div class=panel-photo-placeholder>${initials}</div>'">`
+          : `<div class="panel-photo-placeholder">${initials}</div>`}
+        <h2 class="panel-name">${p.name}</h2>
+        ${p.nickname ? `<p class="panel-nickname">"${p.nickname}"</p>` : ''}
+        ${years ? `<p class="panel-years">${years}</p>` : ''}
+      </div>
+      <div class="panel-fields">
+        ${birthLine ? `<div class="panel-field"><span class="panel-label">Nacimiento</span><span class="panel-value">${birthLine}</span></div>` : ''}
+        ${deathLine ? `<div class="panel-field"><span class="panel-label">Defunción</span><span class="panel-value">${deathLine}</span></div>` : ''}
+        ${parentsHtml ? `<div class="panel-field"><span class="panel-label">Padres</span><span class="panel-value">${parentsHtml}</span></div>` : ''}
+        ${spousesHtml ? `<div class="panel-field"><span class="panel-label">Cónyuge${(d.spouses||[]).length > 1 ? 's' : ''}</span><span class="panel-value">${spousesHtml}</span></div>` : ''}
+        ${d.children && d.children.length > 0 ? `<div class="panel-field"><span class="panel-label">Hijos</span><span class="panel-value">${d.children.length}</span></div>` : ''}
+      </div>
+      <div class="panel-actions">
+        <a href="/dossier.html?id=${encodeURIComponent(p.id)}" class="panel-btn">Ver dossier completo</a>
+        <a href="/arbol2.html?id=${cleanId}" class="panel-btn panel-btn-secondary">Ver en árbol</a>
+      </div>
+    `;
+  } catch(e) {
+    panel.classList.remove('open');
   }
+}
+
+function closePersonPanel() {
+  document.getElementById('person-panel').classList.remove('open');
 }
 
 // --- Chat ---
@@ -95,6 +125,13 @@ async function confirmLLM(btn, encodedQuestion) {
     const photosHtml = buildPhotosHtml(data.people_with_photos);
     const sourceTag = '<span class="source-tag llm">IA</span>';
     container.innerHTML = `${sourceTag}<p>${data.answer.replace(/\n/g, "<br>")}</p>${photosHtml}`;
+
+    const mentionedLlm = data.people_mentioned || [];
+    if (mentionedLlm.length === 1) {
+      showPersonPanel(mentionedLlm[0].replace(/@/g, ''));
+    } else {
+      closePersonPanel();
+    }
 
     conversationHistory.push({ role: "user", content: question });
     conversationHistory.push({ role: "assistant", content: data.answer });
@@ -185,6 +222,14 @@ form.addEventListener("submit", async (e) => {
     const sourceTag = data.source === "db" ? '<span class="source-tag db">Directa</span>' : "";
     addMessage(data.answer, "assistant", photosHtml, sourceTag);
 
+    // Show person panel if exactly 1 person mentioned
+    const mentioned = data.people_mentioned || [];
+    if (mentioned.length === 1) {
+      showPersonPanel(mentioned[0].replace(/@/g, ''));
+    } else {
+      closePersonPanel();
+    }
+
     conversationHistory.push({ role: "user", content: question });
     conversationHistory.push({ role: "assistant", content: data.answer });
     if (conversationHistory.length > 20) {
@@ -198,9 +243,6 @@ form.addEventListener("submit", async (e) => {
   sendBtn.disabled = false;
   input.focus();
 });
-
-// Load birthdays on page load
-loadBirthdays();
 
 // Render a list of people as an assistant message with clickable links
 function renderPeopleList(q, results) {

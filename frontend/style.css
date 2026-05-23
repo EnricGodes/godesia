@@ -97,94 +97,187 @@ nav {
     background: var(--primary-container);
 }
 
-/* Birthday widget */
-.birthday-widget {
-    padding: 14px 24px;
+/* Person panel */
+#person-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100vh;
+    background: var(--surface);
+    border-left: 1px solid var(--outline-variant);
+    overflow-y: auto;
+    z-index: 200;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+#person-panel.open {
+    transform: translateX(0);
+}
+
+#person-panel-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--on-surface-variant);
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+#person-panel-close:hover {
     background: var(--surface-container);
 }
 
-.birthday-widget h3 {
-    font-family: 'Noto Serif', serif;
-    font-size: 0.85rem;
-    color: var(--tertiary);
-    margin-bottom: 10px;
-    font-weight: 400;
-}
-
-.birthday-list {
+.panel-loading {
     display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 4px;
+    gap: 6px;
+    justify-content: center;
+    padding: 48px 0;
 }
 
-.birthday-card {
-    flex-shrink: 0;
-    text-align: center;
-    padding: 10px;
-    border-radius: 0.5rem;
-    background: var(--surface-container-lowest);
-    min-width: 80px;
-    box-shadow: 0 4px 16px rgba(28, 28, 23, 0.04);
-}
-
-.birthday-card.today {
-    background: var(--secondary-container);
-}
-
-.birthday-card img {
-    width: 48px;
-    height: 48px;
-    object-fit: cover;
+.panel-loading span {
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
+    background: var(--primary);
+    animation: bounce 1.2s infinite ease-in-out;
 }
 
-.birthday-card .no-photo {
-    width: 48px;
-    height: 48px;
+.panel-loading span:nth-child(2) { animation-delay: 0.2s; }
+.panel-loading span:nth-child(3) { animation-delay: 0.4s; }
+
+.panel-header {
+    padding: 32px 20px 20px;
+    border-bottom: 1px solid var(--outline-variant);
+    text-align: center;
+}
+
+.panel-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 12px;
+    border: 2px solid var(--outline-variant);
+}
+
+.panel-photo-placeholder {
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background: var(--surface-container-high);
+    color: var(--secondary);
+    font-family: 'Noto Serif', serif;
+    font-size: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto;
-    font-size: 1.2rem;
-    color: var(--secondary);
+    margin: 0 auto 12px;
 }
 
-.birthday-name {
-    font-size: 0.7rem;
+.panel-name {
+    font-family: 'Noto Serif', serif;
+    font-size: 1.05rem;
     color: var(--on-surface);
-    margin-top: 4px;
-    max-width: 80px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-weight: 400;
+    margin: 0 0 4px;
+    line-height: 1.3;
 }
 
-.birthday-date {
-    font-size: 0.65rem;
+.panel-nickname {
+    font-size: 0.8rem;
     color: var(--on-surface-variant);
+    font-style: italic;
+    margin: 0 0 4px;
 }
 
-.alive-tag {
-    display: inline-block;
-    font-size: 0.55rem;
-    color: var(--alive-green);
-    border-radius: 0.25rem;
-    padding: 0 4px;
-    margin-top: 2px;
-    background: rgba(74, 124, 80, 0.1);
+.panel-years {
+    font-size: 0.8rem;
+    color: var(--secondary);
+    font-weight: 600;
+    margin: 0;
+}
+
+.panel-fields {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.panel-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.panel-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--on-surface-variant);
+    font-weight: 700;
+}
+
+.panel-value {
+    font-size: 0.85rem;
+    color: var(--on-surface);
+    line-height: 1.4;
+}
+
+.panel-value a {
+    color: var(--primary);
+    text-decoration: none;
     font-weight: 600;
 }
 
-/* Scrollbar for birthday list */
-.birthday-list::-webkit-scrollbar {
-    height: 4px;
+.panel-value a:hover {
+    text-decoration: underline;
 }
-.birthday-list::-webkit-scrollbar-thumb {
-    background: var(--outline-variant);
-    border-radius: 2px;
+
+.panel-actions {
+    padding: 16px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid var(--outline-variant);
+}
+
+.panel-btn {
+    display: block;
+    text-align: center;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s;
+    background: var(--primary);
+    color: var(--on-primary);
+}
+
+.panel-btn:hover {
+    background: var(--primary-container);
+}
+
+.panel-btn-secondary {
+    background: var(--surface-container);
+    color: var(--on-surface);
+}
+
+.panel-btn-secondary:hover {
+    background: var(--surface-container-high);
 }
 
 /* Chat */

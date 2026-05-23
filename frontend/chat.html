@@ -14,11 +14,6 @@
 <body>
     <div class="app">
 
-        <div class="birthday-widget" id="birthday-widget" style="display:none;">
-            <h3>Aniversaris d'aquesta setmana</h3>
-            <div class="birthday-list" id="birthday-list"></div>
-        </div>
-
         <div class="chat-container" id="chat">
             <div class="message assistant">
                 <div class="message-content">
@@ -35,6 +30,12 @@
                 <button type="submit" id="send-btn">Enviar</button>
             </form>
         </div>
+    </div>
+
+    <!-- Person panel (fixed sidebar) -->
+    <div id="person-panel">
+        <button id="person-panel-close" onclick="closePersonPanel()" title="Cerrar">×</button>
+        <div id="person-panel-content"></div>
     </div>
 
     <script src="mention-autocomplete.js"></script>
