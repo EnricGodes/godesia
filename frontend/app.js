@@ -122,13 +122,13 @@ async function confirmLLM(btn, encodedQuestion) {
     }
 
     const data = await res.json();
-    const photosHtml = buildPhotosHtml(data.people_with_photos);
+    const peopleLlm = data.people_with_photos || [];
+    const pillsLlm = buildPeoplePills(peopleLlm);
     const sourceTag = '<span class="source-tag llm">IA</span>';
-    container.innerHTML = `${sourceTag}<p>${data.answer.replace(/\n/g, "<br>")}</p>${photosHtml}`;
+    container.innerHTML = `${sourceTag}<p>${data.answer.replace(/\n/g, "<br>")}</p>${pillsLlm}`;
 
-    const mentionedLlm = data.people_mentioned || [];
-    if (mentionedLlm.length === 1) {
-      showPersonPanel(mentionedLlm[0].replace(/@/g, ''));
+    if (peopleLlm.length === 1) {
+      showPersonPanel(peopleLlm[0].id.replace(/@/g, ''));
     } else {
       closePersonPanel();
     }
@@ -168,20 +168,14 @@ function removeLoading() {
   if (el) el.remove();
 }
 
-function buildPhotosHtml(people) {
+function buildPeoplePills(people) {
   if (!people || people.length === 0) return "";
-  const cards = people
-    .filter((p) => p.photo)
-    .map(
-      (p) => `
-    <div class="photo-card">
-      <img src="/photos/${p.photo}" alt="${p.name}" onerror="this.style.display='none'">
-      <div class="photo-name">${p.name}</div>
-    </div>`
-    )
-    .join("");
-  if (!cards) return "";
-  return `<div class="photos-strip">${cards}</div>`;
+  const pills = people.map(p => {
+    const id = p.id.replace(/@/g, '');
+    const name = p.name.trim();
+    return `<button class="person-pill" onclick="showPersonPanel('${id}')">${name}</button>`;
+  }).join("");
+  return `<div class="person-pills">${pills}</div>`;
 }
 
 form.addEventListener("submit", async (e) => {
@@ -218,14 +212,13 @@ form.addEventListener("submit", async (e) => {
     }
 
     // Direct DB answer
-    const photosHtml = buildPhotosHtml(data.people_with_photos);
-    const sourceTag = data.source === "db" ? '<span class="source-tag db">Directa</span>' : "";
-    addMessage(data.answer, "assistant", photosHtml, sourceTag);
+    const people = data.people_with_photos || [];
+    const pillsHtml = buildPeoplePills(people);
+    addMessage(data.answer, "assistant", pillsHtml);
 
-    // Show person panel if exactly 1 person mentioned
-    const mentioned = data.people_mentioned || [];
-    if (mentioned.length === 1) {
-      showPersonPanel(mentioned[0].replace(/@/g, ''));
+    // Auto-open panel if exactly 1 person, otherwise close
+    if (people.length === 1) {
+      showPersonPanel(people[0].id.replace(/@/g, ''));
     } else {
       closePersonPanel();
     }

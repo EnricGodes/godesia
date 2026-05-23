@@ -413,33 +413,32 @@ nav {
 }
 
 /* Photos */
-.photos-strip {
+.person-pills {
     display: flex;
-    gap: 10px;
-    margin-top: 14px;
+    gap: 6px;
+    margin-top: 10px;
     flex-wrap: wrap;
 }
 
-.photo-card {
-    text-align: center;
+.person-pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 1rem;
+    font-weight: 600;
+    font-family: 'Manrope', sans-serif;
+    cursor: pointer;
+    background: rgba(23, 52, 30, 0.08);
+    color: var(--primary);
+    border: 1px solid rgba(23, 52, 30, 0.15);
+    transition: background 0.15s, border-color 0.15s;
+    letter-spacing: 0.01em;
 }
 
-.photo-card img {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 16px rgba(28, 28, 23, 0.08);
-}
-
-.photo-card .photo-name {
-    font-size: 0.7rem;
-    color: var(--on-surface-variant);
-    margin-top: 4px;
-    max-width: 80px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.person-pill:hover {
+    background: rgba(23, 52, 30, 0.15);
+    border-color: rgba(23, 52, 30, 0.3);
 }
 
 /* Input */
