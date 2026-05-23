@@ -1647,7 +1647,7 @@ async def classifier_stats():
     ).fetchall():
         origins[row["o"]] = row["n"]
     pending = db.execute(
-        "SELECT COUNT(*) FROM photos WHERE doc_origin='clip_pending' OR (is_document=1 AND (doc_type IS NULL OR doc_type='') AND doc_origin != 'human')"
+        "SELECT COUNT(*) FROM photos WHERE doc_origin IS NULL OR doc_origin='clip_pending' OR (is_document=1 AND (doc_type IS NULL OR doc_type='') AND doc_origin != 'human')"
     ).fetchone()[0]
 
     dc = _get_doc_classifier()
@@ -1668,7 +1668,8 @@ async def classifier_stats():
 async def classifier_pending(limit: int = 20, offset: int = 0):
     db = _db()
     _pending_where = """
-        p.doc_origin = 'clip_pending'
+        p.doc_origin IS NULL
+        OR p.doc_origin = 'clip_pending'
         OR (p.is_document = 1 AND (p.doc_type IS NULL OR p.doc_type = '') AND p.doc_origin != 'human')
     """
     total = db.execute(f"SELECT COUNT(*) FROM photos p WHERE {_pending_where}").fetchone()[0]
