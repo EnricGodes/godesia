@@ -3396,8 +3396,9 @@ class QueryRouter:
         if any(re.search(b, q, re.I) for b in blockers):
             return None
         capitalized = re.findall(r"[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][^?!.;,]+", q)
-        if capitalized:
-            candidate = _normalize_name_fragment(capitalized[-1])
+        candidate_text = capitalized[-1] if capitalized else q
+        candidate = _normalize_name_fragment(candidate_text)
+        if candidate:
             person, matches = self._resolve_person(candidate)
             if person:
                 if len(matches) == 1:
