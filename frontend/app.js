@@ -4,6 +4,7 @@ const input = document.getElementById("question");
 const sendBtn = document.getElementById("send-btn");
 
 let conversationHistory = [];
+let _lastAssistantMsg = null;
 
 // --- Person panel ---
 async function showPersonPanel(personId) {
@@ -60,6 +61,10 @@ async function showPersonPanel(personId) {
         <a href="/arbol2.html?id=${cleanId}" class="panel-btn panel-btn-secondary">Ver en árbol</a>
       </div>
     `;
+
+    if (_lastAssistantMsg) {
+      addFollowUpChips(_lastAssistantMsg, p.name, d);
+    }
   } catch(e) {
     panel.classList.remove('open');
   }
@@ -87,7 +92,50 @@ function addMessage(content, role, sourceTag = "") {
     a.addEventListener('click', e => { e.preventDefault(); showPersonPanel(id); });
   });
   chat.appendChild(div);
+  if (role === 'assistant') _lastAssistantMsg = div;
   chat.scrollTop = chat.scrollHeight;
+}
+
+function addFollowUpChips(msgDiv, personName, dossier) {
+  const content = msgDiv.querySelector('.message-content');
+  if (!content) return;
+  content.querySelectorAll('.followup-chips').forEach(el => el.remove());
+
+  const chips = [];
+  const n = personName;
+  chips.push({ label: 'Padres', q: `Padres de ${n}` });
+  chips.push({ label: 'Hermanos', q: `Hermanos de ${n}` });
+  chips.push({ label: 'Dónde nació', q: `Dónde nació ${n}` });
+  if (dossier.children && dossier.children.length > 0) {
+    chips.push({ label: 'Hijos', q: `Hijos de ${n}` });
+    chips.push({ label: 'Edad primer hijo', q: `A qué edad tuvo su primer hijo ${n}` });
+  }
+  if (dossier.spouses && dossier.spouses.length > 0) {
+    chips.push({ label: 'Cónyuge', q: `Con quién se casó ${n}` });
+    chips.push({ label: 'Edad al casarse', q: `A qué edad se casó ${n}` });
+  }
+  if (dossier.occupations && dossier.occupations.length > 0) {
+    chips.push({ label: 'Profesión', q: `De qué trabajaba ${n}` });
+  }
+  if (!dossier.person.is_alive) {
+    chips.push({ label: 'Dónde murió', q: `Dónde murió ${n}` });
+  }
+
+  const row = document.createElement('div');
+  row.className = 'followup-chips';
+  chips.forEach(({ label, q }) => {
+    const btn = document.createElement('button');
+    btn.className = 'followup-chip';
+    btn.textContent = label;
+    btn.addEventListener('click', () => submitFollowUp(q));
+    row.appendChild(btn);
+  });
+  content.appendChild(row);
+}
+
+function submitFollowUp(question) {
+  input.value = question;
+  form.dispatchEvent(new Event('submit'));
 }
 
 function addLLMConfirmation(message, question, history) {

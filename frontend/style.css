@@ -436,6 +436,35 @@ nav {
     border-color: rgba(23, 52, 30, 0.35);
 }
 
+/* Follow-up chips */
+.followup-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--outline-variant);
+}
+
+.followup-chip {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 1rem;
+    border: 1px solid var(--outline-variant);
+    background: var(--surface-container);
+    color: var(--on-surface);
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 500;
+    transition: background 0.15s;
+}
+
+.followup-chip:hover {
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
+    border-color: transparent;
+}
+
 /* Input */
 .input-area {
     padding: 16px 24px;
