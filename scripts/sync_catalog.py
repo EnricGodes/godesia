@@ -290,7 +290,8 @@ def parse_extra_gedcom_photos(gedcom_path, palaz_to_godes_map):
         for palaz_id, info in photo.tagged_people.items():
             godes_id = palaz_to_godes_map.get(palaz_id)
             if godes_id:
-                remapped[godes_id] = info
+                # Never inherit is_primary from Palazuelos — it would override Godes primary photos
+                remapped[godes_id] = {**info, "is_primary": False}
         photo.tagged_people = remapped
 
     return photos, albums
