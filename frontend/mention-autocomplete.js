@@ -70,8 +70,10 @@ class MentionAutocomplete {
       return;
     }
 
+    clearTimeout(this._debounceTimer);
     if (this.mentionQuery.length > 0) {
-      this.showMentionDropdown();
+      this.closeMentionDropdown();
+      this._debounceTimer = setTimeout(() => this.showMentionDropdown(), 180);
     } else {
       this.closeMentionDropdown();
     }
@@ -122,7 +124,10 @@ class MentionAutocomplete {
     // Discard stale results if query changed while waiting
     if (querySnapshot !== this.mentionQuery) return;
 
-    if (results.length === 0) return;
+    if (results.length === 0) {
+      this.closeMentionDropdown();
+      return;
+    }
 
     // Create or update dropdown
     if (!this.dropdownContainer) {
