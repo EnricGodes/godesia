@@ -116,12 +116,13 @@ class MentionAutocomplete {
   }
 
   async showMentionDropdown() {
-    const results = await this.searchPeople(this.mentionQuery);
+    const querySnapshot = this.mentionQuery;
+    const results = await this.searchPeople(querySnapshot);
 
-    if (results.length === 0) {
-      this.closeMentionDropdown();
-      return;
-    }
+    // Discard stale results if query changed while waiting
+    if (querySnapshot !== this.mentionQuery) return;
+
+    if (results.length === 0) return;
 
     // Create or update dropdown
     if (!this.dropdownContainer) {

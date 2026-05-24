@@ -522,7 +522,7 @@ def search_people(conn, query, limit=20):
     return conn.execute(
         "SELECT id, name, given_name, surname, nickname, birth_year, death_year, photo_file, is_alive "
         "FROM people WHERE NORMALIZE(name) LIKE '%' || NORMALIZE(?) || '%' ORDER BY name LIMIT ?",
-        (query.strip(), limit)
+        (normalized_query, limit)
     ).fetchall()
 
 
