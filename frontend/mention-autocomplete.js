@@ -72,7 +72,6 @@ class MentionAutocomplete {
 
     clearTimeout(this._debounceTimer);
     if (this.mentionQuery.length > 0) {
-      this.closeMentionDropdown();
       this._debounceTimer = setTimeout(() => this.showMentionDropdown(), 180);
     } else {
       this.closeMentionDropdown();
