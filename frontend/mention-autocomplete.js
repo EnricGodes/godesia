@@ -47,13 +47,11 @@ class MentionAutocomplete {
     const text = this.input.value;
     const cursorPos = this.input.selectionStart;
 
-    // Find @ before cursor
+    // Find @ before cursor (spaces allowed in mention query for multi-word names)
     let atPos = -1;
     for (let i = cursorPos - 1; i >= 0; i--) {
       if (text[i] === '@') {
         atPos = i;
-        break;
-      } else if (text[i] === ' ' || text[i] === '\n') {
         break;
       }
     }
