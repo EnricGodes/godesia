@@ -113,14 +113,17 @@ async function a2Init(personId) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  let defaultId = A2_DEFAULT_ID;
-  try {
-    const res = await fetch('/api/settings');
-    if (res.ok) {
-      const s = await res.json();
-      if (s.tree_default_person) defaultId = s.tree_default_person;
-    }
-  } catch (_) {}
+  const urlId = new URLSearchParams(window.location.search).get('id');
+  let defaultId = urlId || A2_DEFAULT_ID;
+  if (!urlId) {
+    try {
+      const res = await fetch('/api/settings');
+      if (res.ok) {
+        const s = await res.json();
+        if (s.tree_default_person) defaultId = s.tree_default_person;
+      }
+    } catch (_) {}
+  }
   a2Init(defaultId).catch(err => {
     document.getElementById('FamilyChart').innerHTML =
       `<div style="padding:40px;font-family:Manrope,sans-serif;color:#ba1a1a;">Error: ${err.message}</div>`;
