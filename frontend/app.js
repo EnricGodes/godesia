@@ -7,7 +7,19 @@ let conversationHistory = [];
 let _lastAssistantMsg = null;
 
 // --- Person panel ---
+function markActivePill(personId) {
+  const cleanId = personId.replace(/@/g, '');
+  document.querySelectorAll('.person-pill').forEach(pill => {
+    const href = pill.getAttribute('href') || '';
+    try {
+      const id = (new URL(href, location.origin).searchParams.get('id') || '').replace(/@/g, '');
+      pill.classList.toggle('active', id === cleanId);
+    } catch(e) {}
+  });
+}
+
 async function showPersonPanel(personId) {
+  markActivePill(personId);
   const panel = document.getElementById('person-panel');
   const content = document.getElementById('person-panel-content');
   panel.classList.add('open');
@@ -72,6 +84,7 @@ async function showPersonPanel(personId) {
 
 function closePersonPanel() {
   document.getElementById('person-panel').classList.remove('open');
+  document.querySelectorAll('.person-pill.active').forEach(p => p.classList.remove('active'));
 }
 
 // --- Chat ---

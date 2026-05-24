@@ -436,6 +436,12 @@ nav {
     border-color: rgba(23, 52, 30, 0.35);
 }
 
+.person-pill.active {
+    background: var(--primary-container);
+    color: var(--on-primary);
+    border-color: var(--primary-container);
+}
+
 /* Follow-up chips */
 .followup-chips {
     display: flex;
