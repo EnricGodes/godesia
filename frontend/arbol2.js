@@ -11,7 +11,7 @@ let a2MainId = null;  // Originally requested person ID (viewport center target)
 
 async function a2Init(personId) {
   const res = await fetch(`/api/tree2/${encodeURIComponent(personId)}?up=6&down=6`);
-  if (!res.ok) throw new Error(`Error carregant arbre: ${res.status}`);
+  if (!res.ok) throw new Error(`Error cargando árbol: ${res.status}`);
   const { nodes, main_id } = await res.json();
 
   const cont = document.getElementById('FamilyChart');
@@ -400,7 +400,7 @@ function a2OpenSidebar(storeItem) {
           style="width:100%;padding:9px;background:#2d4b33;color:#fff;border:none;
                  border-radius:8px;cursor:pointer;font-family:Manrope,sans-serif;
                  font-size:.875rem;font-weight:500;">
-          Centrar en l'arbre
+          Centrar en el árbol
         </button>
         ${dosId
           ? `<a href="/dossier.html?id=${dosId}"
@@ -409,7 +409,7 @@ function a2OpenSidebar(storeItem) {
                       border:1px solid #c2c8bf;border-radius:8px;
                       font-family:Manrope,sans-serif;font-size:.875rem;
                       font-weight:500;text-decoration:none;">
-               Veure dossier complet
+               Ver dossier completo
              </a>`
           : ''}
       </div>
