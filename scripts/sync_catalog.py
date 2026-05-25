@@ -1024,9 +1024,12 @@ def main():
                 doc_origin TEXT, doc_confidence REAL,
                 parent_photo_id INTEGER, position TEXT, is_downloaded INTEGER DEFAULT 0,
                 transcription TEXT, note TEXT,
+                sha256 TEXT, phash TEXT, width INTEGER, height INTEGER,
                 inserted_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
             )
         """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_photos_sha256 ON photos(sha256)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_photos_phash ON photos(phash)")
 
         cursor.execute("""
             CREATE TABLE photo_tags (
