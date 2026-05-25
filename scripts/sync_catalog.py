@@ -303,6 +303,7 @@ def parse_gedcom_people(lines):
     occupations = defaultdict(list)
     residences = defaultdict(list)
     notes = defaultdict(list)
+    burials = defaultdict(list)
     marriages = {}
     children = defaultdict(list)
 
@@ -389,6 +390,17 @@ def parse_gedcom_people(lines):
                                 person["death_age"] = deat_line.split("AGE", 1)[1].strip()
                             j += 1
                         person["is_alive"] = 0
+                    elif tag == "BURI":
+                        j = i + 1
+                        buri_data = {"place_detail": rest or None, "date": None, "place": None}
+                        while j < len(lines) and lines[j].startswith("2"):
+                            buri_line = lines[j].rstrip("\n")
+                            if "DATE" in buri_line:
+                                buri_data["date"] = buri_line.split("DATE", 1)[1].strip()
+                            elif "PLAC" in buri_line:
+                                buri_data["place"] = buri_line.split("PLAC", 1)[1].strip()
+                            j += 1
+                        burials[person_id].append(buri_data)
                     elif tag == "OCCU":
                         j = i + 1
                         occu_data = {"title": rest, "date": None, "place": None}
@@ -517,7 +529,7 @@ def parse_gedcom_people(lines):
                     if wife_id:
                         people[chil_id]["mother_id"] = wife_id
 
-    return people, marriages, children, occupations, residences, notes
+    return people, marriages, children, occupations, residences, notes, burials
 
 
 def _parse_date(date_str):
@@ -633,12 +645,13 @@ def main():
         lines = f.readlines()
 
     print("\nFase 1: Parseando GEDCOM (personas)...")
-    people, marriages, children, occupations, residences, notes = parse_gedcom_people(lines)
+    people, marriages, children, occupations, residences, notes, burials = parse_gedcom_people(lines)
     print(f"  Personas: {len(people)}")
     print(f"  Matrimonios: {len(marriages)}")
     print(f"  Ocupaciones: {sum(len(v) for v in occupations.values())}")
     print(f"  Residencias: {sum(len(v) for v in residences.values())}")
     print(f"  Notas: {sum(len(v) for v in notes.values())}")
+    print(f"  Entierros: {sum(len(v) for v in burials.values())}")
 
     print("\nFase 2: Parseando GEDCOM (fotos)...")
     albums = parse_gedcom_albums(lines)
@@ -800,6 +813,9 @@ def main():
         for ress in residences.values():
             for res in ress:
                 res["date"] = convert_date_to_spanish(res["date"])
+        for buris in burials.values():
+            for buri in buris:
+                buri["date"] = convert_date_to_spanish(buri["date"])
 
         cursor = db_conn.cursor()
 
@@ -883,6 +899,14 @@ def main():
                     INSERT INTO notes (person_id, content)
                     VALUES (?, ?)
                 """, (person_id, note_content))
+
+        cursor.execute("DELETE FROM burial")
+        for person_id, buris in burials.items():
+            for buri in buris:
+                cursor.execute("""
+                    INSERT INTO burial (person_id, place_detail, date, place)
+                    VALUES (?, ?, ?, ?)
+                """, (person_id, buri["place_detail"], buri["date"], buri["place"]))
 
         cursor.execute("DELETE FROM children")
         for fam_id, chil_list in children.items():
