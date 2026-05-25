@@ -255,8 +255,14 @@ function a2AddParentSiblings(tree) {
       return ay - by;
     });
 
-    // Place siblings on the side of the parent farthest from main.
-    const direction = parent.x <= main.x ? -1 : 1;
+    // Place siblings away from the other parent, not relative to main.
+    // When main is off-center (e.g. 4th of 5 siblings), both parents may sit
+    // to the same side of main — causing paternal and maternal siblings to pile
+    // together. Using inter-parent direction guarantees they separate.
+    const otherParents = main.parents.filter(p => p !== parent && p && p.data);
+    const direction = otherParents.length > 0
+        ? (parent.x <= otherParents[0].x ? -1 : 1)
+        : (parent.x <= main.x ? -1 : 1);
     const grandparentNodes = (parent.parents || []).filter(d => d && d.is_ancestry);
 
     siblings.forEach((sibDatum, i) => {
