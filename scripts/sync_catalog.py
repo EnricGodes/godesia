@@ -30,9 +30,16 @@ from pathlib import Path
 
 # Import note cleaning from the main parser
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
-from gedcom_parser import clean_note_html
+from gedcom_parser import clean_note_html, translate_event_type
 from database import convert_date_to_spanish
 from geocode_utils import propagate_geocache, extract_city_from_place
+
+_EVENT_TAG_TYPE = {
+    "CENS": "Censo", "EDUC": "Educación", "BAPM": "Bautismo", "CHR": "Bautizo",
+    "CONF": "Confirmación", "FCOM": "Primera Comunión", "EMIG": "Emigración",
+    "IMMI": "Inmigración", "NATI": "Nacionalidad", "RELI": "Religión", "DSCR": "Descripción",
+}
+_EVENT_TAGS = set(_EVENT_TAG_TYPE) | {"EVEN"}
 
 
 DOC_TYPES = [
@@ -304,6 +311,7 @@ def parse_gedcom_people(lines):
     residences = defaultdict(list)
     notes = defaultdict(list)
     burials = defaultdict(list)
+    events_list = defaultdict(list)
     marriages = {}
     children = defaultdict(list)
 
@@ -401,6 +409,38 @@ def parse_gedcom_people(lines):
                                 buri_data["place"] = buri_line.split("PLAC", 1)[1].strip()
                             j += 1
                         burials[person_id].append(buri_data)
+                    elif tag in _EVENT_TAGS:
+                        j = i + 1
+                        desc = rest or ""
+                        while j < len(lines) and lines[j].rstrip("\n").startswith("2 CONC"):
+                            desc += lines[j].rstrip("\n").split("CONC", 1)[1]
+                            j += 1
+                        ev_data = {
+                            "tag": tag,
+                            "type": _EVENT_TAG_TYPE.get(tag),
+                            "description": desc or None,
+                            "date": None, "place": None, "age": None,
+                            "note": None, "cause": None,
+                        }
+                        while j < len(lines) and lines[j].startswith("2"):
+                            ev_line = lines[j].rstrip("\n")
+                            m2 = re.match(r"^2\s+(\S+)\s*(.*)", ev_line)
+                            if m2:
+                                t2, v2 = m2.group(1), m2.group(2).strip()
+                                if t2 == "TYPE" and tag == "EVEN":
+                                    ev_data["type"] = translate_event_type(v2)
+                                elif t2 == "DATE":
+                                    ev_data["date"] = v2
+                                elif t2 == "PLAC":
+                                    ev_data["place"] = v2
+                                elif t2 == "AGE":
+                                    ev_data["age"] = v2
+                                elif t2 == "NOTE":
+                                    ev_data["note"] = v2
+                                elif t2 == "CAUS":
+                                    ev_data["cause"] = v2
+                            j += 1
+                        events_list[person_id].append(ev_data)
                     elif tag == "OCCU":
                         j = i + 1
                         occu_data = {"title": rest, "date": None, "place": None}
@@ -529,7 +569,7 @@ def parse_gedcom_people(lines):
                     if wife_id:
                         people[chil_id]["mother_id"] = wife_id
 
-    return people, marriages, children, occupations, residences, notes, burials
+    return people, marriages, children, occupations, residences, notes, burials, events_list
 
 
 def _parse_date(date_str):
@@ -645,13 +685,14 @@ def main():
         lines = f.readlines()
 
     print("\nFase 1: Parseando GEDCOM (personas)...")
-    people, marriages, children, occupations, residences, notes, burials = parse_gedcom_people(lines)
+    people, marriages, children, occupations, residences, notes, burials, events_list = parse_gedcom_people(lines)
     print(f"  Personas: {len(people)}")
     print(f"  Matrimonios: {len(marriages)}")
     print(f"  Ocupaciones: {sum(len(v) for v in occupations.values())}")
     print(f"  Residencias: {sum(len(v) for v in residences.values())}")
     print(f"  Notas: {sum(len(v) for v in notes.values())}")
     print(f"  Entierros: {sum(len(v) for v in burials.values())}")
+    print(f"  Eventos: {sum(len(v) for v in events_list.values())}")
 
     print("\nFase 2: Parseando GEDCOM (fotos)...")
     albums = parse_gedcom_albums(lines)
@@ -907,6 +948,16 @@ def main():
                     INSERT INTO burial (person_id, place_detail, date, place)
                     VALUES (?, ?, ?, ?)
                 """, (person_id, buri["place_detail"], buri["date"], buri["place"]))
+
+        cursor.execute("DELETE FROM events")
+        for person_id, evs in events_list.items():
+            for ev in evs:
+                date_es = convert_date_to_spanish(ev["date"]) if ev["date"] else None
+                cursor.execute("""
+                    INSERT INTO events (person_id, tag, type, description, date, place, age, note, cause)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (person_id, ev["tag"], ev["type"], ev["description"],
+                      date_es, ev["place"], ev["age"], ev["note"], ev["cause"]))
 
         cursor.execute("DELETE FROM children")
         for fam_id, chil_list in children.items():
