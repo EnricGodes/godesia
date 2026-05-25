@@ -92,7 +92,7 @@ def init_log_capture():
 async def admin_status():
     db = _db()
     tables = ["people", "marriages", "photos", "photo_tags", "albums",
-              "suggestions", "occupations", "residences", "anecdotes",
+              "suggestions", "occupations", "residences",
               "geocache", "notes", "events"]
     counts = {}
     for t in tables:

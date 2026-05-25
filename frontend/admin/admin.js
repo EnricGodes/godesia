@@ -56,7 +56,7 @@ document.addEventListener('keydown', e => {
 // Navigation
 // ---------------------------------------------------------------------------
 
-const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'config', 'comparador', 'classifier', 'palazuelos', 'dedup'];
+const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'comparador', 'classifier', 'palazuelos', 'dedup', 'config'];
 const initialized = {};
 
 function showSection(name) {
@@ -104,10 +104,10 @@ const Status = {
 
             const grid = document.getElementById('stat-grid');
             const labels = {
-                people: 'Persones', marriages: 'Matrimonis', photos: 'Fotos',
-                photo_tags: 'Tags foto', albums: 'Àlbums', suggestions: 'Aportacions',
-                occupations: 'Ocupacions', residences: 'Residències', anecdotes: 'Anècdotes BD',
-                geocache: 'Geocache', notes: 'Notes', events: 'Events',
+                people: 'Personas', marriages: 'Matrimonios', photos: 'Fotos',
+                photo_tags: 'Tags foto', albums: 'Álbumes', suggestions: 'Aportaciones',
+                occupations: 'Ocupaciones', residences: 'Residencias',
+                geocache: 'Geocache', notes: 'Notas', events: 'Eventos',
             };
             grid.innerHTML = Object.entries(d.db_row_counts || {}).map(([k, v]) => `
                 <div class="stat-card">
@@ -125,7 +125,7 @@ const Status = {
             const d = await apiFetch('/api/admin/logs?lines=150');
             const box = document.getElementById('log-box');
             if (!d.logs || !d.logs.length) {
-                box.textContent = 'No hi ha logs disponibles.';
+                box.textContent = 'No hay logs disponibles.';
                 return;
             }
             box.innerHTML = d.logs.map(l =>
@@ -133,7 +133,7 @@ const Status = {
             ).join('\n');
             box.scrollTop = box.scrollHeight;
         } catch (e) {
-            document.getElementById('log-box').textContent = 'Error carregant logs.';
+            document.getElementById('log-box').textContent = 'Error cargando logs.';
         }
     },
 
@@ -149,7 +149,7 @@ const Status = {
 
     async serverAction(action) {
         const msg = document.getElementById('server-action-msg');
-        msg.textContent = 'Executant…';
+        msg.textContent = 'Ejecutando…';
         try {
             const d = await apiFetch('/api/admin/server/action', {
                 method: 'POST',
@@ -159,7 +159,7 @@ const Status = {
             msg.textContent = d.message || '✓';
             if (action === 'restart') {
                 setTimeout(() => {
-                    msg.textContent = 'Reconnectant…';
+                    msg.textContent = 'Reconectando…';
                     setTimeout(() => window.location.reload(), 4000);
                 }, 2000);
             }
@@ -170,7 +170,7 @@ const Status = {
 
     async dbAction(action) {
         const msg = document.getElementById('db-action-msg');
-        msg.textContent = 'Executant…';
+        msg.textContent = 'Ejecutando…';
         try {
             const d = await apiFetch('/api/admin/db/action', {
                 method: 'POST',
@@ -236,7 +236,7 @@ const Import = {
 
         const btn = document.getElementById('btn-start-import');
         btn.disabled = true;
-        btn.textContent = 'Iniciant…';
+        btn.textContent = 'Iniciando…';
 
         try {
             await apiFetch('/api/admin/import/gedcom', { method: 'POST', body: fd });
@@ -245,7 +245,7 @@ const Import = {
             this.startPolling();
         } catch (e) {
             btn.disabled = false;
-            btn.textContent = 'Iniciar importació';
+            btn.textContent = 'Iniciar importación';
             alert('Error: ' + e.message);
         }
     },
@@ -267,7 +267,7 @@ const Import = {
                 clearInterval(this.pollTimer);
                 this.pollTimer = null;
                 document.getElementById('btn-start-import').disabled = false;
-                document.getElementById('btn-start-import').textContent = 'Iniciar importació';
+                document.getElementById('btn-start-import').textContent = 'Iniciar importación';
                 document.getElementById('btn-reset-import').style.display = '';
                 document.getElementById('import-post-actions').style.display = '';
             }
@@ -277,7 +277,7 @@ const Import = {
     updateLog(d) {
         const badge = document.getElementById('import-status-badge');
         const statusMap = { idle: '', running: 'running', done: 'resolved', error: 'error' };
-        const labelMap = { idle: '', running: 'En curs…', done: '✓ Completat', error: '✗ Error' };
+        const labelMap = { idle: '', running: 'En curso…', done: '✓ Completado', error: '✗ Error' };
         badge.className = `badge badge-${statusMap[d.status] || 'pending'}`;
         badge.textContent = labelMap[d.status] || d.status;
 
@@ -305,7 +305,7 @@ const Import = {
     async syncPhotos() {
         try {
             const d = await apiFetch('/api/admin/sync-photos', { method: 'POST' });
-            alert(d.message || 'Fotos sincronitzades.');
+            alert(d.message || 'Fotos sincronizadas.');
         } catch (e) { alert('Error: ' + e.message); }
     },
 };
@@ -349,7 +349,7 @@ const Suggestions = {
 
     async load() {
         const el = document.getElementById('suggestions-list');
-        el.innerHTML = '<div class="empty-state">Carregant…</div>';
+        el.innerHTML = '<div class="empty-state">Cargando…</div>';
         try {
             const items = await apiFetch('/api/admin/suggestions');
             const badge = document.getElementById('badge-suggestions');
@@ -357,14 +357,14 @@ const Suggestions = {
             badge.textContent = pending || '';
 
             if (!items.length) {
-                el.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div>No hi ha aportacions.</div>';
+                el.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div>No hay aportaciones.</div>';
                 return;
             }
 
             el.innerHTML = `<table class="admin-table">
                 <thead><tr>
-                    <th>Data</th><th>Qui envia</th><th>Persona afectada</th><th>Tipus</th><th>Missatge</th>
-                    <th>Fitxers</th><th>Estat</th><th></th>
+                    <th>Fecha</th><th>Remitente</th><th>Persona afectada</th><th>Tipo</th><th>Mensaje</th>
+                    <th>Archivos</th><th>Estado</th><th></th>
                 </tr></thead>
                 <tbody>${items.map(s => `
                     <tr>
@@ -377,15 +377,15 @@ const Suggestions = {
                         <td style="max-width:240px;font-size:0.8rem;">${esc((s.message || '').slice(0, 100))}${(s.message || '').length > 100 ? '…' : ''}</td>
                         <td style="text-align:center;">
                             ${s.files_count > 0
-                                ? `<button class="btn btn-secondary btn-sm" onclick="Suggestions.viewFiles('${esc(s.id)}', '${esc(s.name || s.id)}')">${s.files_count} fitxer${s.files_count > 1 ? 's' : ''}</button>`
+                                ? `<button class="btn btn-secondary btn-sm" onclick="Suggestions.viewFiles('${esc(s.id)}', '${esc(s.name || s.id)}')">${s.files_count} archivo${s.files_count > 1 ? 's' : ''}</button>`
                                 : '<span style="color:#c2c8bf;">—</span>'}
                         </td>
                         <td>${s.resolved_at
-                            ? `<span class="badge badge-resolved">✓ Resolt</span>`
-                            : `<span class="badge badge-pending">Pendent</span>`}</td>
+                            ? `<span class="badge badge-resolved">✓ Resuelto</span>`
+                            : `<span class="badge badge-pending">Pendiente</span>`}</td>
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
-                                ${!s.resolved_at ? `<button class="btn btn-secondary btn-sm" onclick="Suggestions.resolve('${esc(s.id)}')">Resoldre</button>` : ''}
+                                ${!s.resolved_at ? `<button class="btn btn-secondary btn-sm" onclick="Suggestions.resolve('${esc(s.id)}')">Resolver</button>` : ''}
                                 <button class="btn btn-danger btn-sm" onclick="Suggestions.remove('${esc(s.id)}')">✕</button>
                             </div>
                         </td>
@@ -398,20 +398,20 @@ const Suggestions = {
     },
 
     async viewFiles(id, name) {
-        document.getElementById('files-modal-title').textContent = `Fitxers — ${name}`;
-        document.getElementById('files-modal-body').innerHTML = 'Carregant…';
+        document.getElementById('files-modal-title').textContent = `Archivos — ${name}`;
+        document.getElementById('files-modal-body').innerHTML = 'Cargando…';
         openModal('files-modal');
         try {
             const files = await apiFetch(`/api/admin/suggestions/${id}/files`);
             if (!files.length) {
-                document.getElementById('files-modal-body').innerHTML = '<p style="color:#727971;">Cap fitxer adjunt.</p>';
+                document.getElementById('files-modal-body').innerHTML = '<p style="color:#727971;">Sin archivos adjuntos.</p>';
                 return;
             }
             document.getElementById('files-modal-body').innerHTML = files.map(f => `
                 <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid var(--outline-variant,#c2c8bf);">
                     <span style="flex:1;font-size:0.84rem;">${esc(f.name)}</span>
                     <span style="font-size:0.75rem;color:#727971;">${fmtSize(f.size)}</span>
-                    <a href="${esc(f.url)}" target="_blank" class="btn btn-secondary btn-sm">Baixar</a>
+                    <a href="${esc(f.url)}" target="_blank" class="btn btn-secondary btn-sm">Descargar</a>
                 </div>
             `).join('');
         } catch (e) {
@@ -427,7 +427,7 @@ const Suggestions = {
     },
 
     async remove(id) {
-        if (!confirm('Eliminar aquesta aportació i tots els seus fitxers?')) return;
+        if (!confirm('¿Eliminar esta aportación y todos sus archivos?')) return;
         try {
             await apiFetch(`/api/admin/suggestions/${id}`, { method: 'DELETE' });
             this.load();
@@ -447,7 +447,7 @@ const Queries = {
 
     async load() {
         const el = document.getElementById('queries-list');
-        el.innerHTML = '<div class="empty-state">Carregant…</div>';
+        el.innerHTML = '<div class="empty-state">Cargando…</div>';
         this.selected.clear();
         this.updateDeleteBtn();
         try {
@@ -456,7 +456,7 @@ const Queries = {
             badge.textContent = this.items.length || '';
 
             if (!this.items.length) {
-                el.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div>Cap pregunta sense resposta.</div>';
+                el.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div>Sin preguntas sin respuesta.</div>';
                 return;
             }
 
@@ -500,13 +500,13 @@ const Queries = {
     updateDeleteBtn() {
         const btn = document.getElementById('btn-del-selected');
         btn.disabled = this.selected.size === 0;
-        if (this.selected.size > 0) btn.textContent = `Esborrar seleccionades (${this.selected.size})`;
-        else btn.textContent = 'Esborrar seleccionades';
+        if (this.selected.size > 0) btn.textContent = `Borrar seleccionadas (${this.selected.size})`;
+        else btn.textContent = 'Borrar seleccionadas';
     },
 
     async deleteSelected() {
         if (!this.selected.size) return;
-        if (!confirm(`Esborrar ${this.selected.size} preguntes?`)) return;
+        if (!confirm(`¿Borrar ${this.selected.size} preguntas?`)) return;
         try {
             await apiFetch('/api/admin/queries', {
                 method: 'DELETE',
@@ -518,10 +518,10 @@ const Queries = {
     },
 
     async deleteAll() {
-        if (!confirm('Esborrar TOTES les preguntes sense resposta?')) return;
+        if (!confirm('¿Borrar TODAS las preguntas sin respuesta?')) return;
         try {
             const d = await apiFetch('/api/admin/queries/all', { method: 'DELETE' });
-            alert(`${d.deleted} preguntes esborrades.`);
+            alert(`${d.deleted} preguntas borradas.`);
             this.load();
         } catch (e) { alert(e.message); }
     },
@@ -568,7 +568,7 @@ const Geocoder = {
         document.getElementById('geo-count-resolved').textContent = this.resolved.length;
         document.getElementById('geo-count-validated').textContent = this.validated.length;
         document.getElementById('geo-stats').textContent =
-            `${this.pending.length} pendents · ${this.resolved.length} resoltes · ${this.validated.length} validades`;
+            `${this.pending.length} pendientes · ${this.resolved.length} resueltas · ${this.validated.length} validadas`;
         document.getElementById('badge-geo').textContent = this.pending.length || '';
     },
 
@@ -598,7 +598,7 @@ const Geocoder = {
 
         if (this.activeTab === 'pending') {
             document.getElementById('geo-thead').innerHTML = `<tr>
-                <th>#</th><th>Lloc original</th><th>Query normalitzada</th>
+                <th>#</th><th>Lugar original</th><th>Query normalizada</th>
                 <th style="text-align:center;">Afecta</th><th></th>
             </tr>`;
             document.getElementById('geo-tbody').innerHTML = data.map((e, i) => `
@@ -610,7 +610,7 @@ const Geocoder = {
                         ? `<span class="badge badge-running">${e.affected}</span>`
                         : '<span style="color:#c2c8bf;">—</span>'}</td>
                     <td style="text-align:right;">
-                        <button class="btn btn-primary btn-sm" onclick="Geocoder.openPanel('pending',${i})">Resoldre</button>
+                        <button class="btn btn-primary btn-sm" onclick="Geocoder.openPanel('pending',${i})">Resolver</button>
                     </td>
                 </tr>
             `).join('');
@@ -618,8 +618,8 @@ const Geocoder = {
         } else if (this.activeTab === 'resolved') {
             toolbar.style.display = '';
             document.getElementById('geo-thead').innerHTML = `<tr>
-                <th>#</th><th>Lloc buscat</th><th>Adreça GPS</th>
-                <th>Coordenades</th><th></th>
+                <th>#</th><th>Lugar buscado</th><th>Dirección GPS</th>
+                <th>Coordenadas</th><th></th>
             </tr>`;
             document.getElementById('geo-tbody').innerHTML = data.map((e, i) => `
                 <tr id="geo-row-r-${i}">
@@ -628,7 +628,7 @@ const Geocoder = {
                     <td id="geo-dn-${i}" style="font-size:0.78rem;">
                         ${e.display_name
                             ? `<span style="color:#065f46;">${esc(e.display_name)}</span>`
-                            : `<button class="btn btn-secondary btn-sm" onclick="Geocoder.fetchDN(${i})">carregar</button>`}
+                            : `<button class="btn btn-secondary btn-sm" onclick="Geocoder.fetchDN(${i})">cargar</button>`}
                     </td>
                     <td style="font-family:monospace;font-size:0.75rem;white-space:nowrap;">${e.lat.toFixed(4)}, ${e.lng.toFixed(4)}</td>
                     <td>
@@ -642,7 +642,7 @@ const Geocoder = {
 
         } else {
             document.getElementById('geo-thead').innerHTML = `<tr>
-                <th>#</th><th>Lloc buscat</th><th>Adreça GPS</th><th>Coordenades</th>
+                <th>#</th><th>Lugar buscado</th><th>Dirección GPS</th><th>Coordenadas</th>
             </tr>`;
             document.getElementById('geo-tbody').innerHTML = data.map((e, i) => `
                 <tr>
@@ -675,14 +675,14 @@ const Geocoder = {
         this.fetchAllRunning = true;
         const btn = document.getElementById('btn-fetch-all-names');
         const missing = this.resolved.map((e, i) => ({ e, i })).filter(({ e }) => !e.display_name);
-        if (!missing.length) { btn.textContent = 'Tot carregat'; this.fetchAllRunning = false; return; }
+        if (!missing.length) { btn.textContent = 'Todo cargado'; this.fetchAllRunning = false; return; }
         btn.disabled = true;
         for (let k = 0; k < missing.length; k++) {
-            btn.textContent = `Carregant ${k + 1}/${missing.length}…`;
+            btn.textContent = `Cargando ${k + 1}/${missing.length}…`;
             await this.fetchDN(missing[k].i);
             if (k < missing.length - 1) await new Promise(r => setTimeout(r, 1200));
         }
-        btn.textContent = 'Carregat';
+        btn.textContent = 'Cargado';
         btn.disabled = false;
         this.fetchAllRunning = false;
     },
@@ -716,7 +716,7 @@ const Geocoder = {
         const query = document.getElementById('geo-panel-query').value.trim();
         if (!query) return;
         const cands = document.getElementById('geo-candidates');
-        cands.innerHTML = '<p style="font-size:0.8rem;color:#727971;">Cercant…</p>';
+        cands.innerHTML = '<p style="font-size:0.8rem;color:#727971;">Buscando…</p>';
         try {
             const results = await apiFetch('/api/admin/geocoder/search', {
                 method: 'POST',
@@ -724,7 +724,7 @@ const Geocoder = {
                 body: JSON.stringify({ query }),
             });
             if (!results.length) {
-                cands.innerHTML = '<p style="font-size:0.8rem;color:#727971;">Sense resultats.</p>';
+                cands.innerHTML = '<p style="font-size:0.8rem;color:#727971;">Sin resultados.</p>';
                 return;
             }
             cands.innerHTML = results.map((r, i) => `
@@ -800,7 +800,7 @@ const Geocoder = {
         if (!this.selectedResult || !this.currentEntry) return;
         const saveBtn = document.getElementById('geo-btn-save');
         saveBtn.disabled = true;
-        saveBtn.textContent = 'Guardant…';
+        saveBtn.textContent = 'Guardando…';
         try {
             await apiFetch('/api/admin/geocoder/resolve', {
                 method: 'POST',
@@ -823,7 +823,7 @@ const Geocoder = {
                 if (row) {
                     row.style.opacity = '0.4';
                     const btn = row.querySelector('button');
-                    if (btn) { btn.textContent = '✓ Resolt'; btn.disabled = true; }
+                    if (btn) { btn.textContent = '✓ Resuelto'; btn.disabled = true; }
                 }
             } else {
                 this.resolved[idx].lat = this.selectedResult.lat;
@@ -839,19 +839,19 @@ const Geocoder = {
     async runVital() {
         const btn = document.getElementById('geo-run-vital-btn');
         const msg = document.getElementById('geo-run-vital-msg');
-        if (btn) { btn.disabled = true; btn.textContent = 'Geocodificant...'; }
-        if (msg) msg.textContent = 'Iniciant... pot trigar uns minuts (1s per lloc via Nominatim)';
+        if (btn) { btn.disabled = true; btn.textContent = 'Geocodificando...'; }
+        if (msg) msg.textContent = 'Iniciando... puede tardar unos minutos (1s por lugar via Nominatim)';
         try {
             const d = await apiFetch('/api/admin/geocoder/run-vital', { method: 'POST' });
             if (d.status === 'already_running') {
-                if (msg) msg.textContent = 'Ja hi ha una geocodificació en curs.';
+                if (msg) msg.textContent = 'Ya hay una geocodificación en curso.';
             } else {
-                if (msg) msg.textContent = 'Geocodificació iniciada en segon pla. Torna a carregar la pàgina en uns minuts.';
+                if (msg) msg.textContent = 'Geocodificación iniciada en segundo plano. Recarga la página en unos minutos.';
             }
         } catch (e) {
             if (msg) msg.textContent = 'Error: ' + e.message;
         } finally {
-            if (btn) { btn.disabled = false; btn.textContent = 'Geocodificar llocs vitals'; }
+            if (btn) { btn.disabled = false; btn.textContent = 'Geocodificar lugares vitales'; }
         }
     },
 };
@@ -879,13 +879,13 @@ const Anecdotes = {
 
     async load() {
         const el = document.getElementById('anec-list');
-        el.innerHTML = '<div class="empty-state">Carregant…</div>';
+        el.innerHTML = '<div class="empty-state">Cargando…</div>';
         try {
             const url = `/api/admin/anecdotes?search=${encodeURIComponent(this.searchQuery)}&_t=${Date.now()}`;
             const d = await apiFetch(url);
 
             if (!d.items.length) {
-                el.innerHTML = '<div class="empty-state"><div class="empty-icon">✦</div>Cap anècdota trobada.</div>';
+                el.innerHTML = '<div class="empty-state"><div class="empty-icon">✦</div>Sin anécdotas encontradas.</div>';
                 document.getElementById('anec-pagination').style.display = 'none';
                 return;
             }
@@ -895,7 +895,7 @@ const Anecdotes = {
 
             el.innerHTML = `<table class="admin-table">
                 <thead><tr>
-                    <th style="width:40px;">#</th><th>Títol</th><th>Text</th><th>CTA</th><th></th>
+                    <th style="width:40px;">#</th><th>Título</th><th>Texto</th><th>CTA</th><th></th>
                 </tr></thead>
                 <tbody>${d.items.map(a => `
                     <tr>
@@ -919,7 +919,7 @@ const Anecdotes = {
 
     openNew() {
         this._editIndex = null;
-        document.getElementById('anec-modal-title').textContent = 'Nova anècdota';
+        document.getElementById('anec-modal-title').textContent = 'Nueva anécdota';
         document.getElementById('anec-titulo').value = '';
         document.getElementById('anec-texto').value = '';
         document.getElementById('anec-cta').value = '';
@@ -928,9 +928,9 @@ const Anecdotes = {
 
     openEdit(index) {
         const a = (this._items || []).find(x => x.index === index);
-        if (!a) { alert('Error: no s\'ha trobat l\'anècdota. Recarrega la pàgina.'); return; }
+        if (!a) { alert('Error: no se ha encontrado la anécdota. Recarga la página.'); return; }
         this._editIndex = index;
-        document.getElementById('anec-modal-title').textContent = `Editar anècdota #${index + 1}`;
+        document.getElementById('anec-modal-title').textContent = `Editar anécdota #${index + 1}`;
         document.getElementById('anec-titulo').value = a.titulo || '';
         document.getElementById('anec-texto').value = a.texto || '';
         document.getElementById('anec-cta').value = a.cta || '';
@@ -960,7 +960,7 @@ const Anecdotes = {
             closeModal('anec-modal');
             this._editIndex = null;
             await this.load();
-        } catch (e) { alert('Error guardant: ' + e.message); }
+        } catch (e) { alert('Error guardando: ' + e.message); }
     },
 
     confirmRemove(index) {
@@ -981,8 +981,8 @@ const Anecdotes = {
             await apiFetch(`/api/admin/anecdotes/${index}`, { method: 'DELETE' });
             await this.load();
         } catch (e) {
-            console.error('Error eliminant anècdota:', e);
-            alert('Error eliminant: ' + e.message);
+            console.error('Error eliminando anécdota:', e);
+            alert('Error eliminando: ' + e.message);
         }
     },
 };
@@ -1000,12 +1000,12 @@ const Minibios = {
 
     async load() {
         const el = document.getElementById('mbio-list');
-        el.innerHTML = '<div class="empty-state">Carregant…</div>';
+        el.innerHTML = '<div class="empty-state">Cargando…</div>';
         try {
             const d = await apiFetch(`/api/admin/minibios?_t=${Date.now()}`);
             this._items = d.items || [];
             if (!this._items.length) {
-                el.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div>Cap minibio trobada.</div>';
+                el.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div>Sin minibio encontrada.</div>';
                 return;
             }
             el.innerHTML = `<table class="admin-table">
@@ -1033,7 +1033,7 @@ const Minibios = {
 
     openNew() {
         this._editId = null;
-        document.getElementById('mbio-modal-title').textContent = 'Nova minibio';
+        document.getElementById('mbio-modal-title').textContent = 'Nueva minibio';
         document.getElementById('mbio-id').value = '';
         document.getElementById('mbio-id').readOnly = false;
         document.getElementById('mbio-nombre').value = '';
@@ -1044,7 +1044,7 @@ const Minibios = {
 
     openEdit(id) {
         const m = this._items.find(x => x.id === id);
-        if (!m) { alert('Error: no s\'ha trobat la minibio. Recarrega la pàgina.'); return; }
+        if (!m) { alert('Error: no se ha encontrado la minibio. Recarga la página.'); return; }
         this._editId = id;
         document.getElementById('mbio-modal-title').textContent = `Editar minibio ${id}`;
         document.getElementById('mbio-id').value = m.id;
@@ -1057,7 +1057,7 @@ const Minibios = {
 
     async save() {
         const id = document.getElementById('mbio-id').value.trim();
-        if (!id) { alert('Cal especificar un ID'); return; }
+        if (!id) { alert('Hay que especificar un ID'); return; }
         const body = {
             id,
             nombre: document.getElementById('mbio-nombre').value.trim(),
@@ -1081,7 +1081,7 @@ const Minibios = {
             closeModal('mbio-modal');
             this._editId = null;
             await this.load();
-        } catch (e) { alert('Error guardant: ' + e.message); }
+        } catch (e) { alert('Error guardando: ' + e.message); }
     },
 
     confirmRemove(id) {
@@ -1102,8 +1102,8 @@ const Minibios = {
             await apiFetch(`/api/admin/minibios/${encodeURIComponent(id)}`, { method: 'DELETE' });
             await this.load();
         } catch (e) {
-            console.error('Error eliminant minibio:', e);
-            alert('Error eliminant: ' + e.message);
+            console.error('Error eliminando minibio:', e);
+            alert('Error eliminando: ' + e.message);
         }
     },
 };
@@ -1120,7 +1120,7 @@ const Tests = {
         if (!q) return;
         const resultEl = document.getElementById('test-question-result');
         resultEl.style.display = '';
-        resultEl.innerHTML = '<span style="color:#727971;">Executant…</span>';
+        resultEl.innerHTML = '<span style="color:#727971;">Ejecutando…</span>';
         try {
             const d = await apiFetch('/api/query', {
                 method: 'POST',
@@ -1133,11 +1133,11 @@ const Tests = {
                     <code style="font-size:0.8rem;color:var(--primary,#17341e);">${esc(d.handler || '—')}</code>
                 </div>
                 <div style="margin-bottom:0.5rem;">
-                    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#727971;">Resposta</span><br/>
+                    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#727971;">Respuesta</span><br/>
                     <span style="font-size:0.84rem;">${esc(d.answer || '—')}</span>
                 </div>
                 ${d.people_mentioned?.length ? `<div>
-                    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#727971;">Persones</span><br/>
+                    <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#727971;">Personas</span><br/>
                     <span style="font-size:0.78rem;color:#727971;">${d.people_mentioned.map(p => esc(p.name)).join(', ')}</span>
                 </div>` : ''}
             `;
@@ -1148,23 +1148,23 @@ const Tests = {
 
     async loadBank() {
         const el = document.getElementById('tests-list');
-        el.innerHTML = '<div class="empty-state">Carregant…</div>';
+        el.innerHTML = '<div class="empty-state">Cargando…</div>';
         try {
             const [bank, stats] = await Promise.all([
                 apiFetch('/api/tests/bank'),
                 apiFetch('/api/tests/stats'),
             ]);
             document.getElementById('tests-stats').textContent =
-                `Total: ${stats.total || 0} · Aprovats: ${stats.approved || 0} · Rebutjats: ${stats.rejected || 0} · Pendents: ${stats.pending || 0}`;
+                `Total: ${stats.total || 0} · Aprobados: ${stats.approved || 0} · Rechazados: ${stats.rejected || 0} · Pendientes: ${stats.pending || 0}`;
 
             if (!bank.cases?.length) {
-                el.innerHTML = '<div class="empty-state">Cap cas de test.</div>';
+                el.innerHTML = '<div class="empty-state">Sin casos de test.</div>';
                 return;
             }
 
             el.innerHTML = `<table class="admin-table">
                 <thead><tr>
-                    <th>Pregunta</th><th>Resposta esperada</th><th>Handler</th><th>Veredicte</th><th></th>
+                    <th>Pregunta</th><th>Respuesta esperada</th><th>Handler</th><th>Veredicto</th><th></th>
                 </tr></thead>
                 <tbody>${bank.cases.map(c => {
                     const rowCls = c.verdict === 'approved' ? 'test-row-ok' : c.verdict === 'rejected' ? 'test-row-fail' : '';
@@ -1173,14 +1173,14 @@ const Tests = {
                         <td class="test-answer">${esc((c.expected_answer || '').slice(0, 80))}${(c.expected_answer || '').length > 80 ? '…' : ''}</td>
                         <td class="test-handler">${esc(c.handler || '—')}</td>
                         <td>${c.verdict === 'approved'
-                            ? '<span class="badge badge-resolved">✓ Aprovat</span>'
+                            ? '<span class="badge badge-resolved">✓ Aprobado</span>'
                             : c.verdict === 'rejected'
-                            ? '<span class="badge badge-error">✗ Rebutjat</span>'
-                            : '<span class="badge badge-pending">Pendent</span>'}</td>
+                            ? '<span class="badge badge-error">✗ Rechazado</span>'
+                            : '<span class="badge badge-pending">Pendiente</span>'}</td>
                         <td>
                             <div style="display:flex;gap:0.3rem;justify-content:flex-end;">
-                                <button class="btn btn-sm" style="background:#d1fae5;color:#065f46;border:none;" title="Aprovar" onclick="Tests.verdict('${esc(c.id)}','approved')">✓</button>
-                                <button class="btn btn-sm" style="background:#fee2e2;color:#991b1b;border:none;" title="Rebutjar" onclick="Tests.verdict('${esc(c.id)}','rejected')">✗</button>
+                                <button class="btn btn-sm" style="background:#d1fae5;color:#065f46;border:none;" title="Aprobar" onclick="Tests.verdict('${esc(c.id)}','approved')">✓</button>
+                                <button class="btn btn-sm" style="background:#fee2e2;color:#991b1b;border:none;" title="Rechazar" onclick="Tests.verdict('${esc(c.id)}','rejected')">✗</button>
                             </div>
                         </td>
                     </tr>`;
@@ -1195,15 +1195,15 @@ const Tests = {
         try {
             const btn = document.querySelector('#s-tests .toolbar-right .btn-primary');
             btn.disabled = true;
-            btn.textContent = 'Executant…';
+            btn.textContent = 'Ejecutando…';
             const d = await apiFetch('/api/tests/bank/run', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ mode: 'all', case_ids: [] }),
             });
             btn.disabled = false;
-            btn.textContent = '▷ Executar tots';
-            alert(`Tests completats: ${d.passed || 0} aprovats, ${d.failed || 0} fallits de ${d.total || 0} totals.`);
+            btn.textContent = '▷ Ejecutar todos';
+            alert(`Tests completados: ${d.passed || 0} aprobados, ${d.failed || 0} fallidos de ${d.total || 0} totales.`);
             this.loadBank();
         } catch (e) {
             alert('Error: ' + e.message);
@@ -1280,14 +1280,14 @@ const Config = (() => {
                 const data = await apiFetch(`/api/search?q=${encodeURIComponent(q)}&limit=10`);
                 results.innerHTML = (data.results || []).map(r => {
                     const cid   = r.id.replace(/@/g, '');
-                    const years = `${r.birth_year || '?'} – ${r.death_year || (r.is_alive ? 'viu/a' : '?')}`;
+                    const years = `${r.birth_year || '?'} – ${r.death_year || (r.is_alive ? 'vivo/a' : '?')}`;
                     return `<div style="padding:9px 14px;cursor:pointer;font-size:.875rem;
                                 border-bottom:1px solid #f1eee5;color:#1c1c17;"
                                 onmousedown="Config._select('${cid}','${esc(r.name)}')">
                                 ${esc(r.name)}
                                 <small style="color:#9e9b94;margin-left:6px;">${years}</small>
                             </div>`;
-                }).join('') || '<div style="padding:10px 14px;color:#9e9b94;font-size:.875rem;">Sense resultats</div>';
+                }).join('') || '<div style="padding:10px 14px;color:#9e9b94;font-size:.875rem;">Sin resultados</div>';
                 results.style.display = 'block';
             }, 250);
         });
@@ -1316,7 +1316,7 @@ const Config = (() => {
         selectedName = name;
         const selBox  = document.getElementById('config-selected');
         const saveBtn = document.getElementById('config-save-btn');
-        selBox.textContent    = `Seleccionat: ${name} (${id})`;
+        selBox.textContent    = `Seleccionado: ${name} (${id})`;
         selBox.style.display  = 'block';
         saveBtn.disabled      = false;
         saveBtn.style.opacity = '1';
@@ -1366,7 +1366,7 @@ const Comparador = {
     async startPalazuelos() {
         const btn = document.getElementById('btn-start-cmp-palaz');
         btn.disabled = true;
-        btn.textContent = 'Iniciant…';
+        btn.textContent = 'Iniciando…';
         try {
             await apiFetch('/api/admin/compare/start-palazuelos', { method: 'POST' });
             this._showLogCard();
@@ -1374,17 +1374,17 @@ const Comparador = {
             this._startPolling();
         } catch (e) {
             btn.disabled = false;
-            btn.textContent = '▶ Comparar amb Palazuelos';
+            btn.textContent = '▶ Comparar con Palazuelos';
             alert('Error: ' + e.message);
         }
     },
 
     async start() {
         const input = document.getElementById('cmp-file');
-        if (!input.files[0]) { alert('Selecciona un fitxer .ged primer.'); return; }
+        if (!input.files[0]) { alert('Selecciona un archivo .ged primero.'); return; }
         const btn = document.getElementById('btn-start-cmp');
         btn.disabled = true;
-        btn.textContent = 'Iniciant…';
+        btn.textContent = 'Iniciando…';
 
         const fd = new FormData();
         fd.append('file', input.files[0]);
@@ -1395,7 +1395,7 @@ const Comparador = {
             this._startPolling();
         } catch (e) {
             btn.disabled = false;
-            btn.textContent = 'Iniciar comparació per nom';
+            btn.textContent = 'Iniciar comparación por nombre';
             alert('Error: ' + e.message);
         }
     },
@@ -1417,9 +1417,9 @@ const Comparador = {
                 clearInterval(this._pollTimer);
                 this._pollTimer = null;
                 const btn = document.getElementById('btn-start-cmp');
-                if (btn) { btn.disabled = false; btn.textContent = 'Iniciar comparació per nom'; }
+                if (btn) { btn.disabled = false; btn.textContent = 'Iniciar comparación por nombre'; }
                 const btnP = document.getElementById('btn-start-cmp-palaz');
-                if (btnP) { btnP.disabled = false; btnP.textContent = '▶ Comparar amb Palazuelos'; }
+                if (btnP) { btnP.disabled = false; btnP.textContent = '▶ Comparar con Palazuelos'; }
                 if (d.status === 'done') {
                     this.loadResults();
                     document.getElementById('btn-clear-cmp').style.display = '';
@@ -1431,14 +1431,14 @@ const Comparador = {
     _updateStatus(d) {
         const badge = document.getElementById('cmp-status-badge');
         const cls   = { idle: '', running: 'badge-pending', done: 'badge-resolved', error: 'badge-error' };
-        const lbl   = { idle: '', running: 'En curs…', done: '✓ Completat', error: '✗ Error' };
+        const lbl   = { idle: '', running: 'En curso…', done: '✓ Completado', error: '✗ Error' };
         badge.className = `badge ${cls[d.status] || ''}`;
         badge.textContent = lbl[d.status] || d.status;
 
         const pct = d.total > 0 ? Math.round((d.progress / d.total) * 100) : 0;
         document.getElementById('cmp-progress-bar').style.width = pct + '%';
         document.getElementById('cmp-progress-text').textContent =
-            d.total > 0 ? `${d.progress} / ${d.total} persones (${pct}%)` : '';
+            d.total > 0 ? `${d.progress} / ${d.total} personas (${pct}%)` : '';
 
         const box = document.getElementById('cmp-log');
         const newLines = (d.log || []).slice(this._lastLogLen);
@@ -1464,16 +1464,16 @@ const Comparador = {
             document.getElementById('btn-clear-cmp').style.display = '';
             const lastRun = (d.last_run || '').slice(0, 16).replace('T', ' ');
             document.getElementById('cmp-results-meta').textContent =
-                `${d.total_count} diferències · última comparació: ${lastRun || '—'}`;
+                `${d.total_count} diferencias · última comparación: ${lastRun || '—'}`;
             const badge = document.getElementById('badge-cmp');
             badge.textContent = d.total_count || '';
 
             const ICONS = {
-                dates: '📅 Dates', places: '📍 Llocs', notes: '📝 Notes',
-                photos: '📸 Fotos', name: '💬 Nom', nomatch: '❓ No trobat',
-                occupations: '💼 Oficis', residences: '🏠 Residències',
-                events: '🗓 Esdeveniments',
-                possible_match: '🔍 Possible',
+                dates: '📅 Fechas', places: '📍 Lugares', notes: '📝 Notas',
+                photos: '📸 Fotos', name: '💬 Nombre', nomatch: '❓ No encontrado',
+                occupations: '💼 Oficios', residences: '🏠 Residencias',
+                events: '🗓 Eventos',
+                possible_match: '🔍 Posible',
             };
 
             this._rows = {};
@@ -1484,7 +1484,7 @@ const Comparador = {
                     <th>Persona (BD)</th>
                     <th>Coincidència GEDCOM</th>
                     <th style="text-align:center;">Conf.</th>
-                    <th>Diferències</th>
+                    <th>Diferencias</th>
                     <th style="text-align:center;">Detall</th>
                     <th></th>
                 </tr></thead>
@@ -1513,7 +1513,7 @@ const Comparador = {
                         <td style="white-space:nowrap;">${badges}</td>
                         <td style="text-align:center;">
                             <button class="btn btn-secondary btn-sm"
-                                onclick="Comparador.toggleDetail(${row.id}, this)">▸ Veure</button>
+                                onclick="Comparador.toggleDetail(${row.id}, this)">▸ Ver</button>
                         </td>
                         <td>
                             <button class="btn btn-danger btn-sm" onclick="Comparador.deleteRow(${row.id})">✕</button>
@@ -1537,7 +1537,7 @@ const Comparador = {
         const contentEl = document.getElementById(`cmp-detail-content-${id}`);
         const isOpen = detailRow.style.display !== 'none';
         detailRow.style.display = isOpen ? 'none' : '';
-        btn.textContent = isOpen ? '▸ Veure' : '▾ Tancar';
+        btn.textContent = isOpen ? '▸ Ver' : '▾ Cerrar';
         if (!isOpen && contentEl && !contentEl._loaded) {
             contentEl._loaded = true;
             const row = this._rows[id];
@@ -1546,7 +1546,7 @@ const Comparador = {
             try { details = JSON.parse(row.diff_details || '{}'); } catch (_) {}
             const lines = Object.values(details).flat()
                 .map(item => `<div>• ${esc(String(item))}</div>`);
-            contentEl.innerHTML = lines.join('') || '<em style="color:#9e9b94;">Sense detalls.</em>';
+            contentEl.innerHTML = lines.join('') || '<em style="color:#9e9b94;">Sin detalles.</em>';
         }
     },
 
@@ -1562,7 +1562,7 @@ const Comparador = {
     },
 
     async clearAll() {
-        if (!confirm('Esborrar tots els resultats i reiniciar?')) return;
+        if (!confirm('¿Borrar todos los resultados y reiniciar?')) return;
         try {
             await apiFetch('/api/admin/compare/results/all', { method: 'DELETE' });
             document.getElementById('cmp-results-section').style.display = 'none';
@@ -1571,7 +1571,7 @@ const Comparador = {
             document.getElementById('badge-cmp').textContent = '';
             const btn = document.getElementById('btn-start-cmp');
             btn.disabled = false;
-            btn.textContent = 'Iniciar comparació';
+            btn.textContent = 'Iniciar comparación';
             this._lastLogLen = 0;
         } catch (e) { alert(e.message); }
     },
@@ -1634,20 +1634,20 @@ const DocClassifier = {
             badge.textContent = d.pending_review > 0 ? d.pending_review : '';
 
             const modelEl = document.getElementById('clf-model-status');
-            modelEl.textContent = d.model_exists ? '✓ Model entrenat' : 'Zero-shot (sense model)';
+            modelEl.textContent = d.model_exists ? '✓ Modelo entrenado' : 'Zero-shot (sin modelo)';
             modelEl.className = 'badge ' + (d.model_exists ? 'badge-resolved' : 'badge-pending');
 
             const clipEl = document.getElementById('clf-clip-status');
-            clipEl.textContent = d.clip_available ? '✓ CLIP disponible' : '✗ CLIP no instal·lat (pip install open-clip-torch)';
+            clipEl.textContent = d.clip_available ? '✓ CLIP disponible' : '✗ CLIP no instalado (pip install open-clip-torch)';
             clipEl.style.color = d.clip_available ? '#17341e' : '#991b1b';
 
             const o = d.by_origin || {};
             document.getElementById('clf-breakdown').innerHTML = `
                 <span class="badge" style="background:#e8f0e8;color:#17341e;">Tag: ${o.tag || 0}</span>
                 <span class="badge" style="background:#dbeafe;color:#1e3a8a;">Auto-CLIP: ${o.clip_auto || 0}</span>
-                <span class="badge badge-pending">Revisió: ${o.clip_pending || 0}</span>
-                <span class="badge badge-resolved">Humà: ${o.human || 0}</span>
-                <span class="badge" style="background:#f1eee5;color:#727971;">No processat: ${o.unprocessed || 0}</span>
+                <span class="badge badge-pending">Revisión: ${o.clip_pending || 0}</span>
+                <span class="badge badge-resolved">Humano: ${o.human || 0}</span>
+                <span class="badge" style="background:#f1eee5;color:#727971;">No procesado: ${o.unprocessed || 0}</span>
             `;
         } catch (e) { console.error('clf stats error', e); }
     },
@@ -1655,16 +1655,16 @@ const DocClassifier = {
     async loadPendingQueue(append = false) {
         if (!append) this._offset = 0;
         const el = document.getElementById('clf-queue');
-        if (!append) el.innerHTML = '<div class="empty-state">Carregant…</div>';
+        if (!append) el.innerHTML = '<div class="empty-state">Cargando…</div>';
         try {
             const d = await apiFetch(`/api/admin/classifier/pending?limit=${this.BATCH_SIZE}&offset=${this._offset}`);
             this._total = d.total;
             document.getElementById('clf-queue-count').textContent =
-                d.total > 0 ? `${d.total} fotos pendents de revisió` : 'No hi ha fotos pendents';
+                d.total > 0 ? `${d.total} fotos pendientes de revisión` : 'No hay fotos pendientes';
 
             if (!d.items.length) {
                 if (!append) {
-                    el.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div>Cap foto pendent de revisió.</div>';
+                    el.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div>Sin fotos pendientes de revisión.</div>';
                 }
                 document.getElementById('clf-load-more').style.display = 'none';
                 return;
@@ -1701,7 +1701,7 @@ const DocClassifier = {
                      onerror="this.parentElement.innerHTML='<div style=\\'padding:.5rem;font-size:.7rem;color:#999;\\'>Sense previsualització</div>'"/>
             </div>
             <div class="clf-card-body">
-                <div class="clf-title" title="${esc(item.title || '')}">${esc((item.title || '(sense títol)').slice(0, 60))}</div>
+                <div class="clf-title" title="${esc(item.title || '')}">${esc((item.title || '(sin título)').slice(0, 60))}</div>
                 ${item.persons ? `<div style="font-size:.72rem;color:#2d4b33;margin-bottom:.3rem;opacity:.8;">👤 ${esc(item.persons)}</div>` : ''}
                 <div class="clf-conf-bar-wrap">
                     <div class="clf-conf-bar" style="width:${pct}%;background:${barColor};"></div>
@@ -1716,7 +1716,7 @@ const DocClassifier = {
                 </div>
                 <div class="clf-actions" style="margin-top:.4rem;">
                     <button class="btn btn-sm" style="flex:1;background:#d1fae5;color:#065f46;border:none;font-size:.78rem;"
-                            onclick="DocClassifier.decide(${item.id}, 1)">✓ Document</button>
+                            onclick="DocClassifier.decide(${item.id}, 1)">✓ Documento</button>
                     <button class="btn btn-sm" style="flex:1;background:#fee2e2;color:#991b1b;border:none;font-size:.78rem;"
                             onclick="DocClassifier.decide(${item.id}, 0)">✗ Foto</button>
                 </div>
@@ -1742,8 +1742,8 @@ const DocClassifier = {
                     this._total = Math.max(0, this._total - 1);
                     const el = document.getElementById('clf-queue-count');
                     el.textContent = this._total > 0
-                        ? `${this._total} fotos pendents de revisió`
-                        : 'No hi ha fotos pendents';
+                        ? `${this._total} fotos pendientes de revisión`
+                        : 'No hay fotos pendientes';
                 }, 320);
             }
         } catch (e) { alert('Error: ' + e.message); }
@@ -1756,8 +1756,8 @@ const DocClassifier = {
 
     async startClipScan(rescanPending = false) {
         const msg = rescanPending
-            ? 'Re-classificar pendents amb el model actual? Sobreescriurà els scores anteriors.'
-            : 'Iniciar scan CLIP? Pot trigar uns minuts depenent del nombre de fotos.';
+            ? '¿Re-clasificar pendientes con el modelo actual? Sobreescribirá los scores anteriores.'
+            : '¿Iniciar scan CLIP? Puede tardar unos minutos dependiendo del número de fotos.';
         if (!confirm(msg)) return;
         try {
             await apiFetch('/api/admin/classifier/run-clip', {
@@ -1792,7 +1792,7 @@ const DocClassifier = {
 
     _updateJobStatus(d) {
         const badgeMap = { idle: '', running: 'badge-pending', done: 'badge-resolved', error: 'badge-error' };
-        const labelMap = { idle: '—', running: 'En curs…', done: '✓ Completat', error: '✗ Error' };
+        const labelMap = { idle: '—', running: 'En curso…', done: '✓ Completado', error: '✗ Error' };
         const badge = document.getElementById('clf-job-badge');
         badge.className = 'badge ' + (badgeMap[d.status] || '');
         badge.textContent = labelMap[d.status] || d.status;
@@ -1800,7 +1800,7 @@ const DocClassifier = {
         const pct = d.total > 0 ? Math.round((d.progress / d.total) * 100) : 0;
         document.getElementById('clf-job-bar').style.width = pct + '%';
         document.getElementById('clf-job-progress').textContent = d.total > 0
-            ? `${d.progress} / ${d.total} (${pct}%)  ·  docs auto: ${d.auto_doc}  ·  no-doc auto: ${d.auto_photo}  ·  revisió: ${d.pending}`
+            ? `${d.progress} / ${d.total} (${pct}%)  ·  docs auto: ${d.auto_doc}  ·  no-doc auto: ${d.auto_photo}  ·  revisión: ${d.pending}`
             : '';
 
         const logEl = document.getElementById('clf-job-log');
@@ -1822,30 +1822,30 @@ const DocClassifier = {
     async trainModel() {
         const btn = document.getElementById('clf-btn-train');
         btn.disabled = true;
-        btn.textContent = 'Entrenant…';
+        btn.textContent = 'Entrenando…';
         try {
             const d = await apiFetch('/api/admin/classifier/train', { method: 'POST' });
             if (d.ok) {
                 alert(
-                    `Model entrenat!\n` +
-                    `Mostres: ${d.n_samples} (${d.n_pos} docs · ${d.n_neg} no-docs)\n` +
+                    `Modelo entrenado!\n` +
+                    `Muestras: ${d.n_samples} (${d.n_pos} docs · ${d.n_neg} no-docs)\n` +
                     `Accuracy CV: ${(d.cv_accuracy * 100).toFixed(1)}% ± ${(d.cv_std * 100).toFixed(1)}%`
                 );
                 await this.loadStats();
             } else {
-                alert('No s\'ha pogut entrenar el model:\n' + d.error);
+                alert('No se ha podido entrenar el modelo:\n' + d.error);
             }
         } catch (e) { alert('Error: ' + e.message); }
         finally {
             btn.disabled = false;
-            btn.textContent = '⚙ Entrenar model (fase 3)';
+            btn.textContent = '⚙ Entrenar modelo (fase 3)';
         }
     },
 
     async rerunTags() {
         try {
             const d = await apiFetch('/api/admin/classifier/reclassify-tags', { method: 'POST' });
-            alert(`Tags re-aplicats: ${d.updated} fotos marcades com a document (de ${d.total_checked} revisades).`);
+            alert(`Tags re-aplicados: ${d.updated} fotos marcadas como documento (de ${d.total_checked} revisadas).`);
             await this.loadStats();
         } catch (e) { alert('Error: ' + e.message); }
     },
@@ -1915,7 +1915,7 @@ const Palazuelos = (() => {
 
     async function buildMap() {
         document.getElementById('btn-build-map').disabled = true;
-        document.getElementById('palaz-build-status').textContent = 'Iniciant…';
+        document.getElementById('palaz-build-status').textContent = 'Iniciando…';
         document.getElementById('palaz-build-progress').style.display = '';
         document.getElementById('palaz-build-log').textContent = '';
         try {
@@ -1935,9 +1935,9 @@ const Palazuelos = (() => {
                 document.getElementById('palaz-progress-bar').style.width = pct + '%';
                 document.getElementById('palaz-build-log').textContent = d.log.join('\n');
                 document.getElementById('palaz-build-status').textContent =
-                    d.status === 'running' ? `${d.progress}/${d.total} persones…` :
-                    d.status === 'done' ? `Fet — ${d.result?.matched_auto ?? 0} auto, ${d.result?.needs_review ?? 0} revisió, ${d.result?.no_match ?? 0} sense match` :
-                    d.status === 'error' ? 'Error (veure log)' : d.status;
+                    d.status === 'running' ? `${d.progress}/${d.total} personas…` :
+                    d.status === 'done' ? `Hecho — ${d.result?.matched_auto ?? 0} auto, ${d.result?.needs_review ?? 0} revisión, ${d.result?.no_match ?? 0} sin match` :
+                    d.status === 'error' ? 'Error (ver log)' : d.status;
                 if (d.status !== 'running') {
                     clearInterval(_pollTimer); _pollTimer = null;
                     document.getElementById('btn-build-map').disabled = false;
@@ -2009,11 +2009,11 @@ const Palazuelos = (() => {
     }
 
     function _statusBadge(e) {
-        if (e.match_type === 'rejected') return '<span class="badge" style="background:#d32f2f;">Rebutjat</span>';
+        if (e.match_type === 'rejected') return '<span class="badge" style="background:#d32f2f;">Rechazado</span>';
         if (e.match_type === 'manual') return '<span class="badge" style="background:#1565c0;">Manual</span>';
-        if (!e.palaz_id) return '<span class="badge" style="background:#9e9b94;">Sense match</span>';
+        if (!e.palaz_id) return '<span class="badge" style="background:#9e9b94;">Sin match</span>';
         if (e.confidence >= 80) return '<span class="badge" style="background:#2d4b33;">Auto</span>';
-        return '<span class="badge" style="background:#e65100;">Revisió</span>';
+        return '<span class="badge" style="background:#e65100;">Revisión</span>';
     }
 
     function _renderRow(e) {
@@ -2034,7 +2034,7 @@ const Palazuelos = (() => {
             <td>${_statusBadge(e)}</td>
             <td>
                 <div style="position:relative;">
-                    <input type="text" class="palaz-typeahead-input" placeholder="Cercar a Palazuelos…"
+                    <input type="text" class="palaz-typeahead-input" placeholder="Buscar en Palazuelos…"
                            style="width:100%;font-size:.75rem;padding:.25rem .4rem;border:1px solid #c2c8bf;border-radius:4px;"
                            data-godes-id="${esc(e.godes_id)}"
                            oninput="Palazuelos.onTypeahead(this)"
@@ -2044,7 +2044,7 @@ const Palazuelos = (() => {
             </td>
             <td style="white-space:nowrap;">
                 ${confirmBtn}
-                <button class="btn btn-secondary btn-sm" title="Rebutjar" onclick="Palazuelos.rejectMatch('${esc(e.godes_id)}')">✕</button>
+                <button class="btn btn-secondary btn-sm" title="Rechazar" onclick="Palazuelos.rejectMatch('${esc(e.godes_id)}')">✕</button>
             </td>
         </tr>`;
     }
@@ -2052,7 +2052,7 @@ const Palazuelos = (() => {
     function _renderMapRows(entries) {
         const tbody = document.getElementById('palaz-map-body');
         if (!entries.length) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9e9b94;padding:2rem;">Cap entrada</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9e9b94;padding:2rem;">Sin entradas</td></tr>';
             return;
         }
         tbody.innerHTML = entries.map(_renderRow).join('');
@@ -2161,7 +2161,7 @@ const Palazuelos = (() => {
             if (warnEl) {
                 if (cdnExpired) {
                     warnEl.style.display = '';
-                    warnEl.textContent = `⚠️ Les URLs del GEDCOM Palazuelos van caducar el ${cdnExpiryDate}. Les miniatures i les descàrregues no funcionaran fins que re-exportis palazuelos.ged des de MyHeritage.`;
+                    warnEl.textContent = `⚠️ Las URLs del GEDCOM Palazuelos caducaron el ${cdnExpiryDate}. Las miniaturas y las descargas no funcionarán hasta que re-exportes palazuelos.ged desde MyHeritage.`;
                 } else {
                     warnEl.style.display = 'none';
                 }
@@ -2184,10 +2184,10 @@ const Palazuelos = (() => {
                         </span>
                         <button onclick="Palazuelos.selectPersonPhotos('${esc(gId)}')"
                                 style="font-size:.7rem;padding:.15rem .5rem;border:1px solid #b0c4b1;border-radius:4px;background:#f0f6f0;color:#2d6a4f;cursor:pointer;"
-                                title="Seleccionar totes les fotos d'aquesta persona">Sel·leccionar totes</button>
+                                title="Seleccionar todas las fotos de esta persona">Seleccionar todas</button>
                         <button onclick="Palazuelos.dismissPersonPhotos('${esc(gId)}','${grpRinsJson}')"
                                 style="font-size:.7rem;padding:.15rem .5rem;border:1px solid #d1c4b0;border-radius:4px;background:#faf7f2;color:#9e7a5a;cursor:pointer;"
-                                title="Descartar aquestes fotos (si n'apareixen de noves, es mostraran)">Descartar</button>
+                                title="Descartar estas fotos (si aparecen nuevas, se mostrarán)">Descartar</button>
                     </div>`;
                 // Pending photos (selectable)
                 html += `<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;">`;
@@ -2220,7 +2220,7 @@ const Palazuelos = (() => {
                 // Existing DB photos (non-selectable)
                 const existing = existingByPerson[gId] || [];
                 if (existing.length) {
-                    html += `<div style="font-size:.72rem;color:#9e9b94;margin-bottom:.3rem;">Ja tens:</div>`;
+                    html += `<div style="font-size:.72rem;color:#9e9b94;margin-bottom:.3rem;">Ya tienes:</div>`;
                     html += `<div style="display:flex;flex-wrap:wrap;gap:.4rem;">`;
                     const exBase = _existingPhotos.length;
                     for (const ex of existing) {
@@ -2255,14 +2255,14 @@ const Palazuelos = (() => {
 
     function updateSelCount() {
         const n = document.querySelectorAll('.palaz-photo-check:checked').length;
-        document.getElementById('palaz-sel-count').textContent = n || 'totes';
+        document.getElementById('palaz-sel-count').textContent = n || 'todas';
         document.getElementById('btn-download-selected').style.display = _pendingPhotos.length ? '' : 'none';
     }
 
     async function downloadSelected() {
         const checked = [...document.querySelectorAll('.palaz-photo-check:checked')];
         const toDownload = checked.length ? checked.map(cb => _pendingPhotos[parseInt(cb.dataset.idx)]) : _pendingPhotos;
-        if (!toDownload.length) { alert('No hi ha fotos seleccionades.'); return; }
+        if (!toDownload.length) { alert('No hay fotos seleccionadas.'); return; }
 
         const log = document.getElementById('palaz-download-log');
         log.style.display = '';
@@ -2271,7 +2271,7 @@ const Palazuelos = (() => {
 
         let ok = 0, err = 0;
         for (const ph of toDownload) {
-            log.textContent += `Descarregant ${ph.filename}…\n`;
+            log.textContent += `Descargando ${ph.filename}…\n`;
             log.scrollTop = log.scrollHeight;
             try {
                 const res = await apiFetch('/api/admin/palazuelos/download-photo', {
@@ -2292,13 +2292,13 @@ const Palazuelos = (() => {
                 log.textContent += `  ✗ Error: ${e.message}\n`;
                 err++;
                 if (e.message.includes('expirada')) {
-                    log.textContent += '  ⚠ Re-exporta el GEDCOM de Palazuelos a MyHeritage i torna a intentar-ho.\n';
+                    log.textContent += '  ⚠ Re-exporta el GEDCOM de Palazuelos en MyHeritage e inténtalo de nuevo.\n';
                     break;
                 }
             }
             log.scrollTop = log.scrollHeight;
         }
-        log.textContent += `\nFet: ${ok} descarregades, ${err} errors.`;
+        log.textContent += `\nHecho: ${ok} descargadas, ${err} errores.`;
         document.getElementById('btn-download-selected').disabled = false;
         if (ok > 0) loadPendingPhotos();
     }
@@ -2350,10 +2350,10 @@ const Palazuelos = (() => {
 
     async function backfillTags() {
         const statusEl = document.getElementById('palaz-backfill-status');
-        statusEl.textContent = 'Reparant…';
+        statusEl.textContent = 'Reparando…';
         try {
             const res = await apiFetch('/api/admin/palazuelos/backfill-tags', { method: 'POST' });
-            statusEl.textContent = `✓ ${res.tagged} nous tags creats (${res.processed} fotos processades)`;
+            statusEl.textContent = `✓ ${res.tagged} nuevos tags creados (${res.processed} fotos procesadas)`;
         } catch (e) {
             statusEl.textContent = 'Error: ' + e.message;
         }
@@ -2397,10 +2397,10 @@ const Dedup = (() => {
 
     async function run() {
         const status = document.getElementById('dedup-run-status');
-        status.textContent = 'Escanejant…';
+        status.textContent = 'Escaneando…';
         try {
             const d = await apiFetch('/api/admin/dedup/run', { method: 'POST' });
-            status.textContent = `✓ Auto-aplicades ${d.auto_applied_sha256} (SHA256). Pendents revisió: ${d.pending_review} (B=${d.buckets.B}, C=${d.buckets.C}).`;
+            status.textContent = `✓ Auto-aplicadas ${d.auto_applied_sha256} (SHA256). Pendientes revisión: ${d.pending_review} (B=${d.buckets.B}, C=${d.buckets.C}).`;
             await loadStats();
             await loadPending();
         } catch (e) {
@@ -2445,7 +2445,7 @@ const Dedup = (() => {
                     <span style="font-size:.72rem;color:#727971;">#${p.id}</span>
                 </div>
                 ${thumb}
-                <div style="margin-top:.4rem;font-size:.78rem;font-weight:600;">${esc(p.title || '(sense títol)')}</div>
+                <div style="margin-top:.4rem;font-size:.78rem;font-weight:600;">${esc(p.title || '(sin título)')}</div>
                 <div style="margin-top:.3rem;display:flex;flex-wrap:wrap;">
                     ${fieldBadge('date', p.date)}
                     ${fieldBadge('place', p.place)}
@@ -2456,14 +2456,14 @@ const Dedup = (() => {
                     ${fieldBadge('origin', p.doc_origin)}
                 </div>
                 <div style="font-size:.7rem;color:#727971;margin-top:.3rem;word-break:break-all;">${esc(p.filename)}</div>
-                ${!isWinner ? `<div style="margin-top:.4rem;"><button class="btn btn-secondary btn-sm" onclick="Dedup.decide(${candidateId}, 'swap')">↔ Conservar aquesta en canvi</button></div>` : ''}
+                ${!isWinner ? `<div style="margin-top:.4rem;"><button class="btn btn-secondary btn-sm" onclick="Dedup.decide(${candidateId}, 'swap')">↔ Conservar esta en su lugar</button></div>` : ''}
             </div>
         `;
     }
 
     async function loadPending() {
         const list = document.getElementById('dedup-pending-list');
-        list.innerHTML = '<div class="empty-state">Carregant…</div>';
+        list.innerHTML = '<div class="empty-state">Cargando…</div>';
         const personFilter = document.getElementById('dedup-filter-person').value.trim();
         const qs = new URLSearchParams();
         qs.set('limit', 300);
@@ -2473,7 +2473,7 @@ const Dedup = (() => {
             let pairs = d.pairs || [];
             if (bucketFilter) pairs = pairs.filter(p => p.bucket === bucketFilter);
             if (!pairs.length) {
-                list.innerHTML = '<div class="empty-state">Cap parell pendent.</div>';
+                list.innerHTML = '<div class="empty-state">Sin pares pendientes.</div>';
                 return;
             }
             list.innerHTML = pairs.map(pair => `
@@ -2485,8 +2485,8 @@ const Dedup = (() => {
                             <span style="font-size:.72rem;color:#727971;margin-left:.5rem;">${esc(pair.person_id)}  ·  ${esc(pair.metric)}  ·  score ${pair.kept_score} vs ${pair.drop_score}</span>
                         </div>
                         <div style="display:flex;gap:.4rem;">
-                            <button class="btn btn-primary btn-sm" onclick="Dedup.decide(${pair.candidate_id}, 'confirm')">✓ Eliminar duplicat</button>
-                            <button class="btn btn-secondary btn-sm" onclick="Dedup.decide(${pair.candidate_id}, 'reject')">↔ Conservar ambdues</button>
+                            <button class="btn btn-primary btn-sm" onclick="Dedup.decide(${pair.candidate_id}, 'confirm')">✓ Eliminar duplicado</button>
+                            <button class="btn btn-secondary btn-sm" onclick="Dedup.decide(${pair.candidate_id}, 'reject')">↔ Conservar ambas</button>
                         </div>
                     </div>
                     <div style="display:flex;gap:.6rem;flex-wrap:wrap;">

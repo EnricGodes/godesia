@@ -96,6 +96,11 @@ body {
     border-left-color: rgba(255,255,255,0.6) !important;
 }
 
+.admin-nav a[data-section="config"] {
+    margin-top: auto;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
 .admin-nav .nav-icon {
     font-size: 1rem;
     opacity: 0.8;

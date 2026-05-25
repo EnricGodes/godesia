@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ca">
+<html lang="es">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -16,29 +16,29 @@
     <aside class="admin-sidebar">
         <div class="admin-logo">
             Godesia
-            <span>Panell d'administració</span>
+            <span>Panel de administración</span>
         </div>
         <nav class="admin-nav">
             <a data-section="status" class="active">
-                <span class="nav-icon">⬡</span> Estat del servidor
+                <span class="nav-icon">⬡</span> Estado del servidor
             </a>
             <a data-section="import">
                 <span class="nav-icon">↑</span> Importar GEDCOM
             </a>
             <a data-section="suggestions">
-                <span class="nav-icon">✉</span> Aportacions
+                <span class="nav-icon">✉</span> Aportaciones
                 <span class="nav-badge" id="badge-suggestions"></span>
             </a>
             <a data-section="queries">
-                <span class="nav-icon">?</span> Preguntes no resoltes
+                <span class="nav-icon">?</span> Preguntas no resueltas
                 <span class="nav-badge alert" id="badge-queries"></span>
             </a>
             <a data-section="geocoder">
-                <span class="nav-icon">⊕</span> Geocodificació
+                <span class="nav-icon">⊕</span> Geocodificación
                 <span class="nav-badge" id="badge-geo"></span>
             </a>
             <a data-section="anecdotes">
-                <span class="nav-icon">✦</span> Anècdotes
+                <span class="nav-icon">✦</span> Anécdotas
             </a>
             <a data-section="minibios">
                 <span class="nav-icon">📝</span> Minibios
@@ -46,15 +46,12 @@
             <a data-section="tests">
                 <span class="nav-icon">▷</span> Tests
             </a>
-            <a data-section="config">
-                <span class="nav-icon">⚙</span> Configuració
-            </a>
             <a data-section="comparador">
                 <span class="nav-icon">⇄</span> Comparador GEDCOM
                 <span class="nav-badge" id="badge-cmp"></span>
             </a>
             <a data-section="classifier">
-                <span class="nav-icon">◎</span> Classificador fotos
+                <span class="nav-icon">◎</span> Clasificador fotos
                 <span class="nav-badge" id="badge-classifier"></span>
             </a>
             <a data-section="palazuelos">
@@ -65,6 +62,9 @@
                 <span class="nav-icon">⊟</span> Dedup fotos
                 <span class="nav-badge" id="badge-dedup"></span>
             </a>
+            <a data-section="config">
+                <span class="nav-icon">⚙</span> Configuración
+            </a>
         </nav>
     </aside>
 
@@ -73,13 +73,13 @@
 
         <!-- STATUS -->
         <section id="s-status" class="admin-section active">
-            <h1 class="section-title">Estat del servidor</h1>
-            <p class="section-subtitle">Comptadors de la base de dades, uptime i logs del servidor.</p>
+            <h1 class="section-title">Estado del servidor</h1>
+            <p class="section-subtitle">Contadores de la base de datos, uptime y logs del servidor.</p>
 
             <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
                 <span class="uptime-pill">
                     <span class="uptime-dot"></span>
-                    <span id="status-uptime">Carregant…</span>
+                    <span id="status-uptime">Cargando…</span>
                 </span>
                 <span style="font-size:0.8rem;color:#727971;" id="status-time"></span>
                 <span style="font-size:0.8rem;color:#727971;" id="status-gedcom"></span>
@@ -92,20 +92,20 @@
                 <h3>Control del servidor</h3>
                 <div style="display:flex;gap:0.75rem;margin-top:0.75rem;flex-wrap:wrap;align-items:center;">
                     <button class="btn btn-primary btn-sm" onclick="Status.serverAction('restart')">↺ Reiniciar</button>
-                    <button class="btn btn-danger btn-sm" onclick="Status.serverAction('stop')">■ Aturar</button>
-                    <span style="font-size:0.78rem;color:#727971;flex:1;">Reiniciar tarda ~3s. Aturar desconnectarà el panell.</span>
+                    <button class="btn btn-danger btn-sm" onclick="Status.serverAction('stop')">■ Detener</button>
+                    <span style="font-size:0.78rem;color:#727971;flex:1;">Reiniciar tarda ~3s. Detener desconectará el panel.</span>
                     <span id="server-action-msg" style="font-size:0.8rem;font-weight:600;color:var(--primary,#17341e);"></span>
                 </div>
             </div>
 
             <!-- DB controls -->
             <div class="info-card" style="margin-bottom:1.25rem;">
-                <h3>Control de la base de dades (SQLite)</h3>
+                <h3>Control de la base de datos (SQLite)</h3>
                 <div style="font-size:0.8rem;color:#727971;margin:0.5rem 0 0.75rem;" id="db-info"></div>
                 <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
                     <button class="btn btn-secondary btn-sm" onclick="Status.dbAction('checkpoint')">✓ Checkpoint WAL</button>
                     <button class="btn btn-secondary btn-sm" onclick="Status.dbAction('vacuum')">◈ Vacuum</button>
-                    <span style="font-size:0.75rem;color:#727971;">Per reconectar, usa Reiniciar servidor.</span>
+                    <span style="font-size:0.75rem;color:#727971;">Para reconectar, usa Reiniciar servidor.</span>
                     <span id="db-action-msg" style="font-size:0.8rem;font-weight:600;color:var(--primary,#17341e);"></span>
                 </div>
             </div>
@@ -113,46 +113,46 @@
             <div class="info-card">
                 <h3 style="display:flex;align-items:center;gap:0.5rem;">
                     Logs del servidor
-                    <button class="btn btn-secondary btn-sm" onclick="Status.refreshLogs()" style="margin-left:auto;">↻ Actualitzar</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Status.refreshLogs()" style="margin-left:auto;">↻ Actualizar</button>
                 </h3>
-                <div class="log-box" id="log-box">Carregant logs…</div>
+                <div class="log-box" id="log-box">Cargando logs…</div>
             </div>
         </section>
 
         <!-- IMPORT -->
         <section id="s-import" class="admin-section">
             <h1 class="section-title">Importar GEDCOM</h1>
-            <p class="section-subtitle">Importa un nou fitxer GEDCOM a la base de dades.</p>
+            <p class="section-subtitle">Importa un nuevo archivo GEDCOM a la base de datos.</p>
 
             <div class="info-card" id="import-form-card">
-                <h3>Font del GEDCOM</h3>
+                <h3>Fuente del GEDCOM</h3>
                 <div class="file-drop" id="ged-drop" onclick="document.getElementById('ged-file').click()">
                     <input type="file" id="ged-file" accept=".ged" style="display:none" onchange="Import.onFileSelected(this)"/>
-                    <div id="ged-drop-label">Clica o arrossega un fitxer .ged<br><small>O deixa buit per usar l'últim de docs/</small></div>
+                    <div id="ged-drop-label">Haz clic o arrastra un archivo .ged<br><small>O deja vacío para usar el último de docs/</small></div>
                 </div>
 
                 <div class="form-group" style="margin-top:1.25rem;">
-                    <label>Mode d'importació</label>
+                    <label>Modo de importación</label>
                     <div class="radio-group">
                         <label class="radio-row">
                             <input type="radio" name="import-mode" value="fast" checked/>
                             <div>
-                                <div>Ràpida (parse + migrar, ~4s)</div>
-                                <div class="radio-desc">Actualitza persones, famílies, notes, residències. Recomanat per canvis de dades.</div>
+                                <div>Rápida (parse + migrar, ~4s)</div>
+                                <div class="radio-desc">Actualiza personas, familias, notas, residencias. Recomendado para cambios de datos.</div>
                             </div>
                         </label>
                         <label class="radio-row">
                             <input type="radio" name="import-mode" value="full_no_download"/>
                             <div>
-                                <div>Completa sense descàrrega (sync_catalog, sense baixar fotos)</div>
-                                <div class="radio-desc">Actualitza també fotos, àlbums i tags. Pot trigar minuts.</div>
+                                <div>Completa sin descarga (sync_catalog, sin bajar fotos)</div>
+                                <div class="radio-desc">Actualiza también fotos, álbumes y tags. Puede tardar minutos.</div>
                             </div>
                         </label>
                         <label class="radio-row">
                             <input type="radio" name="import-mode" value="full_with_download"/>
                             <div>
-                                <div>Completa amb descàrrega (sync_catalog, baixa fotos noves)</div>
-                                <div class="radio-desc">Baixa totes les fotos noves. Pot trigar molt temps.</div>
+                                <div>Completa con descarga (sync_catalog, baja fotos nuevas)</div>
+                                <div class="radio-desc">Baja todas las fotos nuevas. Puede tardar mucho tiempo.</div>
                             </div>
                         </label>
                     </div>
@@ -160,35 +160,35 @@
 
                 <label class="checkbox-row" style="margin-bottom:1.25rem;">
                     <input type="checkbox" id="delete-photos"/>
-                    Esborrar fotos antigues del servidor abans d'importar
+                    Borrar fotos antiguas del servidor antes de importar
                 </label>
 
                 <div class="toolbar">
-                    <button class="btn btn-primary" id="btn-start-import" onclick="Import.start()">Iniciar importació</button>
+                    <button class="btn btn-primary" id="btn-start-import" onclick="Import.start()">Iniciar importación</button>
                     <span style="font-size:0.8rem;color:#727971;" id="import-current-ged"></span>
                 </div>
             </div>
 
             <div class="info-card" id="import-log-card" style="display:none;">
                 <h3 style="display:flex;align-items:center;gap:0.5rem;">
-                    Log d'importació
+                    Log de importación
                     <span class="badge" id="import-status-badge"></span>
-                    <button class="btn btn-secondary btn-sm" id="btn-reset-import" onclick="Import.reset()" style="margin-left:auto;display:none;">Nova importació</button>
+                    <button class="btn btn-secondary btn-sm" id="btn-reset-import" onclick="Import.reset()" style="margin-left:auto;display:none;">Nueva importación</button>
                 </h3>
                 <div class="import-log" id="import-log"></div>
                 <div style="margin-top:1rem;display:flex;gap:0.75rem;" id="import-post-actions" style="display:none;">
-                    <button class="btn btn-secondary btn-sm" onclick="Import.syncPhotos()">↻ Sincronitzar fotos de perfil</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Import.syncPhotos()">↻ Sincronizar fotos de perfil</button>
                 </div>
             </div>
         </section>
 
         <!-- SUGGESTIONS -->
         <section id="s-suggestions" class="admin-section">
-            <h1 class="section-title">Aportacions</h1>
-            <p class="section-subtitle">Submissions dels usuaris enviades des de la pàgina Colaborar.</p>
+            <h1 class="section-title">Aportaciones</h1>
+            <p class="section-subtitle">Envíos de usuarios desde la página Colaborar.</p>
 
             <div class="toolbar">
-                <button class="btn btn-secondary btn-sm" onclick="Suggestions.load()">↻ Actualitzar</button>
+                <button class="btn btn-secondary btn-sm" onclick="Suggestions.load()">↻ Actualizar</button>
             </div>
 
             <div id="suggestions-list"></div>
@@ -196,10 +196,10 @@
             <!-- Files modal -->
             <div class="modal-overlay" id="files-modal">
                 <div class="modal">
-                    <div class="modal-title" id="files-modal-title">Fitxers adjunts</div>
+                    <div class="modal-title" id="files-modal-title">Archivos adjuntos</div>
                     <div id="files-modal-body"></div>
                     <div class="modal-actions">
-                        <button class="btn btn-secondary" onclick="closeModal('files-modal')">Tancar</button>
+                        <button class="btn btn-secondary" onclick="closeModal('files-modal')">Cerrar</button>
                     </div>
                 </div>
             </div>
@@ -207,14 +207,14 @@
 
         <!-- QUERIES -->
         <section id="s-queries" class="admin-section">
-            <h1 class="section-title">Preguntes no resoltes</h1>
-            <p class="section-subtitle">Preguntes que el router no ha sabut respondre — registrades a unresolved_queries.jsonl.</p>
+            <h1 class="section-title">Preguntas no resueltas</h1>
+            <p class="section-subtitle">Preguntas que el router no supo responder — registradas en unresolved_queries.jsonl.</p>
 
             <div class="toolbar">
-                <button class="btn btn-secondary btn-sm" onclick="Queries.load()">↻ Actualitzar</button>
+                <button class="btn btn-secondary btn-sm" onclick="Queries.load()">↻ Actualizar</button>
                 <div class="toolbar-right">
-                    <button class="btn btn-secondary btn-sm" id="btn-del-selected" onclick="Queries.deleteSelected()" disabled>Esborrar seleccionades</button>
-                    <button class="btn btn-danger btn-sm" onclick="Queries.deleteAll()">Esborrar totes</button>
+                    <button class="btn btn-secondary btn-sm" id="btn-del-selected" onclick="Queries.deleteSelected()" disabled>Borrar seleccionadas</button>
+                    <button class="btn btn-danger btn-sm" onclick="Queries.deleteAll()">Borrar todas</button>
                 </div>
             </div>
 
@@ -223,39 +223,39 @@
 
         <!-- GEOCODER -->
         <section id="s-geocoder" class="admin-section">
-            <h1 class="section-title">Geocodificació</h1>
-            <p class="section-subtitle">Gestió d'adreces i coordenades GPS per a residències i events.</p>
+            <h1 class="section-title">Geocodificación</h1>
+            <p class="section-subtitle">Gestión de direcciones y coordenadas GPS para residencias y eventos.</p>
 
             <div class="toolbar">
                 <div style="font-size:0.82rem;color:#727971;" id="geo-stats"></div>
                 <div class="toolbar-right">
-                    <button class="btn btn-secondary btn-sm" onclick="Geocoder.load()">↻ Actualitzar</button>
-                    <button class="btn btn-primary btn-sm" id="geo-run-vital-btn" onclick="Geocoder.runVital()">Geocodificar llocs vitals</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Geocoder.load()">↻ Actualizar</button>
+                    <button class="btn btn-primary btn-sm" id="geo-run-vital-btn" onclick="Geocoder.runVital()">Geocodificar lugares vitales</button>
                     <span id="geo-run-vital-msg" style="font-size:.78rem;color:#727971;"></span>
                 </div>
             </div>
 
             <div class="admin-tabs">
                 <button class="admin-tab active" onclick="Geocoder.setTab('pending')">
-                    Pendents <span class="tab-count" id="geo-count-pending">0</span>
+                    Pendientes <span class="tab-count" id="geo-count-pending">0</span>
                 </button>
                 <button class="admin-tab" onclick="Geocoder.setTab('resolved')">
-                    Resoltes <span class="tab-count" id="geo-count-resolved">0</span>
+                    Resueltas <span class="tab-count" id="geo-count-resolved">0</span>
                 </button>
                 <button class="admin-tab" onclick="Geocoder.setTab('validated')">
-                    Validades <span class="tab-count" id="geo-count-validated">0</span>
+                    Validadas <span class="tab-count" id="geo-count-validated">0</span>
                 </button>
             </div>
 
-            <div id="geo-loading" class="empty-state">Carregant…</div>
+            <div id="geo-loading" class="empty-state">Cargando…</div>
             <div id="geo-empty" class="empty-state" style="display:none;">
                 <div class="empty-icon">✓</div>
-                No hi ha entrades en aquesta pestanya.
+                No hay entradas en esta pestaña.
             </div>
 
             <div id="geo-resolved-toolbar" style="display:none;margin-bottom:0.75rem;text-align:right;">
                 <button class="btn btn-secondary btn-sm" id="btn-fetch-all-names" onclick="Geocoder.fetchAllDisplayNames()">
-                    Carregar noms GPS que falten
+                    Cargar nombres GPS que faltan
                 </button>
             </div>
 
@@ -271,9 +271,9 @@
                     <p style="font-size:0.75rem;color:#727971;margin:-0.75rem 0 1rem;" id="geo-panel-orig"></p>
 
                     <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">
-                        <input type="text" id="geo-panel-query" class="form-input" placeholder="Refinar cerca…" style="flex:1;"
+                        <input type="text" id="geo-panel-query" class="form-input" placeholder="Refinar búsqueda…" style="flex:1;"
                                onkeydown="if(event.key==='Enter') Geocoder.doSearch()"/>
-                        <button class="btn btn-primary" onclick="Geocoder.doSearch()">Cercar</button>
+                        <button class="btn btn-primary" onclick="Geocoder.doSearch()">Buscar</button>
                     </div>
 
                     <div id="geo-candidates" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.75rem;"></div>
@@ -286,7 +286,7 @@
                     </div>
 
                     <div class="modal-actions">
-                        <button class="btn btn-secondary" onclick="closeModal('geo-modal')">Cancel·lar</button>
+                        <button class="btn btn-secondary" onclick="closeModal('geo-modal')">Cancelar</button>
                         <button class="btn btn-primary" id="geo-btn-save" onclick="Geocoder.saveResolution()" disabled>Guardar</button>
                     </div>
                 </div>
@@ -295,14 +295,14 @@
 
         <!-- ANECDOTES -->
         <section id="s-anecdotes" class="admin-section">
-            <h1 class="section-title">Anècdotes</h1>
-            <p class="section-subtitle">Edita les anècdotes associades a persones de la família.</p>
+            <h1 class="section-title">Anécdotas</h1>
+            <p class="section-subtitle">Edita las anécdotas asociadas a personas de la familia.</p>
 
             <div class="toolbar">
-                <input type="text" class="search-input" id="anec-search" placeholder="Cercar…" oninput="Anecdotes.onSearch(this.value)"/>
+                <input type="text" class="search-input" id="anec-search" placeholder="Buscar…" oninput="Anecdotes.onSearch(this.value)"/>
                 <div class="toolbar-right">
-                    <button class="btn btn-primary btn-sm" onclick="Anecdotes.openNew()">+ Nova anècdota</button>
-                    <button class="btn btn-secondary btn-sm" onclick="Anecdotes.load()">↻ Actualitzar</button>
+                    <button class="btn btn-primary btn-sm" onclick="Anecdotes.openNew()">+ Nueva anécdota</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Anecdotes.load()">↻ Actualizar</button>
                 </div>
             </div>
 
@@ -310,27 +310,27 @@
             <div class="pagination" id="anec-pagination" style="display:none;">
                 <span class="page-info" id="anec-page-info"></span>
                 <button class="btn btn-secondary btn-sm" id="anec-prev" onclick="Anecdotes.prevPage()">← Anterior</button>
-                <button class="btn btn-secondary btn-sm" id="anec-next" onclick="Anecdotes.nextPage()">Següent →</button>
+                <button class="btn btn-secondary btn-sm" id="anec-next" onclick="Anecdotes.nextPage()">Siguiente →</button>
             </div>
 
             <!-- Anecdote editor modal -->
             <div class="modal-overlay" id="anec-modal">
                 <div class="modal">
-                    <div class="modal-title" id="anec-modal-title">Nova anècdota</div>
+                    <div class="modal-title" id="anec-modal-title">Nueva anécdota</div>
                     <div class="form-group">
-                        <label>Títol ("¿Sabías que…?")</label>
+                        <label>Título ("¿Sabías que…?")</label>
                         <input type="text" class="form-input" id="anec-titulo" placeholder="¿Sabías que…?"/>
                     </div>
                     <div class="form-group">
-                        <label>Text</label>
-                        <textarea class="form-textarea" id="anec-texto" rows="4" placeholder="Descripció de l'anècdota…"></textarea>
+                        <label>Texto</label>
+                        <textarea class="form-textarea" id="anec-texto" rows="4" placeholder="Descripción de la anécdota…"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>CTA (text del botó)</label>
+                        <label>CTA (texto del botón)</label>
                         <input type="text" class="form-input" id="anec-cta" placeholder="Saber más sobre…"/>
                     </div>
                     <div class="modal-actions">
-                        <button class="btn btn-secondary" onclick="closeModal('anec-modal')">Cancel·lar</button>
+                        <button class="btn btn-secondary" onclick="closeModal('anec-modal')">Cancelar</button>
                         <button class="btn btn-primary" onclick="Anecdotes.save()">Guardar</button>
                     </div>
                 </div>
@@ -339,10 +339,10 @@
             <!-- Anecdote delete confirmation modal -->
             <div class="modal-overlay" id="anec-del-modal">
                 <div class="modal" style="max-width:360px;">
-                    <div class="modal-title">Eliminar anècdota</div>
-                    <p style="margin:0.5rem 0 1.5rem;color:#3d3d37;">Segur que vols eliminar aquesta anècdota? Aquesta acció no es pot desfer.</p>
+                    <div class="modal-title">Eliminar anécdota</div>
+                    <p style="margin:0.5rem 0 1.5rem;color:#3d3d37;">¿Seguro que quieres eliminar esta anécdota? Esta acción no se puede deshacer.</p>
                     <div class="modal-actions">
-                        <button class="btn btn-secondary" onclick="closeModal('anec-del-modal')">Cancel·lar</button>
+                        <button class="btn btn-secondary" onclick="closeModal('anec-del-modal')">Cancelar</button>
                         <button class="btn btn-danger" onclick="Anecdotes.confirmDelete()">Sí, eliminar</button>
                     </div>
                 </div>
@@ -352,13 +352,13 @@
         <!-- MINIBIOS -->
         <section id="s-minibios" class="admin-section">
             <h1 class="section-title">Minibios</h1>
-            <p class="section-subtitle">Edita les minibiografies de les persones de la família (en espanyol i català).</p>
+            <p class="section-subtitle">Edita las minibiografías de las personas de la familia (en español y catalán).</p>
 
             <div class="toolbar">
                 <div></div>
                 <div class="toolbar-right">
-                    <button class="btn btn-primary btn-sm" onclick="Minibios.openNew()">+ Nova minibio</button>
-                    <button class="btn btn-secondary btn-sm" onclick="Minibios.load()">↻ Actualitzar</button>
+                    <button class="btn btn-primary btn-sm" onclick="Minibios.openNew()">+ Nueva minibio</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Minibios.load()">↻ Actualizar</button>
                 </div>
             </div>
 
@@ -367,14 +367,14 @@
             <!-- Minibio editor modal -->
             <div class="modal-overlay" id="mbio-modal">
                 <div class="modal">
-                    <div class="modal-title" id="mbio-modal-title">Nova minibio</div>
+                    <div class="modal-title" id="mbio-modal-title">Nueva minibio</div>
                     <div class="form-group">
-                        <label>ID (ex: I4)</label>
+                        <label>ID (ej: I4)</label>
                         <input type="text" class="form-input" id="mbio-id" placeholder="I4"/>
                     </div>
                     <div class="form-group">
-                        <label>Nom complet</label>
-                        <input type="text" class="form-input" id="mbio-nombre" placeholder="Nom de la persona"/>
+                        <label>Nombre completo</label>
+                        <input type="text" class="form-input" id="mbio-nombre" placeholder="Nombre de la persona"/>
                     </div>
                     <div class="form-group">
                         <label>Bio en espanyol</label>
@@ -385,7 +385,7 @@
                         <textarea class="form-textarea" id="mbio-bio-ca" rows="5" placeholder="Biografia en català…"></textarea>
                     </div>
                     <div class="modal-actions">
-                        <button class="btn btn-secondary" onclick="closeModal('mbio-modal')">Cancel·lar</button>
+                        <button class="btn btn-secondary" onclick="closeModal('mbio-modal')">Cancelar</button>
                         <button class="btn btn-primary" onclick="Minibios.save()">Guardar</button>
                     </div>
                 </div>
@@ -395,9 +395,9 @@
             <div class="modal-overlay" id="mbio-del-modal">
                 <div class="modal" style="max-width:360px;">
                     <div class="modal-title">Eliminar minibio</div>
-                    <p style="margin:0.5rem 0 1.5rem;color:#3d3d37;">Segur que vols eliminar aquesta minibio? Aquesta acció no es pot desfer.</p>
+                    <p style="margin:0.5rem 0 1.5rem;color:#3d3d37;">¿Seguro que quieres eliminar esta minibio? Esta acción no se puede deshacer.</p>
                     <div class="modal-actions">
-                        <button class="btn btn-secondary" onclick="closeModal('mbio-del-modal')">Cancel·lar</button>
+                        <button class="btn btn-secondary" onclick="closeModal('mbio-del-modal')">Cancelar</button>
                         <button class="btn btn-danger" onclick="Minibios.confirmDelete()">Sí, eliminar</button>
                     </div>
                 </div>
@@ -408,17 +408,17 @@
         <section id="s-tests" class="admin-section">
             <h1 class="section-title">Tests del Query Router</h1>
             <p class="section-subtitle">
-                Proves de regressió i tester de preguntes en temps real.
-                <a href="/preview_incremental.html" target="_blank" style="color:var(--primary,#17341e);font-weight:600;margin-left:0.75rem;">→ Obrir Preview Incremental</a>
+                Pruebas de regresión y tester de preguntas en tiempo real.
+                <a href="/preview_incremental.html" target="_blank" style="color:var(--primary,#17341e);font-weight:600;margin-left:0.75rem;">→ Abrir Preview Incremental</a>
             </p>
 
             <!-- Query tester -->
             <div class="info-card" style="margin-bottom:1.5rem;">
-                <h3>Tester de preguntes</h3>
+                <h3>Tester de preguntas</h3>
                 <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
-                    <input type="text" class="form-input" id="test-question" placeholder="Escriu una pregunta…" style="flex:1;"
+                    <input type="text" class="form-input" id="test-question" placeholder="Escribe una pregunta…" style="flex:1;"
                            onkeydown="if(event.key==='Enter') Tests.runQuestion()"/>
-                    <button class="btn btn-primary" onclick="Tests.runQuestion()">Executar</button>
+                    <button class="btn btn-primary" onclick="Tests.runQuestion()">Ejecutar</button>
                 </div>
                 <div id="test-question-result" style="display:none;background:var(--surface-container,#f1eee5);border-radius:8px;padding:1rem;font-size:0.84rem;"></div>
             </div>
@@ -427,8 +427,8 @@
             <div class="toolbar">
                 <span style="font-size:0.82rem;color:#727971;" id="tests-stats"></span>
                 <div class="toolbar-right">
-                    <button class="btn btn-secondary btn-sm" onclick="Tests.loadBank()">↻ Actualitzar</button>
-                    <button class="btn btn-primary btn-sm" onclick="Tests.runAll()">▷ Executar tots</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Tests.loadBank()">↻ Actualizar</button>
+                    <button class="btn btn-primary btn-sm" onclick="Tests.runAll()">▷ Ejecutar todos</button>
                 </div>
             </div>
 
@@ -437,18 +437,18 @@
 
         <!-- CONFIGURACIÓ -->
         <section id="s-config" class="admin-section">
-            <h1 class="section-title">Configuració</h1>
-            <p class="section-subtitle">Paràmetres generals de l'aplicació.</p>
+            <h1 class="section-title">Configuración</h1>
+            <p class="section-subtitle">Parámetros generales de la aplicación.</p>
 
             <div class="card" style="max-width:480px;">
-                <h2 class="card-title">Persona principal de l'arbre</h2>
-                <p class="card-subtitle">Individu que apareix per defecte en obrir Árbol 2.</p>
+                <h2 class="card-title">Persona principal del árbol</h2>
+                <p class="card-subtitle">Individuo que aparece por defecto al abrir Árbol 2.</p>
 
                 <div id="config-current" style="margin-bottom:1rem;font-size:.875rem;color:#5a5a4e;"></div>
 
                 <div style="position:relative;margin-bottom:.75rem;">
                     <input type="text" id="config-person-search"
-                        placeholder="Cerca un nom…" autocomplete="off"
+                        placeholder="Busca un nombre…" autocomplete="off"
                         style="width:100%;padding:8px 12px;border:1px solid #c2c8bf;border-radius:8px;
                                font-family:Manrope,sans-serif;font-size:.875rem;box-sizing:border-box;">
                     <div id="config-person-results"
@@ -468,38 +468,38 @@
                     Guardar
                 </button>
                 <span id="config-save-msg"
-                      style="margin-left:12px;font-size:.8rem;color:#2d4b33;display:none;">✓ Guardat</span>
+                      style="margin-left:12px;font-size:.8rem;color:#2d4b33;display:none;">✓ Guardado</span>
             </div>
         </section>
 
         <!-- ── COMPARADOR ── -->
         <section id="s-comparador" class="admin-section">
             <h1 class="section-title">Comparador GEDCOM</h1>
-            <p class="section-subtitle">Compara el GEDCOM de Palazuelos amb les dades de la BD usant el mapa d'individuals ja establert. Només lectura — no modifica res.</p>
+            <p class="section-subtitle">Compara el GEDCOM de Palazuelos con los datos de la BD usando el mapa de individuos ya establecido. Solo lectura — no modifica nada.</p>
 
             <!-- Palazuelos map card (primary) -->
             <div class="info-card" id="cmp-form-card">
-                <h3>Comparar amb Palazuelos</h3>
+                <h3>Comparar con Palazuelos</h3>
                 <p style="font-size:.82rem;color:#727971;margin:.25rem 0 .75rem;">
-                    Utilitza el mapa Godes↔Palazuelos ja establert i el fitxer <code>docs/palazuelos.ged</code>.
-                    Els individus marcats com a "Rebutjat" s'exclouen de la comparació.
+                    Usa el mapa Godes↔Palazuelos ya establecido y el archivo <code>docs/palazuelos.ged</code>.
+                    Los individuos marcados como "Rechazado" se excluyen de la comparación.
                 </p>
                 <div class="toolbar" style="margin-top:.5rem;flex-wrap:wrap;gap:.5rem;">
-                    <button class="btn btn-primary" id="btn-start-cmp-palaz" onclick="Comparador.startPalazuelos()">▶ Comparar amb Palazuelos</button>
-                    <button class="btn btn-secondary btn-sm" id="btn-clear-cmp" onclick="Comparador.clearAll()" style="display:none;">Esborrar tot i reiniciar</button>
+                    <button class="btn btn-primary" id="btn-start-cmp-palaz" onclick="Comparador.startPalazuelos()">▶ Comparar con Palazuelos</button>
+                    <button class="btn btn-secondary btn-sm" id="btn-clear-cmp" onclick="Comparador.clearAll()" style="display:none;">Borrar todo y reiniciar</button>
                 </div>
                 <details style="margin-top:1rem;">
-                    <summary style="font-size:.78rem;color:#9e9b94;cursor:pointer;">Comparar amb un altre fitxer GEDCOM…</summary>
+                    <summary style="font-size:.78rem;color:#9e9b94;cursor:pointer;">Comparar con otro archivo GEDCOM…</summary>
                     <div style="margin-top:.75rem;">
                         <div class="file-drop" id="cmp-drop" onclick="document.getElementById('cmp-file').click()" style="cursor:pointer;">
                             <input type="file" id="cmp-file" accept=".ged" style="display:none" onchange="Comparador.onFileSelected(this)">
                             <div id="cmp-drop-label">
-                                Clica o arrossega un fitxer <strong>.ged</strong><br>
-                                <small style="color:#9e9b94;">Matching per nom. El fitxer s'utilitza només per comparar, no s'importa a la BD.</small>
+                                Haz clic o arrastra un archivo <strong>.ged</strong><br>
+                                <small style="color:#9e9b94;">Matching por nombre. El archivo se usa solo para comparar, no se importa a la BD.</small>
                             </div>
                         </div>
                         <div class="toolbar" style="margin-top:.75rem;">
-                            <button class="btn btn-secondary" id="btn-start-cmp" onclick="Comparador.start()">Iniciar comparació per nom</button>
+                            <button class="btn btn-secondary" id="btn-start-cmp" onclick="Comparador.start()">Iniciar comparación por nombre</button>
                         </div>
                     </div>
                 </details>
@@ -508,7 +508,7 @@
             <!-- Log / progress card -->
             <div class="info-card" id="cmp-log-card" style="display:none;">
                 <h3 style="display:flex;align-items:center;gap:.5rem;">
-                    Progrés <span class="badge" id="cmp-status-badge"></span>
+                    Progreso <span class="badge" id="cmp-status-badge"></span>
                 </h3>
                 <div style="background:#d9d5cc;border-radius:4px;height:6px;margin:.6rem 0;overflow:hidden;">
                     <div id="cmp-progress-bar" style="height:100%;background:#2d4b33;width:0%;transition:width .3s;"></div>
@@ -522,7 +522,7 @@
                 <div class="toolbar">
                     <span style="font-size:.82rem;color:#727971;" id="cmp-results-meta"></span>
                     <div class="toolbar-right">
-                        <button class="btn btn-secondary btn-sm" onclick="Comparador.loadResults()">↻ Actualitzar</button>
+                        <button class="btn btn-secondary btn-sm" onclick="Comparador.loadResults()">↻ Actualizar</button>
                     </div>
                 </div>
                 <div id="cmp-results-list"></div>
@@ -531,8 +531,8 @@
 
         <!-- CLASSIFICADOR FOTOS/DOCUMENTS -->
         <section id="s-classifier" class="admin-section">
-            <h1 class="section-title">Classificador de fotos i documents</h1>
-            <p class="section-subtitle">Pipeline en 4 fases: tags de títol → CLIP zero-shot → revisió humana → model afinat.</p>
+            <h1 class="section-title">Clasificador de fotos y documentos</h1>
+            <p class="section-subtitle">Pipeline en 4 fases: tags de título → CLIP zero-shot → revisión humana → modelo afinado.</p>
 
             <!-- Stats -->
             <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.25rem;">
@@ -546,14 +546,14 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="clf-stat-pending">—</div>
-                    <div class="stat-label">Pendents revisió</div>
+                    <div class="stat-label">Pendientes revisión</div>
                 </div>
             </div>
 
             <!-- Status card -->
             <div class="info-card" style="margin-bottom:1.25rem;">
                 <h3 style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
-                    Estat del classificador
+                    Estado del clasificador
                     <span id="clf-model-status" class="badge badge-pending" style="font-size:.75rem;">…</span>
                     <span id="clf-clip-status" style="font-size:.78rem;margin-left:.5rem;"></span>
                     <button class="btn btn-secondary btn-sm" onclick="DocClassifier.loadStats()" style="margin-left:auto;">↻</button>
@@ -566,16 +566,16 @@
                 <h3>Fases del pipeline</h3>
                 <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.75rem;">
                     <button class="btn btn-secondary btn-sm" onclick="DocClassifier.rerunTags()">
-                        ① Re-aplicar tags títol
+                        ① Re-aplicar tags título
                     </button>
                     <button class="btn btn-primary btn-sm" id="clf-btn-scan" onclick="DocClassifier.startClipScan()">
                         ② Iniciar scan CLIP
                     </button>
                     <button class="btn btn-secondary btn-sm" onclick="DocClassifier.startClipScan(true)">
-                        ↺ Re-classificar pendents
+                        ↺ Re-clasificar pendientes
                     </button>
                     <button class="btn btn-secondary btn-sm" id="clf-btn-train" onclick="DocClassifier.trainModel()">
-                        ⚙ Entrenar model (fase 3)
+                        ⚙ Entrenar modelo (fase 3)
                     </button>
                 </div>
             </div>
@@ -583,7 +583,7 @@
             <!-- CLIP job progress (hidden until scan starts) -->
             <div class="info-card" id="clf-job-card" style="display:none;margin-bottom:1.25rem;">
                 <h3 style="display:flex;align-items:center;gap:.5rem;">
-                    Progrés scan CLIP
+                    Progreso scan CLIP
                     <span class="badge" id="clf-job-badge"></span>
                 </h3>
                 <div style="background:#d9d5cc;border-radius:4px;height:6px;margin:.5rem 0;overflow:hidden;">
@@ -597,7 +597,7 @@
             <div class="toolbar">
                 <span style="font-size:.82rem;color:#727971;" id="clf-queue-count">—</span>
                 <div class="toolbar-right">
-                    <button class="btn btn-secondary btn-sm" onclick="DocClassifier.loadPendingQueue()">↻ Actualitzar</button>
+                    <button class="btn btn-secondary btn-sm" onclick="DocClassifier.loadPendingQueue()">↻ Actualizar</button>
                 </div>
             </div>
 
@@ -605,7 +605,7 @@
 
             <div style="text-align:center;margin-top:1.25rem;">
                 <button class="btn btn-secondary" id="clf-load-more" style="display:none;"
-                        onclick="DocClassifier.loadPendingQueue(true)">Carregar més…</button>
+                        onclick="DocClassifier.loadPendingQueue(true)">Cargar más…</button>
             </div>
 
         </section>
@@ -613,14 +613,14 @@
         <!-- ── SYNC PALAZUELOS ── -->
         <section id="s-palazuelos" class="admin-section">
             <h1 class="section-title">Sync Palazuelos → Godes</h1>
-            <p class="section-subtitle">Relaciona individus dels dos arbres i descarrega fotos de Palazuelos que no estan a Godes.</p>
+            <p class="section-subtitle">Relaciona individuos de los dos árboles y descarga fotos de Palazuelos que no están en Godes.</p>
 
             <!-- Build map card -->
             <div class="info-card">
-                <h3>1. Construir mapa de correspondències</h3>
+                <h3>1. Construir mapa de correspondencias</h3>
                 <p style="font-size:.82rem;color:#727971;margin-bottom:.75rem;">
-                    Llegeix <code>docs/palazuelos.ged</code> i cerca la millor correspondència per cada persona de Godes.
-                    Les correccions manuals es preserven.
+                    Lee <code>docs/palazuelos.ged</code> y busca la mejor correspondencia para cada persona de Godes.
+                    Las correcciones manuales se preservan.
                 </p>
                 <div class="toolbar">
                     <button class="btn btn-primary" id="btn-build-map" onclick="Palazuelos.buildMap()">Construir mapa</button>
@@ -638,17 +638,17 @@
             <div id="palaz-map-section" style="display:none;">
                 <div class="toolbar" style="margin-bottom:.5rem;flex-wrap:wrap;gap:.5rem;">
                     <div style="display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;">
-                        <button id="palaz-btn-tots" class="btn btn-primary btn-sm" onclick="Palazuelos.setFilter('')">Tots <span id="palaz-cnt-tots">0</span></button>
-                        <button id="palaz-btn-confirmed" class="btn btn-secondary btn-sm" onclick="Palazuelos.setFilter('confirmed')">Confirmats <span id="palaz-cnt-confirmed">0</span></button>
-                        <button id="palaz-btn-review" class="btn btn-secondary btn-sm" onclick="Palazuelos.setFilter('review')">Revisió <span id="palaz-cnt-review">0</span></button>
-                        <button id="palaz-btn-nomatch" class="btn btn-secondary btn-sm" onclick="Palazuelos.setFilter('nomatch')">Sense match <span id="palaz-cnt-nomatch">0</span></button>
-                        <button id="palaz-btn-rejected" class="btn btn-secondary btn-sm" onclick="Palazuelos.setFilter('rejected')">Rebutjat <span id="palaz-cnt-rejected">0</span></button>
-                        <input id="palaz-filter-q" type="text" placeholder="Filtrar per nom..."
+                        <button id="palaz-btn-tots" class="btn btn-primary btn-sm" onclick="Palazuelos.setFilter('')">Todos <span id="palaz-cnt-tots">0</span></button>
+                        <button id="palaz-btn-confirmed" class="btn btn-secondary btn-sm" onclick="Palazuelos.setFilter('confirmed')">Confirmados <span id="palaz-cnt-confirmed">0</span></button>
+                        <button id="palaz-btn-review" class="btn btn-secondary btn-sm" onclick="Palazuelos.setFilter('review')">Revisión <span id="palaz-cnt-review">0</span></button>
+                        <button id="palaz-btn-nomatch" class="btn btn-secondary btn-sm" onclick="Palazuelos.setFilter('nomatch')">Sin match <span id="palaz-cnt-nomatch">0</span></button>
+                        <button id="palaz-btn-rejected" class="btn btn-secondary btn-sm" onclick="Palazuelos.setFilter('rejected')">Rechazado <span id="palaz-cnt-rejected">0</span></button>
+                        <input id="palaz-filter-q" type="text" placeholder="Filtrar por nombre..."
                                style="font-size:.8rem;padding:.3rem .6rem;border:1px solid #c2c8bf;border-radius:4px;width:160px;margin-left:.35rem;"
                                oninput="Palazuelos.filterMap()"/>
                     </div>
                     <div class="toolbar-right">
-                        <button class="btn btn-secondary btn-sm" onclick="Palazuelos.loadMap()">↻ Actualitzar</button>
+                        <button class="btn btn-secondary btn-sm" onclick="Palazuelos.loadMap()">↻ Actualizar</button>
                     </div>
                 </div>
 
@@ -670,23 +670,23 @@
 
             <!-- Pending photos -->
             <div class="info-card" style="margin-top:1.5rem;" id="palaz-photos-card">
-                <h3>2. Fotos pendents de descarregar</h3>
+                <h3>2. Fotos pendientes de descargar</h3>
                 <p style="font-size:.82rem;color:#727971;margin-bottom:.75rem;">
                     Fotos de Palazuelos no presents a Godes, per als parells confirmats.
                 </p>
                 <div class="toolbar" style="margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem;">
-                    <button class="btn btn-secondary" onclick="Palazuelos.loadPendingPhotos()">Detectar fotos pendents</button>
+                    <button class="btn btn-secondary" onclick="Palazuelos.loadPendingPhotos()">Detectar fotos pendientes</button>
                     <button class="btn btn-primary" id="btn-download-selected" onclick="Palazuelos.downloadSelected()" style="display:none;">
                         Descarregar seleccionades (<span id="palaz-sel-count">0</span>)
                     </button>
-                    <button class="btn btn-secondary btn-sm" onclick="Palazuelos.backfillTags()" title="Assigna les fotos ja descarregades a totes les persones que les tenen al GEDCOM">
+                    <button class="btn btn-secondary btn-sm" onclick="Palazuelos.backfillTags()" title="Asigna las fotos ya descargadas a todas las personas que las tienen en el GEDCOM">
                         ↔ Reparar tags de fotos
                     </button>
                     <span id="palaz-backfill-status" style="font-size:.8rem;color:#727971;"></span>
                 </div>
                 <div id="palaz-cdn-warning" style="display:none;background:#fff3e0;border:1px solid #ffb74d;border-radius:6px;padding:.6rem .85rem;margin-bottom:.75rem;font-size:.8rem;color:#e65100;"></div>
-                <div id="palaz-photos-loading" style="display:none;color:#727971;font-size:.82rem;">Carregant…</div>
-                <div id="palaz-photos-empty" style="display:none;color:#727971;font-size:.82rem;">Cap foto nova trobada per als parells confirmats.</div>
+                <div id="palaz-photos-loading" style="display:none;color:#727971;font-size:.82rem;">Cargando…</div>
+                <div id="palaz-photos-empty" style="display:none;color:#727971;font-size:.82rem;">No hay fotos nuevas para los pares confirmados.</div>
                 <div id="palaz-photos-list"></div>
                 <pre class="import-log" id="palaz-download-log" style="display:none;height:120px;margin-top:.75rem;"></pre>
             </div>
@@ -701,11 +701,11 @@
             <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.25rem;">
                 <div class="stat-card">
                     <div class="stat-value" id="dedup-stat-pending-b">—</div>
-                    <div class="stat-label">Bucket B pendents</div>
+                    <div class="stat-label">Bucket B pendientes</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="dedup-stat-pending-c">—</div>
-                    <div class="stat-label">Bucket C pendents</div>
+                    <div class="stat-label">Bucket C pendientes</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="dedup-stat-blocked">—</div>
@@ -721,19 +721,19 @@
                 <h3>Accions</h3>
                 <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.75rem;">
                     <button class="btn btn-primary btn-sm" onclick="Dedup.run()">↻ Re-escanejar i auto-aplicar SHA256</button>
-                    <button class="btn btn-secondary btn-sm" onclick="Dedup.loadPending()">⟳ Recarregar pendents</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Dedup.loadPending()">⟳ Recargar pendientes</button>
                 </div>
                 <div id="dedup-run-status" style="margin-top:.5rem;font-size:.82rem;color:#727971;"></div>
             </div>
 
             <div class="toolbar" style="margin-bottom:.75rem;">
                 <div style="display:flex;gap:.35rem;flex-wrap:wrap;">
-                    <button class="btn btn-primary btn-sm" id="dedup-btn-all" onclick="Dedup.setFilter('')">Tots</button>
+                    <button class="btn btn-primary btn-sm" id="dedup-btn-all" onclick="Dedup.setFilter('')">Todos</button>
                     <button class="btn btn-secondary btn-sm" id="dedup-btn-B" onclick="Dedup.setFilter('B')">Bucket B</button>
                     <button class="btn btn-secondary btn-sm" id="dedup-btn-C" onclick="Dedup.setFilter('C')">Bucket C</button>
                 </div>
                 <div class="toolbar-right">
-                    <input type="text" id="dedup-filter-person" placeholder="Filtrar per person_id (@I…@)"
+                    <input type="text" id="dedup-filter-person" placeholder="Filtrar por person_id (@I…@)"
                            style="padding:.4rem .6rem;border:1px solid #d9d5cc;border-radius:4px;font-size:.85rem;"/>
                     <button class="btn btn-secondary btn-sm" onclick="Dedup.loadPending()">Aplicar</button>
                 </div>
@@ -745,13 +745,13 @@
     </main>
 </div>
 
-<!-- Lightbox modal — fora de totes les seccions perquè sigui visible des de qualsevol -->
+<!-- Lightbox modal — fuera de todas las secciones para que sea visible desde cualquiera -->
 <div class="modal-overlay" id="clf-photo-modal" onclick="closeModal('clf-photo-modal')">
     <div class="modal" style="max-width:90vw;padding:1rem;background:#1a1a17;" onclick="event.stopPropagation()">
         <img id="clf-modal-img" src="" alt=""
              style="max-width:100%;max-height:80vh;display:block;margin:0 auto;border-radius:6px;"/>
         <div style="text-align:center;margin-top:.75rem;">
-            <button class="btn btn-secondary" onclick="closeModal('clf-photo-modal')">Tancar</button>
+            <button class="btn btn-secondary" onclick="closeModal('clf-photo-modal')">Cerrar</button>
         </div>
     </div>
 </div>
