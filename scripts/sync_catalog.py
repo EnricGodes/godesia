@@ -60,6 +60,7 @@ DOC_TYPES = [
     ("document",     r"partida\b|acta\b|expedient|expediente|registre(?!.*foto)|documentaci[oó]|\[documentaci|\[diversos\]"),
 ]
 
+
 def classify_document(title):
     """Returns (is_document, doc_type) based on title keywords.
 
@@ -709,21 +710,43 @@ def main():
         ).fetchall())
         # Persistent dedup decisions — survive DROP TABLE photos in Phase 7
         try:
-            blocked = {r[0] for r in db_tmp.execute(
-                "SELECT filename FROM photo_dedup_blocklist"
+            blocked_map = {r[0]: r[1] for r in db_tmp.execute(
+                "SELECT filename, kept_filename FROM photo_dedup_blocklist"
             )}
+            blocked = set(blocked_map.keys())
         except sqlite3.OperationalError:
+            blocked_map = {}
             blocked = set()
         db_tmp.close()
 
         extra_photos, extra_albums = parse_extra_gedcom_photos(extra_ged, palaz_map)
 
+        def _merge_tags_into_winner(loser_photo, loser_fname):
+            """Transfer tagged_people from a blocklisted loser to its kept winner.
+
+            The winner can live in either `photos` (Godes main) or `extra_photos`
+            (Palazuelos). Returns True if any tags were transferred."""
+            kept = blocked_map.get(loser_fname)
+            if not kept or not loser_photo.tagged_people:
+                return 0
+            winner = photos.get(kept) or extra_photos.get(kept)
+            if winner is None:
+                return 0
+            transferred = 0
+            for pid, tag in loser_photo.tagged_people.items():
+                if pid not in winner.tagged_people:
+                    winner.tagged_people[pid] = tag
+                    transferred += 1
+            return transferred
+
         added = 0
         skipped_blocked = 0
         skipped_no_godes = 0
+        recovered_tags = 0
         for fname, photo in extra_photos.items():
             if fname in blocked:
                 skipped_blocked += 1
+                recovered_tags += _merge_tags_into_winner(photo, fname)
                 continue
             if not photo.tagged_people:
                 skipped_no_godes += 1
@@ -740,6 +763,7 @@ def main():
         main_dropped = 0
         for fname in list(photos.keys()):
             if fname in blocked:
+                recovered_tags += _merge_tags_into_winner(photos[fname], fname)
                 del photos[fname]
                 main_dropped += 1
 
@@ -747,6 +771,7 @@ def main():
         print(f"  Saltades sense match Godes: {skipped_no_godes}")
         print(f"  Fotos extra (Palazuelos): {added}")
         print(f"  Saltadas por blocklist dedup: {skipped_blocked} (Palazuelos) + {main_dropped} (Godes)")
+        print(f"  Etiquetas recuperadas de fotos blocklistadas: {recovered_tags}")
         print(f"  Total tras merge: {len(photos)}")
     else:
         print("  (palazuelos.ged no encontrado, se omite)")

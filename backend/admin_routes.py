@@ -480,7 +480,7 @@ def _run_clip_scan(db_path: Path, photos_dir: Path, limit: int, rescan_pending: 
     try:
         origin_filter = "doc_origin IS NULL OR doc_origin = 'clip_pending'" if rescan_pending else "doc_origin IS NULL"
         query = f"""
-            SELECT id, filename FROM photos
+            SELECT id, filename, is_document FROM photos
             WHERE ({origin_filter})
               AND is_downloaded = 1
               AND filename NOT LIKE '%.pdf'
@@ -513,6 +513,10 @@ def _run_clip_scan(db_path: Path, photos_dir: Path, limit: int, rescan_pending: 
                 origin, is_doc = None, None
             elif score >= dc.THRESH_AUTO_DOC:
                 origin, is_doc = "clip_auto", 1
+            elif row["is_document"] == 1:
+                # Title classifier said "document" but CLIP isn't confident → manual review.
+                # Don't auto-deny; keep is_document=1 and flag for human review.
+                origin, is_doc = "clip_pending", None
             elif score <= dc.THRESH_REVIEW_LOW:
                 origin, is_doc = "clip_auto", 0
             else:
@@ -529,7 +533,7 @@ def _run_clip_scan(db_path: Path, photos_dir: Path, limit: int, rescan_pending: 
                        ON CONFLICT(filename) DO UPDATE SET
                            is_document=excluded.is_document, doc_origin=excluded.doc_origin,
                            doc_confidence=excluded.doc_confidence, updated_at=excluded.updated_at""",
-                    (row["filename"], is_doc or 0, origin, score),
+                    (row["filename"], row["is_document"] if is_doc is None else (is_doc or 0), origin, score),
                 )
 
             with _clip_job_lock:
@@ -1857,7 +1861,9 @@ async def upload_photos(files: list[UploadFile] = File(...)):
 def _delete_photo_record(db, photo_id: int, kept_filename: str, person_id: str, reason: str,
                          kept_photo_id: Optional[int] = None):
     """Remove a duplicate photo: DB rows, physical file, register in blocklist.
-    If kept_photo_id is given, reparent any cutouts that pointed to photo_id."""
+    If kept_photo_id is given, reparent any cutouts that pointed to photo_id and
+    transfer any photo_tags from the loser to the winner (preserving tags from
+    people only present on the loser's record)."""
     row = db.execute("SELECT filename, sha256 FROM photos WHERE id=?", (photo_id,)).fetchone()
     if not row:
         return False
@@ -1866,6 +1872,15 @@ def _delete_photo_record(db, photo_id: int, kept_filename: str, person_id: str, 
     if kept_photo_id:
         db.execute(
             "UPDATE photos SET parent_photo_id=? WHERE parent_photo_id=?",
+            (kept_photo_id, photo_id),
+        )
+        # Transfer tags from loser to winner (PK is (photo_id, person_id), so
+        # INSERT OR IGNORE keeps the winner's existing tag for any overlap).
+        db.execute(
+            """INSERT OR IGNORE INTO photo_tags
+                   (photo_id, person_id, is_primary, is_prim_cutout, position, source)
+               SELECT ?, person_id, is_primary, is_prim_cutout, position, source
+               FROM photo_tags WHERE photo_id=?""",
             (kept_photo_id, photo_id),
         )
     db.execute("DELETE FROM photo_tags WHERE photo_id=?", (photo_id,))
