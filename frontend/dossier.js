@@ -1318,12 +1318,12 @@ function buildEvents(data) {
     if (data.burial && data.burial.length > 0) {
         const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
         data.burial.forEach(b => {
-            const year = extractYear(b.date);
+            const year = extractYear(b.date) || person.death_year || null;
             if (year) {
-                const lines = [formatDateWithQualifier(b.date) || ''];
+                const lines = [];
+                if (b.date) lines.push(formatDateWithQualifier(b.date));
                 if (b.place) lines.push(b.place);
                 if (b.place_detail) {
-                    // place_detail might contain cemetery info and location details
                     const details = b.place_detail.split('\n').filter(d => d.trim());
                     lines.push(...details);
                 }
