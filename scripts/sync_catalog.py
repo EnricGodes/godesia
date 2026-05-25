@@ -1110,8 +1110,11 @@ def main():
         # Priority (highest last, so it overwrites lower): tag → clip_auto → clip_pending → human
         # - 'tag':   auto-classified by keyword; restored only where doc_origin still NULL
         # - 'clip_auto': high-confidence CLIP decision
-        # - 'clip_pending': restore score only (stays in review queue, is_document stays 0)
+        # - 'clip_pending': restore score AND is_document (stays in review queue)
         # - 'human': user decision is final, overrides everything
+        # Conflict rule: if title classifier says doc (is_document=1) but CLIP backup
+        # says not-doc with low confidence (clip_auto pero is_document=0 y score < THRESH_AUTO_DOC),
+        # downgrade to clip_pending — the photo needs manual review.
         try:
             cursor.executescript("""
                 UPDATE photos SET
@@ -1122,7 +1125,12 @@ def main():
                   AND filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'tag');
 
                 UPDATE photos SET
-                    doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto'),
+                    doc_origin    = CASE
+                        WHEN is_document = 1
+                         AND (SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto') = 0
+                        THEN 'clip_pending'
+                        ELSE (SELECT pc.doc_origin FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto')
+                    END,
                     doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto'),
                     is_document   = CASE WHEN is_document = 0
                                     THEN (SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto')
@@ -1130,6 +1138,8 @@ def main():
                 WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'clip_auto');
 
                 UPDATE photos SET
+                    is_document   = COALESCE((SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending'), is_document),
+                    doc_type      = COALESCE((SELECT pc.doc_type    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending'), doc_type),
                     doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending'),
                     doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending')
                 WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'clip_pending');
