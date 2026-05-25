@@ -1028,17 +1028,19 @@ def main():
             )
 
         # Restore classifications from photo_classifications (survives DROP TABLE)
-        # - 'human': override everything — user decision is final
-        # - 'clip_auto': restore score + is_document (high-confidence CLIP decision)
+        # Priority (highest last, so it overwrites lower): tag → clip_auto → clip_pending → human
+        # - 'tag':   auto-classified by keyword; restored only where doc_origin still NULL
+        # - 'clip_auto': high-confidence CLIP decision
         # - 'clip_pending': restore score only (stays in review queue, is_document stays 0)
+        # - 'human': user decision is final, overrides everything
         try:
             cursor.executescript("""
                 UPDATE photos SET
-                    is_document   = (SELECT pc.is_document   FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
-                    doc_type      = (SELECT pc.doc_type      FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
-                    doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
-                    doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human')
-                WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'human');
+                    is_document   = (SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'tag'),
+                    doc_type      = (SELECT pc.doc_type    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'tag'),
+                    doc_origin    = 'tag'
+                WHERE doc_origin IS NULL
+                  AND filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'tag');
 
                 UPDATE photos SET
                     doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto'),
@@ -1052,6 +1054,13 @@ def main():
                     doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending'),
                     doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending')
                 WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'clip_pending');
+
+                UPDATE photos SET
+                    is_document   = (SELECT pc.is_document   FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
+                    doc_type      = (SELECT pc.doc_type      FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
+                    doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
+                    doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human')
+                WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'human');
             """)
         except Exception as e:
             print(f"  [avís] No s'han pogut restaurar classificacions: {e}")
