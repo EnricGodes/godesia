@@ -5,17 +5,17 @@ The endpoint skips files that already exist, so re-running is safe.
 
 Usage:
     python3 scripts/upload_photos_to_railway.py           # sube todas las fotos
-    python3 scripts/upload_photos_to_railway.py --new-only  # solo las no trackeadas por git
+    python3 scripts/upload_photos_to_railway.py --new-only  # solo las que faltan en Railway
 """
 
 import argparse
-import subprocess
 import sys
 import requests
 from pathlib import Path
 
 BASE_URL = "https://godesia.up.railway.app"
 ENDPOINT = f"{BASE_URL}/api/admin/upload-photos"
+LIST_ENDPOINT = f"{BASE_URL}/api/admin/list-photos"
 PHOTOS_DIR = Path(__file__).parent.parent / "data" / "photos"
 BATCH_SIZE = 10  # conservador para no exceder límites de tamaño de request
 
@@ -25,13 +25,15 @@ def get_all_photos() -> list[Path]:
 
 
 def get_new_photos() -> list[Path]:
-    """Return only photos not yet tracked by git."""
-    result = subprocess.run(
-        ["git", "ls-files", "--others", "--exclude-standard", "data/photos/"],
-        capture_output=True, text=True,
-        cwd=PHOTOS_DIR.parent.parent
-    )
-    return [PHOTOS_DIR.parent.parent / p.strip() for p in result.stdout.splitlines() if p.strip()]
+    """Return local photos not yet present on the Railway volume.
+
+    data/photos/ is gitignored, so git can't tell us what's new. Instead we ask
+    Railway which filenames it already has and upload only the difference.
+    """
+    r = requests.get(LIST_ENDPOINT, timeout=60)
+    r.raise_for_status()
+    remote = set(r.json()["files"])
+    return [p for p in get_all_photos() if p.name not in remote]
 
 
 def upload_batch(paths: list[Path]) -> dict:

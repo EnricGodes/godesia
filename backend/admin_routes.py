@@ -1833,6 +1833,17 @@ async def classifier_reclassify_tags():
 # Photo volume upload utility
 # ---------------------------------------------------------------------------
 
+@router.get("/list-photos")
+async def list_photos():
+    """Return the set of photo filenames present on the volume (for upload diff)."""
+    photos_dir = _base_dir / "data" / "photos"
+    if not photos_dir.exists():
+        return {"count": 0, "files": []}
+    files = [p.name for p in photos_dir.iterdir()
+             if p.suffix.lower() in (".jpg", ".jpeg", ".png")]
+    return {"count": len(files), "files": files}
+
+
 @router.post("/upload-photos")
 async def upload_photos(files: list[UploadFile] = File(...)):
     """Bulk upload photos to the data/photos directory (for volume sync)."""
