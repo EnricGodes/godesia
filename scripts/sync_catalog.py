@@ -34,6 +34,21 @@ from gedcom_parser import clean_note_html, translate_event_type
 from database import convert_date_to_spanish
 from geocode_utils import propagate_geocache, extract_city_from_place
 
+# MyHeritage exporta un INDI de sistema ("Unassociated photos", RIN @I88888888@) que
+# agrupa todas las fotos no vinculadas a ninguna persona real. No es una persona y no
+# debe importarse: sus fotos huérfanas ensucian la galería. Lo excluimos por id y, como
+# red de seguridad, por nombre (por si MyHeritage cambia el RIN en futuros exports).
+EXCLUDED_INDI_IDS = {"@I88888888@"}
+EXCLUDED_INDI_NAMES = {"unassociated photos"}
+
+
+def is_excluded_indi(indi_id, name=""):
+    """True si el INDI es la persona fantasma de MyHeritage que no debe importarse."""
+    if indi_id in EXCLUDED_INDI_IDS:
+        return True
+    return (name or "").strip().lower() in EXCLUDED_INDI_NAMES
+
+
 _EVENT_TAG_TYPE = {
     "CENS": "Censo", "EDUC": "Educación", "BAPM": "Bautismo", "CHR": "Bautizo",
     "CONF": "Confirmación", "FCOM": "Primera Comunión", "EMIG": "Emigración",
@@ -173,7 +188,11 @@ def parse_gedcom_photos(lines):
 
         match = re.match(r"^0\s+(@I\w+@)\s+INDI", line)
         if match:
-            current_indi = match.group(1)
+            indi_id = match.group(1)
+            # Saltar la persona fantasma "Unassociated photos": sus OBJE son fotos
+            # huérfanas. Las fotos compartidas con personas reales entran igualmente
+            # al parsearse el INDI real (las fotos se indexan por filename).
+            current_indi = None if is_excluded_indi(indi_id) else indi_id
             continue
 
         if current_indi:
@@ -505,6 +524,9 @@ def parse_gedcom_people(lines):
                             person["updated_at"] = rest
                 i += 1
 
+            # Saltar la persona fantasma "Unassociated photos" de MyHeritage
+            if is_excluded_indi(person_id, person.get("name")):
+                continue
             people[person_id] = person
 
     # Parse FAM records

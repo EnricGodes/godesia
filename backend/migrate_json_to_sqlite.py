@@ -10,6 +10,10 @@ from database import get_connection, init_db, parse_gedcom_date, convert_date_to
 from geocode_utils import geocode_with_cache, build_residence_raw, GEOCODEABLE_TAGS, GEOCODEABLE_TYPES
 from geocode_vital_places import seed_vital_places
 
+# Persona fantasma de MyHeritage ("Unassociated photos") que no debe importarse.
+EXCLUDED_PERSON_IDS = {"@I88888888@"}
+EXCLUDED_PERSON_NAMES = {"unassociated photos"}
+
 
 def migrate(json_path, db_path):
     print(f"Leyendo {json_path}...")
@@ -27,6 +31,12 @@ def migrate(json_path, db_path):
 
     print("Insertando personas...")
     for person in data["people"]:
+        # Saltar la persona fantasma "Unassociated photos" de MyHeritage (bucket de
+        # fotos no asociadas; no es una persona real).
+        if person.get("id") in EXCLUDED_PERSON_IDS \
+                or (person.get("name", "") or "").strip().lower() in EXCLUDED_PERSON_NAMES:
+            continue
+
         # Parse birth date
         birth_date_raw = person.get("birth", {}).get("date", "")
         birth_date = convert_date_to_spanish(birth_date_raw)
