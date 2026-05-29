@@ -87,20 +87,117 @@ window.openPhotoModal = async function(photoId) {
         const overlay = document.getElementById('photo-modal-overlay');
         overlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+        document.addEventListener('keydown', _modalKeyHandler);
     } catch (e) {
         console.error('Error loading photo:', e);
     }
 };
 
 /**
+ * Close the modal on Escape. If the zoom overlay is open, let its own
+ * handler close the zoom first instead of closing the whole modal.
+ */
+function _modalKeyHandler(e) {
+    if (e.key === 'Escape') {
+        if (document.getElementById('zoom-mode-overlay')) return;
+        closePhotoModal();
+    }
+}
+
+/**
  * Close photo modal
  */
 window.closePhotoModal = function() {
     exitZoomMode();
+    document.removeEventListener('keydown', _modalKeyHandler);
     const overlay = document.getElementById('photo-modal-overlay');
     overlay.style.display = 'none';
     document.body.style.overflow = 'auto';
     _currentPhotoData = null;
+};
+
+/**
+ * Build a descriptive file name for the photo: "año_lugar_persona1-persona2.ext".
+ * Falls back gracefully when year, place or people are missing.
+ */
+function buildPhotoFileName(p) {
+    const parts = [];
+    const yearMatch = (p.date || '').match(/\d{4}/);
+    if (yearMatch) parts.push(yearMatch[0]);
+    if (p.place) parts.push(p.place);
+    if (p.tagged_people && p.tagged_people.length) {
+        parts.push(p.tagged_people.map(t => t.name).join('-'));
+    }
+    let base = parts.join('_');
+    // Remove characters illegal in file names and collapse whitespace
+    base = base.replace(/[\/\\:*?"<>|]/g, '').replace(/\s+/g, ' ').trim();
+    if (!base) base = (p.title || 'foto').replace(/[\/\\:*?"<>|]/g, '').trim() || 'foto';
+    const extMatch = (p.filename || '').match(/\.[a-zA-Z0-9]+$/);
+    return base + (extMatch ? extMatch[0] : '.jpg');
+}
+
+/**
+ * Download the current photo with a descriptive file name.
+ */
+window.downloadPhoto = async function() {
+    if (!_currentPhotoData) return;
+    const p = _currentPhotoData;
+    try {
+        const res = await fetch(`/photos/${p.filename}`);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = buildPhotoFileName(p);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error('Error downloading photo:', e);
+        alert('No se pudo descargar la imagen.');
+    }
+};
+
+/**
+ * Share the current photo: native share with the image file when supported,
+ * otherwise share/copy the image URL.
+ */
+window.sharePhoto = async function() {
+    if (!_currentPhotoData) return;
+    const p = _currentPhotoData;
+    const title = p.title || 'Foto Godesia';
+    const url = `${location.origin}/photos/${p.filename}`;
+
+    // Best: share the actual image file (mobile and supporting browsers)
+    if (navigator.canShare && navigator.share) {
+        try {
+            const res = await fetch(`/photos/${p.filename}`);
+            const blob = await res.blob();
+            const file = new File([blob], buildPhotoFileName(p), { type: blob.type || 'image/jpeg' });
+            if (navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], title });
+                return;
+            }
+        } catch (e) {
+            if (e.name === 'AbortError') return; // user cancelled
+            // otherwise fall through to URL sharing
+        }
+    }
+
+    // Fallback: share the link
+    if (navigator.share) {
+        try { await navigator.share({ title, url }); return; }
+        catch (e) { if (e.name === 'AbortError') return; }
+    }
+
+    // Last resort: copy to clipboard
+    try {
+        await navigator.clipboard.writeText(url);
+        alert('Enlace de la foto copiado al portapapeles');
+    } catch (e) {
+        prompt('Copia el enlace de la foto:', url);
+    }
 };
 
 /**
@@ -294,6 +391,20 @@ function renderPhotoModal() {
                     onmouseover="this.style.backgroundColor='#2D4B33';this.style.color='white'"
                     onmouseout="this.style.backgroundColor='rgba(252,249,240,0.95)';this.style.color='#2D4B33'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </button>
+
+                <!-- Download button -->
+                <button onclick="downloadPhoto()" title="Descargar imagen" style="position: absolute; top: 16px; right: 116px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;"
+                    onmouseover="this.style.backgroundColor='#2D4B33';this.style.color='white'"
+                    onmouseout="this.style.backgroundColor='rgba(252,249,240,0.95)';this.style.color='#2D4B33'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 19h16"/></svg>
+                </button>
+
+                <!-- Share button -->
+                <button onclick="sharePhoto()" title="Compartir foto" style="position: absolute; top: 16px; right: 166px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;"
+                    onmouseover="this.style.backgroundColor='#2D4B33';this.style.color='white'"
+                    onmouseout="this.style.backgroundColor='rgba(252,249,240,0.95)';this.style.color='#2D4B33'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                 </button>
 
                 <!-- Close button (top right) -->

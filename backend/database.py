@@ -1339,6 +1339,7 @@ def get_person_dossier(conn, person_id):
     documents_list = []
     for doc in documents:
         doc_dict = dict(doc)
+        doc_dict['date'] = convert_date_to_spanish(doc_dict.get('date'))
         title = doc_dict.get('title') or ''
         bracket_match = _re.search(r'\[([^\]]+)\]', title)
         if bracket_match:
@@ -1358,7 +1359,11 @@ def get_person_dossier(conn, person_id):
         WHERE pt.person_id = ? AND ph.filename NOT LIKE '%.pdf' AND ph.is_document = 0
         ORDER BY ph.date DESC
     """, (person_id,)).fetchall()
-    photos_list = [dict(p) for p in photos]
+    photos_list = []
+    for p in photos:
+        p_dict = dict(p)
+        p_dict['date'] = convert_date_to_spanish(p_dict.get('date'))
+        photos_list.append(p_dict)
 
     return {
         "person": person_dict,
@@ -1405,6 +1410,7 @@ def get_photo_details(conn, photo_id):
         return None
 
     photo_dict = dict(photo)
+    photo_dict["date"] = convert_date_to_spanish(photo_dict.get("date"))
 
     # Tagged people in this photo (with nicknames)
     tagged_people = conn.execute("""
