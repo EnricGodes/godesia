@@ -360,7 +360,7 @@
       const allInName = queryWords.length > 0 && queryWords.every(w => nameWords.has(w));
 
       if (allInName) {
-        window.location.href = `/dossier.html?id=${person.id}`;
+        window.location.href = `/dossier.html?id=${(person.id || '').replace(/@/g, '')}`;
       } else {
         toChat();
       }

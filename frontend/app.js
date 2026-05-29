@@ -6,6 +6,11 @@ const sendBtn = document.getElementById("send-btn");
 let conversationHistory = [];
 let _lastAssistantMsg = null;
 
+// Build the ?id= param for a dossier link, stripping GEDCOM @ wrappers (@I104@ → I104).
+function dossierIdParam(id) {
+  return encodeURIComponent((id || '').replace(/@/g, ''));
+}
+
 // --- Person panel ---
 function markActivePill(personId) {
   const cleanId = personId.replace(/@/g, '');
@@ -42,12 +47,12 @@ async function showPersonPanel(personId) {
     const birthLine = [p.birth_date, p.birth_city || p.birth_place].filter(Boolean).join(', ');
     const deathLine = [p.death_date, p.death_city || p.death_place].filter(Boolean).join(', ');
 
-    const fatherHtml = d.father ? `<a href="/dossier.html?id=${encodeURIComponent(d.father.id)}">${d.father.name}</a>` : '';
-    const motherHtml = d.mother ? `<a href="/dossier.html?id=${encodeURIComponent(d.mother.id)}">${d.mother.name}</a>` : '';
+    const fatherHtml = d.father ? `<a href="/dossier.html?id=${dossierIdParam(d.father.id)}">${d.father.name}</a>` : '';
+    const motherHtml = d.mother ? `<a href="/dossier.html?id=${dossierIdParam(d.mother.id)}">${d.mother.name}</a>` : '';
     const parentsHtml = [fatherHtml, motherHtml].filter(Boolean).join(' · ');
 
     const spousesHtml = (d.spouses || []).map(s =>
-      `<a href="/dossier.html?id=${encodeURIComponent(s.id)}">${s.name}</a>`
+      `<a href="/dossier.html?id=${dossierIdParam(s.id)}">${s.name}</a>`
     ).join(' · ');
 
     const cleanId = personId.replace(/@/g, '');
@@ -69,7 +74,7 @@ async function showPersonPanel(personId) {
         ${d.children && d.children.length > 0 ? `<div class="panel-field"><span class="panel-label">Hijos</span><span class="panel-value">${d.children.length}</span></div>` : ''}
       </div>
       <div class="panel-actions">
-        <a href="/dossier.html?id=${encodeURIComponent(p.id)}" class="panel-btn">Ver dossier completo</a>
+        <a href="/dossier.html?id=${dossierIdParam(p.id)}" class="panel-btn">Ver dossier completo</a>
         <a href="/arbol2.html?id=${cleanId}" class="panel-btn panel-btn-secondary">Ver en árbol</a>
       </div>
     `;
@@ -318,7 +323,7 @@ function renderPeopleList(q, results) {
     else if (!p.is_alive) years = `?–?`;
     else years = '';
     const yearsLabel = years ? ` (${years})` : '';
-    return `<li style="margin:4px 0"><a href="/dossier.html?id=${encodeURIComponent(p.id)}" style="color:#2D4B33;font-weight:600;text-decoration:none">${p.name}</a>${yearsLabel}</li>`;
+    return `<li style="margin:4px 0"><a href="/dossier.html?id=${dossierIdParam(p.id)}" style="color:#2D4B33;font-weight:600;text-decoration:none">${p.name}</a>${yearsLabel}</li>`;
   }).join('');
   const asstDiv = document.createElement('div');
   asstDiv.className = 'message assistant';
