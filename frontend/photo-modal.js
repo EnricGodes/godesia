@@ -117,11 +117,13 @@ window.closePhotoModal = function() {
 };
 
 /**
- * Build a descriptive file name for the photo: "año_lugar_persona1-persona2.ext".
- * Falls back gracefully when year, place or people are missing.
+ * Build a descriptive file name for the photo:
+ * "titulo_año_lugar_persona1-persona2.ext".
+ * Falls back gracefully when title, year, place or people are missing.
  */
 function buildPhotoFileName(p) {
     const parts = [];
+    if (p.title) parts.push(p.title);
     const yearMatch = (p.date || '').match(/\d{4}/);
     if (yearMatch) parts.push(yearMatch[0]);
     if (p.place) parts.push(p.place);
@@ -160,8 +162,25 @@ window.downloadPhoto = async function() {
 };
 
 /**
+ * Show a transient toast message at the bottom of the screen.
+ */
+function showPhotoToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = [
+        'position:fixed', 'bottom:28px', 'left:50%', 'transform:translateX(-50%)',
+        'background:#2D4B33', 'color:#fff', 'padding:12px 20px', 'border-radius:8px',
+        'font-size:14px', 'font-weight:600', 'z-index:3000',
+        'box-shadow:0 4px 16px rgba(0,0,0,0.25)', 'opacity:0', 'transition:opacity 0.2s',
+    ].join(';');
+    document.body.appendChild(t);
+    requestAnimationFrame(() => { t.style.opacity = '1'; });
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 250); }, 2200);
+}
+
+/**
  * Share the current photo: native share with the image file when supported,
- * otherwise share/copy the image URL.
+ * otherwise copy the image URL to the clipboard. Always gives visible feedback.
  */
 window.sharePhoto = async function() {
     if (!_currentPhotoData) return;
@@ -169,32 +188,33 @@ window.sharePhoto = async function() {
     const title = p.title || 'Foto Godesia';
     const url = `${location.origin}/photos/${p.filename}`;
 
-    // Best: share the actual image file (mobile and supporting browsers)
-    if (navigator.canShare && navigator.share) {
+    if (navigator.share) {
         try {
-            const res = await fetch(`/photos/${p.filename}`);
-            const blob = await res.blob();
-            const file = new File([blob], buildPhotoFileName(p), { type: blob.type || 'image/jpeg' });
-            if (navigator.canShare({ files: [file] })) {
-                await navigator.share({ files: [file], title });
-                return;
+            // Try to attach the actual image file (best for mobile / WhatsApp etc.)
+            let shareData = { title, text: title, url };
+            if (navigator.canShare) {
+                try {
+                    const res = await fetch(`/photos/${p.filename}`);
+                    const blob = await res.blob();
+                    const file = new File([blob], buildPhotoFileName(p), { type: blob.type || 'image/jpeg' });
+                    if (navigator.canShare({ files: [file] })) {
+                        shareData = { files: [file], title };
+                    }
+                } catch (_) { /* keep the URL-based share */ }
             }
+            await navigator.share(shareData);
+            return;
         } catch (e) {
-            if (e.name === 'AbortError') return; // user cancelled
-            // otherwise fall through to URL sharing
+            if (e.name === 'AbortError') return; // user cancelled the share sheet
+            console.warn('navigator.share failed, falling back to clipboard:', e);
+            // fall through to clipboard
         }
     }
 
-    // Fallback: share the link
-    if (navigator.share) {
-        try { await navigator.share({ title, url }); return; }
-        catch (e) { if (e.name === 'AbortError') return; }
-    }
-
-    // Last resort: copy to clipboard
+    // Fallback: copy the link to the clipboard with visible feedback
     try {
         await navigator.clipboard.writeText(url);
-        alert('Enlace de la foto copiado al portapapeles');
+        showPhotoToast('Enlace de la foto copiado al portapapeles');
     } catch (e) {
         prompt('Copia el enlace de la foto:', url);
     }
