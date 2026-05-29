@@ -328,7 +328,7 @@ function renderDocuments(documents) {
     // Add link to see all documents
     const link = document.createElement('div');
     link.className = 'documents-see-all';
-    link.innerHTML = '<a href="/arxiu.html">Ver todos los documentos →</a>';
+    link.innerHTML = '<a href="/docs.html">Ver todos los documentos →</a>';
     container.parentElement.appendChild(link);
 }
 
