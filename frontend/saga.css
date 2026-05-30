@@ -18,6 +18,20 @@
 .saga-prose p { font-size: 1.02rem; line-height: 1.75; color: var(--on-surface); margin: 0 0 1.25rem 0; }
 .saga-prose strong { color: var(--on-surface); font-weight: 700; }
 
+/* Enlace discreto a la página de dossier de un individuo */
+.saga-person-link { color: var(--primary); font-weight: 700; text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s; }
+.saga-person-link:hover { border-bottom-color: var(--primary); }
+
+/* Tarjetas de "Los hijos de la familia" en la página principal */
+.saga-children-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+.saga-child-card { background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: 0.75rem; overflow: hidden; display: flex; flex-direction: column; }
+.saga-child-card img { width: 100%; height: 240px; object-fit: cover; display: block; }
+.saga-child-body { padding: 1.25rem 1.5rem 1.5rem; }
+.saga-child-card h4 { font-family: 'Noto Serif', serif; font-size: 1.15rem; color: var(--primary); margin: 0 0 0.5rem 0; font-weight: 600; }
+.saga-child-card p { font-size: 0.92rem; line-height: 1.6; color: var(--on-surface-variant); margin: 0 0 1rem 0; }
+.saga-branch-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+.saga-branch-link:hover { text-decoration: underline; }
+
 .saga-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
 .saga-gallery figure { margin: 0; background: var(--surface-container-low); border-radius: 0.75rem; overflow: hidden; border: 1px solid var(--outline-variant); }
 .saga-gallery img { width: 100%; height: 260px; object-fit: cover; display: block; }
