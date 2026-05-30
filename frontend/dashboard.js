@@ -30,6 +30,8 @@ const BRANCH_LINKS = {
     'Cabestany Godes': '/cabestany_godes.html',
     'Godes Faura': '/godes_faura.html',
     'Puig Godes': '/puig_godes.html',
+    'Garrido Godes': '/garrido_godes.html',
+    'Godes Maté': '/godes_mate.html',
     'Godes Hospital': '/godes_hospital.html',
     'Millán Godes': '/millan_godes.html',
 };
