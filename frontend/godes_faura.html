@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="saga.css?v=20260530">
+    <link rel="stylesheet" href="saga.css?v=20260530b">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config={corePlugins:{preflight:false}}</script>
 </head>
@@ -55,7 +55,7 @@
         <p class="saga-subtitle">La rama nacida del matrimonio de Jesús Godes Diago y Anna Maria Faura Ramoneda, con continuidad en las líneas Godes Molins, Godes Nofre y Fontanills Godes.</p>
 
         <figure class="saga-hero-figure">
-            <img src="/photos/500855_510488s7fc1fdha6j34465_A.jpg" alt="Jesus Godes i Anna Mª Faura, 1951">
+            <img onclick="openPhotoModal(315)" src="/photos/500855_510488s7fc1fdha6j34465_A.jpg" alt="Jesus Godes i Anna Mª Faura, 1951">
             <figcaption class="saga-caption">Jesus Godes i Anna Mª Faura, 1951.</figcaption>
         </figure>
     </section>
@@ -132,25 +132,35 @@
         <h2 class="saga-section-title">Galería</h2>
         <div class="saga-gallery">
             <figure>
-                <img src="/photos/500855_510488s7fc1fdha6j34465_A.jpg" alt="Jesus Godes, Anna Mª Faura, 1951">
+                <img onclick="openPhotoModal(315)" src="/photos/500855_510488s7fc1fdha6j34465_A.jpg" alt="Jesus Godes, Anna Mª Faura, 1951">
                 <figcaption>Jesus Godes, Anna Mª Faura, 1951</figcaption>
             </figure>
             <figure>
-                <img src="/photos/500896_82140107rcmx2a6609d07f_A.jpg" alt="Jesus Godes Diago, Anna M. Faura, 1971">
+                <img onclick="openPhotoModal(316)" src="/photos/500896_82140107rcmx2a6609d07f_A.jpg" alt="Jesus Godes Diago, Anna M. Faura, 1971">
                 <figcaption>Jesus Godes Diago, Anna M. Faura, 1971</figcaption>
             </figure>
             <figure>
-                <img src="/photos/000100_5310423h4968dfecu95zi5_V.jpg" alt="Casament Jesus Godes i Anna Maria Faura, 1950, La Rotonda">
+                <img onclick="openPhotoModal(187)" src="/photos/000100_5310423h4968dfecu95zi5_V.jpg" alt="Casament Jesus Godes i Anna Maria Faura, 1950, La Rotonda">
                 <figcaption>Casament Jesus Godes i Anna Maria Faura — Mercè Godes, Bartomeu Galí, Lola Godes, Jesús Mestre, Ramon Godes, Maria Figa, 24 de abril de 1950, La Rotonda</figcaption>
             </figure>
             <figure>
-                <img src="/photos/500861_924132t467be1fcm346c66_A.jpg" alt="Cosins Godes Faura - Cabestany Godes, 1959">
+                <img onclick="openPhotoModal(342)" src="/photos/500861_924132t467be1fcm346c66_A.jpg" alt="Cosins Godes Faura - Cabestany Godes, 1959">
                 <figcaption>Cosins Godes Faura - Cabestany Godes, 1959</figcaption>
             </figure>
             <figure>
-                <img src="/photos/500890_036732f16c01g60b9ll2ix_A.jpg" alt="Jesus Godes Faura, Carme Nofre Solà, 2024">
+                <img onclick="openPhotoModal(394)" src="/photos/500890_036732f16c01g60b9ll2ix_A.jpg" alt="Jesus Godes Faura, Carme Nofre Solà, 2024">
                 <figcaption>Jesus Godes Faura, Carme Nofre Solà, 28 de septiembre de 2024, Masia Can Ametller, Sant Cugat del Vallès</figcaption>
             </figure>
+        </div>
+    </section>
+
+    <section class="saga-section">
+        <div class="saga-cta">
+            <div class="saga-cta-text">
+                <h4>¿Encuentras alguna imprecisión?</h4>
+                <p>¿Quieres añadir información o compartir una foto?</p>
+            </div>
+            <a href="/colaborar.html?source=saga_godes_faura" class="saga-cta-btn">Colabora</a>
         </div>
     </section>
 
@@ -183,6 +193,7 @@
     </div>
 </footer>
 
+<script src="/photo-modal.js"></script>
 <script src="/nav.js"></script>
 </body>
 </html>

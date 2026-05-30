@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="saga.css?v=20260530">
+    <link rel="stylesheet" href="saga.css?v=20260530b">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config={corePlugins:{preflight:false}}</script>
 </head>
@@ -55,7 +55,7 @@
         <p class="saga-subtitle">La rama nacida del matrimonio de Maria Rosa Godes Diago y Felip Puig de Canals, con continuidad en las líneas Puig Ninou, Puig Olivella y Puig Ruz.</p>
 
         <figure class="saga-hero-figure">
-            <img src="/photos/500857_73437317469xy4f61161cd_A.jpg" alt="Maria Rosa Godes i Felip Puig, 1956">
+            <img onclick="openPhotoModal(327)" src="/photos/500857_73437317469xy4f61161cd_A.jpg" alt="Maria Rosa Godes i Felip Puig, 1956">
             <figcaption class="saga-caption">MRosa Godes, Felip Puig, 1956.</figcaption>
         </figure>
     </section>
@@ -102,25 +102,35 @@
         <h2 class="saga-section-title">Galería</h2>
         <div class="saga-gallery">
             <figure>
-                <img src="/photos/500857_73437317469xy4f61161cd_A.jpg" alt="MRosa Godes, Felip Puig, 1956">
+                <img onclick="openPhotoModal(327)" src="/photos/500857_73437317469xy4f61161cd_A.jpg" alt="MRosa Godes, Felip Puig, 1956">
                 <figcaption>MRosa Godes, Felip Puig, 1956</figcaption>
             </figure>
             <figure>
-                <img src="/photos/500812_598338bb2129648ec68w2o_A.jpg" alt="Bateig Felip Puig Godes, 1958">
+                <img onclick="openPhotoModal(108)" src="/photos/500812_598338bb2129648ec68w2o_A.jpg" alt="Bateig Felip Puig Godes, 1958">
                 <figcaption>Bateig Felip Puig Godes, octubre de 1958</figcaption>
             </figure>
             <figure>
-                <img src="/photos/500862_0827376cftscsr446y6o12_A.jpg" alt="MªRosa Godes, Felip Puig Godes, Felip Puig, 1959">
+                <img onclick="openPhotoModal(329)" src="/photos/500862_0827376cftscsr446y6o12_A.jpg" alt="MªRosa Godes, Felip Puig Godes, Felip Puig, 1959">
                 <figcaption>MªRosa Godes, Felip Puig Godes, Felip Puig, 1959</figcaption>
             </figure>
             <figure>
-                <img src="/photos/500871_4994431x76a97q6fa467e2_A.jpg" alt="Can Pera, 1966">
+                <img onclick="openPhotoModal(161)" src="/photos/500871_4994431x76a97q6fa467e2_A.jpg" alt="Can Pera, 1966">
                 <figcaption>Can Pera, 1966, Sant Iscle de Vallalta, Can Pera</figcaption>
             </figure>
             <figure>
-                <img src="/photos/500891_763222l16akuf39476b6cx_A.jpg" alt="Felip Puig, Marta Puig-Ventura, 2024">
+                <img onclick="openPhotoModal(418)" src="/photos/500891_763222l16akuf39476b6cx_A.jpg" alt="Felip Puig, Marta Puig-Ventura, 2024">
                 <figcaption>Felip Puig, Marta Puig-Ventura, 28 de septiembre de 2024, Masia Can Ametller, Sant Cugat del Vallès</figcaption>
             </figure>
+        </div>
+    </section>
+
+    <section class="saga-section">
+        <div class="saga-cta">
+            <div class="saga-cta-text">
+                <h4>¿Encuentras alguna imprecisión?</h4>
+                <p>¿Quieres añadir información o compartir una foto?</p>
+            </div>
+            <a href="/colaborar.html?source=saga_puig_godes" class="saga-cta-btn">Colabora</a>
         </div>
     </section>
 
@@ -153,6 +163,7 @@
     </div>
 </footer>
 
+<script src="/photo-modal.js"></script>
 <script src="/nav.js"></script>
 </body>
 </html>
