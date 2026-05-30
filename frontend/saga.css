@@ -8,7 +8,8 @@
 .saga-subtitle { font-family: 'Noto Serif', serif; font-size: 1.25rem; font-style: italic; color: var(--secondary); line-height: 1.5; max-width: 720px; margin: 0; }
 
 .saga-hero-figure { margin: 2.5rem 0 0 0; }
-.saga-hero-figure img { width: 100%; max-height: 520px; object-fit: cover; border-radius: 0.75rem; box-shadow: 0 8px 32px rgba(0,0,0,0.12); display: block; }
+/* La imagen del hero se muestra completa, nunca recortada (letterbox si hace falta) */
+.saga-hero-figure img { width: 100%; height: auto; max-height: 70vh; object-fit: contain; background: var(--surface-container); border-radius: 0.75rem; box-shadow: 0 8px 32px rgba(0,0,0,0.12); display: block; }
 .saga-caption { margin-top: 0.75rem; font-size: 0.85rem; color: var(--on-surface-variant); font-style: italic; }
 
 .saga-section { margin-bottom: 3.5rem; }
@@ -18,19 +19,25 @@
 .saga-prose p { font-size: 1.02rem; line-height: 1.75; color: var(--on-surface); margin: 0 0 1.25rem 0; }
 .saga-prose strong { color: var(--on-surface); font-weight: 700; }
 
-/* Enlace discreto a la página de dossier de un individuo */
-.saga-person-link { color: var(--primary); font-weight: 700; text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s; }
-.saga-person-link:hover { border-bottom-color: var(--primary); }
+/* Enlace discreto a la página de dossier de un individuo: marrón, sin subrayado */
+.saga-person-link { color: var(--secondary); font-weight: 600; text-decoration: none; transition: color 0.15s; }
+.saga-person-link:hover { color: var(--tertiary); }
 
 /* Tarjetas de "Los hijos de la familia" en la página principal */
-.saga-children-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
-.saga-child-card { background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: 0.75rem; overflow: hidden; display: flex; flex-direction: column; }
-.saga-child-card img { width: 100%; height: 240px; object-fit: cover; display: block; }
-.saga-child-body { padding: 1.25rem 1.5rem 1.5rem; }
-.saga-child-card h4 { font-family: 'Noto Serif', serif; font-size: 1.15rem; color: var(--primary); margin: 0 0 0.5rem 0; font-weight: 600; }
-.saga-child-card p { font-size: 0.92rem; line-height: 1.6; color: var(--on-surface-variant); margin: 0 0 1rem 0; }
-.saga-branch-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 700; color: var(--primary); text-decoration: none; }
-.saga-branch-link:hover { text-decoration: underline; }
+.saga-children-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.75rem; margin-top: 1.75rem; }
+.saga-child-card { background: var(--surface-container-lowest); border: 1px solid var(--outline-variant); border-radius: 1rem; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 2px 12px rgba(0,0,0,0.05); transition: box-shadow 0.2s, transform 0.2s; }
+.saga-child-card:hover { box-shadow: 0 10px 28px rgba(0,0,0,0.10); transform: translateY(-2px); }
+.saga-child-media { aspect-ratio: 4 / 5; overflow: hidden; background: var(--surface-container); }
+.saga-child-media img { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; display: block; }
+.saga-child-body { padding: 1.25rem 1.5rem 1.5rem; display: flex; flex-direction: column; flex: 1; }
+.saga-child-kicker { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.13em; color: var(--on-surface-variant); font-weight: 700; margin-bottom: 0.45rem; }
+.saga-child-name { font-family: 'Noto Serif', serif; font-size: 1.3rem; line-height: 1.2; margin: 0 0 0.2rem 0; font-weight: 700; }
+.saga-child-name a { color: var(--secondary); text-decoration: none; transition: color 0.15s; }
+.saga-child-name a:hover { color: var(--tertiary); }
+.saga-child-years { font-size: 0.85rem; color: var(--on-surface-variant); margin: 0 0 0.9rem 0; font-variant-numeric: tabular-nums; }
+.saga-child-card p { font-size: 0.9rem; line-height: 1.6; color: var(--on-surface-variant); margin: 0 0 1.25rem 0; flex: 1; }
+.saga-branch-link { align-self: flex-start; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 700; color: #fff; background: var(--primary-container); padding: 0.5rem 1rem; border-radius: 999px; text-decoration: none; transition: background 0.15s; }
+.saga-branch-link:hover { background: var(--primary); }
 
 .saga-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
 .saga-gallery figure { margin: 0; background: var(--surface-container-low); border-radius: 0.75rem; overflow: hidden; border: 1px solid var(--outline-variant); }
@@ -51,12 +58,26 @@
 .saga-timeline li::before { content: ''; position: absolute; left: -7px; top: 0.95rem; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; border: 2px solid var(--surface); }
 .saga-timeline .date { font-weight: 700; color: var(--primary); }
 
-.saga-living { background: var(--primary-container); border-radius: 0.75rem; padding: 2rem; }
-.saga-living h3 { font-family: 'Noto Serif', serif; font-size: 1.5rem; color: var(--primary); margin: 0 0 1rem 0; }
-.saga-living p { font-size: 1rem; line-height: 1.7; margin: 0 0 1rem 0; color: var(--on-surface); }
-.saga-living ul { padding-left: 1.25rem; margin: 0.5rem 0; line-height: 1.7; color: var(--on-surface); }
-.saga-living ul ul { margin: 0.25rem 0 0.5rem 0; }
+/* Bloque destacado en verde: texto blanco para contraste */
+.saga-living { background: var(--primary-container); border-radius: 1rem; padding: 2.25rem 2.5rem; color: #fff; }
+.saga-living h3 { font-family: 'Noto Serif', serif; font-size: 1.6rem; color: #fff; margin: 0 0 1rem 0; font-weight: 700; }
+.saga-living p { font-size: 1.02rem; line-height: 1.7; margin: 0 0 1rem 0; color: rgba(255,255,255,0.92); }
+.saga-living strong { color: #fff; font-weight: 700; }
+.saga-living h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.65); font-weight: 700; margin: 1.75rem 0 0.6rem 0; padding-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.18); }
+.saga-living h4:first-of-type { border-top: none; padding-top: 0; margin-top: 1.25rem; }
+.saga-living ul { padding-left: 1.25rem; margin: 0.4rem 0; line-height: 1.7; color: rgba(255,255,255,0.9); }
+.saga-living ul ul { margin: 0.25rem 0 0.5rem 0; color: rgba(255,255,255,0.78); }
+.saga-living li { margin-bottom: 0.2rem; }
+.saga-living li::marker { color: rgba(255,255,255,0.45); }
+.saga-living .saga-person-link { color: #fff; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.4); }
+.saga-living .saga-person-link:hover { color: #fff; border-bottom-color: #fff; }
+.saga-living-total { font-family: 'Noto Serif', serif; font-size: 2.5rem; font-weight: 700; line-height: 1; color: #fff; }
+.saga-living-total small { display: block; font-family: 'Manrope', sans-serif; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; color: rgba(255,255,255,0.7); margin-top: 0.4rem; }
 
-.saga-data { background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: 0.75rem; padding: 1.75rem; margin-top: 1rem; }
+.saga-data { background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: 0.75rem; padding: 1.75rem; margin-top: 1.25rem; }
 .saga-data h3 { font-family: 'Noto Serif', serif; font-size: 1.25rem; color: var(--primary); margin: 0 0 1rem 0; font-weight: 600; }
 .saga-data ul { padding-left: 1.25rem; margin: 0; line-height: 1.8; font-size: 0.95rem; color: var(--on-surface); }
+.saga-data ul ul { margin: 0.2rem 0 0.6rem 0; font-size: 0.9rem; color: var(--on-surface-variant); }
+.saga-data li { margin-bottom: 0.2rem; }
+.saga-data li::marker { color: var(--outline-variant); }
+.saga-data .saga-note { margin: 0.85rem 0 0 0; font-size: 0.9rem; font-style: italic; color: var(--on-surface-variant); }
