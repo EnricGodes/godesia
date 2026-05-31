@@ -957,6 +957,10 @@ def get_dashboard_data(conn):
             "SELECT 2 + COUNT(DISTINCT id) FROM people "
             "WHERE father_id IN ('@I1@','@I2@') OR mother_id IN ('@I1@','@I2@')"},
         {"surname": "Godes Diago",      "ancestors": ["@I10@", "@I17@"]},  # Emili & Antònia Diago
+        # Godes Ferrer: Dolors+Francesc + 2 children = 4 (rama cerrada, sin descendencia viva)
+        {"surname": "Godes Ferrer", "sql":
+            "SELECT 2 + COUNT(DISTINCT id) FROM people "
+            "WHERE father_id IN ('@I126@','@I127@') OR mother_id IN ('@I126@','@I127@')"},
         {"surname": "Godes Güell",      "ancestors": ["@I14@", "@I20@"]},  # Bep & Paquita Güell
         {"surname": "Godes Hospital",   "ancestors": ["@I15@", "@I21@"]},  # Ramón & Nacha Hospital
         # Godes Hurtado: direct nuclear family (Artur+Emilia + their 7 children = 9)

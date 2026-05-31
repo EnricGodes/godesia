@@ -12,6 +12,7 @@
   const RAMAS = [
     { label: 'Godes Caballeria', href: '/godes_caballeria.html' },
     { label: 'Godes Diago',      href: '/godes_diago.html' },
+    { label: 'Godes Ferrer',     href: '/godes_ferrer.html' },
     { label: 'Godes Güell',      href: '/godes_guell.html' },
     { label: 'Godes Hospital',   href: '/godes_hospital.html' },
     { label: 'Godes Hurtado',    href: '/godes_hurtado.html' },

@@ -27,6 +27,7 @@ const BRANCH_LINKS = {
     'Garrido Godes': '/garrido_godes.html',
     'Godes Maté': '/godes_mate.html',
     'Godes Diago': '/godes_diago.html',
+    'Godes Ferrer': '/godes_ferrer.html',
     'Cabestany Godes': '/cabestany_godes.html',
     'Godes Faura': '/godes_faura.html',
     'Puig Godes': '/puig_godes.html',
