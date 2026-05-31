@@ -965,6 +965,10 @@ def get_dashboard_data(conn):
             "WHERE father_id IN ('@I4@','@I8@') OR mother_id IN ('@I4@','@I8@')"},
         {"surname": "Godes Molina",     "ancestors": ["@I11@", "@I18@"]},  # Ernest & Dolores Molina
         {"surname": "Godes Schmid",     "ancestors": ["@I16@", "@I22@"]},  # Artur & Carmen Schmid
+        # Godes Segura: founding trunk (Francesc+Rosa + their 12 children = 14)
+        {"surname": "Godes Segura", "sql":
+            "SELECT 2 + COUNT(DISTINCT id) FROM people "
+            "WHERE father_id IN ('@I149@','@I148@') OR mother_id IN ('@I149@','@I148@')"},
         {"surname": "Godes Terrats",    "ancestors": ["@I7@",  "@I9@"]},   # Pau & Anna Terrats
         {"surname": "Pujol Godes",      "ancestors": ["@I12@", "@I19@"]},  # Rosa & Joan Pujol
     ]

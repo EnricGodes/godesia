@@ -35,6 +35,7 @@ const BRANCH_LINKS = {
     'Godes Hospital': '/godes_hospital.html',
     'Millán Godes': '/millan_godes.html',
     'Godes Schmid': '/godes_schmid.html',
+    'Godes Segura': '/godes_segura.html',
     'Nolla Godes': '/nolla_godes.html',
     'Godes Terrats': '/godes_terrats.html',
     'Mestre Godes': '/mestre_godes.html',
