@@ -40,6 +40,7 @@ const BRANCH_LINKS = {
     'Mestre Godes': '/mestre_godes.html',
     'Pujol Godes': '/pujol_godes.html',
     'Pujol Pérez': '/pujol_perez.html',
+    'Godes': '/godes_hurtado.html',
     'Godes Güell': '/godes_guell.html',
 };
 

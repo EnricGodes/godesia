@@ -10,7 +10,7 @@
   // ─── Menu structure ───────────────────────────────────────────────────────
 
   const RAMAS = [
-    { label: 'Godes',          href: null },
+    { label: 'Godes Hurtado',  href: '/godes_hurtado.html' },
     { label: 'Godes Diago',    href: '/godes_diago.html' },
     { label: 'Godes Güell',    href: '/godes_guell.html' },
     { label: 'Godes Hospital', href: '/godes_hospital.html' },
