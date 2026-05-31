@@ -952,17 +952,21 @@ def get_dashboard_data(conn):
     # "sql" key: custom count query (used for trunks/special cases).
     # "ancestors" key: uses get_branch_descendants (full recursive count).
     branches_config = [
-        # Godes Hurtado: the founding trunk (Artur+Emilia + their 7 children = 9)
+        # Godes Caballeria: founding trunk (Pasqual+Rosa + their 9 children = 11)
+        {"surname": "Godes Caballeria", "sql":
+            "SELECT 2 + COUNT(DISTINCT id) FROM people "
+            "WHERE father_id IN ('@I1@','@I2@') OR mother_id IN ('@I1@','@I2@')"},
+        {"surname": "Godes Diago",      "ancestors": ["@I10@", "@I17@"]},  # Emili & Antònia Diago
+        {"surname": "Godes Güell",      "ancestors": ["@I14@", "@I20@"]},  # Bep & Paquita Güell
+        {"surname": "Godes Hospital",   "ancestors": ["@I15@", "@I21@"]},  # Ramón & Nacha Hospital
+        # Godes Hurtado: direct nuclear family (Artur+Emilia + their 7 children = 9)
         {"surname": "Godes Hurtado", "sql":
             "SELECT 2 + COUNT(DISTINCT id) FROM people "
             "WHERE father_id IN ('@I4@','@I8@') OR mother_id IN ('@I4@','@I8@')"},
-        {"surname": "Godes Diago",    "ancestors": ["@I10@", "@I17@"]},  # Emili & Antònia Diago
-        {"surname": "Godes Güell",    "ancestors": ["@I14@", "@I20@"]},  # Bep & Paquita Güell
-        {"surname": "Godes Hospital", "ancestors": ["@I15@", "@I21@"]},  # Ramón & Nacha Hospital
-        {"surname": "Godes Molina",   "ancestors": ["@I11@", "@I18@"]},  # Ernest & Dolores Molina
-        {"surname": "Godes Schmid",   "ancestors": ["@I16@", "@I22@"]},  # Artur & Carmen Schmid
-        {"surname": "Godes Terrats",  "ancestors": ["@I7@",  "@I9@"]},   # Pau & Anna Terrats
-        {"surname": "Pujol Godes",    "ancestors": ["@I12@", "@I19@"]},  # Rosa & Joan Pujol
+        {"surname": "Godes Molina",     "ancestors": ["@I11@", "@I18@"]},  # Ernest & Dolores Molina
+        {"surname": "Godes Schmid",     "ancestors": ["@I16@", "@I22@"]},  # Artur & Carmen Schmid
+        {"surname": "Godes Terrats",    "ancestors": ["@I7@",  "@I9@"]},   # Pau & Anna Terrats
+        {"surname": "Pujol Godes",      "ancestors": ["@I12@", "@I19@"]},  # Rosa & Joan Pujol
     ]
 
     branches = []
