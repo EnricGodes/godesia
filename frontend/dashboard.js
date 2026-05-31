@@ -38,6 +38,8 @@ const BRANCH_LINKS = {
     'Nolla Godes': '/nolla_godes.html',
     'Godes Terrats': '/godes_terrats.html',
     'Mestre Godes': '/mestre_godes.html',
+    'Pujol Godes': '/pujol_godes.html',
+    'Pujol Pérez': '/pujol_perez.html',
 };
 
 function dossierId(id) { return id ? id.replace(/@/g, '') : ''; }

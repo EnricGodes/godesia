@@ -16,7 +16,7 @@
     { label: 'Godes Molina',   href: '/godes_molina.html' },
     { label: 'Godes Schmid',   href: '/godes_schmid.html' },
     { label: 'Godes Terrats',  href: '/godes_terrats.html' },
-    { label: 'Pujol Godes',    href: null },
+    { label: 'Pujol Godes',    href: '/pujol_godes.html' },
   ];
 
   const ALBUM = [
