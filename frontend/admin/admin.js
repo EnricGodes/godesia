@@ -1463,8 +1463,12 @@ const Comparador = {
             section.style.display = '';
             document.getElementById('btn-clear-cmp').style.display = '';
             const lastRun = (d.last_run || '').slice(0, 16).replace('T', ' ');
+            const nomatchCount = d.rows.filter(r =>
+                (r.diff_types || '').split(',').includes('nomatch')).length;
+            const withDiffs = d.total_count - nomatchCount;
             document.getElementById('cmp-results-meta').textContent =
-                `${d.total_count} diferencias · última comparación: ${lastRun || '—'}`;
+                `${withDiffs} con diferencias · ${nomatchCount} no encontradas · `
+                + `última comparación: ${lastRun || '—'}`;
             const badge = document.getElementById('badge-cmp');
             badge.textContent = d.total_count || '';
 

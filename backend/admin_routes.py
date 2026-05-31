@@ -966,6 +966,16 @@ def _match_person(db_person: dict, individuals: dict, ged_index: dict) -> tuple:
     if db_surname_canon:
         probes.append(db_surname_canon)
 
+    # Loose probes: given name + FIRST surname token only. Handles a trailing
+    # extra surname in the DB, e.g. "de la Cruz Ventura" (DB) vs "de la Cruz"
+    # (GEDCOM). These are accepted only under strict guards below.
+    loose_probes: list = []
+    if db_given_canon and db_surname_canon:
+        first_sur = db_surname_canon.split()[0]
+        if first_sur and first_sur != db_surname_canon:
+            loose_probes.append(f"{db_given_canon} {first_sur}")
+            loose_probes.append(f"{first_sur} {db_given_canon}")
+
     candidates: set = set()
     for name in probes:
         if not name:
@@ -973,11 +983,19 @@ def _match_person(db_person: dict, individuals: dict, ged_index: dict) -> tuple:
         for gid in ged_index.get(name, []):
             candidates.add(gid)
 
-    if not candidates:
+    loose_candidates: set = set()
+    for name in loose_probes:
+        for gid in ged_index.get(name, []):
+            if gid not in candidates:
+                loose_candidates.add(gid)
+
+    if not candidates and not loose_candidates:
         return None, 0
 
     multiple = len(candidates) > 1
     best_gid, best_score = None, 0
+
+    # Strict candidates: original scoring.
     for gid in candidates:
         ged  = individuals[gid]
         ged_year = _ged_year((ged.get("birth") or {}).get("date") or "")
@@ -998,6 +1016,23 @@ def _match_person(db_person: dict, individuals: dict, ged_index: dict) -> tuple:
             else:
                 score = 88 if canon_match else 75
 
+        if score > best_score:
+            best_score, best_gid = score, gid
+
+    # Loose candidates (partial-surname): only accept with birth-year
+    # corroboration (±2) AND a token-subset relationship, to avoid matching the
+    # wrong namesake in the very large Palazuelos tree.
+    db_tokens = set(db_full_canon.split())
+    for gid in loose_candidates:
+        ged = individuals[gid]
+        ged_year = _ged_year((ged.get("birth") or {}).get("date") or "")
+        if not (db_year and ged_year and abs(db_year - ged_year) <= 2):
+            continue
+        ged_full_canon = _canonicalize_person_name(ged.get("name") or "")
+        ged_tokens = set(ged_full_canon.split())
+        if not (db_tokens and ged_tokens and (db_tokens <= ged_tokens or ged_tokens <= db_tokens)):
+            continue
+        score = 85 if ged_full_canon == db_full_canon else 70
         if score > best_score:
             best_score, best_gid = score, gid
 
@@ -1028,23 +1063,19 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
         individuals = data["individuals"]
         _cmp_log(f"  {len(individuals):,} individus al GEDCOM")
 
-        # 2. Build index (only needed for name-based mode)
-        if use_palazuelos_map:
-            _cmp_log("[2/4] Carregant mapa Palazuelos des de la BD…")
-            ged_index = {}
-            ged_surname_year = {}
-        else:
-            _cmp_log("[2/4] Construint índex de noms…")
-            ged_index = _build_ged_index(individuals)
-            _cmp_log(f"  {len(ged_index):,} entrades a l'índex")
-            # Fallback index: (first_surname_canon, birth_year) → [ged_id]
-            ged_surname_year: dict = {}
-            for gid, indi in individuals.items():
-                sur = _canonicalize_person_name(indi.get("surname") or "")
-                first_sur = sur.split()[0] if sur else ""
-                yr = _ged_year((indi.get("birth") or {}).get("date") or "")
-                if first_sur and yr:
-                    ged_surname_year.setdefault((first_sur, yr), []).append(gid)
+        # 2. Build name index — always, so map-mode can fall back to name
+        # matching for people without a usable map entry.
+        _cmp_log("[2/4] Construint índex de noms…")
+        ged_index = _build_ged_index(individuals)
+        _cmp_log(f"  {len(ged_index):,} entrades a l'índex")
+        # Fallback index: (first_surname_canon, birth_year) → [ged_id]
+        ged_surname_year: dict = {}
+        for gid, indi in individuals.items():
+            sur = _canonicalize_person_name(indi.get("surname") or "")
+            first_sur = sur.split()[0] if sur else ""
+            yr = _ged_year((indi.get("birth") or {}).get("date") or "")
+            if first_sur and yr:
+                ged_surname_year.setdefault((first_sur, yr), []).append(gid)
 
         # 3. Load all DB people + pre-fetch related tables (3 queries, not N×3)
         _cmp_log("[3/4] Carregant dades de la BD…")
@@ -1109,6 +1140,7 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
         # 4. Compare each DB person
         _cmp_log("[4/4] Comparant persona a persona…")
         meaningful = 0
+        cnt_map = cnt_name = cnt_nomatch = 0
         for i, db_row in enumerate(db_people):
             with _cmp_job_lock:
                 _cmp_job["progress"] = i + 1
@@ -1116,22 +1148,25 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
             db_person = dict(db_row)
             pid = db_person["id"]
 
+            ged_id, score = None, 0
+            matched_via_map = False
+
             if use_palazuelos_map:
-                # --- Map-based matching ---
+                # --- Map-based matching (authoritative) ---
                 palaz_entry = palazuelos_map_data.get(pid)
-                if palaz_entry is None:
-                    # Person not in map at all → treat as nomatch
-                    ged_id, score = None, 0
-                elif palaz_entry["match_type"] == "rejected":
+                if palaz_entry is not None and palaz_entry["match_type"] == "rejected":
                     # Explicitly confirmed as absent from Palazuelos → skip entirely
                     continue
-                elif palaz_entry["palaz_id"] and palaz_entry["palaz_id"] in individuals:
+                if (palaz_entry and palaz_entry.get("palaz_id")
+                        and palaz_entry["palaz_id"] in individuals):
                     ged_id = palaz_entry["palaz_id"]
                     score = palaz_entry.get("confidence") or 100
-                else:
-                    ged_id, score = None, 0
-            else:
-                # --- Name-based matching (original behaviour) ---
+                    matched_via_map = True
+
+            # --- Name-based matching ---
+            # Primary path in name-mode; fallback in map-mode for people without
+            # a usable map entry (no entry, or palaz_id absent from the GEDCOM).
+            if ged_id is None:
                 ged_id, score = _match_person(db_person, individuals, ged_index)
                 # Second pass: first surname + birth year (score=50)
                 if ged_id is None and db_person.get("birth_year"):
@@ -1144,7 +1179,7 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
             if ged_id is None:
                 diff_types = ["nomatch"]
                 diff_details = {"nomatch": ["Persona no trobada al GEDCOM"]}
-            elif not use_palazuelos_map and score <= 55:
+            elif not matched_via_map and score <= 55:
                 diff_types, diff_details = _compute_diff(
                     db_person, all_notes.get(pid, []), all_occs.get(pid, []),
                     all_res.get(pid, []), all_burials.get(pid, []),
@@ -1165,6 +1200,13 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
                     all_events.get(pid, []),
                     individuals[ged_id],
                 )
+
+            if ged_id is None:
+                cnt_nomatch += 1
+            elif matched_via_map:
+                cnt_map += 1
+            else:
+                cnt_name += 1
 
             if diff_types:
                 conn.execute(
@@ -1189,11 +1231,15 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
 
         elapsed = _fmt_dur(time.time() - t_start)
         _cmp_log(f"✓ Completat: {meaningful} diferències de {total} persones en {elapsed}")
+        _cmp_log(f"  Emparellament: {cnt_map} via mapa · {cnt_name} per nom · {cnt_nomatch} no trobades")
 
         with _cmp_job_lock:
             _cmp_job["status"] = "done"
             _cmp_job["finished_at"] = datetime.now().isoformat()
             _cmp_job["progress"] = total
+            _cmp_job["match_stats"] = {
+                "via_map": cnt_map, "via_name": cnt_name, "nomatch": cnt_nomatch,
+            }
 
     except Exception as exc:
         with _cmp_job_lock:
