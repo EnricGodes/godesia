@@ -192,6 +192,10 @@ class QueryRouter:
             self.conn.create_function("NORM", 1, _sql_norm)
 
         self.patterns: List[Tuple[str, str]] = [
+            # Home hero-chips: aggregate/overview queries (high priority)
+            (r"(?:estad[íi]stic|cu[áa]nt[oa]s\s+(?:miembros|person[ae]s|individu)[^?]*(?:famili|godes)|quant[se]?\s+membres|family\s+statistics|how\s+many\s+(?:members|people)[^?]*family)", "handle_family_stats"),
+            (r"(?:qui[eé]n(?:es)?\s+(?:est[áa]n?\s+)?viv[oa]s?|miembros?\s+vivos?|persones?\s+vives?|qui\s+est[àa]\s+viu|who\s+(?:is|are)\s+aliv|living\s+members?)", "handle_living_members"),
+            (r"(?:aniversari|cumplea|onom[àa]stic|birthday|anniversar)", "handle_anniversaries"),
             (r"(?:qu[eé]\s+persona\s+(?:tuvo|tenia)\s+m[aá]s\s+hijos|cu[aá]l\s+es\s+la\s+persona\s+con\s+m[aá]s\s+hijos\s+registrados)", "handle_max_children_person"),
             (r"(?:qui[eé]n\s+(?:vivio|vivi[oó]|fue)\s+m[aá]s\s+a[nñ]os|qui[eé]n\s+es\s+la\s+persona\s+m[aá]s\s+longeva\s+del\s+[aá]rbol|cu[aá]l\s+es\s+la\s+persona\s+m[aá]s\s+longeva\s+del\s+[aá]rbol)", "handle_max_longevity_person"),
             (r"(?:cu[aá]l\s+es\s+la\s+media\s+de\s+hijos|cu[aá]l\s+es\s+la\s+media\s+de\s+hijos\?)", "handle_average_children"),
@@ -702,6 +706,134 @@ class QueryRouter:
         if rel:
             return "cónyuges o pareja"
         return None
+
+    def handle_family_stats(self, question):
+        c = self.conn
+        total = c.execute("SELECT COUNT(*) FROM people").fetchone()[0]
+        if not total:
+            return None
+        living = c.execute("SELECT COUNT(*) FROM people WHERE is_alive = 1").fetchone()[0]
+        deceased = total - living
+        marriages = c.execute("SELECT COUNT(*) FROM marriages").fetchone()[0]
+        try:
+            partnerships = c.execute("SELECT COUNT(*) FROM partnerships").fetchone()[0]
+        except Exception:
+            partnerships = 0
+        with_photo = c.execute(
+            "SELECT COUNT(*) FROM people WHERE photo_file IS NOT NULL AND photo_file != ''"
+        ).fetchone()[0]
+        row = c.execute(
+            "SELECT MIN(birth_year), MAX(birth_year) FROM people "
+            "WHERE birth_year IS NOT NULL AND birth_year > 0"
+        ).fetchone()
+        min_y, max_y = (row[0], row[1]) if row else (None, None)
+        places = c.execute(
+            "SELECT COALESCE(NULLIF(birth_city, ''), birth_place) AS loc, COUNT(*) AS n "
+            "FROM people WHERE birth_place IS NOT NULL AND birth_place != '' "
+            "GROUP BY loc ORDER BY n DESC LIMIT 5"
+        ).fetchall()
+        span = (max_y - min_y) if (min_y and max_y) else None
+        gens = round(span / 30) if span else None
+        pct = round(with_photo * 100 / total) if total else 0
+        parts = []
+        if span:
+            parts.append(f"La familia Godes reúne {total} personas documentadas a lo largo de {span} años de historia.")
+        else:
+            parts.append(f"La familia Godes reúne {total} personas documentadas.")
+        parts.append("👪 Familias: " + str(marriages) + " matrimonios"
+                     + (f" y {partnerships} parejas registradas." if partnerships else "."))
+        parts.append(f"🌿 Vivos y fallecidos: {living} personas vivas y {deceased} fallecidas.")
+        if min_y and max_y:
+            parts.append(f"📅 Arco temporal: desde el nacimiento más antiguo en {min_y} hasta el más reciente en {max_y}"
+                         + (f", unas {gens} generaciones." if gens else "."))
+        parts.append(f"🖼 Con fotografía: {with_photo} personas ({pct}%).")
+        if places:
+            top = ", ".join(f"{dict(p)['loc']} ({dict(p)['n']})" for p in places if dict(p)['loc'])
+            if top:
+                parts.append(f"📍 Lugares de nacimiento más frecuentes: {top}.")
+        return {"answer": "\n".join(parts), "people_mentioned": [], "people_with_photos": []}
+
+    def handle_living_members(self, question):
+        from collections import Counter
+        c = self.conn
+        rows = [dict(r) for r in c.execute(
+            "SELECT id, name, surname, birth_year, birth_place, photo_file "
+            "FROM people WHERE is_alive = 1"
+        ).fetchall()]
+        total = len(rows)
+        if not total:
+            return {"answer": "No consta ninguna persona viva en el árbol.",
+                    "people_mentioned": [], "people_with_photos": []}
+        branch = Counter()
+        for r in rows:
+            sn = (r.get("surname") or "").strip()
+            branch[sn.split()[0] if sn else "—"] += 1
+        top_branches = branch.most_common(6)
+        dec = Counter()
+        for r in rows:
+            y = r.get("birth_year")
+            if y and y > 0:
+                dec[(y // 10) * 10] += 1
+        with_year = [r for r in rows if r.get("birth_year")]
+        oldest = sorted(with_year, key=lambda r: r["birth_year"])[:4]
+        youngest = sorted(with_year, key=lambda r: r["birth_year"], reverse=True)[:4]
+        def _names(lst):
+            return ", ".join(f"{r['name'].strip()} ({r['birth_year']})" for r in lst)
+        parts = [f"Actualmente hay {total} personas vivas en la familia Godes."]
+        if top_branches:
+            parts.append("🌿 Por rama (apellido): "
+                         + ", ".join(f"{n} ({k})" for n, k in top_branches) + ".")
+        if dec:
+            parts.append("📅 Por década de nacimiento: "
+                         + ", ".join(f"{k}s: {v}" for k, v in sorted(dec.items())) + ".")
+        if oldest:
+            parts.append(f"👴 Los de más edad: {_names(oldest)}.")
+        if youngest:
+            parts.append(f"👶 Los más jóvenes: {_names(youngest)}.")
+        highlight = oldest[:3] + youngest[:3]
+        return {
+            "answer": "\n".join(parts),
+            "people_mentioned": [r["id"] for r in highlight],
+            "people_with_photos": self._people_payload(highlight),
+        }
+
+    def handle_anniversaries(self, question):
+        import datetime as _dt
+        c = self.conn
+        month = _dt.date.today().month
+        this_year = _dt.date.today().year
+        months = ["", "enero", "febrero", "marzo", "abril", "mayo", "junio",
+                  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+        rows = [dict(r) for r in c.execute(
+            "SELECT id, name, birth_day, birth_year, death_year, is_alive, photo_file "
+            "FROM people WHERE birth_month = ? AND birth_day IS NOT NULL "
+            "ORDER BY birth_day, birth_year",
+            (month,)
+        ).fetchall()]
+        if not rows:
+            return {"answer": f"Este mes ({months[month]}) no consta ningún aniversario de nacimiento registrado.",
+                    "people_mentioned": [], "people_with_photos": []}
+        parts = [f"Aniversarios de nacimiento en {months[month]} ({len(rows)}):"]
+        for r in rows:
+            day = r.get("birth_day")
+            by = r.get("birth_year")
+            name = r["name"].strip()
+            extra = ""
+            if by:
+                age = this_year - by
+                yr = "año" if age == 1 else "años"
+                if r.get("is_alive"):
+                    extra = f" — cumple {age} {yr}"
+                elif r.get("death_year"):
+                    extra = f" — habría cumplido {age} {yr} ({by}–{r['death_year']})"
+                else:
+                    extra = f" — nacido en {by}"
+            parts.append(f"• {day} de {months[month]}: {name}{extra}")
+        return {
+            "answer": "\n".join(parts),
+            "people_mentioned": [r["id"] for r in rows],
+            "people_with_photos": self._people_payload(rows[:12]),
+        }
 
     def _people_payload(self, rows):
         cards = []
