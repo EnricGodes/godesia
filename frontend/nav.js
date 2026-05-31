@@ -12,6 +12,7 @@
   const RAMAS = [
     { label: 'Godes',          href: null },
     { label: 'Godes Diago',    href: '/godes_diago.html' },
+    { label: 'Godes Güell',    href: '/godes_guell.html' },
     { label: 'Godes Hospital', href: '/godes_hospital.html' },
     { label: 'Godes Molina',   href: '/godes_molina.html' },
     { label: 'Godes Schmid',   href: '/godes_schmid.html' },
@@ -23,6 +24,7 @@
     { label: 'Todos los álbumes', href: '/albums.html' },
     { label: 'Godes',             href: '/albums.html#A800008' },
     { label: 'Godes Diago',       href: '/albums.html#A800003' },
+    { label: 'Godes Güell',       href: '/albums.html#A800002' },
     { label: 'Godes Hospital',    href: '/albums.html#A800005' },
     { label: 'Godes Schmid',      href: '/albums.html#A800006' },
     { label: 'Godes Terrats',     href: '/albums.html#A800007' },
