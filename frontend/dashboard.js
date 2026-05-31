@@ -34,6 +34,8 @@ const BRANCH_LINKS = {
     'Godes Maté': '/godes_mate.html',
     'Godes Hospital': '/godes_hospital.html',
     'Millán Godes': '/millan_godes.html',
+    'Godes Schmid': '/godes_schmid.html',
+    'Nolla Godes': '/nolla_godes.html',
 };
 
 function dossierId(id) { return id ? id.replace(/@/g, '') : ''; }

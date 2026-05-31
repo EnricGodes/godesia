@@ -14,7 +14,7 @@
     { label: 'Godes Diago',    href: '/godes_diago.html' },
     { label: 'Godes Hospital', href: '/godes_hospital.html' },
     { label: 'Godes Molina',   href: '/godes_molina.html' },
-    { label: 'Godes Schmid',   href: null },
+    { label: 'Godes Schmid',   href: '/godes_schmid.html' },
     { label: 'Godes Terrats',  href: null },
     { label: 'Pujol Godes',    href: null },
   ];
