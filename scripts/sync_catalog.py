@@ -346,10 +346,11 @@ def parse_gedcom_people(lines):
             person = {
                 "id": person_id, "name": "", "given_name": "", "surname": "",
                 "sex": None, "birth_date": None, "birth_day": None, "birth_month": None,
-                "birth_year": None, "birth_place": None, "birth_city": None,
+                "birth_year": None, "birth_place": None, "birth_city": None, "birth_note": None,
                 "death_date": None, "death_year": None,
                 "death_place": None, "death_city": None,
                 "death_cause": None, "death_note": None, "death_age": None,
+                "baptism_date": None, "baptism_place": None, "godparents": None,
                 "is_alive": 0, "_has_deat": False, "father_id": None, "mother_id": None, "photo_file": None, "photo_count": 0,
                 "updated_at": None
             }
@@ -397,6 +398,8 @@ def parse_gedcom_people(lines):
                             elif "PLAC" in birt_line:
                                 person["birth_place"] = birt_line.split("PLAC", 1)[1].strip()
                                 person["birth_city"] = extract_city_from_place(person["birth_place"])
+                            elif "NOTE" in birt_line:
+                                person["birth_note"] = birt_line.split("NOTE", 1)[1].strip()
                             j += 1
                     elif tag == "DEAT":
                         person["_has_deat"] = True
@@ -461,6 +464,14 @@ def parse_gedcom_people(lines):
                                     ev_data["cause"] = v2
                             j += 1
                         events_list[person_id].append(ev_data)
+                        # Baptism/christening also populate the people columns
+                        # (first occurrence wins, matching migrate_json_to_sqlite).
+                        if tag in ("BAPM", "CHR") and not person["baptism_date"] and not person["baptism_place"]:
+                            person["baptism_date"] = ev_data["date"]
+                            person["baptism_place"] = ev_data["place"]
+                            note = ev_data.get("note") or ""
+                            if note.lower().startswith("godparents:"):
+                                person["godparents"] = note.split(":", 1)[1].strip()
                     elif tag == "OCCU":
                         j = i + 1
                         occu_data = {"title": rest, "date": None, "place": None}
@@ -893,6 +904,7 @@ def main():
         for person in people.values():
             person["birth_date"] = convert_date_to_spanish(person["birth_date"])
             person["death_date"] = convert_date_to_spanish(person["death_date"])
+            person["baptism_date"] = convert_date_to_spanish(person["baptism_date"])
         for marr in marriages.values():
             marr["date"] = convert_date_to_spanish(marr["date"])
         for occs in occupations.values():
@@ -919,9 +931,10 @@ def main():
             cursor.execute("""
                 INSERT INTO people
                 (id, name, given_name, surname, sex, birth_date, birth_day, birth_month,
-                 birth_year, birth_place, birth_city, death_date, death_year, death_place, death_city,
-                 death_cause, death_note, death_age, is_alive, father_id, mother_id, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 birth_year, birth_place, birth_city, birth_note, death_date, death_year, death_place, death_city,
+                 death_cause, death_note, death_age, baptism_date, baptism_place, godparents,
+                 is_alive, father_id, mother_id, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET
                     name=excluded.name,
                     given_name=excluded.given_name,
@@ -933,6 +946,7 @@ def main():
                     birth_year=excluded.birth_year,
                     birth_place=excluded.birth_place,
                     birth_city=excluded.birth_city,
+                    birth_note=excluded.birth_note,
                     death_date=excluded.death_date,
                     death_year=excluded.death_year,
                     death_place=excluded.death_place,
@@ -940,16 +954,20 @@ def main():
                     death_cause=excluded.death_cause,
                     death_note=excluded.death_note,
                     death_age=excluded.death_age,
+                    baptism_date=excluded.baptism_date,
+                    baptism_place=excluded.baptism_place,
+                    godparents=excluded.godparents,
                     is_alive=excluded.is_alive,
                     father_id=excluded.father_id,
                     mother_id=excluded.mother_id,
                     updated_at=excluded.updated_at
             """, (person_id, person["name"], person["given_name"], person["surname"], person["sex"],
                   person["birth_date"], person["birth_day"], person["birth_month"], person["birth_year"],
-                  person["birth_place"], person["birth_city"],
+                  person["birth_place"], person["birth_city"], person["birth_note"],
                   person["death_date"], person["death_year"], person["death_place"], person["death_city"],
-                  person["death_cause"], person["death_note"], person["death_age"], person["is_alive"],
-                  person["father_id"], person["mother_id"], person["updated_at"]))
+                  person["death_cause"], person["death_note"], person["death_age"],
+                  person["baptism_date"], person["baptism_place"], person["godparents"],
+                  person["is_alive"], person["father_id"], person["mother_id"], person["updated_at"]))
 
         # DELETE + re-insert matrimonios (avoid duplicates with autoincrement PK)
         cursor.execute("DELETE FROM marriages")
