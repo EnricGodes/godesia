@@ -351,6 +351,7 @@ def parse_gedcom_people(lines):
                 "death_place": None, "death_city": None,
                 "death_cause": None, "death_note": None, "death_age": None,
                 "baptism_date": None, "baptism_place": None, "godparents": None,
+                "email": None,
                 "is_alive": 0, "_has_deat": False, "father_id": None, "mother_id": None, "photo_file": None, "photo_count": 0,
                 "updated_at": None
             }
@@ -504,6 +505,10 @@ def parse_gedcom_people(lines):
                                 resi_data["city"] = rval
                             elif rtag == "CTRY" and rl in ("2", "3"):
                                 resi_data["country"] = rval
+                            elif rtag == "EMAIL" and rl in ("2", "3"):
+                                # GEDCOM escapes '@' as '@@'. First email found wins.
+                                if not person.get("email"):
+                                    person["email"] = rval.replace("@@", "@")
                             j += 1
                         residences[person_id].append(resi_data)
                     elif tag == "NOTE":
@@ -925,6 +930,11 @@ def main():
             db_conn.commit()
         except Exception:
             pass  # Column already exists
+        try:
+            cursor.execute("ALTER TABLE people ADD COLUMN email TEXT")
+            db_conn.commit()
+        except Exception:
+            pass  # Column already exists
 
         # UPSERT personas — preserves photo_file and photo_count (managed by sync_photos)
         for person_id, person in people.items():
@@ -933,8 +943,8 @@ def main():
                 (id, name, given_name, surname, sex, birth_date, birth_day, birth_month,
                  birth_year, birth_place, birth_city, birth_note, death_date, death_year, death_place, death_city,
                  death_cause, death_note, death_age, baptism_date, baptism_place, godparents,
-                 is_alive, father_id, mother_id, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 email, is_alive, father_id, mother_id, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET
                     name=excluded.name,
                     given_name=excluded.given_name,
@@ -957,6 +967,7 @@ def main():
                     baptism_date=excluded.baptism_date,
                     baptism_place=excluded.baptism_place,
                     godparents=excluded.godparents,
+                    email=excluded.email,
                     is_alive=excluded.is_alive,
                     father_id=excluded.father_id,
                     mother_id=excluded.mother_id,
@@ -967,7 +978,7 @@ def main():
                   person["death_date"], person["death_year"], person["death_place"], person["death_city"],
                   person["death_cause"], person["death_note"], person["death_age"],
                   person["baptism_date"], person["baptism_place"], person["godparents"],
-                  person["is_alive"], person["father_id"], person["mother_id"], person["updated_at"]))
+                  person["email"], person["is_alive"], person["father_id"], person["mother_id"], person["updated_at"]))
 
         # DELETE + re-insert matrimonios (avoid duplicates with autoincrement PK)
         cursor.execute("DELETE FROM marriages")

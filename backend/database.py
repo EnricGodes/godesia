@@ -581,7 +581,7 @@ def get_birthdays_this_week(conn):
         d = today + timedelta(days=delta)
         rows = conn.execute(
             "SELECT id, name, given_name, surname, nickname, birth_day, birth_month, birth_year, "
-            "death_year, sex, photo_file, is_alive FROM people "
+            "death_year, sex, photo_file, is_alive, email FROM people "
             "WHERE birth_month = ? AND birth_day = ? ORDER BY name",
             (d.month, d.day)
         ).fetchall()
@@ -600,6 +600,7 @@ def get_birthdays_this_week(conn):
                 "sex": row["sex"],
                 "age": age,
                 "is_alive": bool(row["is_alive"]),
+                "email": row["email"],
                 "photo": row["photo_file"],
                 "is_today": delta == 0,
                 "date_label": d.strftime("%d/%m"),
