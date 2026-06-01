@@ -735,23 +735,20 @@ class QueryRouter:
         span = (max_y - min_y) if (min_y and max_y) else None
         gens = round(span / 30) if span else None
         pct = round(with_photo * 100 / total) if total else 0
-        parts = []
-        if span:
-            parts.append(f"La familia Godes reúne {total} personas documentadas a lo largo de {span} años de historia.")
-        else:
-            parts.append(f"La familia Godes reúne {total} personas documentadas.")
-        parts.append("👪 Familias: " + str(marriages) + " matrimonios"
-                     + (f" y {partnerships} parejas registradas." if partnerships else "."))
-        parts.append(f"🌿 Vivos y fallecidos: {living} personas vivas y {deceased} fallecidas.")
+
+        header = (f"<strong>La familia Godes</strong> reúne <strong>{total} personas</strong> documentadas"
+                  + (f" a lo largo de <strong>{span} años</strong> de historia." if span else "."))
+        rows_out = [
+            f"👨‍👩‍👧 <strong>Familias</strong> · {marriages} matrimonios"
+            + (f" y {partnerships} parejas" if partnerships else ""),
+            f"🌿 <strong>Vivos</strong> · {living} · <strong>Fallecidos</strong> · {deceased}",
+        ]
         if min_y and max_y:
-            parts.append(f"📅 Arco temporal: desde el nacimiento más antiguo en {min_y} hasta el más reciente en {max_y}"
-                         + (f", unas {gens} generaciones." if gens else "."))
-        parts.append(f"🖼 Con fotografía: {with_photo} personas ({pct}%).")
-        if places:
-            top = ", ".join(f"{dict(p)['loc']} ({dict(p)['n']})" for p in places if dict(p)['loc'])
-            if top:
-                parts.append(f"📍 Lugares de nacimiento más frecuentes: {top}.")
-        return {"answer": "\n".join(parts), "people_mentioned": [], "people_with_photos": []}
+            rows_out.append(f"📅 <strong>Arco temporal</strong> · {min_y} – {max_y}"
+                            + (f" · ~{gens} generaciones" if gens else ""))
+        rows_out.append(f"🖼️ <strong>Con fotografía</strong> · {with_photo} ({pct}%)")
+        answer = header + "\n\n" + "\n".join(rows_out)
+        return {"answer": answer, "people_mentioned": [], "people_with_photos": []}
 
     def handle_living_members(self, question):
         from collections import Counter
@@ -777,22 +774,29 @@ class QueryRouter:
         with_year = [r for r in rows if r.get("birth_year")]
         oldest = sorted(with_year, key=lambda r: r["birth_year"])[:4]
         youngest = sorted(with_year, key=lambda r: r["birth_year"], reverse=True)[:4]
-        def _names(lst):
-            return ", ".join(f"{r['name'].strip()} ({r['birth_year']})" for r in lst)
-        parts = [f"Actualmente hay {total} personas vivas en la familia Godes."]
+        def _links(lst):
+            return ", ".join(f"{_person_link(r)} ({r['birth_year']})" for r in lst)
+
+        header = f"Actualmente hay <strong>{total} personas vivas</strong> en la familia Godes."
+        parts = [header, ""]
         if top_branches:
-            parts.append("🌿 Por rama (apellido): "
-                         + ", ".join(f"{n} ({k})" for n, k in top_branches) + ".")
+            parts.append("🌿 <strong>Por rama</strong>")
+            parts.append(", ".join(f"{n} ({k})" for n, k in top_branches))
+            parts.append("")
         if dec:
-            parts.append("📅 Por década de nacimiento: "
-                         + ", ".join(f"{k}s: {v}" for k, v in sorted(dec.items())) + ".")
+            parts.append("📅 <strong>Por década de nacimiento</strong>")
+            parts.append(", ".join(f"{k}s: {v}" for k, v in sorted(dec.items())))
+            parts.append("")
         if oldest:
-            parts.append(f"👴 Los de más edad: {_names(oldest)}.")
+            parts.append("👴 <strong>Los de más edad</strong>")
+            parts.append(_links(oldest))
+            parts.append("")
         if youngest:
-            parts.append(f"👶 Los más jóvenes: {_names(youngest)}.")
+            parts.append("👶 <strong>Los más jóvenes</strong>")
+            parts.append(_links(youngest))
         highlight = oldest[:3] + youngest[:3]
         return {
-            "answer": "\n".join(parts),
+            "answer": "\n".join(parts).strip(),
             "people_mentioned": [r["id"] for r in highlight],
             "people_with_photos": self._people_payload(highlight),
         }
@@ -805,30 +809,28 @@ class QueryRouter:
         months = ["", "enero", "febrero", "marzo", "abril", "mayo", "junio",
                   "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
         rows = [dict(r) for r in c.execute(
-            "SELECT id, name, birth_day, birth_year, death_year, is_alive, photo_file "
+            "SELECT id, name, birth_day, birth_year, is_alive, photo_file "
             "FROM people WHERE birth_month = ? AND birth_day IS NOT NULL "
+            "AND is_alive = 1 "
             "ORDER BY birth_day, birth_year",
             (month,)
         ).fetchall()]
+        mes = months[month]
         if not rows:
-            return {"answer": f"Este mes ({months[month]}) no consta ningún aniversario de nacimiento registrado.",
+            return {"answer": f"Este mes ({mes}) no hay aniversarios de personas vivas en la familia.",
                     "people_mentioned": [], "people_with_photos": []}
-        parts = [f"Aniversarios de nacimiento en {months[month]} ({len(rows)}):"]
+        header = f"🎂 <strong>Aniversarios en {mes}</strong> · {len(rows)} personas"
+        parts = [header, ""]
         for r in rows:
             day = r.get("birth_day")
             by = r.get("birth_year")
-            name = r["name"].strip()
+            link = _person_link(r)
             extra = ""
             if by:
                 age = this_year - by
                 yr = "año" if age == 1 else "años"
-                if r.get("is_alive"):
-                    extra = f" — cumple {age} {yr}"
-                elif r.get("death_year"):
-                    extra = f" — habría cumplido {age} {yr} ({by}–{r['death_year']})"
-                else:
-                    extra = f" — nacido en {by}"
-            parts.append(f"• {day} de {months[month]}: {name}{extra}")
+                extra = f" — cumple {age} {yr}"
+            parts.append(f"<strong>{day} {mes}</strong> · {link}{extra}")
         return {
             "answer": "\n".join(parts),
             "people_mentioned": [r["id"] for r in rows],
