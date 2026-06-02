@@ -1502,13 +1502,21 @@ const Comparador = {
                     const scoreColor = row.match_score >= 90 ? '#065f46'
                                      : row.match_score >= 70 ? '#92400e' : '#991b1b';
                     const personId = (row.db_person_id || '').replace(/@/g, '');
+                    const dbName = row.db_person_name || row.db_person_id || '';
+                    const gedName = row.ged_person_name || '';
                     return `
                     <tr id="cmp-row-${row.id}">
                         <td style="font-size:.84rem;">
                             <a href="/dossier.html?id=${esc(personId)}" target="_blank"
-                               style="color:#2d4b33;font-weight:600;">${esc(row.db_person_name || row.db_person_id)}</a>
+                               style="color:#2d4b33;font-weight:600;">${esc(dbName)}</a>
+                            <span title="Copiar nombre" style="cursor:pointer;color:#b0b8b0;font-size:.72rem;margin-left:.3rem;user-select:none;"
+                                  onclick="Comparador.copyName(${JSON.stringify(dbName)})">⊕</span>
                         </td>
-                        <td style="font-size:.82rem;color:#3d3d37;">${esc(row.ged_person_name || '—')}</td>
+                        <td style="font-size:.82rem;color:#3d3d37;">
+                            ${gedName
+                                ? `<span style="cursor:pointer;" title="Copiar nombre" onclick="Comparador.copyName(${JSON.stringify(gedName)})">${esc(gedName)}</span>`
+                                : '—'}
+                        </td>
                         <td style="text-align:center;">
                             ${row.match_score > 0
                                 ? `<span style="font-weight:700;color:${scoreColor};">${row.match_score}%</span>`
@@ -1520,7 +1528,7 @@ const Comparador = {
                                 onclick="Comparador.toggleDetail(${row.id}, this)">▸ Ver</button>
                         </td>
                         <td>
-                            <button class="btn btn-danger btn-sm" onclick="Comparador.deleteRow(${row.id})">✕</button>
+                            <button class="btn btn-sm" style="background:#f1eee5;color:#727971;border:1px solid #c2c8bf;" title="Descartar (no reaparece si no hay cambios)" onclick="Comparador.dismissRow(${row.id})">✕</button>
                         </td>
                     </tr>
                     <tr id="cmp-detail-${row.id}" style="display:none;">
@@ -1563,6 +1571,24 @@ const Comparador = {
             const n = parseInt(badge.textContent || '0') - 1;
             badge.textContent = n > 0 ? n : '';
         } catch (e) { alert(e.message); }
+    },
+
+    async dismissRow(id) {
+        try {
+            await apiFetch(`/api/admin/compare/result/${id}/dismiss`, { method: 'POST' });
+            const row = document.getElementById(`cmp-row-${id}`);
+            const detail = document.getElementById(`cmp-detail-${id}`);
+            if (row) { row.style.transition = 'opacity .25s'; row.style.opacity = '0'; setTimeout(() => row.remove(), 260); }
+            if (detail) { detail.style.transition = 'opacity .25s'; detail.style.opacity = '0'; setTimeout(() => detail.remove(), 260); }
+            const badge = document.getElementById('badge-cmp');
+            const n = parseInt(badge.textContent || '0') - 1;
+            badge.textContent = n > 0 ? n : '';
+        } catch (e) { alert(e.message); }
+    },
+
+    copyName(name) {
+        if (!name) return;
+        navigator.clipboard.writeText(name).catch(() => {});
     },
 
     async clearAll() {

@@ -584,6 +584,22 @@ def _normalize_name(text: str) -> str:
     return " ".join(stripped.lower().split())
 
 
+def _places_match(a: str, b: str) -> bool:
+    """Lenient place equality: 'Murcia' ~ 'Murcia, España' ~ 'Murcia, Spain'.
+    Returns True if the shorter place is a prefix-component of the longer one."""
+    if not a or not b:
+        return False
+    na = _normalize_name(a)
+    nb = _normalize_name(b)
+    if na == nb:
+        return True
+    shorter, longer = (na, nb) if len(na) <= len(nb) else (nb, na)
+    # Accept if longer starts with shorter followed by separator (, or space)
+    return longer.startswith(shorter) and (
+        len(longer) == len(shorter) or longer[len(shorter)] in ", "
+    )
+
+
 def _strip_nickname(text: str) -> str:
     """Remove quoted and parenthetical nicknames from a given name.
     'Dolores "Lolita"' → 'Dolores', 'Josep (Pepe)' → 'Josep'."""
@@ -765,17 +781,17 @@ def _compute_diff(db_person: dict, db_notes: list, db_occs: list, db_res: list,
     place_diffs = []
     db_bp = (db_person.get("birth_place") or "").strip()
     ged_bp = (ged_birth.get("place") or "").strip()
-    if ged_bp and (not db_bp or (ged_bp.lower() != db_bp.lower() and len(ged_bp) > len(db_bp))):
+    if ged_bp and (not db_bp or (not _places_match(ged_bp, db_bp) and len(ged_bp) > len(db_bp))):
         place_diffs.append(f"Lloc neix.: BD '{db_bp or '—'}' → GEDCOM '{ged_bp}'")
 
     db_dp = (db_person.get("death_place") or "").strip()
     ged_dp = (ged_death.get("place") or "").strip()
-    if ged_dp and (not db_dp or (ged_dp.lower() != db_dp.lower() and len(ged_dp) > len(db_dp))):
+    if ged_dp and (not db_dp or (not _places_match(ged_dp, db_dp) and len(ged_dp) > len(db_dp))):
         place_diffs.append(f"Lloc def.: BD '{db_dp or '—'}' → GEDCOM '{ged_dp}'")
 
     ged_bapt_place = (ged_bapt.get("place") or "").strip()
     db_bapt_place  = (db_person.get("baptism_place") or "").strip()
-    if ged_bapt_place and (not db_bapt_place or (ged_bapt_place.lower() != db_bapt_place.lower() and len(ged_bapt_place) > len(db_bapt_place))):
+    if ged_bapt_place and (not db_bapt_place or (not _places_match(ged_bapt_place, db_bapt_place) and len(ged_bapt_place) > len(db_bapt_place))):
         place_diffs.append(f"Lloc baptisme: BD '{db_bapt_place or '—'}' → GEDCOM '{ged_bapt_place}'")
 
     if ged_burials and not db_burials:
@@ -1133,6 +1149,21 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
                 _cmp_log(f"  Avís: no s'ha pogut carregar el mapa ({e}), fent servir matching per nom")
                 use_palazuelos_map = False
 
+        # Ensure dismiss table exists and load current dismissals
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS compare_dismissed (
+                db_person_id TEXT PRIMARY KEY,
+                diff_types   TEXT,
+                dismissed_at TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        conn.commit()
+        dismissed_map: dict = {}
+        for dr in conn.execute(
+            "SELECT db_person_id, diff_types FROM compare_dismissed"
+        ).fetchall():
+            dismissed_map[dr[0]] = set((dr[1] or "").split(","))
+
         # Clear previous results
         conn.execute("DELETE FROM compare_results")
         conn.commit()
@@ -1209,6 +1240,18 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
                 cnt_name += 1
 
             if diff_types:
+                # Skip if these exact diffs (or a subset) were previously dismissed
+                prev_dismissed = dismissed_map.get(pid)
+                if prev_dismissed is not None:
+                    new_types_set = set(diff_types)
+                    if new_types_set.issubset(prev_dismissed):
+                        continue  # Same or fewer diffs → still dismissed
+                    # New diff types appeared → remove the dismissal so it reappears
+                    conn.execute(
+                        "DELETE FROM compare_dismissed WHERE db_person_id = ?", (pid,)
+                    )
+                    del dismissed_map[pid]
+
                 conn.execute(
                     "INSERT INTO compare_results "
                     "(db_person_id, db_person_name, ged_person_id, ged_person_name, "
@@ -1339,6 +1382,31 @@ async def compare_delete_all():
 @router.delete("/compare/result/{result_id}")
 async def compare_delete_result(result_id: int):
     db = _db()
+    db.execute("DELETE FROM compare_results WHERE id = ?", (result_id,))
+    db.commit()
+    return {"status": "ok"}
+
+
+@router.post("/compare/result/{result_id}/dismiss")
+async def compare_dismiss_result(result_id: int):
+    """Mark a comparison result as dismissed: hides it until new diffs appear."""
+    db = _db()
+    row = db.execute(
+        "SELECT db_person_id, diff_types FROM compare_results WHERE id = ?", (result_id,)
+    ).fetchone()
+    if not row:
+        raise HTTPException(404, "Result not found")
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS compare_dismissed (
+            db_person_id TEXT PRIMARY KEY,
+            diff_types   TEXT,
+            dismissed_at TEXT DEFAULT (datetime('now'))
+        )
+    """)
+    db.execute(
+        "INSERT OR REPLACE INTO compare_dismissed (db_person_id, diff_types) VALUES (?, ?)",
+        (row["db_person_id"], row["diff_types"]),
+    )
     db.execute("DELETE FROM compare_results WHERE id = ?", (result_id,))
     db.commit()
     return {"status": "ok"}
