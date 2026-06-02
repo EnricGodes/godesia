@@ -584,9 +584,36 @@ def _normalize_name(text: str) -> str:
     return " ".join(stripped.lower().split())
 
 
+_PLACE_NOISE = frozenset({
+    "espana", "spain", "espagne", "espanya",
+    "france", "franca", "francia",
+    "italia", "italy",
+    "alemania", "germany", "deutschland",
+    "portugal", "mexico", "argentina",
+    "s", "sp", "span",   # truncated "Spain" / "España"
+})
+
+
+def _place_components(place: str) -> list:
+    """Split a place string into significant normalized components (comma or parens)."""
+    import re as _re
+    parts = _re.split(r"[,()]", place)
+    result = []
+    for p in parts:
+        t = _normalize_name(p).strip()
+        if t and t not in _PLACE_NOISE and len(t) > 1:
+            result.append(t)
+    return result
+
+
 def _places_match(a: str, b: str) -> bool:
-    """Lenient place equality: 'Murcia' ~ 'Murcia, España' ~ 'Murcia, Spain'.
-    Returns True if the shorter place is a prefix-component of the longer one."""
+    """Lenient place equality.
+      'Murcia'                  ~ 'Murcia, España'                ← prefix
+      'Murcia'                  ~ 'Región de Murcia, España'      ← suffix of 1st component
+      'Benabarre (Huesca)'      ~ 'Benabarre, Huesca, Aragón, …'  ← multi-component subset
+      'San Antolín, Murcia, ES' ~ 'Murcia, San Antolín, …'       ← token-set equality
+    Does NOT match 'Barcelona' ~ 'Badalona, Barcelona, España'.
+    """
     if not a or not b:
         return False
     na = _normalize_name(a)
@@ -594,10 +621,33 @@ def _places_match(a: str, b: str) -> bool:
     if na == nb:
         return True
     shorter, longer = (na, nb) if len(na) <= len(nb) else (nb, na)
-    # Accept if longer starts with shorter followed by separator (, or space)
-    return longer.startswith(shorter) and (
+
+    # Case 1: shorter is a prefix of longer (comma/space separator)
+    if longer.startswith(shorter) and (
         len(longer) == len(shorter) or longer[len(shorter)] in ", "
-    )
+    ):
+        return True
+
+    # Case 2: shorter is a word-boundary suffix of the FIRST comma component
+    # e.g. "murcia" ~ "region de murcia, espana"
+    first = longer.split(",")[0].strip()
+    s = shorter
+    if first.endswith(s) and (len(first) == len(s) or first[-(len(s) + 1)] == " "):
+        return True
+
+    # Case 3: multi-component subset matching (both sides have ≥2 components)
+    # e.g. "benabarre (huesca)" ~ "benabarre, huesca, aragon, espana"
+    # e.g. "san antolin, murcia, es" ~ "murcia, san antolin, murcia, span"
+    comps_a = _place_components(a)
+    comps_b = _place_components(b)
+    if len(comps_a) >= 2 and len(comps_b) >= 2:
+        set_a, set_b = set(comps_a), set(comps_b)
+        short_s = set_a if len(set_a) <= len(set_b) else set_b
+        long_s  = set_a if len(set_a) >  len(set_b) else set_b
+        if short_s and short_s.issubset(long_s):
+            return True
+
+    return False
 
 
 def _strip_nickname(text: str) -> str:
