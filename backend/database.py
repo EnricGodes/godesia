@@ -148,6 +148,28 @@ CREATE TABLE IF NOT EXISTS events (
     lng  REAL
 );
 
+CREATE TABLE IF NOT EXISTS event_notes (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER NOT NULL,
+    content  TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS event_sources (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id   INTEGER NOT NULL,
+    source_ref TEXT,
+    page       TEXT,
+    quay       INTEGER,
+    data_date  TEXT,
+    data_text  TEXT
+);
+
+CREATE TABLE IF NOT EXISTS event_photos (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER NOT NULL,
+    photo_id INTEGER NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS geocache (
     query       TEXT PRIMARY KEY,
     lat         REAL,
@@ -443,6 +465,9 @@ def get_connection(db_path):
                decided_at TEXT DEFAULT (datetime('now')),
                PRIMARY KEY (photo_id_a, photo_id_b)
            )""",
+        "CREATE TABLE IF NOT EXISTS event_notes (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER NOT NULL, content TEXT NOT NULL)",
+        "CREATE TABLE IF NOT EXISTS event_sources (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER NOT NULL, source_ref TEXT, page TEXT, quay INTEGER, data_date TEXT, data_text TEXT)",
+        "CREATE TABLE IF NOT EXISTS event_photos (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER NOT NULL, photo_id INTEGER NOT NULL)",
     ]:
         try:
             conn.execute(stmt)
@@ -1324,10 +1349,40 @@ def get_person_dossier(conn, person_id):
 
     # ALL events (Bautismo, Emigración, Educación, Ocupación, Residencia, Censo, etc.)
     events = conn.execute(
-        "SELECT tag, type, description, date, place, age, note, cause, address, email, www, lat, lng FROM events WHERE person_id = ? ORDER BY date",
+        "SELECT id, tag, type, description, date, place, age, note, cause, address, email, www, lat, lng FROM events WHERE person_id = ? ORDER BY date",
         (person_id,)
     ).fetchall()
     events_list = [dict(e) for e in events]
+
+    # Enrich events with notes, sources, and photos from the extension tables
+    event_ids = [e["id"] for e in events_list]
+    if event_ids:
+        ph = ",".join("?" * len(event_ids))
+        notes_rows = conn.execute(
+            f"SELECT event_id, content FROM event_notes WHERE event_id IN ({ph})",
+            event_ids).fetchall()
+        src_rows = conn.execute(
+            f"SELECT event_id, source_ref, page, quay, data_date, data_text "
+            f"FROM event_sources WHERE event_id IN ({ph})",
+            event_ids).fetchall()
+        photo_rows = conn.execute(
+            f"SELECT ep.event_id, p.id, p.filename, p.title "
+            f"FROM event_photos ep JOIN photos p ON ep.photo_id = p.id "
+            f"WHERE ep.event_id IN ({ph})",
+            event_ids).fetchall()
+
+        from collections import defaultdict as _defaultdict
+        notes_map   = _defaultdict(list)
+        sources_map = _defaultdict(list)
+        photos_map  = _defaultdict(list)
+        for r in notes_rows:  notes_map[r["event_id"]].append(r["content"])
+        for r in src_rows:    sources_map[r["event_id"]].append(dict(r))
+        for r in photo_rows:  photos_map[r["event_id"]].append(dict(r))
+
+        for ev in events_list:
+            ev["notes"]   = notes_map.get(ev["id"], [])
+            ev["sources"] = sources_map.get(ev["id"], [])
+            ev["photos"]  = photos_map.get(ev["id"], [])
 
     # Burial
     burial = conn.execute(

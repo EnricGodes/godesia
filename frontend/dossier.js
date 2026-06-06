@@ -1290,7 +1290,10 @@ function buildEvents(data) {
                     ].filter(Boolean),
                     note: e.description || '',  // Store note separately for italic rendering
                     photo: null,
-                    name: personName
+                    name: personName,
+                    extraNotes:   e.notes   || [],
+                    extraSources: e.sources || [],
+                    eventPhotos:  e.photos  || [],
                 });
             }
         });
@@ -1517,6 +1520,29 @@ function renderGraphicMode(events) {
                     ${photosHtml}
                     ${e.lines.map(line => `<div class="text-sm text-outline">${line}</div>`).join('')}
                     ${e.note ? `<div class="text-sm text-outline italic mt-2">${e.note}</div>` : ''}
+                    ${(e.extraNotes && e.extraNotes.length > 0)
+                        ? e.extraNotes.map(n => `<div class="text-sm text-outline italic mt-2">${n}</div>`).join('')
+                        : ''}
+                    ${(e.extraSources && e.extraSources.length > 0) ? `
+                        <div class="mt-3 space-y-1">
+                            ${e.extraSources.map(src => {
+                                const quayLabels = ['No fiable','Cuestionable','Evidencia secundaria','Evidencia directa','Primaria y directa'];
+                                const quayLabel = (src.quay != null && quayLabels[src.quay]) ? quayLabels[src.quay] : '';
+                                const linkHtml = src.page ? `<a href="${src.page}" target="_blank" rel="noopener" class="underline break-all">${src.page}</a>` : '';
+                                return `<div class="text-xs text-outline/70 border-l-2 border-outline-variant pl-2">
+                                    ${linkHtml}
+                                    ${src.data_date ? `<span class="ml-1">(${src.data_date})</span>` : ''}
+                                    ${quayLabel ? `<span class="ml-1 italic">${quayLabel}</span>` : ''}
+                                    ${src.data_text ? `<div class="mt-0.5">${src.data_text}</div>` : ''}
+                                </div>`;
+                            }).join('')}
+                        </div>` : ''}
+                    ${(e.eventPhotos && e.eventPhotos.length > 0) ? `
+                        <div class="flex gap-2 mt-3 flex-wrap">
+                            ${e.eventPhotos.map(ph => `<img src="/photos/${ph.filename}" title="${(ph.title||'').replace(/"/g,'&quot;')}"
+                                class="h-16 w-16 object-cover rounded cursor-pointer border border-outline-variant/40 hover:opacity-80 transition-opacity"
+                                onclick="openPhotoModal(${ph.id})">`).join('')}
+                        </div>` : ''}
                 </div>
             </div>
         </div>
@@ -1542,13 +1568,28 @@ function renderListMode(events) {
                     ${events.map(e => {
                         const fecha = e.lines[0] || '';
                         const descripcion = e.lines.slice(1).join(' • ') || '';
-                        const notas = e.note || '';
+                        const notaBase = e.note ? `<div class="italic">${e.note}</div>` : '';
+                        const extraNotesHtml = (e.extraNotes && e.extraNotes.length > 0)
+                            ? e.extraNotes.map(n => `<div class="italic mt-1">${n}</div>`).join('')
+                            : '';
+                        const extraSourcesHtml = (e.extraSources && e.extraSources.length > 0)
+                            ? `<div class="mt-1 space-y-0.5">${e.extraSources.map(src => {
+                                const linkHtml = src.page ? `<a href="${src.page}" target="_blank" rel="noopener" class="underline text-primary break-all">${src.page}</a>` : '';
+                                return `<div class="text-xs text-outline/70">${linkHtml}${src.data_text ? ` — ${src.data_text}` : ''}</div>`;
+                              }).join('')}</div>`
+                            : '';
+                        const eventPhotosHtml = (e.eventPhotos && e.eventPhotos.length > 0)
+                            ? `<div class="flex gap-1 mt-1 flex-wrap">${e.eventPhotos.map(ph =>
+                                `<img src="/photos/${ph.filename}" title="${(ph.title||'').replace(/"/g,'&quot;')}"
+                                    class="h-10 w-10 object-cover rounded cursor-pointer border border-outline-variant/40"
+                                    onclick="openPhotoModal(${ph.id})">`).join('')}</div>`
+                            : '';
                         return `
                             <tr class="border-b border-outline-variant/20 hover:bg-outline-variant/5 transition-colors" data-type="${e.type}">
                                 <td class="px-4 py-3 text-xs whitespace-nowrap font-semibold text-primary">${e.year}</td>
                                 <td class="px-4 py-3 font-semibold text-sm">${e.type}</td>
                                 <td class="px-4 py-3 text-outline">${descripcion}</td>
-                                <td class="px-4 py-3 text-outline italic">${notas}</td>
+                                <td class="px-4 py-3 text-outline">${notaBase}${extraNotesHtml}${extraSourcesHtml}${eventPhotosHtml}</td>
                             </tr>
                         `;
                     }).join('')}

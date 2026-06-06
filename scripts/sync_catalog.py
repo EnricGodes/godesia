@@ -445,6 +445,7 @@ def parse_gedcom_people(lines):
                             "description": desc or None,
                             "date": None, "place": None, "age": None,
                             "note": None, "cause": None,
+                            "notes": [], "sources": [], "objes": [],
                         }
                         while j < len(lines) and lines[j].startswith("2"):
                             ev_line = lines[j].rstrip("\n")
@@ -460,9 +461,68 @@ def parse_gedcom_people(lines):
                                 elif t2 == "AGE":
                                     ev_data["age"] = v2
                                 elif t2 == "NOTE":
-                                    ev_data["note"] = v2
+                                    ev_data["notes"].append(v2)
+                                    if ev_data["note"] is None:
+                                        ev_data["note"] = v2
+                                    j += 1
+                                    continue
                                 elif t2 == "CAUS":
                                     ev_data["cause"] = v2
+                                elif t2 == "SOUR":
+                                    src = {"source_ref": v2, "page": None, "quay": None,
+                                           "data_date": None, "data_text": None}
+                                    j += 1
+                                    while j < len(lines):
+                                        sl = lines[j].rstrip("\n")
+                                        if not sl or re.match(r"^[012]\s", sl):
+                                            break
+                                        sm3 = re.match(r"^3\s+(\S+)\s*(.*)", sl)
+                                        if sm3:
+                                            st3, sv3 = sm3.group(1), sm3.group(2).strip()
+                                            if st3 == "PAGE":
+                                                src["page"] = sv3
+                                            elif st3 == "QUAY":
+                                                try:
+                                                    src["quay"] = int(sv3)
+                                                except ValueError:
+                                                    pass
+                                        sm4 = re.match(r"^4\s+(\S+)\s*(.*)", sl)
+                                        if sm4:
+                                            st4, sv4 = sm4.group(1), sm4.group(2).strip()
+                                            if st4 == "DATE":
+                                                src["data_date"] = sv4
+                                            elif st4 == "TEXT":
+                                                src["data_text"] = sv4
+                                        j += 1
+                                    ev_data["sources"].append(src)
+                                    continue
+                                elif t2 == "OBJE":
+                                    ob = {"url": None, "filename": None, "title": None,
+                                          "filesize": None, "photo_rin": None}
+                                    j += 1
+                                    while j < len(lines):
+                                        ol = lines[j].rstrip("\n")
+                                        if not ol or re.match(r"^[012]\s", ol):
+                                            break
+                                        om3 = re.match(r"^3\s+(\S+)\s*(.*)", ol)
+                                        if om3:
+                                            ot3, ov3 = om3.group(1), om3.group(2).strip()
+                                            if ot3 == "FILE" and ov3.startswith("http"):
+                                                ob["url"] = ov3
+                                                ob["filename"] = ov3.split("/")[-1]
+                                            elif ot3 == "TITL":
+                                                ob["title"] = ov3
+                                            elif ot3 == "_FILESIZE":
+                                                try:
+                                                    ob["filesize"] = int(ov3)
+                                                except ValueError:
+                                                    pass
+                                            elif ot3 == "_PHOTO_RIN":
+                                                ob["photo_rin"] = ov3
+                                        j += 1
+                                    if ob["filename"]:
+                                        ev_data["objes"].append(ob)
+                                    continue
                             j += 1
                         events_list[person_id].append(ev_data)
                         # Baptism/christening also populate the people columns
@@ -1026,6 +1086,11 @@ def main():
                 """, (person_id, buri["place_detail"], buri["date"], buri["place"]))
 
         cursor.execute("DELETE FROM events")
+        cursor.execute("DELETE FROM event_notes")
+        cursor.execute("DELETE FROM event_sources")
+        cursor.execute("DELETE FROM event_photos")
+        # Collect event-level OBJEs to insert AFTER photos table is rebuilt (DROP+CREATE below)
+        pending_event_objes = []  # list of (event_id, person_id, ob_dict)
         for person_id, evs in events_list.items():
             for ev in evs:
                 date_es = convert_date_to_spanish(ev["date"]) if ev["date"] else None
@@ -1034,6 +1099,24 @@ def main():
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (person_id, ev["tag"], ev["type"], ev["description"],
                       date_es, ev["place"], ev["age"], ev["note"], ev["cause"]))
+                event_id = cursor.lastrowid
+
+                for note_text in ev.get("notes", []):
+                    cursor.execute(
+                        "INSERT INTO event_notes (event_id, content) VALUES (?, ?)",
+                        (event_id, note_text))
+
+                for src in ev.get("sources", []):
+                    cursor.execute(
+                        "INSERT INTO event_sources "
+                        "(event_id, source_ref, page, quay, data_date, data_text) "
+                        "VALUES (?, ?, ?, ?, ?, ?)",
+                        (event_id, src["source_ref"], src["page"], src["quay"],
+                         src["data_date"], src["data_text"]))
+
+                for ob in ev.get("objes", []):
+                    if ob.get("filename"):
+                        pending_event_objes.append((event_id, person_id, ob))
 
         cursor.execute("DELETE FROM children")
         for fam_id, chil_list in children.items():
@@ -1156,6 +1239,27 @@ def main():
                 "INSERT INTO albums (gedcom_id, title) VALUES (?, ?)",
                 (album_id, album_info["title"])
             )
+
+        # Insert event-level photos now that the photos table is rebuilt
+        for event_id, person_id, ob in pending_event_objes:
+            cursor.execute("""
+                INSERT INTO photos (filename, url, filesize, title, photo_rin, is_downloaded)
+                VALUES (?, ?, ?, ?, ?, 0)
+                ON CONFLICT(filename) DO UPDATE SET
+                    url=excluded.url, title=excluded.title, photo_rin=excluded.photo_rin
+            """, (ob["filename"], ob["url"], ob["filesize"], ob["title"], ob["photo_rin"]))
+            photo_id = cursor.execute(
+                "SELECT id FROM photos WHERE filename = ?", (ob["filename"],)
+            ).fetchone()["id"]
+            cursor.execute("""
+                INSERT OR IGNORE INTO photo_tags (photo_id, person_id, is_primary, is_prim_cutout)
+                VALUES (?, ?, 0, 0)
+            """, (photo_id, person_id))
+            cursor.execute(
+                "INSERT INTO event_photos (event_id, photo_id) VALUES (?, ?)",
+                (event_id, photo_id))
+        if pending_event_objes:
+            print(f"  Fotos de eventos: {len(pending_event_objes)} vinculadas")
 
         # Restore classifications from photo_classifications (survives DROP TABLE)
         # Priority (highest last, so it overwrites lower): tag → clip_auto → clip_pending → human
