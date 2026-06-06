@@ -467,6 +467,7 @@ def get_connection(db_path):
            )""",
         "CREATE TABLE IF NOT EXISTS event_notes (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER NOT NULL, content TEXT NOT NULL)",
         "CREATE TABLE IF NOT EXISTS event_sources (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER NOT NULL, source_ref TEXT, page TEXT, quay INTEGER, data_date TEXT, data_text TEXT)",
+        "ALTER TABLE event_sources ADD COLUMN source_title TEXT",
         "CREATE TABLE IF NOT EXISTS event_photos (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER NOT NULL, photo_id INTEGER NOT NULL)",
     ]:
         try:
@@ -1362,7 +1363,7 @@ def get_person_dossier(conn, person_id):
             f"SELECT event_id, content FROM event_notes WHERE event_id IN ({ph})",
             event_ids).fetchall()
         src_rows = conn.execute(
-            f"SELECT event_id, source_ref, page, quay, data_date, data_text "
+            f"SELECT event_id, source_ref, source_title, page, quay, data_date, data_text "
             f"FROM event_sources WHERE event_id IN ({ph})",
             event_ids).fetchall()
         photo_rows = conn.execute(

@@ -174,6 +174,27 @@ def parse_gedcom_albums(lines):
     return albums
 
 
+def parse_gedcom_sources(lines):
+    """Parsea registros '0 @SxxxxX@ SOUR' y retorna {source_ref: title}."""
+    sources = {}
+    current_id = None
+    for line in lines:
+        line = line.rstrip("\n")
+        m = re.match(r"^0\s+(@S\S+@)\s+SOUR", line)
+        if m:
+            current_id = m.group(1)
+            sources[current_id] = None
+            continue
+        if current_id:
+            if re.match(r"^0\s", line):
+                current_id = None
+                continue
+            m1 = re.match(r"^1\s+TITL\s+(.*)", line)
+            if m1:
+                sources[current_id] = m1.group(1).strip()
+    return sources
+
+
 def parse_gedcom_photos(lines):
     """Parsea INDI → OBJE records con _POSITION. Retorna (dict de fotos, dict de INDI → OBJE blocks)."""
     photos = {}
@@ -793,9 +814,11 @@ def main():
     print(f"  Entierros: {sum(len(v) for v in burials.values())}")
     print(f"  Eventos: {sum(len(v) for v in events_list.values())}")
 
-    print("\nFase 2: Parseando GEDCOM (fotos)...")
+    print("\nFase 2: Parseando GEDCOM (fotos y fuentes)...")
     albums = parse_gedcom_albums(lines)
     photos, indi_obje_blocks = parse_gedcom_photos(lines)
+    gedcom_sources = parse_gedcom_sources(lines)
+    print(f"  Fuentes bibliográficas: {len(gedcom_sources)}")
     print(f"  Fotos únicas: {len(photos)}")
     print(f"  Álbumes: {len(albums)}")
 
@@ -1107,11 +1130,12 @@ def main():
                         (event_id, note_text))
 
                 for src in ev.get("sources", []):
+                    source_title = gedcom_sources.get(src["source_ref"])
                     cursor.execute(
                         "INSERT INTO event_sources "
-                        "(event_id, source_ref, page, quay, data_date, data_text) "
-                        "VALUES (?, ?, ?, ?, ?, ?)",
-                        (event_id, src["source_ref"], src["page"], src["quay"],
+                        "(event_id, source_ref, source_title, page, quay, data_date, data_text) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        (event_id, src["source_ref"], source_title, src["page"], src["quay"],
                          src["data_date"], src["data_text"]))
 
                 for ob in ev.get("objes", []):

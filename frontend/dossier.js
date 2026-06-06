@@ -1529,10 +1529,11 @@ function renderGraphicMode(events) {
                                 const quayLabels = ['No fiable','Cuestionable','Evidencia secundaria','Evidencia directa','Primaria y directa'];
                                 const quayLabel = (src.quay != null && quayLabels[src.quay]) ? quayLabels[src.quay] : '';
                                 return `<div class="text-xs text-outline/70 border-l-2 border-outline-variant pl-2 space-y-0.5">
-                                    ${src.page ? `<div><span class="font-semibold text-outline">URL:</span> <a href="${src.page}" target="_blank" rel="noopener" class="underline break-all">${src.page}</a></div>` : ''}
+                                    ${src.source_title ? `<div><span class="font-semibold text-outline">Fuente:</span> ${src.source_title}</div>` : ''}
+                                    ${src.data_text ? `<div><span class="font-semibold text-outline">Nota:</span> ${src.data_text}</div>` : ''}
                                     ${src.data_date ? `<div><span class="font-semibold text-outline">Fecha:</span> ${src.data_date}</div>` : ''}
                                     ${quayLabel ? `<div><span class="font-semibold text-outline">Fiabilidad:</span> ${quayLabel}</div>` : ''}
-                                    ${src.data_text ? `<div><span class="font-semibold text-outline">Nota:</span> ${src.data_text}</div>` : ''}
+                                    ${src.page ? `<div><span class="font-semibold text-outline">URL:</span> <a href="${src.page}" target="_blank" rel="noopener" class="underline break-all">${src.page}</a></div>` : ''}
                                 </div>`;
                             }).join('')}
                         </div>` : ''}
@@ -1580,10 +1581,11 @@ function renderListMode(events) {
                                 const quayLabels = ['No fiable','Cuestionable','Evidencia secundaria','Evidencia directa','Primaria y directa'];
                                 const quayLabel = (src.quay != null && quayLabels[src.quay]) ? quayLabels[src.quay] : '';
                                 return `<div class="text-xs text-outline/70 pl-2 border-l-2 border-outline-variant space-y-0.5">
-                                  ${src.page ? `<div><span class="font-semibold">URL:</span> <a href="${src.page}" target="_blank" rel="noopener" class="underline break-all">${src.page}</a></div>` : ''}
+                                  ${src.source_title ? `<div><span class="font-semibold">Fuente:</span> ${src.source_title}</div>` : ''}
+                                  ${src.data_text ? `<div><span class="font-semibold">Nota:</span> ${src.data_text}</div>` : ''}
                                   ${src.data_date ? `<div><span class="font-semibold">Fecha:</span> ${src.data_date}</div>` : ''}
                                   ${quayLabel ? `<div><span class="font-semibold">Fiabilidad:</span> ${quayLabel}</div>` : ''}
-                                  ${src.data_text ? `<div><span class="font-semibold">Nota:</span> ${src.data_text}</div>` : ''}
+                                  ${src.page ? `<div><span class="font-semibold">URL:</span> <a href="${src.page}" target="_blank" rel="noopener" class="underline break-all">${src.page}</a></div>` : ''}
                                 </div>`;
                               }).join('')}</div>`
                             : '';
