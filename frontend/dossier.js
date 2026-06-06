@@ -1519,29 +1519,32 @@ function renderGraphicMode(events) {
                 <div class="space-y-1">
                     ${photosHtml}
                     ${e.lines.map(line => `<div class="text-sm text-outline">${line}</div>`).join('')}
-                    ${e.note ? `<div class="text-sm text-outline italic mt-2">${e.note}</div>` : ''}
+                    ${e.note ? `<div class="text-sm text-outline italic mt-2 pl-3 border-l-2 border-primary/30">${e.note}</div>` : ''}
                     ${(e.extraNotes && e.extraNotes.length > 0)
-                        ? e.extraNotes.map(n => `<div class="text-sm text-outline italic mt-2">${n}</div>`).join('')
+                        ? e.extraNotes.map(n => `<div class="text-sm text-outline italic mt-2 pl-3 border-l-2 border-primary/30">${n}</div>`).join('')
                         : ''}
                     ${(e.extraSources && e.extraSources.length > 0) ? `
-                        <div class="mt-3 space-y-1">
+                        <div class="mt-3 space-y-2">
                             ${e.extraSources.map(src => {
                                 const quayLabels = ['No fiable','Cuestionable','Evidencia secundaria','Evidencia directa','Primaria y directa'];
                                 const quayLabel = (src.quay != null && quayLabels[src.quay]) ? quayLabels[src.quay] : '';
-                                const linkHtml = src.page ? `<a href="${src.page}" target="_blank" rel="noopener" class="underline break-all">${src.page}</a>` : '';
-                                return `<div class="text-xs text-outline/70 border-l-2 border-outline-variant pl-2">
-                                    ${linkHtml}
-                                    ${src.data_date ? `<span class="ml-1">(${src.data_date})</span>` : ''}
-                                    ${quayLabel ? `<span class="ml-1 italic">${quayLabel}</span>` : ''}
-                                    ${src.data_text ? `<div class="mt-0.5">${src.data_text}</div>` : ''}
+                                return `<div class="text-xs text-outline/70 border-l-2 border-outline-variant pl-2 space-y-0.5">
+                                    ${src.page ? `<div><span class="font-semibold text-outline">URL:</span> <a href="${src.page}" target="_blank" rel="noopener" class="underline break-all">${src.page}</a></div>` : ''}
+                                    ${src.data_date ? `<div><span class="font-semibold text-outline">Fecha:</span> ${src.data_date}</div>` : ''}
+                                    ${quayLabel ? `<div><span class="font-semibold text-outline">Fiabilidad:</span> ${quayLabel}</div>` : ''}
+                                    ${src.data_text ? `<div><span class="font-semibold text-outline">Nota:</span> ${src.data_text}</div>` : ''}
                                 </div>`;
                             }).join('')}
                         </div>` : ''}
                     ${(e.eventPhotos && e.eventPhotos.length > 0) ? `
-                        <div class="flex gap-2 mt-3 flex-wrap">
-                            ${e.eventPhotos.map(ph => `<img src="/photos/${ph.filename}" title="${(ph.title||'').replace(/"/g,'&quot;')}"
-                                class="h-16 w-16 object-cover rounded cursor-pointer border border-outline-variant/40 hover:opacity-80 transition-opacity"
-                                onclick="openPhotoModal(${ph.id})">`).join('')}
+                        <div class="flex gap-4 mt-3 flex-wrap">
+                            ${e.eventPhotos.map(ph => `
+                                <div class="flex flex-col items-center gap-1" style="max-width:96px">
+                                    <img src="/photos/${ph.filename}" title="${(ph.title||'').replace(/"/g,'&quot;')}"
+                                        class="h-16 w-16 object-cover rounded cursor-pointer border border-outline-variant/40 hover:opacity-80 transition-opacity"
+                                        onclick="openPhotoModal(${ph.id})">
+                                    ${ph.title ? `<div class="text-xs text-outline text-center leading-tight">${ph.title}</div>` : ''}
+                                </div>`).join('')}
                         </div>` : ''}
                 </div>
             </div>
@@ -1568,21 +1571,30 @@ function renderListMode(events) {
                     ${events.map(e => {
                         const fecha = e.lines[0] || '';
                         const descripcion = e.lines.slice(1).join(' • ') || '';
-                        const notaBase = e.note ? `<div class="italic">${e.note}</div>` : '';
+                        const notaBase = e.note ? `<div class="italic pl-2 border-l-2 border-primary/30">${e.note}</div>` : '';
                         const extraNotesHtml = (e.extraNotes && e.extraNotes.length > 0)
-                            ? e.extraNotes.map(n => `<div class="italic mt-1">${n}</div>`).join('')
+                            ? e.extraNotes.map(n => `<div class="italic mt-1 pl-2 border-l-2 border-primary/30">${n}</div>`).join('')
                             : '';
                         const extraSourcesHtml = (e.extraSources && e.extraSources.length > 0)
-                            ? `<div class="mt-1 space-y-0.5">${e.extraSources.map(src => {
-                                const linkHtml = src.page ? `<a href="${src.page}" target="_blank" rel="noopener" class="underline text-primary break-all">${src.page}</a>` : '';
-                                return `<div class="text-xs text-outline/70">${linkHtml}${src.data_text ? ` — ${src.data_text}` : ''}</div>`;
+                            ? `<div class="mt-1 space-y-1">${e.extraSources.map(src => {
+                                const quayLabels = ['No fiable','Cuestionable','Evidencia secundaria','Evidencia directa','Primaria y directa'];
+                                const quayLabel = (src.quay != null && quayLabels[src.quay]) ? quayLabels[src.quay] : '';
+                                return `<div class="text-xs text-outline/70 pl-2 border-l-2 border-outline-variant space-y-0.5">
+                                  ${src.page ? `<div><span class="font-semibold">URL:</span> <a href="${src.page}" target="_blank" rel="noopener" class="underline break-all">${src.page}</a></div>` : ''}
+                                  ${src.data_date ? `<div><span class="font-semibold">Fecha:</span> ${src.data_date}</div>` : ''}
+                                  ${quayLabel ? `<div><span class="font-semibold">Fiabilidad:</span> ${quayLabel}</div>` : ''}
+                                  ${src.data_text ? `<div><span class="font-semibold">Nota:</span> ${src.data_text}</div>` : ''}
+                                </div>`;
                               }).join('')}</div>`
                             : '';
                         const eventPhotosHtml = (e.eventPhotos && e.eventPhotos.length > 0)
-                            ? `<div class="flex gap-1 mt-1 flex-wrap">${e.eventPhotos.map(ph =>
-                                `<img src="/photos/${ph.filename}" title="${(ph.title||'').replace(/"/g,'&quot;')}"
+                            ? `<div class="flex gap-3 mt-1 flex-wrap">${e.eventPhotos.map(ph =>
+                                `<div class="flex flex-col items-center gap-0.5" style="max-width:72px">
+                                  <img src="/photos/${ph.filename}" title="${(ph.title||'').replace(/"/g,'&quot;')}"
                                     class="h-10 w-10 object-cover rounded cursor-pointer border border-outline-variant/40"
-                                    onclick="openPhotoModal(${ph.id})">`).join('')}</div>`
+                                    onclick="openPhotoModal(${ph.id})">
+                                  ${ph.title ? `<div class="text-xs text-outline text-center leading-tight">${ph.title}</div>` : ''}
+                                </div>`).join('')}</div>`
                             : '';
                         return `
                             <tr class="border-b border-outline-variant/20 hover:bg-outline-variant/5 transition-colors" data-type="${e.type}">

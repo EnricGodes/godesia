@@ -1376,7 +1376,11 @@ def get_person_dossier(conn, person_id):
         sources_map = _defaultdict(list)
         photos_map  = _defaultdict(list)
         for r in notes_rows:  notes_map[r["event_id"]].append(r["content"])
-        for r in src_rows:    sources_map[r["event_id"]].append(dict(r))
+        for r in src_rows:
+            src_dict = dict(r)
+            if src_dict.get("data_date"):
+                src_dict["data_date"] = convert_date_to_spanish(src_dict["data_date"])
+            sources_map[r["event_id"]].append(src_dict)
         for r in photo_rows:  photos_map[r["event_id"]].append(dict(r))
 
         for ev in events_list:
