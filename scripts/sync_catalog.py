@@ -421,7 +421,20 @@ def parse_gedcom_people(lines):
                                 person["birth_place"] = birt_line.split("PLAC", 1)[1].strip()
                                 person["birth_city"] = extract_city_from_place(person["birth_place"])
                             elif "NOTE" in birt_line:
-                                person["birth_note"] = birt_line.split("NOTE", 1)[1].strip()
+                                note_text = birt_line.split("NOTE", 1)[1].strip()
+                                j += 1
+                                while j < len(lines):
+                                    cl = lines[j].rstrip("\n")
+                                    mc = re.match(r"^3\s+(CONC|CONT)\s?(.*)", cl)
+                                    if mc:
+                                        note_text += ("\n" if mc.group(1) == "CONT" else "") + mc.group(2)
+                                        j += 1
+                                    elif re.match(r"^[012]\s", cl) or not cl:
+                                        break
+                                    else:
+                                        note_text += cl; j += 1
+                                person["birth_note"] = note_text
+                                continue
                             j += 1
                     elif tag == "DEAT":
                         person["_has_deat"] = True
@@ -438,7 +451,20 @@ def parse_gedcom_people(lines):
                             elif "CAUS" in deat_line:
                                 person["death_cause"] = deat_line.split("CAUS", 1)[1].strip()
                             elif "NOTE" in deat_line:
-                                person["death_note"] = deat_line.split("NOTE", 1)[1].strip()
+                                note_text = deat_line.split("NOTE", 1)[1].strip()
+                                j += 1
+                                while j < len(lines):
+                                    cl = lines[j].rstrip("\n")
+                                    mc = re.match(r"^3\s+(CONC|CONT)\s?(.*)", cl)
+                                    if mc:
+                                        note_text += ("\n" if mc.group(1) == "CONT" else "") + mc.group(2)
+                                        j += 1
+                                    elif re.match(r"^[012]\s", cl) or not cl:
+                                        break
+                                    else:
+                                        note_text += cl; j += 1
+                                person["death_note"] = note_text
+                                continue
                             elif "AGE" in deat_line:
                                 person["death_age"] = deat_line.split("AGE", 1)[1].strip()
                             j += 1
@@ -482,10 +508,24 @@ def parse_gedcom_people(lines):
                                 elif t2 == "AGE":
                                     ev_data["age"] = v2
                                 elif t2 == "NOTE":
-                                    ev_data["notes"].append(v2)
-                                    if ev_data["note"] is None:
-                                        ev_data["note"] = v2
+                                    note_text = v2
                                     j += 1
+                                    while j < len(lines):
+                                        cont_line = lines[j].rstrip("\n")
+                                        m3 = re.match(r"^3\s+(CONC|CONT)\s?(.*)", cont_line)
+                                        if m3:
+                                            sep = "\n" if m3.group(1) == "CONT" else ""
+                                            note_text += sep + m3.group(2)
+                                            j += 1
+                                        elif re.match(r"^[012]\s", cont_line) or not cont_line:
+                                            break
+                                        else:
+                                            note_text += cont_line
+                                            j += 1
+                                    note_text = clean_note_html(note_text)
+                                    ev_data["notes"].append(note_text)
+                                    if ev_data["note"] is None:
+                                        ev_data["note"] = note_text
                                     continue
                                 elif t2 == "CAUS":
                                     ev_data["cause"] = v2
@@ -593,16 +633,17 @@ def parse_gedcom_people(lines):
                             j += 1
                         residences[person_id].append(resi_data)
                     elif tag == "NOTE":
-                        # Accumulate raw content including non-CONC continuation lines
+                        # Accumulate raw content including CONC/CONT continuation lines
                         note_content = rest
                         j = i + 1
                         while j < len(lines):
                             raw_line = lines[j].rstrip("\n")
-                            conc_match = re.match(r"^2\s+CONC\s?(.*)", raw_line)
+                            conc_match = re.match(r"^2\s+(CONC|CONT)\s?(.*)", raw_line)
                             if conc_match:
-                                note_content += conc_match.group(1)
+                                sep = "\n" if conc_match.group(1) == "CONT" else ""
+                                note_content += sep + conc_match.group(2)
                                 j += 1
-                            elif re.match(r"^\d+\s+", raw_line) and not raw_line.startswith("2 CONC"):
+                            elif re.match(r"^\d+\s+", raw_line):
                                 break  # New GEDCOM record — stop
                             else:
                                 # Raw HTML continuation line (no level prefix)
