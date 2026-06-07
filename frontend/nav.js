@@ -29,6 +29,7 @@
     { label: 'Godes Diago',       href: '/albums.html#A800003' },
     { label: 'Godes Güell',       href: '/albums.html#A800002' },
     { label: 'Godes Hospital',    href: '/albums.html#A800005' },
+    { label: 'Godes Molina',      href: '/albums.html#A800001' },
     { label: 'Godes Schmid',      href: '/albums.html#A800006' },
     { label: 'Godes Terrats',     href: '/albums.html#A800007' },
     { label: 'Pujol Godes',       href: '/albums.html#A800004' },
