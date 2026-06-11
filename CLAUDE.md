@@ -140,3 +140,5 @@ La tabla GEDCOM `burial` solo actúa como sugerencia en el gestor (`GET /api/adm
 ## Git Workflow
 
 This project uses GitHub (EnricGodes/godesia) for version control. As work is completed, commit changes with clean, descriptive commit messages and push to GitHub.
+
+**Deployment (Railway) reads the data from the repo**: whenever `data/godesia.db` or `data/cemetery_photos/` change (imports, admin edits, niche photos), run `PRAGMA wal_checkpoint(TRUNCATE)` on the DB and include them in the commit. Otherwise Railway serves stale data. `data/photos/` (GEDCOM photos, 1000+) stays gitignored and is synced separately via the admin upload endpoint.
