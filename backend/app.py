@@ -21,6 +21,7 @@ from database import (
     get_albums_list, get_album_photos, get_photos_people_list,
     get_document_types, get_document_photos, get_document_albums, get_documents_people_list,
     get_setting, set_setting,
+    get_cemeteries_summary, get_cemetery_detail, get_person_niche,
 )
 from query_router import QueryRouter
 from query_engine import QueryEngine
@@ -35,6 +36,7 @@ PHOTOS_DIR = DATA_DIR / "photos"
 FRONTEND_DIR = BASE_DIR / "frontend"
 DB_PATH = DATA_DIR / "godesia.db"
 SUGGESTIONS_DIR = DATA_DIR / "suggestions"
+CEMETERY_PHOTOS_DIR = DATA_DIR / "cemetery_photos"
 
 app = FastAPI(title="Godesia", description="Consulta genealógica en lenguaje natural")
 app.include_router(admin_router)
@@ -439,6 +441,35 @@ async def album_photos(
     return get_album_photos(db_conn, album_id, q=q, sort=sort, person_id=person_id, page=page, limit=limit, show_docs=show_docs)
 
 
+@app.get("/api/cemeteries")
+async def cemeteries_list():
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    return get_cemeteries_summary(db_conn)
+
+
+@app.get("/api/cemeteries/locate/{person_id}")
+async def cemeteries_locate(person_id: str):
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    if not person_id.startswith("@"):
+        person_id = "@%s@" % person_id
+    niche = get_person_niche(db_conn, person_id)
+    if not niche:
+        raise HTTPException(status_code=404, detail="Sin sepultura registrada")
+    return niche
+
+
+@app.get("/api/cemeteries/{cemetery_id}")
+async def cemetery_detail(cemetery_id: int):
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    cemetery = get_cemetery_detail(db_conn, cemetery_id)
+    if not cemetery:
+        raise HTTPException(status_code=404, detail="Cementerio no encontrado")
+    return cemetery
+
+
 @app.get("/api/documents")
 async def documents_types():
     if not db_conn:
@@ -800,6 +831,10 @@ async def api_post_settings(body: SettingBody):
 # Serve photos
 if PHOTOS_DIR.exists():
     app.mount("/photos", StaticFiles(directory=str(PHOTOS_DIR)), name="photos")
+
+# Serve niche/registry photos (manual data, outside the GEDCOM photos table)
+CEMETERY_PHOTOS_DIR.mkdir(exist_ok=True)
+app.mount("/cemetery_photos", StaticFiles(directory=str(CEMETERY_PHOTOS_DIR)), name="cemetery_photos")
 
 # Serve frontend
 app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")

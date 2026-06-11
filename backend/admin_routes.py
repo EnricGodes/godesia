@@ -2258,3 +2258,239 @@ async def dedup_stats():
         "blocked": blocked,
         "kept_pairs": kept,
     }
+
+
+# ---------------------------------------------------------------------------
+# Cemeteries & niches (manual data, survives GEDCOM re-imports)
+# ---------------------------------------------------------------------------
+
+
+class CemeteryBody(BaseModel):
+    name: str
+    city: str = ""
+    lat: Optional[float] = None
+    lng: Optional[float] = None
+    description: str = ""
+
+
+def _cemetery_photos_dir() -> Path:
+    d = _base_dir / "data" / "cemetery_photos"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _save_niche_photo(niche_id: int, kind: str, upload: UploadFile, old_file: Optional[str]) -> str:
+    """Save an uploaded niche/registry photo, resized to max 2000px. Returns filename."""
+    from PIL import Image
+    ext = Path(upload.filename or "").suffix.lower()
+    if ext not in (".jpg", ".jpeg", ".png", ".webp"):
+        raise HTTPException(status_code=400, detail=f"Formato no soportado: {ext}")
+    filename = f"niche_{niche_id}_{kind}_{int(time.time())}{ext}"
+    dest = _cemetery_photos_dir() / filename
+    dest.write_bytes(upload.file.read())
+    try:
+        img = Image.open(dest)
+        if max(img.size) > 2000:
+            img.thumbnail((2000, 2000))
+            img.save(dest)
+    except Exception:
+        pass  # keep the original bytes if Pillow can't process them
+    if old_file:
+        (_cemetery_photos_dir() / old_file).unlink(missing_ok=True)
+    return filename
+
+
+def _delete_niche_files(db, niche_id: int):
+    row = db.execute("SELECT photo_file, record_file FROM niches WHERE id = ?", (niche_id,)).fetchone()
+    if row:
+        for f in (row["photo_file"], row["record_file"]):
+            if f:
+                (_cemetery_photos_dir() / f).unlink(missing_ok=True)
+
+
+def _norm_person_id(person_id: str) -> str:
+    return person_id if person_id.startswith("@") else f"@{person_id}@"
+
+
+@router.post("/cemeteries")
+async def create_cemetery(body: CemeteryBody):
+    db = _db()
+    cur = db.execute(
+        "INSERT INTO cemeteries (name, city, lat, lng, description) VALUES (?, ?, ?, ?, ?)",
+        (body.name.strip(), body.city.strip(), body.lat, body.lng, body.description.strip()),
+    )
+    db.commit()
+    return {"ok": True, "id": cur.lastrowid}
+
+
+@router.put("/cemeteries/{cemetery_id}")
+async def update_cemetery(cemetery_id: int, body: CemeteryBody):
+    db = _db()
+    cur = db.execute(
+        "UPDATE cemeteries SET name=?, city=?, lat=?, lng=?, description=?, updated_at=datetime('now') WHERE id=?",
+        (body.name.strip(), body.city.strip(), body.lat, body.lng, body.description.strip(), cemetery_id),
+    )
+    db.commit()
+    if cur.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Cementerio no encontrado")
+    return {"ok": True}
+
+
+@router.delete("/cemeteries/{cemetery_id}")
+async def delete_cemetery(cemetery_id: int, force: int = 0):
+    db = _db()
+    niche_ids = [r[0] for r in db.execute(
+        "SELECT id FROM niches WHERE cemetery_id = ?", (cemetery_id,)).fetchall()]
+    if niche_ids and not force:
+        raise HTTPException(status_code=409, detail=f"El cementerio tiene {len(niche_ids)} nichos. Usa force=1 para borrar todo.")
+    for nid in niche_ids:
+        _delete_niche_files(db, nid)
+        db.execute("DELETE FROM niche_people WHERE niche_id = ?", (nid,))
+    db.execute("DELETE FROM niches WHERE cemetery_id = ?", (cemetery_id,))
+    cur = db.execute("DELETE FROM cemeteries WHERE id = ?", (cemetery_id,))
+    db.commit()
+    if cur.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Cementerio no encontrado")
+    return {"ok": True, "niches_deleted": len(niche_ids)}
+
+
+@router.post("/cemeteries/{cemetery_id}/niches")
+async def create_niche(
+    cemetery_id: int,
+    name: str = Form(...),
+    lat: Optional[float] = Form(None),
+    lng: Optional[float] = Form(None),
+    notes: str = Form(""),
+    photo: Optional[UploadFile] = File(None),
+    record_photo: Optional[UploadFile] = File(None),
+):
+    db = _db()
+    if not db.execute("SELECT 1 FROM cemeteries WHERE id = ?", (cemetery_id,)).fetchone():
+        raise HTTPException(status_code=404, detail="Cementerio no encontrado")
+    cur = db.execute(
+        "INSERT INTO niches (cemetery_id, name, lat, lng, notes) VALUES (?, ?, ?, ?, ?)",
+        (cemetery_id, name.strip(), lat, lng, notes.strip()),
+    )
+    niche_id = cur.lastrowid
+    if photo and photo.filename:
+        db.execute("UPDATE niches SET photo_file = ? WHERE id = ?",
+                   (_save_niche_photo(niche_id, "photo", photo, None), niche_id))
+    if record_photo and record_photo.filename:
+        db.execute("UPDATE niches SET record_file = ? WHERE id = ?",
+                   (_save_niche_photo(niche_id, "record", record_photo, None), niche_id))
+    db.commit()
+    return {"ok": True, "id": niche_id}
+
+
+@router.put("/niches/{niche_id}")
+async def update_niche(
+    niche_id: int,
+    name: str = Form(...),
+    lat: Optional[float] = Form(None),
+    lng: Optional[float] = Form(None),
+    notes: str = Form(""),
+    remove_photo: int = Form(0),
+    remove_record: int = Form(0),
+    photo: Optional[UploadFile] = File(None),
+    record_photo: Optional[UploadFile] = File(None),
+):
+    db = _db()
+    row = db.execute("SELECT * FROM niches WHERE id = ?", (niche_id,)).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Nicho no encontrado")
+    db.execute(
+        "UPDATE niches SET name=?, lat=?, lng=?, notes=?, updated_at=datetime('now') WHERE id=?",
+        (name.strip(), lat, lng, notes.strip(), niche_id),
+    )
+    if photo and photo.filename:
+        db.execute("UPDATE niches SET photo_file = ? WHERE id = ?",
+                   (_save_niche_photo(niche_id, "photo", photo, row["photo_file"]), niche_id))
+    elif remove_photo and row["photo_file"]:
+        (_cemetery_photos_dir() / row["photo_file"]).unlink(missing_ok=True)
+        db.execute("UPDATE niches SET photo_file = NULL WHERE id = ?", (niche_id,))
+    if record_photo and record_photo.filename:
+        db.execute("UPDATE niches SET record_file = ? WHERE id = ?",
+                   (_save_niche_photo(niche_id, "record", record_photo, row["record_file"]), niche_id))
+    elif remove_record and row["record_file"]:
+        (_cemetery_photos_dir() / row["record_file"]).unlink(missing_ok=True)
+        db.execute("UPDATE niches SET record_file = NULL WHERE id = ?", (niche_id,))
+    db.commit()
+    return {"ok": True}
+
+
+@router.delete("/niches/{niche_id}")
+async def delete_niche(niche_id: int):
+    db = _db()
+    _delete_niche_files(db, niche_id)
+    db.execute("DELETE FROM niche_people WHERE niche_id = ?", (niche_id,))
+    cur = db.execute("DELETE FROM niches WHERE id = ?", (niche_id,))
+    db.commit()
+    if cur.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Nicho no encontrado")
+    return {"ok": True}
+
+
+class NichePersonBody(BaseModel):
+    person_id: str
+
+
+@router.post("/niches/{niche_id}/people")
+async def assign_niche_person(niche_id: int, body: NichePersonBody):
+    db = _db()
+    if not db.execute("SELECT 1 FROM niches WHERE id = ?", (niche_id,)).fetchone():
+        raise HTTPException(status_code=404, detail="Nicho no encontrado")
+    person_id = _norm_person_id(body.person_id)
+    if not db.execute("SELECT 1 FROM people WHERE id = ?", (person_id,)).fetchone():
+        raise HTTPException(status_code=404, detail="Persona no encontrada")
+    db.execute("INSERT OR IGNORE INTO niche_people (niche_id, person_id) VALUES (?, ?)",
+               (niche_id, person_id))
+    db.commit()
+    return {"ok": True}
+
+
+@router.delete("/niches/{niche_id}/people/{person_id}")
+async def remove_niche_person(niche_id: int, person_id: str):
+    db = _db()
+    cur = db.execute("DELETE FROM niche_people WHERE niche_id = ? AND person_id = ?",
+                     (niche_id, _norm_person_id(person_id)))
+    db.commit()
+    if cur.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Asignación no encontrada")
+    return {"ok": True}
+
+
+@router.get("/cemeteries/{cemetery_id}/burial-suggestions")
+async def burial_suggestions(cemetery_id: int):
+    """People whose GEDCOM burial place matches this cemetery's name or city,
+    excluding those already assigned to one of its niches."""
+    db = _db()
+    cem = db.execute("SELECT name, city FROM cemeteries WHERE id = ?", (cemetery_id,)).fetchone()
+    if not cem:
+        raise HTTPException(status_code=404, detail="Cementerio no encontrado")
+    # Match by the distinctive part of the name: the same cemetery appears in
+    # burial.place as "Cementerio Poble Nou" and "Cementiri de Poble Nou".
+    core = cem["name"].strip()
+    core_low = core.lower()
+    for prefix in ("cementiri municipal", "cementerio municipal", "cementiri", "cementerio", "cemetery"):
+        if core_low.startswith(prefix):
+            core = core[len(prefix):].strip()
+            core_low = core.lower()
+            break
+    for article in ("de la ", "de les ", "de los ", "dels ", "del ", "de "):
+        if core_low.startswith(article):
+            core = core[len(article):].strip()
+            break
+    core = core or cem["name"].strip()
+    rows = db.execute("""
+        SELECT DISTINCT b.person_id, p.name, p.birth_year, p.death_year, p.photo_file,
+               b.place, b.place_detail, b.date
+        FROM burial b
+        JOIN people p ON p.id = b.person_id
+        WHERE REPLACE(NORMALIZE(b.place), ' ', '') LIKE '%' || REPLACE(NORMALIZE(?), ' ', '') || '%'
+          AND b.person_id NOT IN (
+              SELECT np.person_id FROM niche_people np
+              JOIN niches n ON n.id = np.niche_id
+              WHERE n.cemetery_id = ?)
+        ORDER BY p.name
+    """, (core, cemetery_id)).fetchall()
+    return {"suggestions": [dict(r) for r in rows]}
