@@ -788,7 +788,11 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start;">
                     <div>
                         <div class="form-group">
-                            <label>Nombre del nicho</label>
+                            <label>Título (p.ej. Familia Godes Molina)</label>
+                            <input type="text" class="form-input" id="niche-title" placeholder="Familia Godes Molina"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Ubicación / referencia del nicho</label>
                             <input type="text" class="form-input" id="niche-name" placeholder="Nínxol 312, Departament Tercer…"/>
                         </div>
                         <div class="form-group">
@@ -802,14 +806,14 @@
                         </div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
                             <div class="form-group">
-                                <label>Foto del nicho</label>
-                                <input type="file" id="niche-photo" accept="image/*" style="font-size:.82rem;"/>
-                                <div id="niche-photo-preview" style="margin-top:.4rem;"></div>
+                                <label>Fotos del nicho (puedes elegir varias)</label>
+                                <input type="file" id="niche-photo" accept="image/*" multiple style="font-size:.82rem;"/>
+                                <div id="niche-photo-preview" style="margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap;"></div>
                             </div>
                             <div class="form-group">
-                                <label>Foto del registro</label>
-                                <input type="file" id="niche-record" accept="image/*" style="font-size:.82rem;"/>
-                                <div id="niche-record-preview" style="margin-top:.4rem;"></div>
+                                <label>Fotos del registro</label>
+                                <input type="file" id="niche-record" accept="image/*" multiple style="font-size:.82rem;"/>
+                                <div id="niche-record-preview" style="margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap;"></div>
                             </div>
                         </div>
                     </div>

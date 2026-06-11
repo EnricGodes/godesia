@@ -293,6 +293,7 @@ CREATE TABLE IF NOT EXISTS niches (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     cemetery_id INTEGER NOT NULL,
     name TEXT NOT NULL,
+    title TEXT,
     lat REAL,
     lng REAL,
     photo_file TEXT,
@@ -300,6 +301,14 @@ CREATE TABLE IF NOT EXISTS niches (
     notes TEXT,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS niche_photos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    niche_id INTEGER NOT NULL,
+    filename TEXT NOT NULL,
+    kind TEXT DEFAULT 'photo',
+    created_at TEXT DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS niche_people (
@@ -312,6 +321,7 @@ CREATE TABLE IF NOT EXISTS niche_people (
 
 CREATE INDEX IF NOT EXISTS idx_niches_cemetery ON niches(cemetery_id);
 CREATE INDEX IF NOT EXISTS idx_niche_people_person ON niche_people(person_id);
+CREATE INDEX IF NOT EXISTS idx_niche_photos_niche ON niche_photos(niche_id);
 """
 
 
@@ -511,6 +521,14 @@ def get_connection(db_path):
         "CREATE TABLE IF NOT EXISTS niche_people (id INTEGER PRIMARY KEY AUTOINCREMENT, niche_id INTEGER NOT NULL, person_id TEXT NOT NULL, assigned_at TEXT DEFAULT (datetime('now')), UNIQUE(niche_id, person_id))",
         "CREATE INDEX IF NOT EXISTS idx_niches_cemetery ON niches(cemetery_id)",
         "CREATE INDEX IF NOT EXISTS idx_niche_people_person ON niche_people(person_id)",
+        "ALTER TABLE niches ADD COLUMN title TEXT",
+        "CREATE TABLE IF NOT EXISTS niche_photos (id INTEGER PRIMARY KEY AUTOINCREMENT, niche_id INTEGER NOT NULL, filename TEXT NOT NULL, kind TEXT DEFAULT 'photo', created_at TEXT DEFAULT (datetime('now')))",
+        "CREATE INDEX IF NOT EXISTS idx_niche_photos_niche ON niche_photos(niche_id)",
+        # Migrate legacy single-photo columns into niche_photos (idempotent: columns are nulled)
+        "INSERT INTO niche_photos (niche_id, filename, kind) SELECT id, photo_file, 'photo' FROM niches WHERE photo_file IS NOT NULL",
+        "UPDATE niches SET photo_file = NULL WHERE photo_file IS NOT NULL",
+        "INSERT INTO niche_photos (niche_id, filename, kind) SELECT id, record_file, 'record' FROM niches WHERE record_file IS NOT NULL",
+        "UPDATE niches SET record_file = NULL WHERE record_file IS NOT NULL",
     ]:
         try:
             conn.execute(stmt)
@@ -630,21 +648,54 @@ def get_cemetery_detail(conn, cemetery_id):
     for n in niches:
         niche = dict(n)
         people = conn.execute("""
-            SELECT p.id, p.name, p.birth_year, p.death_year, p.photo_file, p.is_alive, p.sex
+            SELECT p.id, p.name, p.birth_year, p.death_year, p.death_date, p.photo_file, p.is_alive, p.sex
             FROM niche_people np
             JOIN people p ON p.id = np.person_id
             WHERE np.niche_id = ?
-            ORDER BY p.birth_year
+            ORDER BY (p.death_year IS NULL), p.death_year, p.name
         """, (n["id"],)).fetchall()
         niche["people"] = [dict(p) for p in people]
+        niche["photos"] = get_niche_photos(conn, n["id"])
         result["niches"].append(niche)
     return result
+
+
+def get_niche_photos(conn, niche_id):
+    """Photos of a niche (kind: 'photo' = nicho, 'record' = registro)."""
+    rows = conn.execute(
+        "SELECT id, filename, kind FROM niche_photos WHERE niche_id = ? ORDER BY kind, id",
+        (niche_id,)
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_cemeteries_overview(conn):
+    """Sidebar data for the public page: all niches and all people buried in them."""
+    niches = conn.execute("""
+        SELECT n.id, n.title, n.name, n.lat, n.lng, n.cemetery_id,
+               c.name AS cemetery_name, c.city AS cemetery_city,
+               COUNT(np.id) AS people_count
+        FROM niches n
+        JOIN cemeteries c ON c.id = n.cemetery_id
+        LEFT JOIN niche_people np ON np.niche_id = n.id
+        GROUP BY n.id
+        ORDER BY c.name, COALESCE(n.title, n.name)
+    """).fetchall()
+    people = conn.execute("""
+        SELECT p.id, p.name, p.birth_year, p.death_year, p.photo_file, p.sex,
+               np.niche_id, n.cemetery_id
+        FROM niche_people np
+        JOIN people p ON p.id = np.person_id
+        JOIN niches n ON n.id = np.niche_id
+        ORDER BY p.name
+    """).fetchall()
+    return {"niches": [dict(r) for r in niches], "people": [dict(r) for r in people]}
 
 
 def get_person_niche(conn, person_id):
     """Return the niche (with cemetery info) where a person is buried, or None."""
     row = conn.execute("""
-        SELECT n.id, n.name, n.lat, n.lng, n.photo_file, n.record_file, n.notes,
+        SELECT n.id, n.name, n.title, n.lat, n.lng, n.notes,
                c.id AS cemetery_id, c.name AS cemetery_name, c.city AS cemetery_city
         FROM niche_people np
         JOIN niches n ON n.id = np.niche_id
@@ -652,7 +703,11 @@ def get_person_niche(conn, person_id):
         WHERE np.person_id = ?
         LIMIT 1
     """, (person_id,)).fetchone()
-    return dict(row) if row else None
+    if not row:
+        return None
+    niche = dict(row)
+    niche["photos"] = get_niche_photos(conn, niche["id"])
+    return niche
 
 
 def get_parents(conn, person_id):

@@ -2279,33 +2279,47 @@ def _cemetery_photos_dir() -> Path:
     return d
 
 
-def _save_niche_photo(niche_id: int, kind: str, upload: UploadFile, old_file: Optional[str]) -> str:
-    """Save an uploaded niche/registry photo, resized to max 2000px. Returns filename."""
-    from PIL import Image
+_niche_photo_seq = 0
+
+
+def _save_niche_photo(db, niche_id: int, kind: str, upload: UploadFile) -> str:
+    """Save an uploaded niche/registry photo optimized for the web (EXIF rotation
+    baked in, max 1800px, JPEG quality 85). Registers it in niche_photos."""
+    global _niche_photo_seq
+    from PIL import Image, ImageOps
     ext = Path(upload.filename or "").suffix.lower()
-    if ext not in (".jpg", ".jpeg", ".png", ".webp"):
+    if ext not in (".jpg", ".jpeg", ".png", ".webp", ".heic"):
         raise HTTPException(status_code=400, detail=f"Formato no soportado: {ext}")
-    filename = f"niche_{niche_id}_{kind}_{int(time.time())}{ext}"
+    out_ext = ".png" if ext == ".png" else ".jpg"
+    _niche_photo_seq += 1
+    filename = f"niche_{niche_id}_{kind}_{int(time.time())}_{_niche_photo_seq}{out_ext}"
     dest = _cemetery_photos_dir() / filename
-    dest.write_bytes(upload.file.read())
+    raw = upload.file.read()
     try:
-        img = Image.open(dest)
-        if max(img.size) > 2000:
-            img.thumbnail((2000, 2000))
-            img.save(dest)
+        img = Image.open(io.BytesIO(raw))
+        img = ImageOps.exif_transpose(img)  # bake EXIF orientation into the pixels
+        if max(img.size) > 1800:
+            img.thumbnail((1800, 1800))
+        if out_ext == ".jpg":
+            if img.mode not in ("RGB", "L"):
+                img = img.convert("RGB")
+            img.save(dest, "JPEG", quality=85, optimize=True)
+        else:
+            img.save(dest, optimize=True)
+    except HTTPException:
+        raise
     except Exception:
-        pass  # keep the original bytes if Pillow can't process them
-    if old_file:
-        (_cemetery_photos_dir() / old_file).unlink(missing_ok=True)
+        dest.write_bytes(raw)  # keep the original bytes if Pillow can't process them
+    db.execute("INSERT INTO niche_photos (niche_id, filename, kind) VALUES (?, ?, ?)",
+               (niche_id, filename, kind))
     return filename
 
 
 def _delete_niche_files(db, niche_id: int):
-    row = db.execute("SELECT photo_file, record_file FROM niches WHERE id = ?", (niche_id,)).fetchone()
-    if row:
-        for f in (row["photo_file"], row["record_file"]):
-            if f:
-                (_cemetery_photos_dir() / f).unlink(missing_ok=True)
+    rows = db.execute("SELECT filename FROM niche_photos WHERE niche_id = ?", (niche_id,)).fetchall()
+    for r in rows:
+        (_cemetery_photos_dir() / r["filename"]).unlink(missing_ok=True)
+    db.execute("DELETE FROM niche_photos WHERE niche_id = ?", (niche_id,))
 
 
 def _norm_person_id(person_id: str) -> str:
@@ -2358,26 +2372,27 @@ async def delete_cemetery(cemetery_id: int, force: int = 0):
 async def create_niche(
     cemetery_id: int,
     name: str = Form(...),
+    title: str = Form(""),
     lat: Optional[float] = Form(None),
     lng: Optional[float] = Form(None),
     notes: str = Form(""),
-    photo: Optional[UploadFile] = File(None),
-    record_photo: Optional[UploadFile] = File(None),
+    photos: Optional[list[UploadFile]] = File(None),
+    record_photos: Optional[list[UploadFile]] = File(None),
 ):
     db = _db()
     if not db.execute("SELECT 1 FROM cemeteries WHERE id = ?", (cemetery_id,)).fetchone():
         raise HTTPException(status_code=404, detail="Cementerio no encontrado")
     cur = db.execute(
-        "INSERT INTO niches (cemetery_id, name, lat, lng, notes) VALUES (?, ?, ?, ?, ?)",
-        (cemetery_id, name.strip(), lat, lng, notes.strip()),
+        "INSERT INTO niches (cemetery_id, name, title, lat, lng, notes) VALUES (?, ?, ?, ?, ?, ?)",
+        (cemetery_id, name.strip(), title.strip() or None, lat, lng, notes.strip()),
     )
     niche_id = cur.lastrowid
-    if photo and photo.filename:
-        db.execute("UPDATE niches SET photo_file = ? WHERE id = ?",
-                   (_save_niche_photo(niche_id, "photo", photo, None), niche_id))
-    if record_photo and record_photo.filename:
-        db.execute("UPDATE niches SET record_file = ? WHERE id = ?",
-                   (_save_niche_photo(niche_id, "record", record_photo, None), niche_id))
+    for f in (photos or []):
+        if f.filename:
+            _save_niche_photo(db, niche_id, "photo", f)
+    for f in (record_photos or []):
+        if f.filename:
+            _save_niche_photo(db, niche_id, "record", f)
     db.commit()
     return {"ok": True, "id": niche_id}
 
@@ -2386,34 +2401,39 @@ async def create_niche(
 async def update_niche(
     niche_id: int,
     name: str = Form(...),
+    title: str = Form(""),
     lat: Optional[float] = Form(None),
     lng: Optional[float] = Form(None),
     notes: str = Form(""),
-    remove_photo: int = Form(0),
-    remove_record: int = Form(0),
-    photo: Optional[UploadFile] = File(None),
-    record_photo: Optional[UploadFile] = File(None),
+    photos: Optional[list[UploadFile]] = File(None),
+    record_photos: Optional[list[UploadFile]] = File(None),
 ):
     db = _db()
     row = db.execute("SELECT * FROM niches WHERE id = ?", (niche_id,)).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Nicho no encontrado")
     db.execute(
-        "UPDATE niches SET name=?, lat=?, lng=?, notes=?, updated_at=datetime('now') WHERE id=?",
-        (name.strip(), lat, lng, notes.strip(), niche_id),
+        "UPDATE niches SET name=?, title=?, lat=?, lng=?, notes=?, updated_at=datetime('now') WHERE id=?",
+        (name.strip(), title.strip() or None, lat, lng, notes.strip(), niche_id),
     )
-    if photo and photo.filename:
-        db.execute("UPDATE niches SET photo_file = ? WHERE id = ?",
-                   (_save_niche_photo(niche_id, "photo", photo, row["photo_file"]), niche_id))
-    elif remove_photo and row["photo_file"]:
-        (_cemetery_photos_dir() / row["photo_file"]).unlink(missing_ok=True)
-        db.execute("UPDATE niches SET photo_file = NULL WHERE id = ?", (niche_id,))
-    if record_photo and record_photo.filename:
-        db.execute("UPDATE niches SET record_file = ? WHERE id = ?",
-                   (_save_niche_photo(niche_id, "record", record_photo, row["record_file"]), niche_id))
-    elif remove_record and row["record_file"]:
-        (_cemetery_photos_dir() / row["record_file"]).unlink(missing_ok=True)
-        db.execute("UPDATE niches SET record_file = NULL WHERE id = ?", (niche_id,))
+    for f in (photos or []):
+        if f.filename:
+            _save_niche_photo(db, niche_id, "photo", f)
+    for f in (record_photos or []):
+        if f.filename:
+            _save_niche_photo(db, niche_id, "record", f)
+    db.commit()
+    return {"ok": True}
+
+
+@router.delete("/niche-photos/{photo_id}")
+async def delete_niche_photo(photo_id: int):
+    db = _db()
+    row = db.execute("SELECT filename FROM niche_photos WHERE id = ?", (photo_id,)).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Foto no encontrada")
+    (_cemetery_photos_dir() / row["filename"]).unlink(missing_ok=True)
+    db.execute("DELETE FROM niche_photos WHERE id = ?", (photo_id,))
     db.commit()
     return {"ok": True}
 

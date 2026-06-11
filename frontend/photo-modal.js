@@ -94,6 +94,39 @@ window.openPhotoModal = async function(photoId) {
 };
 
 /**
+ * Resolve the image URL for the current photo: photos from the GEDCOM catalog
+ * live in /photos/, but the modal also accepts arbitrary URLs (src_url),
+ * e.g. niche photos in /cemetery_photos/.
+ */
+function _photoSrc(p) {
+    return p.src_url || `/photos/${p.filename}`;
+}
+
+/**
+ * Open the photo modal for an image that is NOT in the photos table,
+ * passing its URL directly plus optional info for the sidebar.
+ * @param {string} url - Image URL (e.g. /cemetery_photos/xxx.jpg)
+ * @param {object} info - Optional: { title, date, place, note }
+ */
+window.openPhotoModalUrl = function(url, info = {}) {
+    _currentPhotoData = {
+        src_url: url,
+        filename: url.split('/').pop(),
+        title: info.title || '',
+        date: info.date || '',
+        place: info.place || '',
+        note: info.note || '',
+        tagged_people: [],
+    };
+    _sidebarVisible = true;
+    renderPhotoModal();
+    const overlay = document.getElementById('photo-modal-overlay');
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', _modalKeyHandler);
+};
+
+/**
  * Close the modal on Escape. If the zoom overlay is open, let its own
  * handler close the zoom first instead of closing the whole modal.
  */
@@ -145,7 +178,7 @@ window.downloadPhoto = async function() {
     if (!_currentPhotoData) return;
     const p = _currentPhotoData;
     try {
-        const res = await fetch(`/photos/${p.filename}`);
+        const res = await fetch(_photoSrc(p));
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -186,7 +219,7 @@ window.sharePhoto = async function() {
     if (!_currentPhotoData) return;
     const p = _currentPhotoData;
     const title = p.title || 'Foto Godesia';
-    const url = `${location.origin}/photos/${p.filename}`;
+    const url = `${location.origin}${_photoSrc(p)}`;
 
     if (navigator.share) {
         try {
@@ -194,7 +227,7 @@ window.sharePhoto = async function() {
             let shareData = { title, text: title, url };
             if (navigator.canShare) {
                 try {
-                    const res = await fetch(`/photos/${p.filename}`);
+                    const res = await fetch(_photoSrc(p));
                     const blob = await res.blob();
                     const file = new File([blob], buildPhotoFileName(p), { type: blob.type || 'image/jpeg' });
                     if (navigator.canShare({ files: [file] })) {
@@ -456,7 +489,7 @@ function renderPhotoModal() {
                 <div id="photo-container" style="flex: 1; display: flex; align-items: center; justify-content: center; background-color: #e5e2da; position: relative; overflow: hidden; padding: 24px;">
                     <div id="photo-wrapper" style="position: relative; display: inline-block;">
                         <img
-                            src="/photos/${p.filename}"
+                            src="${_photoSrc(p)}"
                             alt="${escHtml(p.title || 'Foto')}"
                             style="max-width: 100%; max-height: calc(100vh - 48px); object-fit: contain; display: block;"
                             id="modal-photo"
@@ -652,7 +685,7 @@ window.enterZoomMode = function() {
 
     const img = document.createElement('img');
     img.id = 'zoom-mode-img';
-    img.src = `/photos/${_currentPhotoData.filename}`;
+    img.src = _photoSrc(_currentPhotoData);
     img.style.cssText = [
         'position:absolute', 'top:0', 'left:0', 'width:100%', 'height:100%',
         'object-fit:contain', 'transform-origin:center center',

@@ -1832,16 +1832,16 @@ function renderBurialNiche(niche) {
     }
     section.style.display = 'block';
 
-    const photos = [];
-    if (niche.photo_file) photos.push({ file: niche.photo_file, label: 'Nicho' });
-    if (niche.record_file) photos.push({ file: niche.record_file, label: 'Registro' });
+    const kindLabel = { photo: 'Nicho', record: 'Registro' };
+    const photos = niche.photos || [];
+    const modalTitle = (niche.title || niche.name || '').replace(/'/g, "\\'");
     const photosHtml = photos.length ? `
-        <div class="flex gap-3 mt-4">
+        <div class="flex gap-3 mt-4 flex-wrap">
             ${photos.map(p => `
-                <figure class="cursor-pointer" onclick="window.open('/cemetery_photos/${p.file}', '_blank')">
-                    <img src="/cemetery_photos/${p.file}" alt="${p.label}"
+                <figure class="cursor-pointer" onclick="openPhotoModalUrl('/cemetery_photos/${p.filename}', { title: '${modalTitle}', place: '${(niche.cemetery_name || '').replace(/'/g, "\\'")}', note: '${kindLabel[p.kind] || ''}' })">
+                    <img src="/cemetery_photos/${p.filename}" alt="${kindLabel[p.kind] || 'Foto'}"
                          class="w-32 h-24 object-cover rounded-lg border border-outline-variant/30 hover:opacity-90"/>
-                    <figcaption class="text-[10px] uppercase tracking-wider text-outline mt-1">${p.label}</figcaption>
+                    <figcaption class="text-[10px] uppercase tracking-wider text-outline mt-1">${kindLabel[p.kind] || ''}</figcaption>
                 </figure>`).join('')}
         </div>` : '';
 
@@ -1856,6 +1856,7 @@ function renderBurialNiche(niche) {
             </div>
             <div class="relative">
                 <p class="font-bold text-lg">${niche.cemetery_name}${niche.cemetery_city ? ` <span class="font-normal text-on-surface/70">· ${niche.cemetery_city}</span>` : ''}</p>
+                ${niche.title ? `<p class="text-base mt-1 font-semibold text-on-surface/90">${niche.title}</p>` : ''}
                 <p class="text-sm mt-1 text-on-surface/80">${niche.name}</p>
                 ${niche.notes ? `<p class="text-sm mt-2 italic text-on-surface/70">${niche.notes}</p>` : ''}
                 ${photosHtml}

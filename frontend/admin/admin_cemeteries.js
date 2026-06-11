@@ -209,7 +209,7 @@ const Cemeteries = {
             if (n.lat != null) {
                 points.push([n.lat, n.lng]);
                 L.marker([n.lat, n.lng])
-                    .bindPopup(`<strong>${esc(n.name)}</strong><br>${n.people.length} personas`)
+                    .bindPopup(`<strong>${esc(n.title || n.name)}</strong><br>${n.people.length} personas`)
                     .addTo(this.markers.detail);
             }
         });
@@ -230,10 +230,13 @@ const Cemeteries = {
             <thead><tr><th>Nicho</th><th>Personas</th><th>Coordenadas</th><th>Fotos</th><th></th></tr></thead>
             <tbody>${c.niches.map(n => `
                 <tr>
-                    <td><a href="#" onclick="Cemeteries.openNicheEditor(${n.id});return false;" style="font-weight:600;">${esc(n.name)}</a></td>
+                    <td>
+                        <a href="#" onclick="Cemeteries.openNicheEditor(${n.id});return false;" style="font-weight:600;">${esc(n.title || n.name)}</a>
+                        ${n.title ? `<div style="font-size:.75rem;color:#727971;">${esc(n.name)}</div>` : ''}
+                    </td>
                     <td>${n.people.map(p => esc(personShortName(p.name))).join(', ') || '—'}</td>
                     <td style="font-size:.8rem;color:#727971;">${n.lat != null ? `${n.lat.toFixed(5)}, ${n.lng.toFixed(5)}` : '—'}</td>
-                    <td>${(n.photo_file ? '📷 ' : '') + (n.record_file ? '📄' : '') || '—'}</td>
+                    <td>${(n.photos && n.photos.length) ? `📷 ${n.photos.length}` : '—'}</td>
                     <td style="text-align:right;white-space:nowrap;">
                         <button class="btn btn-secondary btn-sm" onclick="Cemeteries.openNicheEditor(${n.id})">Editar</button>
                         <button class="btn btn-danger btn-sm" onclick="Cemeteries.askDelete('niche', ${n.id})">✕</button>
@@ -257,7 +260,8 @@ const Cemeteries = {
         const niche = nicheId ? this.current.niches.find(n => n.id === nicheId) : null;
         this._showView('cem-view-niche');
         document.getElementById('niche-editor-title').textContent =
-            niche ? `Editar: ${niche.name}` : `Nuevo nicho en ${this.current.name}`;
+            niche ? `Editar: ${niche.title || niche.name}` : `Nuevo nicho en ${this.current.name}`;
+        document.getElementById('niche-title').value = niche ? (niche.title || '') : '';
         document.getElementById('niche-name').value = niche ? niche.name : '';
         document.getElementById('niche-notes').value = niche ? (niche.notes || '') : '';
         document.getElementById('niche-photo').value = '';
@@ -301,10 +305,27 @@ const Cemeteries = {
     _renderNichePhotoPreviews(niche) {
         const photoEl = document.getElementById('niche-photo-preview');
         const recordEl = document.getElementById('niche-record-preview');
-        photoEl.innerHTML = (niche && niche.photo_file)
-            ? `<img src="/cemetery_photos/${niche.photo_file}" style="max-width:120px;border-radius:6px;"/>` : '';
-        recordEl.innerHTML = (niche && niche.record_file)
-            ? `<img src="/cemetery_photos/${niche.record_file}" style="max-width:120px;border-radius:6px;"/>` : '';
+        const render = (photos) => photos.map(p => `
+            <div style="position:relative;">
+                <img src="/cemetery_photos/${p.filename}" style="width:90px;height:70px;object-fit:cover;border-radius:6px;"/>
+                <button title="Eliminar foto" onclick="Cemeteries.deleteNichePhoto(${p.id})"
+                        style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:none;background:#a33;color:#fff;font-size:.7rem;cursor:pointer;line-height:1;">✕</button>
+            </div>`).join('');
+        const photos = (niche && niche.photos) || [];
+        photoEl.innerHTML = render(photos.filter(p => p.kind === 'photo'));
+        recordEl.innerHTML = render(photos.filter(p => p.kind === 'record'));
+    },
+
+    async deleteNichePhoto(photoId) {
+        try {
+            await apiFetch(`/api/admin/niche-photos/${photoId}`, { method: 'DELETE' });
+        } catch (e) {
+            alert('Error eliminando la foto: ' + e.message);
+            return;
+        }
+        this.current = await apiFetch(`/api/cemeteries/${this.current.id}`);
+        const niche = this.current.niches.find(n => n.id === this.editingNicheId);
+        this._renderNichePhotoPreviews(niche);
     },
 
     async saveNiche() {
@@ -312,16 +333,15 @@ const Cemeteries = {
         if (!name) { alert('El nombre del nicho es obligatorio.'); return; }
         const fd = new FormData();
         fd.append('name', name);
+        fd.append('title', document.getElementById('niche-title').value.trim());
         fd.append('notes', document.getElementById('niche-notes').value.trim());
         if (this.markers.niche) {
             const p = this.markers.niche.getLatLng();
             fd.append('lat', p.lat);
             fd.append('lng', p.lng);
         }
-        const photo = document.getElementById('niche-photo').files[0];
-        const record = document.getElementById('niche-record').files[0];
-        if (photo) fd.append('photo', photo);
-        if (record) fd.append('record_photo', record);
+        [...document.getElementById('niche-photo').files].forEach(f => fd.append('photos', f));
+        [...document.getElementById('niche-record').files].forEach(f => fd.append('record_photos', f));
         try {
             if (this.editingNicheId) {
                 await apiFetch(`/api/admin/niches/${this.editingNicheId}`, { method: 'PUT', body: fd });

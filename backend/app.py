@@ -21,7 +21,7 @@ from database import (
     get_albums_list, get_album_photos, get_photos_people_list,
     get_document_types, get_document_photos, get_document_albums, get_documents_people_list,
     get_setting, set_setting,
-    get_cemeteries_summary, get_cemetery_detail, get_person_niche,
+    get_cemeteries_summary, get_cemetery_detail, get_person_niche, get_cemeteries_overview,
 )
 from query_router import QueryRouter
 from query_engine import QueryEngine
@@ -446,6 +446,13 @@ async def cemeteries_list():
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
     return get_cemeteries_summary(db_conn)
+
+
+@app.get("/api/cemeteries/overview")
+async def cemeteries_overview():
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    return get_cemeteries_overview(db_conn)
 
 
 @app.get("/api/cemeteries/locate/{person_id}")

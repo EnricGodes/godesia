@@ -1,13 +1,15 @@
 // Página pública de cementerios: vista general (CartoDB) → cementerio
 // (satélite Esri) con nichos agrupados en clusters numerados por personas.
+// Sidebar tipo álbumes: nichos y personas enterradas, con acceso directo.
 
 const Cementerios = {
     map: null,
     baseLayer: null,
     cemLayer: null,      // marcadores de cementerios (overview)
     clusterGroup: null,  // nichos del cementerio abierto
-    nicheMarkers: {},    // niche_id → marker
+    nicheMarkers: {},    // niche_id → { marker, niche }
     cemeteries: [],
+    overview: { niches: [], people: [] },
     current: null,       // detalle del cementerio abierto
     highlightedId: null,
 
@@ -17,11 +19,15 @@ const Cementerios = {
         this._setBase('carto');
 
         try {
-            this.cemeteries = await (await fetch('/api/cemeteries')).json();
+            [this.cemeteries, this.overview] = await Promise.all([
+                (await fetch('/api/cemeteries')).json(),
+                (await fetch('/api/cemeteries/overview')).json(),
+            ]);
         } catch (e) {
             this.toast('No se pudieron cargar los cementerios');
             return;
         }
+        this.renderSidebar();
         this.showOverview(false);
         this.bindSearch();
 
@@ -60,6 +66,60 @@ const Cementerios = {
         });
     },
 
+    _nicheLabel(n) {
+        return n.title || n.name;
+    },
+
+    // -----------------------------------------------------------------------
+    // Sidebar (nichos + personas con sepultura)
+    // -----------------------------------------------------------------------
+
+    renderSidebar() {
+        const nichesEl = document.getElementById('sb-niches');
+        const peopleEl = document.getElementById('sb-people');
+
+        if (!this.overview.niches.length) {
+            nichesEl.innerHTML = '<p class="text-xs text-on-surface-variant px-1">Sin nichos registrados.</p>';
+        } else {
+            // Agrupados por cementerio
+            const byCem = {};
+            this.overview.niches.forEach(n => {
+                (byCem[n.cemetery_id] = byCem[n.cemetery_id] || { name: n.cemetery_name, niches: [] }).niches.push(n);
+            });
+            nichesEl.innerHTML = Object.values(byCem).map(g => `
+                <p class="text-[11px] font-bold text-on-surface-variant mt-2 mb-1 px-1">${esc(g.name)}</p>
+                ${g.niches.map(n => `
+                    <a class="sidebar-link flex items-center justify-between gap-2" data-niche="${n.id}"
+                       onclick="Cementerios.locateNiche(${n.id})">
+                        <span class="truncate">${esc(this._nicheLabel(n))}</span>
+                        <span class="text-[10px] text-outline shrink-0">${n.people_count}</span>
+                    </a>`).join('')}
+            `).join('');
+        }
+
+        if (!this.overview.people.length) {
+            peopleEl.innerHTML = '<p class="text-xs text-on-surface-variant px-1">Nadie asignado todavía.</p>';
+        } else {
+            peopleEl.innerHTML = this.overview.people.map(p => {
+                const pid = (p.id || '').replace(/@/g, '');
+                return `
+                <a class="sidebar-link flex items-center gap-2" onclick="Cementerios.locatePerson('${pid}')">
+                    <img src="${p.photo_file ? '/photos/' + p.photo_file : `/api/default-photo?sex=${p.sex || ''}&birth_year=${p.birth_year || ''}`}"
+                         class="w-6 h-6 rounded-full object-cover border border-outline-variant/40 shrink-0"
+                         onerror="this.style.visibility='hidden'"/>
+                    <span class="truncate">${esc(p.name)}</span>
+                    <span class="text-[10px] text-outline shrink-0 ml-auto">${p.death_year || ''}</span>
+                </a>`;
+            }).join('');
+        }
+    },
+
+    _markSidebarNiche(nicheId) {
+        document.querySelectorAll('#sb-niches .sidebar-link').forEach(a => {
+            a.classList.toggle('active', a.dataset.niche === String(nicheId));
+        });
+    },
+
     // -----------------------------------------------------------------------
     // Vista general
     // -----------------------------------------------------------------------
@@ -67,8 +127,10 @@ const Cementerios = {
     showOverview(fly = true) {
         this.current = null;
         this.closeNichePanel();
+        this._markSidebarNiche(null);
         document.getElementById('btn-back').classList.add('hidden');
         document.getElementById('btn-back').classList.remove('flex');
+        document.getElementById('cem-title').textContent = 'Cementerios';
         document.getElementById('cem-subtitle').textContent =
             'Los lugares de sepultura de la familia. Haz zoom en un cementerio para descubrir sus nichos.';
         if (this.clusterGroup) { this.clusterGroup.remove(); this.clusterGroup = null; }
@@ -131,8 +193,9 @@ const Cementerios = {
         const back = document.getElementById('btn-back');
         back.classList.remove('hidden');
         back.classList.add('flex');
-        document.getElementById('cem-subtitle').textContent =
-            `${detail.name}${detail.city ? ' — ' + detail.city : ''}. ${detail.description || ''}`;
+        document.getElementById('cem-title').textContent =
+            `${detail.name}${detail.city ? ', ' + detail.city : ''}`;
+        document.getElementById('cem-subtitle').textContent = detail.description || '';
         document.getElementById('cem-legend').textContent =
             'Acércate para separar los grupos y toca un número para ver el nicho.';
 
@@ -181,7 +244,11 @@ const Cementerios = {
         this.highlightedId = nicheId;
         const entry = this.nicheMarkers[nicheId];
         if (!entry) return;
-        entry.marker.setIcon(this._numIconHighlight(entry.niche.people.length));
+        const size = Math.min(32 + String(entry.niche.people.length).length * 6, 64);
+        entry.marker.setIcon(L.divIcon({
+            html: `<div class="godes-pin highlight" style="width:${size}px;height:${size}px;">${entry.niche.people.length}</div>`,
+            className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2],
+        }));
         setTimeout(() => {
             if (this.highlightedId === nicheId && this.nicheMarkers[nicheId]) {
                 entry.marker.setIcon(this._numIcon(entry.niche.people.length, 28, 'godes-pin'));
@@ -189,31 +256,25 @@ const Cementerios = {
         }, 6000);
     },
 
-    _numIconHighlight(count) {
-        const size = Math.min(32 + String(count).length * 6, 64);
-        return L.divIcon({
-            html: `<div class="godes-pin highlight" style="width:${size}px;height:${size}px;">${count}</div>`,
-            className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2],
-        });
-    },
-
     // -----------------------------------------------------------------------
     // Panel de nicho
     // -----------------------------------------------------------------------
 
     openNichePanel(n) {
-        document.getElementById('np-name').textContent = n.name;
+        this._markSidebarNiche(n.id);
+        document.getElementById('np-title').textContent = this._nicheLabel(n);
+        document.getElementById('np-location').textContent = n.title ? n.name : '';
         document.getElementById('np-cemetery').textContent =
             `${this.current.name}${this.current.city ? ' · ' + this.current.city : ''}`;
 
-        const photos = [];
-        if (n.photo_file) photos.push({ file: n.photo_file, label: 'Nicho' });
-        if (n.record_file) photos.push({ file: n.record_file, label: 'Registro' });
+        const kindLabel = { photo: 'Nicho', record: 'Registro' };
+        const photos = n.photos || [];
         document.getElementById('np-photos').innerHTML = photos.map(p => `
-            <figure class="cursor-pointer" onclick="Cementerios.viewPhoto('/cemetery_photos/${p.file}')">
-                <img src="/cemetery_photos/${p.file}" alt="${p.label}"
+            <figure class="cursor-pointer"
+                    onclick="openPhotoModalUrl('/cemetery_photos/${p.filename}', { title: '${escAttr(this._nicheLabel(n))}', place: '${escAttr(this.current.name)}', note: '${escAttr(kindLabel[p.kind] || '')}' })">
+                <img src="/cemetery_photos/${p.filename}" alt="${kindLabel[p.kind] || 'Foto'}"
                      class="w-full h-28 object-cover rounded-lg border border-outline-variant/30 hover:opacity-90"/>
-                <figcaption class="text-[10px] uppercase tracking-wider text-outline mt-1">${p.label}</figcaption>
+                <figcaption class="text-[10px] uppercase tracking-wider text-outline mt-1">${kindLabel[p.kind] || ''}</figcaption>
             </figure>`).join('');
 
         document.getElementById('np-notes').textContent = n.notes || '';
@@ -246,13 +307,8 @@ const Cementerios = {
         document.getElementById('niche-panel').classList.remove('open');
     },
 
-    viewPhoto(url) {
-        document.getElementById('photo-viewer-img').src = url;
-        document.getElementById('photo-viewer').classList.add('open');
-    },
-
     // -----------------------------------------------------------------------
-    // Buscador de persona
+    // Buscador y localización
     // -----------------------------------------------------------------------
 
     bindSearch() {
@@ -282,7 +338,6 @@ const Cementerios = {
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
                 results.style.display = 'none';
-                document.getElementById('photo-viewer').classList.remove('open');
                 this.closeNichePanel();
             }
         });
@@ -307,18 +362,10 @@ const Cementerios = {
         this.enterCemetery(loc.cemetery_id, loc.id, true);
     },
 
-    async locateNiche(nicheId) {
-        // Resolver a qué cementerio pertenece el nicho recorriendo la lista
-        for (const c of this.cemeteries) {
-            const res = await fetch(`/api/cemeteries/${c.id}`);
-            if (!res.ok) continue;
-            const detail = await res.json();
-            if (detail.niches.some(n => n.id === nicheId)) {
-                this.enterCemetery(c.id, nicheId, true);
-                return;
-            }
-        }
-        this.toast('Nicho no encontrado');
+    locateNiche(nicheId) {
+        const n = this.overview.niches.find(x => x.id === nicheId);
+        if (!n) { this.toast('Nicho no encontrado'); return; }
+        this.enterCemetery(n.cemetery_id, nicheId, true);
     },
 
     toast(msg) {
@@ -333,6 +380,12 @@ function esc(s) {
     return String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// Para strings JS dentro de atributos onclick: escapa primero para JS
+// (\' y \\) y después para HTML; el navegador decodifica &#39; de vuelta a '.
+function escAttr(s) {
+    return esc(String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
 }
 
 document.addEventListener('DOMContentLoaded', () => Cementerios.init());
