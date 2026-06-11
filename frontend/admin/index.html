@@ -62,6 +62,9 @@
                 <span class="nav-icon">⊟</span> Dedup fotos
                 <span class="nav-badge" id="badge-dedup"></span>
             </a>
+            <a data-section="cemeteries">
+                <span class="nav-icon">✝</span> Cementerios
+            </a>
             <a data-section="config">
                 <span class="nav-icon">⚙</span> Configuración
             </a>
@@ -742,6 +745,139 @@
             <div id="dedup-pending-list"></div>
         </section>
 
+        <!-- CEMETERIES -->
+        <section id="s-cemeteries" class="admin-section">
+            <h1 class="section-title">Cementerios</h1>
+            <p class="section-subtitle">Gestiona cementerios, nichos y las personas enterradas en cada uno. Datos manuales: sobreviven a las re-importaciones del GEDCOM.</p>
+
+            <!-- Vista: lista de cementerios -->
+            <div id="cem-view-list">
+                <div class="toolbar">
+                    <div></div>
+                    <div class="toolbar-right">
+                        <button class="btn btn-primary btn-sm" onclick="Cemeteries.openNew()">+ Nuevo cementerio</button>
+                        <button class="btn btn-secondary btn-sm" onclick="Cemeteries.load()">↻ Actualizar</button>
+                    </div>
+                </div>
+                <div id="cem-list"></div>
+            </div>
+
+            <!-- Vista: detalle de cementerio (mapa satélite + nichos) -->
+            <div id="cem-view-detail" style="display:none;">
+                <div class="toolbar">
+                    <button class="btn btn-secondary btn-sm" onclick="Cemeteries.showList()">← Cementerios</button>
+                    <div class="toolbar-right">
+                        <button class="btn btn-secondary btn-sm" onclick="Cemeteries.openEdit()">✎ Editar cementerio</button>
+                        <button class="btn btn-primary btn-sm" onclick="Cemeteries.openNicheEditor(null)">+ Nuevo nicho</button>
+                    </div>
+                </div>
+                <h2 id="cem-detail-name" style="margin:.25rem 0 .75rem;font-size:1.15rem;"></h2>
+                <div id="cem-detail-map" style="height:420px;border-radius:8px;margin-bottom:1rem;"></div>
+                <div id="cem-niche-list"></div>
+            </div>
+
+            <!-- Vista: editor de nicho -->
+            <div id="cem-view-niche" style="display:none;">
+                <div class="toolbar">
+                    <button class="btn btn-secondary btn-sm" onclick="Cemeteries.showDetail()">← Volver al cementerio</button>
+                    <div class="toolbar-right">
+                        <button class="btn btn-primary btn-sm" onclick="Cemeteries.saveNiche()">Guardar nicho</button>
+                    </div>
+                </div>
+                <h2 id="niche-editor-title" style="margin:.25rem 0 .75rem;font-size:1.15rem;"></h2>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start;">
+                    <div>
+                        <div class="form-group">
+                            <label>Nombre del nicho</label>
+                            <input type="text" class="form-input" id="niche-name" placeholder="Nínxol 312, Departament Tercer…"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Notas</label>
+                            <textarea class="form-textarea" id="niche-notes" rows="3" placeholder="Concesión, traslados, observaciones…"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Ubicación — haz clic en el mapa para fijar el nicho</label>
+                            <div id="niche-map" style="height:320px;border-radius:8px;"></div>
+                            <div id="niche-coords" style="font-size:.8rem;color:#727971;margin-top:.35rem;">Sin coordenadas</div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                            <div class="form-group">
+                                <label>Foto del nicho</label>
+                                <input type="file" id="niche-photo" accept="image/*" style="font-size:.82rem;"/>
+                                <div id="niche-photo-preview" style="margin-top:.4rem;"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Foto del registro</label>
+                                <input type="file" id="niche-record" accept="image/*" style="font-size:.82rem;"/>
+                                <div id="niche-record-preview" style="margin-top:.4rem;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="info-card" style="margin-bottom:1rem;">
+                            <h3>Personas en este nicho</h3>
+                            <div class="form-group" style="margin-top:.6rem;position:relative;">
+                                <input type="text" class="form-input" id="niche-person-search" placeholder="Buscar persona para asignar…" autocomplete="off"/>
+                                <div id="niche-person-results" style="position:absolute;z-index:50;left:0;right:0;background:#fff;border:1px solid #d9d5cc;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.12);display:none;max-height:240px;overflow-y:auto;"></div>
+                            </div>
+                            <div id="niche-people-list" style="font-size:.85rem;color:#727971;">Guarda el nicho para poder asignar personas.</div>
+                        </div>
+                        <div class="info-card">
+                            <h3>Sugerencias del GEDCOM</h3>
+                            <p style="font-size:.8rem;color:#727971;margin:.4rem 0 .6rem;">Personas con registro de entierro en este cementerio que aún no están asignadas a ningún nicho.</p>
+                            <div id="niche-suggestions"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal: crear/editar cementerio -->
+            <div class="modal-overlay" id="cem-modal">
+                <div class="modal" style="max-width:560px;">
+                    <div class="modal-title" id="cem-modal-title">Nuevo cementerio</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 1rem;">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" class="form-input" id="cem-name" placeholder="Cementiri de Montjuïc"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Ciudad</label>
+                            <input type="text" class="form-input" id="cem-city" placeholder="Barcelona"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea class="form-textarea" id="cem-description" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Ubicación — busca o haz clic en el mapa</label>
+                        <div style="display:flex;gap:.5rem;margin-bottom:.5rem;">
+                            <input type="text" class="form-input" id="cem-geo-query" placeholder="Cementiri de Montjuïc, Barcelona" style="flex:1;"/>
+                            <button class="btn btn-secondary btn-sm" onclick="Cemeteries.geoSearch()">Buscar</button>
+                        </div>
+                        <div id="cem-map" style="height:260px;border-radius:8px;"></div>
+                        <div id="cem-coords" style="font-size:.8rem;color:#727971;margin-top:.35rem;">Sin coordenadas</div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeModal('cem-modal')">Cancelar</button>
+                        <button class="btn btn-primary" onclick="Cemeteries.saveCemetery()">Guardar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal: confirmar borrado -->
+            <div class="modal-overlay" id="cem-del-modal">
+                <div class="modal" style="max-width:400px;">
+                    <div class="modal-title" id="cem-del-title">Eliminar</div>
+                    <p id="cem-del-text" style="margin:0.5rem 0 1.5rem;color:#3d3d37;"></p>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeModal('cem-del-modal')">Cancelar</button>
+                        <button class="btn btn-danger" onclick="Cemeteries.confirmDelete()">Sí, eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 </div>
 
@@ -757,6 +893,7 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="admin.js?v=20260602"></script>
+<script src="admin_cemeteries.js?v=20260611"></script>
+<script src="admin.js?v=20260611"></script>
 </body>
 </html>
