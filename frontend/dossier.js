@@ -1847,12 +1847,12 @@ function renderBurialNiche(niche) {
 
     section.innerHTML = `
         <h3 class="font-headline text-2xl text-primary flex items-center gap-3 mb-6">
-            <span class="material-symbols-outlined">church</span>
+            <img src="/icons/cementerio.svg" class="w-7 h-7" alt=""/>
             Sepultura
         </h3>
         <div class="p-8 bg-surface-container-high rounded-xl border-l-8 border-primary relative overflow-hidden">
             <div class="absolute -right-8 -bottom-8 opacity-5">
-                <span class="material-symbols-outlined text-9xl">church</span>
+                <img src="/icons/cementerio.svg" style="width:9rem;height:9rem;" alt=""/>
             </div>
             <div class="relative">
                 <p class="font-bold text-lg">${niche.cemetery_name}${niche.cemetery_city ? ` <span class="font-normal text-on-surface/70">· ${niche.cemetery_city}</span>` : ''}</p>
