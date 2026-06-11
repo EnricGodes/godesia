@@ -129,6 +129,14 @@ When viewing the photo gallery (Memoria Visual), green rectangles appear over th
 
 **Critical:** Position data is stored in `photo_tags.position` (linked to person_id), not in `photos.position`. If face boxes show random people or wrong positions, verify that the query in `database.py` uses `photo_tags.position` not `photos.position`.
 
+## Cementerios y Nichos (datos manuales)
+
+La sección Cementerios (`frontend/cementerios.html`) muestra dónde está enterrada la familia: vista general sobre mapa CartoDB y, dentro de cada cementerio, satélite Esri con los nichos agrupados en clusters numerados (Leaflet.markercluster, el número suma las personas). Gestor en el panel admin (pestaña Cementerios, `frontend/admin/admin_cemeteries.js`).
+
+**Crítico — persistencia:** las tablas `cemeteries`, `niches` y `niche_people` contienen datos insertados a mano y NO deben tocarse desde `sync_catalog.py` ni scripts de importación: sobreviven a re-importaciones GEDCOM precisamente porque ningún script las nombra. Las fotos de nichos viven en `data/cemetery_photos/` (gitignored, servido en `/cemetery_photos`), fuera de la tabla `photos` que se recrea en cada sync. `niche_people.person_id` usa los IDs GEDCOM estables (`@I16@`).
+
+La tabla GEDCOM `burial` solo actúa como sugerencia en el gestor (`GET /api/admin/cemeteries/{id}/burial-suggestions`, matching por nombre sin acentos ni espacios); la verdad de los nichos es siempre la tabla manual. El dossier muestra la sección "Sepultura" cuando la persona tiene nicho asignado (clave `niche` en `/api/dossier/{id}`), con deep-link `?niche={id}` al mapa.
+
 ## Git Workflow
 
 This project uses GitHub (EnricGodes/godesia) for version control. As work is completed, commit changes with clean, descriptive commit messages and push to GitHub.

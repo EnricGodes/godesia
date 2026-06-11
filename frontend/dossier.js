@@ -200,6 +200,9 @@ function renderDossier(data) {
     // 7c. DOMICILIOS
     renderResidences(data.residences, data.events, data.person);
 
+    // 7d. SEPULTURA (nicho asignado manualmente en el gestor de cementerios)
+    renderBurialNiche(data.niche);
+
     // 8. MILITAR
     renderMilitary(data);
 
@@ -1819,6 +1822,51 @@ function renderResidences(residences, events, person) {
 
         map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }, 50);
+}
+
+function renderBurialNiche(niche) {
+    const section = document.getElementById('burial-niche-section');
+    if (!niche) {
+        section.style.display = 'none';
+        return;
+    }
+    section.style.display = 'block';
+
+    const photos = [];
+    if (niche.photo_file) photos.push({ file: niche.photo_file, label: 'Nicho' });
+    if (niche.record_file) photos.push({ file: niche.record_file, label: 'Registro' });
+    const photosHtml = photos.length ? `
+        <div class="flex gap-3 mt-4">
+            ${photos.map(p => `
+                <figure class="cursor-pointer" onclick="window.open('/cemetery_photos/${p.file}', '_blank')">
+                    <img src="/cemetery_photos/${p.file}" alt="${p.label}"
+                         class="w-32 h-24 object-cover rounded-lg border border-outline-variant/30 hover:opacity-90"/>
+                    <figcaption class="text-[10px] uppercase tracking-wider text-outline mt-1">${p.label}</figcaption>
+                </figure>`).join('')}
+        </div>` : '';
+
+    section.innerHTML = `
+        <h3 class="font-headline text-2xl text-primary flex items-center gap-3 mb-6">
+            <span class="material-symbols-outlined">church</span>
+            Sepultura
+        </h3>
+        <div class="p-8 bg-surface-container-high rounded-xl border-l-8 border-primary relative overflow-hidden">
+            <div class="absolute -right-8 -bottom-8 opacity-5">
+                <span class="material-symbols-outlined text-9xl">church</span>
+            </div>
+            <div class="relative">
+                <p class="font-bold text-lg">${niche.cemetery_name}${niche.cemetery_city ? ` <span class="font-normal text-on-surface/70">· ${niche.cemetery_city}</span>` : ''}</p>
+                <p class="text-sm mt-1 text-on-surface/80">${niche.name}</p>
+                ${niche.notes ? `<p class="text-sm mt-2 italic text-on-surface/70">${niche.notes}</p>` : ''}
+                ${photosHtml}
+                <a href="/cementerios.html?niche=${niche.id}"
+                   class="inline-flex items-center gap-1.5 mt-5 bg-primary text-on-primary px-4 py-2 rounded-full text-xs font-extrabold uppercase tracking-wide hover:bg-primary/90">
+                    <span class="material-symbols-outlined text-[16px]">map</span>
+                    Ver en el mapa
+                </a>
+            </div>
+        </div>
+    `;
 }
 
 function renderMilitary(data) {
