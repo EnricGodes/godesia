@@ -51,7 +51,7 @@
 
   const DIVERSOS = [
     { label: 'Casas Godes',  href: null },
-    { label: 'Cementerios',  href: null },
+    { label: 'Cementerios',  href: '/cementerios.html' },
   ];
 
   // ─── Helpers ──────────────────────────────────────────────────────────────

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Cementerios | Familia Godes</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#2D4B33",
+                        "surface-container": "#f1eee5",
+                        "surface-container-low": "#f6f3ea",
+                        "surface-bright": "#fcf9f0",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#fcf9f0",
+                        "on-background": "#1c1c17",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#424842",
+                        "primary-container": "#d4e4d6",
+                        "on-primary-container": "#0b1f10",
+                        "secondary-container": "#fdd2b1",
+                        "on-secondary-container": "#78583f",
+                        "surface-variant": "#e5e2da",
+                        "surface": "#fcf9f0",
+                        "surface-container-high": "#ebe8df",
+                        "outline": "#727971",
+                        "on-surface": "#1c1c17",
+                        "outline-variant": "#c2c8bf",
+                        "secondary": "#78583e",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": { "DEFAULT": "0.5rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    "fontFamily": { "headline": ["Noto Serif"], "body": ["Manrope"], "label": ["Manrope"] }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        #cem-map { height: calc(100vh - 220px); min-height: 460px; border-radius: 0.75rem; z-index: 0; }
+        .leaflet-popup-content-wrapper { background: #fcf9f0; border: 1px solid rgba(114,121,113,0.2); border-radius: 0.5rem; box-shadow: 0 4px 16px rgba(28,28,23,0.1); color: #1c1c17; }
+        .leaflet-popup-tip { background: #fcf9f0; }
+        .leaflet-popup-close-button { color: #727971 !important; }
+
+        /* Clusters y marcadores numerados, estilo "mapa de fotos" */
+        .godes-cluster, .godes-pin {
+            background: #17341e; color: #fff; border: 2px solid #fcf9f0;
+            border-radius: 9999px; display: flex; align-items: center; justify-content: center;
+            font-family: Manrope, sans-serif; font-weight: 800;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+        }
+        .godes-cluster { font-size: 0.85rem; }
+        .godes-pin { font-size: 0.75rem; }
+        .godes-pin.highlight { background: #78583e; animation: pinpulse 1.4s ease-out infinite; }
+        @keyframes pinpulse {
+            0% { box-shadow: 0 0 0 0 rgba(120,88,62,0.65); }
+            100% { box-shadow: 0 0 0 18px rgba(120,88,62,0); }
+        }
+
+        /* Panel lateral de nicho */
+        #niche-panel {
+            position: absolute; top: 12px; right: 12px; bottom: 12px; width: 340px;
+            max-width: calc(100vw - 48px); z-index: 1000; overflow-y: auto;
+            background: #fcf9f0; border: 1px solid rgba(114,121,113,0.25);
+            border-radius: 0.75rem; box-shadow: 0 8px 28px rgba(28,28,23,0.25);
+            transform: translateX(110%); transition: transform 0.25s ease; padding: 1.1rem;
+        }
+        #niche-panel.open { transform: translateX(0); }
+        @media (max-width: 640px) {
+            #niche-panel { top: auto; left: 12px; right: 12px; width: auto; max-height: 55%; transform: translateY(120%); }
+            #niche-panel.open { transform: translateY(0); }
+        }
+
+        /* Autocompletado de personas */
+        #person-results {
+            position: absolute; z-index: 2000; left: 0; right: 0; top: 100%; margin-top: 4px;
+            background: #fff; border: 1px solid #c2c8bf; border-radius: 0.5rem;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.14); display: none; max-height: 280px; overflow-y: auto;
+        }
+        #person-results .result-item { padding: 0.5rem 0.75rem; cursor: pointer; }
+        #person-results .result-item:hover { background: #f1eee5; }
+
+        /* Visor de fotos */
+        #photo-viewer {
+            position: fixed; inset: 0; z-index: 5000; background: rgba(0,0,0,0.82);
+            display: none; align-items: center; justify-content: center; padding: 2rem;
+        }
+        #photo-viewer.open { display: flex; }
+        #photo-viewer img { max-width: 100%; max-height: 90vh; border-radius: 0.5rem; }
+
+        #cem-toast {
+            position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 6000;
+            background: #17341e; color: #fff; padding: 0.6rem 1.2rem; border-radius: 9999px;
+            font-size: 0.85rem; opacity: 0; transition: opacity 0.2s; pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+
+<script src="/nav.js"></script>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-12">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="font-headline text-3xl sm:text-4xl font-bold text-primary">Cementerios</h1>
+            <p id="cem-subtitle" class="text-on-surface-variant text-sm mt-1">Los lugares de sepultura de la familia. Haz zoom en un cementerio para descubrir sus nichos.</p>
+        </div>
+        <div class="relative w-full md:w-80">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+            <input type="text" id="person-search" autocomplete="off"
+                   placeholder="¿Dónde está enterrado/a…?"
+                   class="w-full pl-10 pr-4 py-2.5 rounded-full bg-surface-container border border-outline-variant/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+            <div id="person-results"></div>
+        </div>
+    </div>
+
+    <div class="relative">
+        <div id="cem-map" class="border border-outline-variant/30"></div>
+
+        <button id="btn-back" onclick="Cementerios.exitCemetery()"
+                class="absolute top-3 left-3 z-[1000] hidden items-center gap-1.5 bg-surface px-4 py-2 rounded-full text-sm font-bold text-primary shadow-lg border border-outline-variant/40 hover:bg-surface-container">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            Todos los cementerios
+        </button>
+
+        <!-- Panel de nicho -->
+        <aside id="niche-panel">
+            <div class="flex items-start justify-between gap-2 mb-2">
+                <h2 id="np-name" class="font-headline text-lg font-bold text-primary leading-tight"></h2>
+                <button onclick="Cementerios.closeNichePanel()" class="text-outline hover:text-on-surface">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <p id="np-cemetery" class="text-xs uppercase tracking-wider font-bold text-outline mb-3"></p>
+            <div id="np-photos" class="grid grid-cols-2 gap-2 mb-3"></div>
+            <p id="np-notes" class="text-sm text-on-surface-variant mb-4"></p>
+            <h3 class="text-[11px] uppercase tracking-wider font-extrabold text-outline mb-2">Personas enterradas</h3>
+            <div id="np-people" class="space-y-1"></div>
+        </aside>
+    </div>
+
+    <div id="cem-legend" class="mt-4 text-xs text-on-surface-variant"></div>
+</main>
+
+<!-- Visor simple de fotos -->
+<div id="photo-viewer" onclick="this.classList.remove('open')">
+    <img id="photo-viewer-img" src="" alt=""/>
+</div>
+<div id="cem-toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="/cementerios.js"></script>
+</body>
+</html>
