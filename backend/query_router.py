@@ -343,7 +343,7 @@ class QueryRouter:
             (r"(?:acab[oó]\s+cas[aá]ndose|con\s+qui[eé]n\s+acab[oó]\s+cas[aá]ndose)", "handle_last_spouse"),
             (r"(?:misma\s+ciudad\s+en\s+la\s+que\s+naci[oó])", "handle_same_birth_death_city"),
             (r"(?:tengan\s+.+\s+como\s+primer\s+apellido)", "handle_first_surname_natural"),
-            (r"(?:(?:a\s+)?(?:qu[eé]|cu[aá]l)\s+(?:era\s+)?(?:(?:la|el)\s+)?(?:profesión|oficio|ocupaci[oó]n(?:es)?|empleo|(?:actividad|empleo)\s+(?:laboral|profesional)?|tipo\s+de\s+(?:trabajo|actividad|empleo)|medio\s+de\s+vida)(?:\s+(?:distint[ao]s?|diferentes))?(?:\s+(?:ten[ií]a|tuvo|figura|aparece|se\s+dedic[oó]|consta|desempe[nñ][oó]|realiz[oó]|era|fue))?\s+.+|de\s+qu[eé]\s+trabaja(?:ba)?\s+.+|en\s+qu[eé]\s+trabaja(?:ba)?\s+.+|con\s+qu[eé]\s+(?:oficio|trabajo|actividad|empleo)\s+(?:aparece|figura|documentado|consta)\s+.+|(?:hay\s+)?constancia\s+(?:de|del)\s+(?:empleo|oficio|trabajo|actividad|profesión|ocupaci[oó]n)\s+(?:de|para)\s+.+|c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+.+)", "handle_occupation_natural"),
+            (r"(?:(?:a\s+)?(?:qu[eé]|cu[aá]l)\s+(?:era\s+)?(?:(?:la|el)\s+)?(?:profesión|oficio|ocupaci[oó]n(?:es)?|empleo|(?:actividad|empleo)\s+(?:laboral|profesional)?|tipo\s+de\s+(?:trabajo|actividad|empleo)|medio\s+de\s+vida)(?:\s+(?:distint[ao]s?|diferentes))?(?:\s+(?:ten[ií]a|tuvo|figura|aparece|se\s+dedic[oó]|consta|desempe[nñ][oó]|realiz[oó]|era|fue))?\s+.+|de\s+qu[eé]\s+trabaj(?:a|aba|[oó])\s+.+|en\s+qu[eé]\s+trabaj(?:a|aba|[oó])\s+.+|a\s+qu[eé]\s+se\s+dedic(?:a|aba|[oó])\s+.+|con\s+qu[eé]\s+(?:oficio|trabajo|actividad|empleo)\s+(?:aparece|figura|documentado|consta)\s+.+|(?:hay\s+)?constancia\s+(?:de|del)\s+(?:empleo|oficio|trabajo|actividad|profesión|ocupaci[oó]n)\s+(?:de|para)\s+.+|c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+.+)", "handle_occupation_natural"),
             (r"(?:d[oó]nde\s+viv[ií]a\s+.+\s+al\s+final\s+de\s+su\s+vida)", "handle_last_residence"),
             (r"(?:cu[aá]ntos\s+hijos\s+lleg[oó]\s+a\s+tener\s+.+)", "handle_children_total_natural"),
             (r"(?:dime\s+qu[eé]\s+personas\s+nacieron\s+en\s+.+\s+y\s+luego\s+murieron\s+fuera\s+de\s+.+)", "handle_born_in_and_died_outside"),
@@ -387,10 +387,10 @@ class QueryRouter:
             (r"^(?:cu[nñ]ados?|brother[s-]in.law)\s+.+$", "handle_brothers_in_law"),
             (r"^(?:donde|d[oó]nde)\s+naci[oó]\s+.+$|(?:cu[aá]l\s+(?:fue|es)\s+(?:el\s+lugar|la\s+ciudad|la\s+localidad|el\s+pueblo)\s+(?:de\s+)?(?:nacimiento|origen|natal)|qu[eé]\s+lugar.*nacimiento)\s+.+", "handle_birth_place_of_person"),
             (r"(?:d[oó]nde\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:lugar|sitio|ciudad|pueblo)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+(?:el\s+lugar|la\s+ciudad)\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+lugar\s+de\s+(?:fallecimiento|defunci[oó]n)\s+(?:tiene|consta)|lugar\s+de\s+defunci[oó]n\s+de)\s+.+", "handle_death_place_of_person"),
-            (r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|en\s+qu[eé]\s+fecha.*naci|cu[aá]l\s+(?:fue|es)\s+(?:la\s+)?fecha\s+(?:exacta\s+)?(?:de\s+)?nacimiento)\s+.+", "handle_birth_date_of_person"),
+            (r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|en\s+qu[eé]\s+(?:a[nñ]o|fecha|d[ií]a)\s+naci[oó]|qu[eé]\s+a[nñ]o\s+naci[oó]|en\s+qu[eé]\s+fecha.*naci|a[nñ]o\s+de\s+nacimiento\s+de|cu[aá]l\s+(?:fue|es)\s+(?:la\s+)?fecha\s+(?:exacta\s+)?(?:de\s+)?nacimiento)\s+.+", "handle_birth_date_of_person"),
             (r"(?:cu[aá]ndo\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:fecha|a[nñ]o|d[ií]a)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+la\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+fecha\s+de\s+defunci[oó]n\s+(?:tiene|consta)|hay\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de|cu[aá]ndo\s+se\s+produjo\s+la\s+defunci[oó]n\s+de|fue\s+(?:enterrad[oa]|sepultad[oa]))\s+.+", "handle_death_date_of_person"),
-            (r"^(?:ocupaci[oó]n|qu[eé]\s+oficio|trabajo|cu[aá]l\s+(?:era|fue)\s+(?:el\s+medio\s+de\s+vida|el\s+oficio))\s+(?:de\s+)?.+$", "handle_occupation_natural"),
-            (r"(?:residencia[s]?|domicilio[s]?|d[óo]nde\s+(?:viv[ií]a|vivia|vive|vivi[oó]|ha\s+vivido|residi[oó]|resid[ií]a)|cu[aá]l(?:es)?\s+(?:fue(?:ron)?|era[n]?|es|son)\s+(?:el\s+|la\s+|los\s+|las\s+)?(?:domicilio[s]?|direcci(?:[oó]n|ones)|primer\s+domicilio|residencia[s]?))\s+", "handle_last_residence"),
+            (r"^(?:profesi[oó]n|oficio|ocupaci[oó]n|trabajo|empleo|qu[eé]\s+oficio|qu[eé]\s+hac[ií]a|cu[aá]l\s+(?:era|fue)\s+(?:el\s+medio\s+de\s+vida|el\s+oficio|la\s+profesi[oó]n|la\s+ocupaci[oó]n))\s+(?:de\s+)?.+$", "handle_occupation_natural"),
+            (r"(?:residencia[s]?|domicilio[s]?|d[óo]nde\s+(?:viv[ií]a|vivia|vive|vivi[oó]|ha\s+vivido|residi[oó]|resid[ií]a|estuvo\s+domiciliad[oa])|en\s+qu[eé]\s+(?:domicilio[s]?|direcci(?:[oó]n|ones)|casa[s]?)\s+(?:estuvo|vivi[oó]|residi[oó])|qu[eé]\s+(?:domicilio[s]?|direcci(?:[oó]n|ones))\s+tuvo|cu[aá]l(?:es)?\s+(?:fue(?:ron)?|era[n]?|es|son)\s+(?:el\s+|la\s+|los\s+|las\s+)?(?:domicilio[s]?|direcci(?:[oó]n|ones)|primer\s+domicilio|residencia[s]?))\s+", "handle_last_residence"),
             (r"^(?:notas?|apuntes?)\s+(?:biogr[aá]ficas?\s+)?de\s+.+$", "handle_notes_field"),
             (r"^(?:qu[eé]\s+)?descendencia\s+.+$", "handle_has_descendants"),
         ]
@@ -2995,14 +2995,17 @@ class QueryRouter:
         # Examples: "figura en la ficha de X", "aparece documentado X", "registrada para X".
         _filler = r"(?:registrad[oa]\s+)?(?:documentad[oa]\s+)?(?:en\s+(?:la\s+ficha|su\s+ficha|su\s+registro|el\s+registro|los\s+datos)\s+(?:de\s+|para\s+)?)?(?:para\s+)?(?:de\s+)?"
         m = (re.search(r"(?:a\s+)?qu[eé]\s+(?:profesión|oficio|ocupaci[oó]n(?:es)?|actividad\s+(?:laboral|profesional)?)\s+(?:distint[ao]s?\s+|diferentes\s+)?(?:ten[ií]a|tuvo|figura|aparece|se\s+dedic[oó]|consta|desempe[nñ][oó]|realiz[oó])\s+" + _filler + r"(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"de\s+qu[eé]\s+trabaja(?:ba)?\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"en\s+qu[eé]\s+trabaja(?:ba)?\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"de\s+qu[eé]\s+trabaj(?:a|aba|[oó])\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"en\s+qu[eé]\s+trabaj(?:a|aba|[oó])\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"a\s+qu[eé]\s+se\s+dedic(?:a|aba|[oó])\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"con\s+qu[eé]\s+(?:oficio|trabajo|actividad|empleo)\s+(?:aparece|figura|documentado|consta)\s+(?:documentad[oa]\s+)?(?:como\s+)?(.+?)(?:\?|$)", q, re.I) or
              re.search(r"qu[eé]\s+tipo\s+de\s+(?:trabajo|actividad|empleo)\s+(?:desempe[nñ][oó]|hac[ií]a|realiz[oó]|tuvo|ten[ií]a)\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"(?:hay\s+)?constancia\s+(?:del\s+|de\s+(?:la\s+)?)?(?:empleo|oficio|trabajo|actividad|profesión|ocupaci[oó]n)\s+(?:de|para)\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"(?:qu[eé]\s+)?empleo\s+consta\s+(?:de|para)\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"c[oó]mo\s+se\s+ganaba\s+la\s+vida\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"cu[aá]l\s+(?:era|fue)\s+(?:el\s+medio\s+de\s+vida|el\s+oficio|la\s+profesión|la\s+ocupaci[oó]n|el\s+empleo|la\s+actividad)\s+(?:de\s+)?(.+?)(?:\?|$)", q, re.I))
+             re.search(r"cu[aá]l\s+(?:era|fue)\s+(?:el\s+medio\s+de\s+vida|el\s+oficio|la\s+profesión|la\s+ocupaci[oó]n|el\s+empleo|la\s+actividad)\s+(?:de\s+)?(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"qu[eé]\s+(?:hac[ií]a|hizo)\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"(?:profesi[oó]n|oficio|ocupaci[oó]n|trabajo|empleo)\s+de\s+(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person,_ = self._resolve_person(m.group(1))
@@ -3476,6 +3479,8 @@ class QueryRouter:
         wants_first = bool(re.search(r"primer(?:a)?\s+(?:domicilio|residencia|direcci[oó]n|casa)", q, re.I))
         m = (re.search(r"(?:ultima|[uú]ltima)\s+residencia\s+de\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"d[oó]nde\s+viv[ií]a\s+(.+?)\s+al\s+final\s+de\s+su\s+vida(?:\?|$)", q, re.I) or
+             re.search(r"en\s+qu[eé]\s+(?:domicilio[s]?|direcci(?:[oó]n|ones)|casa[s]?)\s+(?:estuvo|vivi[oó]|residi[oó])\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"qu[eé]\s+(?:domicilio[s]?|direcci(?:[oó]n|ones))\s+tuvo\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"(?:residencia[s]?|domicilio[s]?|direcci(?:[oó]n|ones)|d[óo]nde\s+(?:vivia|viv[ií]a|vive|vivi[oó]|ha\s+vivido|residi[oó]|resid[ií]a))\s+(?:de\s+|tuvo\s+|tuvieron\s+)?(.+?)(?:\?|$)", q, re.I) or
              re.search(r"cu[aá]l(?:es)?\s+(?:fue(?:ron)?|era[n]?|es|son)\s+(?:el\s+|la\s+|los\s+|las\s+)?(?:domicilio[s]?|direcci(?:[oó]n|ones)|primer\s+domicilio|residencia[s]?)\s+(?:de\s+)?(.+?)(?:\?|$)", q, re.I))
         if not m:
@@ -3592,7 +3597,8 @@ class QueryRouter:
 
     def handle_birth_date_of_person(self, question):
         """Handle 'Cuando nacio X?' or 'Cual fue la fecha de nacimiento de X?' - return X's birth date"""
-        subject = (self._extract_subject_name_from_pattern(question, r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|en\s+qu[eé]\s+fecha.*naci)\s+(.+?)(?:\?|$)") or
+        subject = (self._extract_subject_name_from_pattern(question, r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|en\s+qu[eé]\s+(?:a[nñ]o|fecha|d[ií]a)\s+naci[oó]|qu[eé]\s+a[nñ]o\s+naci[oó]|en\s+qu[eé]\s+fecha.*naci)\s+(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"(?:a[nñ]o\s+de\s+nacimiento\s+de)\s+(.+?)(?:\?|$)") or
                   self._extract_subject_name_from_pattern(question, r"(?:cu[aá]l\s+(?:fue|es)\s+(?:la\s+)?fecha\s+(?:exacta\s+)?(?:de\s+)?nacimiento\s+de)\s+(.+?)(?:\?|$)"))
         if not subject:
             return None
