@@ -399,6 +399,12 @@ async def bootstrap_test_bank():
         raise HTTPException(status_code=503, detail="Router no inicializado")
     return test_bank.bootstrap_from_router(router)
 
+@app.post("/api/tests/bank/auto-review")
+async def auto_review_test_bank():
+    if not router:
+        raise HTTPException(status_code=503, detail="Router no inicializado")
+    return test_bank.auto_review(router)
+
 @app.get("/api/tests/bank/export")
 async def export_test_bank():
     return test_bank.export_bank()

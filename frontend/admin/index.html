@@ -431,10 +431,12 @@
                 <span style="font-size:0.82rem;color:#727971;" id="tests-stats"></span>
                 <div class="toolbar-right">
                     <button class="btn btn-secondary btn-sm" onclick="Tests.loadBank()">↻ Actualizar</button>
-                    <button class="btn btn-primary btn-sm" onclick="Tests.runAll()">▷ Ejecutar todos</button>
+                    <button class="btn btn-secondary btn-sm" id="tests-run-all" onclick="Tests.runAll()">▷ Ejecutar todos</button>
+                    <button class="btn btn-primary btn-sm" id="tests-autoqa-btn" onclick="Tests.autoReview()" title="Ejecuta y verifica cada pregunta contra la base de datos">✓ QA automático</button>
                 </div>
             </div>
 
+            <div id="tests-autoqa" style="display:none;margin-bottom:1rem;"></div>
             <div id="tests-list"></div>
         </section>
 

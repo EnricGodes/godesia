@@ -282,119 +282,142 @@ def run_tests(router, mode: str = "all", case_ids: List[str] = None) -> dict:
     }
 
 
+def generate_questions(conn, per_type: int = 40) -> List[str]:
+    """Generate natural Spanish questions from real people who actually have the
+    data the question asks about (so every question has a verifiable answer)."""
+
+    def names_for(sql: str) -> list:
+        rows = conn.execute(sql + f" ORDER BY RANDOM() LIMIT {per_type}").fetchall()
+        return [r[0] for r in rows if r[0]]
+
+    # Personas con padre/madre conocidos (para parentescos ascendentes y laterales)
+    with_parents = names_for(
+        "SELECT name FROM people WHERE name != '' AND (father_id IS NOT NULL OR mother_id IS NOT NULL)")
+    with_father = names_for("SELECT name FROM people WHERE name != '' AND father_id IS NOT NULL")
+    with_mother = names_for("SELECT name FROM people WHERE name != '' AND mother_id IS NOT NULL")
+    # Personas con hijos (para hijos/nietos)
+    with_children = names_for(
+        "SELECT DISTINCT p.name FROM people p JOIN children c ON c.parent_id = p.id WHERE p.name != ''")
+    # Abuelos conocidos: personas cuyo padre tiene padre
+    with_grandparents = names_for("""
+        SELECT p.name FROM people p
+        JOIN people f ON f.id = p.father_id
+        WHERE p.name != '' AND f.father_id IS NOT NULL""")
+    # Personas casadas
+    married = names_for("""
+        SELECT p.name FROM people p WHERE p.name != '' AND p.id IN (
+            SELECT person1_id FROM marriages UNION SELECT person2_id FROM marriages)""")
+    # Con lugar de nacimiento / muerte
+    with_birth = names_for("SELECT name FROM people WHERE name != '' AND birth_place IS NOT NULL AND birth_place != ''")
+    with_death = names_for("SELECT name FROM people WHERE name != '' AND death_place IS NOT NULL AND death_place != ''")
+    # Con tíos: personas cuyo padre/madre tiene hermanos → sirve para primos/sobrinos/tíos
+    with_uncles = names_for("""
+        SELECT p.name FROM people p JOIN children c1 ON c1.child_id = p.father_id
+        JOIN children c2 ON c2.parent_id = c1.parent_id AND c2.child_id != p.father_id
+        WHERE p.name != ''""")
+
+    qs = []
+    # Conjunto-de-personas (verificables por el oráculo)
+    qs += [f"¿Quiénes eran los padres de {n}?" for n in with_parents]
+    qs += [f"¿Quién era el padre de {n}?" for n in with_father[:per_type // 2]]
+    qs += [f"¿Quién era la madre de {n}?" for n in with_mother[:per_type // 2]]
+    qs += [f"¿Quiénes eran los hermanos de {n}?" for n in with_parents]
+    qs += [f"¿Qué hijos tuvo {n}?" for n in with_children]
+    qs += [f"¿Quiénes son los nietos de {n}?" for n in with_children[:per_type // 2]]
+    qs += [f"¿Con quién se casó {n}?" for n in married]
+    qs += [f"¿Quiénes eran los abuelos de {n}?" for n in with_grandparents]
+    qs += [f"¿Quién era el abuelo paterno de {n}?" for n in with_grandparents[:per_type // 2]]
+    qs += [f"¿Quiénes eran los tíos de {n}?" for n in with_uncles]
+    qs += [f"¿Quiénes son los primos de {n}?" for n in with_uncles]
+    qs += [f"¿Quiénes son los sobrinos de {n}?" for n in with_children[:per_type // 2]]
+    # Datos vitales
+    qs += [f"¿Dónde nació {n}?" for n in with_birth]
+    qs += [f"¿Dónde murió {n}?" for n in with_death]
+    return qs
+
+
 def bootstrap_from_router(router) -> dict:
-    """Auto-generate test cases from the router's pattern list.
-    Uses real person names from the database."""
-    conn = router.conn
-
-    # Get diverse sample of real names
-    rows = conn.execute("""
-        SELECT name FROM people
-        WHERE name IS NOT NULL AND name != ''
-        ORDER BY RANDOM() LIMIT 15
-    """).fetchall()
-    names = [r[0] for r in rows]
-    if not names:
+    """Auto-generate test cases from real DB people and run them."""
+    questions = generate_questions(router.conn)
+    if not questions:
         return {"added": 0, "error": "No people in database"}
-
-    # Get a couple name for couple-related patterns
-    couple_row = conn.execute("""
-        SELECT p1.name, p2.name FROM marriages m
-        JOIN people p1 ON p1.id = m.person1_id
-        JOIN people p2 ON p2.id = m.person2_id
-        WHERE p1.name IS NOT NULL AND p2.name IS NOT NULL
-        LIMIT 1
-    """).fetchone()
-    couple = (couple_row[0], couple_row[1]) if couple_row else (names[0], names[1] if len(names) > 1 else names[0])
-
-    # Get a place
-    place_row = conn.execute(
-        "SELECT birth_place FROM people WHERE birth_place IS NOT NULL AND birth_place != '' LIMIT 1"
-    ).fetchone()
-    place = place_row[0] if place_row else "Barcelona"
-
-    # Get a surname
-    surname_row = conn.execute(
-        "SELECT surname FROM people WHERE surname IS NOT NULL AND surname != '' LIMIT 1"
-    ).fetchone()
-    surname = surname_row[0].split()[0] if surname_row else "Godes"
-
-    questions = []
-    name = names[0]
-    name2 = names[1] if len(names) > 1 else names[0]
-
-    # Generate questions based on common pattern categories
-    templates = [
-        # Family
-        f"Quienes eran los padres de {name}?",
-        f"Quien era el padre de {name}?",
-        f"Quien era la madre de {name}?",
-        f"Que hermanos tenia {name}?",
-        f"Cuantos hermanos tenia {name}?",
-        f"Que hijos tuvo {name}?",
-        f"Cuantos hijos tuvo {name}?",
-        f"Con quien se caso {name}?",
-        # Extended family
-        f"Quienes eran los abuelos de {name}?",
-        f"Quien era el abuelo paterno de {name}?",
-        f"Quien era la abuela materna de {name}?",
-        f"Quienes eran los bisabuelos de {name}?",
-        f"Tios y tias de {name}",
-        f"Primos hermanos de {name}",
-        # In-laws
-        f"Suegros de {name}",
-        f"Nueras de {name}",
-        f"Yernos de {name}",
-        f"Cunados de {name}",
-        # Life events
-        f"Donde nacio {name}?",
-        f"Cuando murio {name}?",
-        f"Donde murio {name}?",
-        f"En que trabajaba {name}?",
-        f"Donde vivia {name}?",
-        f"Ultima residencia de {name}",
-        f"Notas biograficas de {name}",
-        # Relationship
-        f"Que parentesco hay entre {name} y {name2}?",
-        f"Quien es mayor, {name} o {name2}?",
-        # Stats
-        f"Que persona tuvo mas hijos?",
-        f"Quien vivio mas anos?",
-        f"Cual es la media de hijos?",
-        f"Hay mas hombres o mujeres en el arbol?",
-        # Search
-        f"Que personas nacieron en {place}?",
-        f"Quien nacio en 1920?",
-        f"Que personas tienen {surname} como primer apellido?",
-        f"Cuantas personas se llaman {name.split()[0]}?",
-        # Couple
-        f"Cuantos hijos tuvieron {couple[0]} y {couple[1]}?",
-        # Age
-        f"A que edad se caso {name}?",
-        f"A que edad tuvo su primer hijo {name}?",
-        f"Ranking de longevidad de {name}",
-        # Descendants
-        f"Tiene descendencia documentada {name}?",
-        f"Ranking de descendencia de {name}",
-    ]
-
-    # Add more names for variety
-    for n in names[2:8]:
-        templates.extend([
-            f"Hijos de {n}",
-            f"Padres de {n}",
-            f"Donde nacio {n}?",
-        ])
-
-    questions = templates
-    result = add_questions(questions, tags=["bootstrap"])
-
-    # Now run them all
+    result = add_questions(questions, tags=["generated"])
     if result["added"] > 0:
-        run_result = run_tests(router, mode="new")
-        result["run"] = run_result
-
+        result["run"] = run_tests(router, mode="new")
     return result
+
+
+def auto_review(router) -> dict:
+    """Automated QA: run all cases, then verify each against the database oracle.
+    - oracle PASS  → approve (snapshot from last_run), tag 'auto-verified'
+    - oracle FAIL  → reject, store reason, tag 'oracle-fail' (real router bugs)
+    - UNVERIFIABLE → baseline: approve as reference if it has a valid answer and
+      wasn't already approved (frozen line, marked 'baseline-unverified'); keep
+      regressions flagged.
+    Returns a summary including the list of oracle failures.
+    """
+    import test_oracle
+
+    run = run_tests(router, mode="all")
+    bank = _load_bank()
+    now = datetime.now().isoformat()
+    summary = {"run_id": run["run_id"], "total": 0, "verified_ok": 0,
+               "oracle_fail": [], "baseline": 0, "regressions": 0, "unverifiable": 0}
+
+    for case in bank["cases"]:
+        summary["total"] += 1
+        # Estado de oráculo previo: se recalcula desde cero esta corrida
+        case["tags"] = [t for t in case.get("tags", []) if t != "oracle-fail"]
+        case.pop("oracle_reason", None)
+        result, detail = test_oracle.verify(router, case)
+        last = case.get("last_run") or {}
+
+        def _approve(tag):
+            case["verdict"] = "approved"
+            case["updated_at"] = now
+            case.pop("improvement_reviewed", None)
+            case["approved_snapshot"] = {
+                "answer": last.get("answer", ""),
+                "handler": last.get("handler", ""),
+                "people_mentioned": last.get("people_mentioned", []),
+                "approved_at": now,
+            }
+            tags = [t for t in case.get("tags", []) if t != "oracle-fail"]
+            if tag not in tags:
+                tags.append(tag)
+            case["tags"] = tags
+            case.pop("oracle_reason", None)
+
+        if result == test_oracle.PASS:
+            _approve("auto-verified")
+            summary["verified_ok"] += 1
+        elif result == test_oracle.FAIL:
+            case["verdict"] = "rejected"
+            case["updated_at"] = now
+            case["oracle_reason"] = detail
+            if "oracle-fail" not in case.get("tags", []):
+                case.setdefault("tags", []).append("oracle-fail")
+            summary["oracle_fail"].append({"id": case["id"], "question": case["question"],
+                                           "reason": detail})
+        else:  # UNVERIFIABLE → línea base congelada (no hay verdad calculable)
+            summary["unverifiable"] += 1
+            answer = last.get("answer", "")
+            valid = last.get("status") == 200 and answer and "No he sabido responder" not in answer
+            if not valid:
+                # Respuesta rota: si estaba aprobada es una regresión REAL a mirar
+                if case.get("verdict") == "approved":
+                    summary["regressions"] += 1
+            elif case.get("verdict") == "approved":
+                snap = _normalize_answer((case.get("approved_snapshot") or {}).get("answer", ""))
+                if snap != _normalize_answer(answer):
+                    _approve("baseline-refrozen")  # benigna: recongela la línea base
+                    summary["baseline"] += 1
+            else:
+                _approve("baseline-unverified")
+                summary["baseline"] += 1
+
+    _save_bank(bank)
+    return summary
 
 
 def export_bank() -> dict:

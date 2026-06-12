@@ -52,6 +52,38 @@ def _tokenize_name(text: str) -> List[str]:
     return [t for t in _norm_cmp(text).split() if t]
 
 
+# Variantes de nombre de pila catalán↔castellano, para un fallback de búsqueda
+# cuando el nombre escrito no coincide literalmente con el de la BD
+# (p.ej. "Ernesto Godes Hurtado" buscando "Ernest Godes Hurtado").
+_GIVEN_NAME_VARIANTS = {}
+for _group in [
+    {"jose", "josep"}, {"juan", "joan"}, {"antonio", "antoni"}, {"emilio", "emili"},
+    {"felipe", "felip"}, {"guillermo", "guillem"}, {"dolores", "dolors"},
+    {"pedro", "pere"}, {"francisco", "francesc"}, {"jaime", "jaume"},
+    {"amadeo", "amadeu"}, {"arturo", "artur"}, {"ernesto", "ernest"},
+    {"enrique", "enric"}, {"jorge", "jordi"}, {"pablo", "pau"},
+    {"vicente", "vicenc"}, {"miguel", "miquel"}, {"alberto", "albert"},
+    {"luis", "lluis"}, {"joaquin", "joaquim"}, {"narciso", "narcis"},
+    {"rafael", "rafel"}, {"sebastian", "sebastia"}, {"esteban", "esteve"},
+    {"mercedes", "merce"}, {"genaro", "genar"},
+]:
+    for _n in _group:
+        _GIVEN_NAME_VARIANTS[_n] = _group
+
+
+def _given_name_variants(fragment: str) -> List[str]:
+    """Devuelve fragmentos alternativos sustituyendo el primer token por sus
+    variantes CA/ES. Vacío si el primer token no tiene variante conocida."""
+    toks = fragment.split()
+    if not toks:
+        return []
+    first = _norm_cmp(toks[0])
+    group = _GIVEN_NAME_VARIANTS.get(first)
+    if not group:
+        return []
+    return [" ".join([alt] + toks[1:]) for alt in group if alt != first]
+
+
 def _clean_question(question: str) -> str:
     q = question.strip()
     q = re.sub(r"^(?:\d+\.\s*)+", "", q).strip()
@@ -261,6 +293,10 @@ class QueryRouter:
             (r"(?:t[ií]os?|oncles?)\b", "handle_uncles"),
             (r"(?:n[oó]mbrame\s+los\s+primos\s+de\s+.+)", "handle_first_cousins"),
             (r"(?:primos\s+hermanos|cosins?\s+germans?|first\s+cousins)", "handle_first_cousins"),
+            (r"(?:prim[oa]s?(?:\s+herman[oa]s?)?\s+de\s+.+|cosins?\s+de\s+.+)", "handle_first_cousins"),
+            (r"(?:sobrin[oa]s?\s+niet[oa]s?\s+de\s+.+)", "handle_grandnephews"),
+            (r"(?:sobrin[oa]s?\s+de\s+.+|nebot[s]?\s+de\s+.+|nephews?\s+of|nieces?\s+of)", "handle_nephews_nieces"),
+            (r"(?:niet[oa]s?\s+de\s+.+|grandchildren\s+of|grandsons?\s+of|granddaughters?\s+of)", "handle_grandchildren"),
             (r"(?:cas[oó]\s+o\s+emparej[oó]|casar\s+o\s+emparellar)", "handle_spouse_or_partner"),
             (r"(?:(?:con\s+)?qu[eé]\s+(?:persona|hombre|mujer)\s+enlaz[oó]\s+.+\s+(?:por\s+)?matrimonio|with\s+whom\s+did\s+.+\s+marry)", "handle_spouse"),
             (r"(?:cu[aá]ntos?\s+descendientes?\s+directos?\s+(?:tuvo|dej[oó])\s+.+|how\s+many\s+direct\s+descendants)", "handle_direct_descendants"),
@@ -299,7 +335,7 @@ class QueryRouter:
             (r"(?:tatarabuelos\s+de\s+.+)", "handle_great_great_grandparents"),
             (r"(?:bisabuela\s+materna\s+de\s+.+)", "handle_maternal_great_grandmother"),
             (r"(?:bisabuelos\s+de\s+.+)", "handle_great_grandparents"),
-            (r"(?:(?:qui[eé]n|quiénes)\s+era(?:n)?\s+(?:la\s+)?madre\s+de\s+.+|dime\s+c[oó]mo\s+se\s+llamaba\s+la\s+madre\s+de\s+.+)", "handle_mother"),
+            (r"(?:(?:qui[eé]n|quiénes)\s+(?:era(?:n)?|fue(?:ron)?|hac[ií]a\s+de)\s+(?:la\s+)?madre\s+de\s+.+|c[oó]mo\s+se\s+llamaba\s+la\s+madre\s+de\s+.+|madre\s+de\s+.+|mare\s+de\s+.+|mother\s+of)", "handle_mother"),
             (r"(?:qui[eé]n\s+fue\s+el\s+hijo\s+mayor\s+de\s+.+|dime\s+cu[aá]l\s+fue\s+la\s+primera\s+hija\s+de\s+.+)", "handle_child_extremes"),
             (r"(?:cu[aá]ntas\s+personas\s+(?:del\s+[aá]rbol\s+)?se\s+llaman\s+.+)", "handle_given_name_count"),
             (r"(?:dos\s+apellidos\s+iguales)", "handle_same_surname_twice"),
@@ -389,7 +425,11 @@ class QueryRouter:
         return result
 
     def _route_internal(self, question):
+        # Quita numeración inicial ("9. ") y signos ¿¡ de apertura/cierre, que de
+        # otro modo rompen los patrones anclados con "^" (p.ej. "^dónde nació").
         q = question.lower().strip()
+        q = re.sub(r"^(?:\d+\.\s*)+", "", q)
+        q = q.strip(" ¿¡?!")
         for pattern, handler_name in self.patterns:
             try:
                 if re.search(pattern, q, re.I):
@@ -470,6 +510,18 @@ class QueryRouter:
             select_cols + "FROM people WHERE NORM(name) LIKE ? ORDER BY name LIMIT ?",
             (like_pattern, max(limit * 4, 80))
         ).fetchall()
+
+        # Fallback: si no hay coincidencias, reintenta con variantes CA/ES del
+        # nombre de pila ("Ernesto"→"Ernest"). Solo cuando el LIKE original falla.
+        if not rows:
+            for variant in _given_name_variants(name_fragment):
+                vp = "%" + re.sub(r"\s+", "%", _sql_norm(variant)) + "%"
+                rows = self.conn.execute(
+                    select_cols + "FROM people WHERE NORM(name) LIKE ? ORDER BY name LIMIT ?",
+                    (vp, max(limit * 4, 80))
+                ).fetchall()
+                if rows:
+                    break
 
         # Use _norm_cmp for accent-insensitive comparison (it already strips accents)
         query_norm = _norm_cmp(name_fragment)
@@ -574,6 +626,11 @@ class QueryRouter:
             r"primos\s+segundos\s+de\s+(.+?)(?:\?|$)",
             r"t[ií]os\s+abuelos\s+(?:maternos|paternos)?\s+(?:de|que\s+ten[ií]a)\s+(.+?)(?:\?|$)",
             r"sobrinos\s+nietos\s+de\s+(.+?)(?:\?|$)",
+            r"prim[oa]s?(?:\s+herman[oa]s?)?\s+de\s+(.+?)(?:\?|$)",
+            r"cosins?\s+de\s+(.+?)(?:\?|$)",
+            r"sobrin[oa]s?\s+de\s+(.+?)(?:\?|$)",
+            r"nebot[s]?\s+de\s+(.+?)(?:\?|$)",
+            r"niet[oa]s?\s+de\s+(.+?)(?:\?|$)",
             r"bisabuelos\s+de\s+(.+?)(?:\?|$)",
             r"tatarabuelos\s+de\s+(.+?)(?:\?|$)",
             r"tataranietos?\s+(?:documentados?\s+)?de\s+(.+?)(?:\?|$)",
@@ -1130,6 +1187,41 @@ class QueryRouter:
             total = len(paternal_cousins) + len(maternal_cousins)
             answer = f"Los primos hermanos de {person['name']} fueron {total} en total: " + "; ".join(sections) + "."
         people = [person] + paternal_cousins + maternal_cousins
+        return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
+
+    def handle_nephews_nieces(self, question):
+        """Sobrinos/sobrinas de [persona]: hijos de sus hermanos."""
+        subject = self._extract_subject_name(question)
+        if not subject:
+            return None
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        siblings = [_as_dict(s) for s in get_siblings(self.conn, person["id"])]
+        siblings = [s for s in siblings if s and s["id"] != person["id"]]
+        nephews = _sort_people(self._children_of_ids([s["id"] for s in siblings]))
+        if not nephews:
+            answer = f"No constan sobrinos o sobrinas documentados de {person['name']}."
+        else:
+            answer = f"Los sobrinos y sobrinas de {person['name']} fueron { _join_names(nephews) }."
+        people = [person] + nephews
+        return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
+
+    def handle_grandchildren(self, question):
+        """Nietos/nietas de [persona]: hijos de sus hijos."""
+        subject = self._extract_subject_name(question)
+        if not subject:
+            return None
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        children = [_as_dict(c) for c in get_children(self.conn, person["id"])]
+        grandchildren = _sort_people(self._children_of_ids([c["id"] for c in children if c]))
+        if not grandchildren:
+            answer = f"No constan nietos o nietas documentados de {person['name']}."
+        else:
+            answer = f"Los nietos y nietas de {person['name']} fueron { _join_names(grandchildren) }."
+        people = [person] + grandchildren
         return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
 
     def handle_spouse_or_partner(self, question):

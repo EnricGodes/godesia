@@ -137,6 +137,15 @@ La sección Cementerios (`frontend/cementerios.html`) muestra dónde está enter
 
 La tabla GEDCOM `burial` solo actúa como sugerencia en el gestor (`GET /api/admin/cemeteries/{id}/burial-suggestions`, matching por nombre sin acentos ni espacios); la verdad de los nichos es siempre la tabla manual. El dossier muestra la sección "Sepultura" cuando la persona tiene nicho asignado (clave `niche` en `/api/dossier/{id}`), con deep-link `?niche={id}` al mapa.
 
+## QA automático del QueryRouter (banco de preguntas)
+
+El banco de pruebas (`data/test_bank.json`, gestionado por `backend/test_bank.py`) tiene un verificador automático que sustituye la revisión manual de la pestaña Tests del admin:
+
+- **`backend/test_oracle.py`** calcula la respuesta correcta de preguntas estructuradas (padres, hijos, hermanos, primos, abuelos, tíos, sobrinos, nietos, cónyuge, lugar de nacimiento/muerte) directamente desde las tablas (`people`, `children`, `marriages`) y la compara con los `people_mentioned` que devuelve el router. Es **independiente** del router: un PASS significa "coincide con la verdad de la BD".
+- **`test_bank.auto_review(router)`** (endpoint `POST /api/tests/bank/auto-review`, botón "QA automático" en la pestaña Tests) ejecuta todo el banco y aplica veredictos solos: oráculo PASS → aprobado; oráculo FAIL → rechazado con motivo y tag `oracle-fail` (= bug real del router a corregir); no verificable (estadísticas, fraseos libres) → línea base congelada. Los `oracle-fail` son la lista de mejoras pendientes, generada sin trabajo manual.
+- **`scripts/seed_questions.py`** filtra las meta-preguntas absurdas de `_resources/preguntas_reales_godes_500_*.md`, carga las genuinas, genera preguntas nuevas desde la BD (`test_bank.generate_questions`, solo para personas con esos datos → verificables) y ejecuta `auto_review`.
+- Tras tocar el banco o el router, hacer checkpoint del WAL y commitear `data/test_bank.json` (y `data/godesia.db` si cambió) para Railway.
+
 ## Git Workflow
 
 This project uses GitHub (EnricGodes/godesia) for version control. As work is completed, commit changes with clean, descriptive commit messages and push to GitHub.

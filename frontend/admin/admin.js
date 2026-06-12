@@ -1193,7 +1193,7 @@ const Tests = {
 
     async runAll() {
         try {
-            const btn = document.querySelector('#s-tests .toolbar-right .btn-primary');
+            const btn = document.getElementById('tests-run-all');
             btn.disabled = true;
             btn.textContent = 'Ejecutando…';
             const d = await apiFetch('/api/tests/bank/run', {
@@ -1219,6 +1219,42 @@ const Tests = {
             });
             this.loadBank();
         } catch (e) { alert(e.message); }
+    },
+
+    async autoReview() {
+        const btn = document.getElementById('tests-autoqa-btn');
+        const box = document.getElementById('tests-autoqa');
+        btn.disabled = true;
+        btn.textContent = 'Verificando…';
+        box.style.display = 'block';
+        box.innerHTML = '<div class="info-card">Ejecutando todas las preguntas y verificándolas contra la base de datos… (puede tardar)</div>';
+        try {
+            const d = await apiFetch('/api/tests/bank/auto-review', { method: 'POST' });
+            const fails = d.oracle_fail || [];
+            box.innerHTML = `
+                <div class="info-card">
+                    <h3>QA automático</h3>
+                    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin:.6rem 0;font-size:.86rem;">
+                        <span>✅ Verificadas OK: <b>${d.verified_ok}</b></span>
+                        <span>🟢 Línea base: <b>${d.baseline}</b></span>
+                        <span>❔ No verificables: <b>${d.unverifiable}</b></span>
+                        <span>↩︎ Regresiones: <b>${d.regressions}</b></span>
+                        <span style="color:#a33;">✗ Fallos del oráculo: <b>${fails.length}</b></span>
+                    </div>
+                    <p style="font-size:.8rem;color:#727971;">Los fallos del oráculo son preguntas que el router no responde como dicta la base de datos: la lista de mejoras a corregir.</p>
+                    ${fails.length ? `<div style="max-height:360px;overflow:auto;margin-top:.5rem;">
+                        <table class="admin-table" style="font-size:.78rem;">
+                          <thead><tr><th>Pregunta</th><th>Motivo</th></tr></thead>
+                          <tbody>${fails.map(f => `<tr><td>${esc(f.question)}</td><td style="color:#a33;">${esc(f.reason)}</td></tr>`).join('')}</tbody>
+                        </table></div>` : '<p style="color:#2d7a33;font-weight:600;">Sin fallos de lógica. 🎉</p>'}
+                </div>`;
+            this.loadBank();
+        } catch (e) {
+            box.innerHTML = `<div class="info-card" style="color:#a33;">Error: ${esc(e.message)}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '✓ QA automático';
+        }
     },
 };
 
