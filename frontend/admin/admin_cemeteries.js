@@ -287,6 +287,43 @@ const Cemeteries = {
 
         this._renderNichePeople(niche);
         this._loadSuggestions();
+        this._renderRecords(niche);
+    },
+
+    _renderRecords(niche) {
+        const card = document.getElementById('niche-records-card');
+        const records = (niche && niche.records) || [];
+        if (!records.length) {
+            card.style.display = 'none';
+            return;
+        }
+        card.style.display = '';
+        document.getElementById('niche-records-title').textContent =
+            `Registre d'enterraments (${records.length})`;
+        const cols = [
+            ['burial_date', 'Enterram.'], ['death_day', 'Def.'], ['age', 'Edat'],
+            ['civil_status', 'Estat'], ['spouse', 'Cònjuge'], ['profession', 'Professió'],
+            ['parish', 'Parròquia'], ['address', 'Adreça'], ['origin', 'Origen'],
+            ['court', 'Jutjat'], ['titular', 'Titular'], ['notes', 'Notes'],
+        ];
+        const cell = (r, key) => {
+            const v = (r[key] || '').trim();
+            return v ? `<td title="${esc(v)}" style="white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;">${esc(v)}</td>`
+                     : '<td style="color:#c2c8bf;">—</td>';
+        };
+        document.getElementById('niche-records-table').innerHTML = `
+            <table class="admin-table" style="font-size:.78rem;">
+                <thead><tr><th>Nom</th>${cols.map(([, l]) => `<th>${l}</th>`).join('')}</tr></thead>
+                <tbody>${records.map(r => `
+                    <tr>
+                        <td style="white-space:nowrap;font-weight:600;">
+                            ${r.person_id ? '<span style="color:#4a7c50;">●</span> ' : ''}${esc(r.name)}
+                            ${r.person_id ? `<span style="color:#727971;font-weight:400;font-size:.72rem;">${esc(r.person_id)}</span>` : ''}
+                        </td>
+                        ${cols.map(([key]) => cell(r, key)).join('')}
+                    </tr>`).join('')}
+                </tbody>
+            </table>`;
     },
 
     _setNicheMarker(lat, lng) {
