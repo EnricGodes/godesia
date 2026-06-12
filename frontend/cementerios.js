@@ -280,6 +280,11 @@ const Cementerios = {
         document.getElementById('np-notes').textContent = n.notes || '';
 
         const peopleEl = document.getElementById('np-people');
+        // Notas del registre d'enterraments por persona identificada
+        const recordNotes = {};
+        (n.records || []).forEach(r => {
+            if (r.person_id && (r.notes || '').trim()) recordNotes[r.person_id] = r.notes.trim();
+        });
         if (!n.people.length) {
             peopleEl.innerHTML = '<p class="text-sm text-on-surface-variant">Sin personas asignadas.</p>';
         } else {
@@ -288,15 +293,17 @@ const Cementerios = {
                 const img = p.photo_file
                     ? `/photos/${p.photo_file}`
                     : `/api/default-photo?sex=${p.sex || ''}&birth_year=${p.birth_year || ''}`;
+                const note = recordNotes[p.id];
                 return `
                 <a href="/dossier.html?id=${pid}"
                    class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container transition">
-                    <img src="${img}" class="w-10 h-10 rounded-full object-cover border border-outline-variant/40" onerror="this.style.visibility='hidden'"/>
-                    <span class="flex-1">
+                    <img src="${img}" class="w-10 h-10 rounded-full object-cover border border-outline-variant/40 shrink-0" onerror="this.style.visibility='hidden'"/>
+                    <span class="flex-1 min-w-0">
                         <span class="block text-sm font-bold leading-tight">${esc(p.name)}</span>
                         <span class="block text-xs text-on-surface-variant">${p.birth_year || '?'} – ${p.death_year || '?'}</span>
+                        ${note ? `<span class="block text-xs italic text-on-surface-variant/80 mt-0.5">${esc(note)}</span>` : ''}
                     </span>
-                    <span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+                    <span class="material-symbols-outlined text-outline text-[18px] shrink-0">chevron_right</span>
                 </a>`;
             }).join('');
         }

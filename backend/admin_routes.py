@@ -2514,3 +2514,81 @@ async def burial_suggestions(cemetery_id: int):
         ORDER BY p.name
     """, (core, cemetery_id)).fetchall()
     return {"suggestions": [dict(r) for r in rows]}
+
+
+class NicheRecordBody(BaseModel):
+    name: str
+    person_id: str = ""
+    burial_date: str = ""
+    death_day: str = ""
+    civil_status: str = ""
+    spouse: str = ""
+    age: str = ""
+    origin: str = ""
+    profession: str = ""
+    address: str = ""
+    parish: str = ""
+    court: str = ""
+    titular: str = ""
+    notes: str = ""
+
+
+def _record_person_id(db, raw: str):
+    """Valida y normaliza el person_id de un registro; '' → None."""
+    pid = (raw or "").strip()
+    if not pid:
+        return None
+    pid = _norm_person_id(pid)
+    if not db.execute("SELECT 1 FROM people WHERE id = ?", (pid,)).fetchone():
+        raise HTTPException(status_code=404, detail=f"Persona no encontrada: {pid}")
+    return pid
+
+
+@router.post("/niches/{niche_id}/records")
+async def create_niche_record(niche_id: int, body: NicheRecordBody):
+    db = _db()
+    if not db.execute("SELECT 1 FROM niches WHERE id = ?", (niche_id,)).fetchone():
+        raise HTTPException(status_code=404, detail="Nicho no encontrado")
+    if not body.name.strip():
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+    cur = db.execute(
+        "INSERT INTO niche_records (niche_id, person_id, name, burial_date, death_day, "
+        "civil_status, spouse, age, origin, profession, address, parish, court, titular, notes) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (niche_id, _record_person_id(db, body.person_id), body.name.strip(),
+         body.burial_date.strip(), body.death_day.strip(), body.civil_status.strip(),
+         body.spouse.strip(), body.age.strip(), body.origin.strip(), body.profession.strip(),
+         body.address.strip(), body.parish.strip(), body.court.strip(),
+         body.titular.strip(), body.notes.strip()))
+    db.commit()
+    return {"ok": True, "id": cur.lastrowid}
+
+
+@router.put("/niche-records/{record_id}")
+async def update_niche_record(record_id: int, body: NicheRecordBody):
+    db = _db()
+    if not body.name.strip():
+        raise HTTPException(status_code=400, detail="El nombre es obligatorio")
+    cur = db.execute(
+        "UPDATE niche_records SET person_id=?, name=?, burial_date=?, death_day=?, "
+        "civil_status=?, spouse=?, age=?, origin=?, profession=?, address=?, parish=?, "
+        "court=?, titular=?, notes=? WHERE id=?",
+        (_record_person_id(db, body.person_id), body.name.strip(),
+         body.burial_date.strip(), body.death_day.strip(), body.civil_status.strip(),
+         body.spouse.strip(), body.age.strip(), body.origin.strip(), body.profession.strip(),
+         body.address.strip(), body.parish.strip(), body.court.strip(),
+         body.titular.strip(), body.notes.strip(), record_id))
+    db.commit()
+    if cur.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Registro no encontrado")
+    return {"ok": True}
+
+
+@router.delete("/niche-records/{record_id}")
+async def delete_niche_record(record_id: int):
+    db = _db()
+    cur = db.execute("DELETE FROM niche_records WHERE id = ?", (record_id,))
+    db.commit()
+    if cur.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Registro no encontrado")
+    return {"ok": True}

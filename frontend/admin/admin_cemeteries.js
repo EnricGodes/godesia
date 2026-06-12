@@ -293,13 +293,16 @@ const Cemeteries = {
     _renderRecords(niche) {
         const card = document.getElementById('niche-records-card');
         const records = (niche && niche.records) || [];
-        if (!records.length) {
-            card.style.display = 'none';
-            return;
-        }
-        card.style.display = '';
+        this._records = records;
+        // Visible siempre que el nicho exista (para poder añadir el primer registro)
+        card.style.display = this.editingNicheId ? '' : 'none';
         document.getElementById('niche-records-title').textContent =
             `Registre d'enterraments (${records.length})`;
+        if (!records.length) {
+            document.getElementById('niche-records-table').innerHTML =
+                '<p style="font-size:.85rem;color:#727971;">Sin registros. Añade el primero con «+ Nuevo registro».</p>';
+            return;
+        }
         const cols = [
             ['burial_date', 'Enterram.'], ['death_day', 'Def.'], ['age', 'Edat'],
             ['civil_status', 'Estat'], ['spouse', 'Cònjuge'], ['profession', 'Professió'],
@@ -313,7 +316,7 @@ const Cemeteries = {
         };
         document.getElementById('niche-records-table').innerHTML = `
             <table class="admin-table" style="font-size:.78rem;">
-                <thead><tr><th>Nom</th>${cols.map(([, l]) => `<th>${l}</th>`).join('')}</tr></thead>
+                <thead><tr><th>Nom</th>${cols.map(([, l]) => `<th>${l}</th>`).join('')}<th></th></tr></thead>
                 <tbody>${records.map(r => `
                     <tr>
                         <td style="white-space:nowrap;font-weight:600;">
@@ -321,9 +324,77 @@ const Cemeteries = {
                             ${r.person_id ? `<span style="color:#727971;font-weight:400;font-size:.72rem;">${esc(r.person_id)}</span>` : ''}
                         </td>
                         ${cols.map(([key]) => cell(r, key)).join('')}
+                        <td style="white-space:nowrap;text-align:right;">
+                            <button class="btn btn-secondary btn-sm" onclick="Cemeteries.openRecordModal(${r.id})">✎</button>
+                            <button class="btn btn-danger btn-sm" onclick="Cemeteries.deleteRecord(${r.id})">✕</button>
+                        </td>
                     </tr>`).join('')}
                 </tbody>
             </table>`;
+    },
+
+    openRecordModal(recordId) {
+        if (!this.editingNicheId) { alert('Guarda primero el nicho.'); return; }
+        this.editingRecordId = recordId;
+        const r = recordId ? (this._records || []).find(x => x.id === recordId) : null;
+        document.getElementById('nrec-modal-title').textContent =
+            r ? `Editar registro: ${r.name}` : 'Nuevo registro';
+        const fields = ['name', 'person-id', 'burial-date', 'death-day', 'civil-status',
+                        'spouse', 'age', 'origin', 'profession', 'address', 'parish',
+                        'court', 'titular', 'notes'];
+        fields.forEach(f => {
+            const key = f.replace(/-/g, '_');
+            document.getElementById(`nrec-${f}`).value = r ? (r[key] || '') : '';
+        });
+        openModal('nrec-modal');
+    },
+
+    async saveRecord() {
+        const val = f => document.getElementById(`nrec-${f}`).value.trim();
+        if (!val('name')) { alert('El nombre es obligatorio.'); return; }
+        const body = {
+            name: val('name'), person_id: val('person-id'),
+            burial_date: val('burial-date'), death_day: val('death-day'),
+            civil_status: val('civil-status'), spouse: val('spouse'), age: val('age'),
+            origin: val('origin'), profession: val('profession'), address: val('address'),
+            parish: val('parish'), court: val('court'), titular: val('titular'),
+            notes: val('notes'),
+        };
+        try {
+            if (this.editingRecordId) {
+                await apiFetch(`/api/admin/niche-records/${this.editingRecordId}`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+            } else {
+                await apiFetch(`/api/admin/niches/${this.editingNicheId}/records`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+            }
+        } catch (e) {
+            alert('Error guardando el registro: ' + e.message);
+            return;
+        }
+        closeModal('nrec-modal');
+        await this._refreshRecords();
+    },
+
+    async deleteRecord(recordId) {
+        if (!confirm('¿Eliminar este registro del libro de enterramientos?')) return;
+        try {
+            await apiFetch(`/api/admin/niche-records/${recordId}`, { method: 'DELETE' });
+        } catch (e) {
+            alert('Error eliminando: ' + e.message);
+            return;
+        }
+        await this._refreshRecords();
+    },
+
+    async _refreshRecords() {
+        this.current = await apiFetch(`/api/cemeteries/${this.current.id}`);
+        const niche = this.current.niches.find(n => n.id === this.editingNicheId);
+        this._renderRecords(niche);
     },
 
     _setNicheMarker(lat, lng) {

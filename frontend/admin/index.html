@@ -834,10 +834,82 @@
                     </div>
                 </div>
                 <div class="info-card" id="niche-records-card" style="margin-top:1.25rem;display:none;">
-                    <h3 id="niche-records-title">Registre d'enterraments</h3>
+                    <h3 style="display:flex;align-items:center;gap:.5rem;">
+                        <span id="niche-records-title">Registre d'enterraments</span>
+                        <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="Cemeteries.openRecordModal(null)">+ Nuevo registro</button>
+                    </h3>
                     <p style="font-size:.8rem;color:#727971;margin:.4rem 0 .6rem;">Datos del libro de enterramientos (importados del Excel CementirisBCN). ● = persona identificada en la BD.</p>
                     <div style="overflow-x:auto;">
                         <div id="niche-records-table"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal: editar registro de enterramiento -->
+            <div class="modal-overlay" id="nrec-modal">
+                <div class="modal" style="max-width:640px;">
+                    <div class="modal-title" id="nrec-modal-title">Editar registro</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 1rem;">
+                        <div class="form-group">
+                            <label>Nombre *</label>
+                            <input type="text" class="form-input" id="nrec-name"/>
+                        </div>
+                        <div class="form-group">
+                            <label>ID persona BD (ej: I16, vacío si no está)</label>
+                            <input type="text" class="form-input" id="nrec-person-id" placeholder="I16"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha enterramiento</label>
+                            <input type="text" class="form-input" id="nrec-burial-date" placeholder="25/5/1903"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Día defunción</label>
+                            <input type="text" class="form-input" id="nrec-death-day"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Estado civil</label>
+                            <input type="text" class="form-input" id="nrec-civil-status" placeholder="Casado/a, Viudo/a, Párvulo…"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Cónyuge (amb)</label>
+                            <input type="text" class="form-input" id="nrec-spouse"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Edad</label>
+                            <input type="text" class="form-input" id="nrec-age"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Origen</label>
+                            <input type="text" class="form-input" id="nrec-origin"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Profesión</label>
+                            <input type="text" class="form-input" id="nrec-profession"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Dirección</label>
+                            <input type="text" class="form-input" id="nrec-address"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Parroquia</label>
+                            <input type="text" class="form-input" id="nrec-parish"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Juzgado</label>
+                            <input type="text" class="form-input" id="nrec-court"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Titular</label>
+                            <input type="text" class="form-input" id="nrec-titular"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Notas (descripció)</label>
+                        <textarea class="form-textarea" id="nrec-notes" rows="2"></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeModal('nrec-modal')">Cancelar</button>
+                        <button class="btn btn-primary" onclick="Cemeteries.saveRecord()">Guardar</button>
                     </div>
                 </div>
             </div>
@@ -904,7 +976,7 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="admin_cemeteries.js?v=20260612"></script>
-<script src="admin.js?v=20260612"></script>
+<script src="admin_cemeteries.js?v=20260612.1"></script>
+<script src="admin.js?v=20260612.1"></script>
 </body>
 </html>
