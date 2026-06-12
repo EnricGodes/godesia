@@ -390,7 +390,7 @@ class QueryRouter:
             (r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|en\s+qu[eé]\s+fecha.*naci|cu[aá]l\s+(?:fue|es)\s+(?:la\s+)?fecha\s+(?:exacta\s+)?(?:de\s+)?nacimiento)\s+.+", "handle_birth_date_of_person"),
             (r"(?:cu[aá]ndo\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:fecha|a[nñ]o|d[ií]a)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+la\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+fecha\s+de\s+defunci[oó]n\s+(?:tiene|consta)|hay\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de|cu[aá]ndo\s+se\s+produjo\s+la\s+defunci[oó]n\s+de|fue\s+(?:enterrad[oa]|sepultad[oa]))\s+.+", "handle_death_date_of_person"),
             (r"^(?:ocupaci[oó]n|qu[eé]\s+oficio|trabajo|cu[aá]l\s+(?:era|fue)\s+(?:el\s+medio\s+de\s+vida|el\s+oficio))\s+(?:de\s+)?.+$", "handle_occupation_natural"),
-            (r"(?:residencia|d[óo]nde\s+(?:viv[ií]a|vivia|vive|ha\s+vivido)|cu[aá]l\s+(?:fue|era|es)\s+(?:el\s+domicilio|la\s+direcci[oó]n|el\s+primer\s+domicilio))\s+", "handle_last_residence"),
+            (r"(?:residencia[s]?|domicilio[s]?|d[óo]nde\s+(?:viv[ií]a|vivia|vive|vivi[oó]|ha\s+vivido|residi[oó]|resid[ií]a)|cu[aá]l(?:es)?\s+(?:fue(?:ron)?|era[n]?|es|son)\s+(?:el\s+|la\s+|los\s+|las\s+)?(?:domicilio[s]?|direcci(?:[oó]n|ones)|primer\s+domicilio|residencia[s]?))\s+", "handle_last_residence"),
             (r"^(?:notas?|apuntes?)\s+(?:biogr[aá]ficas?\s+)?de\s+.+$", "handle_notes_field"),
             (r"^(?:qu[eé]\s+)?descendencia\s+.+$", "handle_has_descendants"),
         ]
@@ -3457,12 +3457,27 @@ class QueryRouter:
                 rows.append(rr)
         return {"answer": self._list_people_answer(f"Las personas con primer apellido {surname} nacidas en {place} son", rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
+    def _format_residence(self, r, with_date=True):
+        frag = r.get('address') or ''
+        if r.get('address2'):
+            frag += (' ' if frag else '') + r['address2']
+        if r.get('city'):
+            frag += (', ' if frag else '') + r['city']
+        if r.get('country'):
+            frag += (', ' if frag else '') + r['country']
+        if with_date and r.get('date'):
+            frag += f" ({r['date']})"
+        return frag
+
     def handle_last_residence(self, question):
         q = _clean_question(question)
+        # Intención específica: última / al final / primer domicilio
+        wants_last = bool(re.search(r"(?:ultima|[uú]ltima)\s+residencia|al\s+final\s+de\s+su\s+vida|d[oó]nde\s+(?:muri[oó]|acab[oó])", q, re.I))
+        wants_first = bool(re.search(r"primer(?:a)?\s+(?:domicilio|residencia|direcci[oó]n|casa)", q, re.I))
         m = (re.search(r"(?:ultima|[uú]ltima)\s+residencia\s+de\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"d[oó]nde\s+viv[ií]a\s+(.+?)\s+al\s+final\s+de\s+su\s+vida(?:\?|$)", q, re.I) or
-             re.search(r"(?:residencia|d[óo]nde\s+(?:vivia|viv[ií]a|vive|ha\s+vivido))\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"cu[aá]l\s+(?:fue|era|es)\s+(?:el\s+domicilio|la\s+direcci[oó]n|el\s+primer\s+domicilio)\s+(?:de\s+)?(.+?)(?:\?|$)", q, re.I))
+             re.search(r"(?:residencia[s]?|domicilio[s]?|direcci(?:[oó]n|ones)|d[óo]nde\s+(?:vivia|viv[ií]a|vive|vivi[oó]|ha\s+vivido|residi[oó]|resid[ií]a))\s+(?:de\s+|tuvo\s+|tuvieron\s+)?(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"cu[aá]l(?:es)?\s+(?:fue(?:ron)?|era[n]?|es|son)\s+(?:el\s+|la\s+|los\s+|las\s+)?(?:domicilio[s]?|direcci(?:[oó]n|ones)|primer\s+domicilio|residencia[s]?)\s+(?:de\s+)?(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person, _ = self._resolve_person(m.group(1))
@@ -3471,20 +3486,24 @@ class QueryRouter:
         res = [_as_dict(r) for r in get_residences(self.conn, person['id'])]
         if not res:
             return {"answer": f"No constan residencias documentadas de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
         def yr(r):
             vals = re.findall(r"(\d{4})", str(r.get('date') or ''))
             return int(vals[-1]) if vals else -1
-        last = sorted(res, key=lambda r: (yr(r), str(r.get('date') or '')))[-1]
-        frag = last.get('address') or ''
-        if last.get('address2'):
-            frag += (' ' if frag else '') + last['address2']
-        if last.get('city'):
-            frag += (', ' if frag else '') + last['city']
-        if last.get('country'):
-            frag += (', ' if frag else '') + last['country']
-        if last.get('date'):
-            frag += f" ({last['date']})"
-        return {"answer": f"Al final de su vida, {_person_link(person)} vivía en {frag}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        res_sorted = sorted(res, key=lambda r: (yr(r), str(r.get('date') or '')))
+
+        if wants_last:
+            frag = self._format_residence(res_sorted[-1])
+            ans = f"Al final de su vida, {_person_link(person)} vivía en {frag}."
+        elif wants_first:
+            frag = self._format_residence(res_sorted[0])
+            ans = f"El primer domicilio documentado de {_person_link(person)} fue {frag}."
+        elif len(res_sorted) == 1:
+            ans = f"{_person_link(person)} vivió en {self._format_residence(res_sorted[0])}."
+        else:
+            items = "".join(f"<br>• {self._format_residence(r)}" for r in res_sorted)
+            ans = f"{_person_link(person)} vivió en {len(res_sorted)} domicilios documentados:{items}"
+        return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_children_total_natural(self, question):
         q = _clean_question(question)
