@@ -300,7 +300,43 @@ const Cementerios = {
                 </a>`;
             }).join('');
         }
+        this._renderRecords(n.records || []);
         document.getElementById('niche-panel').classList.add('open');
+    },
+
+    _renderRecords(records) {
+        const section = document.getElementById('np-records-section');
+        if (!records.length) {
+            section.style.display = 'none';
+            return;
+        }
+        section.style.display = '';
+        document.getElementById('np-records-title').textContent =
+            `Registre d'enterraments (${records.length})`;
+
+        const cols = [
+            ['burial_date', 'Enterram.'], ['age', 'Edat'], ['civil_status', 'Estat'],
+            ['spouse', 'Cònjuge'], ['profession', 'Professió'], ['parish', 'Parròquia'],
+            ['address', 'Adreça'], ['origin', 'Origen'], ['notes', 'Notes'],
+        ];
+        const cell = (r, key) => {
+            const v = (r[key] || '').trim();
+            if (!v) return '<td class="empty">—</td>';
+            const cls = key === 'notes' ? ' class="notes"' : '';
+            return `<td${cls} title="${esc(v)}">${esc(v)}</td>`;
+        };
+        const nameCell = (r) => {
+            if (r.person_id) {
+                const pid = r.person_id.replace(/@/g, '');
+                return `<td><a class="rec-name in-db" href="/dossier.html?id=${pid}" title="Veure dossier">${esc(r.name)}</a></td>`;
+            }
+            return `<td><span class="rec-name">${esc(r.name)}</span></td>`;
+        };
+        document.getElementById('np-records').innerHTML = `
+            <thead><tr><th>Nom</th>${cols.map(([, label]) => `<th>${label}</th>`).join('')}</tr></thead>
+            <tbody>${records.map(r =>
+                `<tr>${nameCell(r)}${cols.map(([key]) => cell(r, key)).join('')}</tr>`).join('')}
+            </tbody>`;
     },
 
     closeNichePanel() {

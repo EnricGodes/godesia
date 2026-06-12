@@ -319,9 +319,32 @@ CREATE TABLE IF NOT EXISTS niche_people (
     UNIQUE(niche_id, person_id)
 );
 
+-- Full burial-register rows from archival sources (CementirisBCN.xlsx):
+-- every person buried in the niche, whether or not they exist in `people`.
+CREATE TABLE IF NOT EXISTS niche_records (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    niche_id INTEGER NOT NULL,
+    person_id TEXT,
+    name TEXT NOT NULL,
+    burial_date TEXT,
+    death_day TEXT,
+    civil_status TEXT,
+    spouse TEXT,
+    age TEXT,
+    origin TEXT,
+    profession TEXT,
+    address TEXT,
+    parish TEXT,
+    court TEXT,
+    titular TEXT,
+    notes TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_niches_cemetery ON niches(cemetery_id);
 CREATE INDEX IF NOT EXISTS idx_niche_people_person ON niche_people(person_id);
 CREATE INDEX IF NOT EXISTS idx_niche_photos_niche ON niche_photos(niche_id);
+CREATE INDEX IF NOT EXISTS idx_niche_records_niche ON niche_records(niche_id);
 """
 
 
@@ -529,6 +552,8 @@ def get_connection(db_path):
         "UPDATE niches SET photo_file = NULL WHERE photo_file IS NOT NULL",
         "INSERT INTO niche_photos (niche_id, filename, kind) SELECT id, record_file, 'record' FROM niches WHERE record_file IS NOT NULL",
         "UPDATE niches SET record_file = NULL WHERE record_file IS NOT NULL",
+        "CREATE TABLE IF NOT EXISTS niche_records (id INTEGER PRIMARY KEY AUTOINCREMENT, niche_id INTEGER NOT NULL, person_id TEXT, name TEXT NOT NULL, burial_date TEXT, death_day TEXT, civil_status TEXT, spouse TEXT, age TEXT, origin TEXT, profession TEXT, address TEXT, parish TEXT, court TEXT, titular TEXT, notes TEXT, created_at TEXT DEFAULT (datetime('now')))",
+        "CREATE INDEX IF NOT EXISTS idx_niche_records_niche ON niche_records(niche_id)",
     ]:
         try:
             conn.execute(stmt)
@@ -656,6 +681,13 @@ def get_cemetery_detail(conn, cemetery_id):
         """, (n["id"],)).fetchall()
         niche["people"] = [dict(p) for p in people]
         niche["photos"] = get_niche_photos(conn, n["id"])
+        records = conn.execute(
+            "SELECT id, person_id, name, burial_date, death_day, civil_status, spouse, "
+            "age, origin, profession, address, parish, court, titular, notes "
+            "FROM niche_records WHERE niche_id = ? ORDER BY id",
+            (n["id"],)
+        ).fetchall()
+        niche["records"] = [dict(r) for r in records]
         result["niches"].append(niche)
     return result
 

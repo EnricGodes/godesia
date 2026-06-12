@@ -78,8 +78,9 @@
         /* Panel lateral de nicho (oculto del todo cuando no está activo) */
         #map-wrap { position: relative; overflow: hidden; border-radius: 0.75rem; }
         #niche-panel {
-            position: absolute; top: 12px; right: 12px; bottom: 12px; width: 340px;
-            max-width: calc(100% - 24px); z-index: 1000; overflow-y: auto;
+            position: absolute; top: 12px; right: 12px; bottom: 12px;
+            width: min(620px, calc(100% - 24px));
+            z-index: 1000; overflow-y: auto;
             background: #fcf9f0; border: 1px solid rgba(114,121,113,0.25);
             border-radius: 0.75rem; box-shadow: 0 8px 28px rgba(28,28,23,0.25);
             transform: translateX(120%); transition: transform 0.25s ease, visibility 0.25s;
@@ -87,9 +88,29 @@
         }
         #niche-panel.open { transform: translateX(0); visibility: visible; }
         @media (max-width: 640px) {
-            #niche-panel { top: auto; left: 12px; right: 12px; width: auto; max-height: 55%; transform: translateY(130%); }
+            #niche-panel { top: auto; left: 12px; right: 12px; width: auto; max-height: 65%; transform: translateY(130%); }
             #niche-panel.open { transform: translateY(0); }
         }
+
+        /* Tabla del registre d'enterraments */
+        #np-records-wrap { overflow-x: auto; border: 1px solid rgba(114,121,113,0.25); border-radius: 0.5rem; }
+        #np-records { border-collapse: collapse; font-size: 0.72rem; width: 100%; min-width: 760px; }
+        #np-records th {
+            text-align: left; padding: 0.35rem 0.5rem; background: #f1eee5; color: #424842;
+            font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.62rem;
+            white-space: nowrap; position: sticky; top: 0;
+        }
+        #np-records td { padding: 0.35rem 0.5rem; border-top: 1px solid rgba(114,121,113,0.15); vertical-align: top; }
+        #np-records td.empty { color: #c2c8bf; }
+        #np-records .rec-name { font-weight: 700; white-space: nowrap; }
+        #np-records a.rec-name { color: #2D4B33; text-decoration: none; }
+        #np-records a.rec-name:hover { text-decoration: underline; }
+        #np-records .in-db::before {
+            content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 9999px;
+            background: #4a7c50; margin-right: 5px; vertical-align: 1px;
+        }
+        #np-records td.notes { min-width: 140px; max-width: 220px; }
+        .in-db-legend { color: #4a7c50; }
 
         /* Autocompletado de personas */
         #person-results {
@@ -170,7 +191,12 @@
                 <div id="np-photos" class="grid grid-cols-2 gap-2 mb-3"></div>
                 <p id="np-notes" class="text-sm text-on-surface-variant mb-4"></p>
                 <h3 class="text-[11px] uppercase tracking-wider font-extrabold text-outline mb-2">Personas enterradas</h3>
-                <div id="np-people" class="space-y-1"></div>
+                <div id="np-people" class="space-y-1 mb-4"></div>
+                <div id="np-records-section" style="display:none;">
+                    <h3 id="np-records-title" class="text-[11px] uppercase tracking-wider font-extrabold text-outline mb-2"></h3>
+                    <p class="text-[11px] text-on-surface-variant mb-2">Registre del llibre d'enterraments. <span class="in-db-legend">●</span> = persona a la base de dades.</p>
+                    <div id="np-records-wrap"><table id="np-records"></table></div>
+                </div>
             </aside>
         </div>
 

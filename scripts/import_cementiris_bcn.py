@@ -212,22 +212,33 @@ def read_sheet(z, shared, path):
     return out
 
 
-def parse_burial_year(data_str):
-    """DATA puede ser 'dd/mm/yyyy' o serial Excel. Devuelve año o None."""
+def parse_burial_date(data_str):
+    """DATA puede ser 'dd/mm/yyyy' o serial Excel.
+    Devuelve (texto dd/mm/yyyy o original, año o None)."""
     s = (data_str or "").strip()
     if not s or s.startswith("#"):
-        return None
+        return "", None
     m = re.search(r"(\d{4})", s)
     if "/" in s and m:
-        return int(m.group(1))
+        return s, int(m.group(1))
     try:
         serial = float(s)
         if 1 < serial < 80000:
             d = datetime.date(1899, 12, 30) + datetime.timedelta(days=serial)
-            return d.year
+            return d.strftime("%-d/%-m/%Y"), d.year
     except ValueError:
         pass
-    return None
+    return s, None
+
+
+def parse_burial_year(data_str):
+    return parse_burial_date(data_str)[1]
+
+
+def clean(value):
+    """Valores de celda: '#VALUE!' y similares → vacío."""
+    v = (value or "").strip()
+    return "" if v.startswith("#") else v
 
 
 # ---------------------------------------------------------------------------
@@ -412,11 +423,18 @@ def main():
                         "VALUES (?, ?, ?, ?, ?, ?)",
                         (cem_id, name, title, nlat, nlng, notes))
                     niche_id = cur.lastrowid
+                # El Excel es la fuente de verdad de los registros: reemplazo completo
+                conn.execute("DELETE FROM niche_records WHERE niche_id = ?", (niche_id,))
             totals["niches"] += 1
 
-            for r in nrows:
+            # Registros ordenados por fecha de enterramiento (sin fecha al final)
+            def _sort_key(r):
+                _, year = parse_burial_date(r.get("DATA", ""))
+                return (year is None, year or 0)
+
+            for r in sorted(nrows, key=_sort_key):
                 nom = r.get("NOM", "").strip()
-                burial_year = parse_burial_year(r.get("DATA", ""))
+                burial_str, burial_year = parse_burial_date(r.get("DATA", ""))
                 given, surnames = split_given_surnames(nom)
                 surn_key = " ".join(surnames)
                 match, level = None, None
@@ -442,14 +460,27 @@ def main():
                         else:
                             report["unmatched"].append((official_name, nom))
                         totals["unmatched" if not sugg else "doubtful"] += 1
-                        continue
                 else:
                     report["doubtful"].append(
                         (official_name, name, nom, burial_year,
                          [(p["id"], p["name"], p["death_year"]) for p in exact[:4]]))
                     totals["doubtful"] += 1
-                    continue
 
+                # Registro completo del libro de enterraments (haya match o no)
+                totals["records"] += 1
+                if args.apply:
+                    conn.execute(
+                        "INSERT INTO niche_records (niche_id, person_id, name, burial_date, "
+                        "death_day, civil_status, spouse, age, origin, profession, address, "
+                        "parish, court, titular, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (niche_id, match["id"] if match else None, nom, burial_str,
+                         clean(r.get("DEF.")), clean(r.get("ESTAT")), clean(r.get("amb")),
+                         clean(r.get("EDAT")), clean(r.get("ORIGEN")), clean(r.get("PROFESSIÓ")),
+                         clean(r.get("ADREÇA")), clean(r.get("PARROQUIA")), clean(r.get("JUTJAT")),
+                         clean(r.get("TITULAR")), clean(r.get("DESCRIPCIÓ"))))
+
+                if not match:
+                    continue
                 report[level].append((official_name, name, nom, match["id"], match["name"]))
                 totals[level] += 1
                 person_niches[match["id"]].append((official_name, name))
@@ -473,6 +504,7 @@ def main():
     print(f"\n=== {mode} ===")
     print(f"Cementerios: {totals['cemeteries']}")
     print(f"Nichos: {totals['niches']}")
+    print(f"Registros de enterramiento: {totals['records']}")
     print(f"Asignaciones exactas: {totals['exact']}")
     print(f"Asignaciones por variante: {totals['variant']}")
     print(f"Dudosos (revisar informe): {totals['doubtful']}")
