@@ -299,6 +299,7 @@ CREATE TABLE IF NOT EXISTS niches (
     photo_file TEXT,
     record_file TEXT,
     notes TEXT,
+    fs_url TEXT,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT
 );
@@ -338,6 +339,7 @@ CREATE TABLE IF NOT EXISTS niche_records (
     court TEXT,
     titular TEXT,
     notes TEXT,
+    fs_url TEXT,
     created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -554,6 +556,8 @@ def get_connection(db_path):
         "UPDATE niches SET record_file = NULL WHERE record_file IS NOT NULL",
         "CREATE TABLE IF NOT EXISTS niche_records (id INTEGER PRIMARY KEY AUTOINCREMENT, niche_id INTEGER NOT NULL, person_id TEXT, name TEXT NOT NULL, burial_date TEXT, death_day TEXT, civil_status TEXT, spouse TEXT, age TEXT, origin TEXT, profession TEXT, address TEXT, parish TEXT, court TEXT, titular TEXT, notes TEXT, created_at TEXT DEFAULT (datetime('now')))",
         "CREATE INDEX IF NOT EXISTS idx_niche_records_niche ON niche_records(niche_id)",
+        "ALTER TABLE niche_records ADD COLUMN fs_url TEXT",
+        "ALTER TABLE niches ADD COLUMN fs_url TEXT",
     ]:
         try:
             conn.execute(stmt)
@@ -683,7 +687,7 @@ def get_cemetery_detail(conn, cemetery_id):
         niche["photos"] = get_niche_photos(conn, n["id"])
         records = conn.execute(
             "SELECT id, person_id, name, burial_date, death_day, civil_status, spouse, "
-            "age, origin, profession, address, parish, court, titular, notes "
+            "age, origin, profession, address, parish, court, titular, notes, fs_url "
             "FROM niche_records WHERE niche_id = ? ORDER BY id",
             (n["id"],)
         ).fetchall()

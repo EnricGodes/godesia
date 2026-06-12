@@ -322,6 +322,7 @@ const Cemeteries = {
                         <td style="white-space:nowrap;font-weight:600;">
                             ${r.person_id ? '<span style="color:#4a7c50;">●</span> ' : ''}${esc(r.name)}
                             ${r.person_id ? `<span style="color:#727971;font-weight:400;font-size:.72rem;">${esc(r.person_id)}</span>` : ''}
+                            ${r.fs_url ? ` <a href="${esc(r.fs_url)}" target="_blank" rel="noopener" title="Imagen del registro en FamilySearch" style="text-decoration:none;">📄</a>` : ''}
                         </td>
                         ${cols.map(([key]) => cell(r, key)).join('')}
                         <td style="white-space:nowrap;text-align:right;">
@@ -341,7 +342,7 @@ const Cemeteries = {
             r ? `Editar registro: ${r.name}` : 'Nuevo registro';
         const fields = ['name', 'person-id', 'burial-date', 'death-day', 'civil-status',
                         'spouse', 'age', 'origin', 'profession', 'address', 'parish',
-                        'court', 'titular', 'notes'];
+                        'court', 'titular', 'notes', 'fs-url'];
         fields.forEach(f => {
             const key = f.replace(/-/g, '_');
             document.getElementById(`nrec-${f}`).value = r ? (r[key] || '') : '';
@@ -358,7 +359,7 @@ const Cemeteries = {
             civil_status: val('civil-status'), spouse: val('spouse'), age: val('age'),
             origin: val('origin'), profession: val('profession'), address: val('address'),
             parish: val('parish'), court: val('court'), titular: val('titular'),
-            notes: val('notes'),
+            notes: val('notes'), fs_url: val('fs-url'),
         };
         try {
             if (this.editingRecordId) {

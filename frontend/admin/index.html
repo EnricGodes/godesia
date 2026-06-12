@@ -907,6 +907,10 @@
                         <label>Notas (descripció)</label>
                         <textarea class="form-textarea" id="nrec-notes" rows="2"></textarea>
                     </div>
+                    <div class="form-group">
+                        <label>Enllaç FamilySearch (imagen del registro)</label>
+                        <input type="url" class="form-input" id="nrec-fs-url" placeholder="https://www.familysearch.org/ark:/61903/3:1:…"/>
+                    </div>
                     <div class="modal-actions">
                         <button class="btn btn-secondary" onclick="closeModal('nrec-modal')">Cancelar</button>
                         <button class="btn btn-primary" onclick="Cemeteries.saveRecord()">Guardar</button>
@@ -976,7 +980,7 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="admin_cemeteries.js?v=20260612.1"></script>
-<script src="admin.js?v=20260612.1"></script>
+<script src="admin_cemeteries.js?v=20260612.2"></script>
+<script src="admin.js?v=20260612.2"></script>
 </body>
 </html>

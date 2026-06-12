@@ -212,6 +212,96 @@ def read_sheet(z, shared, path):
     return out
 
 
+def read_cells(z, shared, path):
+    """Celdas crudas de una hoja: {ref: valor} (p.ej. {'F12': 'Pasqual Godes'})."""
+    root = ET.fromstring(z.read("xl/" + path))
+    cells = {}
+    for row in root.iter(M + "row"):
+        for c in row.iter(M + "c"):
+            ref = c.get("r") or ""
+            t = c.get("t")
+            v = c.find(M + "v")
+            if t == "s" and v is not None:
+                val = shared[int(v.text)]
+            else:
+                val = v.text if v is not None else ""
+            cells[ref] = (val or "").strip()
+    return cells
+
+
+def read_hyperlinks(z, sheet_xml):
+    """Hyperlinks de una hoja: [(ref_celda, url)]."""
+    R = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
+    try:
+        rels = ET.fromstring(z.read(f"xl/worksheets/_rels/{sheet_xml}.rels"))
+    except KeyError:
+        return []
+    relmap = {rel.get("Id"): rel.get("Target") for rel in rels}
+    root = ET.fromstring(z.read(f"xl/worksheets/{sheet_xml}"))
+    out = []
+    for h in root.iter(M + "hyperlink"):
+        url = relmap.get(h.get(R + "id"), "")
+        if url:
+            out.append((h.get("ref") or "", url))
+    return out
+
+
+def load_fs_person_links(z, shared):
+    """Pestaña 1: filas índice con NOM (col F) cuyo hyperlink (en col A/B/C de la
+    misma fila) apunta a la imagen exacta de su página del registro.
+    Devuelve {nombre_normalizado: url}."""
+    cells = read_cells(z, shared, "worksheets/sheet1.xml")
+    links = {}
+    for ref, url in read_hyperlinks(z, "sheet1.xml"):
+        if "familysearch" not in url:
+            continue
+        rownum = "".join(ch for ch in ref if ch.isdigit())
+        nom = cells.get("F" + rownum, "")
+        if nom:
+            links.setdefault(norm(nom), url)
+    return links
+
+
+def _norm_island(s):
+    """Normaliza ILLA/ISLA para casar pestaña 10 con la 11."""
+    n = norm(s).replace("illa", "isla").replace("int o centro", "interior centro")
+    return re.sub(r"\s+", " ", n).strip()
+
+
+def load_poblenou_volumes(z, shared):
+    """Pestaña 11: volúmenes del registro de Poble Nou por (isla, dept, rango de nº).
+    Devuelve [(isla_norm, dept_digits, desde, hasta, url)]."""
+    cells = read_cells(z, shared, "worksheets/sheet11.xml")
+    url_by_row = {}
+    for ref, url in read_hyperlinks(z, "sheet11.xml"):
+        if "familysearch" in url:
+            url_by_row["".join(ch for ch in ref if ch.isdigit())] = url
+    vols = []
+    row = 2
+    while f"A{row}" in cells or f"B{row}" in cells:
+        isla = cells.get(f"B{row}", "")
+        desde, hasta = cells.get(f"D{row}", ""), cells.get(f"E{row}", "")
+        url = url_by_row.get(str(row))
+        if url and isla and desde.isdigit() and hasta.isdigit():
+            dept = re.sub(r"\D", "", cells.get(f"C{row}", ""))
+            vols.append((_norm_island(isla), dept, int(desde), int(hasta), url))
+        row += 1
+    return vols
+
+
+def find_volume_url(volumes, illa, dept, num):
+    """URL del volumen de Poble Nou para un nicho, si hay candidato único."""
+    if not num or not str(num).strip().isdigit():
+        return None
+    n = int(str(num).strip())
+    isla_n = _norm_island(illa)
+    dept_n = re.sub(r"\D", "", dept or "")
+    cands = {url for v_isla, v_dept, desde, hasta, url in volumes
+             if v_isla == isla_n and desde <= n <= hasta
+             and (not dept_n or not v_dept or v_dept == dept_n)}
+    return cands.pop() if len(cands) == 1 else None
+
+
 def parse_burial_date(data_str):
     """DATA puede ser 'dd/mm/yyyy' o serial Excel.
     Devuelve (texto dd/mm/yyyy o original, año o None)."""
@@ -314,6 +404,8 @@ def main():
 
     z = zipfile.ZipFile(XLSX)
     shared = load_shared_strings(z)
+    fs_links = load_fs_person_links(z, shared)
+    pn_volumes = load_poblenou_volumes(z, shared)
     conn = get_connection(str(DB_PATH))
 
     # Índice de personas de la BD
@@ -406,6 +498,12 @@ def main():
             titulars = sorted({(r.get("TITULAR") or "").strip() for r in nrows} - {""})
             notes = f"Titular de la concessió: {'; '.join(titulars)}" if titulars else ""
 
+            # Enlace al volumen del registre (Poble Nou, pestaña 11)
+            k_num, _, _, _, k_illa, k_dept = key
+            niche_fs = find_volume_url(pn_volumes, k_illa, k_dept, k_num)
+            if niche_fs:
+                totals["niche_fs"] += 1
+
             niche_id = None
             if args.apply:
                 row_db = conn.execute(
@@ -415,13 +513,14 @@ def main():
                     niche_id = row_db["id"]
                     conn.execute(
                         "UPDATE niches SET title = COALESCE(title, ?), notes = ?, "
-                        "lat = COALESCE(lat, ?), lng = COALESCE(lng, ?) WHERE id = ?",
-                        (title, notes, nlat, nlng, niche_id))
+                        "lat = COALESCE(lat, ?), lng = COALESCE(lng, ?), "
+                        "fs_url = COALESCE(?, fs_url) WHERE id = ?",
+                        (title, notes, nlat, nlng, niche_fs, niche_id))
                 else:
                     cur = conn.execute(
-                        "INSERT INTO niches (cemetery_id, name, title, lat, lng, notes) "
-                        "VALUES (?, ?, ?, ?, ?, ?)",
-                        (cem_id, name, title, nlat, nlng, notes))
+                        "INSERT INTO niches (cemetery_id, name, title, lat, lng, notes, fs_url) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        (cem_id, name, title, nlat, nlng, notes, niche_fs))
                     niche_id = cur.lastrowid
                 # El Excel es la fuente de verdad de los registros: reemplazo completo
                 conn.execute("DELETE FROM niche_records WHERE niche_id = ?", (niche_id,))
@@ -468,16 +567,19 @@ def main():
 
                 # Registro completo del libro de enterraments (haya match o no)
                 totals["records"] += 1
+                fs_url = fs_links.get(norm(nom))
+                if fs_url:
+                    totals["record_fs"] += 1
                 if args.apply:
                     conn.execute(
                         "INSERT INTO niche_records (niche_id, person_id, name, burial_date, "
                         "death_day, civil_status, spouse, age, origin, profession, address, "
-                        "parish, court, titular, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        "parish, court, titular, notes, fs_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         (niche_id, match["id"] if match else None, nom, burial_str,
                          clean(r.get("DEF.")), clean(r.get("ESTAT")), clean(r.get("amb")),
                          clean(r.get("EDAT")), clean(r.get("ORIGEN")), clean(r.get("PROFESSIÓ")),
                          clean(r.get("ADREÇA")), clean(r.get("PARROQUIA")), clean(r.get("JUTJAT")),
-                         clean(r.get("TITULAR")), clean(r.get("DESCRIPCIÓ"))))
+                         clean(r.get("TITULAR")), clean(r.get("DESCRIPCIÓ")), fs_url))
 
                 if not match:
                     continue
@@ -505,6 +607,8 @@ def main():
     print(f"Cementerios: {totals['cemeteries']}")
     print(f"Nichos: {totals['niches']}")
     print(f"Registros de enterramiento: {totals['records']}")
+    print(f"Registros con imagen FamilySearch enlazada: {totals['record_fs']}")
+    print(f"Nichos con volumen FamilySearch (Poble Nou): {totals['niche_fs']}")
     print(f"Asignaciones exactas: {totals['exact']}")
     print(f"Asignaciones por variante: {totals['variant']}")
     print(f"Dudosos (revisar informe): {totals['doubtful']}")

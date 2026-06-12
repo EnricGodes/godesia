@@ -2531,6 +2531,7 @@ class NicheRecordBody(BaseModel):
     court: str = ""
     titular: str = ""
     notes: str = ""
+    fs_url: str = ""
 
 
 def _record_person_id(db, raw: str):
@@ -2553,13 +2554,13 @@ async def create_niche_record(niche_id: int, body: NicheRecordBody):
         raise HTTPException(status_code=400, detail="El nombre es obligatorio")
     cur = db.execute(
         "INSERT INTO niche_records (niche_id, person_id, name, burial_date, death_day, "
-        "civil_status, spouse, age, origin, profession, address, parish, court, titular, notes) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "civil_status, spouse, age, origin, profession, address, parish, court, titular, notes, fs_url) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (niche_id, _record_person_id(db, body.person_id), body.name.strip(),
          body.burial_date.strip(), body.death_day.strip(), body.civil_status.strip(),
          body.spouse.strip(), body.age.strip(), body.origin.strip(), body.profession.strip(),
          body.address.strip(), body.parish.strip(), body.court.strip(),
-         body.titular.strip(), body.notes.strip()))
+         body.titular.strip(), body.notes.strip(), body.fs_url.strip()))
     db.commit()
     return {"ok": True, "id": cur.lastrowid}
 
@@ -2572,12 +2573,12 @@ async def update_niche_record(record_id: int, body: NicheRecordBody):
     cur = db.execute(
         "UPDATE niche_records SET person_id=?, name=?, burial_date=?, death_day=?, "
         "civil_status=?, spouse=?, age=?, origin=?, profession=?, address=?, parish=?, "
-        "court=?, titular=?, notes=? WHERE id=?",
+        "court=?, titular=?, notes=?, fs_url=? WHERE id=?",
         (_record_person_id(db, body.person_id), body.name.strip(),
          body.burial_date.strip(), body.death_day.strip(), body.civil_status.strip(),
          body.spouse.strip(), body.age.strip(), body.origin.strip(), body.profession.strip(),
          body.address.strip(), body.parish.strip(), body.court.strip(),
-         body.titular.strip(), body.notes.strip(), record_id))
+         body.titular.strip(), body.notes.strip(), body.fs_url.strip(), record_id))
     db.commit()
     if cur.rowcount == 0:
         raise HTTPException(status_code=404, detail="Registro no encontrado")

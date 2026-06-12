@@ -264,8 +264,12 @@ const Cementerios = {
         this._markSidebarNiche(n.id);
         document.getElementById('np-title').textContent = this._nicheLabel(n);
         document.getElementById('np-location').textContent = n.title ? n.name : '';
-        document.getElementById('np-cemetery').textContent =
-            `${this.current.name}${this.current.city ? ' · ' + this.current.city : ''}`;
+        const cemEl = document.getElementById('np-cemetery');
+        cemEl.innerHTML = esc(`${this.current.name}${this.current.city ? ' · ' + this.current.city : ''}`) +
+            (n.fs_url
+                ? ` · <a href="${esc(n.fs_url)}" target="_blank" rel="noopener"
+                       style="color:#2D4B33;text-decoration:underline;">Volum a FamilySearch</a>`
+                : '');
 
         const kindLabel = { photo: 'Nicho', record: 'Registro' };
         const photos = n.photos || [];
@@ -333,11 +337,15 @@ const Cementerios = {
             return `<td${cls} title="${esc(v)}">${esc(v)}</td>`;
         };
         const nameCell = (r) => {
+            const fs = r.fs_url
+                ? ` <a href="${esc(r.fs_url)}" target="_blank" rel="noopener" title="Veure la pàgina del registre a FamilySearch"
+                     style="text-decoration:none;">📄</a>`
+                : '';
             if (r.person_id) {
                 const pid = r.person_id.replace(/@/g, '');
-                return `<td><a class="rec-name in-db" href="/dossier.html?id=${pid}" title="Veure dossier">${esc(r.name)}</a></td>`;
+                return `<td><a class="rec-name in-db" href="/dossier.html?id=${pid}" title="Veure dossier">${esc(r.name)}</a>${fs}</td>`;
             }
-            return `<td><span class="rec-name">${esc(r.name)}</span></td>`;
+            return `<td><span class="rec-name">${esc(r.name)}</span>${fs}</td>`;
         };
         document.getElementById('np-records').innerHTML = `
             <thead><tr><th>Nom</th>${cols.map(([, label]) => `<th>${label}</th>`).join('')}</tr></thead>
