@@ -15,6 +15,9 @@ from typing import List, Optional, Tuple
 
 from .lemmas import (
     ALLOWED_PREFIX,
+    COMPOUND_RULES,
+    COUNT_LIST_FAMILIES,
+    COUNT_WORDS,
     COUSINS_TOKENS,
     FAMILIES,
     GLOBAL_CEDE,
@@ -40,11 +43,38 @@ def _tokens(text: str) -> List[str]:
 
 
 class IntentRouter:
+    def _subject(self, toks, rel_tokens) -> Optional[str]:
+        """Sujeto = lo que sigue al último token de relación, sin relleno; None si
+        delante de la relación hay algo que no sea palabra función, o si el sujeto
+        queda vacío o es una pareja 'X y Y'."""
+        rel_idx = [i for i, t in enumerate(toks) if t in rel_tokens]
+        if not rel_idx:
+            return None
+        if any(toks[i] not in ALLOWED_PREFIX for i in range(min(rel_idx))):
+            return None
+        tail = toks[max(rel_idx) + 1:]
+        while tail and tail[0] in LEADING_FILLER:
+            tail.pop(0)
+        while tail and tail[-1] in TRAILING_FILLER:
+            tail.pop()
+        if not tail or "y" in tail or "e" in tail:
+            return None
+        return " ".join(tail)
+
     def classify(self, question: str) -> Optional[Tuple[str, str]]:
         """Devuelve (handler_name, pregunta_canonica) o None si cede al router."""
         toks = _tokens(question)
         if not toks:
             return None
+        tokset = set(toks)
+
+        # Compuestos (tío abuelo, sobrino nieto) ANTES del guard de familias.
+        for any_a, any_b, handler, template in COMPOUND_RULES:
+            if (any_a & tokset) and (any_b & tokset):
+                subject = self._subject(toks, any_a | any_b)
+                if subject:
+                    return handler, template.format(s=subject)
+                return None
 
         # Familia(s) presentes. Con 'primos', el token 'hermanos' es modificador
         # ("primos hermanos"), no la familia siblings.
@@ -62,21 +92,18 @@ class IntentRouter:
             return None
         family = next(iter(families))
 
-        # Guardas globales (conteos, extremos, lugar/fecha, matrimonio…): cede.
-        if any(t in GLOBAL_CEDE for t in toks):
-            return None
-
-        # El sujeto va DESPUÉS de la relación: si delante del primer término de
-        # relación hay algo que no sea palabra función (un nombre propio), es una
-        # pregunta sí/no del tipo "¿Era X abuelo de Y?" → cedemos.
-        rel_idx = [i for i, t in enumerate(toks) if t in FAMILIES or t in MODIFIERS]
-        if any(toks[i] not in ALLOWED_PREFIX for i in range(min(rel_idx))):
-            return None
+        # Guardas globales (conteos, extremos, lugar/fecha…): cede. Excepción: una
+        # pregunta de SOLO conteo ("cuántos nietos…") sobre una familia sin handler
+        # de conteo se responde listando (no cede).
+        cede_hits = [t for t in tokset if t in GLOBAL_CEDE]
+        if cede_hits:
+            only_count = all(t in COUNT_WORDS for t in cede_hits)
+            if not (only_count and family in COUNT_LIST_FAMILIES):
+                return None
 
         rules = RULES.get(family)
         if not rules:
             return None
-        tokset = set(toks)
         chosen = None
         for req_all, req_any, forbids, handler, template in rules:
             if not (req_all <= tokset):
@@ -91,18 +118,9 @@ class IntentRouter:
             return None
         handler, template = chosen
 
-        # Sujeto = lo que sigue al último token de relación/modificador, sin
-        # relleno al principio/final.
-        tail = toks[max(rel_idx) + 1:]
-        while tail and tail[0] in LEADING_FILLER:
-            tail.pop(0)
-        while tail and tail[-1] in TRAILING_FILLER:
-            tail.pop()
-        if not tail:
+        # Sujeto tras la relación (el helper aplica el guard de prefijo: si delante
+        # hay un nombre, p.ej. "¿Era X abuelo de Y?", cede).
+        subject = self._subject(toks, set(FAMILIES) | MODIFIERS)
+        if subject is None:
             return None
-        # Sujeto compuesto "X y Y" => pregunta de pareja: cedemos.
-        if "y" in tail or "e" in tail:
-            return None
-
-        subject = " ".join(tail)
         return handler, template.format(s=subject)

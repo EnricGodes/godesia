@@ -46,6 +46,8 @@ FAMILIES = {
     "vivia": "residence", "vivian": "residence", "vivio": "residence",
     "vivieron": "residence", "vive": "residence", "viven": "residence", "vivido": "residence",
     "residia": "residence", "residio": "residence",
+    "domiciliado": "residence", "domiciliada": "residence",
+    "domiciliados": "residence", "domiciliadas": "residence",
     "residencia": "residence", "residencias": "residence",
     "domicilio": "residence", "domicilios": "residence",
     "direccion": "residence", "direcciones": "residence",
@@ -63,6 +65,8 @@ FAMILIES = {
     "nuera": "inlaw", "nueras": "inlaw", "yerno": "inlaw", "yernos": "inlaw",
     "cunado": "inlaw", "cunada": "inlaw", "cunados": "inlaw", "cunadas": "inlaw",
     "padrino": "godparents", "padrinos": "godparents", "madrina": "godparents", "madrinas": "godparents",
+    # compuestos (tío abuelo, sobrino nieto): familia propia, manejada antes del
+    # guard de familias en el clasificador.
     "bisnieto": "greatgrandchildren", "bisnieta": "greatgrandchildren",
     "bisnietos": "greatgrandchildren", "bisnietas": "greatgrandchildren",
     "tatarabuelo": "ggparents", "tatarabuela": "ggparents",
@@ -98,9 +102,9 @@ RULES = {
     "siblings": [(set(), set(), set(), "handle_siblings", "hermanos de {s}")],
     "grandparents": [
         ({"paterno"}, set(), set(), "handle_paternal_grandfather", "abuelo paterno de {s}"),
+        ({"paterna"}, set(), set(), "handle_paternal_grandmother", "abuela paterna de {s}"),
         ({"materna"}, set(), set(), "handle_maternal_grandmother", "abuela materna de {s}"),
-        # General SOLO si no hay lado: "abuelo materno"/"abuela paterna" no tienen
-        # handler propio → ninguna regla encaja → cede.
+        ({"materno"}, set(), set(), "handle_maternal_grandfather", "abuelo materno de {s}"),
         (set(), set(), {"paterno", "paterna", "materno", "materna"}, "handle_grandparents_names", "abuelos de {s}"),
     ],
     "cousins": [
@@ -111,6 +115,14 @@ RULES = {
     "uncles":       [(set(), set(), set(), "handle_uncles", "tios de {s}")],
     "nephews":      [(set(), set(), set(), "handle_nephews_nieces", "sobrinos de {s}")],
     "grandchildren": [(set(), set(), set(), "handle_grandchildren", "nietos de {s}")],
+    "inlaw": [
+        (set(), {"suegro", "suegra", "suegros", "suegras"}, set(), "handle_parents_in_law", "suegros de {s}"),
+        (set(), {"consuegro", "consuegros"}, set(), "handle_consuegros", "consuegros de {s}"),
+        (set(), {"cunado", "cunados"}, set(), "handle_brothers_in_law", "cuñados de {s}"),
+        (set(), {"cunada", "cunadas"}, set(), "handle_sisters_in_law", "cuñada de {s}"),
+        (set(), {"nuera", "nueras"}, set(), "handle_daughters_in_law", "nueras de {s}"),
+        (set(), {"yerno", "yernos"}, set(), "handle_sons_in_law", "yernos de {s}"),
+    ],
     # Bisabuelos solo en general: "bisabuela materna"/"bisabuelo paterno" no
     # tienen handler propio → cede (igual que abuelos).
     "greatgrandparents": [
@@ -154,6 +166,17 @@ GLOBAL_CEDE = {
 }
 
 
+# Palabras de conteo (subconjunto de GLOBAL_CEDE).
+COUNT_WORDS = {
+    "cuantos", "cuantas", "cuanta", "cuanto", "numero", "cantidad",
+    "muchos", "muchas", "pocos", "pocas", "bastantes", "numerosos", "numerosas",
+}
+
+# Familias SIN handler de conteo propio: "cuántos nietos" se responde listándolos.
+# (children/siblings sí tienen handler *_count, así que para esas se cede.)
+COUNT_LIST_FAMILIES = {"grandchildren", "nephews", "cousins", "uncles"}
+
+
 # Relleno que se elimina del PRINCIPIO del sujeto, tras la frase de relación.
 LEADING_FILLER = {
     "de", "del", "la", "las", "los", "el", "l", "d",
@@ -181,6 +204,21 @@ ALLOWED_PREFIX = LEADING_FILLER | {
     "conoces", "sabes", "recuerdas", "indica", "indicame",
     "lista", "enumera", "menciona", "familia", "grupo",
     # interrogativos de atributo: "a/en qué trabajaba", "dónde vivía",
-    # "con quién/dónde/cuándo se casó"
-    "a", "en", "con", "donde", "cuando",
+    # "con quién/dónde/cuándo se casó", "dónde estuvo domiciliado"
+    "a", "en", "con", "donde", "cuando", "estuvo", "estuvieron",
+    # muletillas de "quién aparece/figura/consta como … de X"
+    "aparece", "aparecen", "figura", "figuran", "consta", "como",
+    # conteos al inicio ("cuántos nietos…"): solo prosperan en COUNT_LIST_FAMILIES
+    "cuantos", "cuantas", "cuanta", "cuanto",
 }
+
+
+# Compuestos de parentesco (dos palabras): requieren un token de cada grupo.
+# Se comprueban ANTES del guard de familias (si no, "tío abuelo" = 2 familias →
+# cedería). Tupla: (any_a, any_b, handler, plantilla).
+COMPOUND_RULES = [
+    ({"tio", "tios", "tia", "tias"}, {"abuelo", "abuela", "abuelos", "abuelas"},
+     "handle_great_uncles", "tios abuelos de {s}"),
+    ({"sobrino", "sobrinos", "sobrina", "sobrinas"}, {"nieto", "nieta", "nietos", "nietas"},
+     "handle_grandnephews", "sobrinos nietos de {s}"),
+]
