@@ -59,12 +59,23 @@ FAMILIES = {
     "esposo": "marriage", "esposa": "marriage", "esposos": "marriage", "esposas": "marriage",
     "conyuge": "marriage", "conyuges": "marriage", "marido": "marriage", "maridos": "marriage",
     "pareja": "marriage", "parejas": "marriage", "companera": "marriage", "companero": "marriage",
+    # atributos de evento / ficha
+    "bautizado": "baptism", "bautizada": "baptism", "bautizo": "baptism",
+    "bautismo": "baptism", "bautizaron": "baptism", "bautizados": "baptism", "bautizadas": "baptism",
+    "militar": "military", "militares": "military",
+    "eventos": "events", "evento": "events", "acontecimientos": "events", "acontecimiento": "events",
+    "educacion": "education", "estudios": "education", "estudio": "education",
+    "enterrado": "burial", "enterrada": "burial", "sepultado": "burial", "sepultada": "burial",
+    "sepultura": "burial", "tumba": "burial", "nicho": "burial", "descansa": "burial", "sepulcro": "burial",
+    "notas": "notes", "nota": "notes", "observacion": "notes", "observaciones": "notes",
+    "anotaciones": "notes", "anotacion": "notes", "apuntes": "notes", "comentarios": "notes",
     # familias SIN reglas (solo para el guard de cadenas; cederán al router)
     "suegro": "inlaw", "suegra": "inlaw", "suegros": "inlaw", "suegras": "inlaw",
     "consuegro": "inlaw", "consuegros": "inlaw",
     "nuera": "inlaw", "nueras": "inlaw", "yerno": "inlaw", "yernos": "inlaw",
     "cunado": "inlaw", "cunada": "inlaw", "cunados": "inlaw", "cunadas": "inlaw",
     "padrino": "godparents", "padrinos": "godparents", "madrina": "godparents", "madrinas": "godparents",
+    "apadrino": "godparents", "apadrinaron": "godparents", "apadrinada": "godparents",
     # compuestos (tío abuelo, sobrino nieto): familia propia, manejada antes del
     # guard de familias en el clasificador.
     "bisnieto": "greatgrandchildren", "bisnieta": "greatgrandchildren",
@@ -85,7 +96,7 @@ MODIFIERS = {"paterno", "paterna", "materno", "materna", "segundos", "segundas",
 # Sustantivos de cónyuge: disparan la rama "quién" del matrimonio.
 SPOUSE_NOUNS = {
     "esposo", "esposa", "esposos", "esposas", "conyuge", "conyuges",
-    "marido", "maridos", "pareja", "parejas", "companera", "companero",
+    "marido", "maridos", "companera", "companero",
 }
 
 # --- Reglas por familia (ordenadas, la primera que encaja gana) -------------
@@ -126,8 +137,12 @@ RULES = {
     # Bisabuelos solo en general: "bisabuela materna"/"bisabuelo paterno" no
     # tienen handler propio → cede (igual que abuelos).
     "greatgrandparents": [
+        # "bisabuelos por la rama paterna/materna": no hay handler por lado, pero
+        # la respuesta general (los 8) es válida.
+        (set(), {"rama"}, set(), "handle_great_grandparents", "bisabuelos de {s}"),
         (set(), set(), {"paterno", "paterna", "materno", "materna"}, "handle_great_grandparents", "bisabuelos de {s}"),
     ],
+    "ggchildren": [(set(), set(), set(), "handle_has_great_great_grandchildren", "tataranietos de {s}")],
     # --- atributos ---
     "occupation": [(set(), set(), set(), "handle_occupation_natural", "de que trabajaba {s}")],
     "residence":  [(set(), set(), set(), "handle_last_residence", "donde vivia {s}")],
@@ -136,12 +151,24 @@ RULES = {
         (set(), {"donde", "lugar", "iglesia", "sitio"}, set(), "handle_marriage_date_place", "donde se caso {s}"),
         # fecha
         (set(), {"cuando", "fecha", "ano", "dia"}, set(), "handle_marriage_date_place", "cuando se caso {s}"),
+        # "pareja" → handler que también cubre parejas de hecho (no solo matrimonio)
+        (set(), {"pareja", "parejas"}, set(), "handle_spouse_or_partner", "con quien formo pareja {s}"),
         # cónyuge (sustantivo)
         (set(), SPOUSE_NOUNS, set(), "handle_spouse", "conyuge de {s}"),
-        # "con quién se casó"
-        (set(), {"quien", "quienes"}, set(), "handle_spouse_or_partner", "con quien se caso {s}"),
+        # "con quién/qué persona se casó"
+        (set(), {"quien", "quienes", "persona", "personas"}, set(), "handle_spouse_or_partner", "con quien se caso {s}"),
         # "matrimonio/boda de X" a secas es ambiguo → ninguna regla → cede.
     ],
+    "baptism": [
+        (set(), {"donde", "lugar", "iglesia"}, set(), "handle_baptism_place", "se bautizo {s}"),
+        (set(), set(), set(), "handle_baptism", "bautismo de {s}"),
+    ],
+    "military":   [(set(), set(), set(), "handle_military", "datos militares de {s}")],
+    "events":     [(set(), set(), set(), "handle_events", "eventos de {s}")],
+    "education":  [(set(), set(), set(), "handle_education", "estudios de {s}")],
+    "burial":     [(set(), set(), set(), "handle_burial", "sepultura de {s}")],
+    "notes":      [(set(), set(), set(), "handle_notes_field", "notas de {s}")],
+    "godparents": [(set(), set(), set(), "handle_godparents", "padrinos de {s}")],
 }
 
 
@@ -174,7 +201,7 @@ COUNT_WORDS = {
 
 # Familias SIN handler de conteo propio: "cuántos nietos" se responde listándolos.
 # (children/siblings sí tienen handler *_count, así que para esas se cede.)
-COUNT_LIST_FAMILIES = {"grandchildren", "nephews", "cousins", "uncles"}
+COUNT_LIST_FAMILIES = {"grandchildren", "nephews", "cousins", "uncles", "residence"}
 
 
 # Relleno que se elimina del PRINCIPIO del sujeto, tras la frase de relación.
@@ -188,12 +215,20 @@ LEADING_FILLER = {
     "registrados", "registradas", "todos", "todas", "sus", "su",
     "distintos", "distintas", "diferentes", "varios", "varias",
     "diversos", "diversas", "diferente", "distinto", "distinta",
+    "realmente", "exactamente", "ejercia", "ejercio", "ejercian", "ejerce",
+    "desempenaba", "desempeno", "tuvieron", "recibio", "contrajo", "celebro",
+    "estuvo", "estuvieron", "algun", "alguna",
+    # muletillas internas de los atributos de ficha
+    "consta", "constan", "en", "ficha", "registro", "registros", "sobre", "a",
+    "biograficas", "biografica", "biografico", "biograficos", "acompana",
+    "figuran", "figura", "para",
 }
 
 # Adverbios de cola que romperían el LIKE de resolución de nombre.
 TRAILING_FILLER = {
     "exactamente", "realmente", "exacto", "exacta",
     "aproximadamente", "aprox", "concretamente",
+    "documentados", "documentadas", "registrados", "registradas",
 }
 
 # Coletillas (frases) que pueden ir DETRÁS del nombre y rompen la resolución:
@@ -211,6 +246,19 @@ TRAILING_PHRASES = [
     ["que", "se", "le", "conocen"],
     ["que", "se", "le", "conoce"],
     ["que", "se", "le", "conocian"],
+    ["por", "favor"],
+    ["segun", "consta"],
+    ["segun", "los", "registros"],
+    ["segun", "el", "registro"],
+    ["por", "aquel", "entonces"],
+    ["en", "aquella", "epoca"],
+    ["por", "parte", "de", "padre"],
+    ["por", "parte", "de", "madre"],
+    ["y", "como", "se", "llamaban"],
+    ["y", "como", "se", "llamaba"],
+    ["y", "como", "se", "llaman"],
+    ["en", "su", "bautizo"],
+    ["en", "el", "bautizo"],
 ]
 
 # Palabras admitidas ANTES del término de relación. El sujeto de "REL de SUJETO"

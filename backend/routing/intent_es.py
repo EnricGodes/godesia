@@ -28,6 +28,13 @@ from .lemmas import (
     TRAILING_PHRASES,
 )
 
+
+def _strip_trailing_phrases(toks):
+    for phrase in TRAILING_PHRASES:
+        if len(toks) > len(phrase) and toks[-len(phrase):] == phrase:
+            return toks[:-len(phrase)]
+    return toks
+
 # Conserva la pista de año "(1900)" como token propio para desambiguar por año.
 _TOKEN_RE = re.compile(r"\(\d{4}\)|[a-z0-9']+")
 
@@ -44,14 +51,22 @@ def _tokens(text: str) -> List[str]:
 
 
 class IntentRouter:
+    def __init__(self, name_tokens=None):
+        # Conjunto de tokens que aparecen en nombres reales del árbol. Se usa para
+        # el guard de prefijo: si delante de la relación hay un nombre (p.ej. "¿Era
+        # Francesc abuelo de Y?") cedemos; los preámbulos coloquiales ("me podrías
+        # decir", "a ver", "según consta") no son nombres y se ignoran solos.
+        self.name_tokens = name_tokens or set()
+
     def _subject(self, toks, rel_tokens) -> Optional[str]:
         """Sujeto = lo que sigue al último token de relación, sin relleno; None si
-        delante de la relación hay algo que no sea palabra función, o si el sujeto
-        queda vacío o es una pareja 'X y Y'."""
+        delante de la relación hay un nombre del árbol, o si el sujeto queda vacío
+        o es una pareja 'X y Y'."""
         rel_idx = [i for i, t in enumerate(toks) if t in rel_tokens]
         if not rel_idx:
             return None
-        if any(toks[i] not in ALLOWED_PREFIX for i in range(min(rel_idx))):
+        prefix = toks[:min(rel_idx)]
+        if any(t in self.name_tokens and t not in ALLOWED_PREFIX for t in prefix):
             return None
         tail = toks[max(rel_idx) + 1:]
         while tail and tail[0] in LEADING_FILLER:
@@ -72,6 +87,9 @@ class IntentRouter:
         toks = _tokens(question)
         if not toks:
             return None
+        # Quita coletillas de cola ANTES de detectar familias, para que p.ej.
+        # "…por parte de padre" no cuente 'padre' como familia (cadena falsa).
+        toks = _strip_trailing_phrases(toks)
         tokset = set(toks)
 
         # Compuestos (tío abuelo, sobrino nieto) ANTES del guard de familias.

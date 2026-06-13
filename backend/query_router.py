@@ -217,7 +217,8 @@ class QueryRouter:
         # Capa de intención por lema (castellano): se consulta ANTES de los
         # patrones. Cubre cualquier tiempo verbal/relleno de las intenciones ya
         # migradas y cede (None) en cuanto hay ambigüedad. Ver backend/routing/.
-        self._intent_router = IntentRouter()
+        # Le pasamos los tokens de nombres reales para el guard de prefijo.
+        self._intent_router = IntentRouter(name_tokens=self._build_name_tokens())
 
         # Register a SQL normalization function so we can compare both sides
         # (user input and DB data) with accents stripped and lowercased. This
@@ -288,7 +289,7 @@ class QueryRouter:
             (r"(?:qui[eé]n\s+naci[oó]\s+el\s+\d{1,2}/\d{1,2}/\d{4}|who\s+was\s+born\s+on\s+\d{1,2}/\d{1,2}/\d{4})", "handle_birth_date_search"),
             (r"(?:qui[eé]n\s+(?:falleci[oó]|muri[oó])\s+el\s+\d{1,2}/\d{1,2}/\d{4}|who\s+died\s+on\s+\d{1,2}/\d{1,2}/\d{4})", "handle_death_date_search"),
             (r"(?:qui[eé]n\s+naci[oó]\s+en\s+.+\s+en\s+\d{4}|who\s+was\s+born\s+in\s+.+\s+in\s+\d{4})", "handle_birth_place_year_search"),
-            (r"(?:qui[eé]n\s+muri[oó]\s+en\s+.+\s+en\s+\d{4}|who\s+died\s+in\s+.+\s+in\s+\d{4})", "handle_death_place_year_search"),
+            (r"(?:qui[eé]n\s+(?:muri[oó]|falleci[oó])\s+en\s+.+\s+en\s+(?:el\s+a[nñ]o\s+)?\d{4}|who\s+died\s+in\s+.+\s+in\s+\d{4})", "handle_death_place_year_search"),
             (r"(?:nombre\s+compuesto\s+como|compound\s+name\s+like)", "handle_compound_given_name"),
             (r"(?:qu[eé]\s+registro\s+corresponde\s+a|which\s+record\s+matches)", "handle_record_lookup"),
             (r"(?:qu[eé]\s+personas\s+nacieron\s+en|cu[aá]ntas\s+personas\s+nacieron\s+en|which\s+people\s+were\s+born\s+in)", "handle_birth_place_people"),
@@ -402,6 +403,20 @@ class QueryRouter:
             (r"^(?:notas?|apuntes?)\s+(?:biogr[aá]ficas?\s+)?de\s+.+$", "handle_notes_field"),
             (r"^(?:qu[eé]\s+)?descendencia\s+.+$", "handle_has_descendants"),
         ]
+
+    def _build_name_tokens(self):
+        """Tokens (≥3 letras) que aparecen en nombres/apellidos reales del árbol,
+        para el guard de prefijo de la capa de intención."""
+        toks = set()
+        try:
+            for row in self.conn.execute("SELECT given_name, surname FROM people"):
+                for field in (row[0], row[1]):
+                    for t in _tokenize_name(field or ""):
+                        if len(t) >= 3:
+                            toks.add(t)
+        except Exception:
+            pass
+        return toks
 
     def route(self, question):
         question = _clean_question(question)
@@ -617,7 +632,7 @@ class QueryRouter:
             r"padre\s+de\s+(.+?)(?:\?|$)",
             r"pare\s+de\s+(.+?)(?:\?|$)",
             # More specific patterns BEFORE general ones
-            r"cu[aá]ntos?\s+hermanos(?:\s+y\s+hermanas)?\s+(?:ten[ií]a|tuvo)(?:\s+(?:realmente|aparentemente|exactamente|documentados?|seg[uú]n))?\s+(.+?)(?:\?|$)",
+            r"cu[aá]ntos?\s+hermanos(?:\s+y\s+hermanas)?\s+(?:ten[ií]a|tuvo|lleg[oó]\s+a\s+tener)(?:\s+(?:realmente|aparentemente|exactamente|documentados?|seg[uú]n))?\s+(.+?)(?:\?|$)",
             r"con\s+qu[eé]\s+hermanos?\s+convivi[oó]\s+(.+?)(?:\?|$)",
             r"qu[eé]\s+(?:grupo|familia)\s+de\s+hermanos\s+formaba\s+(.+?)(?:\?|$)",
             r"qu[eé]\s+hermanos\s+y\s+hermanas\s+tuvo\s+(.+?)(?:\?|$)",
@@ -2280,7 +2295,7 @@ class QueryRouter:
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows)}
 
     def handle_death_place_year_search(self, question):
-        m = re.search(r"muri[oó]\s+en\s+(.+?)\s+en\s+(\d{4})(?:\?|$)", _clean_question(question), re.I)
+        m = re.search(r"(?:muri[oó]|falleci[oó])\s+en\s+(.+?)\s+en\s+(?:el\s+a[nñ]o\s+)?(\d{4})(?:\?|$)", _clean_question(question), re.I)
         if not m:
             return None
         place = m.group(1).strip(); year = int(m.group(2))
