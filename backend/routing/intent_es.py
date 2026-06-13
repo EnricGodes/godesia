@@ -29,6 +29,8 @@ from .lemmas import (
 # Tokeniza; conserva la pista de año "(1900)" como token propio.
 _TOKEN_RE = re.compile(r"\(\d{4}\)|[a-z0-9']+")
 _YEAR_RE = re.compile(r"\(\d{4}\)")
+# Verbos posesivos: habilitan la inversión "¿Tenía X <relación>?".
+_POSSESSOR = {"tenia", "tenian", "tuvo", "tuvieron", "tiene", "tienen"}
 
 
 def _strip_accents(text: str) -> str:
@@ -106,15 +108,25 @@ class IntentRouter:
             else:
                 non_owning.append((i, fam))
         owning_fams = {f for _, f in owning}
-        if len(owning_fams) != 1:
-            return None
-        family = next(iter(owning_fams))
-        own_idx = owning[0][0]
-        # Cadena real solo si la relación previa es de OTRA familia ("padre de la
-        # madre de X"). Misma familia antes = sinónimo ("tíos y tías", "nicho…
-        # descansa"), no es cadena.
-        if any(i < own_idx and fam != family for i, fam in non_owning):
-            return None
+        if owning_fams:
+            if len(owning_fams) != 1:
+                return None
+            family = next(iter(owning_fams))
+            own_idx = owning[0][0]
+            # Cadena real solo si la relación previa es de OTRA familia ("padre de
+            # la madre de X"). Misma familia antes = sinónimo ("tíos y tías",
+            # "nicho…descansa"), no es cadena.
+            if any(i < own_idx and fam != family for i, fam in non_owning):
+                return None
+        else:
+            # Inversión con verbo posesivo: "¿Tenía X primas segundas?" (nombre
+            # ANTES de la relación). Aceptamos si hay 1 familia, 1 nombre y un
+            # "tenía/tuvo/tiene" en la pregunta.
+            all_fams = {f for _, f in fam_pos}
+            if len(all_fams) == 1 and len(runs) == 1 and (_POSSESSOR & tokset):
+                family = next(iter(all_fams))
+            else:
+                return None
 
         # Desambiguadores globales (conteos→*_count, extremos, lugar/fecha): cede.
         # Excepción: SOLO conteo sobre familia sin handler de conteo → listar.

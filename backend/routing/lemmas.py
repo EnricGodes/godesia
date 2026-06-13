@@ -107,7 +107,11 @@ RULES = {
         (set(), set(), {"segundos", "segundas"}, "handle_first_cousins", "primos de {s}"),
     ],
     "uncles":       [(set(), set(), set(), "handle_uncles", "tios de {s}")],
-    "nephews":      [(set(), set(), set(), "handle_nephews_nieces", "sobrinos de {s}")],
+    "nephews": [
+        ({"segundos"}, set(), set(), "handle_second_nephews", "sobrinos segundos de {s}"),
+        ({"segundas"}, set(), set(), "handle_second_nephews", "sobrinos segundos de {s}"),
+        (set(), set(), {"segundos", "segundas"}, "handle_nephews_nieces", "sobrinos de {s}"),
+    ],
     "grandchildren": [(set(), set(), set(), "handle_grandchildren", "nietos de {s}")],
     "inlaw": [
         (set(), {"suegro", "suegra", "suegros", "suegras"}, set(), "handle_parents_in_law", "suegros de {s}"),
@@ -166,6 +170,13 @@ GLOBAL_CEDE = {
     "descendencia", "descendientes", "vivos", "vivas", "longeva", "longevo",
     # comparaciones / superlativos ("vivió más años", "más hijos") → analítico
     "mas",
+    # parentescos raros → handlers dedicados (medio hermano, doble primo, primo
+    # tercero, tío político, hermanastro…). Hacen ceder el compuesto al patrón.
+    "medio", "media", "medios", "medias", "doble", "dobles",
+    "politico", "politica", "politicos", "politicas",
+    "tercero", "tercera", "terceros", "terceras",
+    "cuarto", "cuarta", "cuartos", "cuartas",
+    "hermanastro", "hermanastra", "hermanastros", "hermanastras",
 }
 
 COUNT_WORDS = {

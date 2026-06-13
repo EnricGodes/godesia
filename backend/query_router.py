@@ -298,6 +298,22 @@ class QueryRouter:
             (r"(?:cu[aá]ntos?\s+herman|quants?\s+germans?|qu[eé]\s+n[uú]mero\s+de\s+hermanos|qu[eé]\s+cantidad\s+de\s+hermanos|eran\s+muchos\s+los\s+hermanos|cu[aá]ntos\s+eran\s+en\s+total\s+los\s+hermanos|cu[aá]ntos?\s+hermanos\s+se\s+le\s+conocen)", "handle_siblings_count"),
             (r"(?:abuelo\s+paterno|avi\s+patern|abuelo\s+por\s+v[ií]a\s+paterna|abuelo\s+por\s+parte\s+de\s+padre|abuelo\s+de\s+l[ií]nea\s+paterna|qu[eé]\s+abuelo\s+ten[ií]a\s+por\s+v[ií]a\s+paterna|qu[eé]\s+abuelo\s+ten[ií]a\s+por\s+parte\s+de\s+padre)", "handle_paternal_grandfather"),
             (r"(?:abuela\s+materna|[àa]via\s+matern|abuela\s+por\s+v[ií]a\s+materna|abuela\s+por\s+parte\s+de\s+madre|abuela\s+de\s+l[ií]nea\s+materna|qu[eé]\s+abuela\s+ten[ií]a\s+por\s+v[ií]a\s+materna|qu[eé]\s+abuela\s+ten[ií]a\s+por\s+parte\s+de\s+madre)", "handle_maternal_grandmother"),
+            # --- Parentescos raros (ANTES de los genéricos, que los absorberían) ---
+            (r"(?:medi[oa]s?\s+cu[ñn]ad[oa]s?)", "handle_medio_cuñados"),
+            (r"(?:medi[oa]s?\s+herman[oa]s?|hermanastr[oa]s?)", "handle_half_siblings"),
+            (r"(?:medi[oa]s?\s+t[ií][oa]s?)", "handle_half_uncles"),
+            (r"(?:medi[oa]s?\s+prim[oa]s?)", "handle_half_cousins"),
+            (r"(?:concu[ñn]ad[oa]s?)", "handle_concuñados"),
+            (r"(?:t[ií][oa]s?\s+bisabuel[oa]s?)", "handle_great_uncles_bisabuelo"),
+            (r"(?:t[ií][oa]s?\s+tatarabuel[oa]s?)", "handle_great_uncles_tatarabuelo"),
+            (r"(?:t[ií][oa]s?\s+pol[ií]tic[oa]s?)", "handle_uncles_in_law"),
+            (r"(?:dobles?\s+prim[oa]s?)", "handle_double_cousins"),
+            (r"(?:prim[oa]s?\s+pol[ií]tic[oa]s?)", "handle_cousins_in_law"),
+            (r"(?:prim[oa]s?\s+tercer[oa]s?)", "handle_third_cousins"),
+            (r"(?:prim[oa]s?\s+cuart[oa]s?)", "handle_fourth_cousins"),
+            (r"(?:sobrin[oa]s?\s+segund[oa]s?)", "handle_second_nephews"),
+            (r"(?:sobrin[oa]s?\s+bisniet[oa]s?)", "handle_great_grand_nephews"),
+            (r"(?:sobrin[oa]s?\s+tataraniet[oa]s?)", "handle_great_great_grand_nephews"),
             (r"(?:t[ií]os?\s+(?:y\s+)?t[ií]as?\s+de|uncles\s+and\s+aunts\s+of)", "handle_uncles_and_aunts"),
             (r"(?:t[ií]os?|oncles?)\b", "handle_uncles"),
             (r"(?:n[oó]mbrame\s+los\s+primos\s+de\s+.+)", "handle_first_cousins"),
@@ -1312,6 +1328,185 @@ class QueryRouter:
             answer = f"Los bisnietos y bisnietas de {person['name']} fueron { _join_names(greatgc) }."
         people = [person] + greatgc
         return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
+
+    # ---- Parentescos raros (nomenclatura es.wikipedia) ----------------------
+    def _spouse_people(self, person_id):
+        out = []
+        for s in get_spouses(self.conn, person_id):
+            s = _as_dict(s)
+            sp = _as_dict(s.get("person")) if s.get("person") else None
+            if sp:
+                out.append(sp)
+        return out
+
+    def _descendants_at_gen(self, ids, n):
+        people, cur = [], list(ids)
+        for _ in range(n):
+            people = self._children_of_ids(cur)
+            cur = [p["id"] for p in people]
+        return people
+
+    def _siblings_excl(self, person):
+        return [s for s in (_as_dict(x) for x in get_siblings(self.conn, person["id"])) if s["id"] != person["id"]]
+
+    def _compute_half_siblings(self, p):
+        fid, mid = p.get("father_id"), p.get("mother_id")
+        byf = {c["id"]: c for c in (self._children_of_ids([fid]) if fid else [])}
+        bym = {c["id"]: c for c in (self._children_of_ids([mid]) if mid else [])}
+        full = set(byf) & set(bym)
+        pool = {**byf, **bym}
+        return [pool[i] for i in (set(byf) | set(bym)) - full - {p["id"]}]
+
+    def _compute_concuñados(self, p):
+        res = []
+        for sp in self._spouse_people(p["id"]):
+            for sib in self._siblings_excl(sp):
+                res += self._spouse_people(sib["id"])
+        return [r for r in res if r["id"] != p["id"]]
+
+    def _compute_medio_cuñados(self, p):
+        res = []
+        for sp in self._spouse_people(p["id"]):
+            res += self._compute_half_siblings(sp)
+        for h in self._compute_half_siblings(p):
+            res += self._spouse_people(h["id"])
+        return res
+
+    def _compute_great_uncles_gen(self, p, gen):
+        # hermanos de los antepasados de la generación `gen` (3=bisabuelos, 4=tatarabuelos)
+        res = []
+        for a in self._ancestors_at_generation(p["id"], gen):
+            res += [s for s in (_as_dict(x) for x in get_siblings(self.conn, a["id"])) if s["id"] != a["id"]]
+        return res
+
+    def _compute_double_cousins(self, p):
+        _, _, patc, matc = self._get_first_cousins(p)
+        both = {c["id"] for c in patc} & {c["id"] for c in matc}
+        pool = {c["id"]: c for c in patc + matc}
+        return [pool[i] for i in both]
+
+    def _compute_half_uncles(self, p):
+        res = []
+        for parent in (self._get_parent(p, "father"), self._get_parent(p, "mother")):
+            if parent:
+                res += self._compute_half_siblings(parent)
+        return res
+
+    def _compute_half_cousins(self, p):
+        return self._children_of_ids([u["id"] for u in self._compute_half_uncles(p)])
+
+    def _compute_second_nephews(self, p):
+        _, _, patc, matc = self._get_first_cousins(p)
+        return self._children_of_ids([c["id"] for c in patc + matc])
+
+    def _compute_nephews_gen(self, p, n):
+        return self._descendants_at_gen([s["id"] for s in self._siblings_excl(p)], n)
+
+    def _compute_nth_cousins(self, p, degree):
+        g = degree + 1
+        desc = self._descendants_at_gen([a["id"] for a in self._ancestors_at_generation(p["id"], g)], g)
+        exclude = {p["id"]}
+        for gg in range(2, g):
+            exclude |= {x["id"] for x in self._descendants_at_gen(
+                [a["id"] for a in self._ancestors_at_generation(p["id"], gg)], gg)}
+        return [c for c in desc if c["id"] not in exclude]
+
+    def _compute_uncles_in_law(self, p):
+        res = []
+        for sp in self._spouse_people(p["id"]):
+            pat, mat = self._get_aunts_uncles(sp)
+            res += pat + mat
+        pat, mat = self._get_aunts_uncles(p)
+        for u in pat + mat:
+            res += self._spouse_people(u["id"])
+        return res
+
+    def _compute_cousins_in_law(self, p):
+        res = []
+        for sp in self._spouse_people(p["id"]):
+            _, _, patc, matc = self._get_first_cousins(sp)
+            res += patc + matc
+        _, _, patc, matc = self._get_first_cousins(p)
+        for c in patc + matc:
+            res += self._spouse_people(c["id"])
+        return res
+
+    def _kin_answer(self, question, term_kw, noun, compute):
+        q = _clean_question(question)
+        m = None
+        for rx in (rf"{term_kw}\s+de\s+(.+?)(?:\?|$)",
+                   rf"ten[ií]a\s+(.+?)\s+(?:alg[uú]n[oa]?s?\s+)?{term_kw}",
+                   rf"tuvo\s+(.+?)\s+(?:alg[uú]n[oa]?s?\s+)?{term_kw}"):
+            m = re.search(rx, q, re.I)
+            if m:
+                break
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        rows = _sort_people(self._unique_by_id(compute(person)))
+        if not rows:
+            ans = f"No constan {noun} documentados de {_person_link(person)}."
+        else:
+            ans = f"Los {noun} de {_person_link(person)} fueron {_join_names(rows)}."
+        people = [person] + rows
+        return {"answer": ans, "people_mentioned": [x["id"] for x in people],
+                "people_with_photos": self._people_payload(people[:26])}
+
+    @staticmethod
+    def _unique_by_id(rows):
+        seen, out = set(), []
+        for r in rows:
+            if r and r["id"] not in seen:
+                seen.add(r["id"])
+                out.append(r)
+        return out
+
+    def handle_half_siblings(self, q):
+        return self._kin_answer(q, r"(?:medi[oa]s?\s+herman[oa]s?|hermanastr[oa]s?)", "medios hermanos o hermanastros", self._compute_half_siblings)
+
+    def handle_concuñados(self, q):
+        return self._kin_answer(q, r"concu[ñn]ad[oa]s?", "concuñados", self._compute_concuñados)
+
+    def handle_medio_cuñados(self, q):
+        return self._kin_answer(q, r"medi[oa]s?\s+cu[ñn]ad[oa]s?", "medios cuñados", self._compute_medio_cuñados)
+
+    def handle_great_uncles_bisabuelo(self, q):
+        return self._kin_answer(q, r"t[ií][oa]s?\s+bisabuel[oa]s?", "tíos bisabuelos", lambda p: self._compute_great_uncles_gen(p, 3))
+
+    def handle_great_uncles_tatarabuelo(self, q):
+        return self._kin_answer(q, r"t[ií][oa]s?\s+tatarabuel[oa]s?", "tíos tatarabuelos", lambda p: self._compute_great_uncles_gen(p, 4))
+
+    def handle_double_cousins(self, q):
+        return self._kin_answer(q, r"dobles?\s+prim[oa]s?", "dobles primos", self._compute_double_cousins)
+
+    def handle_half_uncles(self, q):
+        return self._kin_answer(q, r"medi[oa]s?\s+t[ií][oa]s?", "medios tíos", self._compute_half_uncles)
+
+    def handle_half_cousins(self, q):
+        return self._kin_answer(q, r"medi[oa]s?\s+prim[oa]s?", "medios primos", self._compute_half_cousins)
+
+    def handle_second_nephews(self, q):
+        return self._kin_answer(q, r"sobrin[oa]s?\s+segund[oa]s?", "sobrinos segundos", self._compute_second_nephews)
+
+    def handle_great_grand_nephews(self, q):
+        return self._kin_answer(q, r"sobrin[oa]s?\s+bisniet[oa]s?", "sobrinos bisnietos", lambda p: self._compute_nephews_gen(p, 3))
+
+    def handle_great_great_grand_nephews(self, q):
+        return self._kin_answer(q, r"sobrin[oa]s?\s+tataraniet[oa]s?", "sobrinos tataranietos", lambda p: self._compute_nephews_gen(p, 4))
+
+    def handle_third_cousins(self, q):
+        return self._kin_answer(q, r"prim[oa]s?\s+tercer[oa]s?", "primos terceros", lambda p: self._compute_nth_cousins(p, 3))
+
+    def handle_fourth_cousins(self, q):
+        return self._kin_answer(q, r"prim[oa]s?\s+cuart[oa]s?", "primos cuartos", lambda p: self._compute_nth_cousins(p, 4))
+
+    def handle_uncles_in_law(self, q):
+        return self._kin_answer(q, r"t[ií][oa]s?\s+pol[ií]tic[oa]s?", "tíos políticos", self._compute_uncles_in_law)
+
+    def handle_cousins_in_law(self, q):
+        return self._kin_answer(q, r"prim[oa]s?\s+pol[ií]tic[oa]s?", "primos políticos", self._compute_cousins_in_law)
 
     def handle_spouse_or_partner(self, question):
         m = re.search(r"(?:con\s+qui[eé]n\s+(?:se\s+cas[oó]|form[oó]\s+pareja)(?:\s+o\s+emparej[oó])?|amb\s+qui\s+es\s+va\s+casar\s+o\s+emparellar)\s+(.+?)(?:\?|$)", _clean_question(question), re.I)
