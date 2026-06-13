@@ -78,10 +78,15 @@ class IntentRouter:
             return None
         tokset = set(toks)
         chosen = None
-        for requires, forbids, handler, template in rules:
-            if requires <= tokset and not (forbids & tokset):
-                chosen = (handler, template)
-                break
+        for req_all, req_any, forbids, handler, template in rules:
+            if not (req_all <= tokset):
+                continue
+            if req_any and not (req_any & tokset):
+                continue
+            if forbids & tokset:
+                continue
+            chosen = (handler, template)
+            break
         if not chosen:
             return None
         handler, template = chosen

@@ -33,9 +33,31 @@ FAMILIES = {
     "nieto": "grandchildren", "nieta": "grandchildren", "nietos": "grandchildren", "nietas": "grandchildren",
     "bisabuelo": "greatgrandparents", "bisabuela": "greatgrandparents",
     "bisabuelos": "greatgrandparents", "bisabuelas": "greatgrandparents",
+    # atributos de persona (no parentescos). Tokens COMPLETOS: "casa" (residencia)
+    # y "caso/casarse" (matrimonio) NO colisionan, que era justo el problema de
+    # usar la raíz cruda.
+    "trabajo": "occupation", "trabaja": "occupation", "trabajaba": "occupation",
+    "trabajaban": "occupation", "trabajaron": "occupation", "trabajar": "occupation",
+    "oficio": "occupation", "oficios": "occupation",
+    "profesion": "occupation", "profesiones": "occupation",
+    "ocupacion": "occupation", "ocupaciones": "occupation",
+    "empleo": "occupation", "empleos": "occupation",
+    "dedicaba": "occupation", "dedicaban": "occupation", "dedico": "occupation",
+    "vivia": "residence", "vivian": "residence", "vivio": "residence",
+    "vivieron": "residence", "vive": "residence", "viven": "residence", "vivido": "residence",
+    "residia": "residence", "residio": "residence",
+    "residencia": "residence", "residencias": "residence",
+    "domicilio": "residence", "domicilios": "residence",
+    "direccion": "residence", "direcciones": "residence",
+    "casa": "residence", "casas": "residence", "morada": "residence",
+    "caso": "marriage", "casar": "marriage", "casarse": "marriage",
+    "casado": "marriage", "casada": "marriage", "casados": "marriage", "casadas": "marriage",
+    "casaron": "marriage", "casaban": "marriage", "casamiento": "marriage",
+    "boda": "marriage", "bodas": "marriage", "matrimonio": "marriage", "matrimonios": "marriage",
+    "esposo": "marriage", "esposa": "marriage", "esposos": "marriage", "esposas": "marriage",
+    "conyuge": "marriage", "conyuges": "marriage", "marido": "marriage", "maridos": "marriage",
+    "pareja": "marriage", "parejas": "marriage", "companera": "marriage", "companero": "marriage",
     # familias SIN reglas (solo para el guard de cadenas; cederán al router)
-    "esposo": "spouse", "esposa": "spouse", "conyuge": "spouse", "marido": "spouse",
-    "mujer": "spouse", "pareja": "spouse",
     "suegro": "inlaw", "suegra": "inlaw", "suegros": "inlaw", "suegras": "inlaw",
     "consuegro": "inlaw", "consuegros": "inlaw",
     "nuera": "inlaw", "nueras": "inlaw", "yerno": "inlaw", "yernos": "inlaw",
@@ -56,36 +78,57 @@ COUSINS_TOKENS = {"primo", "prima", "primos", "primas", "cosi", "cosins", "cosin
 MODIFIERS = {"paterno", "paterna", "materno", "materna", "segundos", "segundas", "hermanos", "hermanas"}
 
 
+# Sustantivos de cónyuge: disparan la rama "quién" del matrimonio.
+SPOUSE_NOUNS = {
+    "esposo", "esposa", "esposos", "esposas", "conyuge", "conyuges",
+    "marido", "maridos", "pareja", "parejas", "companera", "companero",
+}
+
 # --- Reglas por familia (ordenadas, la primera que encaja gana) -------------
-# Tupla: (requires: tokens que deben estar TODOS,
-#         forbids:  tokens que NO deben estar,
+# Tupla: (req_all: tokens que deben estar TODOS,
+#         req_any: si no está vacío, al menos UNO debe estar,
+#         forbids: tokens que NO deben estar,
 #         handler, plantilla canónica con {s})
 # Sin regla (o ninguna encaja) => None => cede al router de 163 patrones.
 RULES = {
-    "parents":  [(set(), set(), "handle_parents", "padres de {s}")],
-    "father":   [(set(), set(), "handle_father", "padre de {s}")],
-    "mother":   [(set(), set(), "handle_mother", "madre de {s}")],
-    "children": [(set(), set(), "handle_children", "hijos de {s}")],
-    "siblings": [(set(), set(), "handle_siblings", "hermanos de {s}")],
+    "parents":  [(set(), set(), set(), "handle_parents", "padres de {s}")],
+    "father":   [(set(), set(), set(), "handle_father", "padre de {s}")],
+    "mother":   [(set(), set(), set(), "handle_mother", "madre de {s}")],
+    "children": [(set(), set(), set(), "handle_children", "hijos de {s}")],
+    "siblings": [(set(), set(), set(), "handle_siblings", "hermanos de {s}")],
     "grandparents": [
-        ({"paterno"}, set(), "handle_paternal_grandfather", "abuelo paterno de {s}"),
-        ({"materna"}, set(), "handle_maternal_grandmother", "abuela materna de {s}"),
+        ({"paterno"}, set(), set(), "handle_paternal_grandfather", "abuelo paterno de {s}"),
+        ({"materna"}, set(), set(), "handle_maternal_grandmother", "abuela materna de {s}"),
         # General SOLO si no hay lado: "abuelo materno"/"abuela paterna" no tienen
         # handler propio → ninguna regla encaja → cede.
-        (set(), {"paterno", "paterna", "materno", "materna"}, "handle_grandparents_names", "abuelos de {s}"),
+        (set(), set(), {"paterno", "paterna", "materno", "materna"}, "handle_grandparents_names", "abuelos de {s}"),
     ],
     "cousins": [
-        ({"segundos"}, set(), "handle_second_cousins", "primos segundos de {s}"),
-        ({"segundas"}, set(), "handle_second_cousins", "primos segundos de {s}"),
-        (set(), {"segundos", "segundas"}, "handle_first_cousins", "primos de {s}"),
+        ({"segundos"}, set(), set(), "handle_second_cousins", "primos segundos de {s}"),
+        ({"segundas"}, set(), set(), "handle_second_cousins", "primos segundos de {s}"),
+        (set(), set(), {"segundos", "segundas"}, "handle_first_cousins", "primos de {s}"),
     ],
-    "uncles":       [(set(), set(), "handle_uncles", "tios de {s}")],
-    "nephews":      [(set(), set(), "handle_nephews_nieces", "sobrinos de {s}")],
-    "grandchildren": [(set(), set(), "handle_grandchildren", "nietos de {s}")],
+    "uncles":       [(set(), set(), set(), "handle_uncles", "tios de {s}")],
+    "nephews":      [(set(), set(), set(), "handle_nephews_nieces", "sobrinos de {s}")],
+    "grandchildren": [(set(), set(), set(), "handle_grandchildren", "nietos de {s}")],
     # Bisabuelos solo en general: "bisabuela materna"/"bisabuelo paterno" no
     # tienen handler propio → cede (igual que abuelos).
     "greatgrandparents": [
-        (set(), {"paterno", "paterna", "materno", "materna"}, "handle_great_grandparents", "bisabuelos de {s}"),
+        (set(), set(), {"paterno", "paterna", "materno", "materna"}, "handle_great_grandparents", "bisabuelos de {s}"),
+    ],
+    # --- atributos ---
+    "occupation": [(set(), set(), set(), "handle_occupation_natural", "de que trabajaba {s}")],
+    "residence":  [(set(), set(), set(), "handle_last_residence", "donde vivia {s}")],
+    "marriage": [
+        # lugar
+        (set(), {"donde", "lugar", "iglesia", "sitio"}, set(), "handle_marriage_date_place", "donde se caso {s}"),
+        # fecha
+        (set(), {"cuando", "fecha", "ano", "dia"}, set(), "handle_marriage_date_place", "cuando se caso {s}"),
+        # cónyuge (sustantivo)
+        (set(), SPOUSE_NOUNS, set(), "handle_spouse", "conyuge de {s}"),
+        # "con quién se casó"
+        (set(), {"quien", "quienes"}, set(), "handle_spouse_or_partner", "con quien se caso {s}"),
+        # "matrimonio/boda de X" a secas es ambiguo → ninguna regla → cede.
     ],
 }
 
@@ -104,8 +147,8 @@ GLOBAL_CEDE = {
     "nacio", "nacieron", "nacida", "nacido", "nacimiento",
     "murio", "murieron", "fallecio", "fallecieron", "muerte", "defuncion",
     "enterrado", "enterrada", "sepultado", "sepultada",
-    # matrimonio (intención no migrada)
-    "caso", "casar", "casarse", "casado", "casada", "casaron", "casaban", "boda", "matrimonio",
+    # residencia con submodo (última/primer/al final) → handler con su lógica
+    "final",
     # agregados / descendencia
     "descendencia", "descendientes", "vivos", "vivas", "longeva", "longevo",
 }
@@ -137,4 +180,7 @@ ALLOWED_PREFIX = LEADING_FILLER | {
     "me", "nos", "puedes", "podrias", "decir", "sacas", "saca",
     "conoces", "sabes", "recuerdas", "indica", "indicame",
     "lista", "enumera", "menciona", "familia", "grupo",
+    # interrogativos de atributo: "a/en qué trabajaba", "dónde vivía",
+    # "con quién/dónde/cuándo se casó"
+    "a", "en", "con", "donde", "cuando",
 }
