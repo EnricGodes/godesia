@@ -21,6 +21,7 @@ from database import (
     get_burial,
     get_events,
 )
+from routing import IntentRouter
 
 
 def _as_dict(row):
@@ -213,6 +214,10 @@ class QueryRouter:
     def __init__(self, conn):
         self.conn = conn
         self._sql_trace: List[str] = []
+        # Capa de intención por lema (castellano): se consulta ANTES de los
+        # patrones. Cubre cualquier tiempo verbal/relleno de las intenciones ya
+        # migradas y cede (None) en cuanto hay ambigüedad. Ver backend/routing/.
+        self._intent_router = IntentRouter()
 
         # Register a SQL normalization function so we can compare both sides
         # (user input and DB data) with accents stripped and lowercased. This
@@ -430,6 +435,24 @@ class QueryRouter:
         q = question.lower().strip()
         q = re.sub(r"^(?:\d+\.\s*)+", "", q)
         q = q.strip(" ¿¡?!")
+
+        # Capa de intención por lema: si reconoce una intención migrada, sintetiza
+        # una pregunta canónica y delega en el handler existente (misma respuesta
+        # aprobada). Si no resuelve la persona, se sigue con los patrones.
+        try:
+            intent_hit = self._intent_router.classify(q)
+        except Exception:
+            intent_hit = None
+        if intent_hit:
+            handler_name, canonical_q = intent_hit
+            try:
+                result = getattr(self, handler_name)(canonical_q)
+                if result:
+                    result['_handler'] = handler_name
+                    return result
+            except Exception:
+                pass
+
         for pattern, handler_name in self.patterns:
             try:
                 if re.search(pattern, q, re.I):
