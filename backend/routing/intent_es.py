@@ -1,10 +1,12 @@
-"""IntentRouter: clasificación de intención por familia + reglas (castellano).
+"""IntentRouter (modelo por INCLUSIÓN).
 
-Tokeniza la pregunta, detecta la familia de parentesco (debe ser única; dos
-familias = cadena/compuesto → cede), elige el handler con las reglas de
-modificadores de esa familia, extrae el sujeto y devuelve `(handler, pregunta
-canónica)` para delegar en el QueryRouter. Conservador: ante cualquier
-ambigüedad devuelve None y cede al router de patrones.
+De cada pregunta aísla solo dos cosas y descarta el resto por no ser ninguna:
+  · SUJETO    = la tirada de tokens que son nombres reales del árbol (name_tokens).
+  · INTENCIÓN = un token cuya raíz está en INTENT_ROOTS (los nombres ganan: un
+                token que es nombre nunca se interpreta como intención).
+Devuelve (handler, pregunta canónica) para delegar en el QueryRouter, o None para
+ceder al router de patrones. No usa listas de muletillas/coletillas: lo que no es
+nombre ni intención (ni modificador/desambiguador) simplemente no se mira.
 """
 
 from __future__ import annotations
@@ -14,29 +16,19 @@ import unicodedata
 from typing import List, Optional, Tuple
 
 from .lemmas import (
-    ALLOWED_PREFIX,
     COMPOUND_RULES,
     COUNT_LIST_FAMILIES,
     COUNT_WORDS,
     COUSINS_TOKENS,
-    FAMILIES,
     GLOBAL_CEDE,
-    LEADING_FILLER,
-    MODIFIERS,
+    NON_NAME_TOKENS,
     RULES,
-    TRAILING_FILLER,
-    TRAILING_PHRASES,
+    family_of,
 )
 
-
-def _strip_trailing_phrases(toks):
-    for phrase in TRAILING_PHRASES:
-        if len(toks) > len(phrase) and toks[-len(phrase):] == phrase:
-            return toks[:-len(phrase)]
-    return toks
-
-# Conserva la pista de año "(1900)" como token propio para desambiguar por año.
+# Tokeniza; conserva la pista de año "(1900)" como token propio.
 _TOKEN_RE = re.compile(r"\(\d{4}\)|[a-z0-9']+")
+_YEAR_RE = re.compile(r"\(\d{4}\)")
 
 
 def _strip_accents(text: str) -> str:
@@ -52,83 +44,103 @@ def _tokens(text: str) -> List[str]:
 
 class IntentRouter:
     def __init__(self, name_tokens=None):
-        # Conjunto de tokens que aparecen en nombres reales del árbol. Se usa para
-        # el guard de prefijo: si delante de la relación hay un nombre (p.ej. "¿Era
-        # Francesc abuelo de Y?") cedemos; los preámbulos coloquiales ("me podrías
-        # decir", "a ver", "según consta") no son nombres y se ignoran solos.
+        # Tokens (≥3 letras) que aparecen en nombres reales del árbol.
         self.name_tokens = name_tokens or set()
 
-    def _subject(self, toks, rel_tokens) -> Optional[str]:
-        """Sujeto = lo que sigue al último token de relación, sin relleno; None si
-        delante de la relación hay un nombre del árbol, o si el sujeto queda vacío
-        o es una pareja 'X y Y'."""
-        rel_idx = [i for i, t in enumerate(toks) if t in rel_tokens]
-        if not rel_idx:
-            return None
-        prefix = toks[:min(rel_idx)]
-        if any(t in self.name_tokens and t not in ALLOWED_PREFIX for t in prefix):
-            return None
-        tail = toks[max(rel_idx) + 1:]
-        while tail and tail[0] in LEADING_FILLER:
-            tail.pop(0)
-        # Quita coletillas de cola ("…a lo largo de su vida") y adverbios sueltos.
-        for phrase in TRAILING_PHRASES:
-            if len(tail) > len(phrase) and tail[-len(phrase):] == phrase:
-                tail = tail[:-len(phrase)]
-                break
-        while tail and tail[-1] in TRAILING_FILLER:
-            tail.pop()
-        if not tail or "y" in tail or "e" in tail:
-            return None
-        return " ".join(tail)
+    def _name_runs(self, toks):
+        """Tiradas contiguas de tokens-nombre, como (índice_inicio, texto)."""
+        runs, cur, start = [], [], None
+        for i, t in enumerate(toks):
+            is_name = t in self.name_tokens and t not in NON_NAME_TOKENS
+            is_year = bool(_YEAR_RE.fullmatch(t))
+            if is_name or (is_year and cur):
+                if not cur:
+                    start = i
+                cur.append(t)
+            elif cur:
+                runs.append((start, " ".join(cur)))
+                cur = []
+        if cur:
+            runs.append((start, " ".join(cur)))
+        return runs
 
     def classify(self, question: str) -> Optional[Tuple[str, str]]:
         """Devuelve (handler_name, pregunta_canonica) o None si cede al router."""
         toks = _tokens(question)
         if not toks:
             return None
-        # Quita coletillas de cola ANTES de detectar familias, para que p.ej.
-        # "…por parte de padre" no cuente 'padre' como familia (cadena falsa).
-        toks = _strip_trailing_phrases(toks)
         tokset = set(toks)
+        runs = self._name_runs(toks)
+        run_starts = [s for s, _ in runs]
+        run_texts = [t for _, t in runs]
 
         # Compuestos (tío abuelo, sobrino nieto) ANTES del guard de familias.
         for any_a, any_b, handler, template in COMPOUND_RULES:
             if (any_a & tokset) and (any_b & tokset):
-                subject = self._subject(toks, any_a | any_b)
-                if subject:
-                    return handler, template.format(s=subject)
-                return None
+                return (handler, template.format(s=run_texts[0])) if len(runs) == 1 else None
 
-        # Familia(s) presentes. Con 'primos', el token 'hermanos' es modificador
-        # ("primos hermanos"), no la familia siblings.
+        # Posiciones de los tokens de relación (por raíz). Un nombre real nunca es
+        # intención; con 'primos', 'hermanos' es modificador, no siblings.
         has_cousins = any(t in COUSINS_TOKENS for t in toks)
-        families = set()
-        for t in toks:
-            fam = FAMILIES.get(t)
-            if fam is None:
+        fam_pos = []
+        for i, t in enumerate(toks):
+            if t in self.name_tokens:
                 continue
-            if has_cousins and fam == "siblings":
+            fam = family_of(t)
+            if fam is None or (fam == "siblings" and has_cousins):
                 continue
-            families.add(fam)
-        # Cero familias o varias (cadena/compuesto): cedemos.
-        if len(families) != 1:
+            fam_pos.append((i, fam))
+        if not fam_pos:
             return None
-        family = next(iter(families))
 
-        # Guardas globales (conteos, extremos, lugar/fecha…): cede. Excepción: una
-        # pregunta de SOLO conteo ("cuántos nietos…") sobre una familia sin handler
-        # de conteo se responde listando (no cede).
+        # La intención es la relación que POSEE el nombre (una tirada arranca tras
+        # ella, antes de la siguiente relación). Una relación SIN nombre detrás es
+        # un cualificador ("…por parte de padre", "…en su bautizo") → se ignora; si
+        # va ANTES de la que posee el nombre, es una cadena ("padre de la madre de
+        # X") → se cede.
+        owning, non_owning = [], []
+        for k, (i, fam) in enumerate(fam_pos):
+            nxt = fam_pos[k + 1][0] if k + 1 < len(fam_pos) else len(toks)
+            if any(i < rs < nxt for rs in run_starts):
+                owning.append((i, fam))
+            else:
+                non_owning.append((i, fam))
+        owning_fams = {f for _, f in owning}
+        if len(owning_fams) != 1:
+            return None
+        family = next(iter(owning_fams))
+        own_idx = owning[0][0]
+        # Cadena real solo si la relación previa es de OTRA familia ("padre de la
+        # madre de X"). Misma familia antes = sinónimo ("tíos y tías", "nicho…
+        # descansa"), no es cadena.
+        if any(i < own_idx and fam != family for i, fam in non_owning):
+            return None
+
+        # Desambiguadores globales (conteos→*_count, extremos, lugar/fecha): cede.
+        # Excepción: SOLO conteo sobre familia sin handler de conteo → listar.
         cede_hits = [t for t in tokset if t in GLOBAL_CEDE]
         if cede_hits:
             only_count = all(t in COUNT_WORDS for t in cede_hits)
             if not (only_count and family in COUNT_LIST_FAMILIES):
                 return None
 
+        # El sujeto debe ser exactamente UNA persona. 0 = lugar/año/agregado;
+        # 2 = dos entidades (parentesco/comparación/pareja). En ambos: cede.
+        if len(runs) != 1:
+            return None
+        subject = run_texts[0]
+
+        # Matrimonio compuesto ("con quién se casó X Y en qué fecha…"): pregunta
+        # cónyuge + fecha/lugar a la vez → hay handler dedicado; cedemos.
+        if family == "marriage":
+            who = {"quien", "quienes"} & tokset
+            when_where = {"fecha", "cuando", "donde", "lugar", "iglesia"} & tokset
+            if who and when_where:
+                return None
+
         rules = RULES.get(family)
         if not rules:
             return None
-        chosen = None
         for req_all, req_any, forbids, handler, template in rules:
             if not (req_all <= tokset):
                 continue
@@ -136,15 +148,5 @@ class IntentRouter:
                 continue
             if forbids & tokset:
                 continue
-            chosen = (handler, template)
-            break
-        if not chosen:
-            return None
-        handler, template = chosen
-
-        # Sujeto tras la relación (el helper aplica el guard de prefijo: si delante
-        # hay un nombre, p.ej. "¿Era X abuelo de Y?", cede).
-        subject = self._subject(toks, set(FAMILIES) | MODIFIERS)
-        if subject is None:
-            return None
-        return handler, template.format(s=subject)
+            return handler, template.format(s=subject)
+        return None

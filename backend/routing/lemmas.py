@@ -1,110 +1,93 @@
-"""Vocabulario controlado castellano para la capa de intención.
+"""Vocabulario controlado castellano para la capa de intención (modelo por INCLUSIÓN).
 
-Modelo: cada nombre de parentesco pertenece a una FAMILIA. La pregunta debe
-mencionar UNA sola familia; si menciona dos (p.ej. "padre de la madre de X") es
-una cadena/compuesto y cedemos al router de patrones. Dentro de la familia, unas
-REGLAS ordenadas con modificadores (paterno/materno, segundos…) eligen el handler.
+La idea (pedida por el usuario): de cada pregunta nos quedamos con DOS cosas y el
+resto se ignora *por no ser ninguna de ellas*, sin diccionarios de relleno:
 
-Se mapean TOKENS COMPLETOS (no prefijos), de modo que una entrada cubre todas las
-formas verbales sin enumerarlas y sin colisiones de raíz (`cas`->casa, `prim`->primero).
+  1. el NOMBRE  → la tirada de tokens que coinciden con nombres reales del árbol
+                  (`name_tokens`, lo extrae `intent_es._find_name_runs`).
+  2. la INTENCIÓN → un token cuya RAÍZ está en `INTENT_ROOTS` ("herman", "dedic"…).
 
-Añadir una intención = registrar sus tokens en FAMILIES y una regla en RULES.
+Las raíces cubren todas las formas verbales sin enumerarlas ("trabaj" → trabaja /
+trabajaba / trabajó / trabajo) y se casan por prefijo de la MÁS LARGA a la más
+corta, para resolver inclusiones (`tatarabuel` > `bisabuel` > `abuel`). Los nombres
+ganan a las raíces: un token que es un nombre real nunca se interpreta como intención.
+
+Lo que SÍ se conserva (no es ruido, cambia la intención): los MODIFICADORES
+(paterno/materno, segundos) y los DESAMBIGUADORES (`GLOBAL_CEDE`: conteos→*_count,
+extremos mayor/primer/último, lugar/fecha) que redirigen a otro handler.
 """
 
-# --- Familia de relación por token (vocabulario MAESTRO) -------------------
-# Incluye también familias SIN reglas todavía (spouse, inlaw…): así el guard de
-# "una sola familia" detecta cadenas y cedemos limpiamente.
-FAMILIES = {
-    # parentescos con reglas (migrados)
-    "padres": "parents", "progenitores": "parents",
-    "padre": "father", "papa": "father",
-    "madre": "mother", "mama": "mother",
-    "hijos": "children", "hijas": "children",
-    "hermanos": "siblings", "hermanas": "siblings",
-    "abuelo": "grandparents", "abuela": "grandparents",
-    "abuelos": "grandparents", "abuelas": "grandparents",
-    "avi": "grandparents", "avia": "grandparents", "avis": "grandparents", "avies": "grandparents",
-    "primo": "cousins", "prima": "cousins", "primos": "cousins", "primas": "cousins",
-    "cosi": "cousins", "cosins": "cousins", "cosina": "cousins", "cosines": "cousins",
-    "tio": "uncles", "tia": "uncles", "tios": "uncles", "tias": "uncles",
-    "oncle": "uncles", "oncles": "uncles",
-    "sobrino": "nephews", "sobrina": "nephews", "sobrinos": "nephews", "sobrinas": "nephews",
-    "nebot": "nephews", "nebots": "nephews",
-    "nieto": "grandchildren", "nieta": "grandchildren", "nietos": "grandchildren", "nietas": "grandchildren",
-    "bisabuelo": "greatgrandparents", "bisabuela": "greatgrandparents",
-    "bisabuelos": "greatgrandparents", "bisabuelas": "greatgrandparents",
-    # atributos de persona (no parentescos). Tokens COMPLETOS: "casa" (residencia)
-    # y "caso/casarse" (matrimonio) NO colisionan, que era justo el problema de
-    # usar la raíz cruda.
-    "trabajo": "occupation", "trabaja": "occupation", "trabajaba": "occupation",
-    "trabajaban": "occupation", "trabajaron": "occupation", "trabajar": "occupation",
-    "oficio": "occupation", "oficios": "occupation",
-    "profesion": "occupation", "profesiones": "occupation",
-    "ocupacion": "occupation", "ocupaciones": "occupation",
-    "empleo": "occupation", "empleos": "occupation",
-    "dedicaba": "occupation", "dedicaban": "occupation", "dedico": "occupation",
-    "vivia": "residence", "vivian": "residence", "vivio": "residence",
-    "vivieron": "residence", "vive": "residence", "viven": "residence", "vivido": "residence",
-    "residia": "residence", "residio": "residence",
-    "domiciliado": "residence", "domiciliada": "residence",
-    "domiciliados": "residence", "domiciliadas": "residence",
-    "residencia": "residence", "residencias": "residence",
-    "domicilio": "residence", "domicilios": "residence",
-    "direccion": "residence", "direcciones": "residence",
-    "casa": "residence", "casas": "residence", "morada": "residence",
-    "caso": "marriage", "casar": "marriage", "casarse": "marriage",
-    "casado": "marriage", "casada": "marriage", "casados": "marriage", "casadas": "marriage",
-    "casaron": "marriage", "casaban": "marriage", "casamiento": "marriage",
-    "boda": "marriage", "bodas": "marriage", "matrimonio": "marriage", "matrimonios": "marriage",
-    "esposo": "marriage", "esposa": "marriage", "esposos": "marriage", "esposas": "marriage",
-    "conyuge": "marriage", "conyuges": "marriage", "marido": "marriage", "maridos": "marriage",
-    "pareja": "marriage", "parejas": "marriage", "companera": "marriage", "companero": "marriage",
-    # atributos de evento / ficha
-    "bautizado": "baptism", "bautizada": "baptism", "bautizo": "baptism",
-    "bautismo": "baptism", "bautizaron": "baptism", "bautizados": "baptism", "bautizadas": "baptism",
-    "militar": "military", "militares": "military",
-    "eventos": "events", "evento": "events", "acontecimientos": "events", "acontecimiento": "events",
-    "educacion": "education", "estudios": "education", "estudio": "education",
-    "enterrado": "burial", "enterrada": "burial", "sepultado": "burial", "sepultada": "burial",
-    "sepultura": "burial", "tumba": "burial", "nicho": "burial", "descansa": "burial", "sepulcro": "burial",
-    "notas": "notes", "nota": "notes", "observacion": "notes", "observaciones": "notes",
-    "anotaciones": "notes", "anotacion": "notes", "apuntes": "notes", "comentarios": "notes",
-    # familias SIN reglas (solo para el guard de cadenas; cederán al router)
-    "suegro": "inlaw", "suegra": "inlaw", "suegros": "inlaw", "suegras": "inlaw",
-    "consuegro": "inlaw", "consuegros": "inlaw",
-    "nuera": "inlaw", "nueras": "inlaw", "yerno": "inlaw", "yernos": "inlaw",
-    "cunado": "inlaw", "cunada": "inlaw", "cunados": "inlaw", "cunadas": "inlaw",
-    "padrino": "godparents", "padrinos": "godparents", "madrina": "godparents", "madrinas": "godparents",
-    "apadrino": "godparents", "apadrinaron": "godparents", "apadrinada": "godparents",
-    # compuestos (tío abuelo, sobrino nieto): familia propia, manejada antes del
-    # guard de familias en el clasificador.
-    "bisnieto": "greatgrandchildren", "bisnieta": "greatgrandchildren",
-    "bisnietos": "greatgrandchildren", "bisnietas": "greatgrandchildren",
-    "tatarabuelo": "ggparents", "tatarabuela": "ggparents",
-    "tatarabuelos": "ggparents", "tatarabuelas": "ggparents",
-    "tataranieto": "ggchildren", "tataranietos": "ggchildren",
-}
+from __future__ import annotations
 
-# "primos hermanos" = primos hermanos (primer grado): cuando hay 'primos', el
-# token 'hermanos' es modificador, no la familia 'siblings'.
+# --- Raíces de intención (root, familia) -----------------------------------
+# Se ordenan por longitud descendente en _ROOTS_SORTED; para un token se toma la
+# raíz más larga que sea prefijo suyo. Sin acentos y en minúsculas.
+INTENT_ROOTS = [
+    # parentescos verticales (¡orden importa por inclusión!)
+    ("padres", "parents"), ("progenitor", "parents"),
+    ("padrin", "godparents"), ("madrin", "godparents"), ("apadrin", "godparents"),
+    ("padr", "father"), ("papa", "father"),
+    ("madre", "mother"), ("mama", "mother"),
+    ("hij", "children"),
+    ("herman", "siblings"),
+    ("tatarabuel", "ggparents"), ("bisabuel", "greatgrandparents"),
+    ("abuel", "grandparents"), ("avi", "grandparents"),
+    ("tataraniet", "ggchildren"), ("bisniet", "greatgrandchildren"),
+    ("niet", "grandchildren"),
+    # colaterales / políticos
+    ("primo", "cousins"), ("prima", "cousins"), ("cosi", "cousins"),
+    ("tio", "uncles"), ("tia", "uncles"), ("oncle", "uncles"),
+    ("sobrin", "nephews"), ("nebot", "nephews"),
+    ("consuegr", "inlaw"), ("suegr", "inlaw"),
+    ("nuera", "inlaw"), ("yern", "inlaw"), ("cunad", "inlaw"),
+    # atributos de persona
+    ("trabaj", "occupation"), ("oficio", "occupation"), ("profesion", "occupation"),
+    ("ocupacion", "occupation"), ("emple", "occupation"), ("dedic", "occupation"),
+    ("residenci", "residence"), ("residi", "residence"), ("domicili", "residence"),
+    ("direccion", "residence"), ("vivi", "residence"), ("vive", "residence"),
+    ("viven", "residence"), ("casa", "residence"), ("morada", "residence"),
+    ("matrimoni", "marriage"), ("casam", "marriage"), ("casar", "marriage"),
+    ("casad", "marriage"), ("casab", "marriage"), ("caso", "marriage"),
+    ("boda", "marriage"), ("conyug", "marriage"), ("espos", "marriage"),
+    ("marid", "marriage"), ("pareja", "marriage"), ("companer", "marriage"),
+    # atributos de evento / ficha
+    ("bauti", "baptism"),
+    ("militar", "military"),
+    ("evento", "events"), ("acontec", "events"),
+    ("educac", "education"), ("estudi", "education"),
+    ("enterrad", "burial"), ("sepult", "burial"), ("sepulcr", "burial"),
+    ("tumba", "burial"), ("nicho", "burial"), ("descansa", "burial"),
+    ("nota", "notes"), ("observ", "notes"), ("anotacion", "notes"),
+    ("apunte", "notes"), ("comentario", "notes"),
+]
+# Raíz más larga primero: garantiza que "bisabuel" gane a "abuel", etc.
+_ROOTS_SORTED = sorted(INTENT_ROOTS, key=lambda rf: -len(rf[0]))
+
+
+def family_of(token: str) -> str | None:
+    """Familia de intención de un token por su raíz (más larga que sea prefijo).
+    Devuelve None si ninguna raíz encaja. (Los nombres se filtran fuera en el
+    llamador: un nombre real nunca llega aquí como intención.)"""
+    for root, fam in _ROOTS_SORTED:
+        if token.startswith(root):
+            return fam
+    return None
+
+
+# "primos hermanos" = primos de primer grado: con 'primos', 'hermanos' es
+# modificador, no la familia siblings.
 COUSINS_TOKENS = {"primo", "prima", "primos", "primas", "cosi", "cosins", "cosina", "cosines"}
 
-# Modificadores: no cuentan como familia y se saltan al extraer el sujeto.
-MODIFIERS = {"paterno", "paterna", "materno", "materna", "segundos", "segundas", "hermanos", "hermanas"}
-
-
-# Sustantivos de cónyuge: disparan la rama "quién" del matrimonio.
+# Sustantivos de cónyuge: disparan la rama "cónyuge" del matrimonio.
 SPOUSE_NOUNS = {
     "esposo", "esposa", "esposos", "esposas", "conyuge", "conyuges",
     "marido", "maridos", "companera", "companero",
 }
 
+
 # --- Reglas por familia (ordenadas, la primera que encaja gana) -------------
-# Tupla: (req_all: tokens que deben estar TODOS,
-#         req_any: si no está vacío, al menos UNO debe estar,
-#         forbids: tokens que NO deben estar,
-#         handler, plantilla canónica con {s})
-# Sin regla (o ninguna encaja) => None => cede al router de 163 patrones.
+# Tupla: (req_all, req_any, forbids, handler, plantilla canónica con {s}).
+# Operan sobre el conjunto de tokens LITERALES de la pregunta.
 RULES = {
     "parents":  [(set(), set(), set(), "handle_parents", "padres de {s}")],
     "father":   [(set(), set(), set(), "handle_father", "padre de {s}")],
@@ -134,11 +117,7 @@ RULES = {
         (set(), {"nuera", "nueras"}, set(), "handle_daughters_in_law", "nueras de {s}"),
         (set(), {"yerno", "yernos"}, set(), "handle_sons_in_law", "yernos de {s}"),
     ],
-    # Bisabuelos solo en general: "bisabuela materna"/"bisabuelo paterno" no
-    # tienen handler propio → cede (igual que abuelos).
     "greatgrandparents": [
-        # "bisabuelos por la rama paterna/materna": no hay handler por lado, pero
-        # la respuesta general (los 8) es válida.
         (set(), {"rama"}, set(), "handle_great_grandparents", "bisabuelos de {s}"),
         (set(), set(), {"paterno", "paterna", "materno", "materna"}, "handle_great_grandparents", "bisabuelos de {s}"),
     ],
@@ -147,17 +126,11 @@ RULES = {
     "occupation": [(set(), set(), set(), "handle_occupation_natural", "de que trabajaba {s}")],
     "residence":  [(set(), set(), set(), "handle_last_residence", "donde vivia {s}")],
     "marriage": [
-        # lugar
         (set(), {"donde", "lugar", "iglesia", "sitio"}, set(), "handle_marriage_date_place", "donde se caso {s}"),
-        # fecha
         (set(), {"cuando", "fecha", "ano", "dia"}, set(), "handle_marriage_date_place", "cuando se caso {s}"),
-        # "pareja" → handler que también cubre parejas de hecho (no solo matrimonio)
         (set(), {"pareja", "parejas"}, set(), "handle_spouse_or_partner", "con quien formo pareja {s}"),
-        # cónyuge (sustantivo)
         (set(), SPOUSE_NOUNS, set(), "handle_spouse", "conyuge de {s}"),
-        # "con quién/qué persona se casó"
         (set(), {"quien", "quienes", "persona", "personas"}, set(), "handle_spouse_or_partner", "con quien se caso {s}"),
-        # "matrimonio/boda de X" a secas es ambiguo → ninguna regla → cede.
     ],
     "baptism": [
         (set(), {"donde", "lugar", "iglesia"}, set(), "handle_baptism_place", "se bautizo {s}"),
@@ -172,117 +145,46 @@ RULES = {
 }
 
 
-# --- Guardas globales: si aparece cualquiera, cedemos al router de patrones --
-# Redirigen a handlers más específicos (conteos, extremos) o a intenciones no
-# migradas (lugar/fecha, matrimonio). Garantía de cero regresiones.
+# --- Desambiguadores globales: si aparece cualquiera, cedemos al router ------
+# NO son ruido: redirigen a un handler más específico (conteos→*_count, extremos)
+# o a una intención no migrada (lugar/fecha). Garantía de cero regresiones.
 GLOBAL_CEDE = {
-    # conteos / cantidad -> handlers *_count
     "cuantos", "cuantas", "cuanta", "cuanto", "numero", "cantidad",
     "muchos", "muchas", "pocos", "pocas", "bastantes", "numerosos", "numerosas",
-    # extremos / orden de nacimiento (ordinales en singular)
     "mayor", "menor", "mayores", "primer", "primera", "primero",
     "ultimo", "ultima", "segundo", "segunda",
-    # listas por lugar / fecha
+    # edad → handlers de edad al casarse / al primer hijo (handle_age_*)
+    "edad", "edades",
+    # "parejas se casaron en X" (plural) → handle_marriages_place, no un cónyuge
+    "casaron", "casaban", "casaren",
+    # ficha "figura registrada / aparece documentado" → handlers *_field
+    "registrada", "registrado", "documentado", "documentada",
     "nacio", "nacieron", "nacida", "nacido", "nacimiento",
     "murio", "murieron", "fallecio", "fallecieron", "muerte", "defuncion",
-    "enterrado", "enterrada", "sepultado", "sepultada",
-    # residencia con submodo (última/primer/al final) → handler con su lógica
     "final",
-    # agregados / descendencia
     "descendencia", "descendientes", "vivos", "vivas", "longeva", "longevo",
+    # comparaciones / superlativos ("vivió más años", "más hijos") → analítico
+    "mas",
 }
 
-
-# Palabras de conteo (subconjunto de GLOBAL_CEDE).
 COUNT_WORDS = {
     "cuantos", "cuantas", "cuanta", "cuanto", "numero", "cantidad",
     "muchos", "muchas", "pocos", "pocas", "bastantes", "numerosos", "numerosas",
 }
 
 # Familias SIN handler de conteo propio: "cuántos nietos" se responde listándolos.
-# (children/siblings sí tienen handler *_count, así que para esas se cede.)
 COUNT_LIST_FAMILIES = {"grandchildren", "nephews", "cousins", "uncles", "residence"}
 
-
-# Relleno que se elimina del PRINCIPIO del sujeto, tras la frase de relación.
-LEADING_FILLER = {
-    "de", "del", "la", "las", "los", "el", "l", "d",
-    "tenia", "tenian", "tuvo", "tuvieron", "tiene", "tienen", "tener",
-    "fueron", "eran", "era", "fue", "son", "es",
-    "que", "quien", "quienes", "cual", "cuales", "como",
-    "se", "llamaba", "llamaban", "llaman", "hay", "habia",
-    "documentados", "documentadas", "documentado", "documentada",
-    "registrados", "registradas", "todos", "todas", "sus", "su",
-    "distintos", "distintas", "diferentes", "varios", "varias",
-    "diversos", "diversas", "diferente", "distinto", "distinta",
-    "realmente", "exactamente", "ejercia", "ejercio", "ejercian", "ejerce",
-    "desempenaba", "desempeno", "tuvieron", "recibio", "contrajo", "celebro",
-    "estuvo", "estuvieron", "algun", "alguna",
-    # muletillas internas de los atributos de ficha
-    "consta", "constan", "en", "ficha", "registro", "registros", "sobre", "a",
-    "biograficas", "biografica", "biografico", "biograficos", "acompana",
-    "figuran", "figura", "para",
-}
-
-# Adverbios de cola que romperían el LIKE de resolución de nombre.
-TRAILING_FILLER = {
-    "exactamente", "realmente", "exacto", "exacta",
-    "aproximadamente", "aprox", "concretamente",
-    "documentados", "documentadas", "registrados", "registradas",
-}
-
-# Coletillas (frases) que pueden ir DETRÁS del nombre y rompen la resolución:
-# "…Jesus Godes Diago a lo largo de su vida". Se eliminan del final del sujeto.
-# Cada entrada es una secuencia de tokens (normalizados, sin acentos).
-TRAILING_PHRASES = [
-    ["a", "lo", "largo", "de", "su", "vida"],
-    ["a", "lo", "largo", "de", "los", "anos"],
-    ["a", "lo", "largo", "de", "su", "carrera"],
-    ["a", "lo", "largo", "de", "toda", "su", "vida"],
-    ["durante", "toda", "su", "vida"],
-    ["durante", "su", "vida"],
-    ["en", "toda", "su", "vida"],
-    ["en", "su", "vida"],
-    ["que", "se", "le", "conocen"],
-    ["que", "se", "le", "conoce"],
-    ["que", "se", "le", "conocian"],
-    ["por", "favor"],
-    ["segun", "consta"],
-    ["segun", "los", "registros"],
-    ["segun", "el", "registro"],
-    ["por", "aquel", "entonces"],
-    ["en", "aquella", "epoca"],
-    ["por", "parte", "de", "padre"],
-    ["por", "parte", "de", "madre"],
-    ["y", "como", "se", "llamaban"],
-    ["y", "como", "se", "llamaba"],
-    ["y", "como", "se", "llaman"],
-    ["en", "su", "bautizo"],
-    ["en", "el", "bautizo"],
-]
-
-# Palabras admitidas ANTES del término de relación. El sujeto de "REL de SUJETO"
-# va siempre DESPUÉS de la relación; si delante hay algo que no sea palabra
-# función o muletilla (p.ej. un nombre propio), es otra estructura —típicamente
-# "¿Era X abuelo de Y?" (sí/no)— y cedemos al router de patrones.
-ALLOWED_PREFIX = LEADING_FILLER | {
-    "dime", "dame", "digame", "nombrame", "nombra", "nombres", "nombre",
-    "me", "nos", "puedes", "podrias", "decir", "sacas", "saca",
-    "conoces", "sabes", "recuerdas", "indica", "indicame",
-    "lista", "enumera", "menciona", "familia", "grupo",
-    # interrogativos de atributo: "a/en qué trabajaba", "dónde vivía",
-    # "con quién/dónde/cuándo se casó", "dónde estuvo domiciliado"
-    "a", "en", "con", "donde", "cuando", "estuvo", "estuvieron",
-    # muletillas de "quién aparece/figura/consta como … de X"
-    "aparece", "aparecen", "figura", "figuran", "consta", "como",
-    # conteos al inicio ("cuántos nietos…"): solo prosperan en COUNT_LIST_FAMILIES
-    "cuantos", "cuantas", "cuanta", "cuanto",
+# Tokens que, aun estando en name_tokens, no deben formar parte de la tirada de
+# nombre porque son palabras-clave del modelo (evita falsos sujetos).
+NON_NAME_TOKENS = GLOBAL_CEDE | COUNT_WORDS | COUSINS_TOKENS | {
+    "paterno", "paterna", "materno", "materna", "segundos", "segundas",
+    "hermanos", "hermanas", "rama", "pareja", "parejas",
 }
 
 
 # Compuestos de parentesco (dos palabras): requieren un token de cada grupo.
-# Se comprueban ANTES del guard de familias (si no, "tío abuelo" = 2 familias →
-# cedería). Tupla: (any_a, any_b, handler, plantilla).
+# Se comprueban ANTES del guard de familias (si no, "tío abuelo" = 2 familias).
 COMPOUND_RULES = [
     ({"tio", "tios", "tia", "tias"}, {"abuelo", "abuela", "abuelos", "abuelas"},
      "handle_great_uncles", "tios abuelos de {s}"),

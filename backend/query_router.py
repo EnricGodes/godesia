@@ -404,15 +404,20 @@ class QueryRouter:
             (r"^(?:qu[eé]\s+)?descendencia\s+.+$", "handle_has_descendants"),
         ]
 
+    # Partículas de apellidos compuestos ("de los Ríos"): son nombres en la BD
+    # pero como token suelto romperían/ensuciarían la tirada de nombre. Excluirlas
+    # no afecta la resolución (usa LIKE %a%b%).
+    _NAME_PARTICLES = {"los", "las", "del", "dels", "san", "santa", "santo", "dela"}
+
     def _build_name_tokens(self):
         """Tokens (≥3 letras) que aparecen en nombres/apellidos reales del árbol,
-        para el guard de prefijo de la capa de intención."""
+        usados por la capa de intención para aislar el sujeto."""
         toks = set()
         try:
             for row in self.conn.execute("SELECT given_name, surname FROM people"):
                 for field in (row[0], row[1]):
                     for t in _tokenize_name(field or ""):
-                        if len(t) >= 3:
+                        if len(t) >= 3 and t not in self._NAME_PARTICLES:
                             toks.add(t)
         except Exception:
             pass
