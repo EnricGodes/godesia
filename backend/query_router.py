@@ -305,7 +305,8 @@ class QueryRouter:
             (r"(?:prim[oa]s?(?:\s+herman[oa]s?)?\s+de\s+.+|cosins?\s+de\s+.+)", "handle_first_cousins"),
             (r"(?:sobrin[oa]s?\s+niet[oa]s?\s+de\s+.+)", "handle_grandnephews"),
             (r"(?:sobrin[oa]s?\s+de\s+.+|nebot[s]?\s+de\s+.+|nephews?\s+of|nieces?\s+of)", "handle_nephews_nieces"),
-            (r"(?:niet[oa]s?\s+de\s+.+|grandchildren\s+of|grandsons?\s+of|granddaughters?\s+of)", "handle_grandchildren"),
+            (r"(?:bisniet[oa]s?\s+de\s+.+|great[\s-]?grandchildren\s+of)", "handle_great_grandchildren"),
+            (r"(?:(?<![a-z])niet[oa]s?\s+de\s+.+|grandchildren\s+of|grandsons?\s+of|granddaughters?\s+of)", "handle_grandchildren"),
             (r"(?:cas[oó]\s+o\s+emparej[oó]|casar\s+o\s+emparellar)", "handle_spouse_or_partner"),
             (r"(?:(?:con\s+)?qu[eé]\s+(?:persona|hombre|mujer)\s+enlaz[oó]\s+.+\s+(?:por\s+)?matrimonio|with\s+whom\s+did\s+.+\s+marry)", "handle_spouse"),
             (r"(?:cu[aá]ntos?\s+descendientes?\s+directos?\s+(?:tuvo|dej[oó])\s+.+|how\s+many\s+direct\s+descendants)", "handle_direct_descendants"),
@@ -1292,6 +1293,24 @@ class QueryRouter:
         else:
             answer = f"Los nietos y nietas de {person['name']} fueron { _join_names(grandchildren) }."
         people = [person] + grandchildren
+        return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
+
+    def handle_great_grandchildren(self, question):
+        """Bisnietos/bisnietas de [persona]: hijos de sus nietos."""
+        m = re.search(r"bisniet[oa]s?\s+de\s+(.+?)(?:\?|$)", _clean_question(question), re.I)
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1))
+        if not person:
+            return None
+        children = [_as_dict(c) for c in get_children(self.conn, person["id"])]
+        grandchildren = self._children_of_ids([c["id"] for c in children if c])
+        greatgc = _sort_people(self._children_of_ids([g["id"] for g in grandchildren]))
+        if not greatgc:
+            answer = f"No constan bisnietos o bisnietas documentados de {person['name']}."
+        else:
+            answer = f"Los bisnietos y bisnietas de {person['name']} fueron { _join_names(greatgc) }."
+        people = [person] + greatgc
         return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
 
     def handle_spouse_or_partner(self, question):

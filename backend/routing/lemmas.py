@@ -121,6 +121,7 @@ RULES = {
         (set(), {"rama"}, set(), "handle_great_grandparents", "bisabuelos de {s}"),
         (set(), set(), {"paterno", "paterna", "materno", "materna"}, "handle_great_grandparents", "bisabuelos de {s}"),
     ],
+    "greatgrandchildren": [(set(), set(), set(), "handle_great_grandchildren", "bisnietos de {s}")],
     "ggchildren": [(set(), set(), set(), "handle_has_great_great_grandchildren", "tataranietos de {s}")],
     # --- atributos ---
     "occupation": [(set(), set(), set(), "handle_occupation_natural", "de que trabajaba {s}")],
