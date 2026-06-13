@@ -1,93 +1,117 @@
 """Vocabulario controlado castellano para la capa de intención.
 
-Mapea TOKENS COMPLETOS (no prefijos) a una intención canónica. Así una sola
-entrada cubre todas las formas verbales sin enumerarlas (`tuvo`/`tenia`/`tiene`
-disparan lo mismo) y se evitan las colisiones de raíz que tendría un stemmer
-ciego (`cas`->casa, `prim`->primero).
+Modelo: cada nombre de parentesco pertenece a una FAMILIA. La pregunta debe
+mencionar UNA sola familia; si menciona dos (p.ej. "padre de la madre de X") es
+una cadena/compuesto y cedemos al router de patrones. Dentro de la familia, unas
+REGLAS ordenadas con modificadores (paterno/materno, segundos…) eligen el handler.
 
-Para añadir una intención nueva: registrar sus tokens-núcleo en CORE_LEMMAS y su
-plantilla canónica en CANONICAL. Lo demás (extracción de sujeto, guardas) es común.
+Se mapean TOKENS COMPLETOS (no prefijos), de modo que una entrada cubre todas las
+formas verbales sin enumerarlas y sin colisiones de raíz (`cas`->casa, `prim`->primero).
+
+Añadir una intención = registrar sus tokens en FAMILIES y una regla en RULES.
 """
 
-from enum import Enum
+# --- Familia de relación por token (vocabulario MAESTRO) -------------------
+# Incluye también familias SIN reglas todavía (spouse, inlaw…): así el guard de
+# "una sola familia" detecta cadenas y cedemos limpiamente.
+FAMILIES = {
+    # parentescos con reglas (migrados)
+    "padres": "parents", "progenitores": "parents",
+    "padre": "father", "papa": "father",
+    "madre": "mother", "mama": "mother",
+    "hijos": "children", "hijas": "children",
+    "hermanos": "siblings", "hermanas": "siblings",
+    "abuelo": "grandparents", "abuela": "grandparents",
+    "abuelos": "grandparents", "abuelas": "grandparents",
+    "avi": "grandparents", "avia": "grandparents", "avis": "grandparents", "avies": "grandparents",
+    "primo": "cousins", "prima": "cousins", "primos": "cousins", "primas": "cousins",
+    "cosi": "cousins", "cosins": "cousins", "cosina": "cousins", "cosines": "cousins",
+    "tio": "uncles", "tia": "uncles", "tios": "uncles", "tias": "uncles",
+    "oncle": "uncles", "oncles": "uncles",
+    "sobrino": "nephews", "sobrina": "nephews", "sobrinos": "nephews", "sobrinas": "nephews",
+    "nebot": "nephews", "nebots": "nephews",
+    "nieto": "grandchildren", "nieta": "grandchildren", "nietos": "grandchildren", "nietas": "grandchildren",
+    "bisabuelo": "greatgrandparents", "bisabuela": "greatgrandparents",
+    "bisabuelos": "greatgrandparents", "bisabuelas": "greatgrandparents",
+    # familias SIN reglas (solo para el guard de cadenas; cederán al router)
+    "esposo": "spouse", "esposa": "spouse", "conyuge": "spouse", "marido": "spouse",
+    "mujer": "spouse", "pareja": "spouse",
+    "suegro": "inlaw", "suegra": "inlaw", "suegros": "inlaw", "suegras": "inlaw",
+    "consuegro": "inlaw", "consuegros": "inlaw",
+    "nuera": "inlaw", "nueras": "inlaw", "yerno": "inlaw", "yernos": "inlaw",
+    "cunado": "inlaw", "cunada": "inlaw", "cunados": "inlaw", "cunadas": "inlaw",
+    "padrino": "godparents", "padrinos": "godparents", "madrina": "godparents", "madrinas": "godparents",
+    "bisnieto": "greatgrandchildren", "bisnieta": "greatgrandchildren",
+    "bisnietos": "greatgrandchildren", "bisnietas": "greatgrandchildren",
+    "tatarabuelo": "ggparents", "tatarabuela": "ggparents",
+    "tatarabuelos": "ggparents", "tatarabuelas": "ggparents",
+    "tataranieto": "ggchildren", "tataranietos": "ggchildren",
+}
+
+# "primos hermanos" = primos hermanos (primer grado): cuando hay 'primos', el
+# token 'hermanos' es modificador, no la familia 'siblings'.
+COUSINS_TOKENS = {"primo", "prima", "primos", "primas", "cosi", "cosins", "cosina", "cosines"}
+
+# Modificadores: no cuentan como familia y se saltan al extraer el sujeto.
+MODIFIERS = {"paterno", "paterna", "materno", "materna", "segundos", "segundas", "hermanos", "hermanas"}
 
 
-class Intent(str, Enum):
-    PARENTS = "parents"
-    FATHER = "father"
-    MOTHER = "mother"
-    CHILDREN = "children"
-    SIBLINGS = "siblings"
-
-
-# Token-núcleo -> intención. Solo formas en plural para hijos/hermanos: el
-# singular con modificador ("primer hijo", "hijo mayor") es OTRA intención y
-# debe cederse al router de patrones.
-CORE_LEMMAS = {
-    "padres": Intent.PARENTS,
-    "progenitores": Intent.PARENTS,
-    "padre": Intent.FATHER,
-    "papa": Intent.FATHER,
-    "madre": Intent.MOTHER,
-    "mama": Intent.MOTHER,
-    "hijos": Intent.CHILDREN,
-    "hijas": Intent.CHILDREN,
-    "hermanos": Intent.SIBLINGS,
-    "hermanas": Intent.SIBLINGS,
+# --- Reglas por familia (ordenadas, la primera que encaja gana) -------------
+# Tupla: (requires: tokens que deben estar TODOS,
+#         forbids:  tokens que NO deben estar,
+#         handler, plantilla canónica con {s})
+# Sin regla (o ninguna encaja) => None => cede al router de 163 patrones.
+RULES = {
+    "parents":  [(set(), set(), "handle_parents", "padres de {s}")],
+    "father":   [(set(), set(), "handle_father", "padre de {s}")],
+    "mother":   [(set(), set(), "handle_mother", "madre de {s}")],
+    "children": [(set(), set(), "handle_children", "hijos de {s}")],
+    "siblings": [(set(), set(), "handle_siblings", "hermanos de {s}")],
+    "grandparents": [
+        ({"paterno"}, set(), "handle_paternal_grandfather", "abuelo paterno de {s}"),
+        ({"materna"}, set(), "handle_maternal_grandmother", "abuela materna de {s}"),
+        # General SOLO si no hay lado: "abuelo materno"/"abuela paterna" no tienen
+        # handler propio → ninguna regla encaja → cede.
+        (set(), {"paterno", "paterna", "materno", "materna"}, "handle_grandparents_names", "abuelos de {s}"),
+    ],
+    "cousins": [
+        ({"segundos"}, set(), "handle_second_cousins", "primos segundos de {s}"),
+        ({"segundas"}, set(), "handle_second_cousins", "primos segundos de {s}"),
+        (set(), {"segundos", "segundas"}, "handle_first_cousins", "primos de {s}"),
+    ],
+    "uncles":       [(set(), set(), "handle_uncles", "tios de {s}")],
+    "nephews":      [(set(), set(), "handle_nephews_nieces", "sobrinos de {s}")],
+    "grandchildren": [(set(), set(), "handle_grandchildren", "nietos de {s}")],
+    # Bisabuelos solo en general: "bisabuela materna"/"bisabuelo paterno" no
+    # tienen handler propio → cede (igual que abuelos).
+    "greatgrandparents": [
+        (set(), {"paterno", "paterna", "materno", "materna"}, "handle_great_grandparents", "bisabuelos de {s}"),
+    ],
 }
 
 
-# Plantilla canónica por intención. Se sintetiza una pregunta mínima que el
-# handler EXISTENTE ya sabe resolver, de modo que la respuesta es idéntica a la
-# aprobada en el banco. {s} = sujeto extraído.
-CANONICAL = {
-    Intent.PARENTS: ("handle_parents", "padres de {s}"),
-    Intent.FATHER: ("handle_father", "padre de {s}"),
-    Intent.MOTHER: ("handle_mother", "madre de {s}"),
-    Intent.CHILDREN: ("handle_children", "hijos de {s}"),
-    Intent.SIBLINGS: ("handle_siblings", "hermanos de {s}"),
-}
-
-
-# Si aparece CUALQUIERA de estos tokens, la pregunta pertenece a una intención
-# todavía no migrada (otro parentesco, cónyuge, lista por lugar/fecha, conteo,
-# extremos…): devolvemos None y deja que actúe el router de 163 patrones. Es la
-# garantía de cero regresiones mientras migramos por lotes.
-OUT_OF_SCOPE = {
-    # otros parentescos verticales
-    "abuelo", "abuela", "abuelos", "abuelas", "avi", "avia", "avis", "avies",
-    "bisabuelo", "bisabuela", "bisabuelos", "bisabuelas",
-    "tatarabuelo", "tatarabuela", "tatarabuelos", "tatarabuelas",
-    "nieto", "nieta", "nietos", "nietas",
-    "bisnieto", "bisnieta", "bisnietos", "bisnietas",
-    "tataranieto", "tataranieta", "tataranietos", "tataranietas",
-    # colaterales / políticos
-    "primo", "prima", "primos", "primas", "cosi", "cosins", "cosina", "cosines",
-    "tio", "tia", "tios", "tias", "oncle", "oncles",
-    "sobrino", "sobrina", "sobrinos", "sobrinas", "nebot", "nebots",
-    "suegro", "suegra", "suegros", "suegras", "consuegro", "consuegros",
-    "nuera", "nueras", "yerno", "yernos",
-    "cunado", "cunada", "cunados", "cunadas",
-    "padrino", "padrinos", "madrina", "madrinas",
-    # cónyuge / pareja
-    "esposo", "esposa", "conyuge", "marido", "mujer", "pareja",
-    "caso", "casar", "casarse", "casado", "casada", "casaron", "boda", "matrimonio",
+# --- Guardas globales: si aparece cualquiera, cedemos al router de patrones --
+# Redirigen a handlers más específicos (conteos, extremos) o a intenciones no
+# migradas (lugar/fecha, matrimonio). Garantía de cero regresiones.
+GLOBAL_CEDE = {
+    # conteos / cantidad -> handlers *_count
+    "cuantos", "cuantas", "cuanta", "cuanto", "numero", "cantidad",
+    "muchos", "muchas", "pocos", "pocas", "bastantes", "numerosos", "numerosas",
+    # extremos / orden de nacimiento (ordinales en singular)
+    "mayor", "menor", "mayores", "primer", "primera", "primero",
+    "ultimo", "ultima", "segundo", "segunda",
     # listas por lugar / fecha
     "nacio", "nacieron", "nacida", "nacido", "nacimiento",
     "murio", "murieron", "fallecio", "fallecieron", "muerte", "defuncion",
     "enterrado", "enterrada", "sepultado", "sepultada",
-    # extremos / orden de nacimiento
-    "mayor", "menor", "mayores", "primer", "primera", "primero",
-    "ultimo", "ultima", "segundo", "segunda",
-    # conteos / cantidad (van a los handlers *_count, más específicos)
-    "cuantos", "cuantas", "cuanta", "cuanto", "numero", "cantidad",
-    "muchos", "muchas", "pocos", "pocas", "bastantes", "numerosos", "numerosas",
+    # matrimonio (intención no migrada)
+    "caso", "casar", "casarse", "casado", "casada", "casaron", "casaban", "boda", "matrimonio",
     # agregados / descendencia
     "descendencia", "descendientes", "vivos", "vivas", "longeva", "longevo",
 }
 
 
-# Relleno que se elimina del PRINCIPIO del sujeto, tras el token-núcleo.
+# Relleno que se elimina del PRINCIPIO del sujeto, tras la frase de relación.
 LEADING_FILLER = {
     "de", "del", "la", "las", "los", "el", "l", "d",
     "tenia", "tenian", "tuvo", "tuvieron", "tiene", "tienen", "tener",
@@ -98,9 +122,19 @@ LEADING_FILLER = {
     "registrados", "registradas", "todos", "todas", "sus", "su",
 }
 
-
 # Adverbios de cola que romperían el LIKE de resolución de nombre.
 TRAILING_FILLER = {
     "exactamente", "realmente", "exacto", "exacta",
     "aproximadamente", "aprox", "concretamente",
+}
+
+# Palabras admitidas ANTES del término de relación. El sujeto de "REL de SUJETO"
+# va siempre DESPUÉS de la relación; si delante hay algo que no sea palabra
+# función o muletilla (p.ej. un nombre propio), es otra estructura —típicamente
+# "¿Era X abuelo de Y?" (sí/no)— y cedemos al router de patrones.
+ALLOWED_PREFIX = LEADING_FILLER | {
+    "dime", "dame", "digame", "nombrame", "nombra", "nombres", "nombre",
+    "me", "nos", "puedes", "podrias", "decir", "sacas", "saca",
+    "conoces", "sabes", "recuerdas", "indica", "indicame",
+    "lista", "enumera", "menciona", "familia", "grupo",
 }
