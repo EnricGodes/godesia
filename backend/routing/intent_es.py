@@ -25,6 +25,7 @@ from .lemmas import (
     MODIFIERS,
     RULES,
     TRAILING_FILLER,
+    TRAILING_PHRASES,
 )
 
 # Conserva la pista de año "(1900)" como token propio para desambiguar por año.
@@ -55,6 +56,11 @@ class IntentRouter:
         tail = toks[max(rel_idx) + 1:]
         while tail and tail[0] in LEADING_FILLER:
             tail.pop(0)
+        # Quita coletillas de cola ("…a lo largo de su vida") y adverbios sueltos.
+        for phrase in TRAILING_PHRASES:
+            if len(tail) > len(phrase) and tail[-len(phrase):] == phrase:
+                tail = tail[:-len(phrase)]
+                break
         while tail and tail[-1] in TRAILING_FILLER:
             tail.pop()
         if not tail or "y" in tail or "e" in tail:

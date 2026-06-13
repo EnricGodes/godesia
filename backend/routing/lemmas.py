@@ -186,6 +186,8 @@ LEADING_FILLER = {
     "se", "llamaba", "llamaban", "llaman", "hay", "habia",
     "documentados", "documentadas", "documentado", "documentada",
     "registrados", "registradas", "todos", "todas", "sus", "su",
+    "distintos", "distintas", "diferentes", "varios", "varias",
+    "diversos", "diversas", "diferente", "distinto", "distinta",
 }
 
 # Adverbios de cola que romperían el LIKE de resolución de nombre.
@@ -193,6 +195,23 @@ TRAILING_FILLER = {
     "exactamente", "realmente", "exacto", "exacta",
     "aproximadamente", "aprox", "concretamente",
 }
+
+# Coletillas (frases) que pueden ir DETRÁS del nombre y rompen la resolución:
+# "…Jesus Godes Diago a lo largo de su vida". Se eliminan del final del sujeto.
+# Cada entrada es una secuencia de tokens (normalizados, sin acentos).
+TRAILING_PHRASES = [
+    ["a", "lo", "largo", "de", "su", "vida"],
+    ["a", "lo", "largo", "de", "los", "anos"],
+    ["a", "lo", "largo", "de", "su", "carrera"],
+    ["a", "lo", "largo", "de", "toda", "su", "vida"],
+    ["durante", "toda", "su", "vida"],
+    ["durante", "su", "vida"],
+    ["en", "toda", "su", "vida"],
+    ["en", "su", "vida"],
+    ["que", "se", "le", "conocen"],
+    ["que", "se", "le", "conoce"],
+    ["que", "se", "le", "conocian"],
+]
 
 # Palabras admitidas ANTES del término de relación. El sujeto de "REL de SUJETO"
 # va siempre DESPUÉS de la relación; si delante hay algo que no sea palabra
