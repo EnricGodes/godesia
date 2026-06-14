@@ -2045,6 +2045,31 @@ async def upload_photos(files: list[UploadFile] = File(...)):
     return {"saved": len(saved), "skipped": len(skipped), "files": saved}
 
 
+@router.get("/list-cemetery-photos")
+async def list_cemetery_photos():
+    """Filenames de las fotos de nichos ya presentes en el volumen (para sync)."""
+    d = _cemetery_photos_dir()
+    files = [p.name for p in d.iterdir() if p.is_file()] if d.exists() else []
+    return {"files": files, "count": len(files)}
+
+
+@router.post("/upload-cemetery-photos")
+async def upload_cemetery_photos(files: list[UploadFile] = File(...)):
+    """Sube fotos de nichos al volumen (data/cemetery_photos). Salta las que ya
+    existen, así re-ejecutar es seguro. Igual que /upload-photos pero para nichos."""
+    d = _cemetery_photos_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    saved, skipped = [], []
+    for f in files:
+        dest = d / f.filename
+        if dest.exists():
+            skipped.append(f.filename)
+        else:
+            dest.write_bytes(await f.read())
+            saved.append(f.filename)
+    return {"saved": len(saved), "skipped": len(skipped), "files": saved}
+
+
 # ---------------------------------------------------------------------------
 # Dedup of duplicate photos (Godes ↔ Palazuelos merge artifacts)
 # ---------------------------------------------------------------------------
