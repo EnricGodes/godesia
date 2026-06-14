@@ -2201,7 +2201,12 @@ const Palazuelos = (() => {
 
     async function rejectMatch(godesId) {
         try {
-            await _patchMap(godesId, { palaz_id: null, palaz_name: null, match_type: 'rejected', confidence: 0 });
+            // Guarda la puntuación actual del candidato (no 0): así, si más tarde
+            // se reabre por puntuar alto y se vuelve a rechazar, no reaparece en
+            // el siguiente "Construir mapa" (a menos que suba aún más).
+            const e = (_mapData || []).find(x => x.godes_id === godesId);
+            const conf = e ? (e.confidence || 0) : 0;
+            await _patchMap(godesId, { palaz_id: null, palaz_name: null, match_type: 'rejected', confidence: conf });
         } catch (e) { alert('Error: ' + e.message); }
     }
 

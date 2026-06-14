@@ -267,6 +267,11 @@ def _jlog(msg: str):
         _job["log"].append(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
 
 
+# Un rechazado se reabre a revisión si AHORA puntúa al menos esto (nivel de
+# auto-match) y por encima de cuando se rechazó. El resto sigue rechazado.
+REJECTED_RESURFACE_MIN = 80
+
+
 def _run_build_map(ged_path: str, db_path: str):
     import sys
     t0 = time.time()
@@ -307,14 +312,21 @@ def _run_build_map(ged_path: str, db_path: str):
         godes_people = [dict(r) for r in rows]
         _jlog(f"  {len(godes_people)} persones Godes")
 
-        # Load existing manual matches to preserve them
+        # Decisiones del usuario. Las MANUALES se preservan siempre; las
+        # RECHAZADAS se vuelven a puntuar (y resurgen a revisión solo si ahora
+        # puntúan alto, ver más abajo).
         existing_manual = {}
+        existing_rejected = {}
+        existing_review = {}   # rechazados ya reabiertos, pendientes de decisión
         try:
             ex = conn.execute(
-                "SELECT godes_id, palaz_id, palaz_name, confidence, match_type FROM palazuelos_map WHERE match_type IN ('manual','rejected')"
+                "SELECT godes_id, palaz_id, palaz_name, confidence, match_type FROM palazuelos_map WHERE match_type IN ('manual','rejected','review')"
             ).fetchall()
             for row in ex:
-                existing_manual[row[0]] = dict(row)
+                d = dict(row)
+                mt = d["match_type"]
+                bucket = existing_rejected if mt == "rejected" else existing_review if mt == "review" else existing_manual
+                bucket[d["godes_id"]] = d
         except Exception:
             pass
 
@@ -324,7 +336,9 @@ def _run_build_map(ged_path: str, db_path: str):
         matched_auto = 0
         needs_review = 0
         no_match = 0
+        resurfaced = 0          # rechazados reabiertos a revisión por puntuar alto
         rows_to_upsert = []
+        resurfaced_rows = []    # van con UPDATE explícito (el upsert protege rechazados)
 
         for i, gp in enumerate(godes_people):
             with _job_lock:
@@ -336,6 +350,13 @@ def _run_build_map(ged_path: str, db_path: str):
             if godes_id in existing_manual:
                 rows_to_upsert.append(existing_manual[godes_id])
                 matched_auto += 1
+                continue
+
+            # Rechazados ya reabiertos: pegajosos en revisión hasta que el usuario
+            # decida (no se re-puntúan, para no auto-confirmarlos en el build siguiente).
+            if godes_id in existing_review:
+                rows_to_upsert.append(existing_review[godes_id])
+                needs_review += 1
                 continue
 
             # Find top candidates
@@ -362,6 +383,29 @@ def _run_build_map(ged_path: str, db_path: str):
                 s = _score_pair(gp, palaz_indis[pid], palaz_fams, palaz_indis)
                 scored.append((s, pid))
             scored.sort(reverse=True)
+
+            # Rechazados: re-puntuados. Resurgen a revisión SOLO si ahora puntúan
+            # alto (≥ REJECTED_RESURFACE_MIN) y por encima de cuando se rechazaron
+            # —así, al volver a rechazarlos no reaparecen (evita el bucle)—. El
+            # resto sigue rechazado (no se pasan todos a "sin match").
+            if godes_id in existing_rejected:
+                rej = existing_rejected[godes_id]
+                new_best = scored[0][0] if scored else 0
+                stored = rej.get("confidence")
+                stored = stored if stored is not None else -1
+                if new_best >= REJECTED_RESURFACE_MIN and min(new_best, 79) > stored:
+                    best_pid = scored[0][1]
+                    resurfaced_rows.append({
+                        "godes_id": godes_id,
+                        "palaz_id": best_pid,
+                        "palaz_name": palaz_indis[best_pid].get("name") or "",
+                        "confidence": min(new_best, 79),
+                    })
+                    needs_review += 1
+                    resurfaced += 1
+                else:
+                    rows_to_upsert.append(rej)
+                continue
 
             if scored and scored[0][0] >= 80:
                 best_score, best_pid = scored[0]
@@ -417,9 +461,17 @@ def _run_build_map(ged_path: str, db_path: str):
                     confidence=excluded.confidence,
                     match_type=excluded.match_type,
                     updated_at=excluded.updated_at
-                WHERE palazuelos_map.match_type NOT IN ('manual', 'rejected')
+                WHERE palazuelos_map.match_type NOT IN ('manual', 'rejected', 'review')
             """, (row["godes_id"], row.get("palaz_id"), row.get("palaz_name"),
                   row.get("confidence", 0), row.get("match_type", "auto")))
+        # Resurgidos: forzar 'rejected' → 'review' (estado propio, pegajoso; el
+        # upsert protege los rechazados, por eso van con UPDATE explícito).
+        for row in resurfaced_rows:
+            conn.execute(
+                "UPDATE palazuelos_map SET palaz_id=?, palaz_name=?, confidence=?, "
+                "match_type='review', updated_at=datetime('now') WHERE godes_id=?",
+                (row["palaz_id"], row["palaz_name"], row["confidence"], row["godes_id"]),
+            )
         conn.commit()
         conn.close()
 
@@ -428,9 +480,10 @@ def _run_build_map(ged_path: str, db_path: str):
             "matched_auto": matched_auto,
             "needs_review": needs_review,
             "no_match": no_match,
+            "resurfaced": resurfaced,
             "total": len(godes_people),
         }
-        _jlog(f"Fet en {elapsed}s — auto:{matched_auto}, revisió:{needs_review}, sense match:{no_match}")
+        _jlog(f"Fet en {elapsed}s — auto:{matched_auto}, revisió:{needs_review}, sense match:{no_match}, rebutjats reoberts:{resurfaced}")
         _export_map_json()
         with _job_lock:
             _job.update({"status": "done", "result": result})
