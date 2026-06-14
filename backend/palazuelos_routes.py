@@ -802,7 +802,9 @@ async def pending_photos():
             if fn in already_imported:
                 continue
             rin = photo.get("photo_rin", "")
-            if rin and rin in dismissed_rins:
+            # Clave de descarte: el RIN si existe; si no, el filename (siempre
+            # presente). Así también se pueden descartar fotos sin RIN.
+            if (rin and rin in dismissed_rins) or (fn in dismissed_rins):
                 continue
             h = _extract_hash(fn)
             if h and h in known_hashes:

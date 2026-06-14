@@ -2246,7 +2246,9 @@ const Palazuelos = (() => {
             }
             let html = '';
             for (const [gId, grp] of Object.entries(byPerson)) {
-                const grpRins = grp.photos.map(p => p.photo_rin).filter(Boolean);
+                // Clave de descarte por foto: RIN si existe, si no el filename
+                // (siempre presente) — así también se descartan fotos sin RIN.
+                const grpRins = grp.photos.map(p => p.photo_rin || p.filename).filter(Boolean);
                 const grpRinsJson = esc(JSON.stringify(grpRins));
                 html += `<div style="margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid #e5e2da;">
                     <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;">
