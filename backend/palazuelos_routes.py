@@ -508,6 +508,24 @@ async def build_map():
     return {"status": "started"}
 
 
+def trigger_build_map() -> bool:
+    """Lanza el rebuild del mapa Palazuelos en segundo plano. Idempotente: si ya
+    hay una tarea en curso o no existe el .ged, no hace nada. Pensado para
+    invocarlo automáticamente tras una importación GEDCOM. Devuelve True si lanzó."""
+    try:
+        ged_path = _default_ged_path()
+        if not ged_path.exists():
+            return False
+        with _job_lock:
+            if _job["status"] == "running":
+                return False
+        db_path = str(_base_dir / "data" / "godesia.db")
+        threading.Thread(target=_run_build_map, args=(str(ged_path), db_path), daemon=True).start()
+        return True
+    except Exception:
+        return False
+
+
 @router.post("/export-map")
 async def export_map():
     """Export manual+rejected entries to data/palazuelos_map.json."""

@@ -236,6 +236,17 @@ def _run_fast_import(ged_path: str, db_path: str):
         fresh.close()
         _log_job(f"  ✓ {n_photos} fotos de perfil actualitzades en {_fmt_dur(time.time()-t4)}")
 
+        # Re-sincronitza el mapa de Palazuelos amb els nous individus importats,
+        # perquè la pestanya Palazuelos mostri els que cal revisar sense haver de
+        # llançar el rebuild a mà.
+        try:
+            from palazuelos_routes import trigger_build_map  # noqa: PLC0415
+            if trigger_build_map():
+                _log_job(f"")
+                _log_job(f"↻ Mapa Palazuelos: rebuild llançat en segon pla (revisa la pestanya Palazuelos)")
+        except Exception as e:
+            _log_job(f"  · Palazuelos: no s'ha pogut re-sincronitzar ({e})")
+
         total = _fmt_dur(time.time() - t_start)
         _log_job(f"")
         _log_job(f"✓ Importació completa en {total}")
@@ -343,6 +354,12 @@ def _run_full_import(ged_path: str, base_dir: Path, skip_download: bool):
             _job["finished_at"] = datetime.now().isoformat()
         _log_job(f"✓ Importació completa en {_fmt_dur(time.time() - t_start)}")
         _upload_new_photos(base_dir)
+        try:
+            from palazuelos_routes import trigger_build_map  # noqa: PLC0415
+            if trigger_build_map():
+                _log_job(f"↻ Mapa Palazuelos: rebuild llançat en segon pla (revisa la pestanya Palazuelos)")
+        except Exception as e:
+            _log_job(f"  · Palazuelos: no s'ha pogut re-sincronitzar ({e})")
     except Exception as e:
         with _job_lock:
             _job["status"] = "error"
