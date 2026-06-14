@@ -273,6 +273,7 @@ const Cementerios = {
 
         const kindLabel = { photo: 'Nicho', record: 'Registro' };
         const photos = n.photos || [];
+        document.getElementById('np-photos-title').style.display = photos.length ? '' : 'none';
         document.getElementById('np-photos').innerHTML = photos.map(p => `
             <figure class="cursor-pointer"
                     onclick="openPhotoModalUrl('/cemetery_photos/${p.filename}', { title: '${escAttr(this._nicheLabel(n))}', place: '${escAttr(this.current.name)}', note: '${escAttr(kindLabel[p.kind] || '')}' })">
@@ -325,11 +326,13 @@ const Cementerios = {
         document.getElementById('np-records-title').textContent =
             `Registro de enterramientos (${records.length})`;
 
-        const cols = [
+        const allCols = [
             ['burial_date', 'Entierro'], ['age', 'Edad'], ['civil_status', 'Estado'],
             ['spouse', 'Cónyuge'], ['profession', 'Profesión'], ['parish', 'Parroquia'],
             ['address', 'Dirección'], ['origin', 'Origen'], ['notes', 'Notas'],
         ];
+        // Oculta las columnas vacías para todos los registros de este nicho.
+        const cols = allCols.filter(([key]) => records.some(r => (r[key] || '').trim()));
         const cell = (r, key) => {
             const v = (r[key] || '').trim();
             if (!v) return '<td class="empty">—</td>';
@@ -348,7 +351,7 @@ const Cementerios = {
             return `<td><span class="rec-name">${esc(r.name)}</span>${fs}</td>`;
         };
         document.getElementById('np-records').innerHTML = `
-            <thead><tr><th>Nom</th>${cols.map(([, label]) => `<th>${label}</th>`).join('')}</tr></thead>
+            <thead><tr><th>Nombre</th>${cols.map(([, label]) => `<th>${label}</th>`).join('')}</tr></thead>
             <tbody>${records.map(r =>
                 `<tr>${nameCell(r)}${cols.map(([key]) => cell(r, key)).join('')}</tr>`).join('')}
             </tbody>`;
