@@ -904,6 +904,14 @@ async def download_photo(body: DownloadPhotoRequest):
         except Exception as exc:
             raise HTTPException(502, f"Error de xarxa: {exc}")
 
+    # En local, empuja la foto al volumen de Railway en segundo plano (en Railway
+    # ya está). Así no hace falta correr el script de subida a mano.
+    try:
+        from photo_sync import push_photos_to_railway  # noqa: PLC0415
+        push_photos_to_railway(photos_dir, [body.filename])
+    except Exception:
+        pass
+
     # Save human-readable copy to docs/fotos-palazuelos/
     try:
         legible_dir = _base_dir / "docs" / "fotos-palazuelos"

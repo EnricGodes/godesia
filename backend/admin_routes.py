@@ -2333,6 +2333,9 @@ def _save_niche_photo(db, niche_id: int, kind: str, upload: UploadFile) -> str:
         dest.write_bytes(raw)  # keep the original bytes if Pillow can't process them
     db.execute("INSERT INTO niche_photos (niche_id, filename, kind) VALUES (?, ?, ?)",
                (niche_id, filename, kind))
+    # En local, empuja la foto al volumen de Railway en segundo plano.
+    from photo_sync import push_photos_to_railway  # noqa: PLC0415
+    push_photos_to_railway(_cemetery_photos_dir(), [filename])
     return filename
 
 
