@@ -8,3 +8,4 @@ _resources/
 data/*.db-shm
 data/*.db-wal
 data/*.DS_Store
+data/cemetery_photos/

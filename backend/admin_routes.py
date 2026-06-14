@@ -2291,7 +2291,11 @@ class CemeteryBody(BaseModel):
 
 
 def _cemetery_photos_dir() -> Path:
-    d = _base_dir / "data" / "cemetery_photos"
+    # Las fotos de nichos viven en data/photos/ (el ÚNICO volumen persistente de
+    # Railway), igual que las GEDCOM/Palazuelos. Así llegan a producción con el
+    # mismo script (upload_photos_to_railway.py) y NO por git. Tienen prefijo
+    # "niche_", no colisionan con las GEDCOM, y no están en la tabla `photos`.
+    d = _base_dir / "data" / "photos"
     d.mkdir(parents=True, exist_ok=True)
     return d
 

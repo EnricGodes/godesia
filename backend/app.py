@@ -845,9 +845,10 @@ async def api_post_settings(body: SettingBody):
 if PHOTOS_DIR.exists():
     app.mount("/photos", StaticFiles(directory=str(PHOTOS_DIR)), name="photos")
 
-# Serve niche/registry photos (manual data, outside the GEDCOM photos table)
-CEMETERY_PHOTOS_DIR.mkdir(exist_ok=True)
-app.mount("/cemetery_photos", StaticFiles(directory=str(CEMETERY_PHOTOS_DIR)), name="cemetery_photos")
+# Serve niche/registry photos. Conviven con las GEDCOM en data/photos/ (el volumen
+# persistente de Railway); la ruta /cemetery_photos/ se mantiene por compatibilidad.
+PHOTOS_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/cemetery_photos", StaticFiles(directory=str(PHOTOS_DIR)), name="cemetery_photos")
 
 # Serve frontend
 app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
