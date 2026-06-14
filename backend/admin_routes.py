@@ -2426,6 +2426,41 @@ async def update_niche(
     return {"ok": True}
 
 
+class NicheEnabledBody(BaseModel):
+    enabled: bool
+
+
+@router.patch("/niches/{niche_id}/enabled")
+async def set_niche_enabled(niche_id: int, body: NicheEnabledBody):
+    """Habilita/deshabilita un nicho. Deshabilitado = no se muestra en la app."""
+    db = _db()
+    cur = db.execute(
+        "UPDATE niches SET enabled = ?, updated_at = datetime('now') WHERE id = ?",
+        (1 if body.enabled else 0, niche_id),
+    )
+    db.commit()
+    if cur.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Nicho no encontrado")
+    return {"ok": True, "enabled": body.enabled}
+
+
+@router.get("/cemeteries")
+async def admin_cemeteries_list():
+    """Como /api/cemeteries pero incluye nichos deshabilitados (para el gestor)."""
+    from database import get_cemeteries_summary  # noqa: PLC0415
+    return get_cemeteries_summary(_db(), include_disabled=True)
+
+
+@router.get("/cemeteries/{cemetery_id}/detail")
+async def admin_cemetery_detail(cemetery_id: int):
+    """Detalle del cementerio con nichos deshabilitados incluidos (para el gestor)."""
+    from database import get_cemetery_detail  # noqa: PLC0415
+    data = get_cemetery_detail(_db(), cemetery_id, include_disabled=True)
+    if not data:
+        raise HTTPException(status_code=404, detail="Cementerio no encontrado")
+    return data
+
+
 @router.delete("/niche-photos/{photo_id}")
 async def delete_niche_photo(photo_id: int):
     db = _db()

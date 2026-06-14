@@ -36,7 +36,7 @@ const Cemeteries = {
 
     async load() {
         try {
-            this.cemeteries = await apiFetch('/api/cemeteries');
+            this.cemeteries = await apiFetch('/api/admin/cemeteries');
         } catch (e) {
             document.getElementById('cem-list').innerHTML = `<p style="color:#a33;">${e.message}</p>`;
             return;
@@ -188,7 +188,7 @@ const Cemeteries = {
 
     async openDetail(id) {
         try {
-            this.current = await apiFetch(`/api/cemeteries/${id}`);
+            this.current = await apiFetch(`/api/admin/cemeteries/${id}/detail`);
         } catch (e) {
             alert(e.message);
             return;
@@ -229,15 +229,17 @@ const Cemeteries = {
         el.innerHTML = `<table class="admin-table">
             <thead><tr><th>Nicho</th><th>Personas</th><th>Coordenadas</th><th>Fotos</th><th></th></tr></thead>
             <tbody>${c.niches.map(n => `
-                <tr>
+                <tr${n.enabled === 0 ? ' style="opacity:.5;"' : ''}>
                     <td>
                         <a href="#" onclick="Cemeteries.openNicheEditor(${n.id});return false;" style="font-weight:600;">${esc(n.title || n.name)}</a>
+                        ${n.enabled === 0 ? '<span style="margin-left:6px;font-size:.65rem;font-weight:700;color:#a33;background:#f7e0e0;border-radius:9999px;padding:1px 7px;">oculto</span>' : ''}
                         ${n.title ? `<div style="font-size:.75rem;color:#727971;">${esc(n.name)}</div>` : ''}
                     </td>
                     <td>${n.people.map(p => esc(personShortName(p.name))).join(', ') || '—'}</td>
                     <td style="font-size:.8rem;color:#727971;">${n.lat != null ? `${n.lat.toFixed(5)}, ${n.lng.toFixed(5)}` : '—'}</td>
                     <td>${(n.photos && n.photos.length) ? `📷 ${n.photos.length}` : '—'}</td>
                     <td style="text-align:right;white-space:nowrap;">
+                        <button class="btn btn-secondary btn-sm" onclick="Cemeteries.toggleNiche(${n.id}, ${n.enabled === 0 ? 'true' : 'false'})" title="${n.enabled === 0 ? 'Mostrar en la app' : 'Ocultar de la app'}">${n.enabled === 0 ? 'Habilitar' : 'Deshabilitar'}</button>
                         <button class="btn btn-secondary btn-sm" onclick="Cemeteries.openNicheEditor(${n.id})">Editar</button>
                         <button class="btn btn-danger btn-sm" onclick="Cemeteries.askDelete('niche', ${n.id})">✕</button>
                     </td>
@@ -248,6 +250,18 @@ const Cemeteries = {
     showDetail() {
         if (this.current) this.openDetail(this.current.id);
         else this.showList();
+    },
+
+    async toggleNiche(nicheId, enabled) {
+        try {
+            await apiFetch(`/api/admin/niches/${nicheId}/enabled`, {
+                method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled }),
+            });
+            if (this.current) await this.openDetail(this.current.id);
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
     },
 
     // -----------------------------------------------------------------------
@@ -297,17 +311,17 @@ const Cemeteries = {
         // Visible siempre que el nicho exista (para poder añadir el primer registro)
         card.style.display = this.editingNicheId ? '' : 'none';
         document.getElementById('niche-records-title').textContent =
-            `Registre d'enterraments (${records.length})`;
+            `Registro de enterramientos (${records.length})`;
         if (!records.length) {
             document.getElementById('niche-records-table').innerHTML =
                 '<p style="font-size:.85rem;color:#727971;">Sin registros. Añade el primero con «+ Nuevo registro».</p>';
             return;
         }
         const cols = [
-            ['burial_date', 'Enterram.'], ['death_day', 'Def.'], ['age', 'Edat'],
-            ['civil_status', 'Estat'], ['spouse', 'Cònjuge'], ['profession', 'Professió'],
-            ['parish', 'Parròquia'], ['address', 'Adreça'], ['origin', 'Origen'],
-            ['court', 'Jutjat'], ['titular', 'Titular'], ['notes', 'Notes'],
+            ['burial_date', 'Entierro'], ['death_day', 'Def.'], ['age', 'Edad'],
+            ['civil_status', 'Estado'], ['spouse', 'Cónyuge'], ['profession', 'Profesión'],
+            ['parish', 'Parroquia'], ['address', 'Dirección'], ['origin', 'Origen'],
+            ['court', 'Juzgado'], ['titular', 'Titular'], ['notes', 'Notas'],
         ];
         const cell = (r, key) => {
             const v = (r[key] || '').trim();
@@ -393,7 +407,7 @@ const Cemeteries = {
     },
 
     async _refreshRecords() {
-        this.current = await apiFetch(`/api/cemeteries/${this.current.id}`);
+        this.current = await apiFetch(`/api/admin/cemeteries/${this.current.id}/detail`);
         const niche = this.current.niches.find(n => n.id === this.editingNicheId);
         this._renderRecords(niche);
     },
@@ -416,7 +430,7 @@ const Cemeteries = {
         const recordEl = document.getElementById('niche-record-preview');
         const render = (photos) => photos.map(p => `
             <div style="position:relative;">
-                <img src="/cemetery_photos/${p.filename}" style="width:90px;height:70px;object-fit:cover;border-radius:6px;"/>
+                <img src="/cemetery_photos/${p.filename}" style="width:84px;height:84px;object-fit:cover;border-radius:6px;"/>
                 <button title="Eliminar foto" onclick="Cemeteries.deleteNichePhoto(${p.id})"
                         style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:none;background:#a33;color:#fff;font-size:.7rem;cursor:pointer;line-height:1;">✕</button>
             </div>`).join('');
@@ -432,7 +446,7 @@ const Cemeteries = {
             alert('Error eliminando la foto: ' + e.message);
             return;
         }
-        this.current = await apiFetch(`/api/cemeteries/${this.current.id}`);
+        this.current = await apiFetch(`/api/admin/cemeteries/${this.current.id}/detail`);
         const niche = this.current.niches.find(n => n.id === this.editingNicheId);
         this._renderNichePhotoPreviews(niche);
     },
@@ -463,7 +477,7 @@ const Cemeteries = {
             return;
         }
         // Refresh detail data and stay in the editor (now in edit mode)
-        this.current = await apiFetch(`/api/cemeteries/${this.current.id}`);
+        this.current = await apiFetch(`/api/admin/cemeteries/${this.current.id}/detail`);
         this.openNicheEditor(this.editingNicheId);
     },
 
@@ -550,7 +564,7 @@ const Cemeteries = {
     },
 
     async _refreshNiche() {
-        this.current = await apiFetch(`/api/cemeteries/${this.current.id}`);
+        this.current = await apiFetch(`/api/admin/cemeteries/${this.current.id}/detail`);
         const niche = this.current.niches.find(n => n.id === this.editingNicheId);
         this._renderNichePeople(niche);
         this._loadSuggestions();

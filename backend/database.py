@@ -558,6 +558,8 @@ def get_connection(db_path):
         "CREATE INDEX IF NOT EXISTS idx_niche_records_niche ON niche_records(niche_id)",
         "ALTER TABLE niche_records ADD COLUMN fs_url TEXT",
         "ALTER TABLE niches ADD COLUMN fs_url TEXT",
+        # Nicho habilitado/deshabilitado: si 0, no se muestra en la app pública.
+        "ALTER TABLE niches ADD COLUMN enabled INTEGER DEFAULT 1",
     ]:
         try:
             conn.execute(stmt)
@@ -647,14 +649,16 @@ def find_person_by_name(conn, name_fragment):
     return [dict(r) for r in rows]
 
 
-def get_cemeteries_summary(conn):
-    """List all cemeteries with niche and people counts."""
-    rows = conn.execute("""
+def get_cemeteries_summary(conn, include_disabled=False):
+    """List all cemeteries with niche and people counts. By default only counts
+    enabled niches (the public view); admin passes include_disabled=True."""
+    nf = "" if include_disabled else "AND n.enabled = 1"
+    rows = conn.execute(f"""
         SELECT c.id, c.name, c.city, c.lat, c.lng, c.description,
                COUNT(DISTINCT n.id) AS niche_count,
                COUNT(DISTINCT np.person_id) AS people_count
         FROM cemeteries c
-        LEFT JOIN niches n ON n.cemetery_id = c.id
+        LEFT JOIN niches n ON n.cemetery_id = c.id {nf}
         LEFT JOIN niche_people np ON np.niche_id = n.id
         GROUP BY c.id
         ORDER BY c.name
@@ -662,16 +666,18 @@ def get_cemeteries_summary(conn):
     return [dict(r) for r in rows]
 
 
-def get_cemetery_detail(conn, cemetery_id):
-    """Return a cemetery with its niches and the people buried in each."""
+def get_cemetery_detail(conn, cemetery_id, include_disabled=False):
+    """Return a cemetery with its niches and the people buried in each. The public
+    view hides disabled niches; admin passes include_disabled=True to manage them."""
     cemetery = conn.execute(
         "SELECT * FROM cemeteries WHERE id = ?", (cemetery_id,)
     ).fetchone()
     if not cemetery:
         return None
     result = dict(cemetery)
+    nf = "" if include_disabled else "AND enabled = 1"
     niches = conn.execute(
-        "SELECT * FROM niches WHERE cemetery_id = ? ORDER BY name", (cemetery_id,)
+        f"SELECT * FROM niches WHERE cemetery_id = ? {nf} ORDER BY name", (cemetery_id,)
     ).fetchall()
     result["niches"] = []
     for n in niches:
@@ -714,6 +720,7 @@ def get_cemeteries_overview(conn):
         FROM niches n
         JOIN cemeteries c ON c.id = n.cemetery_id
         LEFT JOIN niche_people np ON np.niche_id = n.id
+        WHERE n.enabled = 1
         GROUP BY n.id
         ORDER BY c.name, COALESCE(n.title, n.name)
     """).fetchall()
@@ -723,6 +730,7 @@ def get_cemeteries_overview(conn):
         FROM niche_people np
         JOIN people p ON p.id = np.person_id
         JOIN niches n ON n.id = np.niche_id
+        WHERE n.enabled = 1
         ORDER BY p.name
     """).fetchall()
     return {"niches": [dict(r) for r in niches], "people": [dict(r) for r in people]}
@@ -736,7 +744,7 @@ def get_person_niche(conn, person_id):
         FROM niche_people np
         JOIN niches n ON n.id = np.niche_id
         JOIN cemeteries c ON c.id = n.cemetery_id
-        WHERE np.person_id = ?
+        WHERE np.person_id = ? AND n.enabled = 1
         LIMIT 1
     """, (person_id,)).fetchone()
     if not row:

@@ -277,14 +277,14 @@ const Cementerios = {
             <figure class="cursor-pointer"
                     onclick="openPhotoModalUrl('/cemetery_photos/${p.filename}', { title: '${escAttr(this._nicheLabel(n))}', place: '${escAttr(this.current.name)}', note: '${escAttr(kindLabel[p.kind] || '')}' })">
                 <img src="/cemetery_photos/${p.filename}" alt="${kindLabel[p.kind] || 'Foto'}"
-                     class="w-full h-28 object-cover rounded-lg border border-outline-variant/30 hover:opacity-90"/>
+                     class="w-full aspect-square object-cover rounded-lg border border-outline-variant/30 hover:opacity-90"/>
                 <figcaption class="text-[10px] uppercase tracking-wider text-outline mt-1">${kindLabel[p.kind] || ''}</figcaption>
             </figure>`).join('');
 
         document.getElementById('np-notes').textContent = n.notes || '';
 
         const peopleEl = document.getElementById('np-people');
-        // Notas del registre d'enterraments por persona identificada
+        // Notas del registro de enterramientos por persona identificada
         const recordNotes = {};
         (n.records || []).forEach(r => {
             if (r.person_id && (r.notes || '').trim()) recordNotes[r.person_id] = r.notes.trim();
@@ -323,12 +323,12 @@ const Cementerios = {
         }
         section.style.display = '';
         document.getElementById('np-records-title').textContent =
-            `Registre d'enterraments (${records.length})`;
+            `Registro de enterramientos (${records.length})`;
 
         const cols = [
-            ['burial_date', 'Enterram.'], ['age', 'Edat'], ['civil_status', 'Estat'],
-            ['spouse', 'Cònjuge'], ['profession', 'Professió'], ['parish', 'Parròquia'],
-            ['address', 'Adreça'], ['origin', 'Origen'], ['notes', 'Notes'],
+            ['burial_date', 'Entierro'], ['age', 'Edad'], ['civil_status', 'Estado'],
+            ['spouse', 'Cónyuge'], ['profession', 'Profesión'], ['parish', 'Parroquia'],
+            ['address', 'Dirección'], ['origin', 'Origen'], ['notes', 'Notas'],
         ];
         const cell = (r, key) => {
             const v = (r[key] || '').trim();
@@ -338,12 +338,12 @@ const Cementerios = {
         };
         const nameCell = (r) => {
             const fs = r.fs_url
-                ? ` <a href="${esc(r.fs_url)}" target="_blank" rel="noopener" title="Veure la pàgina del registre a FamilySearch"
+                ? ` <a href="${esc(r.fs_url)}" target="_blank" rel="noopener" title="Ver la página del registro en FamilySearch"
                      style="text-decoration:none;">📄</a>`
                 : '';
             if (r.person_id) {
                 const pid = r.person_id.replace(/@/g, '');
-                return `<td><a class="rec-name in-db" href="/dossier.html?id=${pid}" title="Veure dossier">${esc(r.name)}</a>${fs}</td>`;
+                return `<td><a class="rec-name in-db" href="/dossier.html?id=${pid}" title="Ver dossier">${esc(r.name)}</a>${fs}</td>`;
             }
             return `<td><span class="rec-name">${esc(r.name)}</span>${fs}</td>`;
         };
