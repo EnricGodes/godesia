@@ -10,7 +10,7 @@ import re
 import shutil
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse, StreamingResponse
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -481,24 +481,6 @@ async def cemetery_detail(cemetery_id: int):
     if not cemetery:
         raise HTTPException(status_code=404, detail="Cementerio no encontrado")
     return cemetery
-
-
-@app.get("/api/admin/cemeteries/{cemetery_id}/pdf")
-async def cemetery_pdf(cemetery_id: int):
-    if not db_conn:
-        raise HTTPException(status_code=503, detail="BD no inicializada")
-    data = get_cemetery_detail(db_conn, cemetery_id, include_disabled=False)
-    if not data:
-        raise HTTPException(status_code=404, detail="Cementerio no encontrado")
-    from pdf_cemetery import generate_cemetery_pdf
-    import io as _io
-    pdf_bytes = generate_cemetery_pdf(data, photos_dir=str(PHOTOS_DIR))
-    safe = data["name"].lower().replace(" ", "-")
-    return StreamingResponse(
-        _io.BytesIO(pdf_bytes),
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="guia-{safe}.pdf"'},
-    )
 
 
 @app.get("/api/documents")
