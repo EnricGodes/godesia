@@ -252,6 +252,11 @@ const Cemeteries = {
         else this.showList();
     },
 
+    downloadPDF() {
+        if (!this.current) return;
+        window.open(`/api/admin/cemeteries/${this.current.id}/pdf`, '_blank');
+    },
+
     async toggleNiche(nicheId, enabled) {
         try {
             await apiFetch(`/api/admin/niches/${nicheId}/enabled`, {
