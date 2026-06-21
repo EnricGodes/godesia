@@ -6,9 +6,12 @@ Produces a self-guided visit document:
   • One page per enabled niche: street-context map (zoom 16), all fields, people list
 
 Zoom levels:
-  Overview map  — auto-fit to bounding box of all niches
+  Overview map  — auto-fit to bounding box of reliable-geo niches (min zoom 17)
   Per-niche map — zoom 16 (~2.5 km radius), shows street names and neighbourhood
                   context so the visitor can navigate to the niche
+
+Route: niches marked NO GEO / GEO NO are appended at the end (their coordinates
+are unreliable and would distort the nearest-neighbour path).
 """
 
 import io
@@ -26,7 +29,7 @@ _FONT_BOLD = os.path.join(FONT_DIR, "DejaVuSans-Bold.ttf")
 TILE_URL   = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 TILE_SIZE  = 256
 
-_GREEN       = (23, 52, 30)    # #17341e — brand dark green
+_GREEN       = (23, 52, 30)
 _GREEN_LIGHT = (235, 245, 237)
 _RED         = (200, 50, 50)
 _WHITE       = (255, 255, 255)
@@ -40,6 +43,13 @@ _MONTHS_ES = [
 def _today_es():
     d = date.today()
     return f"{d.day} de {_MONTHS_ES[d.month - 1]} de {d.year}"
+
+
+def _is_good_geo(niche):
+    """True if niche has reliable coordinates (no NO GEO / GEO NO tag)."""
+    t = (niche.get("title") or "").upper()
+    return ("NO GEO" not in t and "GEO NO" not in t
+            and niche.get("lat") is not None)
 
 
 # ---------------------------------------------------------------------------
@@ -56,26 +66,27 @@ def _haversine_m(lat1, lng1, lat2, lng2):
 
 
 def optimize_route(niches):
-    """Greedy nearest-neighbour route starting from the northernmost niche."""
-    pos   = [n for n in niches if n.get("lat") is not None]
-    nopos = [n for n in niches if n.get("lat") is None]
-    if not pos:
+    """Greedy nearest-neighbour route. NO GEO niches appended at the end."""
+    good  = [n for n in niches if _is_good_geo(n)]
+    nogeo = [n for n in niches if not _is_good_geo(n)]
+    if not good:
         return niches
-    start = max(pos, key=lambda n: n["lat"])
-    route, rem = [start], [n for n in pos if n is not start]
+    start = max(good, key=lambda n: n["lat"])
+    route, rem = [start], [n for n in good if n is not start]
     while rem:
         last    = route[-1]
-        nearest = min(rem, key=lambda n: _haversine_m(last["lat"], last["lng"], n["lat"], n["lng"]))
+        nearest = min(rem, key=lambda n: _haversine_m(last["lat"], last["lng"],
+                                                       n["lat"], n["lng"]))
         route.append(nearest)
         rem.remove(nearest)
-    return route + nopos
+    return route + nogeo
 
 
 def _route_distance_m(niches):
     total = 0.0
     for i in range(len(niches) - 1):
         a, b = niches[i], niches[i + 1]
-        if a.get("lat") is not None and b.get("lat") is not None:
+        if _is_good_geo(a) and _is_good_geo(b):
             total += _haversine_m(a["lat"], a["lng"], b["lat"], b["lng"])
     return total
 
@@ -94,7 +105,6 @@ def _lat_to_y(lat, zoom):
 
 
 def _to_px(lat, lng, zoom, clat, clng, w, h):
-    """Convert lat/lng to pixel coordinates relative to a centred image."""
     cx, cy = _lon_to_x(clng, zoom), _lat_to_y(clat, zoom)
     px, py = _lon_to_x(lng, zoom),  _lat_to_y(lat, zoom)
     return (
@@ -103,16 +113,15 @@ def _to_px(lat, lng, zoom, clat, clng, w, h):
     )
 
 
-def _pick_zoom(lats, lngs, w, h, pad=70):
-    """Choose a zoom that fits all points with padding."""
+def _pick_zoom(lats, lngs, w, h, pad=70, min_zoom=13):
     if len(lats) <= 1:
-        return 16
+        return max(17, min_zoom)
     dlat, dlng = max(lats) - min(lats), max(lngs) - min(lngs)
-    for z in range(20, 10, -1):
+    for z in range(20, min_zoom - 1, -1):
         if (dlat / 360 * TILE_SIZE * 2 ** z * 1.5 < h - pad * 2
                 and dlng / 360 * TILE_SIZE * 2 ** z < w - pad * 2):
             return z
-    return 12
+    return min_zoom
 
 
 def _load_pil_font(size):
@@ -123,26 +132,30 @@ def _load_pil_font(size):
 
 
 def build_overview_map(niches_ordered, w=570, h=370):
-    """OSM map with numbered red markers for every niche that has coordinates."""
-    pts = [(n["lat"], n["lng"], i) for i, n in enumerate(niches_ordered) if n.get("lat") is not None]
-    if not pts:
+    """OSM map with numbered red markers. Bounding box uses reliable-geo niches only."""
+    all_pts  = [(n["lat"], n["lng"], i)
+                for i, n in enumerate(niches_ordered) if n.get("lat") is not None]
+    good_pts = [(lat, lng, i)
+                for lat, lng, i in all_pts if _is_good_geo(niches_ordered[i])]
+    if not all_pts:
         return None
 
-    lats = [p[0] for p in pts]
-    lngs = [p[1] for p in pts]
+    bbox_pts = good_pts if good_pts else all_pts
+    lats = [p[0] for p in bbox_pts]
+    lngs = [p[1] for p in bbox_pts]
     clat = (min(lats) + max(lats)) / 2
     clng = (min(lngs) + max(lngs)) / 2
-    zoom = _pick_zoom(lats, lngs, w, h)
+    zoom = _pick_zoom(lats, lngs, w, h, min_zoom=17)
 
     sm = StaticMap(w, h, url_template=TILE_URL)
-    for lat, lng, _ in pts:
+    for lat, lng, _ in all_pts:
         sm.add_marker(CircleMarker((lng, lat), "#17341e", 1))
     image = sm.render(zoom=zoom)
 
     draw = ImageDraw.Draw(image)
     fnt  = _load_pil_font(11)
 
-    for lat, lng, idx in pts:
+    for lat, lng, idx in all_pts:
         x, y = _to_px(lat, lng, zoom, clat, clng, w, h)
         r = 13
         draw.ellipse([(x - r - 1, y - r - 1), (x + r + 1, y + r + 1)], fill=_WHITE)
@@ -156,11 +169,7 @@ def build_overview_map(niches_ordered, w=570, h=370):
 
 
 def build_niche_map(niche, w=380, h=240):
-    """Street-level OSM map centred on one niche.
-
-    Uses zoom 16 (~2.5 km wide) so the visitor can read street names and
-    understand the position of the niche relative to nearby roads.
-    """
+    """Street-level OSM map centred on one niche (zoom 16, ~2.5 km context)."""
     if niche.get("lat") is None:
         return None
     lat, lng = niche["lat"], niche["lng"]
@@ -170,7 +179,6 @@ def build_niche_map(niche, w=380, h=240):
 
     draw = ImageDraw.Draw(image)
     x, y = w // 2, h // 2
-    # Outer white ring + red dot for clear visibility at street scale
     draw.ellipse([(x - 8, y - 8), (x + 8, y + 8)], fill=_WHITE)
     draw.ellipse([(x - 6, y - 6), (x + 6, y + 6)], fill=_RED)
     return image
@@ -236,16 +244,21 @@ def _fmt_death(p):
     return str(p["death_year"]) if p.get("death_year") else "—"
 
 
+def _fit_text(pdf, text, max_w_mm):
+    """Truncate text so it fits in max_w_mm, appending ellipsis if needed."""
+    if pdf.get_string_width(text) <= max_w_mm:
+        return text
+    while text and pdf.get_string_width(text + "…") > max_w_mm:
+        text = text[:-1]
+    return text + "…"
+
+
 # ---------------------------------------------------------------------------
 # Main PDF builder
 # ---------------------------------------------------------------------------
 
 def generate_cemetery_pdf(data, photos_dir=None):
-    """Return PDF bytes for a cemetery visitor guide.
-
-    ``data``       — dict from ``get_cemetery_detail()`` (public view, enabled niches only).
-    ``photos_dir`` — filesystem path to the photos directory (data/photos/).
-    """
+    """Return PDF bytes for a cemetery visitor guide."""
     niches_raw = [n for n in data.get("niches", []) if n.get("enabled", 1)]
     route      = optimize_route(niches_raw)
     dist_m     = _route_distance_m(route)
@@ -255,7 +268,7 @@ def generate_cemetery_pdf(data, photos_dir=None):
 
     pdf = _GuidePDF(cem_name)
     pdf.set_auto_page_break(auto=True, margin=15)
-    pw = pdf.w - pdf.l_margin - pdf.r_margin  # usable page width (mm)
+    pw = pdf.w - pdf.l_margin - pdf.r_margin
 
     # ── Cover ──────────────────────────────────────────────────────────────
     pdf.add_page()
@@ -309,31 +322,38 @@ def generate_cemetery_pdf(data, photos_dir=None):
 
     overview_img = build_overview_map(route)
     if overview_img:
-        buf        = _img_to_buf(overview_img)
-        img_h_mm   = min(105, overview_img.height * (pw / overview_img.width))
-        img_w_mm   = overview_img.width * (img_h_mm / overview_img.height)
-        x_img      = pdf.l_margin + (pw - img_w_mm) / 2
+        buf      = _img_to_buf(overview_img)
+        img_h_mm = min(105, overview_img.height * (pw / overview_img.width))
+        img_w_mm = overview_img.width * (img_h_mm / overview_img.height)
+        x_img    = pdf.l_margin + (pw - img_w_mm) / 2
         pdf.image(buf, x=x_img, y=None, w=img_w_mm, h=img_h_mm)
-        pdf.ln(5)
+        pdf.ln(4)
 
-    # Legend (2 columns)
-    pdf.set_font("dv", "", 8.5)
+    # Legend: 2 compact columns, text truncated to fit, no extra blank lines
+    pdf.set_font("dv", "", 8)
     pdf.set_text_color(50, 50, 50)
-    col_w = pw / 2
+    gap    = 4        # mm between columns
+    col_w  = (pw - gap) / 2   # each column (~93 mm on A4)
+    cell_h = 4.5
+
     for idx, n in enumerate(route):
-        title = n.get("title") or n.get("name", "")
-        names = ", ".join(_short_name(p["name"]) for p in (n.get("people") or []))
-        line  = f"{idx + 1}.  {title}"
+        title  = n.get("title") or n.get("name", "")
+        people = n.get("people") or []
+        names  = ", ".join(_short_name(p["name"]) for p in people)
+        line   = f"{idx + 1}. {title}"
         if names:
-            line += f"  —  {names}"
+            line += f" — {names}"
+        line = _fit_text(pdf, line, col_w - 1)
+
         col = idx % 2
-        pdf.set_x(pdf.l_margin + col * col_w)
-        if col == 1:
-            pdf.cell(col_w, 5.5, line, new_x="LMARGIN", new_y="NEXT")
+        pdf.set_x(pdf.l_margin + col * (col_w + gap))
+        if col == 0:
+            pdf.cell(col_w, cell_h, line, new_x="RIGHT", new_y="TOP")
         else:
-            pdf.cell(col_w, 5.5, line, new_x="RIGHT", new_y="TOP")
+            pdf.cell(col_w, cell_h, line, new_x="LMARGIN", new_y="NEXT")
+
     if len(route) % 2 == 1:
-        pdf.ln(5.5)
+        pdf.ln(cell_h)
 
     # ── Per-niche pages ─────────────────────────────────────────────────────
     for idx, niche in enumerate(route):
@@ -350,28 +370,31 @@ def generate_cemetery_pdf(data, photos_dir=None):
         pdf.ln(3)
         pdf.set_text_color(0, 0, 0)
 
-        y_start  = pdf.get_y()
-        left_w   = pw * 0.52
-        right_w  = pw - left_w - 4
-        x_left   = pdf.l_margin
-        x_right  = pdf.l_margin + left_w + 4
+        y_start = pdf.get_y()
+        left_w  = pw * 0.52
+        right_w = pw - left_w - 4
+        x_left  = pdf.l_margin
+        x_right = pdf.l_margin + left_w + 4
 
-        # ── Right column first (images, absolute coords) ─────────────────
+        # ── Right column: map + photos ───────────────────────────────────
         y_right = y_start
 
         niche_img = build_niche_map(niche)
         if niche_img:
             map_h_mm = min(60, niche_img.height * (right_w / niche_img.width))
             map_w_mm = niche_img.width * (map_h_mm / niche_img.height)
-            buf      = _img_to_buf(niche_img)
+            buf = _img_to_buf(niche_img)
             pdf.image(buf, x=x_right + (right_w - map_w_mm) / 2,
                       y=y_right, w=map_w_mm, h=map_h_mm)
             y_right += map_h_mm + 3
 
-        photo_files = [
-            ph["filename"] for ph in (niche.get("photos") or [])
-            if ph.get("kind") == "photo"
-        ][:2]
+        # Record photos first, then niche photos (up to 3 total)
+        record_photos = [ph["filename"] for ph in (niche.get("photos") or [])
+                         if ph.get("kind") == "record"][:2]
+        niche_photos  = [ph["filename"] for ph in (niche.get("photos") or [])
+                         if ph.get("kind") == "photo"][:2]
+        photo_files   = (record_photos + niche_photos)[:3]
+
         if photos_dir:
             for ph_f in photo_files:
                 ph_path = os.path.join(photos_dir, ph_f)
@@ -389,7 +412,7 @@ def generate_cemetery_pdf(data, photos_dir=None):
         def lx():
             pdf.set_x(x_left)
 
-        # Physical location within cemetery (n.name, different from the display title)
+        # Physical location within cemetery
         location = niche.get("name", "")
         if location and location != title:
             lx()
@@ -417,37 +440,12 @@ def generate_cemetery_pdf(data, photos_dir=None):
             pdf.set_text_color(0, 0, 0)
             pdf.ln(2)
 
-        # Address from burial records
-        address = next(
-            (r["address"] for r in (niche.get("records") or []) if r.get("address")),
-            None,
-        )
-        if address:
-            lx()
-            pdf.set_font("dv", "B", 8)
-            pdf.set_text_color(50, 50, 50)
-            pdf.cell(22, 5, "Dirección:", new_x="RIGHT", new_y="TOP")
-            pdf.set_font("dv", "", 8)
-            pdf.set_x(x_left + 22)
-            pdf.multi_cell(left_w - 22, 5, address)
-            pdf.ln(1)
-
         # Notes
         if niche.get("notes"):
             lx()
             pdf.set_font("dv", "", 7.5)
             pdf.set_text_color(90, 90, 90)
             pdf.multi_cell(left_w, 4.5, niche["notes"])
-            pdf.set_text_color(0, 0, 0)
-            pdf.ln(1)
-
-        # FamilySearch link
-        if niche.get("fs_url"):
-            lx()
-            pdf.set_font("dv", "", 8)
-            pdf.set_text_color(0, 80, 160)
-            pdf.cell(left_w, 5, "Registro en FamilySearch",
-                     link=niche["fs_url"], new_x="LMARGIN", new_y="NEXT")
             pdf.set_text_color(0, 0, 0)
             pdf.ln(1)
 
