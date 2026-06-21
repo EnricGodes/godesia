@@ -271,9 +271,9 @@ const Cemeteries = {
             return p.name + (y1 || y2 ? ` (${y1}–${y2})` : '');
         }
 
-        const headers = ['Nombre', 'Aviso', 'Latitud', 'Longitud', 'Dirección',
+        const headers = ['Nombre', 'Aviso', 'Latitud', 'Longitud', 'Ubicacion en cementerio',
                          'Personas enterradas', 'Notas', 'Foto 1', 'Foto 2',
-                         'FamilySearch', 'Cementerio', 'Ver en Google Maps'];
+                         'Cementerio', 'Ver en Google Maps'];
         const rows = [headers.join(',')];
 
         for (const n of cem.niches) {
@@ -282,19 +282,19 @@ const Cemeteries = {
             const isBad = GEO_BAD.test(raw);
             const nombre = cleanTitle(raw);
             const aviso = isBad ? '⚠ Geolocalización aproximada' : '';
-            const address = (n.records || []).map(r => r.address).find(a => a) || '';
+            const ubicacion = n.name || '';
             const people = [...(n.people || [])]
                 .sort((a, b) => (a.death_year || 9999) - (b.death_year || 9999))
-                .map(fmtPerson).join('; ');
+                .map(fmtPerson).join('\n');
             const photoFiles = (n.photos || []).filter(p => p.kind === 'photo').map(p => BASE + p.filename);
             const gmaps = (n.lat != null) ? `https://maps.google.com/?q=${n.lat},${n.lng}` : '';
 
             rows.push([
                 nombre, aviso,
                 n.lat ?? '', n.lng ?? '',
-                address, people, n.notes || '',
+                ubicacion, people, n.notes || '',
                 photoFiles[0] || '', photoFiles[1] || '',
-                n.fs_url || '', cem.name, gmaps,
+                cem.name, gmaps,
             ].map(csvCell).join(','));
         }
 
