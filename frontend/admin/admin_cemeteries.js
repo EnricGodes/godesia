@@ -274,7 +274,7 @@ const Cemeteries = {
         const headers = ['Nombre', 'Aviso', 'Latitud', 'Longitud', 'Dirección',
                          'Personas enterradas', 'Notas', 'Foto 1', 'Foto 2',
                          'FamilySearch', 'Cementerio', 'Ver en Google Maps'];
-        const rows = [headers.map(csvCell).join(',')];
+        const rows = [headers.join(',')];
 
         for (const n of cem.niches) {
             if (n.enabled === 0) continue;
@@ -298,8 +298,7 @@ const Cemeteries = {
             ].map(csvCell).join(','));
         }
 
-        const bom = '﻿';
-        const blob = new Blob([bom + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
         const a = Object.assign(document.createElement('a'), {
             href: URL.createObjectURL(blob),
             download: `${cem.name.replace(/\s+/g, '_')}.csv`,
