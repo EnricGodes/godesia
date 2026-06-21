@@ -272,7 +272,7 @@ const Cemeteries = {
         }
 
         const headers = ['Nombre', 'Aviso', 'Latitud', 'Longitud', 'Ubicacion en cementerio',
-                         'Personas enterradas', 'Notas', 'Foto 1', 'Foto 2',
+                         'Personas enterradas', 'Notas', 'image',
                          'Cementerio', 'Ver en Google Maps'];
         const rows = [headers.join(',')];
 
@@ -293,7 +293,7 @@ const Cemeteries = {
                 nombre, aviso,
                 n.lat ?? '', n.lng ?? '',
                 ubicacion, people, n.notes || '',
-                photoFiles[0] || '', photoFiles[1] || '',
+                photoFiles[0] || '',
                 cem.name, gmaps,
             ].map(csvCell).join(','));
         }
