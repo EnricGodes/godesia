@@ -252,6 +252,11 @@ const Cemeteries = {
         else this.showList();
     },
 
+    downloadPDF() {
+        if (!this.current) return;
+        window.open(`/api/admin/cemeteries/${this.current.id}/pdf`, '_blank');
+    },
+
     downloadCSV() {
         if (!this.current) return;
         const cem = this.current;
