@@ -252,6 +252,62 @@ const Cemeteries = {
         else this.showList();
     },
 
+    downloadCSV() {
+        if (!this.current) return;
+        const cem = this.current;
+        const BASE = 'https://godesia.up.railway.app/photos/';
+        const GEO_BAD = /no\s*geo|geo\s*no\s*ok|sin\s*geo|no\s*ok/i;
+
+        function cleanTitle(raw) {
+            return raw.replace(/^(NO\s*GEO|GEO\s*NO\s*OK|SIN\s*GEO|NO\s*OK)[:\s\-]*/i, '').trim();
+        }
+        function csvCell(v) {
+            const s = (v == null ? '' : String(v)).replace(/"/g, '""');
+            return `"${s}"`;
+        }
+        function fmtPerson(p) {
+            const y1 = p.birth_year || '';
+            const y2 = p.death_year || (p.death_date ? p.death_date.slice(0, 4) : '');
+            return p.name + (y1 || y2 ? ` (${y1}–${y2})` : '');
+        }
+
+        const headers = ['Nombre', 'Aviso', 'Latitud', 'Longitud', 'Dirección',
+                         'Personas enterradas', 'Notas', 'Foto 1', 'Foto 2',
+                         'FamilySearch', 'Cementerio', 'Ver en Google Maps'];
+        const rows = [headers.map(csvCell).join(',')];
+
+        for (const n of cem.niches) {
+            if (n.enabled === 0) continue;
+            const raw = n.title || n.name || '';
+            const isBad = GEO_BAD.test(raw);
+            const nombre = cleanTitle(raw);
+            const aviso = isBad ? '⚠ Geolocalización aproximada' : '';
+            const address = (n.records || []).map(r => r.address).find(a => a) || '';
+            const people = [...(n.people || [])]
+                .sort((a, b) => (a.death_year || 9999) - (b.death_year || 9999))
+                .map(fmtPerson).join('; ');
+            const photoFiles = (n.photos || []).filter(p => p.kind === 'photo').map(p => BASE + p.filename);
+            const gmaps = (n.lat != null) ? `https://maps.google.com/?q=${n.lat},${n.lng}` : '';
+
+            rows.push([
+                nombre, aviso,
+                n.lat ?? '', n.lng ?? '',
+                address, people, n.notes || '',
+                photoFiles[0] || '', photoFiles[1] || '',
+                n.fs_url || '', cem.name, gmaps,
+            ].map(csvCell).join(','));
+        }
+
+        const bom = '﻿';
+        const blob = new Blob([bom + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+        const a = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: `${cem.name.replace(/\s+/g, '_')}.csv`,
+        });
+        a.click();
+        URL.revokeObjectURL(a.href);
+    },
+
     async toggleNiche(nicheId, enabled) {
         try {
             await apiFetch(`/api/admin/niches/${nicheId}/enabled`, {
