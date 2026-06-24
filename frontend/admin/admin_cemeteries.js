@@ -351,7 +351,10 @@ const Cemeteries = {
         }
         setTimeout(() => this.maps.niche.invalidateSize(), 80);
         if (this.markers.niche) { this.markers.niche.remove(); this.markers.niche = null; }
-        document.getElementById('niche-coords').textContent = 'Sin coordenadas — haz clic en el mapa';
+        document.getElementById('niche-lat').value = (niche && niche.lat != null) ? niche.lat : '';
+        document.getElementById('niche-lng').value = (niche && niche.lng != null) ? niche.lng : '';
+        document.getElementById('niche-lat').onchange = () => this._onCoordsInput();
+        document.getElementById('niche-lng').onchange = () => this._onCoordsInput();
         if (niche && niche.lat != null) {
             this._setNicheMarker(niche.lat, niche.lng);
             this.maps.niche.setView([niche.lat, niche.lng], 19);
@@ -484,7 +487,16 @@ const Cemeteries = {
                 this._setNicheMarker(p.lat, p.lng);
             });
         }
-        document.getElementById('niche-coords').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        document.getElementById('niche-lat').value = lat.toFixed(7);
+        document.getElementById('niche-lng').value = lng.toFixed(7);
+    },
+
+    _onCoordsInput() {
+        const lat = parseFloat(document.getElementById('niche-lat').value);
+        const lng = parseFloat(document.getElementById('niche-lng').value);
+        if (isNaN(lat) || isNaN(lng)) return;
+        this._setNicheMarker(lat, lng);
+        this.maps.niche.setView([lat, lng], this.maps.niche.getZoom());
     },
 
     _renderNichePhotoPreviews(niche) {
@@ -520,10 +532,11 @@ const Cemeteries = {
         fd.append('name', name);
         fd.append('title', document.getElementById('niche-title').value.trim());
         fd.append('notes', document.getElementById('niche-notes').value.trim());
-        if (this.markers.niche) {
-            const p = this.markers.niche.getLatLng();
-            fd.append('lat', p.lat);
-            fd.append('lng', p.lng);
+        const lat = parseFloat(document.getElementById('niche-lat').value);
+        const lng = parseFloat(document.getElementById('niche-lng').value);
+        if (!isNaN(lat) && !isNaN(lng)) {
+            fd.append('lat', lat);
+            fd.append('lng', lng);
         }
         [...document.getElementById('niche-photo').files].forEach(f => fd.append('photos', f));
         [...document.getElementById('niche-record').files].forEach(f => fd.append('record_photos', f));

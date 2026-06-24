@@ -1792,6 +1792,18 @@ async def db_action(req: ActionRequest):
             return {"status": "ok", "message": "WAL checkpoint completat. Dades al fitxer principal."}
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
+    elif req.action == "reconnect":
+        try:
+            from database import get_connection  # noqa: PLC0415
+            db_path = _base_dir / "data" / "godesia.db"
+            _db_conn.close()
+            new_conn = get_connection(str(db_path))
+            _db_conn = new_conn
+            import app as _app  # noqa: PLC0415
+            _app.db_conn = new_conn
+            return {"status": "ok", "message": "Connexió BD reiniciada. Ara es veuen tots els canvis."}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
     elif req.action == "vacuum":
         try:
             _db_conn.execute("VACUUM")

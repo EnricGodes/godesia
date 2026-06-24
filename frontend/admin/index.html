@@ -806,7 +806,12 @@
                         <div class="form-group">
                             <label>Ubicación — haz clic en el mapa para fijar el nicho</label>
                             <div id="niche-map" style="height:320px;border-radius:8px;"></div>
-                            <div id="niche-coords" style="font-size:.8rem;color:#727971;margin-top:.35rem;">Sin coordenadas</div>
+                            <div style="display:flex;gap:.6rem;margin-top:.5rem;align-items:center;">
+                                <label style="font-size:.8rem;color:#727971;white-space:nowrap;margin:0;">Lat</label>
+                                <input type="number" id="niche-lat" step="any" placeholder="41.356053" style="font-size:.8rem;padding:.25rem .4rem;border:1px solid #d0d5cc;border-radius:5px;width:130px;"/>
+                                <label style="font-size:.8rem;color:#727971;white-space:nowrap;margin:0;">Lng</label>
+                                <input type="number" id="niche-lng" step="any" placeholder="2.157257" style="font-size:.8rem;padding:.25rem .4rem;border:1px solid #d0d5cc;border-radius:5px;width:130px;"/>
+                            </div>
                         </div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
                             <div class="form-group">
