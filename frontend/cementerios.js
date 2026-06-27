@@ -229,10 +229,9 @@ const Cementerios = {
 
         if (focusNicheId && this.nicheMarkers[focusNicheId]) {
             const { marker, niche } = this.nicheMarkers[focusNicheId];
-            this.clusterGroup.zoomToShowLayer(marker, () => {
-                this.openNichePanel(niche);
-                if (highlight) this._highlightNiche(focusNicheId);
-            });
+            this.openNichePanel(niche);
+            if (highlight) this._highlightNiche(focusNicheId);
+            this.map.flyTo([niche.lat, niche.lng], 19, { duration: 1.2 });
         } else if (points.length) {
             this.map.flyToBounds(L.latLngBounds(points), { padding: [60, 60], maxZoom: 18 });
         } else if (detail.lat != null) {
