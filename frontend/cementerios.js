@@ -267,7 +267,7 @@ const Cementerios = {
         cemEl.innerHTML = esc(`${this.current.name}${this.current.city ? ' · ' + this.current.city : ''}`) +
             (n.fs_url
                 ? ` · <a href="${esc(n.fs_url)}" target="_blank" rel="noopener"
-                       style="color:#2D4B33;text-decoration:underline;">Volum a FamilySearch</a>`
+                       style="color:#2D4B33;text-decoration:underline;">Volumen en FamilySearch</a>`
                 : '');
 
         const kindLabel = { photo: 'Nicho', record: 'Registro' };

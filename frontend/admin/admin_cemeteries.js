@@ -340,6 +340,7 @@ const Cemeteries = {
         document.getElementById('niche-title').value = niche ? (niche.title || '') : '';
         document.getElementById('niche-name').value = niche ? niche.name : '';
         document.getElementById('niche-notes').value = niche ? (niche.notes || '') : '';
+        document.getElementById('niche-fs-url').value = niche ? (niche.fs_url || '') : '';
         document.getElementById('niche-photo').value = '';
         document.getElementById('niche-record').value = '';
         this._renderNichePhotoPreviews(niche);
@@ -532,6 +533,7 @@ const Cemeteries = {
         fd.append('name', name);
         fd.append('title', document.getElementById('niche-title').value.trim());
         fd.append('notes', document.getElementById('niche-notes').value.trim());
+        fd.append('fs_url', document.getElementById('niche-fs-url').value.trim());
         const lat = parseFloat(document.getElementById('niche-lat').value);
         const lng = parseFloat(document.getElementById('niche-lng').value);
         if (!isNaN(lat) && !isNaN(lng)) {

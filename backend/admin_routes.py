@@ -2412,6 +2412,7 @@ async def create_niche(
     lat: Optional[float] = Form(None),
     lng: Optional[float] = Form(None),
     notes: str = Form(""),
+    fs_url: str = Form(""),
     photos: Optional[list[UploadFile]] = File(None),
     record_photos: Optional[list[UploadFile]] = File(None),
 ):
@@ -2419,8 +2420,8 @@ async def create_niche(
     if not db.execute("SELECT 1 FROM cemeteries WHERE id = ?", (cemetery_id,)).fetchone():
         raise HTTPException(status_code=404, detail="Cementerio no encontrado")
     cur = db.execute(
-        "INSERT INTO niches (cemetery_id, name, title, lat, lng, notes) VALUES (?, ?, ?, ?, ?, ?)",
-        (cemetery_id, name.strip(), title.strip() or None, lat, lng, notes.strip()),
+        "INSERT INTO niches (cemetery_id, name, title, lat, lng, notes, fs_url) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (cemetery_id, name.strip(), title.strip() or None, lat, lng, notes.strip(), fs_url.strip() or None),
     )
     niche_id = cur.lastrowid
     for f in (photos or []):
@@ -2441,6 +2442,7 @@ async def update_niche(
     lat: Optional[float] = Form(None),
     lng: Optional[float] = Form(None),
     notes: str = Form(""),
+    fs_url: str = Form(""),
     photos: Optional[list[UploadFile]] = File(None),
     record_photos: Optional[list[UploadFile]] = File(None),
 ):
@@ -2449,8 +2451,8 @@ async def update_niche(
     if not row:
         raise HTTPException(status_code=404, detail="Nicho no encontrado")
     db.execute(
-        "UPDATE niches SET name=?, title=?, lat=?, lng=?, notes=?, updated_at=datetime('now') WHERE id=?",
-        (name.strip(), title.strip() or None, lat, lng, notes.strip(), niche_id),
+        "UPDATE niches SET name=?, title=?, lat=?, lng=?, notes=?, fs_url=?, updated_at=datetime('now') WHERE id=?",
+        (name.strip(), title.strip() or None, lat, lng, notes.strip(), fs_url.strip() or None, niche_id),
     )
     for f in (photos or []):
         if f.filename:
