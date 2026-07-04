@@ -93,6 +93,38 @@ const Status = {
         this.refresh();
         this.refreshLogs();
         this.refreshDbInfo();
+        this.refreshDeployStatus();
+    },
+
+    async refreshDeployStatus() {
+        try {
+            const d = await apiFetch('/api/admin/deploy/status');
+            const el = document.getElementById('deploy-pending');
+            if (el) el.textContent = d.pending ? '● Hay cambios sin publicar' : '';
+        } catch {}
+    },
+
+    async deploy() {
+        const btn = document.getElementById('deploy-btn');
+        const msg = document.getElementById('deploy-msg');
+        btn.disabled = true;
+        msg.style.color = 'var(--primary,#17341e)';
+        msg.textContent = 'Publicando… (checkpoint → commit → push)';
+        try {
+            const d = await apiFetch('/api/admin/deploy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: '{}',
+            });
+            msg.textContent = d.message || '✓';
+            this.refreshDeployStatus();
+            this.refreshDbInfo();
+        } catch (e) {
+            msg.style.color = '#a33';
+            msg.textContent = 'Error: ' + e.message;
+        } finally {
+            btn.disabled = false;
+        }
     },
 
     async refresh() {

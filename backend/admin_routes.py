@@ -1814,6 +1814,83 @@ async def db_action(req: ActionRequest):
         raise HTTPException(status_code=400, detail="Acció no vàlida: usa checkpoint, reconnect o vacuum")
 
 
+@router.post("/deploy")
+async def deploy_to_railway():
+    """Publica los datos manuales (BD SQLite + fotos de nicho) en GitHub para que
+    Railway sirva la versión actual: checkpoint WAL → git add → commit → push.
+
+    Solo tiene sentido ejecutándose en local (el Mac, con git y credenciales). En
+    Railway no hay repo con permiso de push, así que allí devolvería error de push.
+    """
+    if not _base_dir:
+        raise HTTPException(status_code=500, detail="base_dir no inicializado")
+    repo = str(_base_dir)
+    steps = []
+
+    # 1. Volcar el WAL al fichero principal para que el .db commiteado esté completo.
+    try:
+        _db_conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        _db_conn.commit()
+        steps.append("WAL checkpoint")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Checkpoint WAL falló: {e}")
+
+    def git(*args, timeout=120):
+        return subprocess.run(
+            ["git", *args], cwd=repo, capture_output=True, text=True, timeout=timeout
+        )
+
+    # 2. Preparar la BD (único dato que Railway lee del repo). Las fotos de nicho
+    #    están gitignored: viajan al volumen de Railway aparte (upload_photos_to_railway.py).
+    add = git("add", "data/godesia.db")
+    if add.returncode != 0:
+        raise HTTPException(status_code=500, detail=f"git add falló: {add.stderr or add.stdout}")
+
+    # 3. ¿Hay algo staged? Si no, no hay nada que publicar.
+    if git("diff", "--cached", "--quiet").returncode == 0:
+        return {"status": "nochange", "message": "No hay cambios que publicar.", "steps": steps}
+
+    # 4. Commit.
+    commit = git("commit", "-m", "cementerios: actualizar datos manuales (edición admin)")
+    if commit.returncode != 0:
+        raise HTTPException(status_code=500, detail=f"git commit falló: {commit.stderr or commit.stdout}")
+    steps.append("commit")
+
+    # 5. Push.
+    try:
+        push = git("push", "origin", "HEAD", timeout=120)
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=504, detail="git push agotó el tiempo (¿credenciales o red?). El commit local sí se hizo.")
+    if push.returncode != 0:
+        raise HTTPException(status_code=500, detail=f"git push falló: {push.stderr or push.stdout}. El commit local sí se hizo.")
+    steps.append("push")
+
+    return {
+        "status": "ok",
+        "message": "Publicado en GitHub ✓. Railway redesplegará en 1-2 min.",
+        "steps": steps,
+    }
+
+
+@router.get("/deploy/status")
+async def deploy_status():
+    """Indica si hay datos de cementerios/BD pendientes de publicar (para el botón)."""
+    if not _base_dir:
+        return {"pending": False, "detail": "base_dir no inicializado"}
+    repo = str(_base_dir)
+    wal = _base_dir / "data" / "godesia.db-wal"
+    wal_size = wal.stat().st_size if wal.exists() else 0
+    try:
+        r = subprocess.run(
+            ["git", "status", "--porcelain", "--", "data/godesia.db"],
+            cwd=repo, capture_output=True, text=True, timeout=30,
+        )
+        dirty = bool(r.stdout.strip())
+    except Exception:
+        dirty = False
+    return {"pending": dirty or wal_size > 0, "wal_size": wal_size, "dirty": dirty}
+
+
 @router.get("/db/info")
 async def db_info():
     db_path = _base_dir / "data" / "godesia.db"

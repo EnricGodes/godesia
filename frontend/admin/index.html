@@ -113,6 +113,21 @@
                 </div>
             </div>
 
+            <!-- Publicar en Railway -->
+            <div class="info-card" style="margin-bottom:1.25rem;">
+                <h3>Publicar cambios en Railway</h3>
+                <div style="font-size:0.8rem;color:#727971;margin:0.5rem 0 0.75rem;">
+                    Vuelca la BD (checkpoint WAL) y sube <code>data/godesia.db</code> y las fotos de
+                    nicho a GitHub. Railway redesplegará con los datos actuales. Ejecútalo al terminar
+                    de editar cementerios u otros datos manuales.
+                </div>
+                <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+                    <button class="btn btn-primary btn-sm" id="deploy-btn" onclick="Status.deploy()">▲ Publicar en Railway</button>
+                    <span id="deploy-pending" style="font-size:0.78rem;color:#b8860b;"></span>
+                    <span id="deploy-msg" style="font-size:0.8rem;font-weight:600;color:var(--primary,#17341e);"></span>
+                </div>
+            </div>
+
             <div class="info-card">
                 <h3 style="display:flex;align-items:center;gap:0.5rem;">
                     Logs del servidor
