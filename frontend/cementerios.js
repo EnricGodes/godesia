@@ -100,7 +100,9 @@ const Cementerios = {
         if (!this.overview.people.length) {
             peopleEl.innerHTML = '<p class="text-xs text-on-surface-variant px-1">Nadie asignado todavía.</p>';
         } else {
-            peopleEl.innerHTML = this.overview.people.map(p => {
+            const sorted = [...this.overview.people].sort((a, b) =>
+                (a.name || '').localeCompare(b.name || '', 'ca', { sensitivity: 'base' }));
+            peopleEl.innerHTML = sorted.map(p => {
                 const pid = (p.id || '').replace(/@/g, '');
                 return `
                 <a class="sidebar-link flex items-center gap-2" onclick="Cementerios.locatePerson('${pid}')">
