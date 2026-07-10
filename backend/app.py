@@ -8,9 +8,10 @@ from typing import Optional
 
 import re
 import shutil
-from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse, StreamingResponse
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import PlainTextResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -25,6 +26,7 @@ from database import (
 )
 from query_router import QueryRouter
 from query_engine import QueryEngine
+import i18n as i18n_pages
 import test_bank
 from admin_routes import router as admin_router, init_admin, init_log_capture
 from palazuelos_routes import router as palazuelos_router, init_palazuelos
@@ -48,6 +50,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(GZipMiddleware, minimum_size=1024)
+app.middleware("http")(i18n_pages.i18n_middleware)
 
 db_conn = None
 router = None
@@ -127,6 +131,7 @@ async def startup():
 
     init_admin(db_conn, BASE_DIR)
     init_palazuelos(db_conn, BASE_DIR)
+    i18n_pages.init_i18n(db_conn, BASE_DIR)
 
     # LLM engine (optional, only if API key is set)
     if os.environ.get("ANTHROPIC_API_KEY"):
@@ -840,6 +845,7 @@ async def api_get_settings():
         raise HTTPException(status_code=503, detail="BD no inicialitzada")
     return {
         "tree_default_person": get_setting(db_conn, "tree_default_person", "I4"),
+        "active_languages": i18n_pages.get_active_languages(),
     }
 
 
@@ -852,11 +858,43 @@ class SettingBody(BaseModel):
 async def api_post_settings(body: SettingBody):
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicialitzada")
-    allowed_keys = {"tree_default_person"}
+    allowed_keys = {"tree_default_person", "active_languages"}
     if body.key not in allowed_keys:
         raise HTTPException(status_code=400, detail=f"Clau no permesa: {body.key}")
+    if body.key == "active_languages":
+        try:
+            langs = json.loads(body.value)
+            assert isinstance(langs, list) and langs
+            assert all(isinstance(l, dict) and re.fullmatch(r"[a-z]{2,3}", l.get("code", ""))
+                       and l.get("label") for l in langs)
+        except Exception:
+            raise HTTPException(status_code=400, detail="active_languages debe ser una lista [{code,label}]")
+        if not any(l["code"] == "es" for l in langs):
+            raise HTTPException(status_code=400, detail="El español (es) no se puede eliminar")
     set_setting(db_conn, body.key, body.value)
+    if body.key == "active_languages":
+        i18n_pages.invalidate_languages_cache()
     return {"ok": True, "key": body.key, "value": body.value}
+
+
+# ── i18n: idiomas activos, sitemap y robots ──────────────────────────────────
+
+@app.get("/api/languages")
+async def api_languages():
+    """Idiomas activos para el selector del frontend."""
+    return {"languages": i18n_pages.get_active_languages(), "default": i18n_pages.DEFAULT_LANG}
+
+
+@app.get("/sitemap.xml")
+async def sitemap(request: Request):
+    base = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/") or f"{request.url.scheme}://{request.url.netloc}"
+    return Response(i18n_pages.build_sitemap(base), media_type="application/xml")
+
+
+@app.get("/robots.txt")
+async def robots(request: Request):
+    base = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/") or f"{request.url.scheme}://{request.url.netloc}"
+    return PlainTextResponse(f"User-agent: *\nDisallow: /admin/\n\nSitemap: {base}/sitemap.xml\n")
 
 
 # Serve photos
