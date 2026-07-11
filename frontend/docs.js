@@ -132,7 +132,7 @@ async function fetchPhotos(append = false) {
     if (STATE.activeAlbumId) params.set('album_id', STATE.activeAlbumId);
 
     try {
-        const data = await fetch(`/api/documents/photos?${params}`).then(r => r.json());
+        const data = await fetch((window.I18N ? I18N.apiUrl : (p => p))(`/api/documents/photos?${params}`)).then(r => r.json());
 
         if (append) {
             STATE.photos.push(...data.photos);

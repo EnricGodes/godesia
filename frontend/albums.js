@@ -141,7 +141,7 @@ async function fetchPhotos(append = false) {
         : albumId.replace(/^@/, '').replace(/@$/, '');
 
     try {
-        const data = await fetch(`/api/album/${encodeURIComponent(pathId)}/photos?${params}`).then(r => r.json());
+        const data = await fetch((window.I18N ? I18N.apiUrl : (p => p))(`/api/album/${encodeURIComponent(pathId)}/photos?${params}`)).then(r => r.json());
 
         if (append) {
             STATE.photos.push(...data.photos);

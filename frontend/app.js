@@ -36,7 +36,7 @@ async function showPersonPanel(personId) {
   content.innerHTML = '<div class="panel-loading"><span></span><span></span><span></span></div>';
 
   try {
-    const res = await fetch(`/api/dossier/${encodeURIComponent(personId)}`);
+    const res = await fetch((window.I18N ? I18N.apiUrl : (p => p))(`/api/dossier/${encodeURIComponent(personId)}`));
     if (!res.ok) { panel.classList.remove('open'); return; }
     const d = await res.json();
     const p = d.person;

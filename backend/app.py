@@ -27,6 +27,7 @@ from database import (
 from query_router import QueryRouter
 from query_engine import QueryEngine
 import i18n as i18n_pages
+from i18n_dates import format_gedcom_date, localize_dates_deep, validate_lang
 import test_bank
 from admin_routes import router as admin_router, init_admin, init_log_capture
 from palazuelos_routes import router as palazuelos_router, init_palazuelos
@@ -56,12 +57,18 @@ app.middleware("http")(i18n_pages.i18n_middleware)
 db_conn = None
 router = None
 engine = None
-gedcom_export_date = None
+gedcom_export_date = None       # formateada en español (usos legado)
+gedcom_export_date_raw = None   # cruda, para formatear por idioma
+
+
+def _lang_param(lang: str) -> str:
+    """Normaliza el parámetro lang contra los idiomas activos (fallback es)."""
+    return validate_lang(lang, set(i18n_pages.active_codes()))
 
 
 @app.on_event("startup")
 async def startup():
-    global db_conn, router, engine, gedcom_export_date
+    global db_conn, router, engine, gedcom_export_date, gedcom_export_date_raw
     init_log_capture()
     if not DB_PATH.exists():
         raise RuntimeError(f"No se encuentra {DB_PATH}. Ejecuta primero migrate_json_to_sqlite.py")
@@ -123,6 +130,7 @@ async def startup():
                 for line in f:
                     if line.startswith("1 DATE"):
                         raw = line.strip().replace("1 DATE", "").strip()
+                        gedcom_export_date_raw = raw
                         gedcom_export_date = convert_date_to_spanish(raw)
                         print(f"Fecha GEDCOM: {gedcom_export_date}")
                         break
@@ -144,11 +152,13 @@ async def startup():
 class QueryRequest(BaseModel):
     question: str
     history: list = []
+    lang: str = "es"
 
 
 class ConfirmRequest(BaseModel):
     question: str
     history: list = []
+    lang: str = "es"
 
 
 def log_unresolved_query(question):
@@ -197,11 +207,11 @@ async def query_confirm(req: ConfirmRequest):
 
 
 @app.get("/api/birthdays")
-async def birthdays():
+async def birthdays(lang: str = "es"):
     """Cumpleaños de esta semana."""
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
-    return {"birthdays": get_birthdays_this_week(db_conn)}
+    return localize_dates_deep({"birthdays": get_birthdays_this_week(db_conn)}, _lang_param(lang))
 
 
 @app.get("/api/tree/{person_id}")
@@ -251,18 +261,19 @@ async def stats():
 
 
 @app.get("/api/dashboard")
-async def dashboard():
+async def dashboard(lang: str = "es"):
     """All data needed for the dashboard landing page."""
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
-    return get_dashboard_data(db_conn)
+    return localize_dates_deep(get_dashboard_data(db_conn), _lang_param(lang))
 
 
 @app.get("/api/dossier/{person_id}")
-async def dossier(person_id: str):
+async def dossier(person_id: str, lang: str = "es"):
     """Complete dossier data for a person."""
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
+    lang = _lang_param(lang)
     # Decode person_id: frontend sends I16 instead of @I16@
     if not person_id.startswith("@"):
         person_id = "@%s@" % person_id
@@ -271,11 +282,13 @@ async def dossier(person_id: str):
         raise HTTPException(status_code=404, detail="Persona no encontrada")
     person_updated_at = dossier_data.get("person", {}).get("updated_at", "")
     if person_updated_at:
-        dossier_data["gedcom_date"] = convert_date_to_spanish(person_updated_at)
+        dossier_data["gedcom_date"] = format_gedcom_date(person_updated_at, lang)
+    elif gedcom_export_date_raw:
+        dossier_data["gedcom_date"] = format_gedcom_date(gedcom_export_date_raw, lang)
     else:
         dossier_data["gedcom_date"] = gedcom_export_date or ""
     dossier_data["vital_points"] = _build_vital_points(db_conn, dossier_data)
-    return dossier_data
+    return localize_dates_deep(dossier_data, lang)
 
 
 def _lookup_geocache(conn, raw_place: str):
@@ -314,14 +327,14 @@ def _build_vital_points(conn, dossier_data: dict) -> list:
 
 
 @app.get("/api/photo/{photo_id}")
-async def photo_details(photo_id: int):
+async def photo_details(photo_id: int, lang: str = "es"):
     """Get complete details for a photo (title, date, place, tagged people, notes, album)."""
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
     photo_data = get_photo_details(db_conn, photo_id)
     if not photo_data:
         raise HTTPException(status_code=404, detail="Foto no encontrada")
-    return photo_data
+    return localize_dates_deep(photo_data, _lang_param(lang))
 
 
 @app.post("/api/admin/sync-photos")
@@ -442,6 +455,7 @@ async def album_photos(
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=200),
     show_docs: bool = Query(False),
+    lang: str = Query("es"),
 ):
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
@@ -449,7 +463,8 @@ async def album_photos(
         album_id = f"@{album_id}@"
     if person_id and not person_id.startswith("@"):
         person_id = f"@{person_id}@"
-    return get_album_photos(db_conn, album_id, q=q, sort=sort, person_id=person_id, page=page, limit=limit, show_docs=show_docs)
+    result = get_album_photos(db_conn, album_id, q=q, sort=sort, person_id=person_id, page=page, limit=limit, show_docs=show_docs)
+    return localize_dates_deep(result, _lang_param(lang))
 
 
 @app.get("/api/cemeteries")
@@ -536,13 +551,15 @@ async def documents_photos(
     album_id: str = Query(""),
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=200),
+    lang: str = Query("es"),
 ):
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
     if person_id and not person_id.startswith("@"):
         person_id = f"@{person_id}@"
-    return get_document_photos(db_conn, doc_type=doc_type, q=q, sort=sort,
-                               person_id=person_id, album_id=album_id, page=page, limit=limit)
+    result = get_document_photos(db_conn, doc_type=doc_type, q=q, sort=sort,
+                                 person_id=person_id, album_id=album_id, page=page, limit=limit)
+    return localize_dates_deep(result, _lang_param(lang))
 
 
 # ---------------------------------------------------------------------------
@@ -823,7 +840,7 @@ async def api_default_photo(
 
 
 @app.get("/api/minibio/{person_id}")
-async def api_get_minibio(person_id: str):
+async def api_get_minibio(person_id: str, lang: str = "es"):
     p = Path(__file__).parent.parent / "data" / "minibios.json"
     if not p.exists():
         return {}
@@ -831,9 +848,15 @@ async def api_get_minibio(person_id: str):
         items = json.loads(p.read_text(encoding="utf-8"))
     except Exception:
         return {}
+    lang = _lang_param(lang)
     for m in items:
         if m.get("id") == person_id:
-            return m
+            out = dict(m)
+            # Campo resuelto por idioma con fallback a español
+            bios = m.get("bio") if isinstance(m.get("bio"), dict) else {}
+            out["bio"] = (bios.get(lang) or bios.get("es")
+                          or m.get(f"bio_{lang}") or m.get("bio_es") or m.get("bio_ca") or "")
+            return out
     return {}
 
 

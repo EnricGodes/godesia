@@ -79,7 +79,7 @@ function formatNameWithNickname(name, nickname, given_name, surname) {
  */
 window.openPhotoModal = async function(photoId) {
     try {
-        const res = await fetch(`/api/photo/${photoId}`);
+        const res = await fetch(window.I18N ? I18N.apiUrl(`/api/photo/${photoId}`) : `/api/photo/${photoId}`);
         if (!res.ok) {
             console.error('Photo not found');
             return;

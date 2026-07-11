@@ -859,18 +859,18 @@ function buildEvents(data) {
 
         const str = String(dateStr).toLowerCase();
         const months = {
-            'ene': '01', 'enero': '01', 'january': '01', 'jan': '01',
-            'feb': '02', 'febrero': '02', 'february': '02',
-            'mar': '03', 'marzo': '03', 'march': '03',
+            'ene': '01', 'enero': '01', 'january': '01', 'jan': '01', 'gen': '01', 'gener': '01',
+            'feb': '02', 'febrero': '02', 'february': '02', 'febr': '02', 'febrer': '02',
+            'mar': '03', 'marzo': '03', 'march': '03', 'març': '03',
             'abr': '04', 'abril': '04', 'april': '04', 'apr': '04',
-            'may': '05', 'mayo': '05',
-            'jun': '06', 'junio': '06', 'june': '06',
-            'jul': '07', 'julio': '07', 'july': '07',
-            'ago': '08', 'agosto': '08', 'august': '08', 'aug': '08',
-            'sept': '09', 'setembre': '09', 'september': '09', 'sep': '09',
+            'may': '05', 'mayo': '05', 'maig': '05',
+            'jun': '06', 'junio': '06', 'june': '06', 'juny': '06',
+            'jul': '07', 'julio': '07', 'july': '07', 'juliol': '07',
+            'ago': '08', 'agosto': '08', 'august': '08', 'aug': '08', 'agost': '08',
+            'sept': '09', 'setembre': '09', 'september': '09', 'sep': '09', 'set': '09',
             'oct': '10', 'octubre': '10', 'october': '10',
-            'nov': '11', 'noviembre': '11', 'november': '11',
-            'dic': '12', 'diciembre': '12', 'december': '12', 'dec': '12'
+            'nov': '11', 'noviembre': '11', 'november': '11', 'novembre': '11',
+            'dic': '12', 'diciembre': '12', 'december': '12', 'dec': '12', 'des': '12', 'desembre': '12'
         };
 
         const yearMatch = str.match(/\d{4}/);
