@@ -13,7 +13,7 @@ import time
 import traceback
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi import APIRouter, Body, HTTPException, UploadFile, File, Form
 from fastapi.responses import FileResponse
@@ -1638,6 +1638,20 @@ def _write_anecdotas(data: list):
     )
 
 
+def _lang_text(value, lang="es"):
+    """Texto de un campo multiidioma {es: ..., ca: ...} (o string legado)."""
+    if isinstance(value, dict):
+        return value.get(lang) or value.get("es") or ""
+    return value or ""
+
+
+def _as_lang_dict(value):
+    """Normaliza un campo del body a dict por idioma (acepta string legado)."""
+    if isinstance(value, dict):
+        return {k: v for k, v in value.items() if isinstance(v, str) and v}
+    return {"es": value} if value else {}
+
+
 @router.get("/anecdotes")
 async def list_anecdotes(search: str = ""):
     items = _read_anecdotas()
@@ -1645,20 +1659,29 @@ async def list_anecdotes(search: str = ""):
     indexed = [{"index": i, **a} for i, a in enumerate(items)]
     if search:
         q = search.lower()
-        indexed = [a for a in indexed if q in (a.get("titulo") or "").lower() or q in (a.get("texto") or "").lower()]
+        def _matches(a):
+            for field in ("titulo", "texto"):
+                value = a.get(field)
+                texts = value.values() if isinstance(value, dict) else [value or ""]
+                if any(q in (t or "").lower() for t in texts):
+                    return True
+            return False
+        indexed = [a for a in indexed if _matches(a)]
     return {"items": indexed, "total": len(indexed)}
 
 
 class AnecdoteBody(BaseModel):
-    titulo: str = ""
-    texto: str = ""
-    cta: str = ""
+    # Campos multiidioma: {"es": "...", "ca": "..."}. Acepta string legado.
+    titulo: Union[dict, str] = {}
+    texto: Union[dict, str] = {}
+    cta: Union[dict, str] = {}
 
 
 @router.post("/anecdotes")
 async def create_anecdote(body: AnecdoteBody):
     items = _read_anecdotas()
-    items.append({"titulo": body.titulo, "texto": body.texto, "cta": body.cta})
+    items.append({"titulo": _as_lang_dict(body.titulo), "texto": _as_lang_dict(body.texto),
+                  "cta": _as_lang_dict(body.cta)})
     _write_anecdotas(items)
     return {"index": len(items) - 1, "status": "ok"}
 
@@ -1668,7 +1691,8 @@ async def update_anecdote(anecdote_index: int, body: AnecdoteBody):
     items = _read_anecdotas()
     if anecdote_index < 0 or anecdote_index >= len(items):
         raise HTTPException(status_code=404, detail="Anècdota no trobada")
-    items[anecdote_index] = {"titulo": body.titulo, "texto": body.texto, "cta": body.cta}
+    items[anecdote_index] = {"titulo": _as_lang_dict(body.titulo), "texto": _as_lang_dict(body.texto),
+                             "cta": _as_lang_dict(body.cta)}
     _write_anecdotas(items)
     return {"status": "ok"}
 
@@ -1715,8 +1739,21 @@ async def list_minibios():
 class MinibioBody(BaseModel):
     id: str
     nombre: str = ""
+    # {"es": "...", "ca": "..."}; acepta bio_es/bio_ca legados
+    bio: Optional[dict] = None
     bio_es: str = ""
     bio_ca: str = ""
+
+
+def _minibio_bio(body: MinibioBody) -> dict:
+    if body.bio is not None:
+        return _as_lang_dict(body.bio)
+    bio = {}
+    if body.bio_es:
+        bio["es"] = body.bio_es
+    if body.bio_ca:
+        bio["ca"] = body.bio_ca
+    return bio
 
 
 @router.post("/minibios")
@@ -1724,7 +1761,7 @@ async def create_minibio(body: MinibioBody):
     items = _read_minibios()
     if any(m["id"] == body.id for m in items):
         raise HTTPException(status_code=400, detail="ID ja existeix")
-    items.append({"id": body.id, "nombre": body.nombre, "bio_es": body.bio_es, "bio_ca": body.bio_ca})
+    items.append({"id": body.id, "nombre": body.nombre, "bio": _minibio_bio(body)})
     _write_minibios(items)
     return {"status": "ok"}
 
@@ -1735,8 +1772,9 @@ async def update_minibio(person_id: str, body: MinibioBody):
     for m in items:
         if m["id"] == person_id:
             m["nombre"] = body.nombre
-            m["bio_es"] = body.bio_es
-            m["bio_ca"] = body.bio_ca
+            m["bio"] = _minibio_bio(body)
+            m.pop("bio_es", None)
+            m.pop("bio_ca", None)
             _write_minibios(items)
             return {"status": "ok"}
     raise HTTPException(status_code=404, detail="No trobat")

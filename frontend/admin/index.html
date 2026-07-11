@@ -335,18 +335,8 @@
             <div class="modal-overlay" id="anec-modal">
                 <div class="modal">
                     <div class="modal-title" id="anec-modal-title">Nueva anécdota</div>
-                    <div class="form-group">
-                        <label>Título ("¿Sabías que…?")</label>
-                        <input type="text" class="form-input" id="anec-titulo" placeholder="¿Sabías que…?"/>
-                    </div>
-                    <div class="form-group">
-                        <label>Texto</label>
-                        <textarea class="form-textarea" id="anec-texto" rows="4" placeholder="Descripción de la anécdota…"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>CTA (texto del botón)</label>
-                        <input type="text" class="form-input" id="anec-cta" placeholder="Saber más sobre…"/>
-                    </div>
+                    <!-- Campos por idioma activo (rellenados por Anecdotes._renderFields) -->
+                    <div id="anec-fields"></div>
                     <div class="modal-actions">
                         <button class="btn btn-secondary" onclick="closeModal('anec-modal')">Cancelar</button>
                         <button class="btn btn-primary" onclick="Anecdotes.save()">Guardar</button>
@@ -370,7 +360,7 @@
         <!-- MINIBIOS -->
         <section id="s-minibios" class="admin-section">
             <h1 class="section-title">Minibios</h1>
-            <p class="section-subtitle">Edita las minibiografías de las personas de la familia (en español y catalán).</p>
+            <p class="section-subtitle">Edita las minibiografías de las personas de la familia (un campo por idioma activo).</p>
 
             <div class="toolbar">
                 <div></div>
@@ -394,14 +384,8 @@
                         <label>Nombre completo</label>
                         <input type="text" class="form-input" id="mbio-nombre" placeholder="Nombre de la persona"/>
                     </div>
-                    <div class="form-group">
-                        <label>Bio en espanyol</label>
-                        <textarea class="form-textarea" id="mbio-bio-es" rows="5" placeholder="Biografia en español…"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Bio en català</label>
-                        <textarea class="form-textarea" id="mbio-bio-ca" rows="5" placeholder="Biografia en català…"></textarea>
-                    </div>
+                    <!-- Un textarea por idioma activo (rellenados por Minibios._renderFields) -->
+                    <div id="mbio-bio-fields"></div>
                     <div class="modal-actions">
                         <button class="btn btn-secondary" onclick="closeModal('mbio-modal')">Cancelar</button>
                         <button class="btn btn-primary" onclick="Minibios.save()">Guardar</button>
@@ -489,6 +473,29 @@
                 </button>
                 <span id="config-save-msg"
                       style="margin-left:12px;font-size:.8rem;color:#2d4b33;display:none;">✓ Guardado</span>
+            </div>
+
+            <div class="card" style="max-width:480px;margin-top:1.5rem;">
+                <h2 class="card-title">Idiomas activos</h2>
+                <p class="card-subtitle">Idiomas disponibles en la web pública. El español (es) es la base y no
+                    se puede eliminar. Al activar un idioma nuevo, la web degrada a español hasta que existan
+                    sus traducciones (ui.{código}.json, sagas y contenidos).</p>
+
+                <div id="config-langs-list" style="margin-bottom:1rem;"></div>
+
+                <div style="display:flex;gap:8px;margin-bottom:.75rem;">
+                    <input type="text" id="config-lang-code" placeholder="código (ej: fr)" maxlength="3"
+                        style="width:110px;padding:8px 12px;border:1px solid #c2c8bf;border-radius:8px;
+                               font-family:Manrope,sans-serif;font-size:.875rem;box-sizing:border-box;">
+                    <input type="text" id="config-lang-label" placeholder="Etiqueta (ej: Français)"
+                        style="flex:1;padding:8px 12px;border:1px solid #c2c8bf;border-radius:8px;
+                               font-family:Manrope,sans-serif;font-size:.875rem;box-sizing:border-box;">
+                    <button id="config-lang-add"
+                        style="padding:8px 16px;background:#2d4b33;color:#fff;border:none;border-radius:8px;
+                               cursor:pointer;font-family:Manrope,sans-serif;font-size:.875rem;">+ Añadir</button>
+                </div>
+                <span id="config-langs-msg"
+                      style="font-size:.8rem;color:#2d4b33;display:none;">✓ Guardado</span>
             </div>
         </section>
 

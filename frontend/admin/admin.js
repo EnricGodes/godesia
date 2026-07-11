@@ -893,6 +893,27 @@ const Geocoder = {
 // ---------------------------------------------------------------------------
 
 // Anecdotes — uses data/anecdotas.json (permanent, survives GEDCOM imports)
+// Idiomas activos (para los campos multiidioma de anécdotas y minibios)
+const AdminLangs = {
+    _list: null,
+    async get() {
+        if (!this._list) {
+            try {
+                const d = await (await fetch('/api/languages')).json();
+                this._list = d.languages || [];
+            } catch (e) { /* fallback abajo */ }
+            if (!this._list || !this._list.length) this._list = [{ code: 'es', label: 'Español' }];
+        }
+        return this._list;
+    },
+};
+
+// Texto de un campo multiidioma {es:..., ca:...} (o string legado)
+function langText(value, lang = 'es') {
+    if (value && typeof value === 'object') return value[lang] || value.es || '';
+    return value || '';
+}
+
 const Anecdotes = {
     searchQuery: '',
     searchTimer: null,
@@ -929,12 +950,17 @@ const Anecdotes = {
                 <thead><tr>
                     <th style="width:40px;">#</th><th>Título</th><th>Texto</th><th>CTA</th><th></th>
                 </tr></thead>
-                <tbody>${d.items.map(a => `
+                <tbody>${d.items.map(a => {
+                    const titulo = langText(a.titulo), texto = langText(a.texto), cta = langText(a.cta);
+                    const langs = [...new Set(['titulo', 'texto', 'cta'].flatMap(f =>
+                        (a[f] && typeof a[f] === 'object') ? Object.keys(a[f]).filter(l => a[f][l]) : []))];
+                    return `
                     <tr>
                         <td style="color:#727971;font-size:0.75rem;">${a.index + 1}</td>
-                        <td style="font-size:0.82rem;font-weight:600;max-width:200px;">${esc((a.titulo || '').slice(0, 70))}${(a.titulo || '').length > 70 ? '…' : ''}</td>
-                        <td style="font-size:0.8rem;max-width:280px;color:#3d3d37;">${esc((a.texto || '').slice(0, 100))}${(a.texto || '').length > 100 ? '…' : ''}</td>
-                        <td style="font-size:0.75rem;color:#727971;max-width:150px;">${esc((a.cta || '').slice(0, 50))}${(a.cta || '').length > 50 ? '…' : ''}</td>
+                        <td style="font-size:0.82rem;font-weight:600;max-width:200px;">${esc(titulo.slice(0, 70))}${titulo.length > 70 ? '…' : ''}
+                            ${langs.length ? `<div style="font-size:0.65rem;color:#727971;font-weight:400;">${langs.join(' · ')}</div>` : ''}</td>
+                        <td style="font-size:0.8rem;max-width:280px;color:#3d3d37;">${esc(texto.slice(0, 100))}${texto.length > 100 ? '…' : ''}</td>
+                        <td style="font-size:0.75rem;color:#727971;max-width:150px;">${esc(cta.slice(0, 50))}${cta.length > 50 ? '…' : ''}</td>
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
                                 <button class="btn btn-secondary btn-sm" onclick="Anecdotes.openEdit(${a.index})">✎</button>
@@ -942,38 +968,70 @@ const Anecdotes = {
                             </div>
                         </td>
                     </tr>
-                `).join('')}</tbody>
+                `;}).join('')}</tbody>
             </table>`;
         } catch (e) {
             el.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
         }
     },
 
-    openNew() {
+    async _renderFields(a) {
+        const langs = await AdminLangs.get();
+        const value = (field, code) => {
+            if (!a) return '';
+            const v = a[field];
+            if (v && typeof v === 'object') return v[code] || '';
+            return code === 'es' ? (v || '') : '';
+        };
+        document.getElementById('anec-fields').innerHTML = langs.map(l => `
+            <fieldset style="border:1px solid #dddad1;border-radius:8px;padding:0.6rem 0.8rem;margin-bottom:0.8rem;">
+                <legend style="font-size:0.7rem;font-weight:700;color:#727971;padding:0 0.3rem;">${esc(l.label)} (${esc(l.code)})</legend>
+                <div class="form-group">
+                    <label>Título ("¿Sabías que…?")</label>
+                    <input type="text" class="form-input" id="anec-titulo-${l.code}" value="${esc(value('titulo', l.code))}"/>
+                </div>
+                <div class="form-group">
+                    <label>Texto</label>
+                    <textarea class="form-textarea" id="anec-texto-${l.code}" rows="4">${esc(value('texto', l.code))}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>CTA (texto del botón)</label>
+                    <input type="text" class="form-input" id="anec-cta-${l.code}" value="${esc(value('cta', l.code))}"/>
+                </div>
+            </fieldset>`).join('');
+    },
+
+    async openNew() {
         this._editIndex = null;
         document.getElementById('anec-modal-title').textContent = 'Nueva anécdota';
-        document.getElementById('anec-titulo').value = '';
-        document.getElementById('anec-texto').value = '';
-        document.getElementById('anec-cta').value = '';
+        await this._renderFields(null);
         openModal('anec-modal');
     },
 
-    openEdit(index) {
+    async openEdit(index) {
         const a = (this._items || []).find(x => x.index === index);
         if (!a) { alert('Error: no se ha encontrado la anécdota. Recarga la página.'); return; }
         this._editIndex = index;
         document.getElementById('anec-modal-title').textContent = `Editar anécdota #${index + 1}`;
-        document.getElementById('anec-titulo').value = a.titulo || '';
-        document.getElementById('anec-texto').value = a.texto || '';
-        document.getElementById('anec-cta').value = a.cta || '';
+        await this._renderFields(a);
         openModal('anec-modal');
     },
 
     async save() {
+        const langs = await AdminLangs.get();
+        const collect = (field) => {
+            const out = {};
+            langs.forEach(l => {
+                const el = document.getElementById(`anec-${field}-${l.code}`);
+                const v = el ? el.value.trim() : '';
+                if (v) out[l.code] = v;
+            });
+            return out;
+        };
         const body = {
-            titulo: document.getElementById('anec-titulo').value.trim(),
-            texto: document.getElementById('anec-texto').value.trim(),
-            cta: document.getElementById('anec-cta').value.trim(),
+            titulo: collect('titulo'),
+            texto: collect('texto'),
+            cta: collect('cta'),
         };
         try {
             if (this._editIndex !== null) {
@@ -1042,13 +1100,19 @@ const Minibios = {
             }
             el.innerHTML = `<table class="admin-table">
                 <thead><tr>
-                    <th style="width:60px;">ID</th><th>Nom</th><th>Bio (es)</th><th></th>
+                    <th style="width:60px;">ID</th><th>Nom</th><th>Bio (es)</th><th style="width:80px;">Idiomas</th><th></th>
                 </tr></thead>
-                <tbody>${this._items.map(m => `
+                <tbody>${this._items.map(m => {
+                    const bioEs = langText(m.bio) || m.bio_es || '';
+                    const langs = (m.bio && typeof m.bio === 'object')
+                        ? Object.keys(m.bio).filter(l => m.bio[l]).join(' · ')
+                        : (m.bio_es ? 'es' : '') + (m.bio_ca ? ' · ca' : '');
+                    return `
                     <tr>
                         <td style="color:#727971;font-size:0.75rem;">${esc(m.id)}</td>
                         <td style="font-size:0.82rem;font-weight:600;max-width:180px;">${esc((m.nombre || '').slice(0, 60))}${(m.nombre || '').length > 60 ? '…' : ''}</td>
-                        <td style="font-size:0.8rem;max-width:300px;color:#3d3d37;">${esc((m.bio_es || '').slice(0, 120))}${(m.bio_es || '').length > 120 ? '…' : ''}</td>
+                        <td style="font-size:0.8rem;max-width:300px;color:#3d3d37;">${esc(bioEs.slice(0, 120))}${bioEs.length > 120 ? '…' : ''}</td>
+                        <td style="font-size:0.7rem;color:#727971;">${esc(langs)}</td>
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
                                 <button class="btn btn-secondary btn-sm" onclick="Minibios.openEdit('${m.id}')">✎</button>
@@ -1056,25 +1120,38 @@ const Minibios = {
                             </div>
                         </td>
                     </tr>
-                `).join('')}</tbody>
+                `;}).join('')}</tbody>
             </table>`;
         } catch (e) {
             el.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
         }
     },
 
-    openNew() {
+    async _renderFields(m) {
+        const langs = await AdminLangs.get();
+        const value = (code) => {
+            if (!m) return '';
+            if (m.bio && typeof m.bio === 'object') return m.bio[code] || '';
+            return code === 'es' ? (m.bio_es || '') : code === 'ca' ? (m.bio_ca || '') : '';
+        };
+        document.getElementById('mbio-bio-fields').innerHTML = langs.map(l => `
+            <div class="form-group">
+                <label>Bio — ${esc(l.label)} (${esc(l.code)})</label>
+                <textarea class="form-textarea" id="mbio-bio-${l.code}" rows="5">${esc(value(l.code))}</textarea>
+            </div>`).join('');
+    },
+
+    async openNew() {
         this._editId = null;
         document.getElementById('mbio-modal-title').textContent = 'Nueva minibio';
         document.getElementById('mbio-id').value = '';
         document.getElementById('mbio-id').readOnly = false;
         document.getElementById('mbio-nombre').value = '';
-        document.getElementById('mbio-bio-es').value = '';
-        document.getElementById('mbio-bio-ca').value = '';
+        await this._renderFields(null);
         openModal('mbio-modal');
     },
 
-    openEdit(id) {
+    async openEdit(id) {
         const m = this._items.find(x => x.id === id);
         if (!m) { alert('Error: no se ha encontrado la minibio. Recarga la página.'); return; }
         this._editId = id;
@@ -1082,19 +1159,24 @@ const Minibios = {
         document.getElementById('mbio-id').value = m.id;
         document.getElementById('mbio-id').readOnly = true;
         document.getElementById('mbio-nombre').value = m.nombre || '';
-        document.getElementById('mbio-bio-es').value = m.bio_es || '';
-        document.getElementById('mbio-bio-ca').value = m.bio_ca || '';
+        await this._renderFields(m);
         openModal('mbio-modal');
     },
 
     async save() {
         const id = document.getElementById('mbio-id').value.trim();
         if (!id) { alert('Hay que especificar un ID'); return; }
+        const langs = await AdminLangs.get();
+        const bio = {};
+        langs.forEach(l => {
+            const el = document.getElementById(`mbio-bio-${l.code}`);
+            const v = el ? el.value.trim() : '';
+            if (v) bio[l.code] = v;
+        });
         const body = {
             id,
             nombre: document.getElementById('mbio-nombre').value.trim(),
-            bio_es: document.getElementById('mbio-bio-es').value.trim(),
-            bio_ca: document.getElementById('mbio-bio-ca').value.trim(),
+            bio,
         };
         try {
             if (this._editId !== null) {
@@ -1377,6 +1459,58 @@ const Config = (() => {
             msg.style.display = 'inline';
             setTimeout(() => { msg.style.display = 'none'; }, 2500);
         });
+
+        _initLanguages(settings.active_languages || []);
+    }
+
+    // ── Idiomas activos ──────────────────────────────────────────────────
+    let _langs = [];
+
+    function _renderLangs() {
+        document.getElementById('config-langs-list').innerHTML = _langs.map((l, i) => `
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f6f3ea;
+                        border-radius:8px;margin-bottom:6px;font-size:.875rem;">
+                <strong style="width:36px;">${esc(l.code)}</strong>
+                <span style="flex:1;">${esc(l.label)}</span>
+                ${l.code === 'es'
+                    ? '<span style="font-size:.7rem;color:#9e9b94;">base</span>'
+                    : `<button onclick="Config._removeLang(${i})"
+                          style="background:none;border:none;color:#ba1a1a;cursor:pointer;font-size:1rem;">✕</button>`}
+            </div>`).join('');
+    }
+
+    async function _saveLangs() {
+        await apiFetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: 'active_languages', value: JSON.stringify(_langs) })
+        });
+        _renderLangs();
+        const msg = document.getElementById('config-langs-msg');
+        msg.style.display = 'inline';
+        setTimeout(() => { msg.style.display = 'none'; }, 2500);
+    }
+
+    function _initLanguages(langs) {
+        _langs = langs.length ? langs : [{ code: 'es', label: 'Español' }];
+        _renderLangs();
+        document.getElementById('config-lang-add').addEventListener('click', async () => {
+            const code = document.getElementById('config-lang-code').value.trim().toLowerCase();
+            const label = document.getElementById('config-lang-label').value.trim();
+            if (!/^[a-z]{2,3}$/.test(code)) { alert('Código de idioma inválido (2-3 letras, ej: fr)'); return; }
+            if (!label) { alert('Falta la etiqueta del idioma'); return; }
+            if (_langs.some(l => l.code === code)) { alert('Ese idioma ya está activo'); return; }
+            _langs.push({ code, label });
+            document.getElementById('config-lang-code').value = '';
+            document.getElementById('config-lang-label').value = '';
+            try { await _saveLangs(); } catch (e) { _langs.pop(); alert('Error guardando: ' + e.message); }
+        });
+    }
+
+    async function _removeLang(index) {
+        if (_langs[index] && _langs[index].code === 'es') return;
+        const removed = _langs.splice(index, 1);
+        try { await _saveLangs(); } catch (e) { _langs.splice(index, 0, removed[0]); alert('Error guardando: ' + e.message); }
     }
 
     function _select(id, name) {
@@ -1391,7 +1525,7 @@ const Config = (() => {
         document.getElementById('config-person-search').value = '';
     }
 
-    return { init, _select };
+    return { init, _select, _removeLang };
 })();
 
 // ---------------------------------------------------------------------------

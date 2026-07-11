@@ -1,272 +1,596 @@
 [
   {
-    "titulo": "¿Sabías que Artur Godes Caballeria no fue solo tenor, sino también hombre de repertorio?",
-    "texto": "Participó en numerosos segundos papeles dentro de compañías de ópera italiana, una labor menos visible pero esencial.",
-    "cta": "Saber más sobre Artur Godes Caballeria"
+    "titulo": {
+      "es": "¿Sabías que Artur Godes Caballeria no fue solo tenor, sino también hombre de repertorio?"
+    },
+    "texto": {
+      "es": "Participó en numerosos segundos papeles dentro de compañías de ópera italiana, una labor menos visible pero esencial."
+    },
+    "cta": {
+      "es": "Saber más sobre Artur Godes Caballeria"
+    }
   },
   {
-    "titulo": "¿Sabías que la música ocupó un lugar central en varias generaciones de los Godes?",
-    "texto": "Entre tenores, maestros de capilla, violinistas y compositores, la rama musical es una de las más potentes de toda la familia.",
-    "cta": "Saber más sobre la tradición musical de la familia"
+    "titulo": {
+      "es": "¿Sabías que la música ocupó un lugar central en varias generaciones de los Godes?"
+    },
+    "texto": {
+      "es": "Entre tenores, maestros de capilla, violinistas y compositores, la rama musical es una de las más potentes de toda la familia."
+    },
+    "cta": {
+      "es": "Saber más sobre la tradición musical de la familia"
+    }
   },
   {
-    "titulo": "¿Sabías que Montserrat Hurtado Abelló fue violinista?",
-    "texto": "Además de su formación musical, quedó en el recuerdo familiar como una mujer refinada y con mucha personalidad.",
-    "cta": "Saber más sobre Montserrat Hurtado Abelló"
+    "titulo": {
+      "es": "¿Sabías que Montserrat Hurtado Abelló fue violinista?"
+    },
+    "texto": {
+      "es": "Además de su formación musical, quedó en el recuerdo familiar como una mujer refinada y con mucha personalidad."
+    },
+    "cta": {
+      "es": "Saber más sobre Montserrat Hurtado Abelló"
+    }
   },
   {
-    "titulo": "¿Sabías que César Pérez Hurtado abrió rutas de escalada?",
-    "texto": "Su perfil se asocia al mundo de la montaña y a una forma de vida muy distinta de la urbana.",
-    "cta": "Saber más sobre César Pérez Hurtado"
+    "titulo": {
+      "es": "¿Sabías que César Pérez Hurtado abrió rutas de escalada?"
+    },
+    "texto": {
+      "es": "Su perfil se asocia al mundo de la montaña y a una forma de vida muy distinta de la urbana."
+    },
+    "cta": {
+      "es": "Saber más sobre César Pérez Hurtado"
+    }
   },
   {
-    "titulo": "¿Sabías que en la familia hay una anécdota de lotería casi legendaria?",
-    "texto": "Montserrat Hurtado solía comprar décimos con el número 08036, su código postal del Eixample; justo el año que no pudo hacerlo, ese número fue premiado.",
-    "cta": "Saber más sobre Montserrat Hurtado Abelló"
+    "titulo": {
+      "es": "¿Sabías que en la familia hay una anécdota de lotería casi legendaria?"
+    },
+    "texto": {
+      "es": "Montserrat Hurtado solía comprar décimos con el número 08036, su código postal del Eixample; justo el año que no pudo hacerlo, ese número fue premiado."
+    },
+    "cta": {
+      "es": "Saber más sobre Montserrat Hurtado Abelló"
+    }
   },
   {
-    "titulo": "¿Sabías que Josep Sagarra Agost empezó desde una situación muy humilde?",
-    "texto": "Su biografía lo presenta como un hombre hecho a sí mismo, que trabajó desde niño para ayudar a su madre viuda.",
-    "cta": "Saber más sobre Josep Sagarra Agost"
+    "titulo": {
+      "es": "¿Sabías que Josep Sagarra Agost empezó desde una situación muy humilde?"
+    },
+    "texto": {
+      "es": "Su biografía lo presenta como un hombre hecho a sí mismo, que trabajó desde niño para ayudar a su madre viuda."
+    },
+    "cta": {
+      "es": "Saber más sobre Josep Sagarra Agost"
+    }
   },
   {
-    "titulo": "¿Sabías que Josep Sagarra Agost estudió mientras trabajaba?",
-    "texto": "Combinó formación en Llotja con el oficio y acabó construyendo una trayectoria notable en Barcelona.",
-    "cta": "Saber más sobre Josep Sagarra Agost"
+    "titulo": {
+      "es": "¿Sabías que Josep Sagarra Agost estudió mientras trabajaba?"
+    },
+    "texto": {
+      "es": "Combinó formación en Llotja con el oficio y acabó construyendo una trayectoria notable en Barcelona."
+    },
+    "cta": {
+      "es": "Saber más sobre Josep Sagarra Agost"
+    }
   },
   {
-    "titulo": "¿Sabías que Josep Sagarra Agost llegó a ser conseller del Ayuntamiento de Barcelona?",
-    "texto": "No se quedó en el oficio: también tuvo presencia en la vida pública de la ciudad.",
-    "cta": "Saber más sobre Josep Sagarra Agost"
+    "titulo": {
+      "es": "¿Sabías que Josep Sagarra Agost llegó a ser conseller del Ayuntamiento de Barcelona?"
+    },
+    "texto": {
+      "es": "No se quedó en el oficio: también tuvo presencia en la vida pública de la ciudad."
+    },
+    "cta": {
+      "es": "Saber más sobre Josep Sagarra Agost"
+    }
   },
   {
-    "titulo": "¿Sabías que Marià Hurtado Rusca llevó la litografía a Vilanova i la Geltrú?",
-    "texto": "Se trasladó allí atraído por la prosperidad local e impulsó talleres e imprentas en una época clave del oficio.",
-    "cta": "Saber más sobre Marià Hurtado Rusca"
+    "titulo": {
+      "es": "¿Sabías que Marià Hurtado Rusca llevó la litografía a Vilanova i la Geltrú?"
+    },
+    "texto": {
+      "es": "Se trasladó allí atraído por la prosperidad local e impulsó talleres e imprentas en una época clave del oficio."
+    },
+    "cta": {
+      "es": "Saber más sobre Marià Hurtado Rusca"
+    }
   },
   {
-    "titulo": "¿Sabías que la litografía fue uno de los grandes oficios heredados en la familia Hurtado?",
-    "texto": "Varios miembros aparecen ligados a ese mundo justo antes de que la fotografía transformara la reproducción gráfica.",
-    "cta": "Saber más sobre la rama Hurtado"
+    "titulo": {
+      "es": "¿Sabías que la litografía fue uno de los grandes oficios heredados en la familia Hurtado?"
+    },
+    "texto": {
+      "es": "Varios miembros aparecen ligados a ese mundo justo antes de que la fotografía transformara la reproducción gráfica."
+    },
+    "cta": {
+      "es": "Saber más sobre la rama Hurtado"
+    }
   },
   {
-    "titulo": "¿Sabías que Antoni Hurtado Monrós fue litógrafo y también activista catalanista?",
-    "texto": "Además de su oficio, ejerció como secretario de un casal catalanista de distrito.",
-    "cta": "Saber más sobre Antoni Hurtado Monrós"
+    "titulo": {
+      "es": "¿Sabías que Antoni Hurtado Monrós fue litógrafo y también activista catalanista?"
+    },
+    "texto": {
+      "es": "Además de su oficio, ejerció como secretario de un casal catalanista de distrito."
+    },
+    "cta": {
+      "es": "Saber más sobre Antoni Hurtado Monrós"
+    }
   },
   {
-    "titulo": "¿Sabías que Antoni Hurtado Estapé era joyero y hombre del Palau de la Música?",
-    "texto": "Consta como vocal de una junta vinculada a la Escola Orfeònica del Palau.",
-    "cta": "Saber más sobre Antoni Hurtado Estapé"
+    "titulo": {
+      "es": "¿Sabías que Antoni Hurtado Estapé era joyero y hombre del Palau de la Música?"
+    },
+    "texto": {
+      "es": "Consta como vocal de una junta vinculada a la Escola Orfeònica del Palau."
+    },
+    "cta": {
+      "es": "Saber más sobre Antoni Hurtado Estapé"
+    }
   },
   {
-    "titulo": "¿Sabías que Antoni Hurtado Estapé vivió en una torre de la avenida de Pedralbes?",
-    "texto": "Es un detalle que da idea del nivel social alcanzado por algunas ramas de la familia a comienzos del siglo XX.",
-    "cta": "Saber más sobre Antoni Hurtado Estapé"
+    "titulo": {
+      "es": "¿Sabías que Antoni Hurtado Estapé vivió en una torre de la avenida de Pedralbes?"
+    },
+    "texto": {
+      "es": "Es un detalle que da idea del nivel social alcanzado por algunas ramas de la familia a comienzos del siglo XX."
+    },
+    "cta": {
+      "es": "Saber más sobre Antoni Hurtado Estapé"
+    }
   },
   {
-    "titulo": "¿Sabías que Emili Hurtado Rusca estuvo vinculado a la Escuela Náutica de Barcelona?",
-    "texto": "Su trayectoria pasó por un entorno profesional muy singular antes de otras etapas laborales.",
-    "cta": "Saber más sobre Emili Hurtado Rusca"
+    "titulo": {
+      "es": "¿Sabías que Emili Hurtado Rusca estuvo vinculado a la Escuela Náutica de Barcelona?"
+    },
+    "texto": {
+      "es": "Su trayectoria pasó por un entorno profesional muy singular antes de otras etapas laborales."
+    },
+    "cta": {
+      "es": "Saber más sobre Emili Hurtado Rusca"
+    }
   },
   {
-    "titulo": "¿Sabías que Josep Selva Giró fue mossèn y vivió una época convulsa?",
-    "texto": "Su biografía sitúa a la rama Selva dentro de un contexto religioso e histórico muy marcado por la guerra.",
-    "cta": "Saber más sobre Josep Selva Giró"
+    "titulo": {
+      "es": "¿Sabías que Josep Selva Giró fue mossèn y vivió una época convulsa?"
+    },
+    "texto": {
+      "es": "Su biografía sitúa a la rama Selva dentro de un contexto religioso e histórico muy marcado por la guerra."
+    },
+    "cta": {
+      "es": "Saber más sobre Josep Selva Giró"
+    }
   },
   {
-    "titulo": "¿Sabías que Genaro Lacoste Hurtado fue una figura eclesiástica importante en Barcelona?",
-    "texto": "Aparece como vicario reverendo y beneficiado de la parroquia de Sant Jaume.",
-    "cta": "Saber más sobre Genaro Lacoste Hurtado"
+    "titulo": {
+      "es": "¿Sabías que Genaro Lacoste Hurtado fue una figura eclesiástica importante en Barcelona?"
+    },
+    "texto": {
+      "es": "Aparece como vicario reverendo y beneficiado de la parroquia de Sant Jaume."
+    },
+    "cta": {
+      "es": "Saber más sobre Genaro Lacoste Hurtado"
+    }
   },
   {
-    "titulo": "¿Sabías que muchos bautizos de la familia pasan por el nombre de Genaro Lacoste?",
-    "texto": "Su presencia se repite una y otra vez en los primeros sacramentos de varias generaciones.",
-    "cta": "Saber más sobre Genaro Lacoste Hurtado"
+    "titulo": {
+      "es": "¿Sabías que muchos bautizos de la familia pasan por el nombre de Genaro Lacoste?"
+    },
+    "texto": {
+      "es": "Su presencia se repite una y otra vez en los primeros sacramentos de varias generaciones."
+    },
+    "cta": {
+      "es": "Saber más sobre Genaro Lacoste Hurtado"
+    }
   },
   {
-    "titulo": "¿Sabías que Amadeu Hurtado Miró tuvo relieve político e intelectual?",
-    "texto": "Fue abogado prestigioso, diputado y articulista, con una trayectoria pública de primer nivel.",
-    "cta": "Saber más sobre Amadeu Hurtado Miró"
+    "titulo": {
+      "es": "¿Sabías que Amadeu Hurtado Miró tuvo relieve político e intelectual?"
+    },
+    "texto": {
+      "es": "Fue abogado prestigioso, diputado y articulista, con una trayectoria pública de primer nivel."
+    },
+    "cta": {
+      "es": "Saber más sobre Amadeu Hurtado Miró"
+    }
   },
   {
-    "titulo": "¿Sabías que Amadeu Hurtado Miró defendió a Pedro Corominas?",
-    "texto": "Ese episodio lo situó muy pronto en un escenario político y jurídico de gran resonancia.",
-    "cta": "Saber más sobre Amadeu Hurtado Miró"
+    "titulo": {
+      "es": "¿Sabías que Amadeu Hurtado Miró defendió a Pedro Corominas?"
+    },
+    "texto": {
+      "es": "Ese episodio lo situó muy pronto en un escenario político y jurídico de gran resonancia."
+    },
+    "cta": {
+      "es": "Saber más sobre Amadeu Hurtado Miró"
+    }
   },
   {
-    "titulo": "¿Sabías que Amadeu Hurtado Miró también fue un hombre de prensa?",
-    "texto": "Colaboró en diarios influyentes y participó activamente en la vida intelectual catalana y española.",
-    "cta": "Saber más sobre Amadeu Hurtado Miró"
+    "titulo": {
+      "es": "¿Sabías que Amadeu Hurtado Miró también fue un hombre de prensa?"
+    },
+    "texto": {
+      "es": "Colaboró en diarios influyentes y participó activamente en la vida intelectual catalana y española."
+    },
+    "cta": {
+      "es": "Saber más sobre Amadeu Hurtado Miró"
+    }
   },
   {
-    "titulo": "¿Sabías que Felip Puig Godes no fue un conseller aislado, sino una figura muy transversal?",
-    "texto": "Pasó por varias carteras y dejó huella en distintas áreas del Govern.",
-    "cta": "Saber más sobre Felip Puig Godes"
+    "titulo": {
+      "es": "¿Sabías que Felip Puig Godes no fue un conseller aislado, sino una figura muy transversal?"
+    },
+    "texto": {
+      "es": "Pasó por varias carteras y dejó huella en distintas áreas del Govern."
+    },
+    "cta": {
+      "es": "Saber más sobre Felip Puig Godes"
+    }
   },
   {
-    "titulo": "¿Sabías que Oriol Puig Godes dirigió el Servei Meteorològic de Catalunya?",
-    "texto": "La familia no solo ha estado en la política: también en ámbitos técnicos e institucionales muy especializados.",
-    "cta": "Saber más sobre Oriol Puig Godes"
+    "titulo": {
+      "es": "¿Sabías que Oriol Puig Godes dirigió el Servei Meteorològic de Catalunya?"
+    },
+    "texto": {
+      "es": "La familia no solo ha estado en la política: también en ámbitos técnicos e institucionales muy especializados."
+    },
+    "cta": {
+      "es": "Saber más sobre Oriol Puig Godes"
+    }
   },
   {
-    "titulo": "¿Sabías que dos hermanos Puig Godes ocuparon posiciones públicas de alto nivel?",
-    "texto": "Uno en la política institucional y otro en la administración técnica catalana.",
-    "cta": "Saber más sobre la rama Puig Godes"
+    "titulo": {
+      "es": "¿Sabías que dos hermanos Puig Godes ocuparon posiciones públicas de alto nivel?"
+    },
+    "texto": {
+      "es": "Uno en la política institucional y otro en la administración técnica catalana."
+    },
+    "cta": {
+      "es": "Saber más sobre la rama Puig Godes"
+    }
   },
   {
-    "titulo": "¿Sabías que Josep Anton Rojas Diago llegó a dirigir la promoción de Barcelona Turisme?",
-    "texto": "Otra muestra de la presencia de la familia en instituciones clave de la ciudad contemporánea.",
-    "cta": "Saber más sobre Josep Anton Rojas Diago"
+    "titulo": {
+      "es": "¿Sabías que Josep Anton Rojas Diago llegó a dirigir la promoción de Barcelona Turisme?"
+    },
+    "texto": {
+      "es": "Otra muestra de la presencia de la familia en instituciones clave de la ciudad contemporánea."
+    },
+    "cta": {
+      "es": "Saber más sobre Josep Anton Rojas Diago"
+    }
   },
   {
-    "titulo": "¿Sabías que Lluïsa Rojas Diago trabajó en la Universitat Pompeu Fabra?",
-    "texto": "Su perfil aparece ligado a la estructura universitaria de una de las grandes instituciones académicas de Barcelona.",
-    "cta": "Saber más sobre Lluïsa Rojas Diago"
+    "titulo": {
+      "es": "¿Sabías que Lluïsa Rojas Diago trabajó en la Universitat Pompeu Fabra?"
+    },
+    "texto": {
+      "es": "Su perfil aparece ligado a la estructura universitaria de una de las grandes instituciones académicas de Barcelona."
+    },
+    "cta": {
+      "es": "Saber más sobre Lluïsa Rojas Diago"
+    }
   },
   {
-    "titulo": "¿Sabías que la rama Pujol también aparece vinculada a la Generalitat?",
-    "texto": "Juan Francisco Pujol Pérez figura como funcionario en la administración catalana.",
-    "cta": "Saber más sobre Juan Francisco Pujol Pérez"
+    "titulo": {
+      "es": "¿Sabías que la rama Pujol también aparece vinculada a la Generalitat?"
+    },
+    "texto": {
+      "es": "Juan Francisco Pujol Pérez figura como funcionario en la administración catalana."
+    },
+    "cta": {
+      "es": "Saber más sobre Juan Francisco Pujol Pérez"
+    }
   },
   {
-    "titulo": "¿Sabías que Rosa Maria Pujol Pérez desarrolló una carrera como abogada?",
-    "texto": "Una muestra más de la fuerte presencia de perfiles profesionales cualificados en generaciones recientes.",
-    "cta": "Saber más sobre Rosa Maria Pujol Pérez"
+    "titulo": {
+      "es": "¿Sabías que Rosa Maria Pujol Pérez desarrolló una carrera como abogada?"
+    },
+    "texto": {
+      "es": "Una muestra más de la fuerte presencia de perfiles profesionales cualificados en generaciones recientes."
+    },
+    "cta": {
+      "es": "Saber más sobre Rosa Maria Pujol Pérez"
+    }
   },
   {
-    "titulo": "¿Sabías que Eugènia Puig Ninou aparece ya en la familia como psicóloga?",
-    "texto": "El árbol refleja bien cómo los oficios tradicionales fueron dejando paso a nuevas profesiones universitarias.",
-    "cta": "Saber más sobre Eugènia Puig Ninou"
+    "titulo": {
+      "es": "¿Sabías que Eugènia Puig Ninou aparece ya en la familia como psicóloga?"
+    },
+    "texto": {
+      "es": "El árbol refleja bien cómo los oficios tradicionales fueron dejando paso a nuevas profesiones universitarias."
+    },
+    "cta": {
+      "es": "Saber más sobre Eugènia Puig Ninou"
+    }
   },
   {
-    "titulo": "¿Sabías que Ignacia Godes Hospital se dedicó a la educación infantil?",
-    "texto": "Su trayectoria enlaza con otra constante familiar: la enseñanza y la transmisión.",
-    "cta": "Saber más sobre Ignacia Godes Hospital"
+    "titulo": {
+      "es": "¿Sabías que Ignacia Godes Hospital se dedicó a la educación infantil?"
+    },
+    "texto": {
+      "es": "Su trayectoria enlaza con otra constante familiar: la enseñanza y la transmisión."
+    },
+    "cta": {
+      "es": "Saber más sobre Ignacia Godes Hospital"
+    }
   },
   {
-    "titulo": "¿Sabías que Àlex Barahona Cabestany llevó la cocina familiar hasta Abu Dhabi?",
-    "texto": "Su perfil aparece como chef residente allí, llevando el apellido a un contexto completamente internacional.",
-    "cta": "Saber más sobre Àlex Barahona Cabestany"
+    "titulo": {
+      "es": "¿Sabías que Àlex Barahona Cabestany llevó la cocina familiar hasta Abu Dhabi?"
+    },
+    "texto": {
+      "es": "Su perfil aparece como chef residente allí, llevando el apellido a un contexto completamente internacional."
+    },
+    "cta": {
+      "es": "Saber más sobre Àlex Barahona Cabestany"
+    }
   },
   {
-    "titulo": "¿Sabías que Martí Plomer Sánchez representa la rama médica más especializada?",
-    "texto": "Su perfil aparece ya orientado a la cirugía ortopédica y traumatología.",
-    "cta": "Saber más sobre Martí Plomer Sánchez"
+    "titulo": {
+      "es": "¿Sabías que Martí Plomer Sánchez representa la rama médica más especializada?"
+    },
+    "texto": {
+      "es": "Su perfil aparece ya orientado a la cirugía ortopédica y traumatología."
+    },
+    "cta": {
+      "es": "Saber más sobre Martí Plomer Sánchez"
+    }
   },
   {
-    "titulo": "¿Sabías que Adelina Corbacho Godes figura como médica de familia?",
-    "texto": "La presencia sanitaria en la familia no es solo histórica: también llega a generaciones muy recientes.",
-    "cta": "Saber más sobre Adelina Corbacho Godes"
+    "titulo": {
+      "es": "¿Sabías que Adelina Corbacho Godes figura como médica de familia?"
+    },
+    "texto": {
+      "es": "La presencia sanitaria en la familia no es solo histórica: también llega a generaciones muy recientes."
+    },
+    "cta": {
+      "es": "Saber más sobre Adelina Corbacho Godes"
+    }
   },
   {
-    "titulo": "¿Sabías que Albert Cabestany Pérez siguió el camino de la odontología?",
-    "texto": "Un ejemplo más de profesionalización técnica dentro de las ramas contemporáneas.",
-    "cta": "Saber más sobre Albert Cabestany Pérez"
+    "titulo": {
+      "es": "¿Sabías que Albert Cabestany Pérez siguió el camino de la odontología?"
+    },
+    "texto": {
+      "es": "Un ejemplo más de profesionalización técnica dentro de las ramas contemporáneas."
+    },
+    "cta": {
+      "es": "Saber más sobre Albert Cabestany Pérez"
+    }
   },
   {
-    "titulo": "¿Sabías que Joan Nolla Hom se dedicó a la prótesis dental?",
-    "texto": "El detalle muestra cómo el árbol recoge oficios de alta especialización muy concretos.",
-    "cta": "Saber más sobre Joan Nolla Hom"
+    "titulo": {
+      "es": "¿Sabías que Joan Nolla Hom se dedicó a la prótesis dental?"
+    },
+    "texto": {
+      "es": "El detalle muestra cómo el árbol recoge oficios de alta especialización muy concretos."
+    },
+    "cta": {
+      "es": "Saber más sobre Joan Nolla Hom"
+    }
   },
   {
-    "titulo": "¿Sabías que Albert Biosca Drets fue propietario de Biosca & Botey?",
-    "texto": "La vertiente empresarial aparece también con fuerza en varias ramas de la familia.",
-    "cta": "Saber más sobre Albert Biosca Drets"
+    "titulo": {
+      "es": "¿Sabías que Albert Biosca Drets fue propietario de Biosca & Botey?"
+    },
+    "texto": {
+      "es": "La vertiente empresarial aparece también con fuerza en varias ramas de la familia."
+    },
+    "cta": {
+      "es": "Saber más sobre Albert Biosca Drets"
+    }
   },
   {
-    "titulo": "¿Sabías que Felip Puig de Canals fue gemólogo y empresario?",
-    "texto": "No es un perfil habitual, y por eso mismo destaca dentro del conjunto familiar.",
-    "cta": "Saber más sobre Felip Puig de Canals"
+    "titulo": {
+      "es": "¿Sabías que Felip Puig de Canals fue gemólogo y empresario?"
+    },
+    "texto": {
+      "es": "No es un perfil habitual, y por eso mismo destaca dentro del conjunto familiar."
+    },
+    "cta": {
+      "es": "Saber más sobre Felip Puig de Canals"
+    }
   },
   {
-    "titulo": "¿Sabías que Sebastián Diago Almuzara trabajó en Myrurgia?",
-    "texto": "Su nombre conecta la familia con una de las grandes firmas históricas de perfumería de Barcelona.",
-    "cta": "Saber más sobre Sebastià Diago Almuzara"
+    "titulo": {
+      "es": "¿Sabías que Sebastián Diago Almuzara trabajó en Myrurgia?"
+    },
+    "texto": {
+      "es": "Su nombre conecta la familia con una de las grandes firmas históricas de perfumería de Barcelona."
+    },
+    "cta": {
+      "es": "Saber más sobre Sebastià Diago Almuzara"
+    }
   },
   {
-    "titulo": "¿Sabías que Antonio Diago Benseny estuvo ligado a una casa de huéspedes barcelonesa?",
-    "texto": "Aparece como propietario de la Casa de Huéspedes Duque, una pista muy sugerente sobre la vida urbana de la época.",
-    "cta": "Saber más sobre Antonio Diago Benseny"
+    "titulo": {
+      "es": "¿Sabías que Antonio Diago Benseny estuvo ligado a una casa de huéspedes barcelonesa?"
+    },
+    "texto": {
+      "es": "Aparece como propietario de la Casa de Huéspedes Duque, una pista muy sugerente sobre la vida urbana de la época."
+    },
+    "cta": {
+      "es": "Saber más sobre Antonio Diago Benseny"
+    }
   },
   {
-    "titulo": "¿Sabías que Nicómedes Diago Marín tuvo barbería propia con seis empleados?",
-    "texto": "Además de guardia urbano, levantó un negocio que llegó a tener un tamaño considerable.",
-    "cta": "Saber más sobre Nicómedes Diago Marín"
+    "titulo": {
+      "es": "¿Sabías que Nicómedes Diago Marín tuvo barbería propia con seis empleados?"
+    },
+    "texto": {
+      "es": "Además de guardia urbano, levantó un negocio que llegó a tener un tamaño considerable."
+    },
+    "cta": {
+      "es": "Saber más sobre Nicómedes Diago Marín"
+    }
   },
   {
-    "titulo": "¿Sabías que Nicómedes Diago Marín combinó uniforme, contabilidad y empresa?",
-    "texto": "Su perfil reúne seguridad urbana, vida política de distrito y negocio propio.",
-    "cta": "Saber más sobre Nicómedes Diago Marín"
+    "titulo": {
+      "es": "¿Sabías que Nicómedes Diago Marín combinó uniforme, contabilidad y empresa?"
+    },
+    "texto": {
+      "es": "Su perfil reúne seguridad urbana, vida política de distrito y negocio propio."
+    },
+    "cta": {
+      "es": "Saber más sobre Nicómedes Diago Marín"
+    }
   },
   {
-    "titulo": "¿Sabías que una rama de los Diago se proyectó hacia Cuba?",
-    "texto": "Varios nombres de esa línea aparecen ligados a La Habana y a una movilidad transatlántica muy llamativa.",
-    "cta": "Saber más sobre la rama Diago Almuzara"
+    "titulo": {
+      "es": "¿Sabías que una rama de los Diago se proyectó hacia Cuba?"
+    },
+    "texto": {
+      "es": "Varios nombres de esa línea aparecen ligados a La Habana y a una movilidad transatlántica muy llamativa."
+    },
+    "cta": {
+      "es": "Saber más sobre la rama Diago Almuzara"
+    }
   },
   {
-    "titulo": "¿Sabías que Ramona Diago Almuzara llevó una vida especialmente novelesca?",
-    "texto": "Su historia mezcla emigración a Cuba, violencia doméstica, viajes y largos silencios documentales.",
-    "cta": "Saber más sobre Ramona Diago Almuzara"
+    "titulo": {
+      "es": "¿Sabías que Ramona Diago Almuzara llevó una vida especialmente novelesca?"
+    },
+    "texto": {
+      "es": "Su historia mezcla emigración a Cuba, violencia doméstica, viajes y largos silencios documentales."
+    },
+    "cta": {
+      "es": "Saber más sobre Ramona Diago Almuzara"
+    }
   },
   {
-    "titulo": "¿Sabías que Enrique Molina de Pazos ocupó cargos económicos de peso en Córdoba?",
-    "texto": "Fue interventor de fondos municipales y su nombre llegó a proponerse para una distinción civil.",
-    "cta": "Saber más sobre Enrique Molina de Pazos"
+    "titulo": {
+      "es": "¿Sabías que Enrique Molina de Pazos ocupó cargos económicos de peso en Córdoba?"
+    },
+    "texto": {
+      "es": "Fue interventor de fondos municipales y su nombre llegó a proponerse para una distinción civil."
+    },
+    "cta": {
+      "es": "Saber más sobre Enrique Molina de Pazos"
+    }
   },
   {
-    "titulo": "¿Sabías que Enrique Molina Beca ejerció como médico de la Asociación de la Prensa de Córdoba?",
-    "texto": "Una posición muy concreta y prestigiosa dentro del mundo sanitario y periodístico local.",
-    "cta": "Saber más sobre Enrique Molina Beca"
+    "titulo": {
+      "es": "¿Sabías que Enrique Molina Beca ejerció como médico de la Asociación de la Prensa de Córdoba?"
+    },
+    "texto": {
+      "es": "Una posición muy concreta y prestigiosa dentro del mundo sanitario y periodístico local."
+    },
+    "cta": {
+      "es": "Saber más sobre Enrique Molina Beca"
+    }
   },
   {
-    "titulo": "¿Sabías que Celso Rafael Molina Beca fue perito agrícola?",
-    "texto": "La familia no solo miró a la ciudad: también aparecen profesiones ligadas a la tierra y la técnica agraria.",
-    "cta": "Saber más sobre Celso Rafael Molina Beca"
+    "titulo": {
+      "es": "¿Sabías que Celso Rafael Molina Beca fue perito agrícola?"
+    },
+    "texto": {
+      "es": "La familia no solo miró a la ciudad: también aparecen profesiones ligadas a la tierra y la técnica agraria."
+    },
+    "cta": {
+      "es": "Saber más sobre Celso Rafael Molina Beca"
+    }
   },
   {
-    "titulo": "¿Sabías que Eduardo Lagunilla de Plandolit fue arquitecto de Regiones Devastadas?",
-    "texto": "Su carrera lo sitúa en uno de los grandes organismos de reconstrucción de la posguerra.",
-    "cta": "Saber más sobre Eduardo Lagunilla de Plandolit"
+    "titulo": {
+      "es": "¿Sabías que Eduardo Lagunilla de Plandolit fue arquitecto de Regiones Devastadas?"
+    },
+    "texto": {
+      "es": "Su carrera lo sitúa en uno de los grandes organismos de reconstrucción de la posguerra."
+    },
+    "cta": {
+      "es": "Saber más sobre Eduardo Lagunilla de Plandolit"
+    }
   },
   {
-    "titulo": "¿Sabías que Javier Garrido Lagunilla continuó la veta arquitectónica familiar?",
-    "texto": "La arquitectura no aparece una sola vez: se repite en distintas generaciones.",
-    "cta": "Saber más sobre Javier Garrido Lagunilla"
+    "titulo": {
+      "es": "¿Sabías que Javier Garrido Lagunilla continuó la veta arquitectónica familiar?"
+    },
+    "texto": {
+      "es": "La arquitectura no aparece una sola vez: se repite en distintas generaciones."
+    },
+    "cta": {
+      "es": "Saber más sobre Javier Garrido Lagunilla"
+    }
   },
   {
-    "titulo": "¿Sabías que Júlia Godes Sanz de Bremond también figura vinculada a la arquitectura?",
-    "texto": "Otra muestra de cómo algunas vocaciones reaparecen una y otra vez en la misma familia.",
-    "cta": "Saber más sobre Júlia Godes Sanz de Bremond"
+    "titulo": {
+      "es": "¿Sabías que Júlia Godes Sanz de Bremond también figura vinculada a la arquitectura?"
+    },
+    "texto": {
+      "es": "Otra muestra de cómo algunas vocaciones reaparecen una y otra vez en la misma familia."
+    },
+    "cta": {
+      "es": "Saber más sobre Júlia Godes Sanz de Bremond"
+    }
   },
   {
-    "titulo": "¿Sabías que en la familia hay varios jueces documentados?",
-    "texto": "Nombres como Atanasio Diago Lozano o Juan de la Cruz Mediero Hernández revelan una presencia judicial poco habitual.",
-    "cta": "Saber más sobre la rama Diago y Mediero"
+    "titulo": {
+      "es": "¿Sabías que en la familia hay varios jueces documentados?"
+    },
+    "texto": {
+      "es": "Nombres como Atanasio Diago Lozano o Juan de la Cruz Mediero Hernández revelan una presencia judicial poco habitual."
+    },
+    "cta": {
+      "es": "Saber más sobre la rama Diago y Mediero"
+    }
   },
   {
-    "titulo": "¿Sabías que Francisco Mediero Matallana fue capitán y caballero condecorado?",
-    "texto": "Su perfil militar conecta la familia con el ejército y con órdenes honoríficas de su tiempo.",
-    "cta": "Saber más sobre Francisco Mediero Matallana"
+    "titulo": {
+      "es": "¿Sabías que Francisco Mediero Matallana fue capitán y caballero condecorado?"
+    },
+    "texto": {
+      "es": "Su perfil militar conecta la familia con el ejército y con órdenes honoríficas de su tiempo."
+    },
+    "cta": {
+      "es": "Saber más sobre Francisco Mediero Matallana"
+    }
   },
   {
-    "titulo": "¿Sabías que Francisco Molina Hernández fue capellán castrense?",
-    "texto": "La rama Molina enlaza así religión y mundo militar en una misma figura.",
-    "cta": "Saber más sobre Francisco Molina Hernández"
+    "titulo": {
+      "es": "¿Sabías que Francisco Molina Hernández fue capellán castrense?"
+    },
+    "texto": {
+      "es": "La rama Molina enlaza así religión y mundo militar en una misma figura."
+    },
+    "cta": {
+      "es": "Saber más sobre Francisco Molina Hernández"
+    }
   },
   {
-    "titulo": "¿Sabías que uno de los oficios más repetidos en las generaciones antiguas fue el de tejedor?",
-    "texto": "Antes de fotógrafos, abogados o consellers, hubo muchos Godes y afines vinculados al telar y a los tejidos.",
-    "cta": "Saber más sobre los oficios tradicionales de la familia"
+    "titulo": {
+      "es": "¿Sabías que uno de los oficios más repetidos en las generaciones antiguas fue el de tejedor?"
+    },
+    "texto": {
+      "es": "Antes de fotógrafos, abogados o consellers, hubo muchos Godes y afines vinculados al telar y a los tejidos."
+    },
+    "cta": {
+      "es": "Saber más sobre los oficios tradicionales de la familia"
+    }
   },
   {
-    "titulo": "¿Sabías que la familia pasa del telar a la cámara fotográfica en apenas unas generaciones?",
-    "texto": "Los registros permiten ver muy bien el salto desde oficios artesanales hacia profesiones urbanas y modernas.",
-    "cta": "Saber más sobre la evolución profesional de la familia"
+    "titulo": {
+      "es": "¿Sabías que la familia pasa del telar a la cámara fotográfica en apenas unas generaciones?"
+    },
+    "texto": {
+      "es": "Los registros permiten ver muy bien el salto desde oficios artesanales hacia profesiones urbanas y modernas."
+    },
+    "cta": {
+      "es": "Saber más sobre la evolución profesional de la familia"
+    }
   },
   {
-    "titulo": "¿Sabías que varias ramas muestran una fuerte movilidad entre Barcelona, Castellón, Córdoba y Cuba?",
-    "texto": "La familia no fue estática: hay un movimiento constante entre ciudades, puertos y destinos muy distintos.",
-    "cta": "Saber más sobre la geografía familiar"
+    "titulo": {
+      "es": "¿Sabías que varias ramas muestran una fuerte movilidad entre Barcelona, Castellón, Córdoba y Cuba?"
+    },
+    "texto": {
+      "es": "La familia no fue estática: hay un movimiento constante entre ciudades, puertos y destinos muy distintos."
+    },
+    "cta": {
+      "es": "Saber más sobre la geografía familiar"
+    }
   }
 ]

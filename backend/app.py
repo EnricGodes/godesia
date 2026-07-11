@@ -265,7 +265,16 @@ async def dashboard(lang: str = "es"):
     """All data needed for the dashboard landing page."""
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
-    return localize_dates_deep(get_dashboard_data(db_conn), _lang_param(lang))
+    lang = _lang_param(lang)
+    data = get_dashboard_data(db_conn)
+    # Anécdota multiidioma {titulo: {es,...}} → campos resueltos por idioma
+    anecdota = data.get("anecdota")
+    if isinstance(anecdota, dict):
+        data["anecdota"] = {
+            field: (value.get(lang) or value.get("es") or "") if isinstance(value, dict) else (value or "")
+            for field, value in anecdota.items()
+        }
+    return localize_dates_deep(data, lang)
 
 
 @app.get("/api/dossier/{person_id}")
