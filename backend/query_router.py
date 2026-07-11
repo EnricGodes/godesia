@@ -23,6 +23,18 @@ from database import (
 )
 from routing import IntentRouter
 
+import contextvars
+from answer_templates import render as _render_answer
+
+# Idioma de la petición en curso (lo fija route(); seguro entre hilos)
+_current_lang = contextvars.ContextVar("router_lang", default="es")
+
+
+def _t(key, **kwargs):
+    """Plantilla de respuesta (backend/answers/answers_{lang}.json) en el idioma actual."""
+    return _render_answer(key, _current_lang.get(), **kwargs)
+
+
 
 def _as_dict(row):
     return dict(row) if isinstance(row, sqlite3.Row) else row
@@ -128,7 +140,7 @@ def _person_brief(person):
     elif by:
         parts.append(f"({by})")
     if person.get("birth_place"):
-        parts.append(f"de {person['birth_place']}")
+        parts.append(_t("_person_brief.1", a=person['birth_place']))
     return " ".join(parts)
 
 
@@ -440,7 +452,8 @@ class QueryRouter:
             pass
         return toks
 
-    def route(self, question):
+    def route(self, question, lang="es"):
+        _current_lang.set(lang or "es")
         question = _clean_question(question)
         self._sql_trace = []
         try:
@@ -455,9 +468,11 @@ class QueryRouter:
             except Exception:
                 pass
 
+        unresolved = False
         if not result:
+            unresolved = True
             result = {
-                "answer": "No he sabido responder esta pregunta con las reglas actuales.",
+                "answer": _t("route.1"),
                 "people_mentioned": [],
                 "people_with_photos": [],
                 "source": "db",
@@ -466,6 +481,7 @@ class QueryRouter:
 
         result["answer"] = self._postprocess_answer(result.get("answer", ""), result.get("people_mentioned", []))
         result["source"] = "db"
+        result["unresolved"] = unresolved
         result.pop("_handler", None)
         return result
 
@@ -537,11 +553,11 @@ class QueryRouter:
     def _build_debug_block(self, handler_name: str) -> str:
         lines = ["--- DEBUG ---", f"handler: {handler_name}"]
         if self._sql_trace:
-            lines.append("sql:")
+            lines.append(_t("_build_debug_block.1"))
             for i, sql in enumerate(self._sql_trace, 1):
                 lines.append(f"{i}. {sql}")
         else:
-            lines.append("sql: (sin consultas SQLite capturadas)")
+            lines.append(_t("_build_debug_block.2"))
         return "\n".join(lines)
 
     def _extract_year_hint(self, text: str) -> Tuple[str, Optional[int]]:
@@ -819,14 +835,14 @@ class QueryRouter:
         if self._is_grandparent_of(b, a):
             return _sexed_role(a, "nieto", "nieta", "nieto/a")
         if self._is_uncle_aunt_of(a, b):
-            return "tío/tía y sobrino/a"
+            return _t("_relationship_label.1")
         if self._is_uncle_aunt_of(b, a):
-            return "sobrino/a y tío/tía"
+            return _t("_relationship_label.2")
         if self._is_first_cousin(a, b):
             return "primos hermanos"
         rel = self._get_marriage_or_partnership(a["id"], b["id"])
         if rel:
-            return "cónyuges o pareja"
+            return _t("_relationship_label.3")
         return None
 
     def handle_family_stats(self, question):
@@ -858,17 +874,17 @@ class QueryRouter:
         gens = round(span / 30) if span else None
         pct = round(with_photo * 100 / total) if total else 0
 
-        header = (f"<strong>La familia Godes</strong> reúne <strong>{total} personas</strong> documentadas"
-                  + (f" a lo largo de <strong>{span} años</strong> de historia." if span else "."))
+        header = (_t("handle_family_stats.1", a=total)
+                  + (_t("handle_family_stats.2", a=span) if span else "."))
         rows_out = [
             f"👨‍👩‍👧 <strong>Familias</strong> · {marriages} matrimonios"
             + (f" y {partnerships} parejas" if partnerships else ""),
             f"🌿 <strong>Vivos</strong> · {living} · <strong>Fallecidos</strong> · {deceased}",
         ]
         if min_y and max_y:
-            rows_out.append(f"📅 <strong>Arco temporal</strong> · {min_y} – {max_y}"
-                            + (f" · ~{gens} generaciones" if gens else ""))
-        rows_out.append(f"🖼️ <strong>Con fotografía</strong> · {with_photo} ({pct}%)")
+            rows_out.append(_t("handle_family_stats.4", a=min_y, b=max_y)
+                            + (_t("handle_family_stats.5", a=gens) if gens else ""))
+        rows_out.append(_t("handle_family_stats.3", a=with_photo, b=pct))
         answer = header + "\n\n" + "\n".join(rows_out)
         return {"answer": answer, "people_mentioned": [], "people_with_photos": []}
 
@@ -881,7 +897,7 @@ class QueryRouter:
         ).fetchall()]
         total = len(rows)
         if not total:
-            return {"answer": "No consta ninguna persona viva en el árbol.",
+            return {"answer": _t("handle_living_members.2"),
                     "people_mentioned": [], "people_with_photos": []}
         branch = Counter()
         for r in rows:
@@ -899,22 +915,22 @@ class QueryRouter:
         def _links(lst):
             return ", ".join(f"{_person_link(r)} ({r['birth_year']})" for r in lst)
 
-        header = f"Actualmente hay <strong>{total} personas vivas</strong> en la familia Godes."
+        header = _t("handle_living_members.1", a=total)
         parts = [header, ""]
         if top_branches:
-            parts.append("🌿 <strong>Por rama</strong>")
+            parts.append(_t("handle_living_members.3"))
             parts.append(", ".join(f"{n} ({k})" for n, k in top_branches))
             parts.append("")
         if dec:
-            parts.append("📅 <strong>Por década de nacimiento</strong>")
+            parts.append(_t("handle_living_members.4"))
             parts.append(", ".join(f"{k}s: {v}" for k, v in sorted(dec.items())))
             parts.append("")
         if oldest:
-            parts.append("👴 <strong>Los de más edad</strong>")
+            parts.append(_t("handle_living_members.5"))
             parts.append(_links(oldest))
             parts.append("")
         if youngest:
-            parts.append("👶 <strong>Los más jóvenes</strong>")
+            parts.append(_t("handle_living_members.6"))
             parts.append(_links(youngest))
         highlight = oldest[:3] + youngest[:3]
         return {
@@ -939,9 +955,9 @@ class QueryRouter:
         ).fetchall()]
         mes = months[month]
         if not rows:
-            return {"answer": f"Este mes ({mes}) no hay aniversarios de personas vivas en la familia.",
+            return {"answer": _t("handle_anniversaries.2", a=mes),
                     "people_mentioned": [], "people_with_photos": []}
-        header = f"🎂 <strong>Aniversarios en {mes}</strong> · {len(rows)} personas"
+        header = _t("handle_anniversaries.1", a=mes, b=len(rows))
         parts = [header, ""]
         for r in rows:
             day = r.get("birth_day")
@@ -950,9 +966,9 @@ class QueryRouter:
             extra = ""
             if by:
                 age = this_year - by
-                yr = "año" if age == 1 else "años"
+                yr = _t("handle_anniversaries.3") if age == 1 else _t("handle_anniversaries.4")
                 extra = f" — cumple {age} {yr}"
-            parts.append(f"<strong>{day} {mes}</strong> · {link}{extra}")
+            parts.append(_t("handle_anniversaries.5", a=day, b=mes, c=link, d=extra))
         return {
             "answer": "\n".join(parts),
             "people_mentioned": [r["id"] for r in rows],
@@ -1084,13 +1100,13 @@ class QueryRouter:
         father = self._get_parent(person, "father")
         mother = self._get_parent(person, "mother")
         if not father and not mother:
-            answer = f"No constan los padres de {person['name']}."
+            answer = _t("handle_parents.1", a=person['name'])
         elif father and mother:
-            answer = f"Los padres de {person['name']} fueron { _person_brief(father) } y { _person_brief(mother) }."
+            answer = _t("handle_parents.2", a=person['name'], b=_person_brief(father), c=_person_brief(mother))
         elif father:
-            answer = f"De {person['name']} solo consta su padre: { _person_brief(father) }."
+            answer = _t("handle_parents.3", a=person['name'], b=_person_brief(father))
         else:
-            answer = f"De {person['name']} solo consta su madre: { _person_brief(mother) }."
+            answer = _t("handle_parents.4", a=person['name'], b=_person_brief(mother))
         return {"answer": answer, "people_mentioned": [x["id"] for x in [person, father, mother] if x], "people_with_photos": self._people_payload([person, father, mother])}
 
     def handle_father(self, question):
@@ -1101,7 +1117,7 @@ class QueryRouter:
         if not person:
             return None
         father = self._get_parent(person, "father")
-        answer = f"El padre de {person['name']} fue { _person_brief(father) }." if father else f"No consta el padre de {person['name']}."
+        answer = _t("handle_father.1", a=person['name'], b=_person_brief(father)) if father else _t("handle_father.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [x["id"] for x in [person, father] if x], "people_with_photos": self._people_payload([person, father])}
 
     def handle_birth_union(self, question):
@@ -1115,7 +1131,7 @@ class QueryRouter:
         mother = self._get_parent(person, "mother")
         people = [person, father, mother]
         if not father and not mother:
-            answer = f"No consta de qué matrimonio o pareja nació {person['name']}."
+            answer = _t("handle_birth_union.1", a=person['name'])
         elif father and mother:
             union = self._get_marriage_or_partnership(father["id"], mother["id"])
             if union and union["kind"] == "marriage":
@@ -1124,14 +1140,14 @@ class QueryRouter:
                     extra += f", celebrado el {union['date']}"
                 if union.get("place"):
                     extra += f" en {union['place']}"
-                answer = f"{person['name']} nació del matrimonio entre {father['name']} y {mother['name']}{extra}."
+                answer = _t("handle_birth_union.3", a=person['name'], b=father['name'], c=mother['name'], d=extra)
             elif union and union["kind"] == "partnership":
                 extra = f" con inicio documentado en {union['date']}" if union.get("date") else ""
-                answer = f"{person['name']} nació de la pareja formada por {father['name']} y {mother['name']}{extra}."
+                answer = _t("handle_birth_union.4", a=person['name'], b=father['name'], c=mother['name'], d=extra)
             else:
-                answer = f"{person['name']} fue hija/o de {father['name']} y {mother['name']}, pero no consta un matrimonio o una pareja documentados entre ambos."
+                answer = _t("handle_birth_union.5", a=person['name'], b=father['name'], c=mother['name'])
         else:
-            answer = f"De {person['name']} solo consta un progenitor documentado: { _person_brief(father or mother) }."
+            answer = _t("handle_birth_union.2", a=person['name'], b=_person_brief(father or mother))
         return {"answer": answer, "people_mentioned": [p["id"] for p in people if p], "people_with_photos": self._people_payload(people)}
 
     def handle_siblings(self, question):
@@ -1143,9 +1159,9 @@ class QueryRouter:
             return None
         siblings = _sort_people(get_siblings(self.conn, person["id"]))
         if not siblings:
-            answer = f"{person['name']} no tenía hermanos o hermanas documentados."
+            answer = _t("handle_siblings.1", a=person['name'])
         else:
-            answer = f"Los hermanos y hermanas de {person['name']} fueron { _join_names(siblings) }."
+            answer = _t("handle_siblings.2", a=person['name'], b=_join_names(siblings))
         return {"answer": answer, "people_mentioned": [person["id"]] + [s["id"] for s in siblings], "people_with_photos": self._people_payload([person] + siblings)}
 
     def handle_siblings_count(self, question):
@@ -1157,9 +1173,9 @@ class QueryRouter:
             return None
         siblings = _sort_people(get_siblings(self.conn, person["id"]))
         if siblings:
-            answer = f"{person['name']} tenía {len(siblings)} hermanos o hermanas documentados: { _join_names(siblings) }."
+            answer = _t("handle_siblings_count.1", a=person['name'], b=len(siblings), c=_join_names(siblings))
         else:
-            answer = f"{person['name']} no tenía hermanos o hermanas documentados."
+            answer = _t("handle_siblings_count.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [person["id"]] + [s["id"] for s in siblings], "people_with_photos": self._people_payload([person] + siblings)}
 
     def handle_paternal_grandfather(self, question):
@@ -1170,7 +1186,7 @@ class QueryRouter:
         if not person:
             return None
         gp = self._get_grandparent(person, "father", "father")
-        answer = f"El abuelo paterno de {person['name']} fue { _person_brief(gp) }." if gp else f"No consta documentado el abuelo paterno de {person['name']}."
+        answer = _t("handle_paternal_grandfather.1", a=person['name'], b=_person_brief(gp)) if gp else _t("handle_paternal_grandfather.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [x["id"] for x in [person, gp] if x], "people_with_photos": self._people_payload([person, gp])}
 
     def handle_maternal_grandmother(self, question):
@@ -1181,7 +1197,7 @@ class QueryRouter:
         if not person:
             return None
         gm = self._get_grandparent(person, "mother", "mother")
-        answer = f"La abuela materna de {person['name']} fue { _person_brief(gm) }." if gm else f"No consta documentada la abuela materna de {person['name']}."
+        answer = _t("handle_maternal_grandmother.1", a=person['name'], b=_person_brief(gm)) if gm else _t("handle_maternal_grandmother.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [x["id"] for x in [person, gm] if x], "people_with_photos": self._people_payload([person, gm])}
 
     def handle_paternal_grandmother(self, question):
@@ -1192,7 +1208,7 @@ class QueryRouter:
         if not person:
             return None
         gm = self._get_grandparent(person, "father", "mother")
-        answer = f"La abuela paterna de {person['name']} fue { _person_brief(gm) }." if gm else f"No consta documentada la abuela paterna de {person['name']}."
+        answer = _t("handle_paternal_grandmother.1", a=person['name'], b=_person_brief(gm)) if gm else _t("handle_paternal_grandmother.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [x["id"] for x in [person, gm] if x], "people_with_photos": self._people_payload([person, gm])}
 
     def handle_maternal_grandfather(self, question):
@@ -1203,7 +1219,7 @@ class QueryRouter:
         if not person:
             return None
         gp = self._get_grandparent(person, "mother", "father")
-        answer = f"El abuelo materno de {person['name']} fue { _person_brief(gp) }." if gp else f"No consta documentado el abuelo materno de {person['name']}."
+        answer = _t("handle_maternal_grandfather.1", a=person['name'], b=_person_brief(gp)) if gp else _t("handle_maternal_grandfather.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [x["id"] for x in [person, gp] if x], "people_with_photos": self._people_payload([person, gp])}
 
     def handle_uncles_and_aunts(self, question):
@@ -1221,13 +1237,13 @@ class QueryRouter:
         maternal = _sort_people(maternal)
         sections = []
         if paternal:
-            sections.append("por parte de padre: " + _join_names(paternal))
+            sections.append(_t("handle_uncles_and_aunts.3") + _join_names(paternal))
         if maternal:
-            sections.append("por parte de madre: " + _join_names(maternal))
+            sections.append(_t("handle_uncles_and_aunts.4") + _join_names(maternal))
         if not sections:
-            answer = f"No constan tíos o tías documentados de {_person_link(person)}."
+            answer = _t("handle_uncles_and_aunts.1", a=_person_link(person))
         else:
-            answer = f"Los tíos y tías de {_person_link(person)} fueron " + "; ".join(sections) + "."
+            answer = _t("handle_uncles_and_aunts.2", a=_person_link(person)) + "; ".join(sections) + "."
         people = [person] + paternal + maternal
         return {"answer": answer, "people_mentioned": [p["id"] for p in people if p], "people_with_photos": self._people_payload(people)}
 
@@ -1243,13 +1259,13 @@ class QueryRouter:
         maternal = _sort_people(maternal)
         sections = []
         if paternal:
-            sections.append("por parte de padre: " + _join_names(paternal))
+            sections.append(_t("handle_uncles.3") + _join_names(paternal))
         if maternal:
-            sections.append("por parte de madre: " + _join_names(maternal))
+            sections.append(_t("handle_uncles.4") + _join_names(maternal))
         if not sections:
-            answer = f"No constan tíos o tías documentados de {person['name']}."
+            answer = _t("handle_uncles.1", a=person['name'])
         else:
-            answer = f"Los tíos y tías de {person['name']} fueron " + "; ".join(sections) + "."
+            answer = _t("handle_uncles.2", a=person['name']) + "; ".join(sections) + "."
         people = [person] + paternal + maternal
         return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
 
@@ -1265,14 +1281,14 @@ class QueryRouter:
         maternal_cousins = _sort_people(maternal_cousins)
         sections = []
         if paternal_cousins:
-            sections.append("por parte paterna: " + _join_names(paternal_cousins))
+            sections.append(_t("handle_first_cousins.3") + _join_names(paternal_cousins))
         if maternal_cousins:
-            sections.append("por parte materna: " + _join_names(maternal_cousins))
+            sections.append(_t("handle_first_cousins.4") + _join_names(maternal_cousins))
         if not sections:
-            answer = f"No constan primos hermanos documentados de {person['name']}."
+            answer = _t("handle_first_cousins.1", a=person['name'])
         else:
             total = len(paternal_cousins) + len(maternal_cousins)
-            answer = f"Los primos hermanos de {person['name']} fueron {total} en total: " + "; ".join(sections) + "."
+            answer = _t("handle_first_cousins.2", a=person['name'], b=total) + "; ".join(sections) + "."
         people = [person] + paternal_cousins + maternal_cousins
         return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
 
@@ -1288,9 +1304,9 @@ class QueryRouter:
         siblings = [s for s in siblings if s and s["id"] != person["id"]]
         nephews = _sort_people(self._children_of_ids([s["id"] for s in siblings]))
         if not nephews:
-            answer = f"No constan sobrinos o sobrinas documentados de {person['name']}."
+            answer = _t("handle_nephews_nieces.1", a=person['name'])
         else:
-            answer = f"Los sobrinos y sobrinas de {person['name']} fueron { _join_names(nephews) }."
+            answer = _t("handle_nephews_nieces.2", a=person['name'], b=_join_names(nephews))
         people = [person] + nephews
         return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
 
@@ -1305,9 +1321,9 @@ class QueryRouter:
         children = [_as_dict(c) for c in get_children(self.conn, person["id"])]
         grandchildren = _sort_people(self._children_of_ids([c["id"] for c in children if c]))
         if not grandchildren:
-            answer = f"No constan nietos o nietas documentados de {person['name']}."
+            answer = _t("handle_grandchildren.1", a=person['name'])
         else:
-            answer = f"Los nietos y nietas de {person['name']} fueron { _join_names(grandchildren) }."
+            answer = _t("handle_grandchildren.2", a=person['name'], b=_join_names(grandchildren))
         people = [person] + grandchildren
         return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
 
@@ -1323,9 +1339,9 @@ class QueryRouter:
         grandchildren = self._children_of_ids([c["id"] for c in children if c])
         greatgc = _sort_people(self._children_of_ids([g["id"] for g in grandchildren]))
         if not greatgc:
-            answer = f"No constan bisnietos o bisnietas documentados de {person['name']}."
+            answer = _t("handle_great_grandchildren.1", a=person['name'])
         else:
-            answer = f"Los bisnietos y bisnietas de {person['name']} fueron { _join_names(greatgc) }."
+            answer = _t("handle_great_grandchildren.2", a=person['name'], b=_join_names(greatgc))
         people = [person] + greatgc
         return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
 
@@ -1447,9 +1463,9 @@ class QueryRouter:
             return None
         rows = _sort_people(self._unique_by_id(compute(person)))
         if not rows:
-            ans = f"No constan {noun} documentados de {_person_link(person)}."
+            ans = _t("_kin_answer.1", a=noun, b=_person_link(person))
         else:
-            ans = f"Los {noun} de {_person_link(person)} fueron {_join_names(rows)}."
+            ans = _t("_kin_answer.2", a=noun, b=_person_link(person), c=_join_names(rows))
         people = [person] + rows
         return {"answer": ans, "people_mentioned": [x["id"] for x in people],
                 "people_with_photos": self._people_payload(people[:26])}
@@ -1540,9 +1556,9 @@ class QueryRouter:
                 parts.append(txt)
                 people.append(partner)
         if not parts:
-            answer = f"No consta que {person['name']} se casara o tuviera una pareja documentada."
+            answer = _t("handle_spouse_or_partner.1", a=person['name'])
         else:
-            answer = f"{person['name']} se casó o emparejó con { '; '.join(parts) }."
+            answer = _t("handle_spouse_or_partner.2", a=person['name'], b='; '.join(parts))
         return {"answer": answer, "people_mentioned": [p["id"] for p in people if p], "people_with_photos": self._people_payload(people)}
 
     def handle_spouse_with_person_type(self, question):
@@ -1556,7 +1572,7 @@ class QueryRouter:
             return None
         spouses = get_spouses(self.conn, person["id"])
         if not spouses:
-            answer = f"No consta que {_person_link(person)} se casara o formara pareja documentada."
+            answer = _t("handle_spouse_with_person_type.1", a=_person_link(person))
             people = [person]
         else:
             parts = []
@@ -1570,7 +1586,7 @@ class QueryRouter:
                     txt += f" en {s['marriage_place']}"
                 parts.append(txt)
                 people.append(sp)
-            answer = f"{_person_link(person)} formó pareja o matrimonio con { '; '.join(parts) }."
+            answer = _t("handle_spouse_with_person_type.2", a=_person_link(person), b='; '.join(parts))
         return {"answer": answer, "people_mentioned": [p["id"] for p in people if p], "people_with_photos": self._people_payload(people)}
 
     def handle_spouse(self, question):
@@ -1582,7 +1598,7 @@ class QueryRouter:
             return None
         spouses = get_spouses(self.conn, person["id"])
         if not spouses:
-            answer = f"No consta cónyuge documentado de {person['name']}."
+            answer = _t("handle_spouse.1", a=person['name'])
             people = [person]
         else:
             parts = []
@@ -1596,7 +1612,7 @@ class QueryRouter:
                     txt += f" en {s['marriage_place']}"
                 parts.append(txt)
                 people.append(sp)
-            answer = f"El cónyuge de {person['name']} fue { '; '.join(parts) }."
+            answer = _t("handle_spouse.2", a=person['name'], b='; '.join(parts))
         return {"answer": answer, "people_mentioned": [p["id"] for p in people if p], "people_with_photos": self._people_payload(people)}
 
     def handle_children(self, question):
@@ -1608,12 +1624,12 @@ class QueryRouter:
             return None
         children = _sort_people(list(get_children(self.conn, person["id"])))
         if not children:
-            answer = f"No constan hijos documentados de {person['name']}."
+            answer = _t("handle_children.1", a=person['name'])
         else:
             if len(children) == 1:
-                answer = f"El hijo de {person['name']} fue { _join_names(children) }."
+                answer = _t("handle_children.2", a=person['name'], b=_join_names(children))
             else:
-                answer = f"Los hijos de {person['name']} fueron { _join_names(children) }."
+                answer = _t("handle_children.3", a=person['name'], b=_join_names(children))
         return {"answer": answer, "people_mentioned": [person["id"]] + [c["id"] for c in children], "people_with_photos": self._people_payload([person] + children)}
 
     def handle_couple_children(self, question):
@@ -1631,9 +1647,9 @@ class QueryRouter:
         cb = {_as_dict(x)["id"] for x in get_children(self.conn, b["id"])}
         shared = _sort_people([ca[k] for k in ca if k in cb])
         if not shared:
-            return {"answer": f"No constan hijos en común documentados de {_person_link(a)} y {_person_link(b)}.",
+            return {"answer": _t("handle_couple_children.2", a=_person_link(a), b=_person_link(b)),
                     "people_mentioned": [a["id"], b["id"]], "people_with_photos": self._people_payload([a, b])}
-        answer = f"Los hijos de {_person_link(a)} y {_person_link(b)} fueron { _join_names(shared) }."
+        answer = _t("handle_couple_children.1", a=_person_link(a), b=_person_link(b), c=_join_names(shared))
         return {"answer": answer, "people_mentioned": [a["id"], b["id"]] + [s["id"] for s in shared],
                 "people_with_photos": self._people_payload([a, b] + shared)}
 
@@ -1648,9 +1664,9 @@ class QueryRouter:
             return None
         by, dy = person.get("birth_year"), person.get("death_year")
         if not by or not dy:
-            return {"answer": f"No consta cuántos años vivió {_person_link(person)}: faltan fechas de nacimiento o defunción.",
+            return {"answer": _t("handle_lifespan.2", a=_person_link(person)),
                     "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
-        return {"answer": f"{_person_link(person)} vivió unos {dy - by} años ({by}–{dy}).",
+        return {"answer": _t("handle_lifespan.1", a=_person_link(person), b=dy - by, c=by, d=dy),
                 "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
 
     def handle_death_year_search(self, question):
@@ -1664,8 +1680,8 @@ class QueryRouter:
             (year,),
         ).fetchall()]
         if not rows:
-            return {"answer": f"No consta ninguna persona fallecida en {year}.", "people_mentioned": [], "people_with_photos": []}
-        return {"answer": self._list_people_answer(f"Personas fallecidas en {year}", rows),
+            return {"answer": _t("handle_death_year_search.1", a=year), "people_mentioned": [], "people_with_photos": []}
+        return {"answer": self._list_people_answer(_t("handle_death_year_search.2", a=year), rows),
                 "people_mentioned": [r["id"] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_children_count(self, question):
@@ -1678,9 +1694,9 @@ class QueryRouter:
         children = _sort_people(list(get_children(self.conn, person["id"])))
         if children:
             count_word = "hijo o hija" if len(children) == 1 else "hijos o hijas"
-            answer = f"{person['name']} tuvo {len(children)} {count_word} documentad{'o' if len(children) == 1 else 'os'}: { _join_names(children) }."
+            answer = _t("handle_children_count.1", a=person['name'], b=len(children), c=count_word, d='o' if len(children) == 1 else 'os', e=_join_names(children))
         else:
-            answer = f"{person['name']} no tuvo hijos o hijas documentados."
+            answer = _t("handle_children_count.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [person["id"]] + [c["id"] for c in children], "people_with_photos": self._people_payload([person] + children)}
 
     def handle_first_child(self, question):
@@ -1693,9 +1709,9 @@ class QueryRouter:
             return None
         children = _sort_people(list(get_children(self.conn, person["id"])))
         if not children:
-            return {"answer": f"No constan hijos documentados de {_person_link(person)}.", "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_first_child.2", a=_person_link(person)), "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
         first = children[0]
-        return {"answer": f"El primer hijo de {_person_link(person)} fue {_person_link(first)}.", "people_mentioned": [person["id"], first["id"]], "people_with_photos": self._people_payload([person, first])}
+        return {"answer": _t("handle_first_child.1", a=_person_link(person), b=_person_link(first)), "people_mentioned": [person["id"], first["id"]], "people_with_photos": self._people_payload([person, first])}
 
     def handle_oldest_son(self, question):
         q = _clean_question(question)
@@ -1708,9 +1724,9 @@ class QueryRouter:
         children = _sort_people(list(get_children(self.conn, person["id"])))
         sons = [c for c in children if c.get("sex") == "M"]
         if not sons:
-            return {"answer": f"No constan hijos varones documentados de {_person_link(person)}.", "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_oldest_son.2", a=_person_link(person)), "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
         oldest = sons[0]
-        return {"answer": f"El hijo mayor de {_person_link(person)} fue {_person_link(oldest)}.", "people_mentioned": [person["id"], oldest["id"]], "people_with_photos": self._people_payload([person, oldest])}
+        return {"answer": _t("handle_oldest_son.1", a=_person_link(person), b=_person_link(oldest)), "people_mentioned": [person["id"], oldest["id"]], "people_with_photos": self._people_payload([person, oldest])}
 
     def handle_oldest_daughter(self, question):
         q = _clean_question(question)
@@ -1723,9 +1739,9 @@ class QueryRouter:
         children = _sort_people(list(get_children(self.conn, person["id"])))
         daughters = [c for c in children if c.get("sex") == "F"]
         if not daughters:
-            return {"answer": f"No constan hijas documentadas de {_person_link(person)}.", "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_oldest_daughter.2", a=_person_link(person)), "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
         oldest = daughters[0]
-        return {"answer": f"La hija mayor de {_person_link(person)} fue {_person_link(oldest)}.", "people_mentioned": [person["id"], oldest["id"]], "people_with_photos": self._people_payload([person, oldest])}
+        return {"answer": _t("handle_oldest_daughter.1", a=_person_link(person), b=_person_link(oldest)), "people_mentioned": [person["id"], oldest["id"]], "people_with_photos": self._people_payload([person, oldest])}
 
     def handle_last_child(self, question):
         q = _clean_question(question)
@@ -1737,9 +1753,9 @@ class QueryRouter:
             return None
         children = _sort_people(list(get_children(self.conn, person["id"])))
         if not children:
-            return {"answer": f"No constan hijos documentados de {_person_link(person)}.", "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_last_child.2", a=_person_link(person)), "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
         last = children[-1]
-        return {"answer": f"El ultimo hijo de {_person_link(person)} fue {_person_link(last)}.", "people_mentioned": [person["id"], last["id"]], "people_with_photos": self._people_payload([person, last])}
+        return {"answer": _t("handle_last_child.1", a=_person_link(person), b=_person_link(last)), "people_mentioned": [person["id"], last["id"]], "people_with_photos": self._people_payload([person, last])}
 
     def handle_immediate_ascendants(self, question):
         q = _clean_question(question)
@@ -1753,10 +1769,10 @@ class QueryRouter:
         mother = self._get_parent(person, "mother")
         ascendants = [p for p in [father, mother] if p]
         if not ascendants:
-            return {"answer": f"No constan ascendientes documentados de {_person_link(person)}.", "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_immediate_ascendants.2", a=_person_link(person)), "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
         count = len(ascendants)
         links = ", ".join(_person_link(p) for p in ascendants)
-        return {"answer": f"Los ascendientes inmediatos de {_person_link(person)} fueron {count}: {links}.", "people_mentioned": [person["id"]] + [p["id"] for p in ascendants], "people_with_photos": self._people_payload([person] + ascendants)}
+        return {"answer": _t("handle_immediate_ascendants.1", a=_person_link(person), b=count, c=links), "people_mentioned": [person["id"]] + [p["id"] for p in ascendants], "people_with_photos": self._people_payload([person] + ascendants)}
 
     def handle_are_cousins(self, question):
         names = self._extract_two_names(question)
@@ -1767,13 +1783,13 @@ class QueryRouter:
         if not a or not b:
             return None
         if self._is_first_cousin(a, b):
-            answer = f"Sí, {a['name']} y {b['name']} eran primos hermanos."
+            answer = _t("handle_are_cousins.1", a=a['name'], b=b['name'])
         else:
             other = self._relationship_label(a, b)
             if other and other != "primos hermanos":
-                answer = f"No, {a['name']} y {b['name']} no eran primos hermanos; la relación documentada entre ambos era de {other}."
+                answer = _t("handle_are_cousins.2", a=a['name'], b=b['name'], c=other)
             else:
-                answer = f"No, {a['name']} y {b['name']} no constan como primos hermanos."
+                answer = _t("handle_are_cousins.3", a=a['name'], b=b['name'])
         return {"answer": answer, "people_mentioned": [a["id"], b["id"]], "people_with_photos": self._people_payload([a, b])}
 
     def handle_is_grandparent_of(self, question):
@@ -1786,9 +1802,9 @@ class QueryRouter:
             return None
         role = _sexed_role(gp, "abuelo", "abuela", "abuelo/a")
         if self._is_grandparent_of(gp, person):
-            answer = f"Sí. {gp['name']} era {role} de {person['name']}."
+            answer = _t("handle_is_grandparent_of.1", a=gp['name'], b=role, c=person['name'])
         else:
-            answer = f"No. {gp['name']} no figura como abuelo o abuela de {person['name']}."
+            answer = _t("handle_is_grandparent_of.2", a=gp['name'], b=person['name'])
         return {"answer": answer, "people_mentioned": [gp["id"], person["id"]], "people_with_photos": self._people_payload([gp, person])}
 
     def handle_parents_and_children(self, question):
@@ -1808,15 +1824,15 @@ class QueryRouter:
                 pp.append(father["name"])
             if mother:
                 pp.append(mother["name"])
-            parts.append("sus padres fueron " + " y ".join(pp))
+            parts.append(_t("handle_parents_and_children.2") + " y ".join(pp))
         else:
-            parts.append("no constan sus padres")
+            parts.append(_t("handle_parents_and_children.3"))
         if children:
-            parts.append("sus hijos fueron " + _join_names(children))
+            parts.append(_t("handle_parents_and_children.4") + _join_names(children))
         else:
-            parts.append("no constan hijos documentados")
+            parts.append(_t("handle_parents_and_children.5"))
         people = [person, father, mother] + children
-        return {"answer": f"De {person['name']}, " + "; ".join(parts) + ".", "people_mentioned": [p["id"] for p in people if p], "people_with_photos": self._people_payload([p for p in people if p])}
+        return {"answer": _t("handle_parents_and_children.1", a=person['name']) + "; ".join(parts) + ".", "people_mentioned": [p["id"] for p in people if p], "people_with_photos": self._people_payload([p for p in people if p])}
 
     def handle_direct_descendants(self, question):
         """Handle 'cuántos descendientes directos dejó [person]'."""
@@ -1831,9 +1847,9 @@ class QueryRouter:
         # Direct descendants = children
         children = _sort_people(list(get_children(self.conn, person["id"])))
         if not children:
-            answer = f"{_person_link(person)} no tuvo descendientes directos documentados."
+            answer = _t("handle_direct_descendants.1", a=_person_link(person))
         else:
-            answer = f"{_person_link(person)} tuvo {len(children)} descendiente(s) directo(s) documentado(s): {_join_names(children)}."
+            answer = _t("handle_direct_descendants.2", a=_person_link(person), b=len(children), c=_join_names(children))
         return {"answer": answer, "people_mentioned": [person["id"]] + [c["id"] for c in children], "people_with_photos": self._people_payload([person] + children)}
 
     def handle_has_descendants(self, question):
@@ -1845,9 +1861,9 @@ class QueryRouter:
             return None
         count = self._all_descendants_count(person["id"])
         if count > 0:
-            answer = f"Sí. De {person['name']} consta descendencia documentada: al menos {count} descendientes en el árbol."
+            answer = _t("handle_has_descendants.1", a=person['name'], b=count)
         else:
-            answer = f"No consta descendencia documentada de {person['name']}."
+            answer = _t("handle_has_descendants.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
 
     def handle_parents_in_law(self, question):
@@ -1859,7 +1875,7 @@ class QueryRouter:
             return None
         spouses = get_spouses(self.conn, person["id"])
         if not spouses:
-            answer = f"No consta cónyuge documentado de {person['name']}, así que no puedo determinar suegro o suegra."
+            answer = _t("handle_parents_in_law.1", a=person['name'])
             people = [person]
         else:
             sections = []
@@ -1870,15 +1886,15 @@ class QueryRouter:
                 sm = self._get_parent(sp, "mother")
                 bits = []
                 if sf:
-                    bits.append(f"suegro: {sf['name']}")
+                    bits.append(_t("handle_parents_in_law.4", a=sf['name']))
                     people.append(sf)
                 if sm:
-                    bits.append(f"suegra: {sm['name']}")
+                    bits.append(_t("handle_parents_in_law.5", a=sm['name']))
                     people.append(sm)
                 people.append(sp)
                 if bits:
-                    sections.append(f"para su relación con {sp['name']}, " + ", ".join(bits))
-            answer = f"De {person['name']}, " + "; ".join(sections) + "." if sections else f"No constan los padres del cónyuge de {person['name']}."
+                    sections.append(_t("handle_parents_in_law.6", a=sp['name']) + ", ".join(bits))
+            answer = _t("handle_parents_in_law.2", a=person['name']) + "; ".join(sections) + "." if sections else _t("handle_parents_in_law.3", a=person['name'])
         return {"answer": answer, "people_mentioned": [p["id"] for p in people if p], "people_with_photos": self._people_payload([p for p in people if p])}
 
     def handle_relationship(self, question):
@@ -1891,9 +1907,9 @@ class QueryRouter:
             return None
         rel = self._relationship_label(a, b)
         if rel:
-            answer = f"La relación entre {a['name']} y {b['name']} era de {rel}."
+            answer = _t("handle_relationship.1", a=a['name'], b=b['name'], c=rel)
         else:
-            answer = f"No he podido determinar con las reglas actuales la relación exacta entre {a['name']} y {b['name']}."
+            answer = _t("handle_relationship.2", a=a['name'], b=b['name'])
         return {"answer": answer, "people_mentioned": [a["id"], b["id"]], "people_with_photos": self._people_payload([a, b])}
 
 
@@ -1908,7 +1924,7 @@ class QueryRouter:
             return None
         children = _sort_people(self._children_rows_for_parent(parent['id']))
         if not children:
-            answer = f"No constan hijos documentados de {parent['name']}."
+            answer = _t("handle_age_at_first_child.1", a=parent['name'])
             return {"answer": answer, "people_mentioned": [parent['id']], "people_with_photos": self._people_payload([parent])}
         child = children[0]
         named_child = _normalize_name_fragment(m.group(2)) if m.lastindex and m.lastindex >= 2 else None
@@ -1918,9 +1934,9 @@ class QueryRouter:
                 child = chosen
         age = self._age_from_years(parent.get('birth_year'), child.get('birth_year'))
         if age is None:
-            answer = f"No puedo calcular con precisión la edad de {parent['name']} cuando nació {child['name']} porque faltan años de nacimiento."
+            answer = _t("handle_age_at_first_child.2", a=parent['name'], b=child['name'])
         else:
-            answer = f"{parent['name']} tenía aproximadamente {age} años cuando nació {child['name']} ({child.get('birth_year')})."
+            answer = _t("handle_age_at_first_child.3", a=parent['name'], b=age, c=child['name'], d=child.get('birth_year'))
         return {"answer": answer, "people_mentioned": [parent['id'], child['id']], "people_with_photos": self._people_payload([parent, child])}
 
     def handle_age_at_marriage(self, question):
@@ -1935,17 +1951,17 @@ class QueryRouter:
             return None
         spouses = get_spouses(self.conn, person['id'])
         if not spouses:
-            answer = f"No consta un matrimonio documentado de {person['name']}."
+            answer = _t("handle_age_at_marriage.1", a=person['name'])
             return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         first = min(spouses, key=lambda s: self._extract_year_from_text(s.get('marriage_date')) or 999999)
         marriage_year = self._extract_year_from_text(first.get('marriage_date'))
         age = self._age_from_years(person.get('birth_year'), marriage_year)
         spouse = _as_dict(first['person'])
         if age is None:
-            answer = f"No puedo calcular con precisión la edad de {person['name']} al casarse con {spouse['name']} porque falta el año de nacimiento o de matrimonio."
+            answer = _t("handle_age_at_marriage.2", a=person['name'], b=spouse['name'])
         else:
             extra = f" el {first['marriage_date']}" if first.get('marriage_date') else ""
-            answer = f"{person['name']} tenía aproximadamente {age} años cuando se casó con {spouse['name']}{extra}."
+            answer = _t("handle_age_at_marriage.3", a=person['name'], b=age, c=spouse['name'], d=extra)
         return {"answer": answer, "people_mentioned": [person['id'], spouse['id']], "people_with_photos": self._people_payload([person, spouse])}
 
     def handle_spouse_disambiguated_by_birth_place(self, question):
@@ -1957,7 +1973,7 @@ class QueryRouter:
             return None
         spouses = get_spouses(self.conn, person['id'])
         if not spouses:
-            answer = f"No consta un cónyuge documentado de {person['name']}."
+            answer = _t("handle_spouse_disambiguated_by_birth_place.2", a=person['name'])
             return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         parts = []
         people = [person]
@@ -1970,7 +1986,7 @@ class QueryRouter:
                 txt += f" en {s['marriage_place']}"
             parts.append(txt)
             people.append(sp)
-        answer = f"La persona nacida en {place} llamada {person['name']} se casó con " + "; ".join(parts) + "."
+        answer = _t("handle_spouse_disambiguated_by_birth_place.1", a=place, b=person['name']) + "; ".join(parts) + "."
         return {"answer": answer, "people_mentioned": [p['id'] for p in people], "people_with_photos": self._people_payload(people)}
 
     def handle_couple_children_count(self, question):
@@ -1985,9 +2001,9 @@ class QueryRouter:
             return None
         children = self._common_children_union_fallback(p1['id'], p2['id'])
         if children:
-            answer = f"El matrimonio de {p1['name']} y {p2['name']} tuvo {len(children)} hijos documentados: {_join_names(children)}."
+            answer = _t("handle_couple_children_count.1", a=p1['name'], b=p2['name'], c=len(children), d=_join_names(children))
         else:
-            answer = f"No constan hijos documentados del matrimonio de {p1['name']} y {p2['name']}."
+            answer = _t("handle_couple_children_count.2", a=p1['name'], b=p2['name'])
         return {"answer": answer, "people_mentioned": [p1['id'], p2['id']] + [c['id'] for c in children], "people_with_photos": self._people_payload([p1, p2] + children)}
 
     def handle_grandparents_with_years(self, question):
@@ -2006,10 +2022,10 @@ class QueryRouter:
         ]
         gps = _sort_people([g for g in gps if g])
         if not gps:
-            answer = f"No constan abuelos documentados de {person['name']}."
+            answer = _t("handle_grandparents_with_years.1", a=person['name'])
         else:
             desc = ", ".join(f"{g['name']} ({g['birth_year']})" if g.get('birth_year') else g['name'] for g in gps)
-            answer = f"Los abuelos de {person['name']} fueron {desc}."
+            answer = _t("handle_grandparents_with_years.2", a=person['name'], b=desc)
         return {"answer": answer, "people_mentioned": [person['id']] + [g['id'] for g in gps], "people_with_photos": self._people_payload([person] + gps)}
 
     def handle_grandparents_names(self, question):
@@ -2032,9 +2048,9 @@ class QueryRouter:
         ]
         gps = _sort_people([g for g in gps if g])
         if not gps:
-            answer = f"No constan abuelos documentados de {person['name']}."
+            answer = _t("handle_grandparents_names.1", a=person['name'])
         else:
-            answer = f"Los abuelos de {person['name']} se llamaban {_join_names(gps)}."
+            answer = _t("handle_grandparents_names.2", a=person['name'], b=_join_names(gps))
         return {"answer": answer, "people_mentioned": [person['id']] + [g['id'] for g in gps], "people_with_photos": self._people_payload([person] + gps)}
 
     def handle_birth_order_among_siblings(self, question):
@@ -2050,11 +2066,11 @@ class QueryRouter:
         siblings = _sort_people(get_siblings(self.conn, person['id']))
         family = _sort_people(siblings + [person])
         if len(family) == 1:
-            answer = f"{person['name']} era hijo o hija única según la documentación disponible."
+            answer = _t("handle_birth_order_among_siblings.1", a=person['name'])
         else:
             ids = [p['id'] for p in family]
             pos = ids.index(person['id']) + 1
-            answer = f"{person['name']} ocupaba la posición {pos} de {len(family)} entre sus hermanos y hermanas por orden de nacimiento conocido."
+            answer = _t("handle_birth_order_among_siblings.2", a=person['name'], b=pos, c=len(family))
         return {"answer": answer, "people_mentioned": [p['id'] for p in family], "people_with_photos": self._people_payload(family)}
 
     def handle_parents_and_marriage_place(self, question):
@@ -2068,21 +2084,21 @@ class QueryRouter:
         father = self._get_parent(person, 'father')
         mother = self._get_parent(person, 'mother')
         if not father and not mother:
-            answer = f"No constan los padres de {person['name']}."
+            answer = _t("handle_parents_and_marriage_place.1", a=person['name'])
             people = [person]
         else:
             people = [person, father, mother]
             if father and mother:
                 union = self._get_marriage_or_partnership(father['id'], mother['id'])
                 if union and union.get('place'):
-                    answer = f"Los padres de {person['name']} fueron {father['name']} y {mother['name']}, y se casaron en {union['place']}."
+                    answer = _t("handle_parents_and_marriage_place.3", a=person['name'], b=father['name'], c=mother['name'], d=union['place'])
                 elif union and union.get('date'):
-                    answer = f"Los padres de {person['name']} fueron {father['name']} y {mother['name']}. Consta su unión el {union['date']}, pero no el lugar."
+                    answer = _t("handle_parents_and_marriage_place.4", a=person['name'], b=father['name'], c=mother['name'], d=union['date'])
                 else:
-                    answer = f"Los padres de {person['name']} fueron {father['name']} y {mother['name']}, pero no consta dónde se casaron."
+                    answer = _t("handle_parents_and_marriage_place.5", a=person['name'], b=father['name'], c=mother['name'])
             else:
                 only = father or mother
-                answer = f"De {person['name']} solo consta un progenitor documentado: {only['name']}."
+                answer = _t("handle_parents_and_marriage_place.2", a=person['name'], b=only['name'])
         return {"answer": answer, "people_mentioned": [p['id'] for p in people if p], "people_with_photos": self._people_payload([p for p in people if p])}
 
     def handle_relationship_and_older(self, question):
@@ -2100,11 +2116,11 @@ class QueryRouter:
             elif b['birth_year'] < a['birth_year']:
                 older = b['name']
             else:
-                older = "tenían la misma edad aproximada"
-            older_text = older if older == "tenían la misma edad aproximada" else f"El mayor de los dos era {older}."
+                older = _t("handle_relationship_and_older.4")
+            older_text = older if older == "tenían la misma edad aproximada" else _t("handle_relationship_and_older.2", a=older)
         else:
-            older_text = "No puedo determinar cuál era mayor con los años de nacimiento disponibles."
-        answer = f"La relación entre {a['name']} y {b['name']} era de {rel}. {older_text}"
+            older_text = _t("handle_relationship_and_older.3")
+        answer = _t("handle_relationship_and_older.1", a=a['name'], b=b['name'], c=rel, d=older_text)
         return {"answer": answer, "people_mentioned": [a['id'], b['id']], "people_with_photos": self._people_payload([a, b])}
 
     def handle_spouse_and_wedding_date(self, question):
@@ -2117,7 +2133,7 @@ class QueryRouter:
             return None
         spouses = get_spouses(self.conn, person['id'])
         if not spouses:
-            answer = f"No consta un matrimonio documentado de {person['name']}."
+            answer = _t("handle_spouse_and_wedding_date.2", a=person['name'])
             return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         parts = []
         people = [person]
@@ -2130,7 +2146,7 @@ class QueryRouter:
                 txt += f" en {s['marriage_place']}"
             parts.append(txt)
             people.append(sp)
-        answer = f"{person['name']} se casó con " + "; y con ".join(parts) + "."
+        answer = _t("handle_spouse_and_wedding_date.1", a=person['name']) + "; y con ".join(parts) + "."
         return {"answer": answer, "people_mentioned": [p['id'] for p in people], "people_with_photos": self._people_payload(people)}
 
     def handle_marriage_date_place(self, question):
@@ -2149,7 +2165,7 @@ class QueryRouter:
 
         spouses = get_spouses(self.conn, person['id'])
         if not spouses:
-            return {"answer": f"No consta ningún matrimonio documentado de {person['name']}.",
+            return {"answer": _t("handle_marriage_date_place.3", a=person['name']),
                     "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
         parts = []
@@ -2167,20 +2183,20 @@ class QueryRouter:
             if is_date_query:
                 date_str = sp.get('marriage_date') or ''
                 if date_str:
-                    parts.append(f"el {date_str}")
+                    parts.append(_t("handle_marriage_date_place.4", a=date_str))
                 else:
-                    parts.append(f"sin fecha documentada")
+                    parts.append(_t("handle_marriage_date_place.5"))
             else:
                 place_str = sp.get('marriage_place') or ''
                 if place_str:
-                    parts.append(f"en {place_str}")
+                    parts.append(_t("handle_marriage_date_place.6", a=place_str))
                 else:
-                    parts.append(f"sin lugar documentado")
+                    parts.append(_t("handle_marriage_date_place.7"))
 
         if is_date_query:
-            answer = f"{person['name']} se casó " + " y ".join(parts) + "."
+            answer = _t("handle_marriage_date_place.1", a=person['name']) + " y ".join(parts) + "."
         else:
-            answer = f"{person['name']} se casó " + " y ".join(parts) + "."
+            answer = _t("handle_marriage_date_place.2", a=person['name']) + " y ".join(parts) + "."
 
         return {"answer": answer, "people_mentioned": [p['id'] for p in people], "people_with_photos": self._people_payload(people)}
 
@@ -2194,15 +2210,15 @@ class QueryRouter:
             return None
         mother = self._get_parent(person, 'mother')
         if not mother:
-            answer = f"No consta la madre de {person['name']}."
+            answer = _t("handle_father_of_mother.1", a=person['name'])
             people = [person]
         else:
             mf = self._get_parent(mother, 'father')
             people = [person, mother, mf]
             if mf:
-                answer = f"El padre de la madre de {person['name']} fue {mf['name']}."
+                answer = _t("handle_father_of_mother.2", a=person['name'], b=mf['name'])
             else:
-                answer = f"Consta la madre de {person['name']} ({mother['name']}), pero no el padre de ella."
+                answer = _t("handle_father_of_mother.3", a=person['name'], b=mother['name'])
         return {"answer": answer, "people_mentioned": [p['id'] for p in people if p], "people_with_photos": self._people_payload([p for p in people if p])}
 
     def handle_children_born_in_place(self, question):
@@ -2217,9 +2233,9 @@ class QueryRouter:
         children = [c for c in self._children_rows_for_parent(person['id']) if _norm_cmp(place) in _norm_cmp(c.get('birth_place', ''))]
         children = _sort_people(children)
         if children:
-            answer = f"Los hijos de {person['name']} nacidos en {place} fueron {_join_names(children)}."
+            answer = _t("handle_children_born_in_place.1", a=person['name'], b=place, c=_join_names(children))
         else:
-            answer = f"No constan hijos de {person['name']} nacidos en {place}."
+            answer = _t("handle_children_born_in_place.2", a=person['name'], b=place)
         return {"answer": answer, "people_mentioned": [person['id']] + [c['id'] for c in children], "people_with_photos": self._people_payload([person] + children)}
 
     def handle_children_of_couple_married_at_place(self, question):
@@ -2234,13 +2250,13 @@ class QueryRouter:
             return None
         union = self._get_marriage_or_partnership(p1['id'], p2['id'])
         if union and union.get('place') and _norm_cmp(place) not in _norm_cmp(union.get('place', '')):
-            answer = f"Consta la pareja formada por {p1['name']} y {p2['name']}, pero su matrimonio no figura en {place}."
+            answer = _t("handle_children_of_couple_married_at_place.1", a=p1['name'], b=p2['name'], c=place)
             return {"answer": answer, "people_mentioned": [p1['id'], p2['id']], "people_with_photos": self._people_payload([p1, p2])}
         children = self._common_children_union_fallback(p1['id'], p2['id'])
         if children:
-            answer = f"La pareja formada por {p1['name']} y {p2['name']} tuvo estos hijos documentados: {_join_names(children)}."
+            answer = _t("handle_children_of_couple_married_at_place.2", a=p1['name'], b=p2['name'], c=_join_names(children))
         else:
-            answer = f"No constan hijos documentados de la pareja formada por {p1['name']} y {p2['name']}."
+            answer = _t("handle_children_of_couple_married_at_place.3", a=p1['name'], b=p2['name'])
         return {"answer": answer, "people_mentioned": [p1['id'], p2['id']] + [c['id'] for c in children], "people_with_photos": self._people_payload([p1, p2] + children)}
 
     def handle_who_older_when_married(self, question):
@@ -2253,13 +2269,13 @@ class QueryRouter:
         if not a or not b:
             return None
         if a.get('birth_year') is None or b.get('birth_year') is None:
-            answer = f"No puedo determinar quién era mayor al casarse entre {m.group(1).strip()} y {m.group(2).strip()} porque faltan años de nacimiento."
+            answer = _t("handle_who_older_when_married.1", a=m.group(1).strip(), b=m.group(2).strip())
         elif a['birth_year'] < b['birth_year']:
-            answer = f"Cuando se casaron, la persona mayor era {a['name']}."
+            answer = _t("handle_who_older_when_married.2", a=a['name'])
         elif b['birth_year'] < a['birth_year']:
-            answer = f"Cuando se casaron, la persona mayor era {b['name']}."
+            answer = _t("handle_who_older_when_married.3", a=b['name'])
         else:
-            answer = f"Cuando se casaron, {a['name']} y {b['name']} tenían la misma edad aproximada."
+            answer = _t("handle_who_older_when_married.4", a=a['name'], b=b['name'])
         return {"answer": answer, "people_mentioned": [a['id'], b['id']], "people_with_photos": self._people_payload([a, b])}
 
     def handle_birth_place_and_occupation(self, question):
@@ -2279,9 +2295,9 @@ class QueryRouter:
         )
         bp = full.get('birth_place') or 'lugar de nacimiento no documentado'
         if occ_text:
-            answer = f"{full['name']} nació en {bp} y en su ficha consta esta ocupación o actividad: {occ_text}."
+            answer = _t("handle_birth_place_and_occupation.1", a=full['name'], b=bp, c=occ_text)
         else:
-            answer = f"{full['name']} nació en {bp} y no consta ninguna ocupación documentada en su ficha."
+            answer = _t("handle_birth_place_and_occupation.2", a=full['name'], b=bp)
         return {"answer": answer, "people_mentioned": [full['id']], "people_with_photos": self._people_payload([full])}
 
     def handle_surviving_children_count(self, question):
@@ -2294,15 +2310,15 @@ class QueryRouter:
             return None
         children = self._children_rows_for_parent(parent['id'])
         if not children:
-            answer = f"No constan hijos documentados de {parent['name']}."
+            answer = _t("handle_surviving_children_count.3", a=parent['name'])
             return {"answer": answer, "people_mentioned": [parent['id']], "people_with_photos": self._people_payload([parent])}
         death_year = parent.get('death_year')
         if death_year is None:
-            answer = f"No puedo calcular cuántos hijos sobrevivieron a {parent['name']} porque no consta su año de defunción."
+            answer = _t("handle_surviving_children_count.4", a=parent['name'])
             return {"answer": answer, "people_mentioned": [parent['id']] + [c['id'] for c in children], "people_with_photos": self._people_payload([parent] + children)}
         survivors = [c for c in children if c.get('death_year') is None or c.get('death_year') > death_year]
         survivors = _sort_people(survivors)
-        answer = f"Según las fechas disponibles, sobrevivieron a {parent['name']} {len(survivors)} hijos: {_join_names(survivors)}." if survivors else f"Según las fechas disponibles, no consta ningún hijo que sobreviviera a {parent['name']}."
+        answer = _t("handle_surviving_children_count.1", a=parent['name'], b=len(survivors), c=_join_names(survivors)) if survivors else _t("handle_surviving_children_count.2", a=parent['name'])
         return {"answer": answer, "people_mentioned": [parent['id']] + [c['id'] for c in survivors], "people_with_photos": self._people_payload([parent] + survivors)}
 
     def handle_birth_year_search(self, question):
@@ -2315,7 +2331,7 @@ class QueryRouter:
             "SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE birth_year = ? ORDER BY name",
             (year,),
         ).fetchall()]
-        answer = self._list_people_answer(f"Las personas nacidas en {year} fueron", rows)
+        answer = self._list_people_answer(_t("handle_birth_year_search.1", a=year), rows)
         return {"answer": answer, "people_mentioned": [r["id"] for r in rows], "people_with_photos": self._people_payload(rows)}
 
     def handle_death_place_people(self, question):
@@ -2326,7 +2342,7 @@ class QueryRouter:
             "SELECT id, name, birth_year, death_year, death_place, photo_file, is_alive FROM people WHERE NORMALIZE(death_place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY death_year, name LIMIT 100",
             (place,),
         ).fetchall()]
-        answer = self._list_people_answer(f"Las personas fallecidas en {place} fueron", rows)
+        answer = self._list_people_answer(_t("handle_death_place_people.1", a=place), rows)
         return {"answer": answer, "people_mentioned": [r["id"] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_marriages_place(self, question):
@@ -2338,7 +2354,7 @@ class QueryRouter:
             (place,),
         ).fetchall()
         if not rows:
-            return {"answer": f"No he encontrado parejas casadas en {place}.", "people_mentioned": [], "people_with_photos": []}
+            return {"answer": _t("handle_marriages_place.2", a=place), "people_mentioned": [], "people_with_photos": []}
         parts=[]; people=[]
         for r in rows[:25]:
             r=_as_dict(r)
@@ -2350,7 +2366,7 @@ class QueryRouter:
             if r.get('date'):
                 label += f" ({r['date']})"
             parts.append(label)
-        answer = f"Las parejas que se casaron en {place} fueron {len(rows)}: " + ", ".join(parts) + "."
+        answer = _t("handle_marriages_place.1", a=place, b=len(rows)) + ", ".join(parts) + "."
         up=_unique_people(people)
         return {"answer": answer, "people_mentioned": [p['id'] for p in up], "people_with_photos": self._people_payload(up[:25])}
 
@@ -2363,7 +2379,7 @@ class QueryRouter:
             "SELECT id, name, given_name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE given_name IS NOT NULL ORDER BY birth_year, name"
         ).fetchall()]
         filtered=[r for r in rows if _strip_accents((r.get('given_name') or '').strip()).upper().startswith(initial)]
-        answer = self._list_people_answer(f"Las personas cuyo nombre de pila empieza por {m.group(1).upper()} son", filtered)
+        answer = self._list_people_answer(_t("handle_given_name_initial.1", a=m.group(1).upper()), filtered)
         return {"answer": answer, "people_mentioned": [r['id'] for r in filtered], "people_with_photos": self._people_payload(filtered[:25])}
 
     def handle_first_surname(self, question):
@@ -2375,7 +2391,7 @@ class QueryRouter:
             "SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE NORMALIZE(surname) = NORMALIZE(?) OR NORMALIZE(surname) LIKE NORMALIZE(?) || '%' ORDER BY birth_year, name LIMIT 200",
             (surname, surname),
         ).fetchall()]
-        answer = self._list_people_answer(f"Las personas con {surname} como primer apellido son", rows)
+        answer = self._list_people_answer(_t("handle_first_surname.1", a=surname), rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_birth_and_death_place_people(self, question):
@@ -2387,7 +2403,7 @@ class QueryRouter:
             "SELECT id, name, birth_year, death_year, birth_place, death_place, photo_file, is_alive FROM people WHERE NORMALIZE(birth_place) LIKE '%' || NORMALIZE(?) || '%' AND NORMALIZE(death_place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY birth_year, name LIMIT 100",
             (place, place),
         ).fetchall()]
-        answer = self._list_people_answer(f"Las personas nacidas y fallecidas en {place} fueron", rows)
+        answer = self._list_people_answer(_t("handle_birth_and_death_place_people.1", a=place), rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_occupation_field(self, question):
@@ -2399,7 +2415,7 @@ class QueryRouter:
             return None
         occupations=[_as_dict(o) for o in get_occupations(self.conn, person['id'])]
         if not occupations:
-            answer=f"No constan ocupaciones o actividades registradas para {person['name']}."
+            answer=_t("handle_occupation_field.1", a=person['name'])
         else:
             parts=[]
             for o in occupations:
@@ -2407,7 +2423,7 @@ class QueryRouter:
                 if o.get('date'): t += f" ({o['date']})"
                 if o.get('place'): t += f" en {o['place']}"
                 parts.append(t)
-            answer=f"Las ocupaciones o actividades registradas para {person['name']} fueron: " + "; ".join(parts) + "."
+            answer=_t("handle_occupation_field.2", a=person['name']) + "; ".join(parts) + "."
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_residence_field(self, question):
@@ -2419,7 +2435,7 @@ class QueryRouter:
             return None
         residences=[_as_dict(r) for r in get_residences(self.conn, person['id'])]
         if not residences:
-            answer=f"No constan residencias o direcciones documentadas de {person['name']}."
+            answer=_t("handle_residence_field.1", a=person['name'])
         else:
             parts=[]
             for r in residences:
@@ -2429,7 +2445,7 @@ class QueryRouter:
                 if r.get('country'): frag += (', ' if frag else '') + r['country']
                 if r.get('date'): frag += f" ({r['date']})"
                 parts.append(frag)
-            answer=f"Las residencias o direcciones documentadas de {person['name']} fueron: " + "; ".join(parts) + "."
+            answer=_t("handle_residence_field.2", a=person['name']) + "; ".join(parts) + "."
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_notes_field(self, question):
@@ -2447,14 +2463,14 @@ class QueryRouter:
             return None
         notes=[_as_dict(n) for n in get_notes(self.conn, person['id'])]
         if not notes:
-            answer=f"No constan notas biográficas asociadas a {person['name']}."
+            answer=_t("handle_notes_field.1", a=person['name'])
         else:
             parts=[]
             for n in notes[:3]:
                 c=n['content']
                 if len(c)>220: c=c[:220]+'...'
                 parts.append(c)
-            answer=f"Las notas biográficas asociadas a {person['name']} son: " + " | ".join(parts)
+            answer=_t("handle_notes_field.2", a=person['name']) + " | ".join(parts)
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_birth_date_search(self, question):
@@ -2467,13 +2483,13 @@ class QueryRouter:
             (day,month,year),
         ).fetchall()]
         if not rows:
-            answer=f"No he encontrado ninguna persona nacida el {day:02d}/{month:02d}/{year}."
+            answer=_t("handle_birth_date_search.1", a=format(day, '02d'), b=format(month, '02d'), c=year)
         elif len(rows)==1:
             r=rows[0]
             place=f" en {r['birth_place']}" if r.get('birth_place') else ''
-            answer=f"La persona nacida el {day:02d}/{month:02d}/{year} fue {r['name']}{place}."
+            answer=_t("handle_birth_date_search.2", a=format(day, '02d'), b=format(month, '02d'), c=year, d=r['name'], e=place)
         else:
-            answer=self._list_people_answer(f"Las personas nacidas el {day:02d}/{month:02d}/{year} fueron", rows)
+            answer=self._list_people_answer(_t("handle_birth_date_search.3", a=format(day, '02d'), b=format(month, '02d'), c=year), rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows)}
 
     def handle_death_date_search(self, question):
@@ -2487,13 +2503,13 @@ class QueryRouter:
         ).fetchall()]
         rows=[r for r in candidates if self._date_matches_text(r.get('death_date') or '', day, month, year)]
         if not rows:
-            answer=f"No he encontrado ninguna persona fallecida el {day:02d}/{month:02d}/{year}."
+            answer=_t("handle_death_date_search.1", a=format(day, '02d'), b=format(month, '02d'), c=year)
         elif len(rows)==1:
             r=rows[0]
             place=f" en {r['death_place']}" if r.get('death_place') else ''
-            answer=f"La persona fallecida el {day:02d}/{month:02d}/{year} fue {r['name']}{place}."
+            answer=_t("handle_death_date_search.2", a=format(day, '02d'), b=format(month, '02d'), c=year, d=r['name'], e=place)
         else:
-            answer=self._list_people_answer(f"Las personas fallecidas el {day:02d}/{month:02d}/{year} fueron", rows)
+            answer=self._list_people_answer(_t("handle_death_date_search.3", a=format(day, '02d'), b=format(month, '02d'), c=year), rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows)}
 
     def handle_birth_place_year_search(self, question):
@@ -2506,11 +2522,11 @@ class QueryRouter:
             (year, place),
         ).fetchall()]
         if not rows:
-            answer=f"No he encontrado ninguna persona nacida en {place} en {year}."
+            answer=_t("handle_birth_place_year_search.1", a=place, b=year)
         elif len(rows)==1:
-            answer=f"La persona nacida en {place} en {year} fue {rows[0]['name']}."
+            answer=_t("handle_birth_place_year_search.2", a=place, b=year, c=rows[0]['name'])
         else:
-            answer=self._list_people_answer(f"Las personas nacidas en {place} en {year} fueron", rows)
+            answer=self._list_people_answer(_t("handle_birth_place_year_search.3", a=place, b=year), rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows)}
 
     def handle_death_place_year_search(self, question):
@@ -2523,11 +2539,11 @@ class QueryRouter:
             (year, place),
         ).fetchall()]
         if not rows:
-            answer=f"No he encontrado ninguna persona fallecida en {place} en {year}."
+            answer=_t("handle_death_place_year_search.1", a=place, b=year)
         elif len(rows)==1:
-            answer=f"La persona fallecida en {place} en {year} fue {rows[0]['name']}."
+            answer=_t("handle_death_place_year_search.2", a=place, b=year, c=rows[0]['name'])
         else:
-            answer=self._list_people_answer(f"Las personas fallecidas en {place} en {year} fueron", rows)
+            answer=self._list_people_answer(_t("handle_death_place_year_search.3", a=place, b=year), rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows)}
 
     def handle_compound_given_name(self, question):
@@ -2539,7 +2555,7 @@ class QueryRouter:
             "SELECT id, name, given_name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE NORMALIZE(given_name) LIKE NORMALIZE(?) || '%' ORDER BY birth_year, name LIMIT 100",
             (name,),
         ).fetchall()]
-        answer=self._list_people_answer(f"Las personas con un nombre compuesto como {name} son", rows)
+        answer=self._list_people_answer(_t("handle_compound_given_name.1", a=name), rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_record_lookup(self, question):
@@ -2550,7 +2566,7 @@ class QueryRouter:
         if not person:
             return None
         if len(matches) > 1:
-            answer = "He encontrado varias coincidencias para ese registro: " + ", ".join(_person_brief(x) for x in matches[:10]) + "."
+            answer = _t("handle_record_lookup.1") + ", ".join(_person_brief(x) for x in matches[:10]) + "."
             return {"answer": answer, "people_mentioned": [x['id'] for x in matches[:10]], "people_with_photos": self._people_payload(matches[:10])}
         return self._build_info_response(person)
 
@@ -2562,7 +2578,7 @@ class QueryRouter:
             "SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive FROM people WHERE NORMALIZE(birth_place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY birth_year, name LIMIT 100",
             (place,),
         ).fetchall()]
-        answer=self._list_people_answer(f"Las personas nacidas en {place} fueron", rows)
+        answer=self._list_people_answer(_t("handle_birth_place_people.1", a=place), rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
 
@@ -2633,7 +2649,7 @@ class QueryRouter:
         if not rows:
             return None
         person = _as_dict(rows[0])
-        answer = f"La persona con más hijos registrados en el árbol es {person['name']}, con {person['n_children']} hijos documentados."
+        answer = _t("handle_max_children_person.1", a=person['name'], b=person['n_children'])
         return {"answer": answer, "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
 
     def handle_descendance_rank(self, question):
@@ -2648,7 +2664,7 @@ class QueryRouter:
         counts[person["id"]] = self._all_descendants_count(person["id"])
         values = sorted(counts.values(), reverse=True)
         rank = self._rank_position(values, counts[person["id"]])
-        answer = f"{person['name']} se sitúa en el puesto {rank} del ranking de descendencia, con {counts[person['id']]} descendientes documentados."
+        answer = _t("handle_descendance_rank.1", a=person['name'], b=rank, c=counts[person['id']])
         return {"answer": answer, "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
 
     def handle_children_vs_average(self, question):
@@ -2663,7 +2679,7 @@ class QueryRouter:
         values = [self._children_count(pid) for pid in parent_ids] if parent_ids else []
         avg = sum(values) / len(values) if values else 0
         cmp = "por encima" if own > avg else "por debajo" if own < avg else "en la media"
-        answer = f"{person['name']} tuvo {own} hijos. La media del árbol entre personas con descendencia documentada es {avg:.1f}, así que está {cmp}."
+        answer = _t("handle_children_vs_average.1", a=person['name'], b=own, c=format(avg, '.1f'), d=cmp)
         return {"answer": answer, "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
 
     def handle_siblings_vs_generation(self, question):
@@ -2683,9 +2699,9 @@ class QueryRouter:
         if cohort:
             avg = sum(cohort) / len(cohort)
             cmp = "por encima" if own > avg else "por debajo" if own < avg else "en la media"
-            answer = f"{person['name']} tenía {own} hermanos. Entre personas de su misma década de nacimiento, la media es {avg:.1f}, así que está {cmp}."
+            answer = _t("handle_siblings_vs_generation.1", a=person['name'], b=own, c=format(avg, '.1f'), d=cmp)
         else:
-            answer = f"{person['name']} tenía {own} hermanos."
+            answer = _t("handle_siblings_vs_generation.2", a=person['name'], b=own)
         return {"answer": answer, "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
 
     def handle_longevity_rank(self, question):
@@ -2697,12 +2713,12 @@ class QueryRouter:
             return None
         age = self._age_from_years(person.get("birth_year"), person.get("death_year"))
         if age is None:
-            return {"answer": f"No puedo calcular con fiabilidad la longevidad de {person['name']} porque faltan años de nacimiento o defunción.", "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_longevity_rank.2", a=person['name']), "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
         rows = self.conn.execute("SELECT id, name, birth_year, death_year, photo_file FROM people WHERE birth_year IS NOT NULL AND death_year IS NOT NULL").fetchall()
         ages = [(r["id"], r["name"], r["death_year"] - r["birth_year"]) for r in rows]
         ages.sort(key=lambda x: (-x[2], _norm_cmp(x[1])))
         rank = self._rank_position([a[2] for a in ages], age)
-        answer = f"{person['name']} vivió aproximadamente {age} años y ocupa el puesto {rank} entre las longevidades más altas documentadas del árbol."
+        answer = _t("handle_longevity_rank.1", a=person['name'], b=age, c=rank)
         return {"answer": answer, "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
 
     def handle_age_first_child_vs_average(self, question):
@@ -2715,10 +2731,10 @@ class QueryRouter:
         children = self._children_rows_for_parent(person["id"])
         first = next((c for c in children if c.get("birth_year") is not None), None)
         if not first:
-            return {"answer": f"No constan hijos con año de nacimiento conocido para {person['name']}.", "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_age_first_child_vs_average.3", a=person['name']), "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
         own_age = self._age_from_years(person.get("birth_year"), first.get("birth_year"))
         if own_age is None:
-            return {"answer": f"No puedo calcular con fiabilidad la edad de {person['name']} al nacer su primer hijo porque faltan años.", "people_mentioned": [person["id"], first["id"]], "people_with_photos": self._people_payload([person, first])}
+            return {"answer": _t("handle_age_first_child_vs_average.4", a=person['name']), "people_mentioned": [person["id"], first["id"]], "people_with_photos": self._people_payload([person, first])}
         values = []
         for pid in self._distinct_parent_ids():
             prow = _as_dict(get_person(self.conn, pid))
@@ -2732,9 +2748,9 @@ class QueryRouter:
                     values.append(age)
         avg = sum(values) / len(values) if values else None
         cmp = "por encima" if avg is not None and own_age > avg else "por debajo" if avg is not None and own_age < avg else "en la media"
-        answer = f"{person['name']} tenía aproximadamente {own_age} años cuando nació su primer hijo."
+        answer = _t("handle_age_first_child_vs_average.1", a=person['name'], b=own_age)
         if avg is not None:
-            answer += f" La media del árbol es {avg:.1f}, así que está {cmp}."
+            answer += _t("handle_age_first_child_vs_average.2", a=format(avg, '.1f'), b=cmp)
         return {"answer": answer, "people_mentioned": [person["id"], first["id"]], "people_with_photos": self._people_payload([person, first])}
 
     def handle_couple_exact_children_rank(self, question):
@@ -2745,11 +2761,11 @@ class QueryRouter:
         rows = self._couple_children_count_rows()
         exact = [r for r in rows if r["children_count"] == target]
         if not exact:
-            return {"answer": f"No he encontrado ninguna pareja con exactamente {target} hijos documentados.", "people_mentioned": [], "people_with_photos": []}
+            return {"answer": _t("handle_couple_exact_children_rank.2", a=target), "people_mentioned": [], "people_with_photos": []}
         row = exact[0]
         values = [r["children_count"] for r in rows]
         rank = self._rank_position(values, target)
-        answer = f"La primera pareja que encuentro con exactamente {target} hijos es {row.get('person1_name')} y {row.get('person2_name')}. Con {target} hijos, ocupa el puesto {rank} por tamaño familiar."
+        answer = _t("handle_couple_exact_children_rank.1", a=target, b=row.get('person1_name'), c=row.get('person2_name'), d=target, e=rank)
         people = []
         for pid in [row["person1_id"], row["person2_id"]]:
             p = _as_dict(get_person(self.conn, pid))
@@ -2765,7 +2781,7 @@ class QueryRouter:
         total = self.conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
         count = self.conn.execute("SELECT COUNT(*) FROM people WHERE NORMALIZE(birth_place) LIKE '%' || NORMALIZE(?) || '%'", (place,)).fetchone()[0]
         pct = (count / total * 100) if total else 0
-        return {"answer": f"{count} personas nacieron en {place}. Eso representa aproximadamente el {pct:.1f}% del árbol.", "people_mentioned": [], "people_with_photos": []}
+        return {"answer": _t("handle_birth_place_share.1", a=count, b=place, c=format(pct, '.1f')), "people_mentioned": [], "people_with_photos": []}
 
     def handle_death_place_share(self, question):
         m = re.search(r"murieron\s+en\s+(.+?)\s+y\s+qu[eé]\s+relevancia\s+tiene", _clean_question(question), re.I)
@@ -2775,7 +2791,7 @@ class QueryRouter:
         total = self.conn.execute("SELECT COUNT(*) FROM people WHERE death_place IS NOT NULL AND death_place != ''").fetchone()[0]
         count = self.conn.execute("SELECT COUNT(*) FROM people WHERE NORMALIZE(death_place) LIKE '%' || NORMALIZE(?) || '%'", (place,)).fetchone()[0]
         pct = (count / total * 100) if total else 0
-        return {"answer": f"{count} personas murieron en {place}. Sobre el conjunto de defunciones con lugar conocido, eso representa aproximadamente el {pct:.1f}%.", "people_mentioned": [], "people_with_photos": []}
+        return {"answer": _t("handle_death_place_share.1", a=count, b=place, c=format(pct, '.1f')), "people_mentioned": [], "people_with_photos": []}
 
     def handle_births_by_decade(self, question):
         m = re.search(r"d[eé]cada\s+de\s+(\d{4})", _clean_question(question), re.I)
@@ -2783,7 +2799,7 @@ class QueryRouter:
             return None
         decade = int(m.group(1))
         count = self.conn.execute("SELECT COUNT(*) FROM people WHERE birth_year BETWEEN ? AND ?", (decade, decade+9)).fetchone()[0]
-        return {"answer": f"Hay {count} nacimientos registrados en la década de {decade}.", "people_mentioned": [], "people_with_photos": []}
+        return {"answer": _t("handle_births_by_decade.1", a=count, b=decade), "people_mentioned": [], "people_with_photos": []}
 
     def handle_deaths_by_decade(self, question):
         m = re.search(r"d[eé]cada\s+de\s+(\d{4})", _clean_question(question), re.I)
@@ -2791,7 +2807,7 @@ class QueryRouter:
             return None
         decade = int(m.group(1))
         count = self.conn.execute("SELECT COUNT(*) FROM people WHERE death_year BETWEEN ? AND ?", (decade, decade+9)).fetchone()[0]
-        return {"answer": f"Hay {count} fallecimientos registrados en la década de {decade}.", "people_mentioned": [], "people_with_photos": []}
+        return {"answer": _t("handle_deaths_by_decade.1", a=count, b=decade), "people_mentioned": [], "people_with_photos": []}
 
     def handle_first_surname_percentage(self, question):
         m = re.search(r"primer\s+apellido\s+(.+?)(?:\?|$)", _clean_question(question), re.I)
@@ -2801,13 +2817,13 @@ class QueryRouter:
         total = self.conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
         count = self.conn.execute("SELECT COUNT(*) FROM people WHERE NORMALIZE(surname) = NORMALIZE(?) OR NORMALIZE(surname) LIKE NORMALIZE(?) || '%'", (surname, surname)).fetchone()[0]
         pct = (count / total * 100) if total else 0
-        return {"answer": f"Aproximadamente {count} personas tienen {surname} como primer apellido, lo que supone alrededor del {pct:.1f}% del árbol.", "people_mentioned": [], "people_with_photos": []}
+        return {"answer": _t("handle_first_surname_percentage.1", a=count, b=surname, c=format(pct, '.1f')), "people_mentioned": [], "people_with_photos": []}
 
     def handle_known_birth_date_stats(self, question):
         known = self.conn.execute("SELECT COUNT(*) FROM people WHERE birth_year IS NOT NULL").fetchone()[0]
         total = self.conn.execute("SELECT COUNT(*) FROM people").fetchone()[0]
         unknown = total - known
-        return {"answer": f"{known} personas tienen fecha o año de nacimiento informado y {unknown} no lo tienen.", "people_mentioned": [], "people_with_photos": []}
+        return {"answer": _t("handle_known_birth_date_stats.1", a=known, b=unknown), "people_mentioned": [], "people_with_photos": []}
 
     def handle_compare_births(self, question):
         m = re.search(r"nacimiento\s+de\s+(.+?)\s+o\s+el\s+de\s+(.+?)(?:\?|$)", _clean_question(question), re.I)
@@ -2819,13 +2835,13 @@ class QueryRouter:
             return None
         ay, by = a.get("birth_year"), b.get("birth_year")
         if ay is None or by is None:
-            return {"answer": f"No puedo comparar con fiabilidad los nacimientos de {a['name']} y {b['name']} porque faltan años.", "people_mentioned": [a["id"], b["id"]], "people_with_photos": self._people_payload([a, b])}
+            return {"answer": _t("handle_compare_births.2", a=a['name'], b=b['name']), "people_mentioned": [a["id"], b["id"]], "people_with_photos": self._people_payload([a, b])}
         if ay < by:
-            answer = f"El nacimiento anterior fue el de {a['name']} ({ay})."
+            answer = _t("handle_compare_births.1", a=a['name'], b=ay)
         elif by < ay:
-            answer = f"El nacimiento anterior fue el de {b['name']} ({by})."
+            answer = _t("handle_compare_births.3", a=b['name'], b=by)
         else:
-            answer = f"{a['name']} y {b['name']} nacieron en el mismo año ({ay})."
+            answer = _t("handle_compare_births.4", a=a['name'], b=b['name'], c=ay)
         return {"answer": answer, "people_mentioned": [a["id"], b["id"]], "people_with_photos": self._people_payload([a,b])}
 
     def handle_branch_vs_next_couple(self, question):
@@ -2844,11 +2860,11 @@ class QueryRouter:
                 target = row
                 break
         if target_idx is None:
-            return {"answer": f"No encuentro esa pareja en el ranking de familias con hijos documentados.", "people_mentioned": [p1["id"], p2["id"]], "people_with_photos": self._people_payload([p1,p2])}
-        answer = f"La pareja formada por {p1['name']} y {p2['name']} tuvo {target['children_count']} hijos."
+            return {"answer": _t("handle_branch_vs_next_couple.3"), "people_mentioned": [p1["id"], p2["id"]], "people_with_photos": self._people_payload([p1,p2])}
+        answer = _t("handle_branch_vs_next_couple.1", a=p1['name'], b=p2['name'], c=target['children_count'])
         if target_idx + 1 < len(rows):
             nxt = rows[target_idx + 1]
-            answer += f" La siguiente pareja en el ranking es {nxt.get('person1_name')} y {nxt.get('person2_name')}, con {nxt['children_count']} hijos."
+            answer += _t("handle_branch_vs_next_couple.2", a=nxt.get('person1_name'), b=nxt.get('person2_name'), c=nxt['children_count'])
         return {"answer": answer, "people_mentioned": [p1["id"], p2["id"]], "people_with_photos": self._people_payload([p1,p2])}
 
     def handle_birth_place_variants(self, question):
@@ -2862,7 +2878,7 @@ class QueryRouter:
             return None
         key, variants = max(counts.items(), key=lambda kv: len(kv[1]))
         shown = sorted(variants)[:5]
-        answer = f"El topónimo con más variantes de escritura parece ser '{shown[0]}', con {len(variants)} variantes registradas. Ejemplos: " + "; ".join(shown) + "."
+        answer = _t("handle_birth_place_variants.1", a=shown[0], b=len(variants)) + "; ".join(shown) + "."
         return {"answer": answer, "people_mentioned": [], "people_with_photos": []}
 
     def handle_marriage_max_descendants(self, question):
@@ -2881,7 +2897,7 @@ class QueryRouter:
             p = _as_dict(get_person(self.conn, pid))
             if p:
                 people.append(p)
-        answer = f"El matrimonio con más descendencia documentada es {best.get('person1_name')} y {best.get('person2_name')}, con {best_count} descendientes documentados desde su unión."
+        answer = _t("handle_marriage_max_descendants.1", a=best.get('person1_name'), b=best.get('person2_name'), c=best_count)
         return {"answer": answer, "people_mentioned": [p["id"] for p in people], "people_with_photos": self._people_payload(people)}
 
 
@@ -2893,19 +2909,19 @@ class QueryRouter:
             "ORDER BY (death_year - birth_year) DESC, birth_year ASC, name ASC LIMIT 1"
         ).fetchall()
         if not rows:
-            return {"answer": "No puedo determinar la persona más longeva porque faltan fechas de nacimiento o defunción suficientes.", "people_mentioned": [], "people_with_photos": []}
+            return {"answer": _t("handle_max_longevity_person.2"), "people_mentioned": [], "people_with_photos": []}
         person = _as_dict(rows[0])
         age = person["death_year"] - person["birth_year"]
-        answer = f"La persona más longeva del árbol es {person['name']}, con una longevidad documentada aproximada de {age} años."
+        answer = _t("handle_max_longevity_person.1", a=person['name'], b=age)
         return {"answer": answer, "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
 
     def handle_average_children(self, question):
         parent_ids = self._distinct_parent_ids()
         if not parent_ids:
-            return {"answer": "No hay suficiente información para calcular la media de hijos.", "people_mentioned": [], "people_with_photos": []}
+            return {"answer": _t("handle_average_children.2"), "people_mentioned": [], "people_with_photos": []}
         values = [self._children_count(pid) for pid in parent_ids]
         avg = sum(values) / len(values) if values else 0
-        answer = f"La media de hijos es de {avg:.1f} por persona con descendencia documentada."
+        answer = _t("handle_average_children.1", a=format(avg, '.1f'))
         return {"answer": answer, "people_mentioned": [], "people_with_photos": []}
 
     def handle_sex_balance(self, question):
@@ -2914,14 +2930,14 @@ class QueryRouter:
         unknown = self.conn.execute("SELECT COUNT(*) FROM people WHERE sex IS NULL OR sex NOT IN ('M','F')").fetchone()[0]
         if male > female:
             lead = male - female
-            answer = f"Hay más hombres que mujeres: {male} hombres frente a {female} mujeres."
+            answer = _t("handle_sex_balance.1", a=male, b=female)
         elif female > male:
             lead = female - male
-            answer = f"Hay más mujeres que hombres: {female} mujeres frente a {male} hombres."
+            answer = _t("handle_sex_balance.3", a=female, b=male)
         else:
-            answer = f"Hay el mismo número de hombres y mujeres: {male} y {female}, respectivamente."
+            answer = _t("handle_sex_balance.4", a=male, b=female)
         if unknown:
-            answer += f" Además, {unknown} personas no tienen el sexo informado."
+            answer += _t("handle_sex_balance.2", a=unknown)
         return {"answer": answer, "people_mentioned": [], "people_with_photos": []}
 
     def handle_youngest_person(self, question):
@@ -2933,14 +2949,14 @@ class QueryRouter:
             "ORDER BY birth_year DESC, COALESCE(birth_month, 0) DESC, COALESCE(birth_day, 0) DESC, name ASC LIMIT 1"
         ).fetchone()
         if not row:
-            return {"answer": "No puedo determinar la persona más joven porque faltan fechas de nacimiento.", "people_mentioned": [], "people_with_photos": []}
+            return {"answer": _t("handle_youngest_person.2"), "people_mentioned": [], "people_with_photos": []}
         person = _as_dict(row)
-        answer = f"La persona más joven del árbol es {person['name']}"
+        answer = _t("handle_youngest_person.1", a=person['name'])
         if person.get("birth_year"):
             if person.get("birth_month") and person.get("birth_day"):
-                answer += f", nacida el {person['birth_day']:02d}/{person['birth_month']:02d}/{person['birth_year']}."
+                answer += _t("handle_youngest_person.3", a=format(person['birth_day'], '02d'), b=format(person['birth_month'], '02d'), c=person['birth_year'])
             else:
-                answer += f", nacida en {person['birth_year']}."
+                answer += _t("handle_youngest_person.4", a=person['birth_year'])
         else:
             answer += "."
         return {"answer": answer, "people_mentioned": [person["id"]], "people_with_photos": self._people_payload([person])}
@@ -3095,7 +3111,7 @@ class QueryRouter:
             "SELECT id,name,birth_year,death_year,birth_place,death_place,photo_file,is_alive FROM people WHERE NORMALIZE(birth_place) LIKE '%' || NORMALIZE(?) || '%' AND NORMALIZE(death_place) LIKE '%' || NORMALIZE(?) || '%' ORDER BY birth_year,name LIMIT 200",
             (place, place)
         ).fetchall()]
-        return {"answer": self._list_people_answer(f"Las personas nacidas en {place} y fallecidas allí fueron", rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_birth_and_death_same_place_natural.1", a=place), rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_consuegros(self, question):
         subject = self._extract_subject_name(question)
@@ -3110,9 +3126,9 @@ class QueryRouter:
             return None
         rows = self._consuegros_for(person['id'])
         if rows:
-            ans = self._list_people_answer(f"Los consuegros de {_person_link(person)} son", rows)
+            ans = self._list_people_answer(_t("handle_consuegros.2", a=_person_link(person)), rows)
         else:
-            ans = f"No constan consuegros documentados de {_person_link(person)}."
+            ans = _t("handle_consuegros.1", a=_person_link(person))
         return {"answer": ans, "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_second_cousins(self, question):
@@ -3124,8 +3140,8 @@ class QueryRouter:
             return None
         rows = self._second_cousins_for(person['id'])
         if not rows:
-            return {"answer": f"No constan primos segundos documentados de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
-        return {"answer": self._list_people_answer(f"Los primos segundos de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
+            return {"answer": _t("handle_second_cousins.1", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        return {"answer": self._list_people_answer(_t("handle_second_cousins.2", a=_person_link(person)), rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_daughters_in_law(self, question):
         q = _clean_question(question)
@@ -3137,8 +3153,8 @@ class QueryRouter:
             return None
         rows = self._children_in_law_for(person['id'], sex='F')
         if not rows:
-            return {"answer": f"No constan nueras documentadas de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
-        return {"answer": self._list_people_answer(f"Las nueras de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
+            return {"answer": _t("handle_daughters_in_law.1", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        return {"answer": self._list_people_answer(_t("handle_daughters_in_law.2", a=_person_link(person)), rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_sons_in_law(self, question):
         q = _clean_question(question)
@@ -3150,8 +3166,8 @@ class QueryRouter:
             return None
         rows = self._children_in_law_for(person['id'], sex='M')
         if not rows:
-            return {"answer": f"No constan yernos documentados de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
-        return {"answer": self._list_people_answer(f"Los yernos de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
+            return {"answer": _t("handle_sons_in_law.1", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        return {"answer": self._list_people_answer(_t("handle_sons_in_law.2", a=_person_link(person)), rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_relationship_with_parents_of(self, question):
         q = _clean_question(question)
@@ -3167,12 +3183,12 @@ class QueryRouter:
         parts = []
         people = [a, target]
         if father:
-            parts.append(f"con el padre ({_person_link(father)}): {self._relationship_label(a, father) or 'sin parentesco directo documentado'}")
+            parts.append(_t("handle_relationship_with_parents_of.2", a=_person_link(father), b=self._relationship_label(a, father) or 'sin parentesco directo documentado'))
             people.append(father)
         if mother:
-            parts.append(f"con la madre ({_person_link(mother)}): {self._relationship_label(a, mother) or 'sin parentesco directo documentado'}")
+            parts.append(_t("handle_relationship_with_parents_of.3", a=_person_link(mother), b=self._relationship_label(a, mother) or 'sin parentesco directo documentado'))
             people.append(mother)
-        ans = f"La relación de {_person_link(a)} con los padres de {_person_link(target)} era: " + "; ".join(parts) + "."
+        ans = _t("handle_relationship_with_parents_of.1", a=_person_link(a), b=_person_link(target)) + "; ".join(parts) + "."
         return {"answer": ans, "people_mentioned": [p['id'] for p in people if p], "people_with_photos": self._people_payload([p for p in people if p])}
 
     def handle_sisters_in_law(self, question):
@@ -3185,8 +3201,8 @@ class QueryRouter:
             return None
         rows = [p for p in self._siblings_in_law_for(person['id']) if p.get('sex') == 'F']
         if not rows:
-            return {"answer": f"No constan cuñadas documentadas de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
-        return {"answer": self._list_people_answer(f"Las cuñadas de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
+            return {"answer": _t("handle_sisters_in_law.1", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        return {"answer": self._list_people_answer(_t("handle_sisters_in_law.2", a=_person_link(person)), rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_brothers_in_law(self, question):
         q = _clean_question(question)
@@ -3198,8 +3214,8 @@ class QueryRouter:
             return None
         rows = self._siblings_in_law_for(person['id'])
         if not rows:
-            return {"answer": f"No constan cuñados documentados de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
-        return {"answer": self._list_people_answer(f"Los cuñados de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
+            return {"answer": _t("handle_brothers_in_law.1", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        return {"answer": self._list_people_answer(_t("handle_brothers_in_law.2", a=_person_link(person)), rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_great_great_uncle(self, question):
         q = _clean_question(question)
@@ -3211,9 +3227,9 @@ class QueryRouter:
             return None
         rows = self._great_great_uncle_for(person['id'])
         if not rows:
-            ans = f"No constan tíos bisabuelos documentados de {_person_link(person)}."
+            ans = _t("handle_great_great_uncle.1", a=_person_link(person))
         else:
-            ans = self._list_people_answer(f"Los tíos bisabuelos de {_person_link(person)} son", rows)
+            ans = self._list_people_answer(_t("handle_great_great_uncle.2", a=_person_link(person)), rows)
         return {"answer": ans, "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_great_uncles(self, question):
@@ -3224,7 +3240,7 @@ class QueryRouter:
         if not person:
             return None
         rows = self._great_uncles_for(person['id'])
-        return {"answer": self._list_people_answer(f"Los tíos abuelos de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_great_uncles.1", a=_person_link(person)), rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_grandnephews(self, question):
         subject = self._extract_subject_name(question)
@@ -3234,7 +3250,7 @@ class QueryRouter:
         if not person:
             return None
         rows = self._grandnephews_for(person['id'])
-        return {"answer": self._list_people_answer(f"Los sobrinos nietos de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_grandnephews.1", a=_person_link(person)), rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_second_cousin_of_hurtado_branch(self, question):
         q = _clean_question(question)
@@ -3249,9 +3265,9 @@ class QueryRouter:
             if 'hurtado' in _tokenize_name(cand.get('surname') or '') and self._is_second_cousin(person, cand):
                 candidates.append(cand)
         if candidates:
-            ans = f"Sí. {_person_link(person)} era prima segunda de: " + _join_names(candidates) + "."
+            ans = _t("handle_second_cousin_of_hurtado_branch.1", a=_person_link(person)) + _join_names(candidates) + "."
         else:
-            ans = f"No consta que {_person_link(person)} fuera prima segunda de alguien de la rama Hurtado."
+            ans = _t("handle_second_cousin_of_hurtado_branch.2", a=_person_link(person))
         return {"answer": ans, "people_mentioned": [person['id']] + [c['id'] for c in candidates], "people_with_photos": self._people_payload([person] + candidates[:25])}
 
     def handle_oldest_great_grandson(self, question):
@@ -3264,10 +3280,10 @@ class QueryRouter:
         rows = [r for r in self._descendants_at_generation(person['id'], 3) if r.get('sex') == 'M']
         rows = _sort_people(rows)
         if not rows:
-            ans = f"No constan bisnietos varones documentados de {_person_link(person)}."
+            ans = _t("handle_oldest_great_grandson.1", a=_person_link(person))
             people = [person]
         else:
-            ans = f"El bisnieto mayor de {_person_link(person)} fue {_person_brief(rows[0])}."
+            ans = _t("handle_oldest_great_grandson.2", a=_person_link(person), b=_person_brief(rows[0]))
             people = [person, rows[0]]
         return {"answer": ans, "people_mentioned": [p['id'] for p in people], "people_with_photos": self._people_payload(people)}
 
@@ -3279,7 +3295,7 @@ class QueryRouter:
         if not person:
             return None
         rows = self._descendants_at_generation(person['id'], 4)
-        ans = f"Sí. Constan tataranietos documentados de {_person_link(person)}: {_join_names(rows)}." if rows else f"No constan tataranietos documentados de {_person_link(person)}."
+        ans = _t("handle_has_great_great_grandchildren.1", a=_person_link(person), b=_join_names(rows)) if rows else _t("handle_has_great_great_grandchildren.2", a=_person_link(person))
         return {"answer": ans, "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_great_great_grandparents(self, question):
@@ -3290,7 +3306,7 @@ class QueryRouter:
         if not person:
             return None
         rows = self._ancestors_at_generation(person['id'], 4)
-        return {"answer": self._list_people_answer(f"Los tatarabuelos de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_great_great_grandparents.1", a=_person_link(person)), rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_maternal_great_grandmother(self, question):
         subject = self._extract_subject_name(question)
@@ -3302,7 +3318,7 @@ class QueryRouter:
         mother = self._get_parent(person, 'mother')
         gm = self._get_parent(mother, 'mother') if mother else None
         gg = self._get_parent(gm, 'mother') if gm else None
-        ans = f"La bisabuela materna de {_person_link(person)} fue {_person_brief(gg)}." if gg else f"No consta la bisabuela materna de {_person_link(person)}."
+        ans = _t("handle_maternal_great_grandmother.1", a=_person_link(person), b=_person_brief(gg)) if gg else _t("handle_maternal_great_grandmother.2", a=_person_link(person))
         return {"answer": ans, "people_mentioned": [x['id'] for x in [person, gg] if x], "people_with_photos": self._people_payload([person, gg])}
 
     def handle_great_grandparents(self, question):
@@ -3313,7 +3329,7 @@ class QueryRouter:
         if not person:
             return None
         rows = self._ancestors_at_generation(person['id'], 3)
-        return {"answer": self._list_people_answer(f"Los bisabuelos de {_person_link(person)} son", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_great_grandparents.1", a=_person_link(person)), rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_first_surname_natural(self, question):
         m = re.search(r"tengan\s+(.+?)\s+como\s+primer\s+apellido(?:\?|$)", _clean_question(question), re.I)
@@ -3324,7 +3340,7 @@ class QueryRouter:
             "SELECT id,name,birth_year,death_year,birth_place,photo_file,is_alive FROM people WHERE NORMALIZE(surname) = NORMALIZE(?) OR NORMALIZE(surname) LIKE NORMALIZE(?) || '%' ORDER BY birth_year,name LIMIT 200",
             (surname, surname)
         ).fetchall()]
-        return {"answer": self._list_people_answer(f"Las personas con {surname} como primer apellido son", rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_first_surname_natural.1", a=surname), rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_occupation_natural(self, question):
         q = _clean_question(question)
@@ -3350,14 +3366,14 @@ class QueryRouter:
             return None
         occupations = [_as_dict(o) for o in get_occupations(self.conn, person['id'])]
         if not occupations:
-            return {"answer": f"No consta ninguna ocupación o actividad registrada para {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_occupation_natural.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         parts=[]
         for o in occupations:
             txt=o.get('title','')
             if o.get('date'): txt += f" ({o['date']})"
             if o.get('place'): txt += f" en {o['place']}"
             if txt: parts.append(txt)
-        return {"answer": f"La ocupación o actividad registrada para {_person_link(person)} es: " + "; ".join(parts) + ".", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        return {"answer": _t("handle_occupation_natural.1", a=_person_link(person)) + "; ".join(parts) + ".", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_last_spouse(self, question):
         q = _clean_question(question)
@@ -3369,15 +3385,15 @@ class QueryRouter:
             return None
         spouses = get_spouses(self.conn, person['id'])
         if not spouses:
-            return {"answer": f"No consta matrimonio documentado de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_last_spouse.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         def keyfn(s):
             return (self._extract_year_from_text(s.get('marriage_date')) or -1, _norm_cmp(_as_dict(s['person']).get('name','')))
         last = sorted(spouses, key=keyfn)[-1]
         sp = _as_dict(last['person'])
         extra=[]
-        if last.get('marriage_date'): extra.append(f"boda en {last['marriage_date']}")
-        if last.get('marriage_place'): extra.append(f"en {last['marriage_place']}")
-        ans = f"{_person_link(person)} acabó casándose con {_person_link(sp)}"
+        if last.get('marriage_date'): extra.append(_t("handle_last_spouse.3", a=last['marriage_date']))
+        if last.get('marriage_place'): extra.append(_t("handle_last_spouse.4", a=last['marriage_place']))
+        ans = _t("handle_last_spouse.1", a=_person_link(person), b=_person_link(sp))
         if extra: ans += ", " + ", ".join(extra)
         ans += "."
         return {"answer": ans, "people_mentioned": [person['id'], sp['id']], "people_with_photos": self._people_payload([person, sp])}
@@ -3386,7 +3402,7 @@ class QueryRouter:
         rows = [_as_dict(r) for r in self.conn.execute(
             "SELECT id,name,birth_year,death_year,birth_place,death_place,photo_file,is_alive FROM people WHERE birth_place IS NOT NULL AND death_place IS NOT NULL AND TRIM(LOWER(birth_place)) = TRIM(LOWER(death_place)) ORDER BY birth_year,name LIMIT 200"
         ).fetchall()]
-        return {"answer": self._list_people_answer("Las personas que murieron en la misma ciudad en la que nacieron fueron", rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_same_birth_death_city.1"), rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_large_families(self, question):
         q = _clean_question(question)
@@ -3394,15 +3410,15 @@ class QueryRouter:
         threshold = int(m.group(1)) if m else 10
         rows = [r for r in self._couple_children_count_rows() if r['children_count'] >= threshold]
         if not rows:
-            return {"answer": f"No he encontrado parejas con {threshold} o más hijos documentados.", "people_mentioned": [], "people_with_photos": []}
+            return {"answer": _t("handle_large_families.2", a=threshold), "people_mentioned": [], "people_with_photos": []}
         people=[]; parts=[]
         for r in rows[:25]:
             p1 = _as_dict(get_person(self.conn, r['person1_id'])) if r.get('person1_id') else None
             p2 = _as_dict(get_person(self.conn, r['person2_id'])) if r.get('person2_id') else None
             if p1: people.append(p1)
             if p2: people.append(p2)
-            parts.append(f"{_person_link(p1)} y {_person_link(p2)} ({r['children_count']} hijos)")
-        return {"answer": "Las parejas con muchísimos hijos documentados son: " + "; ".join(parts) + ".", "people_mentioned": [p['id'] for p in _unique_people(people)], "people_with_photos": self._people_payload(_unique_people(people)[:25])}
+            parts.append(_t("handle_large_families.3", a=_person_link(p1), b=_person_link(p2), c=r['children_count']))
+        return {"answer": _t("handle_large_families.1") + "; ".join(parts) + ".", "people_mentioned": [p['id'] for p in _unique_people(people)], "people_with_photos": self._people_payload(_unique_people(people)[:25])}
 
     def handle_same_birth_year_as_person(self, question):
         m = re.search(r"mismo\s+a[nñ]o\s+que\s+(.+?)(?:\?|$)", _clean_question(question), re.I)
@@ -3415,7 +3431,7 @@ class QueryRouter:
             "SELECT id,name,birth_year,death_year,birth_place,photo_file,is_alive FROM people WHERE birth_year = ? AND id != ? ORDER BY name",
             (person['birth_year'], person['id'])
         ).fetchall()]
-        return {"answer": self._list_people_answer(f"Las personas nacidas el mismo año que {_person_link(person)} ({person['birth_year']}) fueron", rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_same_birth_year_as_person.1", a=_person_link(person), b=person['birth_year']), rows), "people_mentioned": [person['id']] + [r['id'] for r in rows], "people_with_photos": self._people_payload([person] + rows[:25])}
 
     def handle_has_descendance_named(self, question):
         m = re.search(r"hay\s+alguna\s+(.+?)\s+con\s+descendencia\s+documentada(?:\?|$)", _clean_question(question), re.I)
@@ -3423,13 +3439,13 @@ class QueryRouter:
             return None
         matches = [_as_dict(r) for r in self._search_people(m.group(1), limit=50)]
         rows = [p for p in matches if self._all_descendants_count(p['id']) > 0]
-        return {"answer": self._list_people_answer(f"Las personas que coinciden con '{m.group(1)}' y tienen descendencia documentada son", rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_has_descendance_named.1", a=m.group(1)), rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_unknown_birth_date_people(self, question):
         rows = [_as_dict(r) for r in self.conn.execute(
             "SELECT id,name,birth_year,death_year,birth_place,photo_file,is_alive FROM people WHERE birth_year IS NULL ORDER BY name LIMIT 200"
         ).fetchall()]
-        return {"answer": self._list_people_answer("Las personas sin fecha o año de nacimiento conocido son", rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_unknown_birth_date_people.1"), rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_repeated_compound_names(self, question):
         rows = [_as_dict(r) for r in self.conn.execute("SELECT given_name FROM people WHERE given_name IS NOT NULL").fetchall()]
@@ -3441,10 +3457,10 @@ class QueryRouter:
             if len(toks) >= 2:
                 c[gn] += 1
         if not c:
-            return {"answer": "No he encontrado nombres compuestos repetidos en el árbol.", "people_mentioned": [], "people_with_photos": []}
+            return {"answer": _t("handle_repeated_compound_names.2"), "people_mentioned": [], "people_with_photos": []}
         top = c.most_common(10)
         parts = [f"{_smart_title_name(name)} ({count})" for name, count in top]
-        return {"answer": "Los nombres compuestos más repetidos del árbol son: " + "; ".join(parts) + ".", "people_mentioned": [], "people_with_photos": []}
+        return {"answer": _t("handle_repeated_compound_names.1") + "; ".join(parts) + ".", "people_mentioned": [], "people_with_photos": []}
 
     def handle_parents_in_law_natural(self, question):
         m = re.search(r"suegros\s+de\s+(.+?)(?:\?|$)", _clean_question(question), re.I)
@@ -3465,26 +3481,26 @@ class QueryRouter:
            re.search(r"(?:nac[ií]|nacimiento).+(?:donde|dónde|lugar)", q, re.I) or \
            re.search(r"sit[úu]a.*(?:árbol|arbol).*(?:nacer|nacimiento)", q, re.I):  # "sitúa el árbol en el momento de nacer"
             if full.get("birth_date") and full.get("birth_place"):
-                return {"answer": f"{full['name']} nació el {full['birth_date']} en {full['birth_place']}.",
+                return {"answer": _t("_build_targeted_response.1", a=full['name'], b=full['birth_date'], c=full['birth_place']),
                         "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
             elif full.get("birth_place"):
-                return {"answer": f"{full['name']} nació en {full['birth_place']}.",
+                return {"answer": _t("_build_targeted_response.4", a=full['name'], b=full['birth_place']),
                         "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
             elif full.get("birth_date"):
-                return {"answer": f"{full['name']} nació el {full['birth_date']}.",
+                return {"answer": _t("_build_targeted_response.6", a=full['name'], b=full['birth_date']),
                         "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
 
         # Check if asking about death place/date
         if re.search(r"(?:donde|dónde|lugar).+(?:mur[ií]|murió|defunción)", q, re.I) or \
            re.search(r"(?:mur[ií]|murió|defunción).+(?:donde|dónde|lugar)", q, re.I):
             if full.get("death_date") and full.get("death_place"):
-                return {"answer": f"{full['name']} murió el {full['death_date']} en {full['death_place']}.",
+                return {"answer": _t("_build_targeted_response.2", a=full['name'], b=full['death_date'], c=full['death_place']),
                         "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
             elif full.get("death_place"):
-                return {"answer": f"{full['name']} murió en {full['death_place']}.",
+                return {"answer": _t("_build_targeted_response.5", a=full['name'], b=full['death_place']),
                         "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
             elif full.get("death_date"):
-                return {"answer": f"{full['name']} murió el {full['death_date']}.",
+                return {"answer": _t("_build_targeted_response.7", a=full['name'], b=full['death_date']),
                         "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
 
         # Check if asking about occupation
@@ -3495,7 +3511,7 @@ class QueryRouter:
             ).fetchall()]
             if occupations:
                 occ_str = "; ".join(o.get("description", "") for o in occupations if o.get("description"))
-                return {"answer": f"{full['name']} trabajaba como {occ_str}.",
+                return {"answer": _t("_build_targeted_response.3", a=full['name'], b=occ_str),
                         "people_mentioned": [full["id"]], "people_with_photos": self._people_payload([full])}
 
         # Default to full response
@@ -3507,12 +3523,12 @@ class QueryRouter:
             return None
         lines = [full["name"]]
         if full.get("birth_date") or full.get("birth_place"):
-            birth = "Nacimiento: " + (full.get("birth_date") or "?")
+            birth = _t("_build_info_response.1") + (full.get("birth_date") or "?")
             if full.get("birth_place"):
                 birth += f", {full['birth_place']}"
             lines.append(birth)
         if full.get("death_date") or full.get("death_place"):
-            death = "Defunción: " + (full.get("death_date") or "?")
+            death = _t("_build_info_response.2") + (full.get("death_date") or "?")
             if full.get("death_place"):
                 death += f", {full['death_place']}"
             lines.append(death)
@@ -3530,7 +3546,7 @@ class QueryRouter:
             return None
         records = [_as_dict(r) for r in get_military(self.conn, person['id'])]
         if not records:
-            return {"answer": f"No constan datos militares de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_military.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         parts = []
         for r in records:
             frag = r.get('description') or ''
@@ -3539,7 +3555,7 @@ class QueryRouter:
             if r.get('place'):
                 frag += f" — {r['place']}"
             parts.append(frag.strip())
-        ans = f"Datos militares de {_person_link(person)}: " + "; ".join(parts) + "."
+        ans = _t("handle_military.1", a=_person_link(person)) + "; ".join(parts) + "."
         return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_military_all(self, question):
@@ -3550,7 +3566,7 @@ class QueryRouter:
         ).fetchall():
             rows.append(_as_dict(r))
         if not rows:
-            return {"answer": "No constan registros militares en el árbol.", "people_mentioned": [], "people_with_photos": []}
+            return {"answer": _t("handle_military_all.2"), "people_mentioned": [], "people_with_photos": []}
         # Group by person (one person may have multiple records)
         seen = {}
         for r in rows:
@@ -3566,7 +3582,7 @@ class QueryRouter:
             people.append(p)
             desc = ", ".join(info['descriptions']) if info['descriptions'] else "servicio militar"
             parts.append(f"- {_person_brief(p)}: {desc}")
-        ans = f"Personas con registros militares en el árbol ({len(people)}):\n" + "\n".join(parts)
+        ans = _t("handle_military_all.1", a=len(people)) + "\n".join(parts)
         return {"answer": ans, "people_mentioned": [p['id'] for p in people], "people_with_photos": self._people_payload(people[:25])}
 
     # --- Burial handlers ---
@@ -3581,7 +3597,7 @@ class QueryRouter:
             return None
         records = [_as_dict(r) for r in get_burial(self.conn, person['id'])]
         if not records:
-            return {"answer": f"No constan datos de sepultura de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_burial.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         parts = []
         for r in records:
             frag = r.get('place') or ''
@@ -3590,7 +3606,7 @@ class QueryRouter:
             if r.get('date'):
                 frag += f" ({r['date']})"
             parts.append(frag.strip())
-        ans = f"Sepultura de {_person_link(person)}: " + "; ".join(parts) + "."
+        ans = _t("handle_burial.1", a=_person_link(person)) + "; ".join(parts) + "."
         return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_burial_place(self, question):
@@ -3608,7 +3624,7 @@ class QueryRouter:
         ).fetchall():
             rows.append(_as_dict(r))
         if not rows:
-            return {"answer": f"No constan enterramientos en {place}.", "people_mentioned": [], "people_with_photos": []}
+            return {"answer": _t("handle_burial_place.1", a=place), "people_mentioned": [], "people_with_photos": []}
         # Deduplicate by person
         seen = set()
         unique = []
@@ -3616,7 +3632,7 @@ class QueryRouter:
             if r['id'] not in seen:
                 seen.add(r['id'])
                 unique.append(r)
-        return {"answer": self._list_people_answer(f"Las personas enterradas en {place} son", unique), "people_mentioned": [r['id'] for r in unique], "people_with_photos": self._people_payload(unique[:25])}
+        return {"answer": self._list_people_answer(_t("handle_burial_place.2", a=place), unique), "people_mentioned": [r['id'] for r in unique], "people_with_photos": self._people_payload(unique[:25])}
 
     # --- Baptism handlers ---
 
@@ -3631,13 +3647,13 @@ class QueryRouter:
         bdate = person.get('baptism_date') or ''
         bplace = person.get('baptism_place') or ''
         if not bdate and not bplace:
-            return {"answer": f"No constan datos de bautismo de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_baptism.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         parts = []
         if bdate:
-            parts.append(f"fecha: {bdate}")
+            parts.append(_t("handle_baptism.3", a=bdate))
         if bplace:
-            parts.append(f"lugar: {bplace}")
-        ans = f"Bautismo de {_person_link(person)}: " + ", ".join(parts) + "."
+            parts.append(_t("handle_baptism.4", a=bplace))
+        ans = _t("handle_baptism.1", a=_person_link(person)) + ", ".join(parts) + "."
         return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_baptism_place(self, question):
@@ -3650,8 +3666,8 @@ class QueryRouter:
             return None
         bplace = person.get('baptism_place') or ''
         if not bplace:
-            return {"answer": f"No consta el lugar de bautismo de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
-        ans = f"{_person_link(person)} fue bautizado/a en {bplace}."
+            return {"answer": _t("handle_baptism_place.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        ans = _t("handle_baptism_place.1", a=_person_link(person), b=bplace)
         return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_godparents(self, question):
@@ -3664,8 +3680,8 @@ class QueryRouter:
             return None
         godparents = person.get('godparents') or ''
         if not godparents:
-            return {"answer": f"No constan los padrinos de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
-        ans = f"Los padrinos de {_person_link(person)} fueron: {godparents}."
+            return {"answer": _t("handle_godparents.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+        ans = _t("handle_godparents.1", a=_person_link(person), b=godparents)
         return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     # --- Events handlers ---
@@ -3680,7 +3696,7 @@ class QueryRouter:
             return None
         records = [_as_dict(r) for r in get_events(self.conn, person['id'])]
         if not records:
-            return {"answer": f"No constan eventos registrados para {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_events.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         parts = []
         for r in records:
             frag = r.get('type') or r.get('tag') or ''
@@ -3691,7 +3707,7 @@ class QueryRouter:
             if r.get('place'):
                 frag += f" — {r['place']}"
             parts.append("- " + frag.strip())
-        ans = f"Eventos registrados para {_person_link(person)} ({len(records)}):\n" + "\n".join(parts)
+        ans = _t("handle_events.1", a=_person_link(person), b=len(records)) + "\n".join(parts)
         return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_education(self, question):
@@ -3706,7 +3722,7 @@ class QueryRouter:
             return None
         records = [_as_dict(r) for r in get_events(self.conn, person['id'], 'Educación')]
         if not records:
-            return {"answer": f"No constan datos de estudios o educación de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_education.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         parts = []
         for r in records:
             frag = r.get('description') or 'Educación'
@@ -3715,7 +3731,7 @@ class QueryRouter:
             if r.get('place'):
                 frag += f" — {r['place']}"
             parts.append("- " + frag.strip())
-        ans = f"Datos de educación de {_person_link(person)}:\n" + "\n".join(parts)
+        ans = _t("handle_education.1", a=_person_link(person)) + "\n".join(parts)
         return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_mother(self, question):
@@ -3728,10 +3744,10 @@ class QueryRouter:
             return None
         mother = self._get_parent(person, 'mother')
         if mother:
-            ans = f"La madre de {_person_link(person)} fue {_person_brief(mother)}."
+            ans = _t("handle_mother.1", a=_person_link(person), b=_person_brief(mother))
             ppl = [person, mother]
         else:
-            ans = f"No consta la madre de {_person_link(person)}."
+            ans = _t("handle_mother.2", a=_person_link(person))
             ppl = [person]
         return {"answer": ans, "people_mentioned": [p['id'] for p in ppl if p], "people_with_photos": self._people_payload(ppl)}
 
@@ -3755,9 +3771,9 @@ class QueryRouter:
             kids = [k for k in kids if k.get('sex') == 'F']
             label = 'La primera hija'
         if not kids:
-            return {"answer": f"No consta {'ningún hijo varón' if mode == 'son_oldest' else 'ninguna hija'} de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_child_extremes.2", a='ningún hijo varón' if mode == 'son_oldest' else 'ninguna hija', b=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         kid = kids[0]
-        return {"answer": f"{label} de {_person_link(person)} fue {_person_brief(kid)}.", "people_mentioned": [person['id'], kid['id']], "people_with_photos": self._people_payload([person, kid])}
+        return {"answer": _t("handle_child_extremes.1", a=label, b=_person_link(person), c=_person_brief(kid)), "people_mentioned": [person['id'], kid['id']], "people_with_photos": self._people_payload([person, kid])}
 
     def handle_given_name_count(self, question):
         q = _clean_question(question)
@@ -3771,7 +3787,7 @@ class QueryRouter:
             toks = [_strip_accents(t.lower()) for t in re.split(r"\s+", rr.get('given_name') or '') if t]
             if target in toks:
                 rows.append(rr)
-        return {"answer": f"Hay {len(rows)} personas del árbol que se llaman {_smart_title_name(m.group(1).strip())}.", "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
+        return {"answer": _t("handle_given_name_count.1", a=len(rows), b=_smart_title_name(m.group(1).strip())), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_same_surname_twice(self, question):
         rows = []
@@ -3780,7 +3796,7 @@ class QueryRouter:
             parts = [p for p in re.split(r"\s+", rr.get('surname') or '') if p]
             if len(parts) >= 2 and _norm_cmp(parts[0]) == _norm_cmp(parts[1]):
                 rows.append(rr)
-        return {"answer": self._list_people_answer("Las personas cuyos dos apellidos son iguales son", rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_same_surname_twice.1"), rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_surname_born_in_place(self, question):
         q = _clean_question(question)
@@ -3795,7 +3811,7 @@ class QueryRouter:
             sp = (rr.get('surname') or '').split()
             if sp and _norm_cmp(sp[0]) == _norm_cmp(surname):
                 rows.append(rr)
-        return {"answer": self._list_people_answer(f"Las personas con primer apellido {surname} nacidas en {place} son", rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_surname_born_in_place.1", a=surname, b=place), rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def _format_residence(self, r, with_date=True):
         frag = r.get('address') or ''
@@ -3827,7 +3843,7 @@ class QueryRouter:
             return None
         res = [_as_dict(r) for r in get_residences(self.conn, person['id'])]
         if not res:
-            return {"answer": f"No constan residencias documentadas de {_person_link(person)}.", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t("handle_last_residence.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
         def yr(r):
             vals = re.findall(r"(\d{4})", str(r.get('date') or ''))
@@ -3836,15 +3852,15 @@ class QueryRouter:
 
         if wants_last:
             frag = self._format_residence(res_sorted[-1])
-            ans = f"Al final de su vida, {_person_link(person)} vivía en {frag}."
+            ans = _t("handle_last_residence.1", a=_person_link(person), b=frag)
         elif wants_first:
             frag = self._format_residence(res_sorted[0])
-            ans = f"El primer domicilio documentado de {_person_link(person)} fue {frag}."
+            ans = _t("handle_last_residence.3", a=_person_link(person), b=frag)
         elif len(res_sorted) == 1:
-            ans = f"{_person_link(person)} vivió en {self._format_residence(res_sorted[0])}."
+            ans = _t("handle_last_residence.4", a=_person_link(person), b=self._format_residence(res_sorted[0]))
         else:
             items = "".join(f"<br>• {self._format_residence(r)}" for r in res_sorted)
-            ans = f"{_person_link(person)} vivió en {len(res_sorted)} domicilios documentados:{items}"
+            ans = _t("handle_last_residence.5", a=_person_link(person), b=len(res_sorted), c=items)
         return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_children_total_natural(self, question):
@@ -3857,9 +3873,9 @@ class QueryRouter:
             return None
         kids = _sort_people([_as_dict(c) for c in get_children(self.conn, person['id'])])
         if not kids:
-            ans = f"No constan hijos documentados de {_person_link(person)}."
+            ans = _t("handle_children_total_natural.1", a=_person_link(person))
         else:
-            ans = f"{_person_link(person)} llegó a tener {len(kids)} hijos documentados: " + _join_names(kids) + "."
+            ans = _t("handle_children_total_natural.2", a=_person_link(person), b=len(kids)) + _join_names(kids) + "."
         return {"answer": ans, "people_mentioned": [person['id']] + [k['id'] for k in kids], "people_with_photos": self._people_payload([person] + kids[:25])}
 
     def handle_born_in_and_died_outside(self, question):
@@ -3879,7 +3895,7 @@ class QueryRouter:
             rr = _as_dict(r)
             if _norm_cmp(death_excl) not in _norm_cmp(rr.get('death_place', '')):
                 rows.append(rr)
-        return {"answer": self._list_people_answer(f"Las personas nacidas en {birth_place} y luego murieron fuera de {death_excl} fueron", rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
+        return {"answer": self._list_people_answer(_t("handle_born_in_and_died_outside.1", a=birth_place, b=death_excl), rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def handle_compare_older(self, question):
         q = _clean_question(question)
@@ -3891,13 +3907,13 @@ class QueryRouter:
         if not a or not b:
             return None
         if a.get('birth_year') is None or b.get('birth_year') is None:
-            ans = f"No puedo determinar quién era mayor entre {_person_link(a)} y {_person_link(b)} porque faltan años de nacimiento."
+            ans = _t("handle_compare_older.1", a=_person_link(a), b=_person_link(b))
         elif a['birth_year'] < b['birth_year']:
-            ans = f"La persona mayor era {_person_link(a)}."
+            ans = _t("handle_compare_older.2", a=_person_link(a))
         elif b['birth_year'] < a['birth_year']:
-            ans = f"La persona mayor era {_person_link(b)}."
+            ans = _t("handle_compare_older.3", a=_person_link(b))
         else:
-            ans = f"{_person_link(a)} y {_person_link(b)} tenían la misma edad aproximada."
+            ans = _t("handle_compare_older.4", a=_person_link(a), b=_person_link(b))
         return {"answer": ans, "people_mentioned": [a['id'], b['id']], "people_with_photos": self._people_payload([a, b])}
 
     def handle_birth_place_of_person(self, question):
@@ -3911,9 +3927,9 @@ class QueryRouter:
         if not person:
             return None
         if person.get('birth_place'):
-            answer = f"{person['name']} nació en {person['birth_place']}."
+            answer = _t("handle_birth_place_of_person.1", a=person['name'], b=person['birth_place'])
         else:
-            answer = f"No consta el lugar de nacimiento de {person['name']}."
+            answer = _t("handle_birth_place_of_person.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_death_place_of_person(self, question):
@@ -3927,9 +3943,9 @@ class QueryRouter:
         if not person:
             return None
         if person.get('death_place'):
-            answer = f"{person['name']} murió en {person['death_place']}."
+            answer = _t("handle_death_place_of_person.1", a=person['name'], b=person['death_place'])
         else:
-            answer = f"No consta el lugar de muerte de {person['name']}."
+            answer = _t("handle_death_place_of_person.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_birth_date_of_person(self, question):
@@ -3943,9 +3959,9 @@ class QueryRouter:
         if not person:
             return None
         if person.get('birth_year'):
-            answer = f"{person['name']} nació en {person['birth_year']}."
+            answer = _t("handle_birth_date_of_person.1", a=person['name'], b=person['birth_year'])
         else:
-            answer = f"No consta la fecha de nacimiento de {person['name']}."
+            answer = _t("handle_birth_date_of_person.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_death_date_of_person(self, question):
@@ -3961,9 +3977,9 @@ class QueryRouter:
         if not person:
             return None
         if person.get('death_year'):
-            answer = f"{person['name']} murió en {person['death_year']}."
+            answer = _t("handle_death_date_of_person.1", a=person['name'], b=person['death_year'])
         else:
-            answer = f"No consta la fecha de muerte de {person['name']}."
+            answer = _t("handle_death_date_of_person.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def _extract_subject_name_from_pattern(self, question: str, pattern: str) -> Optional[str]:

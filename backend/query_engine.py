@@ -120,7 +120,10 @@ class QueryEngine:
 
         return "\n".join(lines)
 
-    def query(self, question, conversation_history=None):
+    LANG_NAMES = {"es": "castellano", "ca": "catalán", "en": "inglés",
+                  "fr": "francés", "de": "alemán"}
+
+    def query(self, question, conversation_history=None, lang="es"):
         """Send a question with reduced context to Claude."""
         # Find relevant people
         mentioned = self._extract_names_from_question(question)
@@ -157,7 +160,8 @@ class QueryEngine:
         response = self.client.messages.create(
             model="claude-haiku-4-5-20251001",
             max_tokens=2000,
-            system="%s\n\n%s\nÁRBOL GENEALÓGICO:\n%s" % (SYSTEM_PROMPT, context_note, context),
+            system="%s\n\nIDIOMA PREFERIDO: responde en %s salvo que la pregunta esté claramente en otro idioma.\n\n%s\nÁRBOL GENEALÓGICO:\n%s"
+                   % (SYSTEM_PROMPT, self.LANG_NAMES.get(lang, lang), context_note, context),
             messages=messages,
         )
 

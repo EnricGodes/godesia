@@ -75,7 +75,9 @@ def _classify_case(case: dict) -> str:
     if verdict == "rejected":
         if last_run and not case.get("improvement_reviewed"):
             answer = last_run.get("answer", "")
-            if answer and "No he sabido responder" not in answer:
+            unresolved = last_run.get("unresolved") if "unresolved" in last_run \
+                else ("No he sabido responder" in answer)
+            if answer and not unresolved:
                 return "improvement"  # Rejected case that now works!
         return "rejected"  # Always rejected if not an improvement
 
@@ -215,9 +217,10 @@ def delete_cases(case_ids: List[str]) -> int:
     return deleted
 
 
-def run_tests(router, mode: str = "all", case_ids: List[str] = None) -> dict:
+def run_tests(router, mode: str = "all", case_ids: List[str] = None, lang: str = "es") -> dict:
     """Execute tests. mode: all | new | regressions | selected.
-    Returns run summary."""
+    lang: idioma de las respuestas (el oráculo valida people_mentioned,
+    que es independiente del idioma). Returns run summary."""
     bank = _load_bank()
     run_id = f"run_{uuid.uuid4().hex[:8]}"
     now = datetime.now().isoformat()
@@ -236,21 +239,24 @@ def run_tests(router, mode: str = "all", case_ids: List[str] = None) -> dict:
 
         # Execute
         try:
-            result = router.route(case["question"])
+            result = router.route(case["question"], lang=lang)
             answer = result.get("answer", "") if result else ""
             handler = result.get("_handler", "") if result else ""
             people = result.get("people_mentioned", []) if result else []
+            unresolved = result.get("unresolved", False) if result else True
             status = 200
         except Exception as e:
             answer = f"ERROR: {e}"
             handler = ""
             people = []
+            unresolved = True
             status = 500
 
         run_result = {
             "answer": answer,
             "handler": handler,
             "people_mentioned": people,
+            "unresolved": unresolved,
             "status": status,
             "ran_at": now,
             "run_id": run_id,
@@ -402,7 +408,9 @@ def auto_review(router) -> dict:
         else:  # UNVERIFIABLE → línea base congelada (no hay verdad calculable)
             summary["unverifiable"] += 1
             answer = last.get("answer", "")
-            valid = last.get("status") == 200 and answer and "No he sabido responder" not in answer
+            _unres = last.get("unresolved") if "unresolved" in last \
+                else ("No he sabido responder" in answer)
+            valid = last.get("status") == 200 and answer and not _unres
             if not valid:
                 # Respuesta rota: si estaba aprobada es una regresión REAL a mirar
                 if case.get("verdict") == "approved":

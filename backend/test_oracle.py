@@ -193,7 +193,9 @@ def verify(router, case):
     last = case.get("last_run") or {}
     if last.get("status") != 200 or not last.get("answer"):
         return FAIL, "el router no devolvió respuesta"
-    if "No he sabido responder" in last.get("answer", ""):
+    _unres = last.get("unresolved") if "unresolved" in last \
+        else ("No he sabido responder" in last.get("answer", ""))
+    if _unres:
         return FAIL, "el router no resolvió la pregunta"
 
     # El sujeto de la pregunta es el primer people_mentioned (los handlers

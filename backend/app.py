@@ -161,14 +161,15 @@ class ConfirmRequest(BaseModel):
     lang: str = "es"
 
 
-def log_unresolved_query(question):
+def log_unresolved_query(question, lang="es"):
     """Log a query that could not be resolved."""
     unresolved_file = DATA_DIR / "unresolved_queries.jsonl"
     now = datetime.now()
     entry = {
         "date": now.strftime("%Y-%m-%d"),
         "time": now.strftime("%H:%M:%S"),
-        "question": question
+        "question": question,
+        "lang": lang,
     }
     try:
         with open(unresolved_file, "a") as f:
@@ -184,11 +185,13 @@ async def query(req: QueryRequest):
         raise HTTPException(status_code=503, detail="Motor no inicializado")
 
     # Try direct DB answer
-    result = router.route(req.question)
+    lang = _lang_param(req.lang)
+    result = router.route(req.question, lang=lang)
 
-    # Check if router couldn't resolve the question
-    if result and "No he sabido responder" in result.get("answer", ""):
-        log_unresolved_query(req.question)
+    # Check if router couldn't resolve the question (flag estructural,
+    # independiente del idioma de la respuesta)
+    if result and result.get("unresolved"):
+        log_unresolved_query(req.question, lang)
 
     return result
 
@@ -201,7 +204,7 @@ async def query_confirm(req: ConfirmRequest):
             status_code=503,
             detail="Motor LLM no disponible. Configura ANTHROPIC_API_KEY."
         )
-    result = engine.query(req.question, req.history)
+    result = engine.query(req.question, req.history, lang=_lang_param(req.lang))
     result["source"] = "llm"
     return result
 
@@ -378,6 +381,7 @@ class AddQuestionsRequest(BaseModel):
 class RunTestsRequest(BaseModel):
     mode: str = "all"  # all | new | regressions | selected
     case_ids: list = []
+    lang: str = "es"
 
 class VerdictRequest(BaseModel):
     case_id: str
@@ -406,7 +410,7 @@ async def add_test_questions(req: AddQuestionsRequest):
 async def run_test_bank(req: RunTestsRequest):
     if not router:
         raise HTTPException(status_code=503, detail="Router no inicializado")
-    return test_bank.run_tests(router, req.mode, req.case_ids)
+    return test_bank.run_tests(router, req.mode, req.case_ids, lang=_lang_param(req.lang))
 
 @app.post("/api/tests/bank/verdict")
 async def set_test_verdict(req: VerdictRequest):
