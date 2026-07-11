@@ -223,6 +223,8 @@ def _build_head_block(page, lang, ui, langs):
         if content:
             payload += f"window.__I18N_CONTENT__={json.dumps(content, ensure_ascii=False)};"
     lines.append(f"<script>{payload}</script>")
+    lines.append('<script src="/i18n.js"></script>')
+    lines.append('<script src="/footer.js" defer></script>')
 
     if lang != DEFAULT_LANG:
         # Anti-FOUC: ocultar hasta que i18n.js aplique las traducciones

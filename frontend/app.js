@@ -3,6 +3,11 @@ const form = document.getElementById("query-form");
 const input = document.getElementById("question");
 const sendBtn = document.getElementById("send-btn");
 
+/* i18n: t()/I18N vienen de i18n.js (inyectado por el backend) */
+const _i18nT = window.t || function (k, p, f) { return f !== undefined ? f : k; };
+const _lhref = window.I18N ? window.I18N.href : function (p) { return p; };
+const _lang = window.I18N ? window.I18N.lang() : 'es';
+
 let conversationHistory = [];
 let _lastAssistantMsg = null;
 
@@ -47,12 +52,12 @@ async function showPersonPanel(personId) {
     const birthLine = [p.birth_date, p.birth_city || p.birth_place].filter(Boolean).join(', ');
     const deathLine = [p.death_date, p.death_city || p.death_place].filter(Boolean).join(', ');
 
-    const fatherHtml = d.father ? `<a href="/dossier.html?id=${dossierIdParam(d.father.id)}">${d.father.name}</a>` : '';
-    const motherHtml = d.mother ? `<a href="/dossier.html?id=${dossierIdParam(d.mother.id)}">${d.mother.name}</a>` : '';
+    const fatherHtml = d.father ? `<a href="${_lhref('/dossier.html?id=' + dossierIdParam(d.father.id))}">${d.father.name}</a>` : '';
+    const motherHtml = d.mother ? `<a href="${_lhref('/dossier.html?id=' + dossierIdParam(d.mother.id))}">${d.mother.name}</a>` : '';
     const parentsHtml = [fatherHtml, motherHtml].filter(Boolean).join(' · ');
 
     const spousesHtml = (d.spouses || []).map(s =>
-      `<a href="/dossier.html?id=${dossierIdParam(s.id)}">${s.name}</a>`
+      `<a href="${_lhref('/dossier.html?id=' + dossierIdParam(s.id))}">${s.name}</a>`
     ).join(' · ');
 
     const cleanId = personId.replace(/@/g, '');
@@ -67,15 +72,15 @@ async function showPersonPanel(personId) {
         ${years ? `<p class="panel-years">${years}</p>` : ''}
       </div>
       <div class="panel-fields">
-        ${birthLine ? `<div class="panel-field"><span class="panel-label">Nacimiento</span><span class="panel-value">${birthLine}</span></div>` : ''}
-        ${deathLine ? `<div class="panel-field"><span class="panel-label">Defunción</span><span class="panel-value">${deathLine}</span></div>` : ''}
-        ${parentsHtml ? `<div class="panel-field"><span class="panel-label">Padres</span><span class="panel-value">${parentsHtml}</span></div>` : ''}
-        ${spousesHtml ? `<div class="panel-field"><span class="panel-label">Cónyuge${(d.spouses||[]).length > 1 ? 's' : ''}</span><span class="panel-value">${spousesHtml}</span></div>` : ''}
-        ${d.children && d.children.length > 0 ? `<div class="panel-field"><span class="panel-label">Hijos</span><span class="panel-value">${d.children.length}</span></div>` : ''}
+        ${birthLine ? `<div class="panel-field"><span class="panel-label">${_i18nT('common.birth', null, 'Nacimiento')}</span><span class="panel-value">${birthLine}</span></div>` : ''}
+        ${deathLine ? `<div class="panel-field"><span class="panel-label">${_i18nT('common.death', null, 'Defunción')}</span><span class="panel-value">${deathLine}</span></div>` : ''}
+        ${parentsHtml ? `<div class="panel-field"><span class="panel-label">${_i18nT('common.parents', null, 'Padres')}</span><span class="panel-value">${parentsHtml}</span></div>` : ''}
+        ${spousesHtml ? `<div class="panel-field"><span class="panel-label">${(d.spouses||[]).length > 1 ? _i18nT('common.spouses', null, 'Cónyuges') : _i18nT('common.spouse', null, 'Cónyuge')}</span><span class="panel-value">${spousesHtml}</span></div>` : ''}
+        ${d.children && d.children.length > 0 ? `<div class="panel-field"><span class="panel-label">${_i18nT('common.children', null, 'Hijos')}</span><span class="panel-value">${d.children.length}</span></div>` : ''}
       </div>
       <div class="panel-actions">
-        <a href="/dossier.html?id=${dossierIdParam(p.id)}" class="panel-btn">Ver dossier completo</a>
-        <a href="/arbol2.html?id=${cleanId}" class="panel-btn panel-btn-secondary">Ver en árbol</a>
+        <a href="${_lhref('/dossier.html?id=' + dossierIdParam(p.id))}" class="panel-btn">${_i18nT('pages.chat.view_dossier', null, 'Ver dossier completo')}</a>
+        <a href="${_lhref('/arbol2.html?id=' + cleanId)}" class="panel-btn panel-btn-secondary">${_i18nT('pages.chat.view_tree', null, 'Ver en árbol')}</a>
       </div>
     `;
 
@@ -102,6 +107,7 @@ function addMessage(content, role, sourceTag = "") {
       <p>${content.replace(/\n/g, "<br>")}</p>
     </div>
   `;
+  if (window.I18N) I18N.localizeLinks(div);
   // Style dossier links as pills that open the person panel
   div.querySelectorAll('a[href*="/dossier.html"]').forEach(a => {
     const id = new URL(a.href, location.origin).searchParams.get('id');
@@ -121,22 +127,22 @@ function addFollowUpChips(msgDiv, personName, dossier) {
 
   const chips = [];
   const n = personName;
-  chips.push({ label: 'Padres', q: `Padres de ${n}` });
-  chips.push({ label: 'Hermanos', q: `Hermanos de ${n}` });
-  chips.push({ label: 'Dónde nació', q: `Dónde nació ${n}` });
+  chips.push({ label: _i18nT('pages.chat.chip_parents', null, 'Padres'), q: _i18nT('pages.chat.q_parents', {name: n}, 'Padres de {name}') });
+  chips.push({ label: _i18nT('pages.chat.chip_siblings', null, 'Hermanos'), q: _i18nT('pages.chat.q_siblings', {name: n}, 'Hermanos de {name}') });
+  chips.push({ label: _i18nT('pages.chat.chip_birthplace', null, 'Dónde nació'), q: _i18nT('pages.chat.q_birthplace', {name: n}, 'Dónde nació {name}') });
   if (dossier.children && dossier.children.length > 0) {
-    chips.push({ label: 'Hijos', q: `Hijos de ${n}` });
-    chips.push({ label: 'Edad primer hijo', q: `A qué edad tuvo su primer hijo ${n}` });
+    chips.push({ label: _i18nT('pages.chat.chip_children', null, 'Hijos'), q: _i18nT('pages.chat.q_children', {name: n}, 'Hijos de {name}') });
+    chips.push({ label: _i18nT('pages.chat.chip_first_child', null, 'Edad primer hijo'), q: _i18nT('pages.chat.q_first_child', {name: n}, 'A qué edad tuvo su primer hijo {name}') });
   }
   if (dossier.spouses && dossier.spouses.length > 0) {
-    chips.push({ label: 'Cónyuge', q: `Con quién se casó ${n}` });
-    chips.push({ label: 'Edad al casarse', q: `A qué edad se casó ${n}` });
+    chips.push({ label: _i18nT('pages.chat.chip_spouse', null, 'Cónyuge'), q: _i18nT('pages.chat.q_spouse', {name: n}, 'Con quién se casó {name}') });
+    chips.push({ label: _i18nT('pages.chat.chip_marriage_age', null, 'Edad al casarse'), q: _i18nT('pages.chat.q_marriage_age', {name: n}, 'A qué edad se casó {name}') });
   }
   if (dossier.occupations && dossier.occupations.length > 0) {
-    chips.push({ label: 'Profesión', q: `De qué trabajaba ${n}` });
+    chips.push({ label: _i18nT('pages.chat.chip_occupation', null, 'Profesión'), q: _i18nT('pages.chat.q_occupation', {name: n}, 'De qué trabajaba {name}') });
   }
   if (!dossier.person.is_alive) {
-    chips.push({ label: 'Dónde murió', q: `Dónde murió ${n}` });
+    chips.push({ label: _i18nT('pages.chat.chip_deathplace', null, 'Dónde murió'), q: _i18nT('pages.chat.q_deathplace', {name: n}, 'Dónde murió {name}') });
   }
 
   const row = document.createElement('div');
@@ -163,8 +169,8 @@ function addLLMConfirmation(message, question, history) {
     <div class="message-content llm-confirm">
       <p class="cost-warning">${message}</p>
       <div class="confirm-buttons">
-        <button class="btn-confirm" onclick="confirmLLM(this, '${btoa(encodeURIComponent(question))}')">Si, consultar</button>
-        <button class="btn-cancel" onclick="cancelLLM(this)">No, cancel-lar</button>
+        <button class="btn-confirm" onclick="confirmLLM(this, '${btoa(encodeURIComponent(question))}')">${_i18nT('pages.chat.llm_confirm', null, 'Sí, consultar')}</button>
+        <button class="btn-cancel" onclick="cancelLLM(this)">${_i18nT('pages.chat.llm_cancel', null, 'No, cancelar')}</button>
       </div>
     </div>
   `;
@@ -182,13 +188,13 @@ async function confirmLLM(btn, encodedQuestion) {
     const res = await fetch("/api/query/confirm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, history: conversationHistory }),
+      body: JSON.stringify({ question, history: conversationHistory, lang: _lang }),
     });
 
     container.querySelector(".loading").remove();
 
     if (!res.ok) {
-      container.innerHTML += "<p>Error al consultar la IA.</p>";
+      container.innerHTML += `<p>${_i18nT('pages.chat.llm_error', null, 'Error al consultar la IA.')}</p>`;
       sendBtn.disabled = false;
       return;
     }
@@ -197,6 +203,7 @@ async function confirmLLM(btn, encodedQuestion) {
     const peopleLlm = data.people_with_photos || [];
     const sourceTag = '<span class="source-tag llm">IA</span>';
     container.innerHTML = `${sourceTag}<p>${data.answer.replace(/\n/g, "<br>")}</p>`;
+    if (window.I18N) I18N.localizeLinks(container);
     container.querySelectorAll('a[href*="/dossier.html"]').forEach(a => {
       const id = new URL(a.href, location.origin).searchParams.get('id');
       if (!id) return;
@@ -216,7 +223,7 @@ async function confirmLLM(btn, encodedQuestion) {
       conversationHistory = conversationHistory.slice(-20);
     }
   } catch (e) {
-    container.innerHTML += "<p>Error de connexió.</p>";
+    container.innerHTML += `<p>${_i18nT('common.connection_error', null, 'Error de conexión.')}</p>`;
   }
 
   sendBtn.disabled = false;
@@ -226,7 +233,7 @@ async function confirmLLM(btn, encodedQuestion) {
 function cancelLLM(btn) {
   const container = btn.closest(".llm-confirm");
   container.querySelector(".confirm-buttons").remove();
-  container.innerHTML += "<p class='hint'>Consulta cancel-lada. Cap cost generat.</p>";
+  container.innerHTML += `<p class='hint'>${_i18nT('pages.chat.llm_cancelled', null, 'Consulta cancelada. Sin coste generado.')}</p>`;
   sendBtn.disabled = false;
   input.focus();
 }
@@ -260,13 +267,13 @@ form.addEventListener("submit", async (e) => {
     const res = await fetch("/api/query", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, history: conversationHistory }),
+      body: JSON.stringify({ question, history: conversationHistory, lang: _lang }),
     });
 
     removeLoading();
 
     if (!res.ok) {
-      addMessage("Error al consultar. Inténtalo de nuevo.", "assistant");
+      addMessage(_i18nT('pages.chat.query_error', null, 'Error al consultar. Inténtalo de nuevo.'), "assistant");
       sendBtn.disabled = false;
       return;
     }
@@ -297,7 +304,7 @@ form.addEventListener("submit", async (e) => {
     }
   } catch (err) {
     removeLoading();
-    addMessage("Error de connexió. Està el servidor actiu?", "assistant");
+    addMessage(_i18nT('common.connection_error_server', null, 'Error de conexión. ¿Está el servidor activo?'), "assistant");
   }
 
   sendBtn.disabled = false;
@@ -323,13 +330,13 @@ function renderPeopleList(q, results) {
     else if (!p.is_alive) years = `?–?`;
     else years = '';
     const yearsLabel = years ? ` (${years})` : '';
-    return `<li style="margin:4px 0"><a href="/dossier.html?id=${dossierIdParam(p.id)}" style="color:#2D4B33;font-weight:600;text-decoration:none">${p.name}</a>${yearsLabel}</li>`;
+    return `<li style="margin:4px 0"><a href="${_lhref('/dossier.html?id=' + dossierIdParam(p.id))}" style="color:#2D4B33;font-weight:600;text-decoration:none">${p.name}</a>${yearsLabel}</li>`;
   }).join('');
   const asstDiv = document.createElement('div');
   asstDiv.className = 'message assistant';
   const hasMore = results.length === 50;
-  const moreMsg = hasMore ? '<p style="margin-top:12px;color:#666;font-size:0.9em"><em>He encontrado más de 50 resultados. Te muestro los primeros 50. Intenta refinar tu búsqueda para obtener resultados más específicos.</em></p>' : '';
-  asstDiv.innerHTML = `<div class="message-content">He encontrado ${results.length} personas que coinciden con "<strong>${q}</strong>". Haz clic sobre la que buscas:<ul style="margin-top:8px;padding-left:20px">${list}</ul>${moreMsg}</div>`;
+  const moreMsg = hasMore ? `<p style="margin-top:12px;color:#666;font-size:0.9em"><em>${_i18nT('pages.chat.more_results', null, 'He encontrado más de 50 resultados. Te muestro los primeros 50. Intenta refinar tu búsqueda para obtener resultados más específicos.')}</em></p>` : '';
+  asstDiv.innerHTML = `<div class="message-content">${_i18nT('pages.chat.matches_intro', {count: results.length, query: q}, 'He encontrado {count} personas que coinciden con "<strong>{query}</strong>". Haz clic sobre la que buscas:')}<ul style="margin-top:8px;padding-left:20px">${list}</ul>${moreMsg}</div>`;
   chat.appendChild(asstDiv);
   chat.scrollTop = chat.scrollHeight;
 }

@@ -17,25 +17,30 @@ function personSvg(sex, birth_year, death_year, px) {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${px}" height="${px}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" style="opacity:0.45"><path d="${d}"/></svg>`;
 }
 
+/* i18n: t()/I18N vienen de i18n.js (inyectado por el backend) */
+const _i18nT = window.t || function (k, p, f) { return f !== undefined ? f : k; };
+const _lhref = window.I18N ? window.I18N.href : function (p) { return p; };
+const _api = window.I18N ? window.I18N.apiUrl : function (p) { return p; };
+
 async function loadDossier() {
     const params = new URLSearchParams(window.location.search);
     const personId = params.get('id');
 
     if (!personId) {
-        showError('Persona no especificada');
+        showError(_i18nT('pages.dossier.no_person', null, 'Persona no especificada'));
         return;
     }
 
     try {
-        const res = await fetch(`/api/dossier/${personId}`);
+        const res = await fetch(_api(`/api/dossier/${personId}`));
         if (!res.ok) {
-            throw new Error('Persona no encontrada');
+            throw new Error(_i18nT('pages.dossier.not_found', null, 'Persona no encontrada'));
         }
 
         const data = await res.json();
         renderDossier(data);
 
-        const ctaUrl = `/colaborar.html?person=${personId}&source=dossier`;
+        const ctaUrl = _lhref(`/colaborar.html?person=${personId}&source=dossier`);
         ['cta-top', 'cta-bottom'].forEach(id => {
             const btn = document.getElementById(id);
             if (btn) btn.onclick = () => { window.location.href = ctaUrl; };
@@ -48,7 +53,7 @@ async function loadDossier() {
 function showError(message) {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('error').style.display = 'block';
-    document.getElementById('error').textContent = 'Error: ' + message;
+    document.getElementById('error').textContent = _i18nT('common.error_prefix', null, 'Error') + ': ' + message;
 }
 
 // Global state for photo sorting
@@ -160,17 +165,17 @@ function renderDossier(data) {
 
     document.getElementById('stats-boxes').innerHTML = `
         <div class="bg-surface-container px-4 py-2 rounded-lg border border-outline-variant/30 text-xs">
-            <span class="block text-outline font-bold uppercase tracking-tighter mb-1">Inventario</span>
-            <span class="font-bold">${person.photo_count || 0} Medios</span>
+            <span class="block text-outline font-bold uppercase tracking-tighter mb-1">${_i18nT('pages.dossier.inventory', null, 'Inventario')}</span>
+            <span class="font-bold">${person.photo_count || 0} ${_i18nT('pages.dossier.media', null, 'Medios')}</span>
         </div>
         <div class="bg-surface-container px-4 py-2 rounded-lg border border-outline-variant/30 text-xs">
-            <span class="block text-outline font-bold uppercase tracking-tighter mb-1">Última Act.</span>
+            <span class="block text-outline font-bold uppercase tracking-tighter mb-1">${_i18nT('pages.dossier.last_update', null, 'Última Act.')}</span>
             <span class="font-bold">${data.gedcom_date || '—'}</span>
         </div>
         ${person.death_year && person.death_year >= 2021 && !person.is_alive ? `
         <div class="bg-surface-container px-4 py-2 rounded-lg border border-outline-variant/30 text-xs">
-            <span class="block text-outline font-bold uppercase tracking-tighter mb-1">Estado</span>
-            <span class="font-bold text-secondary">† RECIENTE</span>
+            <span class="block text-outline font-bold uppercase tracking-tighter mb-1">${_i18nT('pages.dossier.status', null, 'Estado')}</span>
+            <span class="font-bold text-secondary">† ${_i18nT('common.recent', null, 'RECIENTE')}</span>
         </div>
         ` : ''}
     `;
@@ -236,57 +241,57 @@ function renderPerfil(data, displayName) {
         <div class="flex flex-col space-y-8" id="card-minibio">
             <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                 <span class="material-symbols-outlined">history_edu</span>
-                Minibiografia
+                ${_i18nT('pages.dossier.minibio_title', null, 'Minibiografía')}
             </h2>
             <div class="flex-1 bg-surface-container-low p-8 rounded-xl heritage-border">
-                <div id="card-minibio-text" class="text-sm text-on-surface-variant italic opacity-70">Carregant...</div>
+                <div id="card-minibio-text" class="text-sm text-on-surface-variant italic opacity-70">${_i18nT('common.loading', null, 'Cargando...')}</div>
             </div>
         </div>
         <div class="flex flex-col space-y-8">
             <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                 <span class="material-symbols-outlined">explore</span>
-                Mapa Vital
+                ${_i18nT('pages.dossier.vital_map', null, 'Mapa Vital')}
             </h2>
             <div class="flex-1 bg-surface-container-low p-4 rounded-xl heritage-border">
                 <div id="vital-map" class="w-full heritage-border shadow-sm"></div>
-                <div id="vital-map-empty" style="display:none;" class="flex items-center justify-center h-64 text-sm text-on-surface-variant italic opacity-70">Sense dades geogràfiques</div>
+                <div id="vital-map-empty" style="display:none;" class="flex items-center justify-center h-64 text-sm text-on-surface-variant italic opacity-70">${_i18nT('pages.dossier.no_geo', null, 'Sin datos geográficos')}</div>
             </div>
         </div>
         <div class="flex flex-col space-y-8">
             <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                 <span class="material-symbols-outlined">fingerprint</span>
-                Perfil de Registro
+                ${_i18nT('pages.dossier.profile_title', null, 'Perfil de Registro')}
             </h2>
             <div class="flex-1 bg-surface-container-low p-8 rounded-xl heritage-border space-y-6">
                 <div class="grid grid-cols-2 gap-8">
                     <div>
-                        <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Nombre Completo</dt>
+                        <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">${_i18nT('pages.dossier.full_name', null, 'Nombre Completo')}</dt>
                         <dd class="text-sm">
                             <span class="font-bold block">${displayName}</span>
-                            ${baptismNames ? `<span class="italic opacity-80 text-xs mt-1 block">Nombres de bautismo: ${baptismNames}</span>` : ''}
+                            ${baptismNames ? `<span class="italic opacity-80 text-xs mt-1 block">${_i18nT('pages.dossier.baptism_names', null, 'Nombres de bautismo')}: ${baptismNames}</span>` : ''}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Género</dt>
+                        <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">${_i18nT('pages.dossier.gender', null, 'Género')}</dt>
                         <dd class="text-sm">
-                            <span class="font-bold block">${person.sex === 'M' ? 'Masculino' : 'Femenino'}</span>
+                            <span class="font-bold block">${person.sex === 'M' ? _i18nT('common.male', null, 'Masculino') : _i18nT('common.female', null, 'Femenino')}</span>
                         </dd>
                     </div>
                 </div>
                 <div class="pt-6 border-t border-outline-variant/30 grid grid-cols-2 gap-8">
                     <div>
-                        <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Nacimiento</dt>
+                        <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">${_i18nT('common.birth', null, 'Nacimiento')}</dt>
                         <dd class="text-sm">
                             <span class="font-bold block">${person.birth_date || person.birth_year}</span>
                             ${(person.birth_city || person.birth_place) ? `<span class="italic opacity-80 text-xs">${person.birth_city || person.birth_place}</span>` : ''}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Bautismo</dt>
+                        <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">${_i18nT('common.baptism', null, 'Bautismo')}</dt>
                         <dd class="text-sm">
                             <span class="font-bold block">${baptismDate || '—'}</span>
-                            ${baptismPlace ? `<span class="italic opacity-80 text-xs">${baptismPlace}</span>` : '<span class="italic opacity-80 text-xs">No registrado</span>'}
-                            ${godparents ? `<span class="italic opacity-80 text-xs block mt-1">Padrinos: ${godparents}</span>` : ''}
+                            ${baptismPlace ? `<span class="italic opacity-80 text-xs">${baptismPlace}</span>` : `<span class="italic opacity-80 text-xs">${_i18nT('pages.dossier.not_registered', null, 'No registrado')}</span>`}
+                            ${godparents ? `<span class="italic opacity-80 text-xs block mt-1">${_i18nT('pages.dossier.godparents', null, 'Padrinos')}: ${godparents}</span>` : ''}
                         </dd>
                     </div>
                 </div>
@@ -296,19 +301,19 @@ function renderPerfil(data, displayName) {
         <div class="flex flex-col space-y-8">
             <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                 <span class="material-symbols-outlined">account_balance</span>
-                Defunción y Sepelio
+                ${_i18nT('pages.dossier.death_title', null, 'Defunción y Sepelio')}
             </h2>
             <div class="flex-1 bg-surface-container-highest/30 p-8 rounded-xl heritage-border space-y-6">
                 <div class="grid grid-cols-2 gap-8">
                     <div>
-                        <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Fallecimiento</dt>
+                        <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">${_i18nT('pages.dossier.decease', null, 'Fallecimiento')}</dt>
                         <dd class="text-sm">
-                            <span class="font-bold block">${person.death_date || person.death_year || '?'}${person.death_age ? ' (' + person.death_age + ' años)' : ''}</span>
+                            <span class="font-bold block">${person.death_date || person.death_year || '?'}${person.death_age ? ' (' + person.death_age + ' ' + _i18nT('common.years', null, 'años') + ')' : ''}</span>
                             ${(person.death_city || person.death_place) ? `<span class="italic opacity-80 text-xs">${person.death_city || person.death_place}</span>` : ''}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">Causa</dt>
+                        <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-2">${_i18nT('pages.dossier.cause', null, 'Causa')}</dt>
                         <dd class="text-sm">
                             <span class="font-bold block">${person.death_cause || '—'}</span>
                         </dd>
@@ -316,18 +321,18 @@ function renderPerfil(data, displayName) {
                 </div>
                 ${data.burial && data.burial.length > 0 ? `
                 <div class="pt-6 border-t border-outline-variant/30">
-                    <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-4">Localización Exacta Sepultura</dt>
+                    <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-4">${_i18nT('pages.dossier.burial_location', null, 'Localización Exacta Sepultura')}</dt>
                     <dd class="space-y-3 text-xs">
                         ${data.burial.map((b, i) => `
                             ${b.place ? `
                             <div>
-                                <span class="block text-outline font-bold mb-1">Cementerio</span>
+                                <span class="block text-outline font-bold mb-1">${_i18nT('pages.dossier.cemetery', null, 'Cementerio')}</span>
                                 <span class="text-xs">${b.place}</span>
                             </div>
                             ` : ''}
                             ${b.place_detail ? `
                             <div>
-                                <span class="block text-outline font-bold mb-1">Referencia</span>
+                                <span class="block text-outline font-bold mb-1">${_i18nT('pages.dossier.reference', null, 'Referencia')}</span>
                                 <span class="text-xs break-words">${b.place_detail}</span>
                             </div>
                             ` : ''}
@@ -336,8 +341,8 @@ function renderPerfil(data, displayName) {
                 </div>
                 ` : `
                 <div class="pt-6 border-t border-outline-variant/30">
-                    <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-4">Localización Exacta Sepultura</dt>
-                    <dd class="text-xs text-on-surface-variant italic">Información no disponible en el registro actual</dd>
+                    <dt class="text-[10px] uppercase tracking-widest text-outline font-extrabold mb-4">${_i18nT('pages.dossier.burial_location', null, 'Localización Exacta Sepultura')}</dt>
+                    <dd class="text-xs text-on-surface-variant italic">${_i18nT('pages.dossier.no_burial_info', null, 'Información no disponible en el registro actual')}</dd>
                 </div>
                 `}
             </div>
@@ -347,23 +352,23 @@ function renderPerfil(data, displayName) {
     document.getElementById('perfil-section').innerHTML = html;
 
     // Fill Card1 minibio async
-    fetch(`/api/minibio/${encodeURIComponent((data.person.id || '').replace(/@/g, ''))}`)
+    fetch(_api(`/api/minibio/${encodeURIComponent((data.person.id || '').replace(/@/g, ''))}`))
         .then(r => r.json())
         .then(m => {
-            const bio = m.bio_es || m.bio_ca || '';
+            const bio = m.bio || m.bio_es || m.bio_ca || '';
             const el = document.getElementById('card-minibio-text');
             if (el) {
                 if (bio) {
                     el.innerHTML = `<p style="line-height:1.7;">${bio}</p>`;
                     el.classList.remove('opacity-70');
                 } else {
-                    el.textContent = 'Sense minibiografia disponible.';
+                    el.textContent = _i18nT('pages.dossier.no_minibio', null, 'Sin minibiografía disponible.');
                 }
             }
         })
         .catch(() => {
             const el = document.getElementById('card-minibio-text');
-            if (el) el.textContent = 'Sense minibiografia disponible.';
+            if (el) el.textContent = _i18nT('pages.dossier.no_minibio', null, 'Sin minibiografía disponible.');
         });
 }
 
@@ -410,7 +415,12 @@ function renderVitalMap(points) {
             const marker = L.marker([p.lat, p.lng], {
                 icon: L.divIcon({ className: '', html: markerHtml, iconSize: [32, 32], iconAnchor: [16, 16] })
             }).addTo(map);
-            const typeLabel = { birth: 'Nacimiento', marriage: 'Matrimonio', death: 'Defunción', burial: 'Sepultura' }[p.type] || p.type;
+            const typeLabel = {
+                birth: _i18nT('common.birth', null, 'Nacimiento'),
+                marriage: _i18nT('common.marriage', null, 'Matrimonio'),
+                death: _i18nT('common.death', null, 'Defunción'),
+                burial: _i18nT('common.burial', null, 'Sepultura')
+            }[p.type] || p.type;
             marker.bindPopup(`<b style="color:#2D4B33;font-size:13px">${typeLabel}</b><div style="font-size:11px;color:#727971;margin-top:4px">${p.label}</div>`, { maxWidth: 240 });
             bounds.push([p.lat, p.lng]);
         });
@@ -422,7 +432,7 @@ function renderVitalMap(points) {
 function recentDeathTag(p) {
     if (!p.death_year || p.is_alive) return '';
     if (p.death_year < 2021) return '';
-    return `<div class="mt-1 text-[9px] uppercase tracking-widest font-extrabold bg-secondary text-on-secondary px-2 py-0.5 rounded">† RECIENTE</div>`;
+    return `<div class="mt-1 text-[9px] uppercase tracking-widest font-extrabold bg-secondary text-on-secondary px-2 py-0.5 rounded">† ${_i18nT('common.recent', null, 'RECIENTE')}</div>`;
 }
 
 function renderFamilyTree(data) {
@@ -452,7 +462,7 @@ function renderFamilyTree(data) {
     }
 
     let html = `
-        <h2 class="font-headline text-3xl text-primary border-b border-outline-variant pb-4 italic text-center">Árbol Familiar Inmediato</h2>
+        <h2 class="font-headline text-3xl text-primary border-b border-outline-variant pb-4 italic text-center">${_i18nT('pages.dossier.family_tree_title', null, 'Árbol Familiar Inmediato')}</h2>
         <div class="flex flex-col items-center">
     `;
 
@@ -462,7 +472,7 @@ function renderFamilyTree(data) {
         parents.forEach(p => {
             const pDisplayName = getDisplayName(p);
             html += `
-                <a href="/dossier.html?id=${dossierId(p.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
+                <a href="${_lhref('/dossier.html?id=' + dossierId(p.id))}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
                             ${p.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${p.photo_file}" alt="${pDisplayName}">` : personSvg(p.sex, p.birth_year, p.death_year, 32)}
@@ -487,7 +497,7 @@ function renderFamilyTree(data) {
         siblings.forEach(s => {
             const sDisplayName = getDisplayName(s);
             html += `
-                <a href="/dossier.html?id=${dossierId(s.id)}" class="cursor-pointer hover:opacity-90 transition-opacity">
+                <a href="${_lhref('/dossier.html?id=' + dossierId(s.id))}" class="cursor-pointer hover:opacity-90 transition-opacity">
                     <div class="flex flex-col items-center node-card opacity-80 shrink-0">
                         <div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant/30 mb-1 bg-surface-container-high flex items-center justify-center">
                             ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${sDisplayName}">` : personSvg(s.sex, s.birth_year, s.death_year, 26)}
@@ -536,7 +546,7 @@ function renderFamilyTree(data) {
                     </div>
                     <h3 class="font-headline font-bold text-primary text-center text-sm">${personDisplayName}</h3>
                     <span class="text-xs opacity-60 italic text-center">${formatYears(person.birth_year, person.death_year, person.is_alive)}</span>
-                    <div class="mt-2 text-[8px] uppercase tracking-widest font-extrabold bg-primary text-on-primary px-2 py-0.5 rounded">Sujeto Central</div>
+                    <div class="mt-2 text-[8px] uppercase tracking-widest font-extrabold bg-primary text-on-primary px-2 py-0.5 rounded">${_i18nT('pages.dossier.central_subject', null, 'Sujeto Central')}</div>
                     ${recentDeathTag(person)}
                 </div>
     `;
@@ -548,7 +558,7 @@ function renderFamilyTree(data) {
             const spouseDisplayName = getDisplayName(s);
             const marriageInfo = s.marriage_date ? ` (${s.marriage_date})` : '';
             html += `
-                <a href="/dossier.html?id=${dossierId(s.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
+                <a href="${_lhref('/dossier.html?id=' + dossierId(s.id))}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-secondary/20 mb-2 bg-surface-container-high flex items-center justify-center">
                             ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${spouseDisplayName}">` : personSvg(s.sex, s.birth_year, s.death_year, 36)}
@@ -556,7 +566,7 @@ function renderFamilyTree(data) {
                         <h4 class="text-[11px] font-bold text-center">${spouseDisplayName}</h4>
                         <span class="text-[10px] opacity-60 text-center">${formatYears(s.birth_year, s.death_year, s.is_alive)}</span>
                         ${s.marriage_date ? `<span class="text-[9px] opacity-50 text-center">${s.marriage_date}</span>` : ''}
-                        ${s.divorce ? `<span class="text-[9px] opacity-40 text-center italic">divorciado ${s.divorce.date || ''}</span>` : ''}
+                        ${s.divorce ? `<span class="text-[9px] opacity-40 text-center italic">${_i18nT('common.divorced', null, 'divorciado')} ${s.divorce.date || ''}</span>` : ''}
                         ${recentDeathTag(s)}
                     </div>
                 </a>
@@ -577,7 +587,7 @@ function renderFamilyTree(data) {
             const cDisplayName = getDisplayName(c);
             const childYears = formatYears(c.birth_year, c.death_year, c.is_alive);
             html += `
-                <a href="/dossier.html?id=${dossierId(c.id)}" class="cursor-pointer hover:opacity-80 transition-opacity">
+                <a href="${_lhref('/dossier.html?id=' + dossierId(c.id))}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
                             ${c.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${c.photo_file}" alt="${cDisplayName}">` : personSvg(c.sex, c.birth_year, c.death_year, 32)}
@@ -594,8 +604,8 @@ function renderFamilyTree(data) {
 
     html += `
         <div class="mt-12 text-center">
-            <a href="/arbol2.html?id=${dossierId(person.id)}" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s; display: inline-block;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                Ver árbol completo →
+            <a href="${_lhref('/arbol2.html?id=' + dossierId(person.id))}" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s; display: inline-block;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                ${_i18nT('pages.dossier.view_full_tree', null, 'Ver árbol completo')} →
             </a>
         </div>
     </div>`;
@@ -690,14 +700,14 @@ function renderPhotosGrid(photos) {
             <div class="space-y-2">
                 <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                     <span class="material-symbols-outlined">collections</span>
-                    Memoria Visual
+                    ${_i18nT('pages.dossier.photos_title', null, 'Memoria Visual')}
                 </h2>
-                <p class="text-xs text-outline font-bold uppercase tracking-widest">Archivo Histórico (${photos.length} medios registrados)</p>
+                <p class="text-xs text-outline font-bold uppercase tracking-widest">${_i18nT('pages.dossier.photos_subtitle', {count: photos.length}, 'Archivo Histórico ({count} medios registrados)')}</p>
             </div>
             <div class="flex gap-2 flex-wrap">
-                <button onclick="sortPhotos('oldest')" id="sort-oldest" class="sort-btn px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors border border-outline-variant text-outline-variant hover:bg-outline-variant/10">Más antigua</button>
-                <button onclick="sortPhotos('newest')" id="sort-newest" class="sort-btn px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors border border-outline-variant text-outline-variant hover:bg-outline-variant/10">Más nueva</button>
-                <button onclick="sortPhotos('added')" id="sort-added" class="sort-btn px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors border border-outline-variant text-outline-variant hover:bg-outline-variant/10">Fecha incorporación</button>
+                <button onclick="sortPhotos('oldest')" id="sort-oldest" class="sort-btn px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors border border-outline-variant text-outline-variant hover:bg-outline-variant/10">${_i18nT('pages.dossier.sort_oldest', null, 'Más antigua')}</button>
+                <button onclick="sortPhotos('newest')" id="sort-newest" class="sort-btn px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors border border-outline-variant text-outline-variant hover:bg-outline-variant/10">${_i18nT('pages.dossier.sort_newest', null, 'Más nueva')}</button>
+                <button onclick="sortPhotos('added')" id="sort-added" class="sort-btn px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors border border-outline-variant text-outline-variant hover:bg-outline-variant/10">${_i18nT('pages.dossier.sort_added', null, 'Fecha incorporación')}</button>
             </div>
         </div>
         <div id="photos-grid-container"></div>
@@ -774,7 +784,10 @@ function renderDocuments(data) {
     const sorted = [...data.documents].sort((a, b) => docOrder(a) - docOrder(b));
 
     const documentCards = sorted.map(doc => {
-        const label = doc.tag || (DOC_TYPE_META[doc.doc_type] || {}).label || 'Document';
+        const metaLabel = (DOC_TYPE_META[doc.doc_type] || {}).label;
+        const label = doc.tag
+            || (metaLabel ? _i18nT('doc_types.' + doc.doc_type, null, metaLabel) : null)
+            || _i18nT('common.doc_default', null, 'Documento');
         const iconPath = getIconForTag(doc.tag) !== '/icons/documentacion.svg'
             ? getIconForTag(doc.tag)
             : getIconForTag(doc.doc_type);
@@ -799,7 +812,7 @@ function renderDocuments(data) {
     const html = `
         <h2 class="font-headline text-3xl text-primary flex items-center gap-4 mb-8">
             <span class="material-symbols-outlined">folder_open</span>
-            Repositorio Documental
+            ${_i18nT('pages.dossier.docs_title', null, 'Repositorio Documental')}
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             ${documentCards}
@@ -886,17 +899,17 @@ function buildEvents(data) {
         if (!dateStr) return '';
         const str = String(dateStr);
         // Handle GEDCOM date qualifiers
-        if (str.startsWith('ABT ')) return 'Aprox. ' + str.substring(4);
-        if (str.startsWith('AFT ')) return 'Después de ' + str.substring(4);
-        if (str.startsWith('BEF ')) return 'Antes de ' + str.substring(4);
-        if (str.startsWith('TO ')) return 'hasta ' + str.substring(3);
+        if (str.startsWith('ABT ')) return _i18nT('dates.approx', null, 'Aprox.') + ' ' + str.substring(4);
+        if (str.startsWith('AFT ')) return _i18nT('dates.after', null, 'Después de') + ' ' + str.substring(4);
+        if (str.startsWith('BEF ')) return _i18nT('dates.before', null, 'Antes de') + ' ' + str.substring(4);
+        if (str.startsWith('TO ')) return _i18nT('dates.until', null, 'hasta') + ' ' + str.substring(3);
         if (str.startsWith('FROM ') && str.includes(' TO ')) {
             const parts = str.split(' TO ');
-            return 'Desde ' + parts[0].substring(5) + ' hasta ' + parts[1];
+            return _i18nT('dates.from_to', {from: parts[0].substring(5), to: parts[1]}, 'Desde {from} hasta {to}');
         }
         if (str.startsWith('BET ') && str.includes(' AND ')) {
             const parts = str.split(' AND ');
-            return 'Entre ' + parts[0].substring(4) + ' y ' + parts[1];
+            return _i18nT('dates.between', {from: parts[0].substring(4), to: parts[1]}, 'Entre {from} y {to}');
         }
         return str;
     }
@@ -909,7 +922,7 @@ function buildEvents(data) {
     function ageText(year, hideIfZero = false) {
         const age = calculateAge(year);
         if (age === 0 && hideIfZero) return '';
-        return age !== null ? `Edad ${age}` : '';
+        return age !== null ? _i18nT('common.age_label', {age: age}, 'Edad {age}') : '';
     }
 
     function ageRangeText(startYear, endYear) {
@@ -917,7 +930,7 @@ function buildEvents(data) {
         const ageStart = calculateAge(startYear);
         const ageEnd = calculateAge(endYear);
         if (ageStart === null || ageEnd === null) return '';
-        return `Edades: ${ageStart} - ${ageEnd}`;
+        return _i18nT('common.ages_label', {from: ageStart, to: ageEnd}, 'Edades: {from} - {to}');
     }
 
     function ageRangeEndText(endYear) {
@@ -932,10 +945,37 @@ function buildEvents(data) {
         // Check if it's a range like "19 de agosto 1917 - 1919"
         if (dateStr.includes(' - ')) {
             const [start, end] = dateStr.split(' - ').map(s => s.trim());
-            return `desde ${start} hasta ${end}`;
+            return _i18nT('dates.from_to_lower', {from: start, to: end}, 'desde {from} hasta {to}');
         }
         return dateStr;
     }
+
+    /* Etiquetas de tipo de evento del cronograma: también sirven de clave de
+       filtro, por lo que se definen una sola vez y se comparan entre sí. */
+    const EVT = {
+        birth: _i18nT('events.birth', null, 'Nacimiento'),
+        baptism: _i18nT('events.baptism', null, 'Bautismo'),
+        marriage_with: _i18nT('events.marriage_with', null, 'Matrimonio con:'),
+        divorce_of: _i18nT('events.divorce_of', null, 'Divorcio de:'),
+        partner: _i18nT('events.partner', null, 'Pareja:'),
+        wife_death: _i18nT('events.wife_death', null, 'Fallecimiento de la esposa:'),
+        husband_death: _i18nT('events.husband_death', null, 'Fallecimiento del esposo:'),
+        daughter_birth: _i18nT('events.daughter_birth', null, 'Nacimiento de la hija'),
+        son_birth: _i18nT('events.son_birth', null, 'Nacimiento del hijo'),
+        daughter_death: _i18nT('events.daughter_death', null, 'Fallecimiento de la hija:'),
+        son_death: _i18nT('events.son_death', null, 'Fallecimiento del hijo:'),
+        daughter_marriage: _i18nT('events.daughter_marriage', null, 'Matrimonio de la hija:'),
+        son_marriage: _i18nT('events.son_marriage', null, 'Matrimonio del hijo:'),
+        occupation: _i18nT('events.occupation', null, 'Ocupación'),
+        residence: _i18nT('events.residence', null, 'Residencia'),
+        military: _i18nT('events.military', null, 'Alistamiento Militar'),
+        anecdote: _i18nT('events.anecdote', null, 'Anécdota'),
+        generic: _i18nT('events.generic', null, 'Evento'),
+        death: _i18nT('events.death', null, 'Defunción'),
+        burial: _i18nT('events.burial', null, 'Entierro'),
+        ex_spouse_death: _i18nT('events.ex_spouse_death', null, 'Fallecimiento del ex-cónyuge'),
+        child_partnership: _i18nT('events.child_partnership', null, 'Sociedad del hijo')
+    };
 
     // Nacimiento
     if (person.birth_year) {
@@ -958,7 +998,7 @@ function buildEvents(data) {
         events.push({
             year: person.birth_year,
             age: ageText(person.birth_year, true),
-            type: 'Nacimiento',
+            type: EVT.birth,
             lines: lines,
             photo: null,
             name: personName
@@ -973,11 +1013,11 @@ function buildEvents(data) {
             events.push({
                 year: year,
                 age: ageText(year),
-                type: 'Bautismo',
+                type: EVT.baptism,
                 lines: [
                     formatDateWithQualifier(person.baptism_date) || '',
                     person.baptism_place || '',
-                    person.godparents ? `Padrinos: ${person.godparents}` : ''
+                    person.godparents ? `${_i18nT('pages.dossier.godparents', null, 'Padrinos')}: ${person.godparents}` : ''
                 ].filter(Boolean),
                 note: '',
                 photo: null,
@@ -996,7 +1036,7 @@ function buildEvents(data) {
                 events.push({
                     year: year,
                     age: ageText(year),
-                    type: 'Matrimonio con:',
+                    type: EVT.marriage_with,
                     lines: [
                         s.marriage_date ? formatDateWithQualifier(s.marriage_date) : '',
                         s.marriage_place ? `${s.marriage_place}` : ''
@@ -1015,7 +1055,7 @@ function buildEvents(data) {
                     events.push({
                         year: divYear,
                         age: ageText(divYear),
-                        type: 'Divorcio de:',
+                        type: EVT.divorce_of,
                         lines: [
                             formatDateWithQualifier(s.divorce.date) || '',
                             s.divorce.place ? `${s.divorce.place}` : ''
@@ -1038,7 +1078,7 @@ function buildEvents(data) {
                     events.push({
                         year: partYear,
                         age: ageText(partYear),
-                        type: 'Pareja:',
+                        type: EVT.partner,
                         lines: [
                             formatDateWithQualifier(s.partnership_date) || ''
                         ].filter(Boolean),
@@ -1059,7 +1099,7 @@ function buildEvents(data) {
                     events.push({
                         year: spouseDeathYear,
                         age: ageText(spouseDeathYear),
-                        type: isFemale ? 'Fallecimiento de la esposa:' : 'Fallecimiento del esposo:',
+                        type: isFemale ? EVT.wife_death : EVT.husband_death,
                         lines: [
                             s.death_date ? formatDateWithQualifier(s.death_date) : `${spouseDeathYear}`,
                             s.death_place || ''
@@ -1078,7 +1118,7 @@ function buildEvents(data) {
         data.children.forEach(c => {
             const year = extractYear(c.birth_year);
             if (year) {
-                const typeText = c.sex === 'F' ? 'Nacimiento de la hija' : 'Nacimiento del hijo';
+                const typeText = c.sex === 'F' ? EVT.daughter_birth : EVT.son_birth;
                 const childName = formatNameWithNickname(c.name, c.nickname, c.given_name, c.surname) || c.name;
                 events.push({
                     year: year,
@@ -1099,7 +1139,7 @@ function buildEvents(data) {
                 const childDeathYear = c.death_year;
                 const subjectDeathYear = person.death_year || 9999;
                 if (childDeathYear <= subjectDeathYear) {
-                    const typeText = c.sex === 'F' ? 'Fallecimiento de la hija:' : 'Fallecimiento del hijo:';
+                    const typeText = c.sex === 'F' ? EVT.daughter_death : EVT.son_death;
                     const childName = formatNameWithNickname(c.name, c.nickname, c.given_name, c.surname) || c.name;
                     events.push({
                         year: childDeathYear,
@@ -1125,7 +1165,7 @@ function buildEvents(data) {
                     const deathDate = dateToComparable(person.death_date || person.death_year);
                     if (mYear && marriageDate <= deathDate) {
                         const lines = [
-                            m.marriage_date ? formatDateWithQualifier(m.marriage_date) : 'Approx. ' + mYear,
+                            m.marriage_date ? formatDateWithQualifier(m.marriage_date) : _i18nT('dates.approx', null, 'Aprox.') + ' ' + mYear,
                             m.marriage_place ? `${m.marriage_place}` : ''
                         ].filter(Boolean);
 
@@ -1135,7 +1175,7 @@ function buildEvents(data) {
                         events.push({
                             year: mYear,
                             age: ageText(mYear),
-                            type: `Matrimonio de ${c.sex === 'F' ? 'la hija' : 'el hijo'}:`,
+                            type: c.sex === 'F' ? EVT.daughter_marriage : EVT.son_marriage,
                             lines: lines,
                             photo: m.spouse_photo,
                             name: spouseName,
@@ -1167,7 +1207,7 @@ function buildEvents(data) {
                         const ageStart = calculateAge(year);
                         const ageEnd = calculateAge(endYear);
                         if (ageStart !== null && ageEnd !== null) {
-                            ageDisplay = `Edades: ${ageStart} - ${ageEnd}`;
+                            ageDisplay = ageRangeText(year, endYear);
                         }
                     }
                 }
@@ -1175,7 +1215,7 @@ function buildEvents(data) {
                 events.push({
                     year: year,
                     age: ageDisplay || ageText(year),
-                    type: 'Ocupación',
+                    type: EVT.occupation,
                     lines: [
                         formatDateRange(o.date) || '',
                         o.title || '',
@@ -1203,14 +1243,14 @@ function buildEvents(data) {
                         const ageStart = calculateAge(year);
                         const ageEnd = calculateAge(endYear);
                         if (ageStart !== null && ageEnd !== null) {
-                            ageDisplay = `Edades: ${ageStart} - ${ageEnd}`;
+                            ageDisplay = ageRangeText(year, endYear);
                         }
                     }
                 }
                 events.push({
                     year: year,
                     age: ageDisplay || ageText(year),
-                    type: 'Residencia',
+                    type: EVT.residence,
                     lines: [
                         formatDateRange(r.date) || '',
                         r.address || '',
@@ -1232,7 +1272,7 @@ function buildEvents(data) {
                 events.push({
                     year: year,
                     age: ageText(year),
-                    type: 'Alistamiento Militar',
+                    type: EVT.military,
                     lines: [
                         formatDateWithQualifier(m.date) || '',
                         m.description || '',
@@ -1254,7 +1294,7 @@ function buildEvents(data) {
                 events.push({
                     year: year,
                     age: ageText(year),
-                    type: 'Anécdota',
+                    type: EVT.anecdote,
                     lines: [
                         formatDateWithQualifier(a.date) || '',
                         a.description || '',
@@ -1286,7 +1326,7 @@ function buildEvents(data) {
                 events.push({
                     year: year,
                     age: ageDisplay || ageText(year),
-                    type: e.type || 'Evento',
+                    type: e.type || EVT.generic,
                     lines: [
                         formatDateWithQualifier(e.date) || '',
                         e.place || ''
@@ -1307,12 +1347,12 @@ function buildEvents(data) {
         const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
         const deathLines = [formatDateWithQualifier(person.death_date) || `${person.death_year}`];
         if (person.death_place) deathLines.push(person.death_place);
-        if (person.death_cause) deathLines.push(`Causa: ${person.death_cause}`);
+        if (person.death_cause) deathLines.push(`${_i18nT('pages.dossier.cause', null, 'Causa')}: ${person.death_cause}`);
 
         events.push({
             year: person.death_year,
             age: ageText(person.death_year),
-            type: 'Defunción',
+            type: EVT.death,
             lines: deathLines,
             note: person.death_note || '',
             photo: null,
@@ -1336,7 +1376,7 @@ function buildEvents(data) {
                 events.push({
                     year: year,
                     age: ageText(year),
-                    type: 'Entierro',
+                    type: EVT.burial,
                     lines: lines.filter(Boolean),
                     photo: null,
                     name: personName
@@ -1362,7 +1402,7 @@ function buildEvents(data) {
                 events.push({
                     year: deathYear,
                     age: ageText(deathYear),
-                    type: 'Fallecimiento del ex-cónyuge',
+                    type: EVT.ex_spouse_death,
                     lines: [
                         s.death_date ? formatDateWithQualifier(s.death_date) : `${deathYear}`,
                         s.death_place ? `${s.death_place}` : ''
@@ -1399,7 +1439,7 @@ function buildEvents(data) {
                         events.push({
                             year: year,
                             age: ageText(year),
-                            type: 'Sociedad del hijo',
+                            type: EVT.child_partnership,
                             lines: [formatDateWithQualifier(partnership.partnership_date) || ''],
                             photos: photos,
                             name: person.name
@@ -1414,8 +1454,8 @@ function buildEvents(data) {
     // Birth (Nacimiento) always comes first
     events.sort((a, b) => {
         // Birth events always come first
-        if (a.type === 'Nacimiento' && b.type !== 'Nacimiento') return -1;
-        if (a.type !== 'Nacimiento' && b.type === 'Nacimiento') return 1;
+        if (a.type === EVT.birth && b.type !== EVT.birth) return -1;
+        if (a.type !== EVT.birth && b.type === EVT.birth) return 1;
 
         // For other events, sort by date
         const dateA = dateToComparable(a.lines[0] || '');  // First line is the date
@@ -1452,7 +1492,7 @@ function renderTimelineSection() {
 
     // Generate filter buttons
     const filterButtonsHtml = `
-        <button onclick="setTimelineFilter(null)" class="px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors ${timelineFilter === null ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">Todos</button>
+        <button onclick="setTimelineFilter(null)" class="px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors ${timelineFilter === null ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">${_i18nT('common.all', null, 'Todos')}</button>
         ${uniqueTypes.map(type => `
             <button onclick="setTimelineFilter('${type}')" class="px-3 py-1 text-xs font-bold uppercase rounded-full transition-colors ${timelineFilter === type ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">
                 ${type}
@@ -1464,11 +1504,11 @@ function renderTimelineSection() {
         <div class="flex items-center justify-between mb-6">
             <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                 <span class="material-symbols-outlined">event_note</span>
-                Cronograma Biográfico
+                ${_i18nT('pages.dossier.timeline_title', null, 'Cronograma Biográfico')}
             </h2>
             <div class="flex gap-2">
-                <button onclick="setTimelineMode('graphic')" class="px-4 py-2 text-xs font-bold uppercase rounded-lg transition-colors ${timelineMode === 'graphic' ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">Gráfico</button>
-                <button onclick="setTimelineMode('list')" class="px-4 py-2 text-xs font-bold uppercase rounded-lg transition-colors ${timelineMode === 'list' ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">Lista</button>
+                <button onclick="setTimelineMode('graphic')" class="px-4 py-2 text-xs font-bold uppercase rounded-lg transition-colors ${timelineMode === 'graphic' ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">${_i18nT('pages.dossier.mode_graphic', null, 'Gráfico')}</button>
+                <button onclick="setTimelineMode('list')" class="px-4 py-2 text-xs font-bold uppercase rounded-lg transition-colors ${timelineMode === 'list' ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">${_i18nT('pages.dossier.mode_list', null, 'Lista')}</button>
             </div>
         </div>
         <div class="flex flex-wrap gap-2 mb-6" id="timeline-filters">
@@ -1495,7 +1535,7 @@ function renderGraphicMode(events) {
             photosHtml = `
                 <div class="flex items-center gap-2 mb-3">
                     ${thumbDiv(e.childPhoto, e.childSex, e.childBirthYear, e.childDeathYear, e.childName)}
-                    <span class="text-xs text-outline mx-1">y</span>
+                    <span class="text-xs text-outline mx-1">${_i18nT('common.and', null, 'y')}</span>
                     ${thumbDiv(e.photo, null, null, null, e.name)}
                 </div>
             `;
@@ -1503,7 +1543,7 @@ function renderGraphicMode(events) {
             photosHtml = `
                 <div class="flex items-center gap-3 mb-2">
                     ${e.photos.map(p => thumbDiv(p.photo, p.personSex, p.personBirthYear, p.personDeathYear, p.name))
-                        .join('<span class="text-xs text-outline mx-1">y</span>')}
+                        .join(`<span class="text-xs text-outline mx-1">${_i18nT('common.and', null, 'y')}</span>`)}
                 </div>
             `;
         } else if (e.photo || e.personSex !== undefined) {
@@ -1529,13 +1569,13 @@ function renderGraphicMode(events) {
                     ${(e.extraSources && e.extraSources.length > 0) ? `
                         <div class="mt-3 space-y-2">
                             ${e.extraSources.map(src => {
-                                const quayLabels = ['No fiable','Cuestionable','Evidencia secundaria','Evidencia directa','Primaria y directa'];
+                                const quayLabels = _i18nT('pages.dossier.quay_labels', null, ['No fiable','Cuestionable','Evidencia secundaria','Evidencia directa','Primaria y directa']);
                                 const quayLabel = (src.quay != null && quayLabels[src.quay]) ? quayLabels[src.quay] : '';
                                 return `<div class="text-xs text-outline/70 border-l-2 border-outline-variant pl-2 space-y-0.5">
-                                    ${src.source_title ? `<div><span class="font-semibold text-outline">Fuente:</span> ${src.source_title}</div>` : ''}
-                                    ${src.data_text ? `<div><span class="font-semibold text-outline">Nota:</span> ${src.data_text}</div>` : ''}
-                                    ${src.data_date ? `<div><span class="font-semibold text-outline">Fecha:</span> ${src.data_date}</div>` : ''}
-                                    ${quayLabel ? `<div><span class="font-semibold text-outline">Fiabilidad:</span> ${quayLabel}</div>` : ''}
+                                    ${src.source_title ? `<div><span class="font-semibold text-outline">${_i18nT('pages.dossier.source', null, 'Fuente')}:</span> ${src.source_title}</div>` : ''}
+                                    ${src.data_text ? `<div><span class="font-semibold text-outline">${_i18nT('pages.dossier.note', null, 'Nota')}:</span> ${src.data_text}</div>` : ''}
+                                    ${src.data_date ? `<div><span class="font-semibold text-outline">${_i18nT('common.date', null, 'Fecha')}:</span> ${src.data_date}</div>` : ''}
+                                    ${quayLabel ? `<div><span class="font-semibold text-outline">${_i18nT('pages.dossier.reliability', null, 'Fiabilidad')}:</span> ${quayLabel}</div>` : ''}
                                     ${src.page ? `<div><span class="font-semibold text-outline">URL:</span> <a href="${src.page}" target="_blank" rel="noopener" class="underline break-all">${src.page}</a></div>` : ''}
                                 </div>`;
                             }).join('')}
@@ -1565,10 +1605,10 @@ function renderListMode(events) {
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-outline-variant/30">
-                        <th class="text-left text-xs font-bold uppercase text-outline px-4 py-3">Fecha</th>
-                        <th class="text-left text-xs font-bold uppercase text-outline px-4 py-3">Evento</th>
-                        <th class="text-left text-xs font-bold uppercase text-outline px-4 py-3">Descripción</th>
-                        <th class="text-left text-xs font-bold uppercase text-outline px-4 py-3">Notas</th>
+                        <th class="text-left text-xs font-bold uppercase text-outline px-4 py-3">${_i18nT('common.date', null, 'Fecha')}</th>
+                        <th class="text-left text-xs font-bold uppercase text-outline px-4 py-3">${_i18nT('pages.dossier.event', null, 'Evento')}</th>
+                        <th class="text-left text-xs font-bold uppercase text-outline px-4 py-3">${_i18nT('pages.dossier.description', null, 'Descripción')}</th>
+                        <th class="text-left text-xs font-bold uppercase text-outline px-4 py-3">${_i18nT('pages.dossier.notes', null, 'Notas')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1581,13 +1621,13 @@ function renderListMode(events) {
                             : '';
                         const extraSourcesHtml = (e.extraSources && e.extraSources.length > 0)
                             ? `<div class="mt-1 space-y-1">${e.extraSources.map(src => {
-                                const quayLabels = ['No fiable','Cuestionable','Evidencia secundaria','Evidencia directa','Primaria y directa'];
+                                const quayLabels = _i18nT('pages.dossier.quay_labels', null, ['No fiable','Cuestionable','Evidencia secundaria','Evidencia directa','Primaria y directa']);
                                 const quayLabel = (src.quay != null && quayLabels[src.quay]) ? quayLabels[src.quay] : '';
                                 return `<div class="text-xs text-outline/70 pl-2 border-l-2 border-outline-variant space-y-0.5">
-                                  ${src.source_title ? `<div><span class="font-semibold">Fuente:</span> ${src.source_title}</div>` : ''}
-                                  ${src.data_text ? `<div><span class="font-semibold">Nota:</span> ${src.data_text}</div>` : ''}
-                                  ${src.data_date ? `<div><span class="font-semibold">Fecha:</span> ${src.data_date}</div>` : ''}
-                                  ${quayLabel ? `<div><span class="font-semibold">Fiabilidad:</span> ${quayLabel}</div>` : ''}
+                                  ${src.source_title ? `<div><span class="font-semibold">${_i18nT('pages.dossier.source', null, 'Fuente')}:</span> ${src.source_title}</div>` : ''}
+                                  ${src.data_text ? `<div><span class="font-semibold">${_i18nT('pages.dossier.note', null, 'Nota')}:</span> ${src.data_text}</div>` : ''}
+                                  ${src.data_date ? `<div><span class="font-semibold">${_i18nT('common.date', null, 'Fecha')}:</span> ${src.data_date}</div>` : ''}
+                                  ${quayLabel ? `<div><span class="font-semibold">${_i18nT('pages.dossier.reliability', null, 'Fiabilidad')}:</span> ${quayLabel}</div>` : ''}
                                   ${src.page ? `<div><span class="font-semibold">URL:</span> <a href="${src.page}" target="_blank" rel="noopener" class="underline break-all">${src.page}</a></div>` : ''}
                                 </div>`;
                               }).join('')}</div>`
@@ -1647,7 +1687,7 @@ function renderCareer(careerList) {
     const cards = careerList.map((c, i) => {
         return `
             <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 border-primary">
-                <p class="text-[10px] text-outline font-medium mb-2">${c.date || 'Período desconocido'}</p>
+                <p class="text-[10px] text-outline font-medium mb-2">${c.date || _i18nT('pages.dossier.unknown_period', null, 'Período desconocido')}</p>
                 ${c.place ? `<p class="text-sm font-bold text-on-surface mb-3">${c.place}</p>` : ''}
                 <p class="text-xs text-outline">${linkifyCareerText(c.title)}</p>
             </div>
@@ -1657,7 +1697,7 @@ function renderCareer(careerList) {
     const html = `
         <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
             <span class="material-symbols-outlined">business_center</span>
-            Trayectoria Profesional
+            ${_i18nT('pages.dossier.career_title', null, 'Trayectoria Profesional')}
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">${cards}</div>
     `;
@@ -1674,7 +1714,7 @@ function renderEducation(educationList) {
 
     const cards = educationList.map(e => `
         <div class="p-6 bg-white heritage-border rounded-xl shadow-sm border-l-4 border-primary">
-            <p class="text-[10px] text-outline font-medium mb-2">${e.date || 'Período desconocido'}</p>
+            <p class="text-[10px] text-outline font-medium mb-2">${e.date || _i18nT('pages.dossier.unknown_period', null, 'Período desconocido')}</p>
             ${e.place ? `<p class="text-sm font-bold text-on-surface mb-3">${e.place}</p>` : ''}
             <p class="text-xs text-outline">${e.title || ''}</p>
         </div>
@@ -1688,7 +1728,7 @@ function renderEducation(educationList) {
                 <path d="M19 7.32566C18.8893 7.32211 18.7782 7.32032 18.6667 7.32032C18.1048 7.31954 17.5475 7.36537 17 7.45576M19 11.0067C18.8893 11.0032 18.7782 11.0014 18.6667 11.0014C17.401 10.9996 16.158 11.2344 15 11.6824M19 14.501C18.8893 14.4975 18.7782 14.4957 18.6667 14.4957C17.401 14.4939 16.158 14.7287 15 15.1767" />
                 <path d="M5 7.32566C5.11067 7.32211 5.22179 7.32032 5.33333 7.32032C5.89518 7.31954 6.45255 7.36537 7 7.45576M5 11.0067C5.11067 11.0032 5.22179 11.0014 5.33333 11.0014C6.599 10.9996 7.84198 11.2344 9 11.6824M5 14.501C5.11067 14.4975 5.22179 14.4957 5.33333 14.4957C6.599 14.4939 7.84198 14.7287 9 15.1767" />
             </svg>
-            Estudios
+            ${_i18nT('pages.dossier.education_title', null, 'Estudios')}
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">${cards}</div>
     `;
@@ -1730,7 +1770,7 @@ function renderResidences(residences, events, person) {
         lat: null,
         lng: null,
         note: '',
-        source_type: 'Nacimiento',
+        source_type: _i18nT('common.birth', null, 'Nacimiento'),
         _pinned_first: true,
     }] : [];
 
@@ -1774,7 +1814,7 @@ function renderResidences(residences, events, person) {
 
     section.innerHTML = `
         <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
-            ${houseIcon} Domicilios
+            ${houseIcon} ${_i18nT('pages.dossier.residences_title', null, 'Domicilios')}
         </h2>
         <div id="residences-map" class="w-full heritage-border shadow-sm"></div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">${cards}</div>`;
@@ -1832,7 +1872,10 @@ function renderBurialNiche(niche) {
     }
     section.style.display = 'block';
 
-    const kindLabel = { photo: 'Nicho', record: 'Registro' };
+    const kindLabel = {
+        photo: _i18nT('pages.dossier.niche', null, 'Nicho'),
+        record: _i18nT('pages.dossier.record', null, 'Registro')
+    };
     const photos = niche.photos || [];
     const modalTitle = (niche.title || niche.name || '').replace(/'/g, "\\'");
     const photosHtml = photos.length ? `
@@ -1848,7 +1891,7 @@ function renderBurialNiche(niche) {
     section.innerHTML = `
         <h3 class="font-headline text-2xl text-primary flex items-center gap-3 mb-6">
             <img src="/icons/cementerio.svg" class="w-7 h-7" alt=""/>
-            Sepultura
+            ${_i18nT('common.burial', null, 'Sepultura')}
         </h3>
         <div class="p-8 bg-surface-container-high rounded-xl border-l-8 border-primary relative overflow-hidden">
             <div class="absolute -right-8 -bottom-8 opacity-5">
@@ -1860,10 +1903,10 @@ function renderBurialNiche(niche) {
                 <p class="text-sm mt-1 text-on-surface/80">${niche.name}</p>
                 ${niche.notes ? `<p class="text-sm mt-2 italic text-on-surface/70">${niche.notes}</p>` : ''}
                 ${photosHtml}
-                <a href="/cementerios.html?niche=${niche.id}"
+                <a href="${_lhref('/cementerios.html?niche=' + niche.id)}"
                    class="inline-flex items-center gap-1.5 mt-5 bg-primary text-on-primary px-4 py-2 rounded-full text-xs font-extrabold uppercase tracking-wide hover:bg-primary/90">
                     <span class="material-symbols-outlined text-[16px]">map</span>
-                    Ver en el mapa
+                    ${_i18nT('pages.dossier.view_on_map', null, 'Ver en el mapa')}
                 </a>
             </div>
         </div>
@@ -1889,7 +1932,7 @@ function renderMilitary(data) {
     const html = `
         <h3 class="font-headline text-2xl text-primary flex items-center gap-3 mb-6">
             <span class="material-symbols-outlined">military_tech</span>
-            Actividad Militar
+            ${_i18nT('pages.dossier.military_title', null, 'Actividad Militar')}
         </h3>
         <div class="p-8 bg-surface-container-high rounded-xl border-l-8 border-primary relative overflow-hidden">
             <div class="absolute -right-8 -bottom-8 opacity-5">
@@ -1921,7 +1964,7 @@ function renderNotes(notes) {
             });
         return `
             <article class="relative p-10 bg-white heritage-border shadow-inner rounded-sm font-headline">
-                <div class="absolute top-0 right-0 p-4 text-[10px] font-bold text-outline">NOTA ${i+1}</div>
+                <div class="absolute top-0 right-0 p-4 text-[10px] font-bold text-outline">${_i18nT('pages.dossier.note_label', {n: i+1}, 'NOTA {n}')}</div>
                 <div class="space-y-6 text-lg italic leading-relaxed opacity-90">
                     <p>${formatted}</p>
                 </div>
@@ -1930,7 +1973,7 @@ function renderNotes(notes) {
     }).join('');
 
     const html = `
-        <h2 class="font-headline text-3xl text-primary border-b border-outline-variant pb-4 italic">Notas Biográficas</h2>
+        <h2 class="font-headline text-3xl text-primary border-b border-outline-variant pb-4 italic">${_i18nT('pages.dossier.notes_title', null, 'Notas Biográficas')}</h2>
         <div class="space-y-12">${articles}</div>
     `;
     document.getElementById('notes-section').innerHTML = html;

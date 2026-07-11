@@ -1,5 +1,9 @@
 /* docs.js — Página de documentos */
 
+/* i18n: t()/I18N vienen de i18n.js (inyectado por el backend) */
+const _i18nT = window.t || function (k, p, f) { return f !== undefined ? f : k; };
+const _lhref = window.I18N ? window.I18N.href : function (p) { return p; };
+
 const STATE = {
     docTypes: [],
     docAlbums: [],
@@ -99,7 +103,8 @@ function selectDocType(docType) {
     history.replaceState(null, '', '#' + docType);
 
     const typeObj = STATE.docTypes.find(t => t.type === docType);
-    const label = typeObj ? typeObj.label : 'Documentos';
+    const label = typeObj ? _i18nT('doc_types.' + typeObj.type, null, typeObj.label)
+        : _i18nT('pages.docs.title', null, 'Documentos');
     document.getElementById('page-title').textContent = label;
 
     document.querySelectorAll('.sidebar-type-link').forEach(el => {
@@ -153,7 +158,7 @@ function renderPhotos(append) {
     if (!append) container.innerHTML = '';
 
     if (!append && STATE.photos.length === 0) {
-        container.innerHTML = '<p class="text-outline text-sm py-12 text-center">No se encontraron documentos.</p>';
+        container.innerHTML = `<p class="text-outline text-sm py-12 text-center">${_i18nT('pages.docs.no_documents', null, 'No se encontraron documentos.')}</p>`;
         return;
     }
 
@@ -253,7 +258,7 @@ function renderUniformGrid(container, photos, startIndex, append) {
 
 function _docTypeLabel(type) {
     const t = STATE.docTypes.find(d => d.type === type);
-    return t ? t.label : type;
+    return t ? _i18nT('doc_types.' + t.type, null, t.label) : type;
 }
 
 // ─── Open photo ───────────────────────────────────────────────────────────────
@@ -287,7 +292,7 @@ function renderSidebarTypes() {
            onclick="selectDocType('${t.type}')">
             <span class="flex items-center gap-1.5">
                 ${iconHtml}
-                <span class="truncate${t.type === '__all__' ? ' font-semibold' : ''}">${t.label}</span>
+                <span class="truncate${t.type === '__all__' ? ' font-semibold' : ''}">${t.type === '__all__' ? _i18nT('nav.all_docs', null, t.label) : _i18nT('doc_types.' + t.type, null, t.label)}</span>
             </span>
             <span class="text-[10px] text-outline shrink-0 ml-1">${t.count}</span>
         </a>`;
@@ -498,7 +503,7 @@ function setupKeyboardNav() {
 
 function updatePhotoCountLabel() {
     const label = document.getElementById('photo-count-label');
-    label.textContent = `${STATE.total} documento${STATE.total !== 1 ? 's' : ''}`;
+    label.textContent = `${STATE.total} ${STATE.total !== 1 ? _i18nT('common.documents_lower', null, 'documentos') : _i18nT('common.document_lower', null, 'documento')}`;
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────

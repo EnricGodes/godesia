@@ -9,10 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config={corePlugins:{preflight:false}}</script>
-  <script src="d3.v7.min.js"></script>
+  <script src="/d3.v7.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/family-chart/dist/styles/family-chart.css">
-  <script src="family-chart.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <script src="/family-chart.js"></script>
+  <link rel="stylesheet" href="/style.css">
   <style>
     /* ── Color overrides: light background + design system grays (issue 1, 9) ── */
     #FamilyChart {
@@ -140,12 +140,12 @@
     <!-- Barra de controles -->
     <div style="position:absolute;top:10px;left:10px;z-index:100;display:flex;gap:8px;align-items:center;">
       <div style="position:relative;">
-        <input type="text" id="a2-search" placeholder="Buscar una persona..." autocomplete="off">
+        <input type="text" id="a2-search" placeholder="Buscar una persona..." data-i18n-placeholder="pages.tree.search_placeholder" autocomplete="off">
         <div id="a2-results"></div>
       </div>
-      <button onclick="a2ZoomIn()"    class="a2-zoom-btn" title="Ampliar">+</button>
-      <button onclick="a2ZoomOut()"   class="a2-zoom-btn" title="Reducir">−</button>
-      <button onclick="a2ZoomReset()" class="a2-zoom-btn" title="Centrar" style="display:flex;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" color="currentColor" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.13432 2.5C6.46805 2.56075 4.9107 2.81456 3.84664 3.87493C2.91537 4.80297 2.60406 6.10756 2.5 8.2M14.8657 2.5C17.532 2.56075 19.0893 2.81456 20.1534 3.87493C21.0846 4.80297 21.3959 6.10756 21.5 8.2M14.8657 21.5C17.532 21.4392 19.0893 21.1854 20.1534 20.1251C21.0846 19.197 21.3959 17.8924 21.5 15.8M9.13432 21.5C6.46805 21.4392 4.9107 21.1854 3.84664 20.1251C2.91537 19.197 2.60406 17.8924 2.5 15.8"></path><path d="M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z"></path></svg></button>
+      <button onclick="a2ZoomIn()"    class="a2-zoom-btn" title="Ampliar" data-i18n-title="pages.tree.zoom_in">+</button>
+      <button onclick="a2ZoomOut()"   class="a2-zoom-btn" title="Reducir" data-i18n-title="pages.tree.zoom_out">−</button>
+      <button onclick="a2ZoomReset()" class="a2-zoom-btn" title="Centrar" data-i18n-title="pages.tree.zoom_reset" style="display:flex;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" color="currentColor" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.13432 2.5C6.46805 2.56075 4.9107 2.81456 3.84664 3.87493C2.91537 4.80297 2.60406 6.10756 2.5 8.2M14.8657 2.5C17.532 2.56075 19.0893 2.81456 20.1534 3.87493C21.0846 4.80297 21.3959 6.10756 21.5 8.2M14.8657 21.5C17.532 21.4392 19.0893 21.1854 20.1534 20.1251C21.0846 19.197 21.3959 17.8924 21.5 15.8M9.13432 21.5C6.46805 21.4392 4.9107 21.1854 3.84664 20.1251C2.91537 19.197 2.60406 17.8924 2.5 15.8"></path><path d="M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z"></path></svg></button>
     </div>
 
     <!-- Contenedor del árbol -->
@@ -166,6 +166,6 @@
   </div>
 
   <script src="/nav.js"></script>
-  <script src="arbol2.js?v=20260513"></script>
+  <script src="/arbol2.js?v=20260513"></script>
 </body>
 </html>

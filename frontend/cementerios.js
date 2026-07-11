@@ -2,6 +2,10 @@
 // (satélite Esri) con nichos agrupados en clusters numerados por personas.
 // Sidebar tipo álbumes: nichos y personas enterradas, con acceso directo.
 
+/* i18n: t()/I18N vienen de i18n.js (inyectado por el backend) */
+const _i18nT = window.t || function (k, p, f) { return f !== undefined ? f : k; };
+const _lhref = window.I18N ? window.I18N.href : function (p) { return p; };
+
 const Cementerios = {
     map: null,
     baseLayer: null,
@@ -24,7 +28,7 @@ const Cementerios = {
                 (await fetch('/api/cemeteries/overview')).json(),
             ]);
         } catch (e) {
-            this.toast('No se pudieron cargar los cementerios');
+            this.toast(_i18nT('pages.cemeteries.load_error', null, 'No se pudieron cargar los cementerios'));
             return;
         }
         this.renderSidebar();
@@ -79,7 +83,7 @@ const Cementerios = {
         const peopleEl = document.getElementById('sb-people');
 
         if (!this.overview.niches.length) {
-            nichesEl.innerHTML = '<p class="text-xs text-on-surface-variant px-1">Sin nichos registrados.</p>';
+            nichesEl.innerHTML = `<p class="text-xs text-on-surface-variant px-1">${_i18nT('pages.cemeteries.no_niches', null, 'Sin nichos registrados.')}</p>`;
         } else {
             // Agrupados por cementerio
             const byCem = {};
@@ -98,7 +102,7 @@ const Cementerios = {
         }
 
         if (!this.overview.people.length) {
-            peopleEl.innerHTML = '<p class="text-xs text-on-surface-variant px-1">Nadie asignado todavía.</p>';
+            peopleEl.innerHTML = `<p class="text-xs text-on-surface-variant px-1">${_i18nT('pages.cemeteries.no_people', null, 'Nadie asignado todavía.')}</p>`;
         } else {
             const sorted = [...this.overview.people].sort((a, b) =>
                 (a.name || '').localeCompare(b.name || '', 'ca', { sensitivity: 'base' }));
@@ -132,9 +136,9 @@ const Cementerios = {
         this._markSidebarNiche(null);
         document.getElementById('btn-back').classList.add('hidden');
         document.getElementById('btn-back').classList.remove('flex');
-        document.getElementById('cem-title').textContent = 'Cementerios';
+        document.getElementById('cem-title').textContent = _i18nT('pages.cemeteries.title', null, 'Cementerios');
         document.getElementById('cem-subtitle').textContent =
-            'Los lugares de sepultura de la familia. Haz zoom en un cementerio para descubrir sus nichos.';
+            _i18nT('pages.cemeteries.subtitle', null, 'Los lugares de sepultura de la familia. Haz zoom en un cementerio para descubrir sus nichos.');
         if (this.clusterGroup) { this.clusterGroup.remove(); this.clusterGroup = null; }
         this._setBase('carto');
 
@@ -150,18 +154,18 @@ const Cementerios = {
                 <div style="font-family:Manrope,sans-serif;min-width:180px;">
                     <div style="font-family:'Noto Serif',serif;font-weight:700;font-size:1rem;color:#17341e;">${esc(c.name)}</div>
                     <div style="color:#727971;font-size:.8rem;margin:.15rem 0 .4rem;">${esc(c.city || '')}</div>
-                    <div style="font-size:.8rem;">${c.niche_count} nichos · ${c.people_count} personas</div>
+                    <div style="font-size:.8rem;">${c.niche_count} ${_i18nT('pages.cemeteries.niches_lower', null, 'nichos')} · ${c.people_count} ${_i18nT('pages.cemeteries.people_lower', null, 'personas')}</div>
                     <button onclick="Cementerios.enterCemetery(${c.id})"
                             style="margin-top:.6rem;background:#17341e;color:#fff;border:none;border-radius:9999px;padding:.4rem 1rem;font-weight:700;font-size:.8rem;cursor:pointer;">
-                        Entrar →
+                        ${_i18nT('pages.cemeteries.enter', null, 'Entrar')} →
                     </button>
                 </div>`);
         });
         const legend = document.getElementById('cem-legend');
         if (!this.cemeteries.length) {
-            legend.textContent = 'Aún no hay cementerios registrados.';
+            legend.textContent = _i18nT('pages.cemeteries.no_cemeteries', null, 'Aún no hay cementerios registrados.');
         } else {
-            legend.textContent = `${this.cemeteries.length} cementerios · los números indican las personas de la familia enterradas en cada uno.`;
+            legend.textContent = _i18nT('pages.cemeteries.overview_legend', {count: this.cemeteries.length}, '{count} cementerios · los números indican las personas de la familia enterradas en cada uno.');
         }
         if (points.length) {
             const bounds = L.latLngBounds(points);
@@ -185,7 +189,7 @@ const Cementerios = {
             if (!res.ok) throw new Error();
             detail = await res.json();
         } catch (e) {
-            this.toast('Cementerio no encontrado');
+            this.toast(_i18nT('pages.cemeteries.not_found', null, 'Cementerio no encontrado'));
             return;
         }
         this.current = detail;
@@ -199,7 +203,7 @@ const Cementerios = {
             `${detail.name}${detail.city ? ', ' + detail.city : ''}`;
         document.getElementById('cem-subtitle').textContent = detail.description || '';
         document.getElementById('cem-legend').textContent =
-            'Acércate para separar los grupos y toca un número para ver el nicho.';
+            _i18nT('pages.cemeteries.detail_legend', null, 'Acércate para separar los grupos y toca un número para ver el nicho.');
 
         if (this.clusterGroup) this.clusterGroup.remove();
         const self = this;
@@ -269,10 +273,13 @@ const Cementerios = {
         cemEl.innerHTML = esc(`${this.current.name}${this.current.city ? ' · ' + this.current.city : ''}`) +
             (n.fs_url
                 ? ` · <a href="${esc(n.fs_url)}" target="_blank" rel="noopener"
-                       style="color:#2D4B33;text-decoration:underline;">Volumen en FamilySearch</a>`
+                       style="color:#2D4B33;text-decoration:underline;">${_i18nT('pages.cemeteries.fs_volume', null, 'Volumen en FamilySearch')}</a>`
                 : '');
 
-        const kindLabel = { photo: 'Nicho', record: 'Registro' };
+        const kindLabel = {
+            photo: _i18nT('pages.dossier.niche', null, 'Nicho'),
+            record: _i18nT('pages.dossier.record', null, 'Registro')
+        };
         const photos = n.photos || [];
         document.getElementById('np-photos-title').style.display = photos.length ? '' : 'none';
         document.getElementById('np-photos').innerHTML = photos.map(p => `
@@ -292,7 +299,7 @@ const Cementerios = {
             if (r.person_id && (r.notes || '').trim()) recordNotes[r.person_id] = r.notes.trim();
         });
         if (!n.people.length) {
-            peopleEl.innerHTML = '<p class="text-sm text-on-surface-variant">Sin personas asignadas.</p>';
+            peopleEl.innerHTML = `<p class="text-sm text-on-surface-variant">${_i18nT('pages.cemeteries.no_assigned', null, 'Sin personas asignadas.')}</p>`;
         } else {
             peopleEl.innerHTML = n.people.map(p => {
                 const pid = (p.id || '').replace(/@/g, '');
@@ -301,7 +308,7 @@ const Cementerios = {
                     : `/api/default-photo?sex=${p.sex || ''}&birth_year=${p.birth_year || ''}`;
                 const note = recordNotes[p.id];
                 return `
-                <a href="/dossier.html?id=${pid}"
+                <a href="${_lhref('/dossier.html?id=' + pid)}"
                    class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container transition">
                     <img src="${img}" class="w-10 h-10 rounded-full object-cover border border-outline-variant/40 shrink-0" onerror="this.style.visibility='hidden'"/>
                     <span class="flex-1 min-w-0">
@@ -325,12 +332,18 @@ const Cementerios = {
         }
         section.style.display = '';
         document.getElementById('np-records-title').textContent =
-            `Registro de enterramientos (${records.length})`;
+            _i18nT('pages.cemeteries.records_title', {count: records.length}, 'Registro de enterramientos ({count})');
 
         const allCols = [
-            ['burial_date', 'Entierro'], ['age', 'Edad'], ['civil_status', 'Estado'],
-            ['spouse', 'Cónyuge'], ['profession', 'Profesión'], ['parish', 'Parroquia'],
-            ['address', 'Dirección'], ['origin', 'Origen'], ['notes', 'Notas'],
+            ['burial_date', _i18nT('pages.cemeteries.col_burial', null, 'Entierro')],
+            ['age', _i18nT('pages.cemeteries.col_age', null, 'Edad')],
+            ['civil_status', _i18nT('pages.cemeteries.col_status', null, 'Estado')],
+            ['spouse', _i18nT('common.spouse', null, 'Cónyuge')],
+            ['profession', _i18nT('pages.cemeteries.col_profession', null, 'Profesión')],
+            ['parish', _i18nT('pages.cemeteries.col_parish', null, 'Parroquia')],
+            ['address', _i18nT('pages.cemeteries.col_address', null, 'Dirección')],
+            ['origin', _i18nT('pages.cemeteries.col_origin', null, 'Origen')],
+            ['notes', _i18nT('pages.dossier.notes', null, 'Notas')],
         ];
         // Oculta las columnas vacías para todos los registros de este nicho.
         const cols = allCols.filter(([key]) => records.some(r => (r[key] || '').trim()));
@@ -342,17 +355,17 @@ const Cementerios = {
         };
         const nameCell = (r) => {
             const fs = r.fs_url
-                ? ` <a href="${esc(r.fs_url)}" target="_blank" rel="noopener" title="Ver la página del registro en FamilySearch"
+                ? ` <a href="${esc(r.fs_url)}" target="_blank" rel="noopener" title="${_i18nT('pages.cemeteries.fs_page', null, 'Ver la página del registro en FamilySearch')}"
                      style="text-decoration:none;">📄</a>`
                 : '';
             if (r.person_id) {
                 const pid = r.person_id.replace(/@/g, '');
-                return `<td><a class="rec-name in-db" href="/dossier.html?id=${pid}" title="Ver dossier">${esc(r.name)}</a>${fs}</td>`;
+                return `<td><a class="rec-name in-db" href="${_lhref('/dossier.html?id=' + pid)}" title="${_i18nT('pages.cemeteries.view_dossier', null, 'Ver dossier')}">${esc(r.name)}</a>${fs}</td>`;
             }
             return `<td><span class="rec-name">${esc(r.name)}</span>${fs}</td>`;
         };
         document.getElementById('np-records').innerHTML = `
-            <thead><tr><th>Nombre</th>${cols.map(([, label]) => `<th>${label}</th>`).join('')}</tr></thead>
+            <thead><tr><th>${_i18nT('pages.cemeteries.col_name', null, 'Nombre')}</th>${cols.map(([, label]) => `<th>${label}</th>`).join('')}</tr></thead>
             <tbody>${records.map(r =>
                 `<tr>${nameCell(r)}${cols.map(([key]) => cell(r, key)).join('')}</tr>`).join('')}
             </tbody>`;
@@ -411,7 +424,7 @@ const Cementerios = {
             if (!res.ok) { this.toast('Sin sepultura registrada para esta persona'); return; }
             loc = await res.json();
         } catch (e) {
-            this.toast('Sin sepultura registrada para esta persona');
+            this.toast(_i18nT('pages.cemeteries.no_burial', null, 'Sin sepultura registrada para esta persona'));
             return;
         }
         this.enterCemetery(loc.cemetery_id, loc.id, true);
@@ -419,7 +432,7 @@ const Cementerios = {
 
     locateNiche(nicheId) {
         const n = this.overview.niches.find(x => x.id === nicheId);
-        if (!n) { this.toast('Nicho no encontrado'); return; }
+        if (!n) { this.toast(_i18nT('pages.cemeteries.niche_not_found', null, 'Nicho no encontrado')); return; }
         this.enterCemetery(n.cemetery_id, nicheId, true);
     },
 

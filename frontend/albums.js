@@ -1,5 +1,9 @@
 /* albums.js — Página de álbumes fotográficos */
 
+/* i18n: t()/I18N vienen de i18n.js (inyectado por el backend) */
+const _i18nT = window.t || function (k, p, f) { return f !== undefined ? f : k; };
+const _lhref = window.I18N ? window.I18N.href : function (p) { return p; };
+
 const STATE = {
     albums: [],
     unassigned: null,
@@ -83,7 +87,7 @@ function selectAlbum(albumId) {
     history.replaceState(null, '', '#' + albumId);
 
     const album = albumId === '__unassigned__' ? STATE.unassigned
-        : albumId === '__all__' ? { title: 'Álbum de fotos' }
+        : albumId === '__all__' ? { title: _i18nT('pages.albums.title', null, 'Álbum de fotos') }
         : STATE.albums.find(a => a.id === albumId || a.id === `@${albumId}@`);
     const title = album ? album.title : albumId;
 
@@ -105,7 +109,7 @@ function showAlbumsOverview() {
     STATE.photos = [];
     history.replaceState(null, '', window.location.pathname);
 
-    document.getElementById('page-title').textContent = 'Álbum de fotos';
+    document.getElementById('page-title').textContent = _i18nT('pages.albums.title', null, 'Álbum de fotos');
 
     document.querySelectorAll('.sidebar-album-link').forEach(el => el.classList.remove('active'));
 
@@ -189,7 +193,7 @@ function renderAlbumCards() {
                     ${isUA ? `<span class="material-symbols-outlined text-base text-secondary shrink-0">family_home</span>` : ''}
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <span class="text-[11px] text-outline">${album.photo_count} fotos</span>
+                    <span class="text-[11px] text-outline">${album.photo_count} ${_i18nT('common.photos_lower', null, 'fotos')}</span>
                     ${yearRange ? `<span class="text-[11px] text-outline-variant">·</span>
                                    <span class="text-[11px] text-outline">${yearRange}</span>` : ''}
                 </div>
@@ -205,7 +209,7 @@ function renderPhotos(append) {
     if (!append) container.innerHTML = '';
 
     if (!append && STATE.photos.length === 0) {
-        container.innerHTML = '<p class="text-outline text-sm py-12 text-center">No se encontraron fotos.</p>';
+        container.innerHTML = `<p class="text-outline text-sm py-12 text-center">${_i18nT('pages.albums.no_photos', null, 'No se encontraron fotos.')}</p>`;
         return;
     }
 
@@ -311,7 +315,7 @@ function renderSidebarAlbums() {
         <a class="sidebar-album-link" data-id="__all__" onclick="selectAlbum('__all__')">
             <span class="flex items-center gap-1.5">
                 <span class="material-symbols-outlined text-sm text-outline">collections</span>
-                <span class="truncate font-semibold">Todas las fotos</span>
+                <span class="truncate font-semibold">${_i18nT('pages.albums.all_photos', null, 'Todas las fotos')}</span>
             </span>
             <span class="text-[10px] text-outline shrink-0 ml-1">${totalPhotos}</span>
         </a>
@@ -319,7 +323,7 @@ function renderSidebarAlbums() {
         <a class="sidebar-album-link text-[11px] text-outline" onclick="showAlbumsOverview()">
             <span class="flex items-center gap-1.5">
                 <span class="material-symbols-outlined text-sm">grid_view</span>
-                <span>Ver álbumes</span>
+                <span>${_i18nT('pages.albums.view_albums', null, 'Ver álbumes')}</span>
             </span>
         </a>
         <div class="border-t border-outline-variant/20 my-1.5"></div>`;
@@ -544,7 +548,7 @@ function toggleDocs() {
 
 function updatePhotoCountLabel() {
     const label = document.getElementById('photo-count-label');
-    label.textContent = `${STATE.total} foto${STATE.total !== 1 ? 's' : ''}`;
+    label.textContent = `${STATE.total} ${STATE.total !== 1 ? _i18nT('common.photos_lower', null, 'fotos') : _i18nT('common.photo_lower', null, 'foto')}`;
 }
 
 function updatePageSubtitle() {
@@ -552,7 +556,7 @@ function updatePageSubtitle() {
         + (STATE.unassigned?.photo_count || 0);
     const albumCount = STATE.albums.length + (STATE.unassigned ? 1 : 0);
     document.getElementById('page-subtitle').textContent =
-        `${albumCount} álbumes · ${total} fotos`;
+        `${albumCount} ${_i18nT('pages.albums.albums_lower', null, 'álbumes')} · ${total} ${_i18nT('common.photos_lower', null, 'fotos')}`;
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────

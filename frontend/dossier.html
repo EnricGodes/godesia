@@ -82,7 +82,7 @@
 </head>
 <body class="bg-surface font-body text-on-surface selection:bg-secondary-container">
 
-<div id="loading" class="text-center py-12">Carregant dossier...</div>
+<div id="loading" class="text-center py-12" data-i18n="pages.dossier.loading">Cargando dossier...</div>
 <div id="error" class="text-center py-12 bg-error-container text-on-surface" style="display:none;"></div>
 
 <main id="content" class="min-h-screen relative overflow-x-hidden" style="display:none;">
@@ -90,8 +90,8 @@
         <!-- TOP CTA -->
         <div class="flex justify-end mb-8">
             <div class="bg-surface-container-high/50 px-4 py-2 rounded-full border border-outline-variant/30 flex items-center gap-4">
-                <span class="text-[10px] font-bold text-outline uppercase tracking-wider">¿Alguna imprecisión?</span>
-                <button id="cta-top" class="text-[10px] bg-primary text-on-primary px-3 py-1 rounded-full font-extrabold uppercase hover:bg-primary/90">Colaborar</button>
+                <span class="text-[10px] font-bold text-outline uppercase tracking-wider" data-i18n="pages.dossier.cta_question">¿Alguna imprecisión?</span>
+                <button id="cta-top" class="text-[10px] bg-primary text-on-primary px-3 py-1 rounded-full font-extrabold uppercase hover:bg-primary/90" data-i18n="common.collaborate">Colaborar</button>
             </div>
         </div>
 
@@ -104,7 +104,7 @@
             </div>
             <div class="flex-1 space-y-6">
                 <div class="flex items-center gap-3">
-                    <span class="text-xs uppercase tracking-[0.3em] text-outline font-bold">Registro de Patrimonio Familiar</span>
+                    <span class="text-xs uppercase tracking-[0.3em] text-outline font-bold" data-i18n="pages.dossier.registry_label">Registro de Patrimonio Familiar</span>
                 </div>
                 <h1 id="hero-name" class="font-headline text-6xl md:text-8xl font-bold text-primary leading-tight"></h1>
                 <div id="vital-dates" class="flex flex-wrap items-center gap-6 font-headline text-2xl italic text-secondary"></div>
@@ -149,10 +149,10 @@
         <section class="mb-20">
             <div class="bg-primary-container/30 border border-primary/20 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-8">
                 <div class="space-y-2 text-center md:text-left">
-                    <h4 class="font-headline text-xl font-bold text-primary">¿Encuentras alguna imprecisión?</h4>
-                    <p class="text-sm opacity-80">¿Quieres añadir información o compartir una foto?</p>
+                    <h4 class="font-headline text-xl font-bold text-primary" data-i18n="common.cta_inaccuracy">¿Encuentras alguna imprecisión?</h4>
+                    <p class="text-sm opacity-80" data-i18n="common.cta_add_info">¿Quieres añadir información o compartir una foto?</p>
                 </div>
-                <button id="cta-bottom" class="bg-primary text-on-primary px-8 py-3 font-bold text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors shadow-lg shrink-0">Colabora</button>
+                <button id="cta-bottom" class="bg-primary text-on-primary px-8 py-3 font-bold text-sm tracking-widest uppercase hover:bg-primary/90 transition-colors shadow-lg shrink-0" data-i18n="common.collaborate_cta">Colabora</button>
             </div>
         </section>
     </div>
@@ -197,8 +197,8 @@
     </div>
 </footer>
 
-<script src="photo-modal.js?v=20260611"></script>
-<script src="dossier.js?v=20260611.1"></script>
+<script src="/photo-modal.js?v=20260611"></script>
+<script src="/dossier.js?v=20260611.1"></script>
 <script src="/nav.js"></script>
 </body>
 </html>

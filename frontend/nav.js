@@ -7,6 +7,11 @@
 (function () {
   'use strict';
 
+  /* i18n: t() y helpers vienen de i18n.js (inyectado por el backend);
+     shim de identidad para páginas internas servidas sin localizar */
+  const t = window.t || function (k, p, f) { return f !== undefined ? f : k; };
+  const lhref = window.I18N ? window.I18N.href : function (p) { return p; };
+
   // ─── Menu structure ───────────────────────────────────────────────────────
 
   const RAMAS = [
@@ -24,7 +29,7 @@
   ];
 
   const ALBUM = [
-    { label: 'Todos los álbumes', href: '/albums.html' },
+    { label: t('nav.all_albums', null, 'Todos los álbumes'), href: '/albums.html' },
     { label: 'Godes',             href: '/albums.html#A800008' },
     { label: 'Godes Diago',       href: '/albums.html#A800003' },
     { label: 'Godes Güell',       href: '/albums.html#A800002' },
@@ -33,30 +38,31 @@
     { label: 'Godes Schmid',      href: '/albums.html#A800006' },
     { label: 'Godes Terrats',     href: '/albums.html#A800007' },
     { label: 'Pujol Godes',       href: '/albums.html#A800004' },
-    { label: 'Fotos Familiares',  href: '/albums.html#__unassigned__' },
+    { label: t('nav.family_photos', null, 'Fotos Familiares'), href: '/albums.html#__unassigned__' },
   ];
 
   const DOCUMENTOS = [
-    { label: 'Todos los documentos', href: '/docs.html' },
-    { label: 'Bautismos',            href: '/docs.html#bautisme' },
-    { label: 'Biografías',           href: '/docs.html#biografia' },
-    { label: 'Cartas',               href: '/docs.html#carta' },
-    { label: 'Defunciones',          href: '/docs.html#defuncio' },
-    { label: 'Matrimonios',          href: '/docs.html#matrimoni' },
-    { label: 'Nacimientos',          href: '/docs.html#naixement' },
-    { label: 'Padrones',             href: '/docs.html#padro' },
-    { label: 'Testamentos',          href: '/docs.html#testament' },
-    { label: 'Documentos',           href: '/docs.html#document' },
+    { label: t('nav.all_docs', null, 'Todos los documentos'), href: '/docs.html' },
+    { label: t('doc_types.bautisme', null, 'Bautismos'),     href: '/docs.html#bautisme' },
+    { label: t('doc_types.biografia', null, 'Biografías'),   href: '/docs.html#biografia' },
+    { label: t('doc_types.carta', null, 'Cartas'),           href: '/docs.html#carta' },
+    { label: t('doc_types.defuncio', null, 'Defunciones'),   href: '/docs.html#defuncio' },
+    { label: t('doc_types.matrimoni', null, 'Matrimonios'),  href: '/docs.html#matrimoni' },
+    { label: t('doc_types.naixement', null, 'Nacimientos'),  href: '/docs.html#naixement' },
+    { label: t('doc_types.padro', null, 'Padrones'),         href: '/docs.html#padro' },
+    { label: t('doc_types.testament', null, 'Testamentos'),  href: '/docs.html#testament' },
+    { label: t('doc_types.document', null, 'Documentos'),    href: '/docs.html#document' },
   ];
 
   const DIVERSOS = [
-    { label: 'Casas Godes',  href: null },
-    { label: 'Cementerios',  href: '/cementerios.html' },
+    { label: t('nav.casas_godes', null, 'Casas Godes'), href: null },
+    { label: t('nav.cemeteries', null, 'Cementerios'),  href: '/cementerios.html' },
   ];
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
-  const PATH = window.location.pathname;
+  /* Ruta actual sin el prefijo de idioma (/ca/x.html -> /x.html) */
+  const PATH = window.location.pathname.replace(/^\/[a-z]{2,3}(\/|$)/, '/');
 
   function isActivePage(href) {
     if (!href) return false;
@@ -85,12 +91,12 @@
           ? 'font-semibold text-[#2D4B33] bg-[#f1eee5]'
           : 'text-[#1c1c17] hover:bg-[#f1eee5]';
         return (
-          `<a href="${item.href}" class="block px-4 py-2 text-sm ${active} rounded-md transition-colors">` +
+          `<a href="${lhref(item.href)}" class="block px-4 py-2 text-sm ${active} rounded-md transition-colors">` +
           `${item.label}</a>`
         );
       }
       return (
-        `<span class="block px-4 py-2 text-sm text-[#b8b5ac] cursor-not-allowed select-none" title="Próximamente">` +
+        `<span class="block px-4 py-2 text-sm text-[#b8b5ac] cursor-not-allowed select-none" title="${t('nav.coming_soon', null, 'Próximamente')}">` +
         `${item.label}</span>`
       );
     }).join('');
@@ -128,18 +134,18 @@
 
           /* ── Col 1: Logo (far left) ── */
           `<div class="flex items-center">` +
-            `<a href="/" class="text-lg font-bold text-white hover:text-white/80 transition-colors"` +
+            `<a href="${lhref('/')}" class="text-lg font-bold text-white hover:text-white/80 transition-colors"` +
             ` style="font-family:'Noto Serif',serif;letter-spacing:-.01em">Godesia</a>` +
           `</div>` +
 
           /* ── Col 2: Nav items ── */
           `<div class="flex items-center gap-0.5">` +
-            `<a href="/arbol2.html" class="${linkCls}${arbolActive}">Árbol</a>` +
-            renderDropdown('ramas',      'Ramas familiares', RAMAS) +
-            `<a href="/chat.html" class="${linkCls}${chatActive}">Consultas</a>` +
-            renderDropdown('album',      'Álbum',            ALBUM) +
-            renderDropdown('documentos', 'Documentos',       DOCUMENTOS) +
-            renderDropdown('diversos',   'Diversos',         DIVERSOS) +
+            `<a href="${lhref('/arbol2.html')}" class="${linkCls}${arbolActive}">${t('nav.tree', null, 'Árbol')}</a>` +
+            renderDropdown('ramas',      t('nav.menu_branches', null, 'Ramas familiares'), RAMAS) +
+            `<a href="${lhref('/chat.html')}" class="${linkCls}${chatActive}">${t('nav.chat', null, 'Consultas')}</a>` +
+            renderDropdown('album',      t('nav.menu_album', null, 'Álbum'),          ALBUM) +
+            renderDropdown('documentos', t('nav.menu_documents', null, 'Documentos'), DOCUMENTOS) +
+            renderDropdown('diversos',   t('nav.menu_misc', null, 'Diversos'),        DIVERSOS) +
           `</div>` +
 
           /* ── Col 3: Action buttons (far right) ── */
@@ -154,8 +160,8 @@
             `</button>` +
 
             /* Colaborar — stretched circle (rounded-full) with nav styling */
-            `<a href="/colaborar.html" id="gn-colaborar-btn" class="whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium text-white/90 border border-white hover:bg-white/15 hover:text-white transition-colors" style="background:transparent">` +
-              `Colaborar` +
+            `<a href="${lhref('/colaborar.html')}" id="gn-colaborar-btn" class="whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium text-white/90 border border-white hover:bg-white/15 hover:text-white transition-colors" style="background:transparent">` +
+              `${t('nav.collaborate', null, 'Colaborar')}` +
             `</a>` +
 
             /* Login — user icon circle */
@@ -170,19 +176,19 @@
             `<div id="gn-search-expanded" style="display:none;width:calc(40vw - 2rem);max-width:720px;right:1rem;z-index:10000">` +
               `<div class="bg-white rounded-2xl shadow-2xl p-6 border border-[#e5e2da]">` +
                 /* Título */
-                `<h3 style="font-family:'Noto Serif',serif;font-size:1.1rem;color:#2D4B33;margin:0 0 0.75rem 0;font-weight:600">Buscador</h3>` +
+                `<h3 style="font-family:'Noto Serif',serif;font-size:1.1rem;color:#2D4B33;margin:0 0 0.75rem 0;font-weight:600">${t('nav.search_title', null, 'Buscador')}</h3>` +
                 /* Texto intro */
-                `<p style="font-size:0.85rem;color:#424842;margin:0 0 1.25rem 0;line-height:1.5">Pregúntame sobre la familia Godes. Usa <strong>@</strong> para acceder al listado de miembros</p>` +
+                `<p style="font-size:0.85rem;color:#424842;margin:0 0 1.25rem 0;line-height:1.5">${t('nav.search_intro', null, 'Pregúntame sobre la familia Godes. Usa <strong>@</strong> para acceder al listado de miembros')}</p>` +
                 /* Search box */
                 `<form id="gn-search-form" class="flex items-center gap-3 bg-[#fcf9f0] rounded-xl p-3 border border-[#e5e2da] mb-4">` +
                   `<span class="flex items-center justify-center text-[#2D4B33] flex-shrink-0">` +
                     `<span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 20">auto_awesome</span>` +
                   `</span>` +
-                  `<input id="gn-search-input" type="text" placeholder="Escribe tu pregunta" autocomplete="off" class="flex-1 border-0 bg-transparent text-[#1c1c17] placeholder-[#b8b5ac] focus:outline-none" style="font-size:0.95rem"/>` +
+                  `<input id="gn-search-input" type="text" placeholder="${t('nav.search_placeholder', null, 'Escribe tu pregunta')}" autocomplete="off" class="flex-1 border-0 bg-transparent text-[#1c1c17] placeholder-[#b8b5ac] focus:outline-none" style="font-size:0.95rem"/>` +
                   `<button type="submit" class="hidden"></button>` +
                 `</form>` +
                 /* Botón consultar */
-                `<button type="button" id="gn-search-submit" class="w-full bg-[#2D4B33] text-white rounded-lg py-2.5 font-medium text-sm hover:bg-[#1a2f22] transition-colors">Consultar</button>` +
+                `<button type="button" id="gn-search-submit" class="w-full bg-[#2D4B33] text-white rounded-lg py-2.5 font-medium text-sm hover:bg-[#1a2f22] transition-colors">${t('nav.search_submit', null, 'Consultar')}</button>` +
               `</div>` +
             `</div>` +
 
@@ -334,7 +340,7 @@
   // ─── Smart search: person name → dossier, question → chat ─────────────────
 
   window.smartSearch = async function(q) {
-    const toChat = () => { window.location.href = '/chat.html?q=' + encodeURIComponent(q); };
+    const toChat = () => { window.location.href = lhref('/chat.html?q=' + encodeURIComponent(q)); };
 
     // 1. Query terminada en "?" → chat (pregunta explícita)
     if (q.trim().endsWith('?')) { toChat(); return; }
@@ -350,7 +356,7 @@
 
       // Múltiples resultados → chat con lista de coincidencias
       if (data.results.length > 1) {
-        window.location.href = '/chat.html?matches=' + encodeURIComponent(q);
+        window.location.href = lhref('/chat.html?matches=' + encodeURIComponent(q));
         return;
       }
 
@@ -366,7 +372,7 @@
       const allInName = queryWords.length > 0 && queryWords.every(w => nameWords.has(w));
 
       if (allInName) {
-        window.location.href = `/dossier.html?id=${(person.id || '').replace(/@/g, '')}`;
+        window.location.href = lhref(`/dossier.html?id=${(person.id || '').replace(/@/g, '')}`);
       } else {
         toChat();
       }
@@ -536,10 +542,10 @@
       const items = data.types.filter(t => t.type !== '__all__');
       if (!items.length) return;
       const links = [
-        `<a href="/docs.html" style="display:block;padding:8px 16px;font-size:13px;color:#1c1c17;text-decoration:none;white-space:nowrap;" onmouseover="this.style.background='#f1eee5'" onmouseout="this.style.background=''">Todos los documentos</a>`,
+        `<a href="${lhref('/docs.html')}" style="display:block;padding:8px 16px;font-size:13px;color:#1c1c17;text-decoration:none;white-space:nowrap;" onmouseover="this.style.background='#f1eee5'" onmouseout="this.style.background=''">${t('nav.all_docs', null, 'Todos los documentos')}</a>`,
         `<div style="border-top:1px solid #e5e2da;margin:4px 0;"></div>`,
-        ...items.map(t =>
-          `<a href="/docs.html#${t.type}" style="display:block;padding:8px 16px;font-size:13px;color:#1c1c17;text-decoration:none;white-space:nowrap;" onmouseover="this.style.background='#f1eee5'" onmouseout="this.style.background=''">${t.label}</a>`
+        ...items.map(item =>
+          `<a href="${lhref('/docs.html#' + item.type)}" style="display:block;padding:8px 16px;font-size:13px;color:#1c1c17;text-decoration:none;white-space:nowrap;" onmouseover="this.style.background='#f1eee5'" onmouseout="this.style.background=''">${t('doc_types.' + item.type, null, item.label)}</a>`
         )
       ].join('');
       menu.innerHTML = `<div class="bg-white rounded-xl shadow-xl py-1.5 border border-[#e5e2da]" style="min-width:11rem">${links}</div>`;

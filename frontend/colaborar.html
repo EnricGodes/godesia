@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
     tailwind.config = {
@@ -56,9 +56,9 @@
 
     <!-- Header -->
     <div class="mb-10">
-        <p class="text-xs uppercase tracking-widest text-outline font-bold mb-2">Patrimoni familiar</p>
-        <h1 class="font-headline text-4xl font-bold text-primary mb-3">Colabora con Godesia</h1>
-        <p class="text-on-surface-variant text-sm leading-relaxed">
+        <p class="text-xs uppercase tracking-widest text-outline font-bold mb-2" data-i18n="pages.collaborate.kicker">Patrimonio familiar</p>
+        <h1 class="font-headline text-4xl font-bold text-primary mb-3" data-i18n="pages.collaborate.title">Colabora con Godesia</h1>
+        <p class="text-on-surface-variant text-sm leading-relaxed" data-i18n="pages.collaborate.subtitle">
             ¿Tienes una foto, una anécdota o una corrección? Tu aportación ayuda a preservar la memoria de la familia.
         </p>
     </div>
@@ -67,7 +67,7 @@
     <div id="context-banner" class="hidden mb-8 bg-primary-container/20 border border-primary/20 rounded-xl px-5 py-4 flex items-center gap-4">
         <div id="context-photo" class="w-12 h-14 bg-surface-container-high rounded overflow-hidden shrink-0"></div>
         <div>
-            <p class="text-xs text-outline uppercase tracking-wider font-bold mb-0.5">Sobre</p>
+            <p class="text-xs text-outline uppercase tracking-wider font-bold mb-0.5" data-i18n="pages.collaborate.about">Sobre</p>
             <p id="context-name" class="font-semibold text-on-surface"></p>
         </div>
         <button onclick="clearPerson()" class="ml-auto text-outline hover:text-error text-xl leading-none">&times;</button>
@@ -78,22 +78,22 @@
 
         <!-- Tipo -->
         <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-outline mb-2">Tipo de aportación</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-outline mb-2" data-i18n="pages.collaborate.type_label">Tipo de aportación</label>
             <select id="field-type" name="type" class="w-full border border-outline-variant rounded-lg px-4 py-3 bg-surface text-on-surface focus:outline-none focus:border-primary text-sm">
-                <option value="">— Selecciona una opción —</option>
-                <option value="correccion">Corrección de datos</option>
-                <option value="anecdota">Añadir anécdota</option>
-                <option value="foto">Subir foto</option>
-                <option value="comentario">Comentario general</option>
-                <option value="otro">Otro</option>
+                <option value="" data-i18n="pages.collaborate.type_placeholder">— Selecciona una opción —</option>
+                <option value="correccion" data-i18n="pages.collaborate.type_correction">Corrección de datos</option>
+                <option value="anecdota" data-i18n="pages.collaborate.type_anecdote">Añadir anécdota</option>
+                <option value="foto" data-i18n="pages.collaborate.type_photo">Subir foto</option>
+                <option value="comentario" data-i18n="pages.collaborate.type_comment">Comentario general</option>
+                <option value="otro" data-i18n="pages.collaborate.type_other">Otro</option>
             </select>
         </div>
 
         <!-- Persona -->
         <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-outline mb-2">Persona relacionada <span class="normal-case font-normal">(opcional)</span></label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-outline mb-2" data-i18n-html="pages.collaborate.person_label">Persona relacionada <span class="normal-case font-normal">(opcional)</span></label>
             <div class="relative">
-                <input id="person-search" type="text" placeholder="Busca por nombre…"
+                <input id="person-search" type="text" placeholder="Busca por nombre…" data-i18n-placeholder="pages.collaborate.person_placeholder"
                     class="w-full border border-outline-variant rounded-lg px-4 py-3 bg-surface text-on-surface focus:outline-none focus:border-primary text-sm"
                     autocomplete="off">
                 <input type="hidden" id="field-person-id" name="person_id">
@@ -104,13 +104,13 @@
         <!-- Nombre -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-outline mb-2">Tu nombre <span class="normal-case font-normal">(opcional)</span></label>
+                <label class="block text-xs font-bold uppercase tracking-wider text-outline mb-2" data-i18n-html="pages.collaborate.name_label">Tu nombre <span class="normal-case font-normal">(opcional)</span></label>
                 <input id="field-name" name="name" type="text"
                     class="w-full border border-outline-variant rounded-lg px-4 py-3 bg-surface text-on-surface focus:outline-none focus:border-primary text-sm"
                     placeholder="Joan Godes">
             </div>
             <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-outline mb-2">Tu email <span class="normal-case font-normal">(opcional)</span></label>
+                <label class="block text-xs font-bold uppercase tracking-wider text-outline mb-2" data-i18n-html="pages.collaborate.email_label">Tu email <span class="normal-case font-normal">(opcional)</span></label>
                 <input id="field-email" name="email" type="email"
                     class="w-full border border-outline-variant rounded-lg px-4 py-3 bg-surface text-on-surface focus:outline-none focus:border-primary text-sm"
                     placeholder="joan@example.com">
@@ -119,18 +119,18 @@
 
         <!-- Mensaje -->
         <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-outline mb-2">Mensaje <span class="text-error">*</span></label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-outline mb-2" data-i18n-html="pages.collaborate.message_label">Mensaje <span class="text-error">*</span></label>
             <textarea id="field-message" name="message" required rows="5"
                 class="w-full border border-outline-variant rounded-lg px-4 py-3 bg-surface text-on-surface focus:outline-none focus:border-primary text-sm resize-none"
-                placeholder="Explica tu aportación con el máximo detalle posible…"></textarea>
+                placeholder="Explica tu aportación con el máximo detalle posible…" data-i18n-placeholder="pages.collaborate.message_placeholder"></textarea>
         </div>
 
         <!-- Archivos -->
         <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-outline mb-2">Archivos adjuntos <span class="normal-case font-normal">(opcional)</span></label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-outline mb-2" data-i18n-html="pages.collaborate.files_label">Archivos adjuntos <span class="normal-case font-normal">(opcional)</span></label>
             <label for="field-files" class="flex items-center gap-3 border-2 border-dashed border-outline-variant rounded-xl px-5 py-4 cursor-pointer hover:border-primary transition-colors">
                 <span class="material-symbols-outlined text-outline">upload_file</span>
-                <span class="text-sm text-outline">Haz clic o arrastra fotos, documentos…</span>
+                <span class="text-sm text-outline" data-i18n="pages.collaborate.files_hint">Haz clic o arrastra fotos, documentos…</span>
                 <input id="field-files" type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" class="hidden">
             </label>
             <div id="file-previews" class="flex flex-wrap gap-3 mt-3"></div>
@@ -139,7 +139,8 @@
         <!-- Submit -->
         <div class="pt-2">
             <button type="submit" id="btn-submit"
-                class="w-full bg-primary text-on-primary py-4 rounded-xl font-bold text-sm uppercase tracking-widest hover:bg-primary/90 transition-colors">
+                class="w-full bg-primary text-on-primary py-4 rounded-xl font-bold text-sm uppercase tracking-widest hover:bg-primary/90 transition-colors"
+                data-i18n="pages.collaborate.submit">
                 Enviar aportación
             </button>
         </div>
@@ -149,9 +150,9 @@
     <!-- Success state -->
     <div id="success-state" class="hidden text-center py-16 space-y-4">
         <div class="text-5xl">🌿</div>
-        <h2 class="font-headline text-2xl font-bold text-primary">Gràcies!</h2>
-        <p class="text-on-surface-variant text-sm">Tu aportación ha sido recibida. La revisaremos próximamente.</p>
-        <a href="/" class="inline-block mt-4 text-sm text-primary underline underline-offset-4">Volver al inicio</a>
+        <h2 class="font-headline text-2xl font-bold text-primary" data-i18n="pages.collaborate.thanks">¡Gracias!</h2>
+        <p class="text-on-surface-variant text-sm" data-i18n="pages.collaborate.received">Tu aportación ha sido recibida. La revisaremos próximamente.</p>
+        <a href="/" class="inline-block mt-4 text-sm text-primary underline underline-offset-4" data-i18n="pages.collaborate.back_home">Volver al inicio</a>
     </div>
 
 </main>
@@ -334,7 +335,7 @@ document.getElementById('suggestion-form').addEventListener('submit', async func
     e.preventDefault();
     const btn = document.getElementById('btn-submit');
     btn.disabled = true;
-    btn.textContent = 'Enviando…';
+    btn.textContent = (window.t ? t('pages.collaborate.sending', null, 'Enviando…') : 'Enviando…');
 
     const fd = new FormData();
     fd.append('name', document.getElementById('field-name').value);
@@ -353,8 +354,8 @@ document.getElementById('suggestion-form').addEventListener('submit', async func
         document.getElementById('success-state').classList.remove('hidden');
     } catch (err) {
         btn.disabled = false;
-        btn.textContent = 'Enviar aportación';
-        alert('Ha habido un error. Inténtalo de nuevo.');
+        btn.textContent = (window.t ? t('pages.collaborate.submit', null, 'Enviar aportación') : 'Enviar aportación');
+        alert(window.t ? t('pages.collaborate.error', null, 'Ha habido un error. Inténtalo de nuevo.') : 'Ha habido un error. Inténtalo de nuevo.');
     }
 });
 </script>

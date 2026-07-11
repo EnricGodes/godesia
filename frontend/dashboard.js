@@ -17,10 +17,16 @@ function personSvg(sex, birth_year, death_year, px) {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${px}" height="${px}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" style="opacity:0.45"><path d="${d}"/></svg>`;
 }
 
+/* i18n: t()/I18N vienen de i18n.js (inyectado por el backend) */
+const _i18nT = window.t || function (k, p, f) { return f !== undefined ? f : k; };
+const _lhref = window.I18N ? window.I18N.href : function (p) { return p; };
+const _api = window.I18N ? window.I18N.apiUrl : function (p) { return p; };
+
 const MONTHS_ES = [
     '', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
     'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
 ];
+const MONTHS = _i18nT('dates.months_short', null, MONTHS_ES);
 
 const BRANCH_LINKS = {
     'Godes Molina': '/godes_molina.html',
@@ -69,7 +75,7 @@ function formatNameWithNickname(name, nickname, given_name, surname) {
 
 async function loadDashboard() {
     try {
-        const res = await fetch('/api/dashboard');
+        const res = await fetch(_api('/api/dashboard'));
         const data = await res.json();
         renderStats(data.stats);
         renderBranches(data.branches);
@@ -97,7 +103,7 @@ function renderStats(stats) {
 function renderBranches(branches) {
     const container = document.getElementById('sidebar-branches');
     container.innerHTML = branches.map((b, i) => {
-        const href = BRANCH_LINKS[b.surname] || '#';
+        const href = BRANCH_LINKS[b.surname] ? _lhref(BRANCH_LINKS[b.surname]) : '#';
         const cls = href === '#' ? 'branch-link disabled' : 'branch-link';
         return `
         <a href="${href}" class="${cls}${i === 0 ? ' active' : ''}"${href === '#' ? ' style="opacity:0.5;pointer-events:none"' : ''}>
@@ -112,16 +118,16 @@ function renderBirthdays(birthdays) {
     const container = document.getElementById('birthdays-list');
     const alive_birthdays = birthdays.filter(b => b.is_alive);
     if (!alive_birthdays.length) {
-        container.innerHTML = '<p class="no-data">No hay aniversarios esta semana</p>';
+        container.innerHTML = `<p class="no-data">${_i18nT('pages.index.no_birthdays', null, 'No hay aniversarios esta semana')}</p>`;
         return;
     }
     container.innerHTML = alive_birthdays.slice(0, 5).map(b => {
-        const monthLabel = MONTHS_ES[b.birth_month] || '';
+        const monthLabel = MONTHS[b.birth_month] || '';
         const isToday = b.is_today;
         const displayName = formatNameWithNickname(b.name, b.nickname, b.given_name, b.surname);
         const pid = dossierId(b.id);
         const mailIcon = b.email
-            ? `<a href="mailto:${encodeURIComponent(b.email)}?subject=${encodeURIComponent('Felicidades ' + displayName)}&body=${encodeURIComponent('¡Feliz cumpleaños, ' + displayName + '!')}" class="anniversary-mail" title="Enviar felicitación a ${b.email}" style="color:var(--on-surface-variant);flex-shrink:0;display:flex;align-items:center;">
+            ? `<a href="mailto:${encodeURIComponent(b.email)}?subject=${encodeURIComponent(_i18nT('pages.index.mail_subject', {name: displayName}, 'Felicidades {name}'))}&body=${encodeURIComponent(_i18nT('pages.index.mail_body', {name: displayName}, '¡Feliz cumpleaños, {name}!'))}" class="anniversary-mail" title="${_i18nT('pages.index.mail_title', {email: b.email}, 'Enviar felicitación a {email}')}" style="color:var(--on-surface-variant);flex-shrink:0;display:flex;align-items:center;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
                 <path d="M2 6L8.91302 9.91697C11.4616 11.361 12.5384 11.361 15.087 9.91697L22 6" />
                 <path d="M2.01577 13.4756C2.08114 16.5412 2.11383 18.0739 3.24496 19.2094C4.37608 20.3448 5.95033 20.3843 9.09883 20.4634C11.0393 20.5122 12.9607 20.5122 14.9012 20.4634C18.0497 20.3843 19.6239 20.3448 20.7551 19.2094C21.8862 18.0739 21.9189 16.5412 21.9842 13.4756C22.0053 12.4899 22.0053 11.5101 21.9842 10.5244C21.9189 7.45886 21.8862 5.92609 20.7551 4.79066C19.6239 3.65523 18.0497 3.61568 14.9012 3.53657C12.9607 3.48781 11.0393 3.48781 9.09882 3.53656C5.95033 3.61566 4.37608 3.65521 3.24495 4.79065C2.11382 5.92608 2.08114 7.45885 2.01576 10.5244C1.99474 11.5101 1.99475 12.4899 2.01577 13.4756Z" />
@@ -135,12 +141,12 @@ function renderBirthdays(birthdays) {
                 <span class="anniversary-day">${b.birth_day}</span>
             </div>
             <div class="anniversary-info">
-                <p class="anniversary-name"><a href="/dossier.html?id=${pid}" style="color:inherit;text-decoration:none">${displayName}</a>${b.age ? ' (' + b.age + ' años)' : ''}</p>
+                <p class="anniversary-name"><a href="${_lhref('/dossier.html?id=' + pid)}" style="color:inherit;text-decoration:none">${displayName}</a>${b.age ? ' (' + b.age + ' ' + _i18nT('common.years', null, 'años') + ')' : ''}</p>
             </div>
             ${mailIcon}
             ${b.photo
-                ? `<a href="/dossier.html?id=${pid}"><img class="anniversary-photo" src="/photos/${b.photo}" alt="${displayName}"></a>`
-                : `<a href="/dossier.html?id=${pid}" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--surface-container-high);border:1px solid var(--outline-variant);flex-shrink:0;">${personSvg(b.sex, b.birth_year, b.death_year, 22)}</a>`
+                ? `<a href="${_lhref('/dossier.html?id=' + pid)}"><img class="anniversary-photo" src="/photos/${b.photo}" alt="${displayName}"></a>`
+                : `<a href="${_lhref('/dossier.html?id=' + pid)}" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--surface-container-high);border:1px solid var(--outline-variant);flex-shrink:0;">${personSvg(b.sex, b.birth_year, b.death_year, 22)}</a>`
             }
         </div>`;
     }).join('');
@@ -149,11 +155,11 @@ function renderBirthdays(birthdays) {
 function renderPhotos(photos) {
     const container = document.getElementById('photos-gallery');
     if (!photos.length) {
-        container.innerHTML = '<p class="no-data">No hay fotografías disponibles</p>';
+        container.innerHTML = `<p class="no-data">${_i18nT('pages.index.no_photos', null, 'No hay fotografías disponibles')}</p>`;
         return;
     }
     container.innerHTML = photos.map((p) => {
-        const title = p.title || 'Fotografía';
+        const title = p.title || _i18nT('common.photo_default', null, 'Fotografía');
         const year = p.date || '';
         const place = p.place || '';
         return `
@@ -169,7 +175,7 @@ function renderPhotos(photos) {
     // Add link to see all photos
     const link = document.createElement('div');
     link.className = 'photos-see-all';
-    link.innerHTML = '<a href="/albums.html#__all__">Ver todas las fotografías →</a>';
+    link.innerHTML = `<a href="${_lhref('/albums.html#__all__')}">${_i18nT('pages.index.see_all_photos', null, 'Ver todas las fotografías')} →</a>`;
     container.parentElement.appendChild(link);
 }
 
@@ -183,14 +189,14 @@ function renderRecentlyUpdated(people) {
         const death = p.death_year || '';
         const years = [birth, death].filter(Boolean).join(' – ') || '';
         return `
-        <a href="/dossier.html?id=${pid}" class="featured-member" style="text-decoration:none;">
+        <a href="${_lhref('/dossier.html?id=' + pid)}" class="featured-member" style="text-decoration:none;">
             ${p.photo_file
                 ? `<img src="/photos/${p.photo_file}" alt="${displayName}"
                         style="width:56px;height:56px;border-radius:8px;object-fit:cover;flex-shrink:0;">`
                 : `<div class="featured-no-photo" style="width:56px;height:56px;border-radius:8px;flex-shrink:0;">${personSvg(p.sex, p.birth_year, p.death_year, 30)}</div>`
             }
             <div class="featured-info">
-                <p style="font-size:0.6rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--secondary);margin:0 0 2px 0;">Datos actualizados · ${p.updated_at_display}</p>
+                <p style="font-size:0.6rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--secondary);margin:0 0 2px 0;">${_i18nT('pages.index.updated_label', null, 'Datos actualizados')} · ${p.updated_at_display}</p>
                 <p class="featured-name">${displayName}</p>
                 ${years ? `<p class="featured-years">${years}</p>` : ''}
             </div>
@@ -207,13 +213,13 @@ function renderFeatured(featured) {
         const pid = dossierId(p.id);
         const displayName = formatNameWithNickname(p.name, p.nickname, p.given_name, p.surname);
         const birthDate = p.birth_date || '';
-        const parents = [p.father_name, p.mother_name].filter(Boolean).join(' y ');
+        const parents = [p.father_name, p.mother_name].filter(Boolean).join(' ' + _i18nT('common.and', null, 'y') + ' ');
         const descParts = [];
-        if (birthDate) descParts.push(`Nacido: ${birthDate}`);
-        if (parents) descParts.push(`Padres: ${parents}`);
+        if (birthDate) descParts.push(`${_i18nT('pages.index.born_label', null, 'Nacido')}: ${birthDate}`);
+        if (parents) descParts.push(`${_i18nT('common.parents', null, 'Padres')}: ${parents}`);
         const descLine = descParts.join(' · ');
         return `
-        <a href="/dossier.html?id=${pid}" class="featured-member">
+        <a href="${_lhref('/dossier.html?id=' + pid)}" class="featured-member">
             ${p.photo_file
                 ? `<img class="featured-photo" src="/photos/${p.photo_file}" alt="${displayName}">`
                 : `<div class="featured-no-photo">${personSvg(p.sex, p.birth_year, p.death_year, 30)}</div>`
@@ -230,18 +236,19 @@ function renderFeatured(featured) {
 function renderAnecdota(a) {
     const section = document.getElementById('anecdota-section');
     if (!a) return;
-    const ctaName = a.cta && a.cta.includes('sobre ') ? a.cta.split('sobre ')[1] : null;
+    const ctaMarker = _i18nT('pages.index.cta_marker', null, 'sobre ');
+    const ctaName = a.cta && a.cta.includes(ctaMarker) ? a.cta.split(ctaMarker)[1] : null;
     const infoIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-secondary shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><path d="M12 16V12"/><path d="M12.125 8.25H12M12.25 8.25C12.25 8.11193 12.1381 8 12 8C11.8619 8 11.75 8.11193 11.75 8.25C11.75 8.38807 11.8619 8.5 12 8.5C12.1381 8.5 12.25 8.38807 12.25 8.25Z"/></svg>`;
     section.innerHTML = `
         <div class="flex items-start gap-4 bg-surface-container rounded-2xl px-6 py-5 border border-outline-variant/20">
             ${infoIcon}
             <div class="flex-1 min-w-0">
-                <p class="text-[0.65rem] uppercase tracking-[0.18em] font-extrabold text-secondary mb-1">Anécdotas familiares</p>
+                <p class="text-[0.65rem] uppercase tracking-[0.18em] font-extrabold text-secondary mb-1">${_i18nT('pages.index.anecdotes_title', null, 'Anécdotas familiares')}</p>
                 <p class="font-serif text-[1.05rem] text-on-surface leading-snug mb-2">${a.titulo}</p>
                 <p class="text-[0.88rem] text-on-surface-variant leading-relaxed mb-3">${a.texto}</p>
                 <div class="flex items-center justify-between mt-1">
-                    ${ctaName ? `<a id="anecdota-cta" href="/chat.html?q=${encodeURIComponent(ctaName)}" style="text-decoration:none;" class="text-[0.8rem] font-bold text-primary">${a.cta} →</a>` : '<span></span>'}
-                    <a id="anecdota-colaborar" href="/colaborar.html?type=anecdota" style="text-decoration:none;" class="text-[0.8rem] font-bold text-secondary">Colabora →</a>
+                    ${ctaName ? `<a id="anecdota-cta" href="${_lhref('/chat.html?q=' + encodeURIComponent(ctaName))}" style="text-decoration:none;" class="text-[0.8rem] font-bold text-primary">${a.cta} →</a>` : '<span></span>'}
+                    <a id="anecdota-colaborar" href="${_lhref('/colaborar.html?type=anecdota')}" style="text-decoration:none;" class="text-[0.8rem] font-bold text-secondary">${_i18nT('common.collaborate_cta', null, 'Colabora')} →</a>
                 </div>
             </div>
         </div>`;
@@ -254,9 +261,9 @@ function renderAnecdota(a) {
                 const match = data.results && data.results[0];
                 if (match) {
                     const cta = document.getElementById('anecdota-cta');
-                    if (cta) cta.href = `/dossier.html?id=${dossierId(match.id)}`;
+                    if (cta) cta.href = _lhref(`/dossier.html?id=${dossierId(match.id)}`);
                     const col = document.getElementById('anecdota-colaborar');
-                    if (col) col.href = `/colaborar.html?type=anecdota&person=${dossierId(match.id)}`;
+                    if (col) col.href = _lhref(`/colaborar.html?type=anecdota&person=${dossierId(match.id)}`);
                 }
             })
             .catch(() => {});
@@ -277,7 +284,7 @@ function renderInMemoriam(people) {
                     style="width:48px;height:64px;border-radius:6px;filter:grayscale(15%);">`
             : `<div class="featured-no-photo shrink-0" style="border-radius:6px;width:48px;height:64px;">${personSvg(p.sex, p.birth_year, p.death_year, 28)}</div>`;
         return `
-        <a href="/dossier.html?id=${pid}" class="featured-member items-start" style="opacity:0.92; text-decoration:none;">
+        <a href="${_lhref('/dossier.html?id=' + pid)}" class="featured-member items-start" style="opacity:0.92; text-decoration:none;">
             ${photoEl}
             <div class="featured-info">
                 <p class="text-[0.55rem] uppercase tracking-widest text-outline font-bold mb-0.5 italic">In Memoriam</p>
@@ -292,7 +299,7 @@ function renderInMemoriam(people) {
 function renderDocuments(documents) {
     const container = document.getElementById('documents-gallery');
     if (!documents || !documents.length) {
-        container.innerHTML = '<p class="no-data">No hay documentos disponibles</p>';
+        container.innerHTML = `<p class="no-data">${_i18nT('pages.index.no_documents', null, 'No hay documentos disponibles')}</p>`;
         return;
     }
 
@@ -325,7 +332,7 @@ function renderDocuments(documents) {
 
     const d = documents[0];
     // Extract [Type] from title if present
-    const rawCaption = d.title || 'Documento';
+    const rawCaption = d.title || _i18nT('common.doc_default', null, 'Documento');
     const typeMatch = rawCaption.match(/\[([^\]]+)\]/);
     const docType = typeMatch ? typeMatch[1].toLowerCase() : '';
     const caption = rawCaption.replace(/\s*\[.*?\]\s*/g, '').trim();
@@ -349,7 +356,7 @@ function renderDocuments(documents) {
     // Add link to see all documents
     const link = document.createElement('div');
     link.className = 'documents-see-all';
-    link.innerHTML = '<a href="/docs.html">Ver todos los documentos →</a>';
+    link.innerHTML = `<a href="${_lhref('/docs.html')}">${_i18nT('pages.index.see_all_docs', null, 'Ver todos los documentos')} →</a>`;
     container.parentElement.appendChild(link);
 }
 
@@ -362,7 +369,7 @@ function doSearch() {
             window.smartSearch(q);
         } else {
             // Fallback to chat if nav.js not loaded yet
-            window.location.href = '/chat.html?q=' + encodeURIComponent(q);
+            window.location.href = _lhref('/chat.html?q=' + encodeURIComponent(q));
         }
     }
 }
@@ -378,7 +385,7 @@ document.querySelectorAll('.hero-chip').forEach(chip => {
         if (window.smartSearch) {
             window.smartSearch(q);
         } else {
-            window.location.href = '/chat.html?q=' + encodeURIComponent(q);
+            window.location.href = _lhref('/chat.html?q=' + encodeURIComponent(q));
         }
     });
 });

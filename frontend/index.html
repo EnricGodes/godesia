@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
     tailwind.config = {
@@ -55,8 +55,8 @@
             <span class="material-symbols-outlined text-on-primary text-[1.2rem]">diversity_3</span>
         </div>
         <div>
-            <h3 class="font-serif text-[0.9rem] font-semibold text-primary italic">Ramas Familiares</h3>
-            <p class="text-[0.6rem] uppercase tracking-[0.15em] text-on-surface-variant">Explora tu linaje</p>
+            <h3 class="font-serif text-[0.9rem] font-semibold text-primary italic" data-i18n="nav.sidebar_title">Ramas Familiares</h3>
+            <p class="text-[0.6rem] uppercase tracking-[0.15em] text-on-surface-variant" data-i18n="nav.sidebar_subtitle">Explora tu linaje</p>
         </div>
     </div>
     <nav class="sidebar-branches flex flex-col gap-1" id="sidebar-branches">
@@ -70,20 +70,20 @@
     <!-- Hero Section -->
     <section class="text-center mb-16 flex flex-col items-center">
         <div class="max-w-[700px] mb-10">
-            <h1 class="font-serif text-[2.5rem] md:text-[3.2rem] text-primary leading-[1.2] mb-4 font-normal">Bienvenido al legado de la <em class="text-secondary italic">Familia Godes</em>.</h1>
-            <p class="text-[1.05rem] text-on-surface-variant leading-[1.7] font-light">Tu linaje es una historia viva. Descubre las conexiones, los documentos y mantén vivos los recuerdos para las generaciones futuras.</p>
+            <h1 class="font-serif text-[2.5rem] md:text-[3.2rem] text-primary leading-[1.2] mb-4 font-normal" data-i18n-html="pages.index.hero_title">Bienvenido al legado de la <em class="text-secondary italic">Familia Godes</em>.</h1>
+            <p class="text-[1.05rem] text-on-surface-variant leading-[1.7] font-light" data-i18n="pages.index.hero_subtitle">Tu linaje es una historia viva. Descubre las conexiones, los documentos y mantén vivos los recuerdos para las generaciones futuras.</p>
         </div>
         <div class="w-full max-w-[700px]">
             <div class="hero-search-box relative flex items-center bg-surface-container-lowest rounded-2xl pl-6 pr-2 py-2 shadow-[0_12px_40px_rgba(28,28,23,0.08)] border-2 border-transparent transition-colors focus-within:border-[rgba(23,52,30,0.2)]">
                 <span class="material-symbols-outlined text-secondary text-2xl mr-4">auto_awesome</span>
-                <input type="text" id="hero-query" class="flex-1 border-none bg-transparent font-sans text-[1.1rem] text-on-surface outline-none placeholder:text-outline-variant" placeholder="Pregúntame sobre la familia Godes..." autocomplete="off">
-                <button id="hero-send" class="bg-primary text-on-primary border-none py-3 px-7 rounded-xl font-sans text-[0.95rem] font-bold cursor-pointer transition-colors hover:bg-primary-container whitespace-nowrap">Consultar</button>
+                <input type="text" id="hero-query" class="flex-1 border-none bg-transparent font-sans text-[1.1rem] text-on-surface outline-none placeholder:text-outline-variant" placeholder="Pregúntame sobre la familia Godes..." data-i18n-placeholder="pages.index.hero_placeholder" autocomplete="off">
+                <button id="hero-send" class="bg-primary text-on-primary border-none py-3 px-7 rounded-xl font-sans text-[0.95rem] font-bold cursor-pointer transition-colors hover:bg-primary-container whitespace-nowrap" data-i18n="pages.index.hero_send">Consultar</button>
             </div>
             <div class="mt-4 flex gap-2 flex-wrap justify-center items-center">
-                <span class="text-[0.7rem] uppercase tracking-[0.15em] text-on-surface-variant font-bold">Consultas rápidas:</span>
-                <button class="hero-chip text-[0.75rem] font-semibold py-1.5 px-4 rounded-full bg-surface-container-high text-on-surface border border-outline-variant cursor-pointer transition-all font-sans hover:bg-secondary-container hover:text-secondary" data-q="cuántos miembros tiene la familia godes?">Estadísticas</button>
-                <button class="hero-chip text-[0.75rem] font-semibold py-1.5 px-4 rounded-full bg-surface-container-high text-on-surface border border-outline-variant cursor-pointer transition-all font-sans hover:bg-secondary-container hover:text-secondary" data-q="quién está vivo?">Miembros vivos</button>
-                <button class="hero-chip text-[0.75rem] font-semibold py-1.5 px-4 rounded-full bg-surface-container-high text-on-surface border border-outline-variant cursor-pointer transition-all font-sans hover:bg-secondary-container hover:text-secondary" data-q="aniversarios este mes">Aniversarios</button>
+                <span class="text-[0.7rem] uppercase tracking-[0.15em] text-on-surface-variant font-bold" data-i18n="pages.index.quick_queries">Consultas rápidas:</span>
+                <button class="hero-chip text-[0.75rem] font-semibold py-1.5 px-4 rounded-full bg-surface-container-high text-on-surface border border-outline-variant cursor-pointer transition-all font-sans hover:bg-secondary-container hover:text-secondary" data-q="cuántos miembros tiene la familia godes?" data-i18n="pages.index.chip_stats">Estadísticas</button>
+                <button class="hero-chip text-[0.75rem] font-semibold py-1.5 px-4 rounded-full bg-surface-container-high text-on-surface border border-outline-variant cursor-pointer transition-all font-sans hover:bg-secondary-container hover:text-secondary" data-q="quién está vivo?" data-i18n="pages.index.chip_alive">Miembros vivos</button>
+                <button class="hero-chip text-[0.75rem] font-semibold py-1.5 px-4 rounded-full bg-surface-container-high text-on-surface border border-outline-variant cursor-pointer transition-all font-sans hover:bg-secondary-container hover:text-secondary" data-q="aniversarios este mes" data-i18n="pages.index.chip_anniversaries">Aniversarios</button>
             </div>
         </div>
     </section>
@@ -98,30 +98,30 @@
 
         <!-- Stats Card -->
         <div class="dash-card rounded-3xl p-8 bg-primary text-on-primary col-span-1 md:col-span-6 shadow-[0_12px_40px_rgba(23,52,30,0.2)]">
-            <h4 class="text-[0.65rem] uppercase tracking-[0.2em] font-bold opacity-70 mb-6">Pulso del Legado</h4>
+            <h4 class="text-[0.65rem] uppercase tracking-[0.2em] font-bold opacity-70 mb-6" data-i18n="pages.index.stats_title">Pulso del Legado</h4>
             <div class="flex flex-col gap-5">
                 <div class="flex justify-between items-end pb-3 border-b border-white/15">
-                    <span class="text-[0.85rem] font-light">Miembros Documentados</span>
+                    <span class="text-[0.85rem] font-light" data-i18n="pages.index.stat_people">Miembros Documentados</span>
                     <span class="font-serif text-[1.8rem] leading-none" id="stat-people">--</span>
                 </div>
                 <div class="flex justify-between items-end pb-3 border-b border-white/15">
-                    <span class="text-[0.85rem] font-light">Familias</span>
+                    <span class="text-[0.85rem] font-light" data-i18n="pages.index.stat_families">Familias</span>
                     <span class="font-serif text-[1.8rem] leading-none" id="stat-families">--</span>
                 </div>
                 <div class="flex justify-between items-end pb-3 border-b border-white/15">
-                    <span class="text-[0.85rem] font-light">Miembros Vivos</span>
+                    <span class="text-[0.85rem] font-light" data-i18n="pages.index.stat_alive">Miembros Vivos</span>
                     <span class="font-serif text-[1.8rem] leading-none" id="stat-alive">--</span>
                 </div>
                 <div class="flex justify-between items-end pb-3 border-b border-white/15">
-                    <span class="text-[0.85rem] font-light">Fotografías</span>
+                    <span class="text-[0.85rem] font-light" data-i18n="pages.index.stat_photos">Fotografías</span>
                     <span class="font-serif text-[1.8rem] leading-none" id="stat-photos">--</span>
                 </div>
                 <div class="flex justify-between items-end pb-3 border-b border-white/15">
-                    <span class="text-[0.85rem] font-light">Años de historia</span>
+                    <span class="text-[0.85rem] font-light" data-i18n="pages.index.stat_years">Años de historia</span>
                     <span class="font-serif text-[1.8rem] leading-none" id="stat-years">--</span>
                 </div>
                 <div class="flex justify-between items-end pb-3 border-b border-white/15">
-                    <span class="text-[0.85rem] font-light">Última actualización</span>
+                    <span class="text-[0.85rem] font-light" data-i18n="pages.index.stat_updated">Última actualización</span>
                     <span class="font-serif text-[1.8rem] leading-none" id="stat-updated">--</span>
                 </div>
             </div>
@@ -129,7 +129,7 @@
 
         <!-- Birthdays / Anniversaries -->
         <div class="dash-card rounded-3xl p-8 bg-surface-container col-span-1 md:col-span-6">
-            <h4 class="dash-card-title font-serif text-[1.3rem] text-primary mb-6 font-normal">Aniversarios Próximos</h4>
+            <h4 class="dash-card-title font-serif text-[1.3rem] text-primary mb-6 font-normal" data-i18n="pages.index.birthdays_title">Aniversarios Próximos</h4>
             <div id="birthdays-list" class="anniversaries-list flex flex-col gap-5">
                 <!-- Filled by JS -->
             </div>
@@ -137,7 +137,7 @@
 
         <!-- Siempre en nuestro recuerdo -->
         <div class="dash-card rounded-3xl p-8 bg-surface-container-lowest col-span-1 md:col-span-12 shadow-[0_4px_20px_rgba(28,28,23,0.05)]">
-            <h4 class="dash-card-title font-serif text-[1.3rem] text-primary mb-6 font-normal">Siempre en nuestro recuerdo</h4>
+            <h4 class="dash-card-title font-serif text-[1.3rem] text-primary mb-6 font-normal" data-i18n="pages.index.memoriam_title">Siempre en nuestro recuerdo</h4>
             <div class="featured-grid" id="in-memoriam-list">
                 <!-- Filled by JS -->
             </div>
@@ -147,8 +147,8 @@
         <div class="dash-card rounded-3xl bg-transparent py-8 px-0 col-span-1 md:col-span-12">
             <div class="photos-header flex justify-between items-end mb-8 pb-4 border-b border-surface-dim">
                 <div>
-                    <h2 class="font-serif text-[1.8rem] text-primary font-normal">Galería Fotográfica</h2>
-                    <p class="text-[0.8rem] text-on-surface-variant mt-1">Fotografías del archivo familiar</p>
+                    <h2 class="font-serif text-[1.8rem] text-primary font-normal" data-i18n="pages.index.gallery_title">Galería Fotográfica</h2>
+                    <p class="text-[0.8rem] text-on-surface-variant mt-1" data-i18n="pages.index.gallery_subtitle">Fotografías del archivo familiar</p>
                 </div>
             </div>
             <div class="photos-strip-dash" id="photos-gallery">
@@ -158,7 +158,7 @@
 
         <!-- Latest Additions -->
         <div class="dash-card rounded-3xl p-8 bg-surface-container-lowest col-span-1 md:col-span-12 shadow-[0_4px_20px_rgba(28,28,23,0.05)]">
-            <h4 class="dash-card-title font-serif text-[1.3rem] text-primary mb-6 font-normal">Últimas Incorporaciones al Árbol 🎉</h4>
+            <h4 class="dash-card-title font-serif text-[1.3rem] text-primary mb-6 font-normal" data-i18n="pages.index.latest_title">Últimas Incorporaciones al Árbol 🎉</h4>
             <div class="featured-grid" id="featured-list">
                 <!-- Filled by JS -->
             </div>
@@ -166,7 +166,7 @@
 
         <!-- Recently Updated -->
         <div class="dash-card rounded-3xl p-8 bg-surface-container-lowest col-span-1 md:col-span-12 shadow-[0_4px_20px_rgba(28,28,23,0.05)]">
-            <h4 class="dash-card-title font-serif text-[1.3rem] text-primary mb-6 font-normal">Últimas Actualizaciones</h4>
+            <h4 class="dash-card-title font-serif text-[1.3rem] text-primary mb-6 font-normal" data-i18n="pages.index.recently_updated_title">Últimas Actualizaciones</h4>
             <div class="featured-grid" id="recently-updated-list">
                 <!-- Filled by JS -->
             </div>
@@ -176,8 +176,8 @@
         <div class="dash-card rounded-3xl bg-transparent py-8 px-0 col-span-1 md:col-span-12">
             <div class="documents-header flex justify-between items-end mb-8 pb-4 border-b border-surface-dim">
                 <div>
-                    <h2 class="font-serif text-[1.8rem] text-primary font-normal">Archivo Documental</h2>
-                    <p class="text-[0.8rem] text-on-surface-variant mt-1">Certificados, cartas, testamentos y más</p>
+                    <h2 class="font-serif text-[1.8rem] text-primary font-normal" data-i18n="pages.index.docs_title">Archivo Documental</h2>
+                    <p class="text-[0.8rem] text-on-surface-variant mt-1" data-i18n="pages.index.docs_subtitle">Certificados, cartas, testamentos y más</p>
                 </div>
             </div>
             <div class="documents-grid" id="documents-gallery">
@@ -228,9 +228,9 @@
     </div>
 </footer>
 
-<script src="photo-modal.js"></script>
-<script src="mention-autocomplete.js"></script>
-<script src="dashboard.js"></script>
+<script src="/photo-modal.js"></script>
+<script src="/mention-autocomplete.js"></script>
+<script src="/dashboard.js"></script>
 <script src="/nav.js"></script>
 </body>
 </html>

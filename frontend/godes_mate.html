@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="saga.css?v=20260530b">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/saga.css?v=20260530b">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config={corePlugins:{preflight:false}}</script>
 </head>
@@ -22,13 +22,13 @@
         </div>
         <div>
             <h3 class="sidebar-title">Saga Godes Molina</h3>
-            <p class="sidebar-subtitle">Subramas</p>
+            <p class="sidebar-subtitle" data-i18n="saga.subbranches">Subramas</p>
         </div>
     </div>
     <nav class="sidebar-branches">
         <a href="/godes_molina.html" class="branch-link">
             <span class="material-symbols-outlined branch-icon">hub</span>
-            <span class="branch-name">Página principal</span>
+            <span class="branch-name" data-i18n="saga.main_page">Página principal</span>
         </a>
         <a href="/garrido_godes.html" class="branch-link">
             <span class="material-symbols-outlined branch-icon">family_history</span>
@@ -45,7 +45,7 @@
 <div class="saga-container">
 
     <section class="saga-hero">
-        <div class="saga-kicker">Subrama</div>
+        <div class="saga-kicker" data-i18n="saga.kicker_sub">Subrama</div>
         <h1 class="saga-title">Godes Maté</h1>
         <p class="saga-subtitle">La rama nacida del matrimonio de Enrique Godes Molina y María Esther Maté Ramos, continuada por Enric e Ignacio Godes Maté, y por la línea Godes Mateo.</p>
 
@@ -135,10 +135,10 @@
     <section class="saga-section">
         <div class="saga-cta">
             <div class="saga-cta-text">
-                <h4>¿Encuentras alguna imprecisión?</h4>
-                <p>¿Quieres añadir información o compartir una foto?</p>
+                <h4 data-i18n="common.cta_inaccuracy">¿Encuentras alguna imprecisión?</h4>
+                <p data-i18n="common.cta_add_info">¿Quieres añadir información o compartir una foto?</p>
             </div>
-            <a href="/colaborar.html?source=saga_godes_mate" class="saga-cta-btn">Colabora</a>
+            <a href="/colaborar.html?source=saga_godes_mate" class="saga-cta-btn" data-i18n="common.collaborate_cta">Colabora</a>
         </div>
     </section>
 

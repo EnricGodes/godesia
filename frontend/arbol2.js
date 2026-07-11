@@ -3,6 +3,11 @@
 
 const A2_DEFAULT_ID = 'I4'; // Artur Godes Caballeria
 
+/* i18n: t()/I18N vienen de i18n.js (inyectado por el backend) */
+const _i18nT = window.t || function (k, p, f) { return f !== undefined ? f : k; };
+const _lhref = window.I18N ? window.I18N.href : function (p) { return p; };
+const _api = window.I18N ? window.I18N.apiUrl : function (p) { return p; };
+
 let a2Store  = null;
 let a2Svg    = null;  // SVG DOM element (for links + zoom)
 let a2MainId = null;  // Originally requested person ID (viewport center target)
@@ -11,7 +16,7 @@ let a2MainId = null;  // Originally requested person ID (viewport center target)
 
 async function a2Init(personId) {
   const res = await fetch(`/api/tree2/${encodeURIComponent(personId)}?up=6&down=6`);
-  if (!res.ok) throw new Error(`Error cargando árbol: ${res.status}`);
+  if (!res.ok) throw new Error(_i18nT('pages.tree.load_error', {status: res.status}, 'Error cargando árbol: {status}'));
   const { nodes, main_id } = await res.json();
 
   const cont = document.getElementById('FamilyChart');
@@ -390,8 +395,8 @@ function a2OpenSidebar(storeItem) {
         ${a2DisplayYears(data)}
       </p>
 
-      ${birthLine ? a2Field('Naixement', birthLine) : ''}
-      ${deathLine ? a2Field('Defunció',  deathLine) : ''}
+      ${birthLine ? a2Field(_i18nT('common.birth', null, 'Nacimiento'), birthLine) : ''}
+      ${deathLine ? a2Field(_i18nT('common.death', null, 'Defunción'),  deathLine) : ''}
 
       <div id="sidebar-minibio" style="margin-top:12px;font-size:0.82rem;color:#3d3d37;line-height:1.5;"></div>
 
@@ -400,16 +405,16 @@ function a2OpenSidebar(storeItem) {
           style="width:100%;padding:9px;background:#2d4b33;color:#fff;border:none;
                  border-radius:8px;cursor:pointer;font-family:Manrope,sans-serif;
                  font-size:.875rem;font-weight:500;">
-          Centrar en el árbol
+          ${_i18nT('pages.tree.center_tree', null, 'Centrar en el árbol')}
         </button>
         ${dosId
-          ? `<a href="/dossier.html?id=${dosId}"
+          ? `<a href="${_lhref('/dossier.html?id=' + dosId)}"
                style="display:block;text-align:center;padding:9px;
                       background:#f1eee5;color:#2d4b33;
                       border:1px solid #c2c8bf;border-radius:8px;
                       font-family:Manrope,sans-serif;font-size:.875rem;
                       font-weight:500;text-decoration:none;">
-               Ver dossier completo
+               ${_i18nT('pages.chat.view_dossier', null, 'Ver dossier completo')}
              </a>`
           : ''}
       </div>
@@ -418,10 +423,10 @@ function a2OpenSidebar(storeItem) {
   sidebar.style.display = 'block';
 
   if (dosId) {
-    fetch(`/api/minibio/${encodeURIComponent(dosId)}`)
+    fetch(_api(`/api/minibio/${encodeURIComponent(dosId)}`))
       .then(r => r.json())
       .then(m => {
-        const bio = m.bio_es || m.bio_ca || '';
+        const bio = m.bio || m.bio_es || m.bio_ca || '';
         const el = document.getElementById('sidebar-minibio');
         if (el && bio) el.innerHTML = `<p style="margin:0;font-style:italic;">${bio}</p>`;
       })

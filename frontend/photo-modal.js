@@ -6,6 +6,10 @@
 let _currentPhotoData = null;
 let _sidebarVisible = true;
 
+/* i18n: t()/I18N vienen de i18n.js (inyectado por el backend) */
+const _pmT = window.t || function (k, p, f) { return f !== undefined ? f : k; };
+const _pmHref = window.I18N ? window.I18N.href : function (p) { return p; };
+
 const _DOC_TYPE_META = {
     'bautisme':    { label: 'Bautismos',           icon: '/icons/bautismo.svg' },
     'matrimoni':   { label: 'Matrimonios',          icon: '/icons/matrimonio.svg' },
@@ -190,7 +194,7 @@ window.downloadPhoto = async function() {
         URL.revokeObjectURL(url);
     } catch (e) {
         console.error('Error downloading photo:', e);
-        alert('No se pudo descargar la imagen.');
+        alert(_pmT('photo_modal.download_error', null, 'No se pudo descargar la imagen.'));
     }
 };
 
@@ -247,9 +251,9 @@ window.sharePhoto = async function() {
     // Fallback: copy the link to the clipboard with visible feedback
     try {
         await navigator.clipboard.writeText(url);
-        showPhotoToast('Enlace de la foto copiado al portapapeles');
+        showPhotoToast(_pmT('photo_modal.link_copied', null, 'Enlace de la foto copiado al portapapeles'));
     } catch (e) {
-        prompt('Copia el enlace de la foto:', url);
+        prompt(_pmT('photo_modal.copy_link', null, 'Copia el enlace de la foto:'), url);
     }
 };
 
@@ -276,7 +280,7 @@ window.togglePhotoSidebar = function() {
             sidebar.style.overflow = 'auto';
         }, 650);
         toggleBtn.innerHTML = '←';
-        toggleBtn.title = 'Ocultar panel';
+        toggleBtn.title = _pmT('photo_modal.hide_panel', null, 'Ocultar panel');
     } else {
         // Hide sidebar — fade content first, then collapse
         sidebarContent.style.opacity = '0';
@@ -287,7 +291,7 @@ window.togglePhotoSidebar = function() {
             sidebar.style.borderRight = 'none';
         }, 150);
         toggleBtn.innerHTML = '→';
-        toggleBtn.title = 'Mostrar panel';
+        toggleBtn.title = _pmT('photo_modal.show_panel', null, 'Mostrar panel');
     }
 };
 
@@ -296,7 +300,7 @@ window.togglePhotoSidebar = function() {
  */
 window.gotoPersonDossier = function(personId) {
     personId = personId.replace(/@/g, '');
-    window.location.href = `/dossier.html?id=${personId}`;
+    window.location.href = _pmHref(`/dossier.html?id=${personId}`);
 };
 
 /**
@@ -325,10 +329,10 @@ function renderPhotoModal() {
     const ctx = window.__photoModalContext;
     const breadcrumbHtml = ctx?.albumTitle
         ? `<div style="font-size: 11px; color: #727971; margin-bottom: 16px;">
-               <a href="/albums.html#${ctx.albumId}" style="color: #2D4B33; font-weight: 700; text-decoration: none;"
+               <a href="${_pmHref('/albums.html#' + ctx.albumId)}" style="color: #2D4B33; font-weight: 700; text-decoration: none;"
                   onmouseover="this.style.textDecoration='underline'"
                   onmouseout="this.style.textDecoration='none'">${ctx.albumTitle}</a>
-               <span> › Foto</span>
+               <span> › ${_pmT('common.photo', null, 'Foto')}</span>
            </div>`
         : '';
 
@@ -355,7 +359,7 @@ function renderPhotoModal() {
     // Personas etiquetadas
     const tagsHtml = p.tagged_people && p.tagged_people.length > 0
         ? `<div style="margin-bottom: 28px;">
-             <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">Personas Etiquetadas</h3>
+             <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">${_pmT('photo_modal.tagged_people', null, 'Personas Etiquetadas')}</h3>
              <div style="display: flex; flex-direction: column; gap: 4px;">
                ${p.tagged_people.map(person => {
                  const cleanId = person.person_id.replace(/@/g, '');
@@ -379,7 +383,7 @@ function renderPhotoModal() {
     const albumItems = [];
     if (p.album_title) {
         albumItems.push(
-            `<a href="/albums.html#${p.album_id}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#2D4B33;font-weight:600;text-decoration:none;"
+            `<a href="${_pmHref('/albums.html#' + p.album_id)}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#2D4B33;font-weight:600;text-decoration:none;"
                 onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
                <span class="material-symbols-outlined" style="font-size:16px;color:#727971;">photo_album</span>
                ${p.album_title}
@@ -388,17 +392,18 @@ function renderPhotoModal() {
     }
     if (p.is_document) {
         const meta = _DOC_TYPE_META[p.doc_type] || { label: 'Diversos', icon: '/icons/diversos.svg' };
+        const metaLabel = p.doc_type ? _pmT('doc_types.' + p.doc_type, null, meta.label) : meta.label;
         albumItems.push(
-            `<a href="/docs.html#${p.doc_type || '__unclassified__'}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#2D4B33;font-weight:600;text-decoration:none;"
+            `<a href="${_pmHref('/docs.html#' + (p.doc_type || '__unclassified__'))}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#2D4B33;font-weight:600;text-decoration:none;"
                 onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
                <img src="${meta.icon}" style="width:16px;height:16px;flex-shrink:0;" alt="">
-               ${meta.label}
+               ${metaLabel}
              </a>`
         );
     }
     const albumHtml = albumItems.length
         ? `<div style="margin-bottom: 28px;">
-             <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">Álbums</h3>
+             <h3 style="font-size: 11px; font-weight: bold; color: #727971; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px 0;">${_pmT('photo_modal.albums', null, 'Álbumes')}</h3>
              <div style="display:flex;flex-direction:column;gap:8px;">${albumItems.join('')}</div>
            </div>`
         : '';
@@ -435,7 +440,7 @@ function renderPhotoModal() {
             <!-- Photo area -->
             <div id="photo-area" style="flex: 1; display: flex; flex-direction: column; position: relative; min-width: 0; overflow: visible;">
                 <!-- Toggle sidebar button -->
-                <button id="toggle-sidebar-btn" onclick="togglePhotoSidebar()" title="Ocultar panel" style="position: absolute; top: 16px; left: 16px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;">
+                <button id="toggle-sidebar-btn" onclick="togglePhotoSidebar()" title="${_pmT('photo_modal.hide_panel', null, 'Ocultar panel')}" style="position: absolute; top: 16px; left: 16px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;">
                     ←
                 </button>
 
@@ -447,26 +452,26 @@ function renderPhotoModal() {
                 </button>
 
                 <!-- Download button -->
-                <button onclick="downloadPhoto()" title="Descargar imagen" style="position: absolute; top: 16px; right: 116px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;"
+                <button onclick="downloadPhoto()" title="${_pmT('photo_modal.download', null, 'Descargar imagen')}" style="position: absolute; top: 16px; right: 116px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;"
                     onmouseover="this.style.backgroundColor='#2D4B33';this.style.color='white'"
                     onmouseout="this.style.backgroundColor='rgba(252,249,240,0.95)';this.style.color='#2D4B33'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 19h16"/></svg>
                 </button>
 
                 <!-- Share button -->
-                <button onclick="sharePhoto()" title="Compartir foto" style="position: absolute; top: 16px; right: 166px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;"
+                <button onclick="sharePhoto()" title="${_pmT('photo_modal.share', null, 'Compartir foto')}" style="position: absolute; top: 16px; right: 166px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;"
                     onmouseover="this.style.backgroundColor='#2D4B33';this.style.color='white'"
                     onmouseout="this.style.backgroundColor='rgba(252,249,240,0.95)';this.style.color='#2D4B33'">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                 </button>
 
                 <!-- Close button (top right) -->
-                <button onclick="closePhotoModal()" title="Cerrar" style="position: absolute; top: 16px; right: 16px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;">
+                <button onclick="closePhotoModal()" title="${_pmT('common.close', null, 'Cerrar')}" style="position: absolute; top: 16px; right: 16px; z-index: 50; width: 40px; height: 40px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33; border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.2s;">
                     ✕
                 </button>
 
                 <!-- Prev arrow -->
-                ${ctx?.onPrev ? `<button onclick="window.__photoModalContext.onPrev()" title="Anterior"
+                ${ctx?.onPrev ? `<button onclick="window.__photoModalContext.onPrev()" title="${_pmT('photo_modal.prev', null, 'Anterior')}"
                     style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); z-index: 50;
                            width: 44px; height: 44px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33;
                            border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer;
@@ -476,7 +481,7 @@ function renderPhotoModal() {
                     onmouseout="this.style.backgroundColor='rgba(252,249,240,0.95)';this.style.color='#2D4B33'">‹</button>` : ''}
 
                 <!-- Next arrow -->
-                ${ctx?.onNext ? `<button onclick="window.__photoModalContext.onNext()" title="Siguiente"
+                ${ctx?.onNext ? `<button onclick="window.__photoModalContext.onNext()" title="${_pmT('photo_modal.next', null, 'Siguiente')}"
                     style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); z-index: 50;
                            width: 44px; height: 44px; background-color: rgba(252, 249, 240, 0.95); color: #2D4B33;
                            border: 1px solid rgba(114, 121, 113, 0.3); border-radius: 50%; cursor: pointer;
@@ -693,7 +698,7 @@ window.enterZoomMode = function() {
     ].join(';');
 
     // Close button (top-right)
-    const closeBtn = _makeZoomBtn('✕', 'Cerrar zoom (Esc)', exitZoomMode);
+    const closeBtn = _makeZoomBtn('✕', _pmT('photo_modal.close_zoom', null, 'Cerrar zoom (Esc)'), exitZoomMode);
     closeBtn.style.cssText += ';position:absolute;top:16px;right:16px;z-index:10;font-size:18px;';
 
     // +/- controls (bottom-center)
@@ -703,8 +708,8 @@ window.enterZoomMode = function() {
         'display:flex', 'align-items:center', 'gap:12px', 'z-index:10',
     ].join(';');
 
-    const minusBtn = _makeZoomBtn('−', 'Reducir zoom', () => _applyZoom(-1));
-    const plusBtn  = _makeZoomBtn('+', 'Ampliar zoom',  () => _applyZoom(+1));
+    const minusBtn = _makeZoomBtn('−', _pmT('photo_modal.zoom_out', null, 'Reducir zoom'), () => _applyZoom(-1));
+    const plusBtn  = _makeZoomBtn('+', _pmT('photo_modal.zoom_in', null, 'Ampliar zoom'),  () => _applyZoom(+1));
 
     const label = document.createElement('span');
     label.id = 'zoom-level-label';

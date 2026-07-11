@@ -143,13 +143,13 @@
 
             <div class="flex items-center gap-2 mb-5">
                 <img src="/icons/cementerio.svg" class="w-5 h-5" alt=""/>
-                <h2 class="font-headline font-bold text-primary">Cementerios</h2>
+                <h2 class="font-headline font-bold text-primary" data-i18n="pages.cemeteries.title">Cementerios</h2>
             </div>
 
-            <h3 class="text-[10px] uppercase tracking-wider font-extrabold text-outline mb-2">Nichos</h3>
+            <h3 class="text-[10px] uppercase tracking-wider font-extrabold text-outline mb-2" data-i18n="pages.cemeteries.niches">Nichos</h3>
             <div id="sb-niches" class="mb-6"></div>
 
-            <h3 class="text-[10px] uppercase tracking-wider font-extrabold text-outline mb-2">Personas</h3>
+            <h3 class="text-[10px] uppercase tracking-wider font-extrabold text-outline mb-2" data-i18n="pages.cemeteries.people">Personas</h3>
             <div id="sb-people"></div>
 
         </div>
@@ -159,13 +159,13 @@
     <main class="px-4 sm:px-6 pt-8 pb-12 min-w-0">
         <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
             <div>
-                <h1 id="cem-title" class="font-headline text-3xl sm:text-4xl font-bold text-primary">Cementerios</h1>
-                <p id="cem-subtitle" class="text-on-surface-variant text-sm mt-1">Los lugares de sepultura de la familia. Haz zoom en un cementerio para descubrir sus nichos.</p>
+                <h1 id="cem-title" class="font-headline text-3xl sm:text-4xl font-bold text-primary" data-i18n="pages.cemeteries.title">Cementerios</h1>
+                <p id="cem-subtitle" class="text-on-surface-variant text-sm mt-1" data-i18n="pages.cemeteries.subtitle">Los lugares de sepultura de la familia. Haz zoom en un cementerio para descubrir sus nichos.</p>
             </div>
             <div class="relative w-full md:w-80 shrink-0">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
                 <input type="text" id="person-search" autocomplete="off"
-                       placeholder="¿Dónde está enterrado/a…?"
+                       placeholder="¿Dónde está enterrado/a…?" data-i18n-placeholder="pages.cemeteries.search_placeholder"
                        class="w-full pl-10 pr-4 py-2.5 rounded-full bg-surface-container border border-outline-variant/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"/>
                 <div id="person-results"></div>
             </div>
@@ -177,7 +177,7 @@
             <button id="btn-back" onclick="Cementerios.exitCemetery()"
                     class="absolute top-3 right-3 z-[900] hidden items-center gap-1.5 bg-surface px-4 py-2 rounded-full text-sm font-bold text-primary shadow-lg border border-outline-variant/40 hover:bg-surface-container">
                 <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-                Todos los cementerios
+                <span data-i18n="pages.cemeteries.all_cemeteries">Todos los cementerios</span>
             </button>
 
             <!-- Panel de nicho -->
@@ -191,13 +191,13 @@
                 <p id="np-location" class="text-sm text-on-surface-variant mb-1"></p>
                 <p id="np-cemetery" class="text-xs uppercase tracking-wider font-bold text-outline mb-3"></p>
                 <p id="np-notes" class="text-sm text-on-surface-variant mb-4" style="white-space:pre-wrap;"></p>
-                <h3 class="text-[11px] uppercase tracking-wider font-extrabold text-outline mb-2">Personas enterradas</h3>
+                <h3 class="text-[11px] uppercase tracking-wider font-extrabold text-outline mb-2" data-i18n="pages.cemeteries.buried_people">Personas enterradas</h3>
                 <div id="np-people" class="space-y-1 mb-4"></div>
-                <h3 id="np-photos-title" class="text-[11px] uppercase tracking-wider font-extrabold text-outline mb-2" style="display:none;">Fotografías</h3>
+                <h3 id="np-photos-title" class="text-[11px] uppercase tracking-wider font-extrabold text-outline mb-2" style="display:none;" data-i18n="pages.cemeteries.photos">Fotografías</h3>
                 <div id="np-photos" class="grid grid-cols-2 gap-2 mb-4"></div>
                 <div id="np-records-section" style="display:none;">
                     <h3 id="np-records-title" class="text-[11px] uppercase tracking-wider font-extrabold text-outline mb-2"></h3>
-                    <p class="text-[11px] text-on-surface-variant mb-2">Registro del libro de enterramientos. <span class="in-db-legend">●</span> = persona en la base de datos.</p>
+                    <p class="text-[11px] text-on-surface-variant mb-2" data-i18n-html="pages.cemeteries.records_legend">Registro del libro de enterramientos. <span class="in-db-legend">●</span> = persona en la base de datos.</p>
                     <div id="np-records-wrap"><table id="np-records"></table></div>
                 </div>
             </aside>
