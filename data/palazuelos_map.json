@@ -2268,6 +2268,13 @@
     "match_type": "rejected"
   },
   {
+    "godes_id": "@I500500@",
+    "palaz_id": "@I501253@",
+    "palaz_name": "Juan Pujol López",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
     "godes_id": "@I500502@",
     "palaz_id": "@I501254@",
     "palaz_name": "José Pujol",
@@ -4434,6 +4441,1497 @@
     "godes_id": "@I501040@",
     "palaz_id": "@I507100@",
     "palaz_name": "José Mesegué Lafita",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501044@",
+    "palaz_id": "@I286@",
+    "palaz_name": "Amadeu Cuito Hurtado",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501045@",
+    "palaz_id": "@I501457@",
+    "palaz_name": "Anna Ricart",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501046@",
+    "palaz_id": "@I501458@",
+    "palaz_name": "Ferran Rafael Cuito Ricart",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501047@",
+    "palaz_id": "@I509223@",
+    "palaz_name": "Aurora Sara Cuito Ricart",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501049@",
+    "palaz_id": "@I739@",
+    "palaz_name": "María Elisa Morales López de Lerena",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501050@",
+    "palaz_id": "@I284@",
+    "palaz_name": "Joan Hurtado Morales",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501051@",
+    "palaz_id": "@I285@",
+    "palaz_name": "Marc Hurtado Morales",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501052@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501053@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501054@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501056@",
+    "palaz_id": "@I1086@",
+    "palaz_name": "Angelita Ruaix Dejuan",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501059@",
+    "palaz_id": "@I502848@",
+    "palaz_name": "José-Luis Hospital Ruaix",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501060@",
+    "palaz_id": "@I502849@",
+    "palaz_name": "María del Pilar Torent Nolla",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501061@",
+    "palaz_id": "@I1088@",
+    "palaz_name": "Francisco Javier Hospital Ruaix",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501063@",
+    "palaz_id": "@I502922@",
+    "palaz_name": "Carlos Hospital Torent",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501064@",
+    "palaz_id": "@I502924@",
+    "palaz_name": "Cristina Hospital Torent",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501065@",
+    "palaz_id": "@I502923@",
+    "palaz_name": "Susana Mas Casanovas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501066@",
+    "palaz_id": "@I502925@",
+    "palaz_name": "Fernando Grandes Carci",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501068@",
+    "palaz_id": "@I1091@",
+    "palaz_name": "Eloísa Villanueva Oruñuela",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501072@",
+    "palaz_id": "@I509877@",
+    "palaz_name": "Teresa Pascual Relat",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501073@",
+    "palaz_id": "@I509878@",
+    "palaz_name": "Modesto Dejuan",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501074@",
+    "palaz_id": "@I509879@",
+    "palaz_name": "Josefa Costa",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501078@",
+    "palaz_id": "@I510795@",
+    "palaz_name": "Dolors Ruaix Dejuan",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501080@",
+    "palaz_id": "@I1092@",
+    "palaz_name": "Carmen Hospital Villanueva",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501081@",
+    "palaz_id": "@I1093@",
+    "palaz_name": "Teresa Hospital Villanueva",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501082@",
+    "palaz_id": "@I1094@",
+    "palaz_name": "Fernando Hospital Villanueva",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501083@",
+    "palaz_id": "@I502840@",
+    "palaz_name": "Antonia Rusiñol Cucurny",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501084@",
+    "palaz_id": "@I502872@",
+    "palaz_name": "Alberto Escassany Auzeill",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501086@",
+    "palaz_id": "@I502867@",
+    "palaz_name": "Fernando Hospital Rusiñol",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501087@",
+    "palaz_id": "@I502869@",
+    "palaz_name": "Santiago Hospital Rusiñol",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501088@",
+    "palaz_id": "@I502870@",
+    "palaz_name": "Elisabet Hospital Rusiñol",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501089@",
+    "palaz_id": "@I508353@",
+    "palaz_name": "Jose Mª Merce Bernet",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501092@",
+    "palaz_id": "@I502844@",
+    "palaz_name": "José Riera Ruaix",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501094@",
+    "palaz_id": "@I502845@",
+    "palaz_name": "Mº Teresa Riera Ruaix",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501095@",
+    "palaz_id": "@I502846@",
+    "palaz_name": "Salvador Roig Obradó",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501102@",
+    "palaz_id": "@I502910@",
+    "palaz_name": "José Oriol Maspons Casades",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501104@",
+    "palaz_id": "@I502881@",
+    "palaz_name": "Montse Bosch Solé",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501105@",
+    "palaz_id": "@I506231@",
+    "palaz_name": "Espinosa",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501107@",
+    "palaz_id": "@I502921@",
+    "palaz_name": "Lazarte",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501109@",
+    "palaz_id": "@I502912@",
+    "palaz_name": "Anna Maspons Majó",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501111@",
+    "palaz_id": "@I506235@",
+    "palaz_name": "Majó Bosch",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501112@",
+    "palaz_id": "@I506235@",
+    "palaz_name": "Majó Bosch",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501113@",
+    "palaz_id": "@I506233@",
+    "palaz_name": "Majó Espinosa",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501114@",
+    "palaz_id": "@I506233@",
+    "palaz_name": "Majó Espinosa",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501115@",
+    "palaz_id": "@I502841@",
+    "palaz_name": "Francisco Amat Costa",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501117@",
+    "palaz_id": "@I502949@",
+    "palaz_name": "Antonio Amat Ruaix",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501119@",
+    "palaz_id": "@I502951@",
+    "palaz_name": "Mª Rosa Sabater Ollé",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501120@",
+    "palaz_id": "@I509881@",
+    "palaz_name": "Juan Ruaix Pahissa",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501121@",
+    "palaz_id": "@I509882@",
+    "palaz_name": "Antonia Roca Ciuró",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501122@",
+    "palaz_id": "@I509883@",
+    "palaz_name": "Salvador Pascual",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501123@",
+    "palaz_id": "@I509884@",
+    "palaz_name": "Maria Ralat",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501124@",
+    "palaz_id": "@I509904@",
+    "palaz_name": "Salvi Ruaix",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501125@",
+    "palaz_id": "@I509905@",
+    "palaz_name": "Ana Maria Pahissa",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501126@",
+    "palaz_id": "@I509907@",
+    "palaz_name": "Jaume Roca",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501127@",
+    "palaz_id": "@I509908@",
+    "palaz_name": "Maria Ciuró",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501129@",
+    "palaz_id": "@I1212@",
+    "palaz_name": "Mariana Capellades",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501131@",
+    "palaz_id": "@I508518@",
+    "palaz_name": "Anacleto Escayol Carol",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501132@",
+    "palaz_id": "@I503893@",
+    "palaz_name": "Estevan Sagarra Capellades",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501134@",
+    "palaz_id": "@I506924@",
+    "palaz_name": "Isabel Cardó Cirera",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501135@",
+    "palaz_id": "@I508514@",
+    "palaz_name": "Juan Cardó",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501136@",
+    "palaz_id": "@I508515@",
+    "palaz_name": "María Cirera",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501137@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501138@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501139@",
+    "palaz_id": "@I508519@",
+    "palaz_name": "Pedro Escayól",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501140@",
+    "palaz_id": "@I508520@",
+    "palaz_name": "Antonia Carol",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501141@",
+    "palaz_id": "@I887@",
+    "palaz_name": "José Sagarra",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501142@",
+    "palaz_id": "@I888@",
+    "palaz_name": "Francisca Munné (Monner)",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501143@",
+    "palaz_id": "@I503899@",
+    "palaz_name": "Francisca Sagarra Munné",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501146@",
+    "palaz_id": "@I889@",
+    "palaz_name": "Antonio Agost",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501148@",
+    "palaz_id": "@I1215@",
+    "palaz_name": "Rosa Theresa Mª del Roser Sagarra Munné",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501150@",
+    "palaz_id": "@I1213@",
+    "palaz_name": "Ygnes Eularia Maria De La Concepcio Sagarra Munné",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501151@",
+    "palaz_id": "@I508657@",
+    "palaz_name": "Teresa Prats",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501153@",
+    "palaz_id": "@I508661@",
+    "palaz_name": "María Almuzara Prats",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501154@",
+    "palaz_id": "@I502239@",
+    "palaz_name": "Rosa Villanova Jaime",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501156@",
+    "palaz_id": "@I508654@",
+    "palaz_name": "Maria Otis Baile",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501157@",
+    "palaz_id": "@I508655@",
+    "palaz_name": "Mariano Otis",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501158@",
+    "palaz_id": "@I508656@",
+    "palaz_name": "Barbara Baile",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501160@",
+    "palaz_id": "@I502242@",
+    "palaz_name": "Aniceto Martin Benito Almuzara Villanova",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501169@",
+    "palaz_id": "@I502651@",
+    "palaz_name": "Ramon Blanch Valles",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501170@",
+    "palaz_id": "@I502655@",
+    "palaz_name": "Montserrat Blanch Almuzara",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501171@",
+    "palaz_id": "@I502953@",
+    "palaz_name": "Angel Pujol Pont",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501172@",
+    "palaz_id": "@I505045@",
+    "palaz_name": "Juan Puig Rutllà",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501183@",
+    "palaz_id": "@I505051@",
+    "palaz_name": "Narcis Valls",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501185@",
+    "palaz_id": "@I505046@",
+    "palaz_name": "Petronila Valls i Doset",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501186@",
+    "palaz_id": "@I505061@",
+    "palaz_name": "Joan Valls i Doset",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501187@",
+    "palaz_id": "@I506228@",
+    "palaz_name": "Carme Valls i Cabot",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501188@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501189@",
+    "palaz_id": "@I506229@",
+    "palaz_name": "Elisa Valls i Cabot",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501190@",
+    "palaz_id": "@I506230@",
+    "palaz_name": "Valls i Costa",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501191@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501192@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501193@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501194@",
+    "palaz_id": "@I989@",
+    "palaz_name": "Odó Martí Grau",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501195@",
+    "palaz_id": "@I990@",
+    "palaz_name": "Dolores Llorach Huguet",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501197@",
+    "palaz_id": "@I1018@",
+    "palaz_name": "Rosa Canals Solé",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501202@",
+    "palaz_id": "@I509174@",
+    "palaz_name": "Rafael Cuitó Canals",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501207@",
+    "palaz_id": "@I1078@",
+    "palaz_name": "Elena Güell Llorente",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501210@",
+    "palaz_id": "@I502962@",
+    "palaz_name": "Elena Traver Climent",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501216@",
+    "palaz_id": "@I502978@",
+    "palaz_name": "Garcia Tomàs",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501217@",
+    "palaz_id": "@I502969@",
+    "palaz_name": "Joan Güell Garcia",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501218@",
+    "palaz_id": "@I502971@",
+    "palaz_name": "Güell Garcia",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501219@",
+    "palaz_id": "@I502971@",
+    "palaz_name": "Güell Garcia",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501220@",
+    "palaz_id": "@I502960@",
+    "palaz_name": "Brocal Cervera",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501221@",
+    "palaz_id": "@I502973@",
+    "palaz_name": "Güell Brocal",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501222@",
+    "palaz_id": "@I502973@",
+    "palaz_name": "Güell Brocal",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501223@",
+    "palaz_id": "@I501448@",
+    "palaz_name": "Llorente",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501224@",
+    "palaz_id": "@I502542@",
+    "palaz_name": "Gonzalez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501228@",
+    "palaz_id": "@I502966@",
+    "palaz_name": "Manuel Güell",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501229@",
+    "palaz_id": "@I502967@",
+    "palaz_name": "Antonia Ayats",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501232@",
+    "palaz_id": "@I509856@",
+    "palaz_name": "Josefa Pedro y Baylach",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501233@",
+    "palaz_id": "@I509857@",
+    "palaz_name": "José Cisquella",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501234@",
+    "palaz_id": "@I509858@",
+    "palaz_name": "Francisco Pedro",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501235@",
+    "palaz_id": "@I509859@",
+    "palaz_name": "María Baylach",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501236@",
+    "palaz_id": "@I509860@",
+    "palaz_name": "Catalina Talladas Miguel",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501237@",
+    "palaz_id": "@I502981@",
+    "palaz_name": "Miguel Abella",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501238@",
+    "palaz_id": "@I502982@",
+    "palaz_name": "Josefa Baylac",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501239@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501242@",
+    "palaz_id": "@I501259@",
+    "palaz_name": "Maria Arias Rusca",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501249@",
+    "palaz_id": "@I507046@",
+    "palaz_name": "José Llafrenca Alsina",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501250@",
+    "palaz_id": "@I507047@",
+    "palaz_name": "Ramon Llafrenca Alsina",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501251@",
+    "palaz_id": "@I502624@",
+    "palaz_name": "Juan Sánchez",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501252@",
+    "palaz_id": "@I502625@",
+    "palaz_name": "Victoria Lloberas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501253@",
+    "palaz_id": "@I502622@",
+    "palaz_name": "Agustín Llafrenca",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501254@",
+    "palaz_id": "@I502623@",
+    "palaz_name": "Magdalena Serra",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501255@",
+    "palaz_id": "@I509177@",
+    "palaz_name": "Juan Llorach Guasch",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501256@",
+    "palaz_id": "@I509178@",
+    "palaz_name": "Dolores Huguet Ivern",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501257@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501258@",
+    "palaz_id": "@I509194@",
+    "palaz_name": "Ildefonso Llorach i Huguet",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501259@",
+    "palaz_id": "@I509190@",
+    "palaz_name": "Eusebio Llorach i Huguet",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501260@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501263@",
+    "palaz_id": "@I501207@",
+    "palaz_name": "Dolores Martí Llorach",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501264@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501266@",
+    "palaz_id": "@I506227@",
+    "palaz_name": "Alfons Puig Casamitjana",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501269@",
+    "palaz_id": "@I506225@",
+    "palaz_name": "Ana Bausis Llestas",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501271@",
+    "palaz_id": "@I506894@",
+    "palaz_name": "Gonzalo Casamitjana Bausís",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501272@",
+    "palaz_id": "@I506895@",
+    "palaz_name": "Pelayo Casamitjana Bausís",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501273@",
+    "palaz_id": "@I506896@",
+    "palaz_name": "Lola Casamitjana Bausís",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501274@",
+    "palaz_id": "@I506897@",
+    "palaz_name": "César Casamitjana Bausís",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501275@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501276@",
+    "palaz_id": "@I506911@",
+    "palaz_name": "Luisa Amigo Y Dalmases",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501277@",
+    "palaz_id": "@I505062@",
+    "palaz_name": "Dolors Valls i Doset",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501278@",
+    "palaz_id": "@I505995@",
+    "palaz_name": "Manuel José Juan Sunyer Dosset",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501284@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501286@",
+    "palaz_id": "@I504333@",
+    "palaz_name": "Casimiro Sunyer Casaramona",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501287@",
+    "palaz_id": "@I504334@",
+    "palaz_name": "Manuel Sunyer Casaramona",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501288@",
+    "palaz_id": "@I504335@",
+    "palaz_name": "Joaquin Sunyer Casaramona",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501290@",
+    "palaz_id": "@I504350@",
+    "palaz_name": "Juan Sunyer Casaramona",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501291@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501292@",
+    "palaz_id": "@I504321@",
+    "palaz_name": "Casimiro Casaramona Puigcercós",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501293@",
+    "palaz_id": "@I504322@",
+    "palaz_name": "Irene Argelés Odeig",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501296@",
+    "palaz_id": "@I504325@",
+    "palaz_name": "Augusto Casaramona Argelés",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501298@",
+    "palaz_id": "@I504461@",
+    "palaz_name": "María Josefa Sunyer Vilaseca",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501300@",
+    "palaz_id": "@I508221@",
+    "palaz_name": "Vilaseca",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501301@",
+    "palaz_id": "@I508222@",
+    "palaz_name": "Domenech",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501302@",
+    "palaz_id": "@I508223@",
+    "palaz_name": "Jose Vilaseca Domènech",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501303@",
+    "palaz_id": "@I508224@",
+    "palaz_name": "Enric Vilaseca Domenech",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501304@",
+    "palaz_id": "@I504462@",
+    "palaz_name": "Mercedes Sunyer Vilaseca",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501305@",
+    "palaz_id": "@I504463@",
+    "palaz_name": "Dolores Sunyer Vilaseca",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501306@",
+    "palaz_id": "@I506430@",
+    "palaz_name": "Pablo Llorens Regaña",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501307@",
+    "palaz_id": "@I504365@",
+    "palaz_name": "Carme Bofill Solà",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501308@",
+    "palaz_id": "@I504371@",
+    "palaz_name": "Josep Sunyer Bofill",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501310@",
+    "palaz_id": "@I504368@",
+    "palaz_name": "Carme Sunyer Bofill",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501311@",
+    "palaz_id": "@I504367@",
+    "palaz_name": "Manel Sunyer Bofill",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501312@",
+    "palaz_id": "@I506025@",
+    "palaz_name": "Mª Mercedes Arus Serret",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501318@",
+    "palaz_id": "@I506681@",
+    "palaz_name": "Mª Mercedes Sunyer Martín",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501319@",
+    "palaz_id": "@I506706@",
+    "palaz_name": "Adela Montull",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501321@",
+    "palaz_id": "@I506678@",
+    "palaz_name": "Francisco Javier Sunyer Martín",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501322@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501323@",
+    "palaz_id": "@I504369@",
+    "palaz_name": "Maria Lourdes",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501324@",
+    "palaz_id": "@I504370@",
+    "palaz_name": "Josep",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501325@",
+    "palaz_id": "@I504372@",
+    "palaz_name": "Guillermina",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501326@",
+    "palaz_id": "@I506704@",
+    "palaz_name": "Mª Jesús Jimeno",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501327@",
+    "palaz_id": "@I512059@",
+    "palaz_name": "Laia Sunyer Montull",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501328@",
+    "palaz_id": "@I506707@",
+    "palaz_name": "Inma Borrell Carrió",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501329@",
+    "palaz_id": "@I506677@",
+    "palaz_name": "José Miguel Sunyer Martín",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501330@",
+    "palaz_id": "@I506705@",
+    "palaz_name": "María de la Puente",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501331@",
+    "palaz_id": "@I506679@",
+    "palaz_name": "Mª Teresa Sunyer Martín",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501332@",
+    "palaz_id": "@I506708@",
+    "palaz_name": "Juan Antonio de la Sotilla",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501333@",
+    "palaz_id": "@I506682@",
+    "palaz_name": "Mª Dolores Sunyer Martín",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501334@",
+    "palaz_id": "@I506709@",
+    "palaz_name": "Xavier Roy",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501335@",
+    "palaz_id": "@I506683@",
+    "palaz_name": "Antonio Sunyer Martín",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501336@",
+    "palaz_id": "@I506710@",
+    "palaz_name": "Anna Guirado",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501337@",
+    "palaz_id": "@I506685@",
+    "palaz_name": "Eduardo Sunyer Martín",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501338@",
+    "palaz_id": "@I506712@",
+    "palaz_name": "Susana García",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501339@",
+    "palaz_id": "@I506686@",
+    "palaz_name": "Luis Sunyer Martín",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501340@",
+    "palaz_id": "@I506713@",
+    "palaz_name": "Weiping",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501341@",
+    "palaz_id": "@I506687@",
+    "palaz_name": "Miryam Sunyer Martín",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501342@",
+    "palaz_id": "@I506714@",
+    "palaz_name": "Miguel Vidal-Quadras Tries de Bes",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501343@",
+    "palaz_id": "@I502670@",
+    "palaz_name": "Arturo Abelló Pidell",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501345@",
+    "palaz_id": "@I510506@",
+    "palaz_name": "Joaquín Monrós",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501346@",
+    "palaz_id": "@I510507@",
+    "palaz_name": "Agustina Marsá",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501348@",
+    "palaz_id": "@I510509@",
+    "palaz_name": "Juan Abelló",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501349@",
+    "palaz_id": "@I510510@",
+    "palaz_name": "Teresa Pidell",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501350@",
+    "palaz_id": "@I505047@",
+    "palaz_name": "Felipe Rigau Samada",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501351@",
+    "palaz_id": "@I505048@",
+    "palaz_name": "Gertrudis Sellés Dosset",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501352@",
+    "palaz_id": "@I506912@",
+    "palaz_name": "Felipe Rigau",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501353@",
+    "palaz_id": "@I506913@",
+    "palaz_name": "Catalina Samada",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501354@",
+    "palaz_id": "@I506914@",
+    "palaz_name": "Benito Sellés",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501355@",
+    "palaz_id": "@I506915@",
+    "palaz_name": "Maria Dosset",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501357@",
+    "palaz_id": "@I506854@",
+    "palaz_name": "Josefa Sabater Aruño",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501360@",
+    "palaz_id": "@I506857@",
+    "palaz_name": "Pedro Sabater",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501361@",
+    "palaz_id": "@I506858@",
+    "palaz_name": "Josefa Arunño",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501363@",
+    "palaz_id": "@I507162@",
+    "palaz_name": "Ramon Vila",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501364@",
+    "palaz_id": "@I507163@",
+    "palaz_name": "Felipa Bofill",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501368@",
+    "palaz_id": "@I506006@",
+    "palaz_name": "Josep Mª Planells Sunyer",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501369@",
+    "palaz_id": "@I506003@",
+    "palaz_name": "Montserrat Planells Sunyer",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501376@",
+    "palaz_id": "@I506123@",
+    "palaz_name": "Mercedes Cornet Planells Cornet Jaumandreu",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501381@",
+    "palaz_id": "@I506066@",
+    "palaz_name": "Pedro Reverté Gil",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501383@",
+    "palaz_id": "@I506068@",
+    "palaz_name": "Manuel Reverte Planells",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501385@",
+    "palaz_id": "@I506087@",
+    "palaz_name": "Isabel Reverte Planells",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501389@",
+    "palaz_id": "@I506072@",
+    "palaz_name": "Celestina Ortiz Rivero",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501396@",
+    "palaz_id": "@I506113@",
+    "palaz_name": "Ana Mª Vidal Planells",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501397@",
+    "palaz_id": "@I506111@",
+    "palaz_name": "Manel Jordi Vidal Planells",
     "confidence": 100,
     "match_type": "manual"
   },
