@@ -96,6 +96,21 @@
     "padro": "Padrones",
     "testament": "Testamentos"
   },
+  "doc_tags": {
+    "Bautismo": "Bautismo",
+    "Biografia": "Biografía",
+    "Carta": "Carta",
+    "Cementerio": "Cementerio",
+    "Defunción": "Defunción",
+    "Diversos": "Diversos",
+    "Documentación": "Documentación",
+    "Documento": "Documento",
+    "Documentos": "Documentos",
+    "Matrimonio": "Matrimonio",
+    "Nacimiento": "Nacimiento",
+    "Obituario": "Obituario",
+    "Padrón": "Padrón"
+  },
   "events": {
     "anecdote": "Anécdota",
     "baptism": "Bautismo",

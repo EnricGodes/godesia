@@ -786,8 +786,9 @@ function renderDocuments(data) {
     const documentCards = sorted.map(doc => {
         const metaLabel = (DOC_TYPE_META[doc.doc_type] || {}).label;
         const label = doc.tag
-            || (metaLabel ? _i18nT('doc_types.' + doc.doc_type, null, metaLabel) : null)
-            || _i18nT('common.doc_default', null, 'Documento');
+            ? _i18nT('doc_tags.' + doc.tag, null, doc.tag)
+            : (metaLabel ? _i18nT('doc_types.' + doc.doc_type, null, metaLabel) : null)
+              || _i18nT('common.doc_default', null, 'Documento');
         const iconPath = getIconForTag(doc.tag) !== '/icons/documentacion.svg'
             ? getIconForTag(doc.tag)
             : getIconForTag(doc.doc_type);
