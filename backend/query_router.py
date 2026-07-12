@@ -230,7 +230,16 @@ class QueryRouter:
         # patrones. Cubre cualquier tiempo verbal/relleno de las intenciones ya
         # migradas y cede (None) en cuanto hay ambigüedad. Ver backend/routing/.
         # Le pasamos los tokens de nombres reales para el guard de prefijo.
-        self._intent_router = IntentRouter(name_tokens=self._build_name_tokens())
+        self._name_tokens = self._build_name_tokens()
+        self._intent_router = IntentRouter(name_tokens=self._name_tokens)
+        # Reescritura de preguntas no-españolas (ca/en/fr/de) a español canónico
+        # antes del matching, reutilizando los mismos name_tokens para no traducir
+        # nombres. Ver backend/routing/rewriter.py.
+        try:
+            from routing.rewriter import QuestionRewriter
+        except ImportError:
+            from backend.routing.rewriter import QuestionRewriter
+        self._rewriter = QuestionRewriter(name_tokens=self._name_tokens)
 
         # Register a SQL normalization function so we can compare both sides
         # (user input and DB data) with accents stripped and lowercased. This
@@ -455,6 +464,14 @@ class QueryRouter:
     def route(self, question, lang="es"):
         _current_lang.set(lang or "es")
         question = _clean_question(question)
+        # Reescritura a español si la pregunta está en otro idioma de la
+        # plataforma (detección automática; lang de la UI solo desempata).
+        # El español no se toca → 0 regresiones. La respuesta sigue saliendo en
+        # el idioma de la UI vía _current_lang.
+        try:
+            question, self._detected_lang = self._rewriter.rewrite(question, ui_lang=lang or "es")
+        except Exception:
+            self._detected_lang = "es"
         self._sql_trace = []
         try:
             self.conn.set_trace_callback(self._sql_trace.append)
