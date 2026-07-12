@@ -1710,8 +1710,11 @@ class QueryRouter:
             return None
         children = _sort_people(list(get_children(self.conn, person["id"])))
         if children:
-            count_word = "hijo o hija" if len(children) == 1 else "hijos o hijas"
-            answer = _t("handle_children_count.1", a=person['name'], b=len(children), c=count_word, d='o' if len(children) == 1 else 'os', e=_join_names(children))
+            # Frase completa en la plantilla (singular/plural): la concordancia
+            # difiere por idioma ("documentado" es / "documentat" ca), así que
+            # no puede componerse con sufijos desde el código.
+            key = "handle_children_count.one" if len(children) == 1 else "handle_children_count.many"
+            answer = _t(key, a=person['name'], b=len(children), e=_join_names(children))
         else:
             answer = _t("handle_children_count.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [person["id"]] + [c["id"] for c in children], "people_with_photos": self._people_payload([person] + children)}
@@ -3781,16 +3784,14 @@ class QueryRouter:
         if not person:
             return None
         kids = _sort_people([_as_dict(c) for c in get_children(self.conn, person['id'])])
-        if mode == 'son_oldest':
-            kids = [k for k in kids if k.get('sex') == 'M']
-            label = 'El hijo mayor'
-        else:
-            kids = [k for k in kids if k.get('sex') == 'F']
-            label = 'La primera hija'
+        # Claves por sexo: la etiqueta ("El hijo mayor"/"La primera hija") y la
+        # negación son idioma-dependientes → van completas en la plantilla.
+        sub = "son" if mode == 'son_oldest' else "daughter"
+        kids = [k for k in kids if k.get('sex') == ('M' if sub == "son" else 'F')]
         if not kids:
-            return {"answer": _t("handle_child_extremes.2", a='ningún hijo varón' if mode == 'son_oldest' else 'ninguna hija', b=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+            return {"answer": _t(f"handle_child_extremes.{sub}.2", b=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         kid = kids[0]
-        return {"answer": _t("handle_child_extremes.1", a=label, b=_person_link(person), c=_person_brief(kid)), "people_mentioned": [person['id'], kid['id']], "people_with_photos": self._people_payload([person, kid])}
+        return {"answer": _t(f"handle_child_extremes.{sub}.1", b=_person_link(person), c=_person_brief(kid)), "people_mentioned": [person['id'], kid['id']], "people_with_photos": self._people_payload([person, kid])}
 
     def handle_given_name_count(self, question):
         q = _clean_question(question)
