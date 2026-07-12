@@ -978,6 +978,11 @@ function buildEvents(data) {
         child_partnership: _i18nT('events.child_partnership', null, 'Sociedad del hijo')
     };
 
+    /* Traduce un tipo de evento de la BD (español, p.ej. "Trabajo", "Mudanza")
+       vía event_types.<tipo>; si no hay clave, deja el original. Se usa como
+       etiqueta y como clave del filtro, por lo que debe aplicarse al construir. */
+    const evtType = (raw) => raw ? _i18nT('event_types.' + raw, null, raw) : EVT.generic;
+
     // Nacimiento
     if (person.birth_year) {
         const personName = formatNameWithNickname(person.name, data.nickname, person.given_name, person.surname) || person.name;
@@ -1327,7 +1332,7 @@ function buildEvents(data) {
                 events.push({
                     year: year,
                     age: ageDisplay || ageText(year),
-                    type: e.type || EVT.generic,
+                    type: evtType(e.type),
                     lines: [
                         formatDateWithQualifier(e.date) || '',
                         e.place || ''
@@ -1759,7 +1764,7 @@ function renderResidences(residences, events, person) {
             lat: e.lat || null,
             lng: e.lng || null,
             note: e.description || '',
-            source_type: e.type || '',
+            source_type: e.type ? _i18nT('event_types.' + e.type, null, e.type) : '',
         }));
 
     // Birth place — always first, before any sort
