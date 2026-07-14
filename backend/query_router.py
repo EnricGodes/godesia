@@ -312,6 +312,10 @@ class QueryRouter:
             (r"(?:con\s+qui[eé]n\s+se\s+cas[oó]\s+la\s+persona\s+nacida\s+en\s+.+\s+llamada\s+.+)", "handle_spouse_disambiguated_by_birth_place"),
             (r"(?:cu[aá]ntos?\s+hijos\s+(?:tuvo\s+)?(?:el\s+matrimonio\s+de\s+)?.+\s+y\s+.+|cu[aá]ntos?\s+hijos\s+tuvieron\s+.+\s+y\s+.+)", "handle_couple_children_count"),
             (r"(?:qui[eé]nes\s+eran\s+los\s+abuelos\s+de\s+.+\s+y\s+en\s+qu[eé]\s+a[nñ]os\s+nacieron)", "handle_grandparents_with_years"),
+            (r"abuelos?\s+(?:maternos?|de\s+la\s+rama\s+materna)", "handle_maternal_grandparents"),
+            (r"abuelos?\s+(?:paternos?|de\s+la\s+rama\s+paterna)", "handle_paternal_grandparents"),
+            (r"t[ií]os?\b.*\b(?:maternos?|rama\s+materna)", "handle_maternal_uncles_aunts"),
+            (r"t[ií]os?\b.*\b(?:paternos?|rama\s+paterna)", "handle_paternal_uncles_aunts"),
             (r"(?:c[oó]mo\s+se\s+llamaban\s+los\s+(?:cuatro\s+)?abuelos\s+de|qui[eé]nes\s+(?:eran|fueron)\s+los\s+(?:cuatro\s+)?abuelos\s+de|qu[eé]\s+abuelos?\s+ten[ií]a\s+.+|me\s+sacas\s+los\s+nombres\s+de\s+los\s+abuelos\s+de|abuelos\s+ten[ií]a\s+por\s+las\s+dos\s+ramas\s+.+|abuelos?\s+(?:paternos?\s+y\s+maternos?|maternos?\s+y\s+paternos?)\s+de)", "handle_grandparents_names"),
             (r"(?:en\s+qu[eé]\s+posici[oó]n\s+(?:entre\s+)?sus\s+hermanos\s+(?:naci[oó]|naci[oó]\s+)|qu[eé]\s+lugar\s+(?:ocupaba|ocupa)\s+(?:dentro|entre)\s+sus\s+hermanos)", "handle_birth_order_among_siblings"),
             (r"(?:qui[eé]nes\s+eran\s+los\s+padres\s+de\s+.+\s+y\s+d[oó]nde\s+se\s+casaron)", "handle_parents_and_marriage_place"),
@@ -1623,6 +1627,50 @@ class QueryRouter:
 
     def handle_fourth_cousins(self, q):
         return self._kin_answer(q, r"prim[oa]s?\s+cuart[oa]s?", "primos cuartos", lambda p: self._compute_nth_cousins(p, 4))
+
+    def handle_maternal_grandparents(self, q):
+        return self._kin_answer(q, r"abuelos?\s+(?:maternos?|de\s+la\s+rama\s+materna)", "abuelos maternos", lambda p: self._side_grandparents(p, "mother"))
+
+    def handle_paternal_grandparents(self, q):
+        return self._kin_answer(q, r"abuelos?\s+(?:paternos?|de\s+la\s+rama\s+paterna)", "abuelos paternos", lambda p: self._side_grandparents(p, "father"))
+
+    def handle_maternal_uncles_aunts(self, q):
+        return self._side_answer(q, r"t[ií]os?(?:\s+y\s+t[ií]as?)?", r"maternos?|rama\s+materna", "tíos maternos", lambda p: self._get_aunts_uncles(p)[1])
+
+    def handle_paternal_uncles_aunts(self, q):
+        return self._side_answer(q, r"t[ií]os?(?:\s+y\s+t[ií]as?)?", r"paternos?|rama\s+paterna", "tíos paternos", lambda p: self._get_aunts_uncles(p)[0])
+
+    def _side_answer(self, question, kin_rx, side_rx, noun, compute):
+        """Como _kin_answer pero para parentescos con lado (materno/paterno): cubre
+        'X maternos de N', 'X de la rama materna constan para N' y la forma con el
+        lado al final 'X tenía/tuvo/de N por la rama materna'."""
+        q = _clean_question(question)
+        subject = None
+        for rx in (rf"{kin_rx}\s+(?:de\s+la\s+)?(?:{side_rx})\s+(?:de|constan?\s+para)\s+(.+?)(?:\?|$)",
+                   rf"{kin_rx}\s+(?:ten[ií]a|tuvo)\s+(.+?)\s+por\s+la\s+(?:{side_rx})",
+                   rf"{kin_rx}\s+de\s+(.+?)\s+por\s+la\s+(?:{side_rx})"):
+            m = re.search(rx, q, re.I)
+            if m:
+                subject = m.group(1)
+                break
+        if not subject:
+            return None
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        rows = _sort_people(self._unique_by_id(compute(person)))
+        ans = (_t("_kin_answer.1", a=noun, b=_person_link(person)) if not rows
+               else _t("_kin_answer.2", a=noun, b=_person_link(person), c=_join_names(rows)))
+        people = [person] + rows
+        return {"answer": ans, "people_mentioned": [x["id"] for x in people],
+                "people_with_photos": self._people_payload(people[:26])}
+
+    def _side_grandparents(self, p, which):
+        parent = self._get_parent(p, which)
+        if not parent:
+            return []
+        return [x for x in (self._get_parent(parent, "father"),
+                            self._get_parent(parent, "mother")) if x]
 
     def handle_mother_in_law(self, q):
         return self._kin_answer(q, r"(?:madre\s+pol[ií]tica|suegra)", "madre política o suegra", self._compute_mother_in_law)

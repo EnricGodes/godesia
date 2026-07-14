@@ -96,17 +96,20 @@ RULES = {
     "siblings": [(set(), set(), set(), "handle_siblings", "hermanos de {s}")],
     "grandparents": [
         ({"paterno"}, set(), set(), "handle_paternal_grandfather", "abuelo paterno de {s}"),
-        ({"paterna"}, set(), set(), "handle_paternal_grandmother", "abuela paterna de {s}"),
-        ({"materna"}, set(), set(), "handle_maternal_grandmother", "abuela materna de {s}"),
+        # "de la rama materna/paterna" = ambos abuelos de ese lado → ceden al patrón.
+        ({"paterna"}, set(), {"rama"}, "handle_paternal_grandmother", "abuela paterna de {s}"),
+        ({"materna"}, set(), {"rama"}, "handle_maternal_grandmother", "abuela materna de {s}"),
         ({"materno"}, set(), set(), "handle_maternal_grandfather", "abuelo materno de {s}"),
-        (set(), set(), {"paterno", "paterna", "materno", "materna"}, "handle_grandparents_names", "abuelos de {s}"),
+        (set(), set(), {"paterno", "paterna", "materno", "materna", "paternos",
+                       "maternos", "rama"}, "handle_grandparents_names", "abuelos de {s}"),
     ],
     "cousins": [
         ({"segundos"}, set(), set(), "handle_second_cousins", "primos segundos de {s}"),
         ({"segundas"}, set(), set(), "handle_second_cousins", "primos segundos de {s}"),
         (set(), set(), {"segundos", "segundas"}, "handle_first_cousins", "primos de {s}"),
     ],
-    "uncles":       [(set(), set(), set(), "handle_uncles", "tios de {s}")],
+    "uncles":       [(set(), set(), {"paterno", "paterna", "paternos", "materno",
+                                     "materna", "maternos", "rama"}, "handle_uncles", "tios de {s}")],
     "nephews": [
         ({"segundos"}, set(), set(), "handle_second_nephews", "sobrinos segundos de {s}"),
         ({"segundas"}, set(), set(), "handle_second_nephews", "sobrinos segundos de {s}"),
