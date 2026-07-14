@@ -459,7 +459,7 @@ class QueryRouter:
             (r"(?:(?:qu[eé]\s+)?actividad\s+militar\s+tuvo\s+.+|servicio\s+militar\s+de\s+.+|datos?\s+militar(?:es)?\s+de\s+.+)", "handle_military"),
             (r"(?:qui[eé]nes\s+participaron\s+en\s+(?:la\s+)?guerra|qui[eé]nes\s+fueron\s+a\s+la\s+guerra|combatientes\s+del\s+[aá]rbol)", "handle_military_all"),
             # Burial
-            (r"(?:d[oó]nde\s+(?:fue\s+enterrad[oa]|est[aá]\s+(?:enterrad[oa]|sepultad[oa]))\s+.+|sepultura\s+de\s+.+|tumba\s+de\s+.+)", "handle_burial"),
+            (r"(?:d[oó]nde\s+(?:fue\s+enterrad[oa]|est[aá]\s+(?:enterrad[oa]|sepultad[oa])|recibi[oó]\s+sepultura)\s+.+|sepultura\s+de\s+.+|tumba\s+de\s+.+|(?:qu[eé]\s+)?lugar\s+de\s+entierro\s+consta\s+para\s+.+)", "handle_burial"),
             (r"(?:qui[eé]nes\s+(?:fueron\s+enterrados|est[aá]n\s+enterrados|est[aá]n\s+sepultados)\s+en\s+.+|enterramientos\s+en\s+.+)", "handle_burial_place"),
             # Baptism
             (r"(?:cu[aá]ndo\s+(?:fue\s+)?bautizad[oa]\s+.+|(?:fecha|d[ií]a)\s+(?:del?\s+)?bautismo\s+de\s+.+|bautismo\s+de\s+.+)", "handle_baptism"),
@@ -485,12 +485,12 @@ class QueryRouter:
             (r"^(?:yernos?|son[s-]in.law)\s+.+$", "handle_sons_in_law"),
             (r"^(?:cu[nñ]adas?|sister[s-]in.law)\s+.+$", "handle_sisters_in_law"),
             (r"^(?:cu[nñ]ados?|brother[s-]in.law)\s+.+$", "handle_brothers_in_law"),
-            (r"^(?:donde|d[oó]nde)\s+naci[oó]\s+.+$|(?:cu[aá]l\s+(?:fue|es)\s+(?:el\s+lugar|la\s+ciudad|la\s+localidad|el\s+pueblo)\s+(?:de\s+)?(?:nacimiento|origen|natal)|qu[eé]\s+lugar.*nacimiento)\s+.+", "handle_birth_place_of_person"),
+            (r"^(?:donde|d[oó]nde)\s+naci[oó]\s+.+$|(?:cu[aá]l\s+(?:fue|es)\s+(?:el\s+lugar|la\s+ciudad|la\s+localidad|el\s+pueblo)\s+(?:de\s+)?(?:nacimiento|origen|natal)|qu[eé]\s+lugar.*nacimiento|en\s+qu[eé]\s+(?:lugar|localidad|pueblo|ciudad)\s+naci[oó]|de\s+d[oó]nde\s+era\s+natural)\s+.+", "handle_birth_place_of_person"),
             (r"(?:d[oó]nde\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:lugar|sitio|ciudad|pueblo)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+(?:el\s+lugar|la\s+ciudad)\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+lugar\s+de\s+(?:fallecimiento|defunci[oó]n)\s+(?:tiene|consta)|lugar\s+de\s+defunci[oó]n\s+de)\s+.+", "handle_death_place_of_person"),
-            (r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|en\s+qu[eé]\s+(?:a[nñ]o|fecha|d[ií]a)\s+naci[oó]|qu[eé]\s+a[nñ]o\s+naci[oó]|en\s+qu[eé]\s+fecha.*naci|a[nñ]o\s+de\s+nacimiento\s+de|cu[aá]l\s+(?:fue|es)\s+(?:la\s+)?fecha\s+(?:exacta\s+)?(?:de\s+)?nacimiento)\s+.+", "handle_birth_date_of_person"),
+            (r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|cu[aá]ndo\s+consta\s+que\s+naci[oó]|en\s+qu[eé]\s+(?:a[nñ]o|fecha|d[ií]a)\s+naci[oó]|qu[eé]\s+a[nñ]o\s+naci[oó]|en\s+qu[eé]\s+fecha.*naci|qu[eé]\s+fecha\s+de\s+nacimiento\s+consta|a[nñ]o\s+de\s+nacimiento\s+de|cu[aá]l\s+(?:fue|es)\s+(?:la\s+)?fecha\s+(?:exacta\s+)?(?:de\s+)?nacimiento)\s+.+", "handle_birth_date_of_person"),
             (r"(?:cu[aá]ndo\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:fecha|a[nñ]o|d[ií]a)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+la\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+fecha\s+de\s+defunci[oó]n\s+(?:tiene|consta)|hay\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de|cu[aá]ndo\s+se\s+produjo\s+la\s+defunci[oó]n\s+de|fue\s+(?:enterrad[oa]|sepultad[oa]))\s+.+", "handle_death_date_of_person"),
             (r"^(?:profesi[oó]n|oficio|ocupaci[oó]n|trabajo|empleo|qu[eé]\s+oficio|qu[eé]\s+hac[ií]a|cu[aá]l\s+(?:era|fue)\s+(?:el\s+medio\s+de\s+vida|el\s+oficio|la\s+profesi[oó]n|la\s+ocupaci[oó]n))\s+(?:de\s+)?.+$", "handle_occupation_natural"),
-            (r"(?:residencia[s]?|domicilio[s]?|d[óo]nde\s+(?:viv[ií]a|vivia|vive|vivi[oó]|ha\s+vivido|residi[oó]|resid[ií]a|estuvo\s+domiciliad[oa])|en\s+qu[eé]\s+(?:domicilio[s]?|direcci(?:[oó]n|ones)|casa[s]?)\s+(?:estuvo|vivi[oó]|residi[oó])|qu[eé]\s+(?:domicilio[s]?|direcci(?:[oó]n|ones))\s+tuvo|cu[aá]l(?:es)?\s+(?:fue(?:ron)?|era[n]?|es|son)\s+(?:el\s+|la\s+|los\s+|las\s+)?(?:domicilio[s]?|direcci(?:[oó]n|ones)|primer\s+domicilio|residencia[s]?))\s+", "handle_last_residence"),
+            (r"(?:residencia[s]?|domicilio[s]?|d[óo]nde\s+(?:viv[ií]a|vivia|vive|vivi[oó]|ha\s+vivido|residi[oó]|resid[ií]a|habit[oó]|estuvo\s+domiciliad[oa])|en\s+qu[eé]\s+(?:domicilio[s]?|direcci(?:[oó]n|ones)|casa[s]?)\s+(?:estuvo|vivi[oó]|residi[oó])|qu[eé]\s+(?:domicilio[s]?|direcci(?:[oó]n|ones))\s+tuvo|cu[aá]l(?:es)?\s+(?:fue(?:ron)?|era[n]?|es|son)\s+(?:el\s+|la\s+|los\s+|las\s+)?(?:domicilio[s]?|direcci(?:[oó]n|ones)|primer\s+domicilio|residencia[s]?))\s+", "handle_last_residence"),
             (r"^(?:notas?|apuntes?)\s+(?:biogr[aá]ficas?\s+)?de\s+.+$", "handle_notes_field"),
             (r"^(?:qu[eé]\s+)?descendencia\s+.+$", "handle_has_descendants"),
         ]
@@ -538,6 +538,8 @@ class QueryRouter:
             except Exception:
                 pass
 
+        result = self._apply_gender_filter(question, result)
+
         unresolved = False
         if not result:
             unresolved = True
@@ -553,6 +555,38 @@ class QueryRouter:
         result["source"] = "db"
         result["unresolved"] = unresolved
         result.pop("_handler", None)
+        return result
+
+    _FEM_REL_RE = re.compile(r"\b(hermanas|hijas|tias|sobrinas|abuelas|nietas|primas)\b")
+    _MASC_REL_RE = re.compile(r"\b(hermanos|hijos|tios|sobrinos|abuelos|nietos|primos)\b")
+    _MASC_CUE_RE = re.compile(r"\b(hombres|varones)\b")
+
+    def _apply_gender_filter(self, question, result):
+        """Filtra por sexo las personas de una respuesta de parentesco cuando la
+        pregunta lo pide explícitamente: femenino ('hermanas', 'tías'…) → F;
+        'varones'/'hombres' → M. El masculino neutro ('hermanos', 'tíos') no
+        filtra → mismo comportamiento de siempre (0 regresiones). Se conserva
+        siempre al sujeto (primer id)."""
+        if not result:
+            return result
+        people = result.get("people_mentioned") or []
+        if len(people) < 2:
+            return result
+        q = _strip_accents(_clean_question(question).lower())
+        if self._MASC_CUE_RE.search(q):                       # "varones"/"hombres"
+            want = "M"
+        elif self._FEM_REL_RE.search(q) and not self._MASC_REL_RE.search(q):
+            want = "F"                                        # solo femenino (no compuesto "tíos y tías")
+        else:
+            return result
+        kept = [people[0]]
+        for pid in people[1:]:
+            row = self.conn.execute("SELECT sex FROM people WHERE id = ?", (pid,)).fetchone()
+            if row and row[0] == want:
+                kept.append(pid)
+        if kept != people:
+            result = dict(result)
+            result["people_mentioned"] = kept
         return result
 
     def _route_internal(self, question):
@@ -3746,7 +3780,8 @@ class QueryRouter:
 
     def handle_burial(self, question):
         q = _clean_question(question)
-        m = re.search(r"(?:enterrad[oa]|sepultad[oa]|sepultura\s+de|tumba\s+de)\s+(.+?)(?:\?|$)", q, re.I)
+        m = (re.search(r"(?:enterrad[oa]|sepultad[oa]|sepultura\s+de|tumba\s+de|recibi[oó]\s+sepultura)\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"lugar\s+de\s+entierro\s+consta\s+para\s+(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person, _ = self._resolve_person(m.group(1))
@@ -3994,7 +4029,7 @@ class QueryRouter:
              re.search(r"d[oó]nde\s+viv[ií]a\s+(.+?)\s+al\s+final\s+de\s+su\s+vida(?:\?|$)", q, re.I) or
              re.search(r"en\s+qu[eé]\s+(?:domicilio[s]?|direcci(?:[oó]n|ones)|casa[s]?)\s+(?:estuvo|vivi[oó]|residi[oó])\s+(.+?)(?:\?|$)", q, re.I) or
              re.search(r"qu[eé]\s+(?:domicilio[s]?|direcci(?:[oó]n|ones))\s+tuvo\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"(?:residencia[s]?|domicilio[s]?|direcci(?:[oó]n|ones)|d[óo]nde\s+(?:vivia|viv[ií]a|vive|vivi[oó]|ha\s+vivido|residi[oó]|resid[ií]a))\s+(?:de\s+|tuvo\s+|tuvieron\s+)?(.+?)(?:\?|$)", q, re.I) or
+             re.search(r"(?:residencia[s]?|domicilio[s]?|direcci(?:[oó]n|ones)|d[óo]nde\s+(?:vivia|viv[ií]a|vive|vivi[oó]|ha\s+vivido|residi[oó]|resid[ií]a|habit[oó]))\s+(?:de\s+|tuvo\s+|tuvieron\s+)?(.+?)(?:\?|$)", q, re.I) or
              re.search(r"cu[aá]l(?:es)?\s+(?:fue(?:ron)?|era[n]?|es|son)\s+(?:el\s+|la\s+|los\s+|las\s+)?(?:domicilio[s]?|direcci(?:[oó]n|ones)|primer\s+domicilio|residencia[s]?)\s+(?:de\s+)?(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
@@ -4080,7 +4115,9 @@ class QueryRouter:
         """Handle 'Donde nacio X?' or 'Cual fue el lugar de nacimiento de X?' - return X's birthplace"""
         subject = (self._extract_subject_name_from_pattern(question, r"(?:donde|d[oó]nde)\s+naci[oó]\s+(.+?)(?:\?|$)") or
                   self._extract_subject_name_from_pattern(question, r"(?:cu[aá]l\s+(?:fue|es)\s+(?:el\s+lugar|la\s+ciudad|la\s+localidad|el\s+pueblo)\s+(?:de\s+)?(?:nacimiento|origen|natal)\s+de)\s+(.+?)(?:\?|$)") or
-                  self._extract_subject_name_from_pattern(question, r"(?:qu[eé]\s+lugar.*nacimiento\s+(?:tiene|tiene|tuvo)\s+(?:de\s+)?)\s*(.+?)(?:\?|$)"))
+                  self._extract_subject_name_from_pattern(question, r"(?:qu[eé]\s+lugar.*nacimiento\s+(?:tiene|tiene|tuvo)\s+(?:de\s+)?)\s*(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"en\s+qu[eé]\s+(?:lugar|localidad|pueblo|ciudad)\s+naci[oó]\s+(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"de\s+d[oó]nde\s+era\s+natural\s+(.+?)(?:\?|$)"))
         if not subject:
             return None
         person, _ = self._resolve_person(subject)
@@ -4112,7 +4149,9 @@ class QueryRouter:
         """Handle 'Cuando nacio X?' or 'Cual fue la fecha de nacimiento de X?' - return X's birth date"""
         subject = (self._extract_subject_name_from_pattern(question, r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|en\s+qu[eé]\s+(?:a[nñ]o|fecha|d[ií]a)\s+naci[oó]|qu[eé]\s+a[nñ]o\s+naci[oó]|en\s+qu[eé]\s+fecha.*naci)\s+(.+?)(?:\?|$)") or
                   self._extract_subject_name_from_pattern(question, r"(?:a[nñ]o\s+de\s+nacimiento\s+de)\s+(.+?)(?:\?|$)") or
-                  self._extract_subject_name_from_pattern(question, r"(?:cu[aá]l\s+(?:fue|es)\s+(?:la\s+)?fecha\s+(?:exacta\s+)?(?:de\s+)?nacimiento\s+de)\s+(.+?)(?:\?|$)"))
+                  self._extract_subject_name_from_pattern(question, r"(?:cu[aá]l\s+(?:fue|es)\s+(?:la\s+)?fecha\s+(?:exacta\s+)?(?:de\s+)?nacimiento\s+de)\s+(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"qu[eé]\s+fecha\s+de\s+nacimiento\s+consta\s+para\s+(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"cu[aá]ndo\s+consta\s+que\s+naci[oó]\s+(.+?)(?:\?|$)"))
         if not subject:
             return None
         person, _ = self._resolve_person(subject)
