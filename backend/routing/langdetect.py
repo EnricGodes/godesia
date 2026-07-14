@@ -24,6 +24,12 @@ _TOKEN_RE = re.compile(r"[a-zà-ÿ0-9']+")
 DEFAULT_LANG = "es"
 _THRESHOLD = 2  # puntuación mínima para aceptar un idioma no-español
 
+# Palabras francesas con diacrítico que el español no escribe nunca y que además
+# colisionan con nombres propios del árbol ("Pere", "Marie") en su forma SIN
+# acento: por eso name_tokens las excluye del conteo y se pierde la señal. La
+# forma acentuada ("père", "mère", "marié") es inequívocamente francesa.
+_FR_FORCE_RE = re.compile(r"\b(père|mère|marié|mariée)\b", re.IGNORECASE)
+
 
 def _strip_accents(text: str) -> str:
     return "".join(
@@ -68,6 +74,10 @@ def detect_lang(question: str, ui_lang: str = "es", name_tokens=None,
             score += 2
         if score:
             scores[lang] = score
+    # Señal forzada del francés por palabras acentuadas inequívocas (père/marié…),
+    # que el conteo por tokens pierde al excluir name_tokens.
+    if "fr" in lang_markers and _FR_FORCE_RE.search(question or ""):
+        scores["fr"] = scores.get("fr", 0) + 2
     if not scores:
         return DEFAULT_LANG
 

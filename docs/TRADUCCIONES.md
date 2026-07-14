@@ -22,7 +22,7 @@ nunca las claves.
 **Reglas:**
 - No traduzcas los placeholders `{name}`, `{count}`, `{from}`, `{to}`… — solo el texto alrededor.
 - No traduzcas el HTML embebido (`<strong>`, `<em>`, `<span>`), solo su contenido de texto.
-- Las claves **`pages.chat.q_*`** (preguntas que generan los chips del chat) se traducen **solo si ese idioma tiene un reescritor de preguntas** en `backend/routing/rewrite_<código>.py` (hoy: catalán). Al pulsar el chip, la pregunta se muestra en el chat y se envía al router; con reescritor, se traduce a español y resuelve. Para idiomas **sin** reescritor todavía (inglés, francés, alemán), déjalas **en español** para que sigan resolviendo (la respuesta ya sale en el idioma de la interfaz). Tras traducir un `q_*`, valídalo: `python3 scripts/parity_check.py --lang <código>`.
+- Las claves **`pages.chat.q_*`** (preguntas que generan los chips del chat) se traducen **solo si ese idioma tiene un reescritor de preguntas** en `backend/routing/rewrite_<código>.py` (hoy: catalán, inglés y francés). Al pulsar el chip, la pregunta se muestra en el chat y se envía al router; con reescritor, se traduce a español y resuelve. Para idiomas **sin** reescritor todavía (alemán), déjalas **en español** para que sigan resolviendo (la respuesta ya sale en el idioma de la interfaz). Tras traducir un `q_*`, valídalo: `python3 scripts/parity_check.py --lang <código>`.
 - Los arrays `dates.months` y `dates.months_short` conservan el primer elemento vacío `""`.
 
 ---

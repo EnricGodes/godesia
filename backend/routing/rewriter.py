@@ -87,8 +87,10 @@ def _normalize_typography(text: str) -> str:
     return text
 
 
-_ACCENT_CLASS = {"a": "[aàá]", "e": "[eèé]", "i": "[iíï]", "o": "[oòó]",
-                 "u": "[uúü]", "c": "[cç]", "n": "[nñ]"}
+# Incluye acentos de es/ca/fr (grave, agudo, circunflejo, diéresis) para que las
+# reglas escritas sin tilde casen cualquier variante.
+_ACCENT_CLASS = {"a": "[aàáâä]", "e": "[eèéêë]", "i": "[iíìïî]", "o": "[oòóôö]",
+                 "u": "[uúùûü]", "c": "[cç]", "n": "[nñ]", "y": "[yÿ]"}
 
 
 def _accent_insensitive(pattern: str) -> str:
@@ -144,7 +146,8 @@ class QuestionRewriter:
         connectors = getattr(mod, "NAME_CONNECTORS", set())
         non_name = getattr(mod, "NON_NAME_TOKENS", set())
         cont_only = getattr(mod, "NAME_CONTINUATION_ONLY", set())
-        q, names = self._protect_names(q, connectors, non_name, cont_only)
+        ambiguous = getattr(mod, "NAME_AMBIGUOUS", set())
+        q, names = self._protect_names(q, connectors, non_name, cont_only, ambiguous)
 
         # 3. Minúsculas, PERO conservando acentos: las palabras que no se
         #    traducen (contenido ya español: "años", "qué"…) deben llegar
@@ -167,7 +170,8 @@ class QuestionRewriter:
         return out, lang
 
     # ── Protección de nombres ────────────────────────────────────────────────
-    def _protect_names(self, text, connectors, non_name, cont_only=frozenset()):
+    def _protect_names(self, text, connectors, non_name, cont_only=frozenset(),
+                       ambiguous=frozenset()):
         """Sustituye tiradas de tokens-nombre (con conectores intermedios) por
         centinelas. Espejo de intent_es._name_runs + partículas conectoras.
 
@@ -181,10 +185,18 @@ class QuestionRewriter:
         precedido de otro nombre), nunca si lo inician ("més petit" = comparación)."""
         spans = [(m.group(0), m.start(), m.end()) for m in _TOKEN_SPAN_RE.finditer(text)]
         info = []  # (norm, start, end, is_name, is_year)
-        for tok, s, e in spans:
+        for idx, (tok, s, e) in enumerate(spans):
             n = _norm(tok)
-            info.append((n, s, e, n in self.name_tokens and n not in non_name,
-                         bool(_YEAR_RE.fullmatch(tok))))
+            is_name = n in self.name_tokens and n not in non_name
+            # Tokens ambiguos (p.ej. "Marie"/"Pere" = nombre propio Y keyword francés
+            # père/marié): se protegen como nombre SOLO si el token siguiente también
+            # es nombre ("Marie Zimmer" sí; "père de X"/"s'est marié(e)" no).
+            if (not is_name and n in ambiguous and n in self.name_tokens
+                    and idx + 1 < len(spans)):
+                n2 = _norm(spans[idx + 1][0])
+                if n2 in self.name_tokens and n2 not in non_name:
+                    is_name = True
+            info.append((n, s, e, is_name, bool(_YEAR_RE.fullmatch(tok))))
 
         def names_after(j):
             c = 0
