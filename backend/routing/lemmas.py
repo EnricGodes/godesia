@@ -114,7 +114,10 @@ RULES = {
     ],
     "grandchildren": [(set(), set(), set(), "handle_grandchildren", "nietos de {s}")],
     "inlaw": [
-        (set(), {"suegro", "suegra", "suegros", "suegras"}, set(), "handle_parents_in_law", "suegros de {s}"),
+        # "suegra o el suegro" lleva ambos tokens → ceden al patrón de ambos.
+        (set(), {"suegra", "suegras"}, {"suegro", "suegros"}, "handle_mother_in_law", "suegra de {s}"),
+        (set(), {"suegro"}, {"suegra", "suegras", "suegros"}, "handle_father_in_law", "suegro de {s}"),
+        (set(), {"suegros"}, set(), "handle_inlaw_parents_pair", "suegros de {s}"),
         (set(), {"consuegro", "consuegros"}, set(), "handle_consuegros", "consuegros de {s}"),
         (set(), {"cunado", "cunados"}, set(), "handle_brothers_in_law", "cuñados de {s}"),
         (set(), {"cunada", "cunadas"}, set(), "handle_sisters_in_law", "cuñada de {s}"),

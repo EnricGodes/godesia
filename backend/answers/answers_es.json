@@ -338,5 +338,9 @@
   "handle_youngest_person.2": "No puedo determinar la persona más joven porque faltan fechas de nacimiento.",
   "handle_youngest_person.3": ", nacida el {a}/{b}/{c}.",
   "handle_youngest_person.4": ", nacida en {a}.",
-  "route.1": "No he sabido responder esta pregunta con las reglas actuales."
+  "route.1": "No he sabido responder esta pregunta con las reglas actuales.",
+  "handle_death_age.1": "La edad que consta en la defunción de {a} es {b}.",
+  "handle_death_age.2": "No consta la edad de defunción de {a}.",
+  "handle_death_cause.1": "La causa de muerte que consta para {a} es {b}.",
+  "handle_death_cause.2": "No consta la causa de muerte de {a}."
 }

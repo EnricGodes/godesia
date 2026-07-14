@@ -297,6 +297,8 @@ class QueryRouter:
             (r"(?:cu[aá]ntos?\s+hijos\s+sobrevivieron\s+a\s+.+)", "handle_surviving_children_count"),
             (r"(?:qui[eé]n\s+naci[oó]\s+en\s+(?:el\s+)?a[nñ]o|who\s+was\s+born\s+in\s+the\s+year|qui[eé]n\s+naci[oó]\s+en\s+\d{4})", "handle_birth_year_search"),
             (r"(?:qui[eé]n(?:es)?\s+(?:falleci[oó]|muri[oó])\s+en\s+(?:el\s+a[nñ]o\s+)?\d{4}|who\s+died\s+in\s+(?:the\s+year\s+)?\d{4})", "handle_death_year_search"),
+            (r"(?:qu[eé]\s+edad\s+consta\s+en\s+(?:la\s+)?(?:defunci[oó]n|muerte)\s+de|(?:con|a)\s+qu[eé]\s+edad\s+(?:falleci[oó]|muri[oó])|qu[eé]\s+edad\s+ten[ií]a\s+(?:al\s+(?:morir|fallecer)|cuando\s+(?:muri[oó]|falleci[oó])))", "handle_death_age"),
+            (r"(?:qu[eé]\s+causa\s+de\s+(?:defunci[oó]n|muerte)\s+consta|cu[aá]l\s+fue\s+la\s+causa\s+de\s+(?:muerte|defunci[oó]n|fallecimiento)|(?:qu[eé]\s+(?:enfermedad\s+o\s+causa|causa\s+o\s+enfermedad))\s+(?:provoc[oó]|caus[oó])|de\s+qu[eé]\s+(?:muri[oó]|falleci[oó]))", "handle_death_cause"),
             (r"(?:cu[aá]ntos?\s+a[nñ]os\s+vivi[oó]\s+.+|qu[eé]\s+edad\s+(?:alcanz[oó]|tuvo\s+al\s+morir)\s+.+)", "handle_lifespan"),
             (r"(?:qui[eé]nes\s+(?:eran|fueron|son)\s+los\s+hijos\s+de\s+.+\s+y\s+.+|qu[eé]\s+hijos\s+tuvo\s+en\s+com[uú]n\s+.+\s+y\s+.+|hijos\s+(?:en\s+com[uú]n\s+)?(?:de\s+)?la\s+pareja\s+(?:formada\s+por|de)\s+.+\s+y\s+.+)", "handle_couple_children"),
             (r"(?:qu[eé]\s+personas\s+murieron\s+en|which\s+people\s+died\s+in)", "handle_death_place_people"),
@@ -354,6 +356,9 @@ class QueryRouter:
             (r"(?:era\s+.+\s+abuelo\s+o\s+abuela\s+de|was\s+.+\s+grandparent\s+of)", "handle_is_grandparent_of"),
             (r"(?:(?:ten[ií]a|tiene)\s+descendencia|had\s+descendants)", "handle_has_descendants"),
             (r"(?:suegra\s+o\s+el\s+suegro|suegra\s+o\s+suegro|father-in-law|mother-in-law)", "handle_parents_in_law"),
+            (r"(?:madre\s+pol[ií]tica|suegra)\b", "handle_mother_in_law"),
+            (r"(?:padre\s+pol[ií]tico|suegro)\b", "handle_father_in_law"),
+            (r"(?:hijos?\s+pol[ií]tic[oa]s?|yernos?\s+y\s+nueras?|nueras?\s+y\s+yernos?)", "handle_children_in_law"),
             (r"(?:qu[eé]\s+(?:relaci[oó]n|parentesco|grado\s+de\s+parentesco)(?:\s+familiar)?\s+(?:ten[ií]a|hab[ií]a|hay|existe|une)|what\s+relationship)", "handle_relationship"),
             (r"(?:padres\s+de|pares\s+de|parents\s+of)", "handle_parents"),
             (r"(?:(?:qui[eé]n|quiénes)\s+era(?:n)?\s+(?:el\s+)?padre\s+de\s+.+|padre\s+de|pare\s+de|father\s+of)", "handle_father"),
@@ -365,6 +370,8 @@ class QueryRouter:
             (r"(?:hij[oa]\s+mayor\s+de\s+.+|oldest\s+son\s+of|oldest\s+daughter\s+of)", "handle_oldest_son"),
             (r"(?:hija\s+mayor\s+de\s+.+|oldest\s+daughter\s+of)", "handle_oldest_daughter"),
             (r"(?:ascendientes\s+inmediatos\s+de|immediate\s+ascendants\s+of)", "handle_immediate_ascendants"),
+            (r"(?:antepasad[oa]s?|ascendient[ea]s?|ancestr[oa]s?)\s+conocid[oa]s?", "handle_known_ancestors"),
+            (r"descendient[ea]s?\s+conocid[oa]s?", "handle_known_descendants"),
             (r"(?:busco\s+a\s+las\s+personas\s+que\s+nacieron\s+en\s+.+\s+y\s+tambi[eé]n\s+murieron\s+all[ií])", "handle_birth_and_death_same_place_natural"),
             (r"(?:qu[ií]ero\s+ver\s+si\s+.+\s+ten[ií]a\s+consuegros\s+documentados|consuegros\s+de\s+.+)", "handle_consuegros"),
             (r"(?:primos\s+segundos\s+de\s+.+)", "handle_second_cousins"),
@@ -1468,6 +1475,8 @@ class QueryRouter:
         q = _clean_question(question)
         m = None
         for rx in (rf"{term_kw}\s+de\s+(.+?)(?:\?|$)",
+                   rf"{term_kw}\s+(?:consta|constan)\s+para\s+(.+?)(?:\?|$)",
+                   rf"{term_kw}\s+(?:tuvo|tiene|ten[ií]a)\s+(.+?)(?:\?|$)",
                    rf"ten[ií]a\s+(.+?)\s+(?:alg[uú]n[oa]?s?\s+)?{term_kw}",
                    rf"tuvo\s+(.+?)\s+(?:alg[uú]n[oa]?s?\s+)?{term_kw}"):
             m = re.search(rx, q, re.I)
@@ -1534,6 +1543,88 @@ class QueryRouter:
 
     def handle_fourth_cousins(self, q):
         return self._kin_answer(q, r"prim[oa]s?\s+cuart[oa]s?", "primos cuartos", lambda p: self._compute_nth_cousins(p, 4))
+
+    def handle_mother_in_law(self, q):
+        return self._kin_answer(q, r"(?:madre\s+pol[ií]tica|suegra)", "madre política o suegra", self._compute_mother_in_law)
+
+    def handle_father_in_law(self, q):
+        return self._kin_answer(q, r"(?:padre\s+pol[ií]tico|suegro)", "padre político o suegro", self._compute_father_in_law)
+
+    def handle_children_in_law(self, q):
+        return self._kin_answer(q, r"(?:hijos?\s+pol[ií]tic[oa]s?|yernos?\s+y\s+nueras?|nueras?\s+y\s+yernos?)", "hijos políticos (yernos y nueras)", self._compute_children_in_law)
+
+    def _compute_mother_in_law(self, p):
+        res = []
+        for sp in self._spouse_people(p["id"]):
+            m = self._get_parent(sp, "mother")
+            if m:
+                res.append(m)
+        return res
+
+    def _compute_father_in_law(self, p):
+        res = []
+        for sp in self._spouse_people(p["id"]):
+            f = self._get_parent(sp, "father")
+            if f:
+                res.append(f)
+        return res
+
+    def _compute_children_in_law(self, p):
+        """Cónyuges/parejas de los hijos: por registro de matrimonio y, como
+        respaldo, el otro progenitor de cada nieto (capta uniones sin boda)."""
+        res = []
+        mychildren = {c["id"] for c in self._children_rows_for_parent(p["id"])}
+        for cid in mychildren:
+            res += self._spouse_people(cid)
+            for gc in self._children_rows_for_parent(cid):
+                for pid in (gc.get("father_id"), gc.get("mother_id")):
+                    if pid and pid not in mychildren and pid != p["id"]:
+                        co = _as_dict(get_person(self.conn, pid))
+                        if co:
+                            res.append(co)
+        return res
+
+    def handle_inlaw_parents_pair(self, q):
+        return self._kin_answer(q, r"suegros", "suegros",
+                                lambda p: self._compute_mother_in_law(p) + self._compute_father_in_law(p))
+
+    def handle_known_ancestors(self, q):
+        return self._kin_answer(q, r"(?:antepasad[oa]s?|ascendient[ea]s?|ancestr[oa]s?)\s+conocid[oa]s?", "antepasados conocidos", self._compute_all_ancestors)
+
+    def handle_known_descendants(self, q):
+        return self._kin_answer(q, r"descendient[ea]s?\s+conocid[oa]s?", "descendientes conocidos", self._compute_all_descendants)
+
+    def _compute_all_ancestors(self, p):
+        """Todos los antepasados (recursivo por father_id/mother_id)."""
+        out, seen, stack = [], set(), [p["id"]]
+        while stack:
+            row = _as_dict(get_person(self.conn, stack.pop()))
+            if not row:
+                continue
+            for pid in (row.get("father_id"), row.get("mother_id")):
+                if pid and pid not in seen:
+                    seen.add(pid)
+                    anc = _as_dict(get_person(self.conn, pid))
+                    if anc:
+                        out.append(anc)
+                    stack.append(pid)
+        return out
+
+    def _compute_all_descendants(self, p):
+        """Todos los descendientes (recursivo por la tabla children)."""
+        out, seen, queue = [], set(), [p["id"]]
+        while queue:
+            for row in self.conn.execute(
+                    "SELECT child_id FROM children WHERE parent_id = ?",
+                    (queue.pop(0),)).fetchall():
+                cid = row[0]
+                if cid and cid not in seen:
+                    seen.add(cid)
+                    child = _as_dict(get_person(self.conn, cid))
+                    if child:
+                        out.append(child)
+                    queue.append(cid)
+        return out
 
     def handle_uncles_in_law(self, q):
         return self._kin_answer(q, r"t[ií][oa]s?\s+pol[ií]tic[oa]s?", "tíos políticos", self._compute_uncles_in_law)
@@ -3998,6 +4089,43 @@ class QueryRouter:
             answer = _t("handle_death_date_of_person.1", a=person['name'], b=person['death_year'])
         else:
             answer = _t("handle_death_date_of_person.2", a=person['name'])
+        return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    def handle_death_age(self, question):
+        """'¿Qué edad consta en la defunción de X?' / '¿Con qué edad falleció X?'"""
+        subject = (self._extract_subject_name_from_pattern(question, r"edad\s+consta\s+en\s+(?:la\s+)?(?:defunci[oó]n|muerte)\s+de\s+(.+?)(?:\?|$)") or
+                   self._extract_subject_name_from_pattern(question, r"(?:con|a)\s+qu[eé]\s+edad\s+(?:falleci[oó]|muri[oó])\s+(.+?)(?:\?|$)") or
+                   self._extract_subject_name_from_pattern(question, r"edad\s+ten[ií]a\s+(?:al\s+(?:morir|fallecer)|cuando\s+(?:muri[oó]|falleci[oó]))\s+(.+?)(?:\?|$)"))
+        if not subject:
+            return None
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        row = self.conn.execute("SELECT death_age FROM people WHERE id = ?", (person['id'],)).fetchone()
+        age = (_as_dict(row) or {}).get('death_age') if row else None
+        if age not in (None, ''):
+            answer = _t("handle_death_age.1", a=person['name'], b=age)
+        else:
+            answer = _t("handle_death_age.2", a=person['name'])
+        return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    def handle_death_cause(self, question):
+        """'¿Cuál fue la causa de muerte de X?' / '¿De qué murió X?'"""
+        subject = (self._extract_subject_name_from_pattern(question, r"causa\s+de\s+(?:defunci[oó]n|muerte)\s+consta\s+(?:para|de)\s+(.+?)(?:\?|$)") or
+                   self._extract_subject_name_from_pattern(question, r"causa\s+de\s+(?:muerte|defunci[oó]n|fallecimiento)\s+de\s+(.+?)(?:\?|$)") or
+                   self._extract_subject_name_from_pattern(question, r"(?:enfermedad\s+o\s+causa|causa\s+o\s+enfermedad)\s+(?:provoc[oó]|caus[oó])\s+(?:la\s+muerte\s+de\s+)?(.+?)(?:\?|$)") or
+                   self._extract_subject_name_from_pattern(question, r"de\s+qu[eé]\s+(?:muri[oó]|falleci[oó])\s+(.+?)(?:\?|$)"))
+        if not subject:
+            return None
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        row = self.conn.execute("SELECT death_cause FROM people WHERE id = ?", (person['id'],)).fetchone()
+        cause = (_as_dict(row) or {}).get('death_cause') if row else None
+        if cause not in (None, ''):
+            answer = _t("handle_death_cause.1", a=person['name'], b=cause)
+        else:
+            answer = _t("handle_death_cause.2", a=person['name'])
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def _extract_subject_name_from_pattern(self, question: str, pattern: str) -> Optional[str]:
