@@ -342,5 +342,6 @@
   "handle_death_age.1": "La edad que consta en la defunción de {a} es {b}.",
   "handle_death_age.2": "No consta la edad de defunción de {a}.",
   "handle_death_cause.1": "La causa de muerte que consta para {a} es {b}.",
-  "handle_death_cause.2": "No consta la causa de muerte de {a}."
+  "handle_death_cause.2": "No consta la causa de muerte de {a}.",
+  "handle_event_field.1": "En la ficha de {a} consta: {b}."
 }

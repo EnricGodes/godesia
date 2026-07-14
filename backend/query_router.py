@@ -40,6 +40,37 @@ def _as_dict(row):
     return dict(row) if isinstance(row, sqlite3.Row) else row
 
 
+_ES_MONTHS = {"ene": "enero", "feb": "febrero", "mar": "marzo", "abr": "abril",
+              "may": "mayo", "jun": "junio", "jul": "julio", "ago": "agosto",
+              "sep": "septiembre", "oct": "octubre", "nov": "noviembre",
+              "dic": "diciembre"}
+
+
+def _render_date_es(raw):
+    """Convierte una fecha GEDCOM abreviada ('28 may. 1944', 'Aprox. 1943',
+    'Después de 1924', 'De 1937 a 1939') a la forma larga en español ('28 de
+    mayo de 1944', 'aproximadamente 1943'…) que usan las fichas del árbol."""
+    if not raw:
+        return raw
+    s = str(raw).strip()
+    low = s.lower()
+    for pref, out in (("después de ", "después de "), ("despues de ", "después de "),
+                      ("antes de ", "antes de "), ("aprox. ", "aproximadamente "),
+                      ("aproximadamente ", "aproximadamente "), ("estimado ", "estimado en ")):
+        if low.startswith(pref):
+            return out + _render_date_es(s[len(pref):])
+    if low.startswith("de ") and " a " in low:      # rango "De 1937 a 1939"
+        a, b = s[3:].split(" a ", 1)
+        return "de " + _render_date_es(a) + " a " + _render_date_es(b)
+    m = re.match(r"^(?:(\d{1,2})\s+)?([a-zç]+)\.?\s+(\d{4})$", low)
+    if m:
+        day, mon, year = m.groups()
+        full = _ES_MONTHS.get(mon[:3])
+        if full:
+            return f"{day} de {full} de {year}" if day else f"{full} de {year}"
+    return s
+
+
 def _strip_accents(text: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFD", text or "") if unicodedata.category(c) != "Mn")
 
@@ -306,6 +337,21 @@ class QueryRouter:
             (r"(?:nombre\s+de\s+pila\s+(?:que\s+)?empie(?:ce|za)\s+por|given\s+name\s+starts\s+with)", "handle_given_name_initial"),
             (r"(?:primer\s+apellido|first\s+surname)", "handle_first_surname"),
             (r"(?:nacieron\s+y\s+murieron\s+en|were\s+born\s+and\s+died\s+in)", "handle_birth_and_death_place_people"),
+            (r"(?:aparece\s+censad|censo\s+consta|figura\s+.+\s+en\s+el\s+censo)", "handle_event_field"),
+            (r"(?:mudanza\s+consta|se\s+mud[oó])", "handle_event_field"),
+            (r"(?:inmigraci[oó]n\s+de|a\s+d[oó]nde\s+lleg[oó]|llegada\s+consta)", "handle_event_field"),
+            (r"(?:emigr[oó]\s+|emigraci[oó]n\s+de)", "handle_event_field"),
+            (r"(?:formaci[oó]n\s+consta|d[oó]nde\s+estudi[oó]|en\s+qu[eé]\s+centro\s+estudi[oó]|estudios\s+consta)", "handle_event_field"),
+            (r"(?:se\s+confirm[oó]|confirmaci[oó]n\s+consta)", "handle_event_field"),
+            (r"primera\s+comuni[oó]n", "handle_event_field"),
+            (r"(?:servicio|alistamiento)\s+militar", "handle_event_field"),
+            (r"nacionalidad\s+de", "handle_event_field"),
+            (r"religi[oó]n\s+(?:consta|de|ten[ií]a|era)", "handle_event_field"),
+            (r"problema\s+de\s+salud", "handle_event_field"),
+            (r"entidad\s+aparece\s+.+\s+como\s+miembro", "handle_event_field"),
+            (r"trabajaba\s+.+\s+seg[uú]n\s+el\s+evento", "handle_event_field"),
+            (r"an[eé]cdota\s+(?:familiar\s+)?(?:consta|aparece)", "handle_event_field"),
+            (r"(?:dato\s+biogr[aá]fico\s+consta|hecho\s+aparece\s+documentado|(?:qu[eé]\s+)?evento\s+consta)", "handle_event_field"),
             (r"(?:ocupaci[oó]n\s+o\s+actividad\s+figura\s+registrada\s+para|occupation\s+for)", "handle_occupation_field"),
             (r"(?:residencia\s+o\s+direcci[oó]n\s+aparece\s+documentado|where\s+is\s+documented\s+the\s+residence)", "handle_residence_field"),
             (r"(?:notas?\s+(?:biogr[aá]ficas?\s+)?hay\s+(?:sobre|de|para|asociadas\s+a)\s+.+|observaciones?\s+(?:biogr[aá]ficas?\s+)?(?:de|sobre|aparecen\s+(?:en|para))\s+.+|(?:qu[eé]\s+)?(?:anotaciones?|comentarios?|apuntes?|detalles?\s+biogr[aá]ficos?|informaci[oó]n\s+adicional|texto)\s+(?:hay\s+)?(?:sobre|de|para|acompa[nñ]a)\s+.+|biographical\s+notes\s+for)", "handle_notes_field"),
@@ -3823,12 +3869,19 @@ class QueryRouter:
 
     def handle_education(self, question):
         q = _clean_question(question)
-        m = re.search(r"(?:estudios|educaci[oó]n)\s+de\s+(.+?)(?:\?|$)", q, re.I)
-        if not m:
-            m = re.search(r"datos?\s+de\s+(?:estudios|educaci[oó]n)\s+de\s+(.+?)(?:\?|$)", q, re.I)
-        if not m:
+        subject = None
+        for rx in (r"datos?\s+de\s+(?:estudios|educaci[oó]n)\s+de\s+(.+?)(?:\?|$)",
+                   r"(?:estudios|educaci[oó]n)\s+de\s+(.+?)(?:\?|$)",
+                   r"(?:formaci[oó]n|estudios)\s+consta[n]?\s+para\s+(.+?)(?:\?|$)",
+                   r"en\s+qu[eé]\s+centro\s+estudi[oó]\s+(.+?)(?:\?|$)",
+                   r"d[oó]nde\s+estudi[oó]\s+(.+?)(?:\?|$)"):
+            m = re.search(rx, q, re.I)
+            if m:
+                subject = m.group(1)
+                break
+        if not subject:
             return None
-        person, _ = self._resolve_person(m.group(1))
+        person, _ = self._resolve_person(subject)
         if not person:
             return None
         records = [_as_dict(r) for r in get_events(self.conn, person['id'], 'Educación')]
@@ -3836,12 +3889,10 @@ class QueryRouter:
             return {"answer": _t("handle_education.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         parts = []
         for r in records:
-            frag = r.get('description') or 'Educación'
-            if r.get('date'):
-                frag += f" ({r['date']})"
-            if r.get('place'):
-                frag += f" — {r['place']}"
-            parts.append("- " + frag.strip())
+            frag = " — ".join(str(x) for x in (r.get('description'), r.get('place'),
+                                               _render_date_es(r.get('date'))) if x)
+            if frag:
+                parts.append("- " + frag)
         ans = _t("handle_education.1", a=_person_link(person)) + "\n".join(parts)
         return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
@@ -4089,6 +4140,78 @@ class QueryRouter:
             answer = _t("handle_death_date_of_person.1", a=person['name'], b=person['death_year'])
         else:
             answer = _t("handle_death_date_of_person.2", a=person['name'])
+        return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
+
+    # (regex de extracción del sujeto, filtro de tipo de evento o None=cualquiera)
+    _EVENT_RULES = [
+        (r"censad[oa]\s+(.+?)(?:\?|$)", "Censo"),
+        (r"censo\s+consta\s+para\s+(.+?)(?:\?|$)", "Censo"),
+        (r"figura\s+(.+?)\s+en\s+el\s+censo", "Censo"),
+        (r"mudanza\s+consta\s+para\s+(.+?)(?:\?|$)", "Mudanza"),
+        (r"se\s+mud[oó]\s+(.+?)(?:\?|$)", "Mudanza"),
+        (r"inmigraci[oó]n\s+de\s+(.+?)(?:\?|$)", "Inmigración"),
+        (r"a\s+d[oó]nde\s+lleg[oó]\s+(.+?)(?:\?|$)", "Inmigración"),
+        (r"llegada\s+consta\s+para\s+(.+?)(?:\?|$)", "Inmigración"),
+        (r"emigr[oó]\s+(.+?)(?:\?|$)", "Emigración"),
+        (r"emigraci[oó]n\s+de\s+(.+?)(?:\?|$)", "Emigración"),
+        (r"formaci[oó]n\s+consta\s+para\s+(.+?)(?:\?|$)", "Educación"),
+        (r"estudios\s+consta[n]?\s+para\s+(.+?)(?:\?|$)", "Educación"),
+        (r"en\s+qu[eé]\s+centro\s+estudi[oó]\s+(.+?)(?:\?|$)", "Educación"),
+        (r"(?:d[oó]nde\s+)?estudi[oó]\s+(.+?)(?:\?|$)", "Educación"),
+        (r"confirm[oó]\s+(.+?)(?:\?|$)", "Confirmación"),
+        (r"confirmaci[oó]n\s+consta\s+para\s+(.+?)(?:\?|$)", "Confirmación"),
+        (r"primera\s+comuni[oó]n\s+consta\s+para\s+(.+?)(?:\?|$)", "Primera Comunión"),
+        (r"(?:servicio|alistamiento)\s+militar\s+(?:consta\s+para|de)\s+(.+?)(?:\?|$)", "%Militar%"),
+        (r"nacionalidad\s+de\s+(.+?)(?:\?|$)", "Nacionalidad"),
+        (r"religi[oó]n\s+(?:consta\s+para|de|(?:que\s+)?ten[ií]a|era\s+la\s+de)\s+(.+?)(?:\?|$)", "Religión"),
+        (r"problema\s+de\s+salud\s+.*?\s+(?:para|de)\s+(.+?)(?:\?|$)", "Enfermedad"),
+        (r"entidad\s+aparece\s+(.+?)\s+como\s+miembro", "Afiliación"),
+        (r"trabajaba\s+(.+?)\s+seg[uú]n\s+el\s+evento", "Trabajo"),
+        (r"an[eé]cdota\s+(?:familiar\s+)?(?:consta|aparece)\s+sobre\s+(.+?)(?:\?|$)", "Anécdota"),
+        # genéricas (cualquier tipo de evento)
+        (r"(?:dato\s+biogr[aá]fico\s+consta|hecho\s+aparece\s+documentado|evento\s+consta)\s+(?:para|sobre)\s+(.+?)(?:\?|$)", None),
+    ]
+
+    def handle_event_field(self, question):
+        """Eventos de la tabla `events`: censo, mudanza, inmigración, educación,
+        confirmación, militar, nacionalidad, religión, anécdota… y el genérico
+        'qué dato biográfico/hecho/evento consta para X' (cualquier tipo)."""
+        q = _clean_question(question)
+        typ = subject = None
+        for rx, t in self._EVENT_RULES:
+            m = re.search(rx, q, re.I)
+            if m:
+                subject, typ = _normalize_name_fragment(m.group(1)), t
+                break
+        if not subject:
+            return None
+        person, _ = self._resolve_person(subject)
+        if not person:
+            return None
+        if typ is None:
+            rows = self.conn.execute(
+                "SELECT * FROM events WHERE person_id = ? AND type NOT IN "
+                "('_UPD', 'Número de Referencia')", (person['id'],)).fetchall()
+        elif typ.startswith('%'):
+            rows = self.conn.execute(
+                "SELECT * FROM events WHERE person_id = ? AND type LIKE ?",
+                (person['id'], typ)).fetchall()
+        else:
+            rows = self.conn.execute(
+                "SELECT * FROM events WHERE person_id = ? AND type = ?",
+                (person['id'], typ)).fetchall()
+        items = []
+        for e in rows:
+            e = _as_dict(e)
+            parts = [x for x in (e.get('description'), e.get('place'),
+                                 _render_date_es(e.get('date'))) if x]
+            if not parts:
+                parts = [x for x in (e.get('note'), e.get('cause'), e.get('address')) if x]
+            if parts:
+                items.append(" — ".join(str(x) for x in parts))
+        if not items:
+            return None
+        answer = _t("handle_event_field.1", a=person['name'], b="; ".join(items))
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
     def handle_death_age(self, question):
