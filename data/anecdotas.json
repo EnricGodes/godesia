@@ -1,596 +1,1244 @@
 [
   {
     "titulo": {
-      "es": "¿Sabías que Artur Godes Caballeria no fue solo tenor, sino también hombre de repertorio?"
+      "es": "¿Sabías que Artur Godes Caballeria no fue solo tenor, sino también hombre de repertorio?",
+      "ca": "Sabies que Artur Godes Caballeria no va ser només tenor, sinó també home de repertori?",
+      "en": "Did you know that Artur Godes Caballeria was not only a tenor, but also a repertory performer?",
+      "fr": "Saviez-vous qu’Artur Godes Caballeria n’était pas seulement ténor, mais aussi un homme de répertoire ?",
+      "de": "Wusstest du, dass Artur Godes Caballeria nicht nur Tenor war, sondern auch ein Repertoire-Sänger?"
     },
     "texto": {
-      "es": "Participó en numerosos segundos papeles dentro de compañías de ópera italiana, una labor menos visible pero esencial."
+      "es": "Participó en numerosos segundos papeles dentro de compañías de ópera italiana, una labor menos visible pero esencial.",
+      "ca": "Va participar en nombrosos papers secundaris dins de companyies d’òpera italiana, una tasca menys visible però essencial.",
+      "en": "He performed numerous supporting roles in Italian opera companies, a less visible but essential task.",
+      "fr": "Il participa à de nombreux seconds rôles au sein de compagnies d’opéra italien, un travail moins visible mais essentiel.",
+      "de": "Er übernahm zahlreiche Nebenrollen in italienischen Opernkompanien, eine weniger sichtbare, aber wesentliche Aufgabe."
     },
     "cta": {
-      "es": "Saber más sobre Artur Godes Caballeria"
+      "es": "Saber más sobre Artur Godes Caballeria",
+      "ca": "Saber més sobre Artur Godes Caballeria",
+      "en": "Learn more about Artur Godes Caballeria",
+      "fr": "En savoir plus sur Artur Godes Caballeria",
+      "de": "Mehr über Artur Godes Caballeria erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que la música ocupó un lugar central en varias generaciones de los Godes?"
+      "es": "¿Sabías que la música ocupó un lugar central en varias generaciones de los Godes?",
+      "ca": "Sabies que la música va ocupar un lloc central en diverses generacions dels Godes?",
+      "en": "Did you know that music held a central place across several generations of the Godes family?",
+      "fr": "Saviez-vous que la musique a occupé une place centrale dans plusieurs générations des Godes ?",
+      "de": "Wusstest du, dass Musik über mehrere Generationen der Godes hinweg eine zentrale Rolle spielte?"
     },
     "texto": {
-      "es": "Entre tenores, maestros de capilla, violinistas y compositores, la rama musical es una de las más potentes de toda la familia."
+      "es": "Entre tenores, maestros de capilla, violinistas y compositores, la rama musical es una de las más potentes de toda la familia.",
+      "ca": "Entre tenors, mestres de capella, violinistes i compositors, la branca musical és una de les més potents de tota la família.",
+      "en": "With tenors, chapel masters, violinists and composers, the musical branch is one of the strongest in the whole family.",
+      "fr": "Entre ténors, maîtres de chapelle, violonistes et compositeurs, la branche musicale est l’une des plus fortes de toute la famille.",
+      "de": "Mit Tenören, Kapellmeistern, Geigern und Komponisten gehört der musikalische Zweig zu den stärksten der ganzen Familie."
     },
     "cta": {
-      "es": "Saber más sobre la tradición musical de la familia"
+      "es": "Saber más sobre la tradición musical de la familia",
+      "ca": "Saber més sobre la tradició musical de la família",
+      "en": "Learn more about the family’s musical tradition",
+      "fr": "En savoir plus sur la tradition musicale de la famille",
+      "de": "Mehr über die musikalische Tradition der Familie erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Montserrat Hurtado Abelló fue violinista?"
+      "es": "¿Sabías que Montserrat Hurtado Abelló fue violinista?",
+      "ca": "Sabies que Montserrat Hurtado Abelló va ser violinista?",
+      "en": "Did you know that Montserrat Hurtado Abelló was a violinist?",
+      "fr": "Saviez-vous que Montserrat Hurtado Abelló était violoniste ?",
+      "de": "Wusstest du, dass Montserrat Hurtado Abelló Geigerin war?"
     },
     "texto": {
-      "es": "Además de su formación musical, quedó en el recuerdo familiar como una mujer refinada y con mucha personalidad."
+      "es": "Además de su formación musical, quedó en el recuerdo familiar como una mujer refinada y con mucha personalidad.",
+      "ca": "A més de la seva formació musical, va quedar en el record familiar com una dona refinada i amb molta personalitat.",
+      "en": "Beyond her musical training, she remained in family memory as a refined woman with a strong personality.",
+      "fr": "Au-delà de sa formation musicale, elle est restée dans la mémoire familiale comme une femme raffinée et dotée d’une forte personnalité.",
+      "de": "Neben ihrer musikalischen Ausbildung blieb sie der Familie als eine kultivierte Frau mit viel Persönlichkeit in Erinnerung."
     },
     "cta": {
-      "es": "Saber más sobre Montserrat Hurtado Abelló"
+      "es": "Saber más sobre Montserrat Hurtado Abelló",
+      "ca": "Saber més sobre Montserrat Hurtado Abelló",
+      "en": "Learn more about Montserrat Hurtado Abelló",
+      "fr": "En savoir plus sur Montserrat Hurtado Abelló",
+      "de": "Mehr über Montserrat Hurtado Abelló erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que César Pérez Hurtado abrió rutas de escalada?"
+      "es": "¿Sabías que César Pérez Hurtado abrió rutas de escalada?",
+      "ca": "Sabies que César Pérez Hurtado va obrir vies d’escalada?",
+      "en": "Did you know that César Pérez Hurtado opened climbing routes?",
+      "fr": "Saviez-vous que César Pérez Hurtado a ouvert des voies d’escalade ?",
+      "de": "Wusstest du, dass César Pérez Hurtado Kletterrouten erschloss?"
     },
     "texto": {
-      "es": "Su perfil se asocia al mundo de la montaña y a una forma de vida muy distinta de la urbana."
+      "es": "Su perfil se asocia al mundo de la montaña y a una forma de vida muy distinta de la urbana.",
+      "ca": "El seu perfil s’associa al món de la muntanya i a una forma de vida molt diferent de la urbana.",
+      "en": "His profile is associated with the world of the mountains and a way of life very different from the urban one.",
+      "fr": "Son profil est associé au monde de la montagne et à un mode de vie très différent de l’univers urbain.",
+      "de": "Sein Profil ist mit der Welt der Berge und einer Lebensweise verbunden, die sich stark vom städtischen Leben unterscheidet."
     },
     "cta": {
-      "es": "Saber más sobre César Pérez Hurtado"
+      "es": "Saber más sobre César Pérez Hurtado",
+      "ca": "Saber més sobre César Pérez Hurtado",
+      "en": "Learn more about César Pérez Hurtado",
+      "fr": "En savoir plus sur César Pérez Hurtado",
+      "de": "Mehr über César Pérez Hurtado erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que en la familia hay una anécdota de lotería casi legendaria?"
+      "es": "¿Sabías que en la familia hay una anécdota de lotería casi legendaria?",
+      "ca": "Sabies que a la família hi ha una anècdota de loteria gairebé llegendària?",
+      "en": "Did you know that the family has an almost legendary lottery anecdote?",
+      "fr": "Saviez-vous que la famille possède une anecdote de loterie presque légendaire ?",
+      "de": "Wusstest du, dass es in der Familie eine beinahe legendäre Lotterie-Anekdote gibt?"
     },
     "texto": {
-      "es": "Montserrat Hurtado solía comprar décimos con el número 08036, su código postal del Eixample; justo el año que no pudo hacerlo, ese número fue premiado."
+      "es": "Montserrat Hurtado solía comprar décimos con el número 08036, su código postal del Eixample; justo el año que no pudo hacerlo, ese número fue premiado.",
+      "ca": "Montserrat Hurtado solia comprar dècims amb el número 08036, el seu codi postal de l’Eixample; just l’any que no ho va poder fer, aquell número va ser premiat.",
+      "en": "Montserrat Hurtado used to buy lottery tickets with the number 08036, her Eixample postcode; the very year she could not do so, that number won a prize.",
+      "fr": "Montserrat Hurtado avait l’habitude d’acheter des billets portant le numéro 08036, son code postal de l’Eixample ; précisément l’année où elle ne put pas le faire, ce numéro fut primé.",
+      "de": "Montserrat Hurtado kaufte gewöhnlich Lose mit der Nummer 08036, ihrer Postleitzahl im Eixample; genau in dem Jahr, in dem sie es nicht tun konnte, gewann diese Nummer."
     },
     "cta": {
-      "es": "Saber más sobre Montserrat Hurtado Abelló"
+      "es": "Saber más sobre Montserrat Hurtado Abelló",
+      "ca": "Saber més sobre Montserrat Hurtado Abelló",
+      "en": "Learn more about Montserrat Hurtado Abelló",
+      "fr": "En savoir plus sur Montserrat Hurtado Abelló",
+      "de": "Mehr über Montserrat Hurtado Abelló erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Josep Sagarra Agost empezó desde una situación muy humilde?"
+      "es": "¿Sabías que Josep Sagarra Agost empezó desde una situación muy humilde?",
+      "ca": "Sabies que Josep Sagarra Agost va començar des d’una situació molt humil?",
+      "en": "Did you know that Josep Sagarra Agost started from very humble circumstances?",
+      "fr": "Saviez-vous que Josep Sagarra Agost partit d’une situation très humble ?",
+      "de": "Wusstest du, dass Josep Sagarra Agost aus sehr einfachen Verhältnissen kam?"
     },
     "texto": {
-      "es": "Su biografía lo presenta como un hombre hecho a sí mismo, que trabajó desde niño para ayudar a su madre viuda."
+      "es": "Su biografía lo presenta como un hombre hecho a sí mismo, que trabajó desde niño para ayudar a su madre viuda.",
+      "ca": "La seva biografia el presenta com un home fet a si mateix, que va treballar des de petit per ajudar la seva mare vídua.",
+      "en": "His biography presents him as a self-made man who worked from childhood to help his widowed mother.",
+      "fr": "Sa biographie le présente comme un homme qui s’est fait lui-même, ayant travaillé dès l’enfance pour aider sa mère veuve.",
+      "de": "Seine Biografie stellt ihn als Selfmademan dar, der schon als Kind arbeitete, um seiner verwitweten Mutter zu helfen."
     },
     "cta": {
-      "es": "Saber más sobre Josep Sagarra Agost"
+      "es": "Saber más sobre Josep Sagarra Agost",
+      "ca": "Saber més sobre Josep Sagarra Agost",
+      "en": "Learn more about Josep Sagarra Agost",
+      "fr": "En savoir plus sur Josep Sagarra Agost",
+      "de": "Mehr über Josep Sagarra Agost erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Josep Sagarra Agost estudió mientras trabajaba?"
+      "es": "¿Sabías que Josep Sagarra Agost estudió mientras trabajaba?",
+      "ca": "Sabies que Josep Sagarra Agost va estudiar mentre treballava?",
+      "en": "Did you know that Josep Sagarra Agost studied while working?",
+      "fr": "Saviez-vous que Josep Sagarra Agost étudia tout en travaillant ?",
+      "de": "Wusstest du, dass Josep Sagarra Agost studierte, während er arbeitete?"
     },
     "texto": {
-      "es": "Combinó formación en Llotja con el oficio y acabó construyendo una trayectoria notable en Barcelona."
+      "es": "Combinó formación en Llotja con el oficio y acabó construyendo una trayectoria notable en Barcelona.",
+      "ca": "Va combinar la formació a la Llotja amb l’ofici i va acabar construint una trajectòria notable a Barcelona.",
+      "en": "He combined training at Llotja with his trade and went on to build a notable career in Barcelona.",
+      "fr": "Il combina sa formation à la Llotja avec son métier et finit par construire un parcours remarquable à Barcelone.",
+      "de": "Er verband seine Ausbildung an der Llotja mit seinem Handwerk und baute schließlich eine bemerkenswerte Laufbahn in Barcelona auf."
     },
     "cta": {
-      "es": "Saber más sobre Josep Sagarra Agost"
+      "es": "Saber más sobre Josep Sagarra Agost",
+      "ca": "Saber més sobre Josep Sagarra Agost",
+      "en": "Learn more about Josep Sagarra Agost",
+      "fr": "En savoir plus sur Josep Sagarra Agost",
+      "de": "Mehr über Josep Sagarra Agost erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Josep Sagarra Agost llegó a ser conseller del Ayuntamiento de Barcelona?"
+      "es": "¿Sabías que Josep Sagarra Agost llegó a ser conseller del Ayuntamiento de Barcelona?",
+      "ca": "Sabies que Josep Sagarra Agost va arribar a ser conseller de l’Ajuntament de Barcelona?",
+      "en": "Did you know that Josep Sagarra Agost became a councillor at Barcelona City Council?",
+      "fr": "Saviez-vous que Josep Sagarra Agost devint conseiller municipal à la mairie de Barcelone ?",
+      "de": "Wusstest du, dass Josep Sagarra Agost Stadtrat im Rathaus von Barcelona wurde?"
     },
     "texto": {
-      "es": "No se quedó en el oficio: también tuvo presencia en la vida pública de la ciudad."
+      "es": "No se quedó en el oficio: también tuvo presencia en la vida pública de la ciudad.",
+      "ca": "No es va quedar en l’ofici: també va tenir presència en la vida pública de la ciutat.",
+      "en": "He did not remain only in his trade: he also had a presence in the city’s public life.",
+      "fr": "Il ne resta pas limité à son métier : il eut aussi une présence dans la vie publique de la ville.",
+      "de": "Er blieb nicht nur bei seinem Beruf: Er war auch im öffentlichen Leben der Stadt präsent."
     },
     "cta": {
-      "es": "Saber más sobre Josep Sagarra Agost"
+      "es": "Saber más sobre Josep Sagarra Agost",
+      "ca": "Saber més sobre Josep Sagarra Agost",
+      "en": "Learn more about Josep Sagarra Agost",
+      "fr": "En savoir plus sur Josep Sagarra Agost",
+      "de": "Mehr über Josep Sagarra Agost erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Marià Hurtado Rusca llevó la litografía a Vilanova i la Geltrú?"
+      "es": "¿Sabías que Marià Hurtado Rusca llevó la litografía a Vilanova i la Geltrú?",
+      "ca": "Sabies que Marià Hurtado Rusca va portar la litografia a Vilanova i la Geltrú?",
+      "en": "Did you know that Marià Hurtado Rusca brought lithography to Vilanova i la Geltrú?",
+      "fr": "Saviez-vous que Marià Hurtado Rusca introduisit la lithographie à Vilanova i la Geltrú ?",
+      "de": "Wusstest du, dass Marià Hurtado Rusca die Lithografie nach Vilanova i la Geltrú brachte?"
     },
     "texto": {
-      "es": "Se trasladó allí atraído por la prosperidad local e impulsó talleres e imprentas en una época clave del oficio."
+      "es": "Se trasladó allí atraído por la prosperidad local e impulsó talleres e imprentas en una época clave del oficio.",
+      "ca": "S’hi va traslladar atret per la prosperitat local i va impulsar tallers i impremtes en una època clau de l’ofici.",
+      "en": "He moved there attracted by local prosperity and promoted workshops and printing houses at a key moment for the trade.",
+      "fr": "Il s’y installa attiré par la prospérité locale et y lança des ateliers et des imprimeries à un moment clé du métier.",
+      "de": "Er zog dorthin, angezogen vom lokalen Wohlstand, und förderte Werkstätten und Druckereien in einer Schlüsselphase des Gewerbes."
     },
     "cta": {
-      "es": "Saber más sobre Marià Hurtado Rusca"
+      "es": "Saber más sobre Marià Hurtado Rusca",
+      "ca": "Saber més sobre Marià Hurtado Rusca",
+      "en": "Learn more about Marià Hurtado Rusca",
+      "fr": "En savoir plus sur Marià Hurtado Rusca",
+      "de": "Mehr über Marià Hurtado Rusca erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que la litografía fue uno de los grandes oficios heredados en la familia Hurtado?"
+      "es": "¿Sabías que la litografía fue uno de los grandes oficios heredados en la familia Hurtado?",
+      "ca": "Sabies que la litografia va ser un dels grans oficis heretats a la família Hurtado?",
+      "en": "Did you know that lithography was one of the great inherited trades in the Hurtado family?",
+      "fr": "Saviez-vous que la lithographie fut l’un des grands métiers hérités dans la famille Hurtado ?",
+      "de": "Wusstest du, dass die Lithografie eines der großen überlieferten Handwerke der Familie Hurtado war?"
     },
     "texto": {
-      "es": "Varios miembros aparecen ligados a ese mundo justo antes de que la fotografía transformara la reproducción gráfica."
+      "es": "Varios miembros aparecen ligados a ese mundo justo antes de que la fotografía transformara la reproducción gráfica.",
+      "ca": "Diversos membres apareixen vinculats a aquest món just abans que la fotografia transformés la reproducció gràfica.",
+      "en": "Several members were linked to that world just before photography transformed graphic reproduction.",
+      "fr": "Plusieurs membres apparaissent liés à cet univers juste avant que la photographie ne transforme la reproduction graphique.",
+      "de": "Mehrere Mitglieder waren mit dieser Welt verbunden, kurz bevor die Fotografie die grafische Reproduktion veränderte."
     },
     "cta": {
-      "es": "Saber más sobre la rama Hurtado"
+      "es": "Saber más sobre la rama Hurtado",
+      "ca": "Saber més sobre la branca Hurtado",
+      "en": "Learn more about the Hurtado branch",
+      "fr": "En savoir plus sur la branche Hurtado",
+      "de": "Mehr über den Zweig Hurtado erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Antoni Hurtado Monrós fue litógrafo y también activista catalanista?"
+      "es": "¿Sabías que Antoni Hurtado Monrós fue litógrafo y también activista catalanista?",
+      "ca": "Sabies que Antoni Hurtado Monrós va ser litògraf i també activista catalanista?",
+      "en": "Did you know that Antoni Hurtado Monrós was a lithographer and also a Catalanist activist?",
+      "fr": "Saviez-vous qu’Antoni Hurtado Monrós fut lithographe et aussi militant catalaniste ?",
+      "de": "Wusstest du, dass Antoni Hurtado Monrós Lithograf und zugleich katalanistischer Aktivist war?"
     },
     "texto": {
-      "es": "Además de su oficio, ejerció como secretario de un casal catalanista de distrito."
+      "es": "Además de su oficio, ejerció como secretario de un casal catalanista de distrito.",
+      "ca": "A més del seu ofici, va exercir de secretari d’un casal catalanista de districte.",
+      "en": "In addition to his trade, he served as secretary of a district Catalanist association.",
+      "fr": "En plus de son métier, il fut secrétaire d’un casal catalaniste de district.",
+      "de": "Neben seinem Beruf war er Sekretär eines katalanistischen Bezirksvereins."
     },
     "cta": {
-      "es": "Saber más sobre Antoni Hurtado Monrós"
+      "es": "Saber más sobre Antoni Hurtado Monrós",
+      "ca": "Saber més sobre Antoni Hurtado Monrós",
+      "en": "Learn more about Antoni Hurtado Monrós",
+      "fr": "En savoir plus sur Antoni Hurtado Monrós",
+      "de": "Mehr über Antoni Hurtado Monrós erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Antoni Hurtado Estapé era joyero y hombre del Palau de la Música?"
+      "es": "¿Sabías que Antoni Hurtado Estapé era joyero y hombre del Palau de la Música?",
+      "ca": "Sabies que Antoni Hurtado Estapé era joier i home del Palau de la Música?",
+      "en": "Did you know that Antoni Hurtado Estapé was a jeweller and a man of the Palau de la Música?",
+      "fr": "Saviez-vous qu’Antoni Hurtado Estapé était joaillier et lié au Palau de la Música ?",
+      "de": "Wusstest du, dass Antoni Hurtado Estapé Juwelier war und dem Palau de la Música verbunden war?"
     },
     "texto": {
-      "es": "Consta como vocal de una junta vinculada a la Escola Orfeònica del Palau."
+      "es": "Consta como vocal de una junta vinculada a la Escola Orfeònica del Palau.",
+      "ca": "Consta com a vocal d’una junta vinculada a l’Escola Orfeònica del Palau.",
+      "en": "He is recorded as a board member of an association linked to the Escola Orfeònica del Palau.",
+      "fr": "Il figure comme membre d’un comité lié à l’Escola Orfeònica del Palau.",
+      "de": "Er ist als Vorstandsmitglied einer mit der Escola Orfeònica del Palau verbundenen Vereinigung verzeichnet."
     },
     "cta": {
-      "es": "Saber más sobre Antoni Hurtado Estapé"
+      "es": "Saber más sobre Antoni Hurtado Estapé",
+      "ca": "Saber més sobre Antoni Hurtado Estapé",
+      "en": "Learn more about Antoni Hurtado Estapé",
+      "fr": "En savoir plus sur Antoni Hurtado Estapé",
+      "de": "Mehr über Antoni Hurtado Estapé erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Antoni Hurtado Estapé vivió en una torre de la avenida de Pedralbes?"
+      "es": "¿Sabías que Antoni Hurtado Estapé vivió en una torre de la avenida de Pedralbes?",
+      "ca": "Sabies que Antoni Hurtado Estapé va viure en una torre de l’avinguda de Pedralbes?",
+      "en": "Did you know that Antoni Hurtado Estapé lived in a villa on Avinguda de Pedralbes?",
+      "fr": "Saviez-vous qu’Antoni Hurtado Estapé vécut dans une villa de l’avinguda de Pedralbes ?",
+      "de": "Wusstest du, dass Antoni Hurtado Estapé in einer Villa an der Avinguda de Pedralbes lebte?"
     },
     "texto": {
-      "es": "Es un detalle que da idea del nivel social alcanzado por algunas ramas de la familia a comienzos del siglo XX."
+      "es": "Es un detalle que da idea del nivel social alcanzado por algunas ramas de la familia a comienzos del siglo XX.",
+      "ca": "És un detall que dona idea del nivell social assolit per algunes branques de la família a començaments del segle XX.",
+      "en": "It is a detail that gives an idea of the social standing reached by some branches of the family in the early 20th century.",
+      "fr": "C’est un détail qui donne une idée du niveau social atteint par certaines branches de la famille au début du XXe siècle.",
+      "de": "Dieses Detail vermittelt einen Eindruck vom gesellschaftlichen Status, den einige Familienzweige zu Beginn des 20. Jahrhunderts erreichten."
     },
     "cta": {
-      "es": "Saber más sobre Antoni Hurtado Estapé"
+      "es": "Saber más sobre Antoni Hurtado Estapé",
+      "ca": "Saber més sobre Antoni Hurtado Estapé",
+      "en": "Learn more about Antoni Hurtado Estapé",
+      "fr": "En savoir plus sur Antoni Hurtado Estapé",
+      "de": "Mehr über Antoni Hurtado Estapé erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Emili Hurtado Rusca estuvo vinculado a la Escuela Náutica de Barcelona?"
+      "es": "¿Sabías que Emili Hurtado Rusca estuvo vinculado a la Escuela Náutica de Barcelona?",
+      "ca": "Sabies que Emili Hurtado Rusca va estar vinculat a l’Escola Nàutica de Barcelona?",
+      "en": "Did you know that Emili Hurtado Rusca was linked to the Barcelona Nautical School?",
+      "fr": "Saviez-vous qu’Emili Hurtado Rusca fut lié à l’École nautique de Barcelone ?",
+      "de": "Wusstest du, dass Emili Hurtado Rusca mit der Nautischen Schule von Barcelona verbunden war?"
     },
     "texto": {
-      "es": "Su trayectoria pasó por un entorno profesional muy singular antes de otras etapas laborales."
+      "es": "Su trayectoria pasó por un entorno profesional muy singular antes de otras etapas laborales.",
+      "ca": "La seva trajectòria va passar per un entorn professional molt singular abans d’altres etapes laborals.",
+      "en": "His career passed through a very distinctive professional environment before other working stages.",
+      "fr": "Son parcours passa par un milieu professionnel très singulier avant d’autres étapes professionnelles.",
+      "de": "Sein Werdegang führte durch ein sehr besonderes berufliches Umfeld, bevor weitere Arbeitsstationen folgten."
     },
     "cta": {
-      "es": "Saber más sobre Emili Hurtado Rusca"
+      "es": "Saber más sobre Emili Hurtado Rusca",
+      "ca": "Saber més sobre Emili Hurtado Rusca",
+      "en": "Learn more about Emili Hurtado Rusca",
+      "fr": "En savoir plus sur Emili Hurtado Rusca",
+      "de": "Mehr über Emili Hurtado Rusca erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Josep Selva Giró fue mossèn y vivió una época convulsa?"
+      "es": "¿Sabías que Josep Selva Giró fue mossèn y vivió una época convulsa?",
+      "ca": "Sabies que Josep Selva Giró va ser mossèn i va viure una època convulsa?",
+      "en": "Did you know that Josep Selva Giró was a priest and lived through a turbulent period?",
+      "fr": "Saviez-vous que Josep Selva Giró fut prêtre et vécut une époque troublée ?",
+      "de": "Wusstest du, dass Josep Selva Giró Priester war und eine bewegte Zeit erlebte?"
     },
     "texto": {
-      "es": "Su biografía sitúa a la rama Selva dentro de un contexto religioso e histórico muy marcado por la guerra."
+      "es": "Su biografía sitúa a la rama Selva dentro de un contexto religioso e histórico muy marcado por la guerra.",
+      "ca": "La seva biografia situa la branca Selva dins d’un context religiós i històric molt marcat per la guerra.",
+      "en": "His biography places the Selva branch within a religious and historical context strongly marked by war.",
+      "fr": "Sa biographie situe la branche Selva dans un contexte religieux et historique fortement marqué par la guerre.",
+      "de": "Seine Biografie stellt den Zweig Selva in einen religiösen und historischen Kontext, der stark vom Krieg geprägt war."
     },
     "cta": {
-      "es": "Saber más sobre Josep Selva Giró"
+      "es": "Saber más sobre Josep Selva Giró",
+      "ca": "Saber més sobre Josep Selva Giró",
+      "en": "Learn more about Josep Selva Giró",
+      "fr": "En savoir plus sur Josep Selva Giró",
+      "de": "Mehr über Josep Selva Giró erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Genaro Lacoste Hurtado fue una figura eclesiástica importante en Barcelona?"
+      "es": "¿Sabías que Genaro Lacoste Hurtado fue una figura eclesiástica importante en Barcelona?",
+      "ca": "Sabies que Genaro Lacoste Hurtado va ser una figura eclesiàstica important a Barcelona?",
+      "en": "Did you know that Genaro Lacoste Hurtado was an important ecclesiastical figure in Barcelona?",
+      "fr": "Saviez-vous que Genaro Lacoste Hurtado fut une figure ecclésiastique importante à Barcelone ?",
+      "de": "Wusstest du, dass Genaro Lacoste Hurtado eine bedeutende kirchliche Persönlichkeit in Barcelona war?"
     },
     "texto": {
-      "es": "Aparece como vicario reverendo y beneficiado de la parroquia de Sant Jaume."
+      "es": "Aparece como vicario reverendo y beneficiado de la parroquia de Sant Jaume.",
+      "ca": "Apareix com a vicari reverend i beneficiat de la parròquia de Sant Jaume.",
+      "en": "He appears as a reverend vicar and beneficed priest of the parish of Sant Jaume.",
+      "fr": "Il apparaît comme vicaire révérend et bénéficiaire de la paroisse de Sant Jaume.",
+      "de": "Er erscheint als ehrwürdiger Vikar und Benefiziat der Pfarrei Sant Jaume."
     },
     "cta": {
-      "es": "Saber más sobre Genaro Lacoste Hurtado"
+      "es": "Saber más sobre Genaro Lacoste Hurtado",
+      "ca": "Saber més sobre Genaro Lacoste Hurtado",
+      "en": "Learn more about Genaro Lacoste Hurtado",
+      "fr": "En savoir plus sur Genaro Lacoste Hurtado",
+      "de": "Mehr über Genaro Lacoste Hurtado erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que muchos bautizos de la familia pasan por el nombre de Genaro Lacoste?"
+      "es": "¿Sabías que muchos bautizos de la familia pasan por el nombre de Genaro Lacoste?",
+      "ca": "Sabies que molts batejos de la família passen pel nom de Genaro Lacoste?",
+      "en": "Did you know that many family baptisms pass through the name of Genaro Lacoste?",
+      "fr": "Saviez-vous que de nombreux baptêmes familiaux passent par le nom de Genaro Lacoste ?",
+      "de": "Wusstest du, dass der Name Genaro Lacoste bei vielen Taufen der Familie auftaucht?"
     },
     "texto": {
-      "es": "Su presencia se repite una y otra vez en los primeros sacramentos de varias generaciones."
+      "es": "Su presencia se repite una y otra vez en los primeros sacramentos de varias generaciones.",
+      "ca": "La seva presència es repeteix una vegada i una altra en els primers sagraments de diverses generacions.",
+      "en": "His presence appears again and again in the first sacraments of several generations.",
+      "fr": "Sa présence revient encore et encore dans les premiers sacrements de plusieurs générations.",
+      "de": "Seine Präsenz wiederholt sich immer wieder bei den ersten Sakramenten mehrerer Generationen."
     },
     "cta": {
-      "es": "Saber más sobre Genaro Lacoste Hurtado"
+      "es": "Saber más sobre Genaro Lacoste Hurtado",
+      "ca": "Saber més sobre Genaro Lacoste Hurtado",
+      "en": "Learn more about Genaro Lacoste Hurtado",
+      "fr": "En savoir plus sur Genaro Lacoste Hurtado",
+      "de": "Mehr über Genaro Lacoste Hurtado erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Amadeu Hurtado Miró tuvo relieve político e intelectual?"
+      "es": "¿Sabías que Amadeu Hurtado Miró tuvo relieve político e intelectual?",
+      "ca": "Sabies que Amadeu Hurtado Miró va tenir rellevància política i intel·lectual?",
+      "en": "Did you know that Amadeu Hurtado Miró had political and intellectual prominence?",
+      "fr": "Saviez-vous qu’Amadeu Hurtado Miró eut une importance politique et intellectuelle ?",
+      "de": "Wusstest du, dass Amadeu Hurtado Miró politisches und intellektuelles Gewicht hatte?"
     },
     "texto": {
-      "es": "Fue abogado prestigioso, diputado y articulista, con una trayectoria pública de primer nivel."
+      "es": "Fue abogado prestigioso, diputado y articulista, con una trayectoria pública de primer nivel.",
+      "ca": "Va ser un advocat prestigiós, diputat i articulista, amb una trajectòria pública de primer nivell.",
+      "en": "He was a prestigious lawyer, deputy and columnist, with a first-rate public career.",
+      "fr": "Il fut avocat prestigieux, député et chroniqueur, avec un parcours public de tout premier plan.",
+      "de": "Er war ein angesehener Anwalt, Abgeordneter und Publizist mit einer öffentlichen Laufbahn ersten Ranges."
     },
     "cta": {
-      "es": "Saber más sobre Amadeu Hurtado Miró"
+      "es": "Saber más sobre Amadeu Hurtado Miró",
+      "ca": "Saber més sobre Amadeu Hurtado Miró",
+      "en": "Learn more about Amadeu Hurtado Miró",
+      "fr": "En savoir plus sur Amadeu Hurtado Miró",
+      "de": "Mehr über Amadeu Hurtado Miró erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Amadeu Hurtado Miró defendió a Pedro Corominas?"
+      "es": "¿Sabías que Amadeu Hurtado Miró defendió a Pedro Corominas?",
+      "ca": "Sabies que Amadeu Hurtado Miró va defensar Pedro Corominas?",
+      "en": "Did you know that Amadeu Hurtado Miró defended Pedro Corominas?",
+      "fr": "Saviez-vous qu’Amadeu Hurtado Miró défendit Pedro Corominas ?",
+      "de": "Wusstest du, dass Amadeu Hurtado Miró Pedro Corominas verteidigte?"
     },
     "texto": {
-      "es": "Ese episodio lo situó muy pronto en un escenario político y jurídico de gran resonancia."
+      "es": "Ese episodio lo situó muy pronto en un escenario político y jurídico de gran resonancia.",
+      "ca": "Aquell episodi el va situar molt aviat en un escenari polític i jurídic de gran ressonància.",
+      "en": "That episode placed him very early on in a political and legal arena of great resonance.",
+      "fr": "Cet épisode le plaça très tôt dans un espace politique et juridique de grande résonance.",
+      "de": "Diese Episode brachte ihn schon früh in ein politisches und juristisches Umfeld von großer Resonanz."
     },
     "cta": {
-      "es": "Saber más sobre Amadeu Hurtado Miró"
+      "es": "Saber más sobre Amadeu Hurtado Miró",
+      "ca": "Saber més sobre Amadeu Hurtado Miró",
+      "en": "Learn more about Amadeu Hurtado Miró",
+      "fr": "En savoir plus sur Amadeu Hurtado Miró",
+      "de": "Mehr über Amadeu Hurtado Miró erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Amadeu Hurtado Miró también fue un hombre de prensa?"
+      "es": "¿Sabías que Amadeu Hurtado Miró también fue un hombre de prensa?",
+      "ca": "Sabies que Amadeu Hurtado Miró també va ser un home de premsa?",
+      "en": "Did you know that Amadeu Hurtado Miró was also a man of the press?",
+      "fr": "Saviez-vous qu’Amadeu Hurtado Miró fut aussi un homme de presse ?",
+      "de": "Wusstest du, dass Amadeu Hurtado Miró auch ein Mann der Presse war?"
     },
     "texto": {
-      "es": "Colaboró en diarios influyentes y participó activamente en la vida intelectual catalana y española."
+      "es": "Colaboró en diarios influyentes y participó activamente en la vida intelectual catalana y española.",
+      "ca": "Va col·laborar en diaris influents i va participar activament en la vida intel·lectual catalana i espanyola.",
+      "en": "He contributed to influential newspapers and actively took part in Catalan and Spanish intellectual life.",
+      "fr": "Il collabora à des journaux influents et participa activement à la vie intellectuelle catalane et espagnole.",
+      "de": "Er schrieb für einflussreiche Zeitungen und nahm aktiv am katalanischen und spanischen intellektuellen Leben teil."
     },
     "cta": {
-      "es": "Saber más sobre Amadeu Hurtado Miró"
+      "es": "Saber más sobre Amadeu Hurtado Miró",
+      "ca": "Saber més sobre Amadeu Hurtado Miró",
+      "en": "Learn more about Amadeu Hurtado Miró",
+      "fr": "En savoir plus sur Amadeu Hurtado Miró",
+      "de": "Mehr über Amadeu Hurtado Miró erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Felip Puig Godes no fue un conseller aislado, sino una figura muy transversal?"
+      "es": "¿Sabías que Felip Puig Godes no fue un conseller aislado, sino una figura muy transversal?",
+      "ca": "Sabies que Felip Puig Godes no va ser un conseller aïllat, sinó una figura molt transversal?",
+      "en": "Did you know that Felip Puig Godes was not an isolated minister, but a highly cross-cutting figure?",
+      "fr": "Saviez-vous que Felip Puig Godes ne fut pas un conseller isolé, mais une figure très transversale ?",
+      "de": "Wusstest du, dass Felip Puig Godes kein isolierter Minister war, sondern eine sehr vielseitige Figur?"
     },
     "texto": {
-      "es": "Pasó por varias carteras y dejó huella en distintas áreas del Govern."
+      "es": "Pasó por varias carteras y dejó huella en distintas áreas del Govern.",
+      "ca": "Va passar per diverses carteres i va deixar empremta en diferents àrees del Govern.",
+      "en": "He held several portfolios and left his mark on different areas of the Government.",
+      "fr": "Il occupa plusieurs portefeuilles et laissa son empreinte dans différents domaines du Govern.",
+      "de": "Er bekleidete mehrere Ressorts und hinterließ in verschiedenen Bereichen der Regierung Spuren."
     },
     "cta": {
-      "es": "Saber más sobre Felip Puig Godes"
+      "es": "Saber más sobre Felip Puig Godes",
+      "ca": "Saber més sobre Felip Puig Godes",
+      "en": "Learn more about Felip Puig Godes",
+      "fr": "En savoir plus sur Felip Puig Godes",
+      "de": "Mehr über Felip Puig Godes erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Oriol Puig Godes dirigió el Servei Meteorològic de Catalunya?"
+      "es": "¿Sabías que Oriol Puig Godes dirigió el Servei Meteorològic de Catalunya?",
+      "ca": "Sabies que Oriol Puig Godes va dirigir el Servei Meteorològic de Catalunya?",
+      "en": "Did you know that Oriol Puig Godes directed the Servei Meteorològic de Catalunya?",
+      "fr": "Saviez-vous qu’Oriol Puig Godes dirigea le Servei Meteorològic de Catalunya ?",
+      "de": "Wusstest du, dass Oriol Puig Godes den Servei Meteorològic de Catalunya leitete?"
     },
     "texto": {
-      "es": "La familia no solo ha estado en la política: también en ámbitos técnicos e institucionales muy especializados."
+      "es": "La familia no solo ha estado en la política: también en ámbitos técnicos e institucionales muy especializados.",
+      "ca": "La família no només ha estat en la política: també en àmbits tècnics i institucionals molt especialitzats.",
+      "en": "The family has not only been present in politics, but also in highly specialised technical and institutional fields.",
+      "fr": "La famille n’a pas seulement été présente en politique : elle l’a aussi été dans des domaines techniques et institutionnels très spécialisés.",
+      "de": "Die Familie war nicht nur in der Politik präsent, sondern auch in hoch spezialisierten technischen und institutionellen Bereichen."
     },
     "cta": {
-      "es": "Saber más sobre Oriol Puig Godes"
+      "es": "Saber más sobre Oriol Puig Godes",
+      "ca": "Saber més sobre Oriol Puig Godes",
+      "en": "Learn more about Oriol Puig Godes",
+      "fr": "En savoir plus sur Oriol Puig Godes",
+      "de": "Mehr über Oriol Puig Godes erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que dos hermanos Puig Godes ocuparon posiciones públicas de alto nivel?"
+      "es": "¿Sabías que dos hermanos Puig Godes ocuparon posiciones públicas de alto nivel?",
+      "ca": "Sabies que dos germans Puig Godes van ocupar posicions públiques d’alt nivell?",
+      "en": "Did you know that two Puig Godes brothers held high-level public positions?",
+      "fr": "Saviez-vous que deux frères Puig Godes occupèrent des fonctions publiques de haut niveau ?",
+      "de": "Wusstest du, dass zwei Brüder Puig Godes hochrangige öffentliche Ämter innehatten?"
     },
     "texto": {
-      "es": "Uno en la política institucional y otro en la administración técnica catalana."
+      "es": "Uno en la política institucional y otro en la administración técnica catalana.",
+      "ca": "Un en la política institucional i l’altre en l’administració tècnica catalana.",
+      "en": "One in institutional politics and the other in Catalan technical administration.",
+      "fr": "L’un dans la politique institutionnelle et l’autre dans l’administration technique catalane.",
+      "de": "Einer in der institutionellen Politik und der andere in der katalanischen Fachverwaltung."
     },
     "cta": {
-      "es": "Saber más sobre la rama Puig Godes"
+      "es": "Saber más sobre la rama Puig Godes",
+      "ca": "Saber més sobre la branca Puig Godes",
+      "en": "Learn more about the Puig Godes branch",
+      "fr": "En savoir plus sur la branche Puig Godes",
+      "de": "Mehr über den Zweig Puig Godes erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Josep Anton Rojas Diago llegó a dirigir la promoción de Barcelona Turisme?"
+      "es": "¿Sabías que Josep Anton Rojas Diago llegó a dirigir la promoción de Barcelona Turisme?",
+      "ca": "Sabies que Josep Anton Rojas Diago va arribar a dirigir la promoció de Barcelona Turisme?",
+      "en": "Did you know that Josep Anton Rojas Diago came to lead the promotion of Barcelona Turisme?",
+      "fr": "Saviez-vous que Josep Anton Rojas Diago en vint à diriger la promotion de Barcelona Turisme ?",
+      "de": "Wusstest du, dass Josep Anton Rojas Diago die Werbung von Barcelona Turisme leitete?"
     },
     "texto": {
-      "es": "Otra muestra de la presencia de la familia en instituciones clave de la ciudad contemporánea."
+      "es": "Otra muestra de la presencia de la familia en instituciones clave de la ciudad contemporánea.",
+      "ca": "Una altra mostra de la presència de la família en institucions clau de la ciutat contemporània.",
+      "en": "Another example of the family’s presence in key institutions of the contemporary city.",
+      "fr": "Un autre exemple de la présence de la famille dans des institutions clés de la ville contemporaine.",
+      "de": "Ein weiteres Beispiel für die Präsenz der Familie in Schlüsselinstitutionen der heutigen Stadt."
     },
     "cta": {
-      "es": "Saber más sobre Josep Anton Rojas Diago"
+      "es": "Saber más sobre Josep Anton Rojas Diago",
+      "ca": "Saber més sobre Josep Anton Rojas Diago",
+      "en": "Learn more about Josep Anton Rojas Diago",
+      "fr": "En savoir plus sur Josep Anton Rojas Diago",
+      "de": "Mehr über Josep Anton Rojas Diago erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Lluïsa Rojas Diago trabajó en la Universitat Pompeu Fabra?"
+      "es": "¿Sabías que Lluïsa Rojas Diago trabajó en la Universitat Pompeu Fabra?",
+      "ca": "Sabies que Lluïsa Rojas Diago va treballar a la Universitat Pompeu Fabra?",
+      "en": "Did you know that Lluïsa Rojas Diago worked at Universitat Pompeu Fabra?",
+      "fr": "Saviez-vous que Lluïsa Rojas Diago travailla à la Universitat Pompeu Fabra ?",
+      "de": "Wusstest du, dass Lluïsa Rojas Diago an der Universitat Pompeu Fabra arbeitete?"
     },
     "texto": {
-      "es": "Su perfil aparece ligado a la estructura universitaria de una de las grandes instituciones académicas de Barcelona."
+      "es": "Su perfil aparece ligado a la estructura universitaria de una de las grandes instituciones académicas de Barcelona.",
+      "ca": "El seu perfil apareix lligat a l’estructura universitària d’una de les grans institucions acadèmiques de Barcelona.",
+      "en": "Her profile is linked to the university structure of one of Barcelona’s major academic institutions.",
+      "fr": "Son profil apparaît lié à la structure universitaire de l’une des grandes institutions académiques de Barcelone.",
+      "de": "Ihr Profil ist mit der Universitätsstruktur einer der großen akademischen Institutionen Barcelonas verbunden."
     },
     "cta": {
-      "es": "Saber más sobre Lluïsa Rojas Diago"
+      "es": "Saber más sobre Lluïsa Rojas Diago",
+      "ca": "Saber més sobre Lluïsa Rojas Diago",
+      "en": "Learn more about Lluïsa Rojas Diago",
+      "fr": "En savoir plus sur Lluïsa Rojas Diago",
+      "de": "Mehr über Lluïsa Rojas Diago erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que la rama Pujol también aparece vinculada a la Generalitat?"
+      "es": "¿Sabías que la rama Pujol también aparece vinculada a la Generalitat?",
+      "ca": "Sabies que la branca Pujol també apareix vinculada a la Generalitat?",
+      "en": "Did you know that the Pujol branch is also linked to the Generalitat?",
+      "fr": "Saviez-vous que la branche Pujol apparaît aussi liée à la Generalitat ?",
+      "de": "Wusstest du, dass der Zweig Pujol ebenfalls mit der Generalitat verbunden ist?"
     },
     "texto": {
-      "es": "Juan Francisco Pujol Pérez figura como funcionario en la administración catalana."
+      "es": "Juan Francisco Pujol Pérez figura como funcionario en la administración catalana.",
+      "ca": "Juan Francisco Pujol Pérez figura com a funcionari de l’administració catalana.",
+      "en": "Juan Francisco Pujol Pérez is listed as a civil servant in the Catalan administration.",
+      "fr": "Juan Francisco Pujol Pérez figure comme fonctionnaire dans l’administration catalane.",
+      "de": "Juan Francisco Pujol Pérez ist als Beamter in der katalanischen Verwaltung verzeichnet."
     },
     "cta": {
-      "es": "Saber más sobre Juan Francisco Pujol Pérez"
+      "es": "Saber más sobre Juan Francisco Pujol Pérez",
+      "ca": "Saber més sobre Juan Francisco Pujol Pérez",
+      "en": "Learn more about Juan Francisco Pujol Pérez",
+      "fr": "En savoir plus sur Juan Francisco Pujol Pérez",
+      "de": "Mehr über Juan Francisco Pujol Pérez erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Rosa Maria Pujol Pérez desarrolló una carrera como abogada?"
+      "es": "¿Sabías que Rosa Maria Pujol Pérez desarrolló una carrera como abogada?",
+      "ca": "Sabies que Rosa Maria Pujol Pérez va desenvolupar una carrera com a advocada?",
+      "en": "Did you know that Rosa Maria Pujol Pérez developed a career as a lawyer?",
+      "fr": "Saviez-vous que Rosa Maria Pujol Pérez mena une carrière d’avocate ?",
+      "de": "Wusstest du, dass Rosa Maria Pujol Pérez eine Laufbahn als Anwältin einschlug?"
     },
     "texto": {
-      "es": "Una muestra más de la fuerte presencia de perfiles profesionales cualificados en generaciones recientes."
+      "es": "Una muestra más de la fuerte presencia de perfiles profesionales cualificados en generaciones recientes.",
+      "ca": "Una mostra més de la forta presència de perfils professionals qualificats en generacions recents.",
+      "en": "Another example of the strong presence of qualified professional profiles in recent generations.",
+      "fr": "Un exemple de plus de la forte présence de profils professionnels qualifiés dans les générations récentes.",
+      "de": "Ein weiteres Beispiel für die starke Präsenz qualifizierter Berufsprofile in jüngeren Generationen."
     },
     "cta": {
-      "es": "Saber más sobre Rosa Maria Pujol Pérez"
+      "es": "Saber más sobre Rosa Maria Pujol Pérez",
+      "ca": "Saber més sobre Rosa Maria Pujol Pérez",
+      "en": "Learn more about Rosa Maria Pujol Pérez",
+      "fr": "En savoir plus sur Rosa Maria Pujol Pérez",
+      "de": "Mehr über Rosa Maria Pujol Pérez erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Eugènia Puig Ninou aparece ya en la familia como psicóloga?"
+      "es": "¿Sabías que Eugènia Puig Ninou aparece ya en la familia como psicóloga?",
+      "ca": "Sabies que Eugènia Puig Ninou ja apareix a la família com a psicòloga?",
+      "en": "Did you know that Eugènia Puig Ninou already appears in the family as a psychologist?",
+      "fr": "Saviez-vous qu’Eugènia Puig Ninou apparaît déjà dans la famille comme psychologue ?",
+      "de": "Wusstest du, dass Eugènia Puig Ninou in der Familie bereits als Psychologin erscheint?"
     },
     "texto": {
-      "es": "El árbol refleja bien cómo los oficios tradicionales fueron dejando paso a nuevas profesiones universitarias."
+      "es": "El árbol refleja bien cómo los oficios tradicionales fueron dejando paso a nuevas profesiones universitarias.",
+      "ca": "L’arbre reflecteix bé com els oficis tradicionals van anar deixant pas a noves professions universitàries.",
+      "en": "The tree clearly reflects how traditional trades gradually gave way to new university professions.",
+      "fr": "L’arbre montre bien comment les métiers traditionnels ont peu à peu cédé la place à de nouvelles professions universitaires.",
+      "de": "Der Stammbaum zeigt gut, wie traditionelle Berufe nach und nach neuen akademischen Berufen Platz machten."
     },
     "cta": {
-      "es": "Saber más sobre Eugènia Puig Ninou"
+      "es": "Saber más sobre Eugènia Puig Ninou",
+      "ca": "Saber més sobre Eugènia Puig Ninou",
+      "en": "Learn more about Eugènia Puig Ninou",
+      "fr": "En savoir plus sur Eugènia Puig Ninou",
+      "de": "Mehr über Eugènia Puig Ninou erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Ignacia Godes Hospital se dedicó a la educación infantil?"
+      "es": "¿Sabías que Ignacia Godes Hospital se dedicó a la educación infantil?",
+      "ca": "Sabies que Ignacia Godes Hospital es va dedicar a l’educació infantil?",
+      "en": "Did you know that Ignacia Godes Hospital dedicated herself to early childhood education?",
+      "fr": "Saviez-vous qu’Ignacia Godes Hospital se consacra à l’éducation de la petite enfance ?",
+      "de": "Wusstest du, dass Ignacia Godes Hospital sich der frühkindlichen Bildung widmete?"
     },
     "texto": {
-      "es": "Su trayectoria enlaza con otra constante familiar: la enseñanza y la transmisión."
+      "es": "Su trayectoria enlaza con otra constante familiar: la enseñanza y la transmisión.",
+      "ca": "La seva trajectòria enllaça amb una altra constant familiar: l’ensenyament i la transmissió.",
+      "en": "Her career connects with another family constant: teaching and transmission.",
+      "fr": "Son parcours rejoint une autre constante familiale : l’enseignement et la transmission.",
+      "de": "Ihr Werdegang knüpft an eine weitere familiäre Konstante an: Unterricht und Weitergabe."
     },
     "cta": {
-      "es": "Saber más sobre Ignacia Godes Hospital"
+      "es": "Saber más sobre Ignacia Godes Hospital",
+      "ca": "Saber més sobre Ignacia Godes Hospital",
+      "en": "Learn more about Ignacia Godes Hospital",
+      "fr": "En savoir plus sur Ignacia Godes Hospital",
+      "de": "Mehr über Ignacia Godes Hospital erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Àlex Barahona Cabestany llevó la cocina familiar hasta Abu Dhabi?"
+      "es": "¿Sabías que Àlex Barahona Cabestany llevó la cocina familiar hasta Abu Dhabi?",
+      "ca": "Sabies que Àlex Barahona Cabestany va portar la cuina familiar fins a Abu Dhabi?",
+      "en": "Did you know that Àlex Barahona Cabestany took family cooking all the way to Abu Dhabi?",
+      "fr": "Saviez-vous qu’Àlex Barahona Cabestany porta la cuisine familiale jusqu’à Abu Dhabi ?",
+      "de": "Wusstest du, dass Àlex Barahona Cabestany die Familienküche bis nach Abu Dhabi brachte?"
     },
     "texto": {
-      "es": "Su perfil aparece como chef residente allí, llevando el apellido a un contexto completamente internacional."
+      "es": "Su perfil aparece como chef residente allí, llevando el apellido a un contexto completamente internacional.",
+      "ca": "El seu perfil apareix com a xef resident allà, portant el cognom a un context completament internacional.",
+      "en": "His profile appears as a resident chef there, carrying the surname into a completely international context.",
+      "fr": "Son profil apparaît comme chef résident sur place, portant le nom de famille dans un contexte pleinement international.",
+      "de": "Sein Profil erscheint dort als Resident Chef und trägt den Familiennamen in einen vollkommen internationalen Kontext."
     },
     "cta": {
-      "es": "Saber más sobre Àlex Barahona Cabestany"
+      "es": "Saber más sobre Àlex Barahona Cabestany",
+      "ca": "Saber més sobre Àlex Barahona Cabestany",
+      "en": "Learn more about Àlex Barahona Cabestany",
+      "fr": "En savoir plus sur Àlex Barahona Cabestany",
+      "de": "Mehr über Àlex Barahona Cabestany erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Martí Plomer Sánchez representa la rama médica más especializada?"
+      "es": "¿Sabías que Martí Plomer Sánchez representa la rama médica más especializada?",
+      "ca": "Sabies que Martí Plomer Sánchez representa la branca mèdica més especialitzada?",
+      "en": "Did you know that Martí Plomer Sánchez represents the most specialised medical branch?",
+      "fr": "Saviez-vous que Martí Plomer Sánchez représente la branche médicale la plus spécialisée ?",
+      "de": "Wusstest du, dass Martí Plomer Sánchez den spezialisiertesten medizinischen Zweig repräsentiert?"
     },
     "texto": {
-      "es": "Su perfil aparece ya orientado a la cirugía ortopédica y traumatología."
+      "es": "Su perfil aparece ya orientado a la cirugía ortopédica y traumatología.",
+      "ca": "El seu perfil apareix ja orientat a la cirurgia ortopèdica i la traumatologia.",
+      "en": "His profile is already oriented toward orthopaedic surgery and traumatology.",
+      "fr": "Son profil apparaît déjà orienté vers la chirurgie orthopédique et la traumatologie.",
+      "de": "Sein Profil ist bereits auf orthopädische Chirurgie und Traumatologie ausgerichtet."
     },
     "cta": {
-      "es": "Saber más sobre Martí Plomer Sánchez"
+      "es": "Saber más sobre Martí Plomer Sánchez",
+      "ca": "Saber més sobre Martí Plomer Sánchez",
+      "en": "Learn more about Martí Plomer Sánchez",
+      "fr": "En savoir plus sur Martí Plomer Sánchez",
+      "de": "Mehr über Martí Plomer Sánchez erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Adelina Corbacho Godes figura como médica de familia?"
+      "es": "¿Sabías que Adelina Corbacho Godes figura como médica de familia?",
+      "ca": "Sabies que Adelina Corbacho Godes figura com a metgessa de família?",
+      "en": "Did you know that Adelina Corbacho Godes is listed as a family doctor?",
+      "fr": "Saviez-vous qu’Adelina Corbacho Godes figure comme médecin de famille ?",
+      "de": "Wusstest du, dass Adelina Corbacho Godes als Hausärztin verzeichnet ist?"
     },
     "texto": {
-      "es": "La presencia sanitaria en la familia no es solo histórica: también llega a generaciones muy recientes."
+      "es": "La presencia sanitaria en la familia no es solo histórica: también llega a generaciones muy recientes.",
+      "ca": "La presència sanitària a la família no és només històrica: també arriba a generacions molt recents.",
+      "en": "The family’s presence in healthcare is not only historical: it also reaches very recent generations.",
+      "fr": "La présence sanitaire dans la famille n’est pas seulement historique : elle atteint aussi des générations très récentes.",
+      "de": "Die Präsenz der Familie im Gesundheitswesen ist nicht nur historisch: Sie reicht auch bis in sehr junge Generationen."
     },
     "cta": {
-      "es": "Saber más sobre Adelina Corbacho Godes"
+      "es": "Saber más sobre Adelina Corbacho Godes",
+      "ca": "Saber més sobre Adelina Corbacho Godes",
+      "en": "Learn more about Adelina Corbacho Godes",
+      "fr": "En savoir plus sur Adelina Corbacho Godes",
+      "de": "Mehr über Adelina Corbacho Godes erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Albert Cabestany Pérez siguió el camino de la odontología?"
+      "es": "¿Sabías que Albert Cabestany Pérez siguió el camino de la odontología?",
+      "ca": "Sabies que Albert Cabestany Pérez va seguir el camí de l’odontologia?",
+      "en": "Did you know that Albert Cabestany Pérez followed the path of dentistry?",
+      "fr": "Saviez-vous qu’Albert Cabestany Pérez suivit la voie de l’odontologie ?",
+      "de": "Wusstest du, dass Albert Cabestany Pérez den Weg der Zahnmedizin einschlug?"
     },
     "texto": {
-      "es": "Un ejemplo más de profesionalización técnica dentro de las ramas contemporáneas."
+      "es": "Un ejemplo más de profesionalización técnica dentro de las ramas contemporáneas.",
+      "ca": "Un exemple més de professionalització tècnica dins de les branques contemporànies.",
+      "en": "One more example of technical professionalisation within the contemporary branches.",
+      "fr": "Un exemple de plus de professionnalisation technique au sein des branches contemporaines.",
+      "de": "Ein weiteres Beispiel für technische Professionalisierung innerhalb der zeitgenössischen Zweige."
     },
     "cta": {
-      "es": "Saber más sobre Albert Cabestany Pérez"
+      "es": "Saber más sobre Albert Cabestany Pérez",
+      "ca": "Saber més sobre Albert Cabestany Pérez",
+      "en": "Learn more about Albert Cabestany Pérez",
+      "fr": "En savoir plus sur Albert Cabestany Pérez",
+      "de": "Mehr über Albert Cabestany Pérez erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Joan Nolla Hom se dedicó a la prótesis dental?"
+      "es": "¿Sabías que Joan Nolla Hom se dedicó a la prótesis dental?",
+      "ca": "Sabies que Joan Nolla Hom es va dedicar a la pròtesi dental?",
+      "en": "Did you know that Joan Nolla Hom worked in dental prosthetics?",
+      "fr": "Saviez-vous que Joan Nolla Hom se consacra à la prothèse dentaire ?",
+      "de": "Wusstest du, dass Joan Nolla Hom in der Zahntechnik tätig war?"
     },
     "texto": {
-      "es": "El detalle muestra cómo el árbol recoge oficios de alta especialización muy concretos."
+      "es": "El detalle muestra cómo el árbol recoge oficios de alta especialización muy concretos.",
+      "ca": "El detall mostra com l’arbre recull oficis d’alta especialització molt concrets.",
+      "en": "The detail shows how the tree records very specific highly specialised trades.",
+      "fr": "Ce détail montre comment l’arbre recueille des métiers très concrets et hautement spécialisés.",
+      "de": "Dieses Detail zeigt, wie der Stammbaum sehr konkrete hoch spezialisierte Berufe erfasst."
     },
     "cta": {
-      "es": "Saber más sobre Joan Nolla Hom"
+      "es": "Saber más sobre Joan Nolla Hom",
+      "ca": "Saber més sobre Joan Nolla Hom",
+      "en": "Learn more about Joan Nolla Hom",
+      "fr": "En savoir plus sur Joan Nolla Hom",
+      "de": "Mehr über Joan Nolla Hom erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Albert Biosca Drets fue propietario de Biosca & Botey?"
+      "es": "¿Sabías que Albert Biosca Drets fue propietario de Biosca & Botey?",
+      "ca": "Sabies que Albert Biosca Drets va ser propietari de Biosca & Botey?",
+      "en": "Did you know that Albert Biosca Drets owned Biosca & Botey?",
+      "fr": "Saviez-vous qu’Albert Biosca Drets fut propriétaire de Biosca & Botey ?",
+      "de": "Wusstest du, dass Albert Biosca Drets Eigentümer von Biosca & Botey war?"
     },
     "texto": {
-      "es": "La vertiente empresarial aparece también con fuerza en varias ramas de la familia."
+      "es": "La vertiente empresarial aparece también con fuerza en varias ramas de la familia.",
+      "ca": "La vessant empresarial també apareix amb força en diverses branques de la família.",
+      "en": "The business side also appears strongly in several branches of the family.",
+      "fr": "Le versant entrepreneurial apparaît aussi avec force dans plusieurs branches de la famille.",
+      "de": "Auch die unternehmerische Seite tritt in mehreren Zweigen der Familie deutlich hervor."
     },
     "cta": {
-      "es": "Saber más sobre Albert Biosca Drets"
+      "es": "Saber más sobre Albert Biosca Drets",
+      "ca": "Saber més sobre Albert Biosca Drets",
+      "en": "Learn more about Albert Biosca Drets",
+      "fr": "En savoir plus sur Albert Biosca Drets",
+      "de": "Mehr über Albert Biosca Drets erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Felip Puig de Canals fue gemólogo y empresario?"
+      "es": "¿Sabías que Felip Puig de Canals fue gemólogo y empresario?",
+      "ca": "Sabies que Felip Puig de Canals va ser gemmòleg i empresari?",
+      "en": "Did you know that Felip Puig de Canals was a gemologist and entrepreneur?",
+      "fr": "Saviez-vous que Felip Puig de Canals fut gemmologue et entrepreneur ?",
+      "de": "Wusstest du, dass Felip Puig de Canals Gemmologe und Unternehmer war?"
     },
     "texto": {
-      "es": "No es un perfil habitual, y por eso mismo destaca dentro del conjunto familiar."
+      "es": "No es un perfil habitual, y por eso mismo destaca dentro del conjunto familiar.",
+      "ca": "No és un perfil habitual, i per això mateix destaca dins del conjunt familiar.",
+      "en": "It is not a common profile, and for that very reason it stands out within the family as a whole.",
+      "fr": "Ce n’est pas un profil courant, et c’est précisément pourquoi il se distingue dans l’ensemble familial.",
+      "de": "Es ist kein gewöhnliches Profil, und gerade deshalb sticht es innerhalb der Familie hervor."
     },
     "cta": {
-      "es": "Saber más sobre Felip Puig de Canals"
+      "es": "Saber más sobre Felip Puig de Canals",
+      "ca": "Saber més sobre Felip Puig de Canals",
+      "en": "Learn more about Felip Puig de Canals",
+      "fr": "En savoir plus sur Felip Puig de Canals",
+      "de": "Mehr über Felip Puig de Canals erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Sebastián Diago Almuzara trabajó en Myrurgia?"
+      "es": "¿Sabías que Sebastián Diago Almuzara trabajó en Myrurgia?",
+      "ca": "Sabies que Sebastián Diago Almuzara va treballar a Myrurgia?",
+      "en": "Did you know that Sebastián Diago Almuzara worked at Myrurgia?",
+      "fr": "Saviez-vous que Sebastián Diago Almuzara travailla chez Myrurgia ?",
+      "de": "Wusstest du, dass Sebastián Diago Almuzara bei Myrurgia arbeitete?"
     },
     "texto": {
-      "es": "Su nombre conecta la familia con una de las grandes firmas históricas de perfumería de Barcelona."
+      "es": "Su nombre conecta la familia con una de las grandes firmas históricas de perfumería de Barcelona.",
+      "ca": "El seu nom connecta la família amb una de les grans firmes històriques de perfumeria de Barcelona.",
+      "en": "His name connects the family with one of Barcelona’s great historic perfume companies.",
+      "fr": "Son nom relie la famille à l’une des grandes maisons historiques de parfumerie de Barcelone.",
+      "de": "Sein Name verbindet die Familie mit einem der großen historischen Parfümerieunternehmen Barcelonas."
     },
     "cta": {
-      "es": "Saber más sobre Sebastià Diago Almuzara"
+      "es": "Saber más sobre Sebastià Diago Almuzara",
+      "ca": "Saber més sobre Sebastià Diago Almuzara",
+      "en": "Learn more about Sebastià Diago Almuzara",
+      "fr": "En savoir plus sur Sebastià Diago Almuzara",
+      "de": "Mehr über Sebastià Diago Almuzara erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Antonio Diago Benseny estuvo ligado a una casa de huéspedes barcelonesa?"
+      "es": "¿Sabías que Antonio Diago Benseny estuvo ligado a una casa de huéspedes barcelonesa?",
+      "ca": "Sabies que Antonio Diago Benseny va estar lligat a una casa d’hostes barcelonina?",
+      "en": "Did you know that Antonio Diago Benseny was linked to a Barcelona guesthouse?",
+      "fr": "Saviez-vous qu’Antonio Diago Benseny fut lié à une maison d’hôtes barcelonaise ?",
+      "de": "Wusstest du, dass Antonio Diago Benseny mit einem Gästehaus in Barcelona verbunden war?"
     },
     "texto": {
-      "es": "Aparece como propietario de la Casa de Huéspedes Duque, una pista muy sugerente sobre la vida urbana de la época."
+      "es": "Aparece como propietario de la Casa de Huéspedes Duque, una pista muy sugerente sobre la vida urbana de la época.",
+      "ca": "Apareix com a propietari de la Casa de Huéspedes Duque, una pista molt suggeridora sobre la vida urbana de l’època.",
+      "en": "He appears as the owner of Casa de Huéspedes Duque, a very suggestive clue about urban life at the time.",
+      "fr": "Il apparaît comme propriétaire de la Casa de Huéspedes Duque, un indice très évocateur de la vie urbaine de l’époque.",
+      "de": "Er erscheint als Eigentümer der Casa de Huéspedes Duque, ein sehr aufschlussreicher Hinweis auf das städtische Leben jener Zeit."
     },
     "cta": {
-      "es": "Saber más sobre Antonio Diago Benseny"
+      "es": "Saber más sobre Antonio Diago Benseny",
+      "ca": "Saber més sobre Antonio Diago Benseny",
+      "en": "Learn more about Antonio Diago Benseny",
+      "fr": "En savoir plus sur Antonio Diago Benseny",
+      "de": "Mehr über Antonio Diago Benseny erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Nicómedes Diago Marín tuvo barbería propia con seis empleados?"
+      "es": "¿Sabías que Nicómedes Diago Marín tuvo barbería propia con seis empleados?",
+      "ca": "Sabies que Nicómedes Diago Marín va tenir barberia pròpia amb sis empleats?",
+      "en": "Did you know that Nicómedes Diago Marín had his own barber shop with six employees?",
+      "fr": "Saviez-vous que Nicómedes Diago Marín eut son propre salon de coiffure avec six employés ?",
+      "de": "Wusstest du, dass Nicómedes Diago Marín einen eigenen Friseursalon mit sechs Angestellten hatte?"
     },
     "texto": {
-      "es": "Además de guardia urbano, levantó un negocio que llegó a tener un tamaño considerable."
+      "es": "Además de guardia urbano, levantó un negocio que llegó a tener un tamaño considerable.",
+      "ca": "A més de guàrdia urbà, va aixecar un negoci que va arribar a tenir una mida considerable.",
+      "en": "In addition to being a municipal guard, he built a business that grew to a considerable size.",
+      "fr": "En plus d’être garde urbain, il monta une affaire qui atteignit une taille considérable.",
+      "de": "Neben seiner Tätigkeit als Stadtpolizist baute er ein Geschäft auf, das eine beträchtliche Größe erreichte."
     },
     "cta": {
-      "es": "Saber más sobre Nicómedes Diago Marín"
+      "es": "Saber más sobre Nicómedes Diago Marín",
+      "ca": "Saber més sobre Nicómedes Diago Marín",
+      "en": "Learn more about Nicómedes Diago Marín",
+      "fr": "En savoir plus sur Nicómedes Diago Marín",
+      "de": "Mehr über Nicómedes Diago Marín erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Nicómedes Diago Marín combinó uniforme, contabilidad y empresa?"
+      "es": "¿Sabías que Nicómedes Diago Marín combinó uniforme, contabilidad y empresa?",
+      "ca": "Sabies que Nicómedes Diago Marín va combinar uniforme, comptabilitat i empresa?",
+      "en": "Did you know that Nicómedes Diago Marín combined uniform, accounting and business?",
+      "fr": "Saviez-vous que Nicómedes Diago Marín combina uniforme, comptabilité et entreprise ?",
+      "de": "Wusstest du, dass Nicómedes Diago Marín Uniform, Buchhaltung und Unternehmertum verband?"
     },
     "texto": {
-      "es": "Su perfil reúne seguridad urbana, vida política de distrito y negocio propio."
+      "es": "Su perfil reúne seguridad urbana, vida política de distrito y negocio propio.",
+      "ca": "El seu perfil reuneix seguretat urbana, vida política de districte i negoci propi.",
+      "en": "His profile brings together urban security, district political life and his own business.",
+      "fr": "Son profil réunit sécurité urbaine, vie politique de district et affaire personnelle.",
+      "de": "Sein Profil vereint städtische Sicherheit, Bezirkspolitik und ein eigenes Geschäft."
     },
     "cta": {
-      "es": "Saber más sobre Nicómedes Diago Marín"
+      "es": "Saber más sobre Nicómedes Diago Marín",
+      "ca": "Saber més sobre Nicómedes Diago Marín",
+      "en": "Learn more about Nicómedes Diago Marín",
+      "fr": "En savoir plus sur Nicómedes Diago Marín",
+      "de": "Mehr über Nicómedes Diago Marín erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que una rama de los Diago se proyectó hacia Cuba?"
+      "es": "¿Sabías que una rama de los Diago se proyectó hacia Cuba?",
+      "ca": "Sabies que una branca dels Diago es va projectar cap a Cuba?",
+      "en": "Did you know that one branch of the Diago family projected itself toward Cuba?",
+      "fr": "Saviez-vous qu’une branche des Diago se projeta vers Cuba ?",
+      "de": "Wusstest du, dass sich ein Zweig der Diago nach Kuba ausrichtete?"
     },
     "texto": {
-      "es": "Varios nombres de esa línea aparecen ligados a La Habana y a una movilidad transatlántica muy llamativa."
+      "es": "Varios nombres de esa línea aparecen ligados a La Habana y a una movilidad transatlántica muy llamativa.",
+      "ca": "Diversos noms d’aquesta línia apareixen lligats a l’Havana i a una mobilitat transatlàntica molt cridanera.",
+      "en": "Several names from that line are linked to Havana and to a very striking transatlantic mobility.",
+      "fr": "Plusieurs noms de cette lignée apparaissent liés à La Havane et à une mobilité transatlantique très frappante.",
+      "de": "Mehrere Namen dieser Linie sind mit Havanna und einer sehr auffälligen transatlantischen Mobilität verbunden."
     },
     "cta": {
-      "es": "Saber más sobre la rama Diago Almuzara"
+      "es": "Saber más sobre la rama Diago Almuzara",
+      "ca": "Saber més sobre la branca Diago Almuzara",
+      "en": "Learn more about the Diago Almuzara branch",
+      "fr": "En savoir plus sur la branche Diago Almuzara",
+      "de": "Mehr über den Zweig Diago Almuzara erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Ramona Diago Almuzara llevó una vida especialmente novelesca?"
+      "es": "¿Sabías que Ramona Diago Almuzara llevó una vida especialmente novelesca?",
+      "ca": "Sabies que Ramona Diago Almuzara va portar una vida especialment novel·lesca?",
+      "en": "Did you know that Ramona Diago Almuzara led a particularly novel-like life?",
+      "fr": "Saviez-vous que Ramona Diago Almuzara mena une vie particulièrement romanesque ?",
+      "de": "Wusstest du, dass Ramona Diago Almuzara ein besonders romanhaftes Leben führte?"
     },
     "texto": {
-      "es": "Su historia mezcla emigración a Cuba, violencia doméstica, viajes y largos silencios documentales."
+      "es": "Su historia mezcla emigración a Cuba, violencia doméstica, viajes y largos silencios documentales.",
+      "ca": "La seva història barreja emigració a Cuba, violència domèstica, viatges i llargs silencis documentals.",
+      "en": "Her story combines emigration to Cuba, domestic violence, journeys and long documentary silences.",
+      "fr": "Son histoire mêle émigration à Cuba, violence domestique, voyages et longs silences documentaires.",
+      "de": "Ihre Geschichte verbindet Auswanderung nach Kuba, häusliche Gewalt, Reisen und lange dokumentarische Leerstellen."
     },
     "cta": {
-      "es": "Saber más sobre Ramona Diago Almuzara"
+      "es": "Saber más sobre Ramona Diago Almuzara",
+      "ca": "Saber més sobre Ramona Diago Almuzara",
+      "en": "Learn more about Ramona Diago Almuzara",
+      "fr": "En savoir plus sur Ramona Diago Almuzara",
+      "de": "Mehr über Ramona Diago Almuzara erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Enrique Molina de Pazos ocupó cargos económicos de peso en Córdoba?"
+      "es": "¿Sabías que Enrique Molina de Pazos ocupó cargos económicos de peso en Córdoba?",
+      "ca": "Sabies que Enrique Molina de Pazos va ocupar càrrecs econòmics de pes a Còrdova?",
+      "en": "Did you know that Enrique Molina de Pazos held important financial posts in Córdoba?",
+      "fr": "Saviez-vous qu’Enrique Molina de Pazos occupa des postes économiques importants à Cordoue ?",
+      "de": "Wusstest du, dass Enrique Molina de Pazos bedeutende Finanzämter in Córdoba innehatte?"
     },
     "texto": {
-      "es": "Fue interventor de fondos municipales y su nombre llegó a proponerse para una distinción civil."
+      "es": "Fue interventor de fondos municipales y su nombre llegó a proponerse para una distinción civil.",
+      "ca": "Va ser interventor de fons municipals i el seu nom va arribar a proposar-se per a una distinció civil.",
+      "en": "He was municipal funds comptroller and his name was even proposed for a civil distinction.",
+      "fr": "Il fut contrôleur des fonds municipaux et son nom fut même proposé pour une distinction civile.",
+      "de": "Er war Rechnungsprüfer städtischer Mittel, und sein Name wurde sogar für eine zivile Auszeichnung vorgeschlagen."
     },
     "cta": {
-      "es": "Saber más sobre Enrique Molina de Pazos"
+      "es": "Saber más sobre Enrique Molina de Pazos",
+      "ca": "Saber més sobre Enrique Molina de Pazos",
+      "en": "Learn more about Enrique Molina de Pazos",
+      "fr": "En savoir plus sur Enrique Molina de Pazos",
+      "de": "Mehr über Enrique Molina de Pazos erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Enrique Molina Beca ejerció como médico de la Asociación de la Prensa de Córdoba?"
+      "es": "¿Sabías que Enrique Molina Beca ejerció como médico de la Asociación de la Prensa de Córdoba?",
+      "ca": "Sabies que Enrique Molina Beca va exercir com a metge de l’Asociación de la Prensa de Córdoba?",
+      "en": "Did you know that Enrique Molina Beca worked as doctor for the Asociación de la Prensa de Córdoba?",
+      "fr": "Saviez-vous qu’Enrique Molina Beca exerça comme médecin de l’Asociación de la Prensa de Córdoba ?",
+      "de": "Wusstest du, dass Enrique Molina Beca als Arzt der Asociación de la Prensa de Córdoba tätig war?"
     },
     "texto": {
-      "es": "Una posición muy concreta y prestigiosa dentro del mundo sanitario y periodístico local."
+      "es": "Una posición muy concreta y prestigiosa dentro del mundo sanitario y periodístico local.",
+      "ca": "Una posició molt concreta i prestigiosa dins del món sanitari i periodístic local.",
+      "en": "A very specific and prestigious position within the local healthcare and journalistic world.",
+      "fr": "Un poste très précis et prestigieux dans le monde sanitaire et journalistique local.",
+      "de": "Eine sehr konkrete und angesehene Position im lokalen Gesundheits- und Pressewesen."
     },
     "cta": {
-      "es": "Saber más sobre Enrique Molina Beca"
+      "es": "Saber más sobre Enrique Molina Beca",
+      "ca": "Saber més sobre Enrique Molina Beca",
+      "en": "Learn more about Enrique Molina Beca",
+      "fr": "En savoir plus sur Enrique Molina Beca",
+      "de": "Mehr über Enrique Molina Beca erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Celso Rafael Molina Beca fue perito agrícola?"
+      "es": "¿Sabías que Celso Rafael Molina Beca fue perito agrícola?",
+      "ca": "Sabies que Celso Rafael Molina Beca va ser perit agrícola?",
+      "en": "Did you know that Celso Rafael Molina Beca was an agricultural expert?",
+      "fr": "Saviez-vous que Celso Rafael Molina Beca fut expert agricole ?",
+      "de": "Wusstest du, dass Celso Rafael Molina Beca Landwirtschaftssachverständiger war?"
     },
     "texto": {
-      "es": "La familia no solo miró a la ciudad: también aparecen profesiones ligadas a la tierra y la técnica agraria."
+      "es": "La familia no solo miró a la ciudad: también aparecen profesiones ligadas a la tierra y la técnica agraria.",
+      "ca": "La família no només va mirar cap a la ciutat: també apareixen professions lligades a la terra i a la tècnica agrària.",
+      "en": "The family did not only look to the city: professions linked to the land and agricultural technique also appear.",
+      "fr": "La famille ne s’est pas seulement tournée vers la ville : on y trouve aussi des professions liées à la terre et à la technique agraire.",
+      "de": "Die Familie blickte nicht nur auf die Stadt: Es erscheinen auch Berufe, die mit Land und Agrartechnik verbunden sind."
     },
     "cta": {
-      "es": "Saber más sobre Celso Rafael Molina Beca"
+      "es": "Saber más sobre Celso Rafael Molina Beca",
+      "ca": "Saber més sobre Celso Rafael Molina Beca",
+      "en": "Learn more about Celso Rafael Molina Beca",
+      "fr": "En savoir plus sur Celso Rafael Molina Beca",
+      "de": "Mehr über Celso Rafael Molina Beca erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Eduardo Lagunilla de Plandolit fue arquitecto de Regiones Devastadas?"
+      "es": "¿Sabías que Eduardo Lagunilla de Plandolit fue arquitecto de Regiones Devastadas?",
+      "ca": "Sabies que Eduardo Lagunilla de Plandolit va ser arquitecte de Regiones Devastadas?",
+      "en": "Did you know that Eduardo Lagunilla de Plandolit was an architect for Regiones Devastadas?",
+      "fr": "Saviez-vous qu’Eduardo Lagunilla de Plandolit fut architecte de Regiones Devastadas ?",
+      "de": "Wusstest du, dass Eduardo Lagunilla de Plandolit Architekt bei Regiones Devastadas war?"
     },
     "texto": {
-      "es": "Su carrera lo sitúa en uno de los grandes organismos de reconstrucción de la posguerra."
+      "es": "Su carrera lo sitúa en uno de los grandes organismos de reconstrucción de la posguerra.",
+      "ca": "La seva carrera el situa en un dels grans organismes de reconstrucció de la postguerra.",
+      "en": "His career places him in one of the major reconstruction bodies of the post-war period.",
+      "fr": "Sa carrière le situe dans l’un des grands organismes de reconstruction de l’après-guerre.",
+      "de": "Seine Laufbahn verortet ihn in einer der großen Wiederaufbaubehörden der Nachkriegszeit."
     },
     "cta": {
-      "es": "Saber más sobre Eduardo Lagunilla de Plandolit"
+      "es": "Saber más sobre Eduardo Lagunilla de Plandolit",
+      "ca": "Saber més sobre Eduardo Lagunilla de Plandolit",
+      "en": "Learn more about Eduardo Lagunilla de Plandolit",
+      "fr": "En savoir plus sur Eduardo Lagunilla de Plandolit",
+      "de": "Mehr über Eduardo Lagunilla de Plandolit erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Javier Garrido Lagunilla continuó la veta arquitectónica familiar?"
+      "es": "¿Sabías que Javier Garrido Lagunilla continuó la veta arquitectónica familiar?",
+      "ca": "Sabies que Javier Garrido Lagunilla va continuar la veta arquitectònica familiar?",
+      "en": "Did you know that Javier Garrido Lagunilla continued the family’s architectural vein?",
+      "fr": "Saviez-vous que Javier Garrido Lagunilla poursuivit la veine architecturale familiale ?",
+      "de": "Wusstest du, dass Javier Garrido Lagunilla die architektonische Ader der Familie fortsetzte?"
     },
     "texto": {
-      "es": "La arquitectura no aparece una sola vez: se repite en distintas generaciones."
+      "es": "La arquitectura no aparece una sola vez: se repite en distintas generaciones.",
+      "ca": "L’arquitectura no apareix una sola vegada: es repeteix en diferents generacions.",
+      "en": "Architecture does not appear just once: it recurs across different generations.",
+      "fr": "L’architecture n’apparaît pas une seule fois : elle revient dans différentes générations.",
+      "de": "Architektur taucht nicht nur einmal auf: Sie wiederholt sich in verschiedenen Generationen."
     },
     "cta": {
-      "es": "Saber más sobre Javier Garrido Lagunilla"
+      "es": "Saber más sobre Javier Garrido Lagunilla",
+      "ca": "Saber més sobre Javier Garrido Lagunilla",
+      "en": "Learn more about Javier Garrido Lagunilla",
+      "fr": "En savoir plus sur Javier Garrido Lagunilla",
+      "de": "Mehr über Javier Garrido Lagunilla erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Júlia Godes Sanz de Bremond también figura vinculada a la arquitectura?"
+      "es": "¿Sabías que Júlia Godes Sanz de Bremond también figura vinculada a la arquitectura?",
+      "ca": "Sabies que Júlia Godes Sanz de Bremond també figura vinculada a l’arquitectura?",
+      "en": "Did you know that Júlia Godes Sanz de Bremond is also listed as linked to architecture?",
+      "fr": "Saviez-vous que Júlia Godes Sanz de Bremond figure aussi comme liée à l’architecture ?",
+      "de": "Wusstest du, dass Júlia Godes Sanz de Bremond ebenfalls mit der Architektur verbunden ist?"
     },
     "texto": {
-      "es": "Otra muestra de cómo algunas vocaciones reaparecen una y otra vez en la misma familia."
+      "es": "Otra muestra de cómo algunas vocaciones reaparecen una y otra vez en la misma familia.",
+      "ca": "Una altra mostra de com algunes vocacions reapareixen una vegada i una altra en la mateixa família.",
+      "en": "Another example of how some vocations reappear again and again in the same family.",
+      "fr": "Un autre exemple de la façon dont certaines vocations réapparaissent encore et encore dans la même famille.",
+      "de": "Ein weiteres Beispiel dafür, wie manche Berufungen in derselben Familie immer wieder auftauchen."
     },
     "cta": {
-      "es": "Saber más sobre Júlia Godes Sanz de Bremond"
+      "es": "Saber más sobre Júlia Godes Sanz de Bremond",
+      "ca": "Saber més sobre Júlia Godes Sanz de Bremond",
+      "en": "Learn more about Júlia Godes Sanz de Bremond",
+      "fr": "En savoir plus sur Júlia Godes Sanz de Bremond",
+      "de": "Mehr über Júlia Godes Sanz de Bremond erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que en la familia hay varios jueces documentados?"
+      "es": "¿Sabías que en la familia hay varios jueces documentados?",
+      "ca": "Sabies que a la família hi ha diversos jutges documentats?",
+      "en": "Did you know that the family includes several documented judges?",
+      "fr": "Saviez-vous que plusieurs juges sont documentés dans la famille ?",
+      "de": "Wusstest du, dass in der Familie mehrere Richter dokumentiert sind?"
     },
     "texto": {
-      "es": "Nombres como Atanasio Diago Lozano o Juan de la Cruz Mediero Hernández revelan una presencia judicial poco habitual."
+      "es": "Nombres como Atanasio Diago Lozano o Juan de la Cruz Mediero Hernández revelan una presencia judicial poco habitual.",
+      "ca": "Noms com Atanasio Diago Lozano o Juan de la Cruz Mediero Hernández revelen una presència judicial poc habitual.",
+      "en": "Names such as Atanasio Diago Lozano or Juan de la Cruz Mediero Hernández reveal an unusual judicial presence.",
+      "fr": "Des noms comme Atanasio Diago Lozano ou Juan de la Cruz Mediero Hernández révèlent une présence judiciaire peu habituelle.",
+      "de": "Namen wie Atanasio Diago Lozano oder Juan de la Cruz Mediero Hernández zeigen eine ungewöhnliche Präsenz im Justizwesen."
     },
     "cta": {
-      "es": "Saber más sobre la rama Diago y Mediero"
+      "es": "Saber más sobre la rama Diago y Mediero",
+      "ca": "Saber més sobre la branca Diago i Mediero",
+      "en": "Learn more about the Diago and Mediero branch",
+      "fr": "En savoir plus sur la branche Diago et Mediero",
+      "de": "Mehr über den Zweig Diago und Mediero erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Francisco Mediero Matallana fue capitán y caballero condecorado?"
+      "es": "¿Sabías que Francisco Mediero Matallana fue capitán y caballero condecorado?",
+      "ca": "Sabies que Francisco Mediero Matallana va ser capità i cavaller condecorat?",
+      "en": "Did you know that Francisco Mediero Matallana was a captain and decorated knight?",
+      "fr": "Saviez-vous que Francisco Mediero Matallana fut capitaine et chevalier décoré ?",
+      "de": "Wusstest du, dass Francisco Mediero Matallana Hauptmann und dekorierter Ritter war?"
     },
     "texto": {
-      "es": "Su perfil militar conecta la familia con el ejército y con órdenes honoríficas de su tiempo."
+      "es": "Su perfil militar conecta la familia con el ejército y con órdenes honoríficas de su tiempo.",
+      "ca": "El seu perfil militar connecta la família amb l’exèrcit i amb ordres honorífiques del seu temps.",
+      "en": "His military profile connects the family with the army and with the honorary orders of his time.",
+      "fr": "Son profil militaire relie la famille à l’armée et aux ordres honorifiques de son temps.",
+      "de": "Sein militärisches Profil verbindet die Familie mit dem Heer und mit den Ehrenorden seiner Zeit."
     },
     "cta": {
-      "es": "Saber más sobre Francisco Mediero Matallana"
+      "es": "Saber más sobre Francisco Mediero Matallana",
+      "ca": "Saber més sobre Francisco Mediero Matallana",
+      "en": "Learn more about Francisco Mediero Matallana",
+      "fr": "En savoir plus sur Francisco Mediero Matallana",
+      "de": "Mehr über Francisco Mediero Matallana erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que Francisco Molina Hernández fue capellán castrense?"
+      "es": "¿Sabías que Francisco Molina Hernández fue capellán castrense?",
+      "ca": "Sabies que Francisco Molina Hernández va ser capellà castrense?",
+      "en": "Did you know that Francisco Molina Hernández was a military chaplain?",
+      "fr": "Saviez-vous que Francisco Molina Hernández fut aumônier militaire ?",
+      "de": "Wusstest du, dass Francisco Molina Hernández Militärseelsorger war?"
     },
     "texto": {
-      "es": "La rama Molina enlaza así religión y mundo militar en una misma figura."
+      "es": "La rama Molina enlaza así religión y mundo militar en una misma figura.",
+      "ca": "La branca Molina enllaça així religió i món militar en una mateixa figura.",
+      "en": "The Molina branch thus links religion and the military world in a single figure.",
+      "fr": "La branche Molina relie ainsi religion et monde militaire dans une même figure.",
+      "de": "Der Zweig Molina verbindet so Religion und Militärwelt in einer einzigen Figur."
     },
     "cta": {
-      "es": "Saber más sobre Francisco Molina Hernández"
+      "es": "Saber más sobre Francisco Molina Hernández",
+      "ca": "Saber més sobre Francisco Molina Hernández",
+      "en": "Learn more about Francisco Molina Hernández",
+      "fr": "En savoir plus sur Francisco Molina Hernández",
+      "de": "Mehr über Francisco Molina Hernández erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que uno de los oficios más repetidos en las generaciones antiguas fue el de tejedor?"
+      "es": "¿Sabías que uno de los oficios más repetidos en las generaciones antiguas fue el de tejedor?",
+      "ca": "Sabies que un dels oficis més repetits en les generacions antigues va ser el de teixidor?",
+      "en": "Did you know that one of the most repeated trades in the older generations was weaving?",
+      "fr": "Saviez-vous que l’un des métiers les plus répétés dans les générations anciennes fut celui de tisserand ?",
+      "de": "Wusstest du, dass einer der häufigsten Berufe in den älteren Generationen der des Webers war?"
     },
     "texto": {
-      "es": "Antes de fotógrafos, abogados o consellers, hubo muchos Godes y afines vinculados al telar y a los tejidos."
+      "es": "Antes de fotógrafos, abogados o consellers, hubo muchos Godes y afines vinculados al telar y a los tejidos.",
+      "ca": "Abans de fotògrafs, advocats o consellers, hi va haver molts Godes i afins vinculats al teler i als teixits.",
+      "en": "Before photographers, lawyers or ministers, many Godes and relatives were linked to the loom and to textiles.",
+      "fr": "Avant les photographes, les avocats ou les consellers, de nombreux Godes et alliés furent liés au métier à tisser et aux tissus.",
+      "de": "Vor Fotografen, Anwälten oder Ministern waren viele Godes und Angehörige mit Webstuhl und Textilien verbunden."
     },
     "cta": {
-      "es": "Saber más sobre los oficios tradicionales de la familia"
+      "es": "Saber más sobre los oficios tradicionales de la familia",
+      "ca": "Saber més sobre els oficis tradicionals de la família",
+      "en": "Learn more about the family’s traditional trades",
+      "fr": "En savoir plus sur les métiers traditionnels de la famille",
+      "de": "Mehr über die traditionellen Berufe der Familie erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que la familia pasa del telar a la cámara fotográfica en apenas unas generaciones?"
+      "es": "¿Sabías que la familia pasa del telar a la cámara fotográfica en apenas unas generaciones?",
+      "ca": "Sabies que la família passa del teler a la càmera fotogràfica en tot just unes generacions?",
+      "en": "Did you know that the family moved from the loom to the camera in just a few generations?",
+      "fr": "Saviez-vous que la famille passa du métier à tisser à l’appareil photo en quelques générations à peine ?",
+      "de": "Wusstest du, dass die Familie in nur wenigen Generationen vom Webstuhl zur Fotokamera überging?"
     },
     "texto": {
-      "es": "Los registros permiten ver muy bien el salto desde oficios artesanales hacia profesiones urbanas y modernas."
+      "es": "Los registros permiten ver muy bien el salto desde oficios artesanales hacia profesiones urbanas y modernas.",
+      "ca": "Els registres permeten veure molt bé el salt des dels oficis artesanals cap a professions urbanes i modernes.",
+      "en": "The records clearly show the leap from artisanal trades to urban and modern professions.",
+      "fr": "Les registres permettent de voir très clairement le passage des métiers artisanaux aux professions urbaines et modernes.",
+      "de": "Die Aufzeichnungen zeigen sehr deutlich den Sprung von handwerklichen Berufen zu urbanen und modernen Professionen."
     },
     "cta": {
-      "es": "Saber más sobre la evolución profesional de la familia"
+      "es": "Saber más sobre la evolución profesional de la familia",
+      "ca": "Saber més sobre l’evolució professional de la família",
+      "en": "Learn more about the family’s professional evolution",
+      "fr": "En savoir plus sur l’évolution professionnelle de la famille",
+      "de": "Mehr über die berufliche Entwicklung der Familie erfahren"
     }
   },
   {
     "titulo": {
-      "es": "¿Sabías que varias ramas muestran una fuerte movilidad entre Barcelona, Castellón, Córdoba y Cuba?"
+      "es": "¿Sabías que varias ramas muestran una fuerte movilidad entre Barcelona, Castellón, Córdoba y Cuba?",
+      "ca": "Sabies que diverses branques mostren una forta mobilitat entre Barcelona, Castelló, Còrdova i Cuba?",
+      "en": "Did you know that several branches show strong mobility between Barcelona, Castellón, Córdoba and Cuba?",
+      "fr": "Saviez-vous que plusieurs branches montrent une forte mobilité entre Barcelone, Castellón, Cordoue et Cuba ?",
+      "de": "Wusstest du, dass mehrere Zweige eine starke Mobilität zwischen Barcelona, Castellón, Córdoba und Kuba zeigen?"
     },
     "texto": {
-      "es": "La familia no fue estática: hay un movimiento constante entre ciudades, puertos y destinos muy distintos."
+      "es": "La familia no fue estática: hay un movimiento constante entre ciudades, puertos y destinos muy distintos.",
+      "ca": "La família no va ser estàtica: hi ha un moviment constant entre ciutats, ports i destinacions molt diverses.",
+      "en": "The family was not static: there is constant movement between cities, ports and very different destinations.",
+      "fr": "La famille ne fut pas statique : on observe un mouvement constant entre villes, ports et destinations très diverses.",
+      "de": "Die Familie war nicht statisch: Es gibt eine ständige Bewegung zwischen Städten, Häfen und sehr unterschiedlichen Zielen."
     },
     "cta": {
-      "es": "Saber más sobre la geografía familiar"
+      "es": "Saber más sobre la geografía familiar",
+      "ca": "Saber més sobre la geografia familiar",
+      "en": "Learn more about the family geography",
+      "fr": "En savoir plus sur la géographie familiale",
+      "de": "Mehr über die Geografie der Familie erfahren"
     }
   }
 ]
