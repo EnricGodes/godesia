@@ -41,7 +41,7 @@ NON_NAME_TOKENS = {
     "combien", "etaient", "etait", "sont", "est", "avec", "enfants", "freres",
     "surs", "soeurs", "parents", "pere", "mere", "grands", "grand", "cousins",
     "oncles", "tantes", "les", "des", "le", "la", "de", "en", "que", "y",
-    "et", "ne", "nee",
+    "et", "ne", "nee", "grande", "grandes", "petits", "petites", "beaux", "belles",
     # participios que colisionan con nombres reales (p.ej. "marié"→"Marie"):
     # nunca deben protegerse como nombre.
     "marie", "mariee", "maries", "mariees", "decede", "decedee", "decedes",
@@ -65,6 +65,32 @@ _INV = r"(?:-t)?-il(?:/elle)?"
 _INVO = r"(?:(?:-t)?-il(?:/elle)?)?"   # inversión opcional (a veces el sujeto va antes)
 _QUELLE = r"quel(?:le)?(?:/quelle)?"   # "quel", "quelle", "quel/quelle"
 PHRASE_RULES = [
+    # --- estructuras del banco GEDCOM: "recorded for", entierro, censo ---
+    # "quels X sont indiqués pour Y" / "quelle X est indiqué(e) pour Y" → "que X consta para Y"
+    (r"\bquel(?:le|s|les)? (.+?) (?:sont|est) indique(?:e)?s? pour (.+?)\s*\??$",
+     r"que \1 consta para \2"),
+    (r"\bou (.+?) a" + _INV + r" ete (?:inhume|enterre)\(e\)", r"donde fue enterrado \1"),
+    (r"\ba quel age (.+?) est" + _INV + r" (?:mort|decede)\(e\)", r"a que edad murio \1"),
+    (r"\bou (.+?) a" + _INV + r" etudie\b", r"donde estudio \1"),
+    (r"\bquelle descendance directe (.+?) a" + _INV + r" eue?\b", r"que descendencia directa tuvo \1"),
+    (r"\ba quelle date (.+?) a" + _INV + r" ete inhume\(e\)", r"en que fecha fue enterrado \1"),
+    (r"\ba quelle date (.+?) a" + _INV + r" ete baptise\(e\)", r"en que fecha se bautizo \1"),
+    (r"\bdans quel lieu (.+?) est" + _INV + r" ne\(e\)", r"en que lugar nacio \1"),
+    (r"\bdans quel lieu (.+?) a" + _INV + r" ete baptise\(e\)", r"en que lugar se bautizo \1"),
+    (r"\bdans quel lieu (.+?) est" + _INV + r" decede\(e\)", r"en que lugar murio \1"),
+    (r"\bquand (.+?) se est" + _INV + r" marie\(e\)", r"cuando se caso \1"),
+    (r"\bdans quel lieu (.+?) se est" + _INV + r" marie\(e\)", r"en que lugar se caso \1"),
+    (r"\ba quelles adresses (.+?) a" + _INV + r" (?:reside|vecu|habite)", r"en que domicilios vivio \1"),
+    (r"\bou (.+?) a" + _INV + r" (?:reside|vecu|habite)", r"donde vivio \1"),
+    (r"\bou (.+?) apparait" + _INV + r" recense\(e\)", r"donde aparece censado \1"),
+    (r"\bdans quel lieu (.+?) figure" + _INV + r" dans le recensement", r"en que lugar aparece censado \1"),
+    (r"\bou (.+?) a" + _INV + r" emigre\b", r"a donde emigro \1"),
+    (r"\bou (.+?) a" + _INV + r" demenage\b", r"a donde se mudo \1"),
+    (r"\bou (.+?) est" + _INV + r" arrive\(e\)", r"donde llego \1"),
+    (r"\bquand est" + _INV + r" indique que (.+?) est" + _INV + r" ne\(e\)", r"cuando nacio \1"),
+    # "quels <REL> <nombre> avait-il/elle" (inversión) → "que <REL> tuvo <nombre>".
+    # \2 anclado al centinela de nombre para no partir "frères et sœurs <nombre>".
+    (r"\bquel(?:le|s|les)? (.+?) (qzx\d+xzq) avait" + _INV + r"\s*\??$", r"que \1 tuvo \2"),
     # --- compuestas (base + coletilla) primero ---
     (r"\bquel age avait (.+?) a la naissance de son premier enfant, (.+?), et est-ce au-dessus ou en dessous de la moyenne\b",
      r"cuantos anos tenia \1 cuando nacio su primer hijo, \2, y esta por encima o por debajo de la media"),
@@ -204,14 +230,41 @@ MULTIWORD_MAP = [
     (r"\barriere-grand-mere maternelle\b", "bisabuela materna"),
     (r"\barriere-grand-pere paternel\b", "bisabuelo paterno"),
     (r"\barriere-arriere-grand-mere maternelle\b", "tatarabuela materna"),
+    (r"\barriere-arriere-grands-parents\b", "tatarabuelos"),
     (r"\barriere-grands-parents\b", "bisabuelos"),
     (r"\barriere-grand-mere\b", "bisabuela"),
     (r"\barriere-grand-pere\b", "bisabuelo"),
     (r"\bgrands-parents\b", "abuelos"),
+    # nietos por generación y género
+    (r"\barriere-arriere-petits-enfants\b", "tataranietos"),
+    (r"\barriere-petits-enfants\b", "bisnietos"),
+    (r"\bpetits-neveux et petites-ni[eè]ces\b", "sobrinos nietos"),
+    (r"\bpetits-fils\b", "nietos varones"), (r"\bpetites-filles\b", "nietas"),
+    (r"\bpetits-enfants\b", "nietos"),
+    (r"\bgrands-m[eè]res\b", "abuelas"), (r"\bgrands-p[eè]res\b", "abuelos varones"),
+    # in-laws: consuegros (beaux-parents des enfants) antes de beaux-parents
+    (r"\bbeaux-parents des enfants\b", "consuegros"),
+    (r"\bbeaux-parents\b", "suegros"),
+    (r"\bbeaux-freres et belles-s(?:oe|œ|)urs\b", "cunados"),
+    # medios hermanos, primos varones, tíos abuelos, yernos y nueras
+    (r"\bdemi-freres et demi-s(?:oe|œ|)urs\b", "medios hermanos"),
+    (r"\bdemi-freres\b", "medios hermanos"), (r"\bdemi-s(?:oe|œ)urs\b", "medias hermanas"),
+    (r"\bcousins masculins\b", "primos varones"),
+    (r"\bgrands-oncles et grandes-tantes\b", "tios abuelos"),
+    (r"\bgendres et brus\b", "hijos politicos"),
+    # compuestos "... et ..." (ambos géneros) ANTES de las formas simples
     (r"\bfreres et s(?:oe|œ|)urs\b", "hermanos"),
     (r"\boncles et tantes\b", "tios"),
     (r"\bneveux et nieces\b", "sobrinos"),
-    (r"\bpetits-enfants\b", "nietos"),
+    # gendered simples (para el filtro de sexo)
+    (r"\bfreres\b", "hermanos varones"), (r"\bs(?:oe|œ)urs\b", "hermanas"),
+    (r"\bfils\b", "hijos varones"), (r"\bneveux\b", "sobrinos varones"),
+    (r"\boncles\b", "tios varones"),
+    (r"\bancetres connus\b", "antepasados conocidos"),
+    (r"\bdescendants connus\b", "descendientes conocidos"),
+    (r"\bcause de deces\b", "causa de muerte"),
+    (r"\bdate de deces\b", "fecha de defuncion"),
+    (r"\bdate de naissance\b", "fecha de nacimiento"),
     (r"\bcousins issus de germains\b", "primos segundos"),
     (r"\bcousins germains\b", "primos hermanos"),
     (r"\bcousins/cousines\b", "primos"),
@@ -261,4 +314,24 @@ TOKEN_MAP = {
     # otros
     "premier": "primer", "approximatif": "aproximado", "plus": "mas",
     "moins": "menos", "comme": "como", "ans": "anos", "prenom": "nombre de pila",
+    # ── vocabulario ampliado (capacidades nuevas) ────────────────────────────
+    "filles": "hijas", "fille": "hija", "conjoints": "conyuges",
+    "epoux": "marido", "epouse": "esposa", "travail": "trabajo",
+    "ancetres": "antepasados", "ancetre": "antepasado",
+    "connus": "conocidos", "connu": "conocido", "connues": "conocidas",
+    "descendants": "descendientes", "descendant": "descendiente",
+    "cause": "causa", "deces": "muerte", "inhume": "enterrado",
+    "inhumee": "enterrada", "recense": "censado", "recensee": "censada",
+    "apparait": "aparece", "recensement": "censo",
+    "immigration": "inmigracion", "emigration": "emigracion",
+    "religion": "religion", "nationalite": "nacionalidad",
+    "education": "educacion", "confirmation": "confirmacion",
+    "sepulture": "sepultura", "domicile": "domicilio", "domiciles": "domicilios",
+    "evenement": "evento", "fait": "hecho",
+    "maternels": "maternos", "paternels": "paternos", "maternelles": "maternas",
+    "paternelles": "paternas", "ascendants": "ascendientes",
+    "ascendant": "ascendiente", "metier": "oficio", "figure": "figura",
+    "formation": "formacion", "partenaires": "conyuges", "partenaire": "conyuge",
+    "adresses": "domicilios", "paternelle": "paterna", "maternelle": "materna",
+    "baptise": "bautizado", "baptisee": "bautizada",
 }
