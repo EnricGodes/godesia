@@ -70,6 +70,13 @@ PRE_RULES = [
 
 # ── Reglas de frase (reordenación/formas fijas), en orden ────────────────────
 PHRASE_RULES = [
+    # Artefacto del banco: sufijo de género con barra ("empadronat/ada",
+    # "enterrat/ada", "casat/ada") → se queda la forma masculina.
+    (r"/ada\b", ""),
+    # eventos reflexivos "es va <inf>" → "se <pretérito>"
+    (r"\bes va confirmar\b", "se confirmo"), (r"\bes van confirmar\b", "se confirmaron"),
+    (r"\bes va batejar\b", "se bautizo"), (r"\bes van batejar\b", "se bautizaron"),
+    (r"\bes va mudar\b", "se mudo"), (r"\bes van mudar\b", "se mudaron"),
     # "qui" catalán es invariable; el número lo da el verbo. Algunos patrones
     # españoles exigen "quiénes" plural literal → generarlo ante verbo plural.
     (r"\bqui (eren|son|van|varen|havien|foren|tenien)\b", r"quienes \1"),
@@ -101,6 +108,8 @@ PERIPHRASIS = {
     "arribar": ("llego", "llegaron"),
     "emigrar": ("emigro", "emigraron"),
     "fer": ("hizo", "hicieron"),
+    "provocar": ("provoco", "provocaron"),
+    "estar": ("estuvo", "estuvieron"),
 }
 
 # ── N-gramas (largo→corto), antes del barrido token a token ──────────────────
@@ -132,6 +141,17 @@ MULTIWORD_MAP = [
     (r"\bmurio el (\d{4})\b", r"murio en \1"),
     (r"\bmurio el (?=[a-zà-ÿ])", "murio en "),
     (r"\ba el arbre\b", "en el arbol"), (r"\bde l'arbre\b", "del arbol"),
+    # "cosins segons" = primos segundos ("segons" suelto es "según", no se toca)
+    (r"\bcosins segons\b", "primos segundos"), (r"\bcosines segones\b", "primas segundas"),
+    (r"\bnebots segons\b", "sobrinos segundos"),
+    # "per a X" (catalán 'para') → "para X"; "consta/consten per a" muy frecuente
+    (r"\bper a\b", "para"),
+    # "mort" como sustantivo (causa/la mort) → "muerte" (no "fallecido")
+    (r"\bcausa de mort\b", "causa de muerte"), (r"\bla mort de\b", "la muerte de"),
+    (r"\bdata de mort\b", "fecha de defuncion"), (r"\bdata de defuncio\b", "fecha de defuncion"),
+    # medios hermanos y dato biográfico (concordancia)
+    (r"\bmig germans\b", "medios hermanos"), (r"\bmig germanes\b", "medias hermanas"),
+    (r"\bdada biografica\b", "dato biografico"), (r"\bdades biografiques\b", "datos biograficos"),
 ]
 
 # ── Barrido palabra a palabra (claves sin acento) ────────────────────────────
@@ -197,4 +217,43 @@ TOKEN_MAP = {
     "gener": "enero", "febrer": "febrero", "marc": "marzo", "maig": "mayo",
     "juny": "junio", "juliol": "julio", "agost": "agosto",
     "setembre": "septiembre", "novembre": "noviembre", "desembre": "diciembre",
+    # ── vocabulario ampliado (capacidades nuevas del router) ──────────────
+    # parentescos: femeninos plurales (para el filtro de sexo) y lado plural
+    "ties": "tias", "avies": "abuelas",
+    "rebesavis": "tatarabuelos", "rebesavia": "tatarabuela", "rebesavies": "tatarabuelas",
+    "rebesnet": "tataranieto", "rebesnets": "tataranietos",
+    "rebesneta": "tataranieta", "rebesnetes": "tataranietas",
+    "materns": "maternos", "paterns": "paternos",
+    "maternes": "maternas", "paternes": "paternas", "branca": "rama",
+    "varons": "varones", "varo": "varon",
+    # políticos (in-laws) y consuegros
+    "politics": "politicos", "politiques": "politicas",
+    "consogre": "consuegro", "consogres": "consuegros",
+    # ancestros/descendientes conocidos
+    "avantpassat": "antepasado", "avantpassats": "antepasados",
+    "ascendent": "ascendiente", "ascendents": "ascendientes",
+    "descendent": "descendiente", "descendents": "descendientes",
+    "conegut": "conocido", "coneguts": "conocidos",
+    "coneguda": "conocida", "conegudes": "conocidas",
+    # eventos
+    "baptisme": "bautismo", "batejar": "bautizar",
+    "empadronat": "censado", "empadronada": "censada", "empadronats": "censados",
+    "apareix": "aparece", "apareixen": "aparecen", "cens": "censo",
+    "mudanca": "mudanza", "mudances": "mudanzas",
+    "immigracio": "inmigracion", "immigracions": "inmigraciones",
+    "emigracio": "emigracion", "arribar": "llegar",
+    "defuncio": "defuncion", "treball": "trabajo",
+    "enterrament": "entierro", "sepultura": "sepultura",
+    "domicili": "domicilio", "domicilis": "domicilios",
+    "confirmacio": "confirmacion", "comunio": "comunion",
+    "nacionalitat": "nacionalidad", "religio": "religion",
+    "educacio": "educacion", "formacio": "formacion",
+    "malaltia": "enfermedad", "entitat": "entidad", "membre": "miembro",
+    "consten": "constan", "viure": "vivir", "visque": "vivio",
+    # evento genérico y campos
+    "fet": "hecho", "documentat": "documentado", "documentada": "documentada",
+    "dada": "dato", "dades": "datos", "esdeveniment": "evento",
+    "esdeveniments": "eventos", "centre": "centro", "mig": "medio",
+    "premi": "premio", "funeral": "funeral", "obituari": "obituario",
+    "reunio": "reunion", "servei": "servicio", "allistament": "alistamiento",
 }

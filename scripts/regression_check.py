@@ -106,12 +106,26 @@ def main():
                     help="recongela el baseline con el estado actual")
     ap.add_argument("--only-regressions", action="store_true",
                     help="lista solo las regresiones")
+    ap.add_argument("--lang", default="es",
+                    help="idioma del banco/enrutado (es|ca|en|fr); usa gedcom_test_bank_<lang>.json")
+    ap.add_argument("--parity", action="store_true",
+                    help="mide si <lang> resuelve IGUAL que es (people_mentioned+unresolved), "
+                         "ignorando el idioma del texto de la respuesta. Métrica correcta "
+                         "para validar los reescritores ca/en/fr.")
     args = ap.parse_args()
 
-    bank = json.loads(BANK_PATH.read_text())
+    if args.parity and args.lang != "es":
+        _run_parity(args)
+        return
+
+    bank_path = (BANK_PATH if args.lang == "es"
+                 else BASE / "data" / f"gedcom_test_bank_{args.lang}.json")
+    baseline_path = (BASELINE_PATH if args.lang == "es"
+                     else BASE / "data" / f"gedcom_regression_baseline_{args.lang}.json")
+    bank = json.loads(bank_path.read_text())
     baseline = {}
-    if BASELINE_PATH.exists():
-        baseline = json.loads(BASELINE_PATH.read_text())
+    if baseline_path.exists():
+        baseline = json.loads(baseline_path.read_text())
 
     conn = get_connection(str(BASE / "data" / "godesia.db"))
     router = QueryRouter(conn)
@@ -124,7 +138,7 @@ def main():
             continue
         if args.type and c.get("answer_type") != args.type:
             continue
-        res = router.route(c["question"], lang="es")
+        res = router.route(c["question"], lang=args.lang)
         st = classify(c, res)
         states[c["id"]] = st
         by_cat[c["category"]][st] += 1
@@ -178,10 +192,47 @@ def main():
         # Fusiona (no pierde estados de casos filtrados por --category/--type).
         merged = dict(baseline)
         merged.update(states)
-        BASELINE_PATH.write_text(json.dumps(merged, ensure_ascii=False, indent=0))
-        print(f"\n✓ baseline actualizado → {BASELINE_PATH.name} ({len(merged)} casos)")
+        baseline_path.write_text(json.dumps(merged, ensure_ascii=False, indent=0))
+        print(f"\n✓ baseline actualizado → {baseline_path.name} ({len(merged)} casos)")
 
     sys.exit(1 if regressions else 0)
+
+
+def _run_parity(args):
+    """Compara el enrutado de <lang> contra es sobre el banco GEDCOM: mismos
+    people_mentioned y mismo estado unresolved. Inmune al idioma del texto."""
+    from collections import Counter
+    es = {c["id"]: c for c in json.loads((BASE / "data" / "gedcom_test_bank_es.json").read_text())}
+    lang_bank = json.loads((BASE / "data" / f"gedcom_test_bank_{args.lang}.json").read_text())
+    conn = get_connection(str(BASE / "data" / "godesia.db"))
+    router = QueryRouter(conn)
+    same = 0
+    diff_cat = Counter()
+    diffs = []
+    for c in lang_bank:
+        e = es.get(c["id"])
+        if not e:
+            continue
+        if args.category and c.get("category") != args.category:
+            continue
+        rl = router.route(c["question"], lang=args.lang)
+        re_ = router.route(e["question"], lang="es")
+        ok = (set(rl.get("people_mentioned") or []) == set(re_.get("people_mentioned") or [])
+              and rl.get("unresolved") == re_.get("unresolved"))
+        if ok:
+            same += 1
+        else:
+            diff_cat[c["category"]] += 1
+            diffs.append((c["category"], c["question"], e["question"]))
+    total = sum(1 for c in lang_bank if c["id"] in es)
+    print(f"\n=== Paridad {args.lang}↔es (banco GEDCOM, {total} preguntas) ===")
+    print(f"  {args.lang} resuelve IGUAL que es: {same}/{total} ({100*same//max(total,1)}%)"
+          f"  | difieren: {total - same}")
+    print("\n--- categorías donde difieren ---")
+    for k, n in diff_cat.most_common():
+        print(f"  {k:26s} {n}")
+    for cat, q, eq in diffs[:args.show]:
+        print(f"  [{cat}] {args.lang}: {q[:60]}")
 
 
 def _show(r):
