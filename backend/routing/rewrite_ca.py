@@ -20,6 +20,13 @@ MARKERS_STRONG = {
     "matrimoni", "parentiu", "relacio", "mitjana", "malnom", "esglesia",
     "cementiri", "nascut", "nascuda", "nascudes", "nascuts", "mori",
     "batejat", "anomenada", "anomenat", "cognom", "cognoms", "avia",
+    # vocabulario distintivo catalán (no válido en español) para robustecer la
+    # detección: trabajo, mujer/hombre, edad/años, lugar, posesivos, periféstico…
+    "treballar", "treballava", "treballa", "feina", "ofici", "dona", "dones",
+    "edat", "anys", "lloc", "viure", "visque", "quan", "seva", "seves", "seu",
+    "seus", "vaig", "varen", "mudanca", "enterrat", "domicili",
+    "avantpassats", "ascendents", "descendents", "rebesnets", "besnets",
+    "naixement", "defuncio", "baptisme", "empadronat", "consogres",
 }
 # Débiles/ambiguos: cuentan 1. "que" NO entra (colisiona con el "qué" español);
 # el "què" catalán ya se detecta por su acento grave (CHAR_MARKERS).
@@ -142,6 +149,8 @@ MULTIWORD_MAP = [
     (r"\bmurio el (?=[a-zà-ÿ])", "murio en "),
     (r"\ba el arbre\b", "en el arbol"), (r"\bde l'arbre\b", "del arbol"),
     # "cosins segons" = primos segundos ("segons" suelto es "según", no se toca)
+    # "la dona de X" / "la seva dona" = esposa (no "mujer" genérica)
+    (r"\bdona de\b", "esposa de"), (r"\bseva dona\b", "esposa"),
     (r"\bcosins segons\b", "primos segundos"), (r"\bcosines segones\b", "primas segundas"),
     (r"\bnebots segons\b", "sobrinos segundos"),
     # "per a X" (catalán 'para') → "para X"; "consta/consten per a" muy frecuente
