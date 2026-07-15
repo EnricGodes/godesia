@@ -103,7 +103,16 @@
     (root || document).querySelectorAll('[data-content]').forEach(function (el) {
       const v = content[el.getAttribute('data-content')];
       if (v === undefined) return;
-      el.innerHTML = Array.isArray(v) ? v.join('\n') : v;
+      if (Array.isArray(v)) {
+        // En listas (p.ej. la cronología de las sagas) los ítems traducidos vienen
+        // sin <li> (solo su contenido); hay que envolverlos o el <ul> queda roto.
+        const isList = el.tagName === 'UL' || el.tagName === 'OL';
+        el.innerHTML = isList
+          ? v.map(function (x) { return /^\s*<li/i.test(x) ? x : '<li>' + x + '</li>'; }).join('')
+          : v.join('\n');
+      } else {
+        el.innerHTML = v;
+      }
       localizeLinks(el);
     });
   }

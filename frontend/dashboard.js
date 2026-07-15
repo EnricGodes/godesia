@@ -336,7 +336,9 @@ function renderDocuments(documents) {
     const typeMatch = rawCaption.match(/\[([^\]]+)\]/);
     const docType = typeMatch ? typeMatch[1].toLowerCase() : '';
     const caption = rawCaption.replace(/\s*\[.*?\]\s*/g, '').trim();
-    const typeLabel = docType ? docType.charAt(0).toUpperCase() + docType.slice(1) : '';
+    // Etiqueta traducida vía doc_tags.* (clave capitalizada, p.ej. "Defunción")
+    const typeKey = typeMatch ? typeMatch[1].charAt(0).toUpperCase() + typeMatch[1].slice(1).toLowerCase() : '';
+    const typeLabel = typeKey ? _i18nT('doc_tags.' + typeKey, null, typeKey) : '';
     const iconPath = docIconMap[docType] || '/icons/documentacion.svg';
 
     container.innerHTML = `

@@ -94,7 +94,14 @@
     "matrimoni": "Marriages",
     "naixement": "Births",
     "padro": "Census records",
-    "testament": "Wills"
+    "testament": "Wills",
+    "certificat": "Certificates",
+    "dibuix": "Drawings and Plans",
+    "arbre": "Family Trees",
+    "transcripcio": "Transcriptions",
+    "poema": "Poems",
+    "invitacio": "Invitations",
+    "Diversos": "Miscellaneous"
   },
   "doc_tags": {
     "Bautismo": "Baptism",

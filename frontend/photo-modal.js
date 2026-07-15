@@ -392,7 +392,7 @@ function renderPhotoModal() {
     }
     if (p.is_document) {
         const meta = _DOC_TYPE_META[p.doc_type] || { label: 'Diversos', icon: '/icons/diversos.svg' };
-        const metaLabel = p.doc_type ? _pmT('doc_types.' + p.doc_type, null, meta.label) : meta.label;
+        const metaLabel = _pmT('doc_types.' + (p.doc_type || 'Diversos'), null, meta.label);
         albumItems.push(
             `<a href="${_pmHref('/docs.html#' + (p.doc_type || '__unclassified__'))}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#2D4B33;font-weight:600;text-decoration:none;"
                 onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">

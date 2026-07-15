@@ -94,7 +94,14 @@
     "matrimoni": "Eheschließungen",
     "naixement": "Geburten",
     "padro": "Einwohnermelderegister",
-    "testament": "Testamente"
+    "testament": "Testamente",
+    "certificat": "Zertifikate",
+    "dibuix": "Zeichnungen und Pläne",
+    "arbre": "Stammbäume",
+    "transcripcio": "Transkriptionen",
+    "poema": "Gedichte",
+    "invitacio": "Einladungen",
+    "Diversos": "Verschiedenes"
   },
   "doc_tags": {
     "Bautismo": "Taufe",

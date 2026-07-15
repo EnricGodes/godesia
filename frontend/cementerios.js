@@ -421,7 +421,7 @@ const Cementerios = {
         let loc;
         try {
             const res = await fetch(`/api/cemeteries/locate/${encodeURIComponent(personId)}`);
-            if (!res.ok) { this.toast('Sin sepultura registrada para esta persona'); return; }
+            if (!res.ok) { this.toast(_i18nT('pages.cemeteries.no_burial', null, 'Sin sepultura registrada para esta persona')); return; }
             loc = await res.json();
         } catch (e) {
             this.toast(_i18nT('pages.cemeteries.no_burial', null, 'Sin sepultura registrada para esta persona'));

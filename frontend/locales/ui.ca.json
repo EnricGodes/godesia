@@ -94,7 +94,14 @@
     "matrimoni": "Matrimonis",
     "naixement": "Naixements",
     "padro": "Padrons",
-    "testament": "Testaments"
+    "testament": "Testaments",
+    "certificat": "Certificats",
+    "dibuix": "Dibuixos i plànols",
+    "arbre": "Arbres genealògics",
+    "transcripcio": "Transcripcions",
+    "poema": "Poemes",
+    "invitacio": "Invitacions",
+    "Diversos": "Diversos"
   },
   "doc_tags": {
     "Bautismo": "Baptisme",

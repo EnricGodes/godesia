@@ -103,8 +103,10 @@ function selectDocType(docType) {
     history.replaceState(null, '', '#' + docType);
 
     const typeObj = STATE.docTypes.find(t => t.type === docType);
-    const label = typeObj ? _i18nT('doc_types.' + typeObj.type, null, typeObj.label)
-        : _i18nT('pages.docs.title', null, 'Documentos');
+    const label = !typeObj ? _i18nT('pages.docs.title', null, 'Documentos')
+        : (typeObj.type === '__all__'
+            ? _i18nT('nav.all_docs', null, typeObj.label)
+            : _i18nT('doc_types.' + typeObj.type, null, typeObj.label));
     document.getElementById('page-title').textContent = label;
 
     document.querySelectorAll('.sidebar-type-link').forEach(el => {
