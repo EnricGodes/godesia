@@ -2654,7 +2654,7 @@ class QueryRouter:
         person,_ = self._resolve_person(m.group(1))
         if not person:
             return None
-        occupations=[_as_dict(o) for o in get_occupations(self.conn, person['id'])]
+        occupations=self._occupations_merged(person['id'])
         if not occupations:
             answer=_t("handle_occupation_field.1", a=person['name'])
         else:
@@ -3583,6 +3583,20 @@ class QueryRouter:
         ).fetchall()]
         return {"answer": self._list_people_answer(_t("handle_first_surname_natural.1", a=surname), rows), "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
+    def _occupations_merged(self, person_id):
+        """Ocupaciones repartidas entre la tabla `occupations` y los eventos de
+        tipo Trabajo: se fusionan (misma forma title/date/place)."""
+        rows = [_as_dict(o) for o in get_occupations(self.conn, person_id)]
+        for e in self.conn.execute(
+                "SELECT description, place, date FROM events "
+                "WHERE person_id = ? AND type = 'Trabajo'", (person_id,)).fetchall():
+            e = _as_dict(e)
+            title = e.get('description') or e.get('place')
+            if title:
+                rows.append({"title": title, "place": e.get('place'),
+                             "date": _render_date_es(e.get('date'))})
+        return rows
+
     def handle_occupation_natural(self, question):
         q = _clean_question(question)
         # Common "filler" words that can appear between the verb and the person name.
@@ -3605,7 +3619,7 @@ class QueryRouter:
         person,_ = self._resolve_person(m.group(1))
         if not person:
             return None
-        occupations = [_as_dict(o) for o in get_occupations(self.conn, person['id'])]
+        occupations = self._occupations_merged(person['id'])
         if not occupations:
             return {"answer": _t("handle_occupation_natural.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
         parts=[]
