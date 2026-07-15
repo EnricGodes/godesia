@@ -225,6 +225,10 @@ def _normalize_name_fragment(text: str) -> str:
         text,
         flags=re.I,
     )
+    # Artículo personal delante del nombre (catalán 'la Montserrat', 'en Pere',
+    # 'l'Emili'; coloquial en español 'la Montse'): se descarta para resolver.
+    text = re.sub(r"^(?:l'|n')\s*", "", text, flags=re.I)
+    text = re.sub(r"^(?:el|la|els|les|en|na)\s+", "", text, flags=re.I)
     return text.strip()
 
 
