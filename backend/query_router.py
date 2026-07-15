@@ -35,6 +35,15 @@ def _t(key, **kwargs):
     return _render_answer(key, _current_lang.get(), **kwargs)
 
 
+def _noun(noun):
+    """Traduce un nombre de parentesco (p.ej. 'tíos maternos', 'madre política o
+    suegra') al idioma actual vía la clave 'kin_nouns.<es>'. Fallback: el propio
+    texto español, para que nunca quede una clave sin resolver."""
+    key = "kin_nouns." + noun
+    out = _t(key)
+    return noun if out == key else out
+
+
 
 def _as_dict(row):
     return dict(row) if isinstance(row, sqlite3.Row) else row
@@ -987,9 +996,9 @@ class QueryRouter:
         header = (_t("handle_family_stats.1", a=total)
                   + (_t("handle_family_stats.2", a=span) if span else "."))
         rows_out = [
-            f"👨‍👩‍👧 <strong>Familias</strong> · {marriages} matrimonios"
-            + (f" y {partnerships} parejas" if partnerships else ""),
-            f"🌿 <strong>Vivos</strong> · {living} · <strong>Fallecidos</strong> · {deceased}",
+            _t("handle_family_stats.6", a=marriages)
+            + (_t("handle_family_stats.7", a=partnerships) if partnerships else ""),
+            _t("handle_family_stats.8", a=living, b=deceased),
         ]
         if min_y and max_y:
             rows_out.append(_t("handle_family_stats.4", a=min_y, b=max_y)
@@ -1247,12 +1256,12 @@ class QueryRouter:
             if union and union["kind"] == "marriage":
                 extra = ""
                 if union.get("date"):
-                    extra += f", celebrado el {union['date']}"
+                    extra += _t("frag.held_on", a=union['date'])
                 if union.get("place"):
-                    extra += f" en {union['place']}"
+                    extra += _t("frag.at_place", a=union['place'])
                 answer = _t("handle_birth_union.3", a=person['name'], b=father['name'], c=mother['name'], d=extra)
             elif union and union["kind"] == "partnership":
-                extra = f" con inicio documentado en {union['date']}" if union.get("date") else ""
+                extra = _t("frag.documented_start", a=union['date']) if union.get("date") else ""
                 answer = _t("handle_birth_union.4", a=person['name'], b=father['name'], c=mother['name'], d=extra)
             else:
                 answer = _t("handle_birth_union.5", a=person['name'], b=father['name'], c=mother['name'])
@@ -1574,6 +1583,7 @@ class QueryRouter:
         if not person:
             return None
         rows = _sort_people(self._unique_by_id(compute(person)))
+        noun = _noun(noun)
         if not rows:
             ans = _t("_kin_answer.1", a=noun, b=_person_link(person))
         else:
@@ -1661,6 +1671,7 @@ class QueryRouter:
         if not person:
             return None
         rows = _sort_people(self._unique_by_id(compute(person)))
+        noun = _noun(noun)
         ans = (_t("_kin_answer.1", a=noun, b=_person_link(person)) if not rows
                else _t("_kin_answer.2", a=noun, b=_person_link(person), c=_join_names(rows)))
         people = [person] + rows
@@ -1778,7 +1789,7 @@ class QueryRouter:
             if s.get("marriage_date"):
                 txt += f" (matrimonio: {s['marriage_date']})"
             if s.get("marriage_place"):
-                txt += f" en {s['marriage_place']}"
+                txt += _t("frag.at_place", a=s['marriage_place'])
             parts.append(txt)
             people.append(sp)
         partnerships = self.conn.execute(
@@ -1790,7 +1801,7 @@ class QueryRouter:
             if partner:
                 txt = partner["name"]
                 if p["date"]:
-                    txt += f" (pareja documentada desde {p['date']})"
+                    txt += _t("frag.partner_since", a=p['date'])
                 parts.append(txt)
                 people.append(partner)
         if not parts:
@@ -1819,9 +1830,9 @@ class QueryRouter:
                 sp = _as_dict(s["person"])
                 txt = sp["name"]
                 if s.get("marriage_date"):
-                    txt += f" el {s['marriage_date']}"
+                    txt += _t("frag.on_date", a=s['marriage_date'])
                 if s.get("marriage_place"):
-                    txt += f" en {s['marriage_place']}"
+                    txt += _t("frag.at_place", a=s['marriage_place'])
                 parts.append(txt)
                 people.append(sp)
             answer = _t("handle_spouse_with_person_type.2", a=_person_link(person), b='; '.join(parts))
@@ -1845,9 +1856,9 @@ class QueryRouter:
                 sp = _as_dict(s["person"])
                 txt = sp["name"]
                 if s.get("marriage_date"):
-                    txt += f", casados el {s['marriage_date']}"
+                    txt += _t("frag.married_on", a=s['marriage_date'])
                 if s.get("marriage_place"):
-                    txt += f" en {s['marriage_place']}"
+                    txt += _t("frag.at_place", a=s['marriage_place'])
                 parts.append(txt)
                 people.append(sp)
             answer = _t("handle_spouse.2", a=person['name'], b='; '.join(parts))
@@ -2201,7 +2212,7 @@ class QueryRouter:
         if age is None:
             answer = _t("handle_age_at_marriage.2", a=person['name'], b=spouse['name'])
         else:
-            extra = f" el {first['marriage_date']}" if first.get('marriage_date') else ""
+            extra = _t("frag.on_date", a=first['marriage_date']) if first.get('marriage_date') else ""
             answer = _t("handle_age_at_marriage.3", a=person['name'], b=age, c=spouse['name'], d=extra)
         return {"answer": answer, "people_mentioned": [person['id'], spouse['id']], "people_with_photos": self._people_payload([person, spouse])}
 
@@ -2224,7 +2235,7 @@ class QueryRouter:
             if s.get('marriage_date'):
                 txt += f" (matrimonio: {s['marriage_date']})"
             if s.get('marriage_place'):
-                txt += f" en {s['marriage_place']}"
+                txt += _t("frag.at_place", a=s['marriage_place'])
             parts.append(txt)
             people.append(sp)
         answer = _t("handle_spouse_disambiguated_by_birth_place.1", a=place, b=person['name']) + "; ".join(parts) + "."
@@ -2382,9 +2393,9 @@ class QueryRouter:
             sp = _as_dict(s['person'])
             txt = sp['name']
             if s.get('marriage_date'):
-                txt += f"; la boda fue el {s['marriage_date']}"
+                txt += _t("frag.wedding_was", a=s['marriage_date'])
             if s.get('marriage_place'):
-                txt += f" en {s['marriage_place']}"
+                txt += _t("frag.at_place", a=s['marriage_place'])
             parts.append(txt)
             people.append(sp)
         answer = _t("handle_spouse_and_wedding_date.1", a=person['name']) + "; y con ".join(parts) + "."
@@ -2531,10 +2542,10 @@ class QueryRouter:
         occs = _sort_people([])
         occupations = get_occupations(self.conn, person['id'])
         occ_text = "; ".join(
-            (o['title'] + (f" ({o['date']})" if o.get('date') else "") + (f" en {o['place']}" if o.get('place') else ""))
+            (o['title'] + (f" ({o['date']})" if o.get('date') else "") + (_t("frag.at_place", a=o['place']) if o.get('place') else ""))
             for o in (_as_dict(occ) for occ in occupations) if o.get('title')
         )
-        bp = full.get('birth_place') or 'lugar de nacimiento no documentado'
+        bp = full.get('birth_place') or _t("frag.birthplace_unknown")
         if occ_text:
             answer = _t("handle_birth_place_and_occupation.1", a=full['name'], b=bp, c=occ_text)
         else:
@@ -2662,7 +2673,7 @@ class QueryRouter:
             for o in occupations:
                 t=o['title']
                 if o.get('date'): t += f" ({o['date']})"
-                if o.get('place'): t += f" en {o['place']}"
+                if o.get('place'): t += _t("frag.at_place", a=o['place'])
                 parts.append(t)
             answer=_t("handle_occupation_field.2", a=person['name']) + "; ".join(parts) + "."
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
@@ -2727,7 +2738,7 @@ class QueryRouter:
             answer=_t("handle_birth_date_search.1", a=format(day, '02d'), b=format(month, '02d'), c=year)
         elif len(rows)==1:
             r=rows[0]
-            place=f" en {r['birth_place']}" if r.get('birth_place') else ''
+            place=_t("frag.at_place", a=r['birth_place']) if r.get('birth_place') else ''
             answer=_t("handle_birth_date_search.2", a=format(day, '02d'), b=format(month, '02d'), c=year, d=r['name'], e=place)
         else:
             answer=self._list_people_answer(_t("handle_birth_date_search.3", a=format(day, '02d'), b=format(month, '02d'), c=year), rows)
@@ -2747,7 +2758,7 @@ class QueryRouter:
             answer=_t("handle_death_date_search.1", a=format(day, '02d'), b=format(month, '02d'), c=year)
         elif len(rows)==1:
             r=rows[0]
-            place=f" en {r['death_place']}" if r.get('death_place') else ''
+            place=_t("frag.at_place", a=r['death_place']) if r.get('death_place') else ''
             answer=_t("handle_death_date_search.2", a=format(day, '02d'), b=format(month, '02d'), c=year, d=r['name'], e=place)
         else:
             answer=self._list_people_answer(_t("handle_death_date_search.3", a=format(day, '02d'), b=format(month, '02d'), c=year), rows)
@@ -3626,7 +3637,7 @@ class QueryRouter:
         for o in occupations:
             txt=o.get('title','')
             if o.get('date'): txt += f" ({o['date']})"
-            if o.get('place'): txt += f" en {o['place']}"
+            if o.get('place'): txt += _t("frag.at_place", a=o['place'])
             if txt: parts.append(txt)
         return {"answer": _t("handle_occupation_natural.1", a=_person_link(person)) + "; ".join(parts) + ".", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
