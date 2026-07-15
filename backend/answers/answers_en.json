@@ -374,5 +374,6 @@
   "handle_family_stats.6": "👨‍👩‍👧 <strong>Families</strong> · {a} marriages",
   "handle_family_stats.7": " and {a} partnerships",
   "handle_family_stats.8": "🌿 <strong>Living</strong> · {a} · <strong>Deceased</strong> · {b}",
-  "frag.birthplace_unknown": "undocumented birthplace"
+  "frag.birthplace_unknown": "undocumented birthplace",
+  "frag.marriage_paren": " (marriage: {a})"
 }

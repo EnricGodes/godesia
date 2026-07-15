@@ -374,5 +374,6 @@
   "handle_family_stats.6": "👨‍👩‍👧 <strong>Famílies</strong> · {a} matrimonis",
   "handle_family_stats.7": " i {a} parelles",
   "handle_family_stats.8": "🌿 <strong>Vius</strong> · {a} · <strong>Difunts</strong> · {b}",
-  "frag.birthplace_unknown": "lloc de naixement no documentat"
+  "frag.birthplace_unknown": "lloc de naixement no documentat",
+  "frag.marriage_paren": " (matrimoni: {a})"
 }

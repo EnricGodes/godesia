@@ -379,5 +379,6 @@
   "handle_family_stats.6": "👨‍👩‍👧 <strong>Familias</strong> · {a} matrimonios",
   "handle_family_stats.7": " y {a} parejas",
   "handle_family_stats.8": "🌿 <strong>Vivos</strong> · {a} · <strong>Fallecidos</strong> · {b}",
-  "frag.birthplace_unknown": "lugar de nacimiento no documentado"
+  "frag.birthplace_unknown": "lugar de nacimiento no documentado",
+  "frag.marriage_paren": " (matrimonio: {a})"
 }

@@ -88,34 +88,66 @@ def _as_dict(row):
     return dict(row) if isinstance(row, sqlite3.Row) else row
 
 
-_ES_MONTHS = {"ene": "enero", "feb": "febrero", "mar": "marzo", "abr": "abril",
-              "may": "mayo", "jun": "junio", "jul": "julio", "ago": "agosto",
-              "sep": "septiembre", "oct": "octubre", "nov": "noviembre",
-              "dic": "diciembre"}
+# Meses (índice 0=enero) por idioma; las fechas de la BD usan la abreviatura es.
+_MONTHS = {
+    "es": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
+    "ca": ["gener", "febrer", "març", "abril", "maig", "juny", "juliol", "agost", "setembre", "octubre", "novembre", "desembre"],
+    "en": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    "fr": ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+    "de": ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+}
+_MONTH_IDX = {"ene": 0, "feb": 1, "mar": 2, "abr": 3, "may": 4, "jun": 5,
+              "jul": 6, "ago": 7, "sep": 8, "oct": 9, "nov": 10, "dic": 11}
+# Cualificadores GEDCOM (prefijos es) → prefijo por idioma.
+_DATE_QUAL = [
+    (["después de ", "despues de "], {"es": "después de ", "ca": "després de ", "en": "after ", "fr": "après ", "de": "nach "}),
+    (["antes de "], {"es": "antes de ", "ca": "abans de ", "en": "before ", "fr": "avant ", "de": "vor "}),
+    (["aprox. ", "aprox ", "aproximadamente "], {"es": "aproximadamente ", "ca": "aproximadament ", "en": "around ", "fr": "vers ", "de": "etwa "}),
+    (["estimado "], {"es": "estimado en ", "ca": "estimat el ", "en": "estimated ", "fr": "estimé en ", "de": "geschätzt "}),
+    (["hasta "], {"es": "hasta ", "ca": "fins ", "en": "until ", "fr": "jusqu’à ", "de": "bis "}),
+    (["desde "], {"es": "desde ", "ca": "des de ", "en": "from ", "fr": "depuis ", "de": "seit "}),
+]
+_DATE_FROMTO = {"es": ("de ", " a "), "ca": ("de ", " a "), "en": ("from ", " to "), "fr": ("de ", " à "), "de": ("von ", " bis ")}
+_DATE_BETWEEN = {"es": ("entre ", " y "), "ca": ("entre ", " i "), "en": ("between ", " and "), "fr": ("entre ", " et "), "de": ("zwischen ", " und ")}
 
 
-def _render_date_es(raw):
-    """Convierte una fecha GEDCOM abreviada ('28 may. 1944', 'Aprox. 1943',
-    'Después de 1924', 'De 1937 a 1939') a la forma larga en español ('28 de
-    mayo de 1944', 'aproximadamente 1943'…) que usan las fichas del árbol."""
+def _render_date(raw):
+    """Renderiza una fecha GEDCOM abreviada en español ('28 may. 1944', 'Aprox.
+    1943', 'Después de 1924', 'De 1937 a 1939', 'Entre X y Y') a forma larga en
+    el IDIOMA ACTUAL: cualificadores (después de→'després de'/'after'…) y meses
+    traducidos. Fallback a español."""
     if not raw:
         return raw
+    lang = _current_lang.get()
+    if lang not in _MONTHS:
+        lang = "es"
     s = str(raw).strip()
     low = s.lower()
-    for pref, out in (("después de ", "después de "), ("despues de ", "después de "),
-                      ("antes de ", "antes de "), ("aprox. ", "aproximadamente "),
-                      ("aproximadamente ", "aproximadamente "), ("estimado ", "estimado en ")):
-        if low.startswith(pref):
-            return out + _render_date_es(s[len(pref):])
-    if low.startswith("de ") and " a " in low:      # rango "De 1937 a 1939"
+    for prefixes, out in _DATE_QUAL:
+        for pref in prefixes:
+            if low.startswith(pref):
+                return out[lang] + _render_date(s[len(pref):])
+    if low.startswith("de ") and " a " in low:          # rango "De 1937 a 1939"
         a, b = s[3:].split(" a ", 1)
-        return "de " + _render_date_es(a) + " a " + _render_date_es(b)
+        pre, mid = _DATE_FROMTO[lang]
+        return pre + _render_date(a) + mid + _render_date(b)
+    if low.startswith("entre ") and " y " in low:       # rango "Entre X y Y"
+        a, b = s[6:].split(" y ", 1)
+        pre, mid = _DATE_BETWEEN[lang]
+        return pre + _render_date(a) + mid + _render_date(b)
     m = re.match(r"^(?:(\d{1,2})\s+)?([a-zç]+)\.?\s+(\d{4})$", low)
     if m:
         day, mon, year = m.groups()
-        full = _ES_MONTHS.get(mon[:3])
-        if full:
-            return f"{day} de {full} de {year}" if day else f"{full} de {year}"
+        idx = _MONTH_IDX.get(mon[:3])
+        if idx is not None:
+            month = _MONTHS[lang][idx]
+            if not day:
+                return f"{month} {year}" if lang in ("en", "fr", "de") else f"{month} de {year}"
+            if lang in ("es", "ca"):
+                return f"{day} de {month} de {year}"
+            if lang == "de":
+                return f"{day}. {month} {year}"
+            return f"{day} {month} {year}"              # en, fr
     return s
 
 
@@ -1295,12 +1327,12 @@ class QueryRouter:
             if union and union["kind"] == "marriage":
                 extra = ""
                 if union.get("date"):
-                    extra += _t("frag.held_on", a=union['date'])
+                    extra += _t("frag.held_on", a=_render_date(union['date']))
                 if union.get("place"):
                     extra += _t("frag.at_place", a=union['place'])
                 answer = _t("handle_birth_union.3", a=person['name'], b=father['name'], c=mother['name'], d=extra)
             elif union and union["kind"] == "partnership":
-                extra = _t("frag.documented_start", a=union['date']) if union.get("date") else ""
+                extra = _t("frag.documented_start", a=_render_date(union['date'])) if union.get("date") else ""
                 answer = _t("handle_birth_union.4", a=person['name'], b=father['name'], c=mother['name'], d=extra)
             else:
                 answer = _t("handle_birth_union.5", a=person['name'], b=father['name'], c=mother['name'])
@@ -1828,7 +1860,7 @@ class QueryRouter:
             sp = _as_dict(s["person"])
             txt = sp["name"]
             if s.get("marriage_date"):
-                txt += f" (matrimonio: {s['marriage_date']})"
+                txt += _t("frag.marriage_paren", a=_render_date(s['marriage_date']))
             if s.get("marriage_place"):
                 txt += _t("frag.at_place", a=s['marriage_place'])
             parts.append(txt)
@@ -1842,7 +1874,7 @@ class QueryRouter:
             if partner:
                 txt = partner["name"]
                 if p["date"]:
-                    txt += _t("frag.partner_since", a=p['date'])
+                    txt += _t("frag.partner_since", a=_render_date(p['date']))
                 parts.append(txt)
                 people.append(partner)
         if not parts:
@@ -1871,7 +1903,7 @@ class QueryRouter:
                 sp = _as_dict(s["person"])
                 txt = sp["name"]
                 if s.get("marriage_date"):
-                    txt += _t("frag.on_date", a=s['marriage_date'])
+                    txt += _t("frag.on_date", a=_render_date(s['marriage_date']))
                 if s.get("marriage_place"):
                     txt += _t("frag.at_place", a=s['marriage_place'])
                 parts.append(txt)
@@ -1897,7 +1929,7 @@ class QueryRouter:
                 sp = _as_dict(s["person"])
                 txt = sp["name"]
                 if s.get("marriage_date"):
-                    txt += _t("frag.married_on", a=s['marriage_date'])
+                    txt += _t("frag.married_on", a=_render_date(s['marriage_date']))
                 if s.get("marriage_place"):
                     txt += _t("frag.at_place", a=s['marriage_place'])
                 parts.append(txt)
@@ -2253,7 +2285,7 @@ class QueryRouter:
         if age is None:
             answer = _t("handle_age_at_marriage.2", a=person['name'], b=spouse['name'])
         else:
-            extra = _t("frag.on_date", a=first['marriage_date']) if first.get('marriage_date') else ""
+            extra = _t("frag.on_date", a=_render_date(first['marriage_date'])) if first.get('marriage_date') else ""
             answer = _t("handle_age_at_marriage.3", a=person['name'], b=age, c=spouse['name'], d=extra)
         return {"answer": answer, "people_mentioned": [person['id'], spouse['id']], "people_with_photos": self._people_payload([person, spouse])}
 
@@ -2274,7 +2306,7 @@ class QueryRouter:
             sp = _as_dict(s['person'])
             txt = sp['name']
             if s.get('marriage_date'):
-                txt += f" (matrimonio: {s['marriage_date']})"
+                txt += _t("frag.marriage_paren", a=_render_date(s['marriage_date']))
             if s.get('marriage_place'):
                 txt += _t("frag.at_place", a=s['marriage_place'])
             parts.append(txt)
@@ -2386,7 +2418,7 @@ class QueryRouter:
                 if union and union.get('place'):
                     answer = _t("handle_parents_and_marriage_place.3", a=person['name'], b=father['name'], c=mother['name'], d=union['place'])
                 elif union and union.get('date'):
-                    answer = _t("handle_parents_and_marriage_place.4", a=person['name'], b=father['name'], c=mother['name'], d=union['date'])
+                    answer = _t("handle_parents_and_marriage_place.4", a=person['name'], b=father['name'], c=mother['name'], d=_render_date(union['date']))
                 else:
                     answer = _t("handle_parents_and_marriage_place.5", a=person['name'], b=father['name'], c=mother['name'])
             else:
@@ -2434,7 +2466,7 @@ class QueryRouter:
             sp = _as_dict(s['person'])
             txt = sp['name']
             if s.get('marriage_date'):
-                txt += _t("frag.wedding_was", a=s['marriage_date'])
+                txt += _t("frag.wedding_was", a=_render_date(s['marriage_date']))
             if s.get('marriage_place'):
                 txt += _t("frag.at_place", a=s['marriage_place'])
             parts.append(txt)
@@ -2583,7 +2615,7 @@ class QueryRouter:
         occs = _sort_people([])
         occupations = get_occupations(self.conn, person['id'])
         occ_text = "; ".join(
-            (o['title'] + (f" ({o['date']})" if o.get('date') else "") + (_t("frag.at_place", a=o['place']) if o.get('place') else ""))
+            (o['title'] + (f" ({_render_date(o['date'])})" if o.get('date') else "") + (_t("frag.at_place", a=o['place']) if o.get('place') else ""))
             for o in (_as_dict(occ) for occ in occupations) if o.get('title')
         )
         bp = full.get('birth_place') or _t("frag.birthplace_unknown")
@@ -2657,7 +2689,7 @@ class QueryRouter:
             if p2: people.append(p2)
             label = f"{p1['name'] if p1 else '?'} y {p2['name'] if p2 else '?'}"
             if r.get('date'):
-                label += f" ({r['date']})"
+                label += f" ({_render_date(r['date'])})"
             parts.append(label)
         answer = _t("handle_marriages_place.1", a=place, b=len(rows)) + ", ".join(parts) + "."
         up=_unique_people(people)
@@ -2713,7 +2745,7 @@ class QueryRouter:
             parts=[]
             for o in occupations:
                 t=o['title']
-                if o.get('date'): t += f" ({o['date']})"
+                if o.get('date'): t += f" ({_render_date(o['date'])})"
                 if o.get('place'): t += _t("frag.at_place", a=o['place'])
                 parts.append(t)
             answer=_t("handle_occupation_field.2", a=person['name']) + "; ".join(parts) + "."
@@ -2736,7 +2768,7 @@ class QueryRouter:
                 if r.get('address2'): frag += (' ' if frag else '') + r['address2']
                 if r.get('city'): frag += (', ' if frag else '') + r['city']
                 if r.get('country'): frag += (', ' if frag else '') + r['country']
-                if r.get('date'): frag += f" ({r['date']})"
+                if r.get('date'): frag += f" ({_render_date(r['date'])})"
                 parts.append(frag)
             answer=_t("handle_residence_field.2", a=person['name']) + "; ".join(parts) + "."
         return {"answer": answer, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
@@ -3646,7 +3678,7 @@ class QueryRouter:
             title = e.get('description') or e.get('place')
             if title:
                 rows.append({"title": title, "place": e.get('place'),
-                             "date": _render_date_es(e.get('date'))})
+                             "date": _render_date(e.get('date'))})
         return rows
 
     def handle_occupation_natural(self, question):
@@ -3677,7 +3709,7 @@ class QueryRouter:
         parts=[]
         for o in occupations:
             txt=o.get('title','')
-            if o.get('date'): txt += f" ({o['date']})"
+            if o.get('date'): txt += f" ({_render_date(o['date'])})"
             if o.get('place'): txt += _t("frag.at_place", a=o['place'])
             if txt: parts.append(txt)
         return {"answer": _t("handle_occupation_natural.1", a=_person_link(person)) + "; ".join(parts) + ".", "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
@@ -3698,7 +3730,7 @@ class QueryRouter:
         last = sorted(spouses, key=keyfn)[-1]
         sp = _as_dict(last['person'])
         extra=[]
-        if last.get('marriage_date'): extra.append(_t("handle_last_spouse.3", a=last['marriage_date']))
+        if last.get('marriage_date'): extra.append(_t("handle_last_spouse.3", a=_render_date(last['marriage_date'])))
         if last.get('marriage_place'): extra.append(_t("handle_last_spouse.4", a=last['marriage_place']))
         ans = _t("handle_last_spouse.1", a=_person_link(person), b=_person_link(sp))
         if extra: ans += ", " + ", ".join(extra)
@@ -3858,7 +3890,7 @@ class QueryRouter:
         for r in records:
             frag = r.get('description') or ''
             if r.get('date'):
-                frag += f" ({r['date']})"
+                frag += f" ({_render_date(r['date'])})"
             if r.get('place'):
                 frag += f" — {r['place']}"
             parts.append(frag.strip())
@@ -3912,7 +3944,7 @@ class QueryRouter:
             if r.get('place_detail'):
                 frag += f" — {r['place_detail']}"
             if r.get('date'):
-                frag += f" ({r['date']})"
+                frag += f" ({_render_date(r['date'])})"
             parts.append(frag.strip())
         ans = _t("handle_burial.1", a=_person_link(person)) + "; ".join(parts) + "."
         return {"answer": ans, "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
@@ -4011,7 +4043,7 @@ class QueryRouter:
             if r.get('description'):
                 frag += f": {r['description']}"
             if r.get('date'):
-                frag += f" ({r['date']})"
+                frag += f" ({_render_date(r['date'])})"
             if r.get('place'):
                 frag += f" — {r['place']}"
             parts.append("- " + frag.strip())
@@ -4041,7 +4073,7 @@ class QueryRouter:
         parts = []
         for r in records:
             frag = " — ".join(str(x) for x in (r.get('description'), r.get('place'),
-                                               _render_date_es(r.get('date'))) if x)
+                                               _render_date(r.get('date'))) if x)
             if frag:
                 parts.append("- " + frag)
         ans = _t("handle_education.1", a=_person_link(person)) + "\n".join(parts)
@@ -4133,7 +4165,7 @@ class QueryRouter:
         if r.get('country'):
             frag += (', ' if frag else '') + r['country']
         if with_date and r.get('date'):
-            frag += f" ({r['date']})"
+            frag += f" ({_render_date(r['date'])})"
         return frag
 
     def handle_last_residence(self, question):
@@ -4162,7 +4194,7 @@ class QueryRouter:
             addr = e.get('place') or e.get('description')
             if addr:
                 res.append({"address": addr, "address2": None, "city": None,
-                            "country": None, "date": _render_date_es(e.get('date'))})
+                            "country": None, "date": _render_date(e.get('date'))})
         if not res:
             return {"answer": _t("handle_last_residence.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
@@ -4369,7 +4401,7 @@ class QueryRouter:
         for e in rows:
             e = _as_dict(e)
             parts = [x for x in (e.get('description'), e.get('place'),
-                                 _render_date_es(e.get('date'))) if x]
+                                 _render_date(e.get('date'))) if x]
             if not parts:
                 parts = [x for x in (e.get('note'), e.get('cause'), e.get('address')) if x]
             if parts:
