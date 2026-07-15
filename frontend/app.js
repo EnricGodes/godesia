@@ -155,6 +155,9 @@ function addFollowUpChips(msgDiv, personName, dossier) {
     row.appendChild(btn);
   });
   content.appendChild(row);
+  // Los chips se añaden tras cargar el dossier (async), cuando el mensaje ya se
+  // había desplazado; sin este scroll quedan cortados por debajo del visible.
+  chat.scrollTop = chat.scrollHeight;
 }
 
 function submitFollowUp(question) {
