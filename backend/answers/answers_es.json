@@ -380,5 +380,6 @@
   "handle_family_stats.7": " y {a} parejas",
   "handle_family_stats.8": "🌿 <strong>Vivos</strong> · {a} · <strong>Fallecidos</strong> · {b}",
   "frag.birthplace_unknown": "lugar de nacimiento no documentado",
-  "frag.marriage_paren": " (matrimonio: {a})"
+  "frag.marriage_paren": " (matrimonio: {a})",
+  "handle_name_matches.1": "He encontrado varias coincidencias:"
 }

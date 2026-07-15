@@ -375,5 +375,6 @@
   "handle_family_stats.7": " et {a} unions",
   "handle_family_stats.8": "🌿 <strong>Vivants</strong> · {a} · <strong>Décédés</strong> · {b}",
   "frag.birthplace_unknown": "lieu de naissance non documenté",
-  "frag.marriage_paren": " (mariage : {a})"
+  "frag.marriage_paren": " (mariage : {a})",
+  "handle_name_matches.1": "J’ai trouvé plusieurs correspondances :"
 }

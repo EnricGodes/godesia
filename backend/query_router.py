@@ -4477,7 +4477,7 @@ class QueryRouter:
             if person:
                 if len(matches) == 1:
                     return self._build_targeted_response(person, question)
-                parts = ["He encontrado varias coincidencias:"]
+                parts = [_t("handle_name_matches.1")]
                 for m in matches[:10]:
                     parts.append(f"- {_person_brief(m)}")
                 return {"answer": "\n".join(parts), "people_mentioned": [m["id"] for m in matches[:10]], "people_with_photos": self._people_payload(matches[:10])}

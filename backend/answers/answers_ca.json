@@ -375,5 +375,6 @@
   "handle_family_stats.7": " i {a} parelles",
   "handle_family_stats.8": "🌿 <strong>Vius</strong> · {a} · <strong>Difunts</strong> · {b}",
   "frag.birthplace_unknown": "lloc de naixement no documentat",
-  "frag.marriage_paren": " (matrimoni: {a})"
+  "frag.marriage_paren": " (matrimoni: {a})",
+  "handle_name_matches.1": "He trobat diverses coincidències:"
 }
