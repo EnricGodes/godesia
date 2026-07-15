@@ -4087,6 +4087,16 @@ class QueryRouter:
         if not person:
             return None
         res = [_as_dict(r) for r in get_residences(self.conn, person['id'])]
+        # Los domicilios están repartidos entre la tabla `residences` y los eventos
+        # de tipo Mudanza (cambio de vivienda): se fusionan para "¿dónde vivió X?".
+        for e in self.conn.execute(
+                "SELECT place, date, description FROM events "
+                "WHERE person_id = ? AND type = 'Mudanza'", (person['id'],)).fetchall():
+            e = _as_dict(e)
+            addr = e.get('place') or e.get('description')
+            if addr:
+                res.append({"address": addr, "address2": None, "city": None,
+                            "country": None, "date": _render_date_es(e.get('date'))})
         if not res:
             return {"answer": _t("handle_last_residence.2", a=_person_link(person)), "people_mentioned": [person['id']], "people_with_photos": self._people_payload([person])}
 
