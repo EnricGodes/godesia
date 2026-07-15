@@ -27,7 +27,10 @@ MARKERS_STRONG = {
 MARKERS_WEAK = {"are", "is", "and", "or", "in", "that", "was", "for"}
 CHAR_MARKERS = set()  # el inglés no tiene caracteres propios
 
-PRE_SPLIT = []
+# Genitivo sajón "X's <rel>": se marca el apóstrofo posesivo ANTES de proteger
+# el nombre (así "Ballart's" no rompe la protección) con un token "zzgen" que
+# luego una PHRASE_RULE usa para reordenar a "<rel> de X".
+PRE_SPLIT = [(r"([a-zà-ÿ])'s\b", r"\1 zzgen")]
 NAME_CONNECTORS = {"de", "del", "la"}
 NON_NAME_TOKENS = {
     "who", "what", "where", "when", "which", "did", "does", "were", "was",
@@ -46,6 +49,43 @@ PRE_RULES = []
 
 # ── Reglas de frase (reordenación), de más específica a más genérica ─────────
 PHRASE_RULES = [
+    # --- estructuras del banco GEDCOM (genitivo sajón, "did X have", "recorded
+    #     for X") + eventos/vitales ---
+    (r"\bwho (?:was|were) (.+?) zzgen (.+?)\s*$", r"\2 de \1"),   # X's <rel>
+    (r"\b(?:which|what) (.+?) did (?!the couple)(.+?) have\s*$", r"que \1 tuvo \2"),
+    # vitales específicas ANTES de la genérica "recorded for"
+    (r"\bwhat death date is recorded for (.+?)\s*$", r"en que fecha murio \1"),
+    (r"\bwhat birth date is recorded for (.+?)\s*$", r"en que fecha nacio \1"),
+    (r"\bwhat marriage place is recorded for (.+?)\s*$", r"donde se caso \1"),
+    (r"\bwhat marriage date is recorded for (.+?)\s*$", r"en que fecha se caso \1"),
+    (r"\bwhat partners? (?:is|are) recorded for (.+?)\s*$", r"con quien se caso \1"),
+    (r"\b(?:what|which) (.+?) (?:is|are) recorded for (.+?)\s*$", r"que \1 constan para \2"),
+    (r"\bwhere was (.+?) originally from\b", r"de donde era \1"),
+    (r"\bat what age did (.+?) die\b", r"a que edad murio \1"),
+    (r"\bwhere did (.+?) study\b", r"donde estudio \1"),
+    (r"\bwhere did (.+?) move to\b", r"a donde se mudo \1"),
+    (r"\bon what date did (.+?) get married\b", r"en que fecha se caso \1"),
+    (r"\bwhere was (.+?) confirmed\b", r"donde se confirmo \1"),
+    (r"\bwhere was (.+?) (?:baptized|baptised)\b", r"donde se bautizo \1"),
+    (r"\bat what institution did (.+?) study\b", r"en que centro estudio \1"),
+    (r"\bwho was (.+?) married to\b", r"con quien se caso \1"),
+    (r"\bin what place did (.+?) die\b", r"donde murio \1"),
+    (r"\bwhere was (.+?) buried\b", r"donde fue enterrado \1"),
+    (r"\bwhere did (.+?) die\b", r"donde murio \1"),
+    (r"\bwhere does (.+?) appear in the census\b", r"donde aparece censado \1"),
+    (r"\bon what date was (.+?) (?:baptized|baptised)\b", r"en que fecha se bautizo \1"),
+    (r"\bon what date was (.+?) buried\b", r"en que fecha fue enterrado \1"),
+    (r"\bwhen did (.+?) get married\b", r"cuando se caso \1"),
+    (r"\bwhere did (.+?) get married\b", r"donde se caso \1"),
+    (r"\bin what place was (.+?) born\b", r"en que lugar nacio \1"),
+    (r"\bin what place was (.+?) (?:baptized|baptised)\b", r"en que lugar se bautizo \1"),
+    (r"\bin what place did (.+?) get married\b", r"en que lugar se caso \1"),
+    (r"\bat (?:which|what) addresses did (.+?) live\b", r"en que domicilios vivio \1"),
+    (r"\bwhere did (.+?) live\b", r"donde vivio \1"),
+    (r"\bwhen is (.+?) recorded as having been born\b", r"cuando nacio \1"),
+    (r"\bwhat did (.+?) do for a living\b", r"de que trabajaba \1"),
+    (r"\bwhat partner is recorded for (.+?)\s*$", r"con quien se caso \1"),
+    (r"\b(.+?) zzgen (.+?)\s*$", r"\2 de \1"),   # genitivo residual
     # --- preguntas COMPUESTAS (base + coletilla): van primero porque el español
     #     las resuelve con un handler específico distinto al de la base ---
     (r"\bhow old was (.+?) when their first child was born,? and is that above or below average\b",
@@ -145,6 +185,47 @@ PERIPHRASIS = {}
 # ── N-gramas (antes del barrido token a token) ───────────────────────────────
 MULTIWORD_MAP = [
     (r"\bwith whom\b", "con quien"),
+    # ── relaciones compuestas y con género (banco GEDCOM) ────────────────────
+    # las "... and ..." y las maternal/paternal ANTES que las formas simples
+    (r"\bgreat-uncles and great-aunts\b", "tios abuelos"),
+    (r"\b(?:maternal-branch|maternal) grandparents\b", "abuelos maternos"),
+    (r"\b(?:paternal-branch|paternal) grandparents\b", "abuelos paternos"),
+    (r"\bmaternal-branch uncles and aunts\b", "tios maternos"),
+    (r"\bpaternal-branch uncles and aunts\b", "tios paternos"),
+    (r"\bdirect descendants\b", "descendencia directa"),
+    (r"\bmaternal uncles and aunts\b", "tios maternos"),
+    (r"\bpaternal uncles and aunts\b", "tios paternos"),
+    (r"\buncles and aunts\b", "tios"),
+    (r"\bgreat-great-grandchildren\b", "tataranietos"),
+    (r"\bgreat-grandchildren\b", "bisnietos"),
+    (r"\bdeath date\b", "fecha de defuncion"),
+    (r"\bbirth date\b", "fecha de nacimiento"),
+    (r"\bgreat-nephews and great-nieces\b", "sobrinos nietos"),
+    (r"\bnephews and nieces\b", "sobrinos"),
+    (r"\bsons- and daughters-in-law\b", "hijos politicos"),
+    (r"\bco-parents-in-law\b", "consuegros"),
+    (r"\bsiblings-in-law\b", "cunados"),
+    (r"\bparents-in-law\b", "suegros"),
+    (r"\bmaternal grandparents\b", "abuelos maternos"),
+    (r"\bpaternal grandparents\b", "abuelos paternos"),
+    (r"\bknown ancestors\b", "antepasados conocidos"),
+    (r"\bknown descendants\b", "descendientes conocidos"),
+    (r"\bfull siblings\b", "hermanos completos"),
+    (r"\bhalf-siblings\b", "medios hermanos"),
+    (r"\bmale cousins\b", "primos varones"), (r"\bfemale cousins\b", "primas"),
+    (r"\bbiographical detail\b", "dato biografico"),
+    (r"\bcause of death\b", "causa de muerte"),
+    (r"\bdivorce date\b", "fecha de divorcio"),
+    (r"\bfirst communion\b", "primera comunion"),
+    # "brothers and sisters" = hermanos (ambos), ANTES de "brothers"→varones
+    (r"\bbrothers and sisters\b", "hermanos"),
+    # gendered plurales (tras los compuestos "... and ...")
+    (r"\bgrandmothers\b", "abuelas"), (r"\bgrandfathers\b", "abuelos varones"),
+    (r"\bgrandsons\b", "nietos varones"), (r"\bgranddaughters\b", "nietas"),
+    (r"\bbrothers\b", "hermanos varones"), (r"\bsons\b", "hijos varones"),
+    (r"\bdaughters\b", "hijas"),
+    (r"\bnephews\b", "sobrinos varones"), (r"\buncles\b", "tios varones"),
+    (r"\bspouses\b", "conyuges"), (r"\bancestors\b", "antepasados"),
     (r"\bmother-in-law or father-in-law\b", "suegra o el suegro"),
     (r"\bmother-in-law\b", "suegra"), (r"\bfather-in-law\b", "suegro"),
     (r"\bsister-in-law\b", "cunada"), (r"\bbrother-in-law\b", "cunado"),
@@ -211,4 +292,12 @@ TOKEN_MAP = {
     "percentage": "porcentaje", "date": "fecha", "wedding": "boda",
     "year": "ano", "years": "anos", "trade": "oficio", "whole": "todo",
     "most": "mas",
+    # capacidades nuevas
+    "census": "censo", "event": "evento", "buried": "enterrado",
+    "baptized": "bautizado", "baptised": "bautizado", "grandmothers": "abuelas",
+    "nieces": "sobrinas", "sisters": "hermanas", "aunts": "tias",
+    "immigration": "inmigracion", "emigration": "emigracion",
+    "religion": "religion", "nationality": "nacionalidad",
+    "education": "educacion", "confirmation": "confirmacion",
+    "move": "mudanza", "moved": "mudanza",
 }
