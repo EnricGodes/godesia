@@ -44,6 +44,45 @@ def _noun(noun):
     return noun if out == key else out
 
 
+# Concordancia de los nombres de parentesco (para {art}/{cop}/{neg} de
+# _kin_answer). Género y número del nombre (por defecto masculino plural, que es
+# lo habitual: abuelos, tíos, primos…); solo se listan las excepciones.
+_NOUN_META = {
+    "madre política o suegra": ("f", "s"),
+    "padre político o suegro": ("m", "s"),
+}
+_ARTICLE = {
+    "es": {("m", "s"): "El", ("f", "s"): "La", ("m", "p"): "Los", ("f", "p"): "Las"},
+    "ca": {("m", "s"): "El", ("f", "s"): "La", ("m", "p"): "Els", ("f", "p"): "Les"},
+    "fr": {("m", "s"): "Le", ("f", "s"): "La", ("m", "p"): "Les", ("f", "p"): "Les"},
+    "en": {("m", "s"): "The", ("f", "s"): "The", ("m", "p"): "The", ("f", "p"): "The"},
+    "de": {("m", "s"): "Der", ("f", "s"): "Die", ("m", "p"): "Die", ("f", "p"): "Die"},
+}
+_COPULA = {  # cópula en pasado, concuerda en número
+    "es": {"s": "fue", "p": "fueron"}, "ca": {"s": "va ser", "p": "van ser"},
+    "fr": {"s": "était", "p": "étaient"}, "en": {"s": "was", "p": "were"},
+    "de": {"s": "war", "p": "waren"},
+}
+_NEG = {  # "no consta/n" (sin resultados)
+    "es": {"s": "no consta", "p": "no constan"}, "ca": {"s": "no consta", "p": "no consten"},
+    "fr": {"s": "n’est pas enregistré", "p": "ne sont pas enregistrés"},
+    "en": {"s": "is not recorded", "p": "are not recorded"},
+    "de": {"s": "ist nicht erfasst", "p": "sind nicht erfasst"},
+}
+
+
+def _kin_agreement(noun, n_rows):
+    """Devuelve (art, cop, neg) concordados para el nombre `noun` (clave es) en
+    el idioma actual. El número lo marca el nombre; si hay >1 resultado, plural."""
+    lang = _current_lang.get()
+    if lang not in _ARTICLE:
+        lang = "es"
+    g, num = _NOUN_META.get(noun, ("m", "p"))
+    if n_rows > 1:
+        num = "p"
+    return (_ARTICLE[lang][(g, num)], _COPULA[lang][num], _NEG[lang][num])
+
+
 
 def _as_dict(row):
     return dict(row) if isinstance(row, sqlite3.Row) else row
@@ -1583,11 +1622,12 @@ class QueryRouter:
         if not person:
             return None
         rows = _sort_people(self._unique_by_id(compute(person)))
-        noun = _noun(noun)
+        art, cop, neg = _kin_agreement(noun, len(rows))
+        noun_t = _noun(noun)
         if not rows:
-            ans = _t("_kin_answer.1", a=noun, b=_person_link(person))
+            ans = _t("_kin_answer.1", art=art, a=noun_t, b=_person_link(person), neg=neg)
         else:
-            ans = _t("_kin_answer.2", a=noun, b=_person_link(person), c=_join_names(rows))
+            ans = _t("_kin_answer.2", art=art, a=noun_t, b=_person_link(person), cop=cop, c=_join_names(rows))
         people = [person] + rows
         return {"answer": ans, "people_mentioned": [x["id"] for x in people],
                 "people_with_photos": self._people_payload(people[:26])}
@@ -1671,9 +1711,10 @@ class QueryRouter:
         if not person:
             return None
         rows = _sort_people(self._unique_by_id(compute(person)))
-        noun = _noun(noun)
-        ans = (_t("_kin_answer.1", a=noun, b=_person_link(person)) if not rows
-               else _t("_kin_answer.2", a=noun, b=_person_link(person), c=_join_names(rows)))
+        art, cop, neg = _kin_agreement(noun, len(rows))
+        noun_t = _noun(noun)
+        ans = (_t("_kin_answer.1", art=art, a=noun_t, b=_person_link(person), neg=neg) if not rows
+               else _t("_kin_answer.2", art=art, a=noun_t, b=_person_link(person), cop=cop, c=_join_names(rows)))
         people = [person] + rows
         return {"answer": ans, "people_mentioned": [x["id"] for x in people],
                 "people_with_photos": self._people_payload(people[:26])}
