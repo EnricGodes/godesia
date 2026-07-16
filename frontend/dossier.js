@@ -1048,7 +1048,7 @@ function buildEvents(data) {
                         s.marriage_place ? `${s.marriage_place}` : ''
                     ].filter(Boolean),
                     photo: s.photo_file,
-                    personSex: s.sex, personBirthYear: s.birth_year, personDeathYear: s.death_year,
+                    personId: s.id, personSex: s.sex, personBirthYear: s.birth_year, personDeathYear: s.death_year,
                     name: spouseName
                 });
             }
@@ -1068,7 +1068,7 @@ function buildEvents(data) {
                         ].filter(Boolean),
                         note: s.divorce.note || '',
                         photo: s.photo_file,
-                        personSex: s.sex, personBirthYear: s.birth_year, personDeathYear: s.death_year,
+                        personId: s.id, personSex: s.sex, personBirthYear: s.birth_year, personDeathYear: s.death_year,
                         name: spouseName
                     });
                 }
@@ -1089,7 +1089,7 @@ function buildEvents(data) {
                             formatDateWithQualifier(s.partnership_date) || ''
                         ].filter(Boolean),
                         photo: s.photo_file,
-                        personSex: s.sex, personBirthYear: s.birth_year, personDeathYear: s.death_year,
+                        personId: s.id, personSex: s.sex, personBirthYear: s.birth_year, personDeathYear: s.death_year,
                         name: spouseName
                     });
                 }
@@ -1111,7 +1111,7 @@ function buildEvents(data) {
                             s.death_place || ''
                         ].filter(Boolean),
                         photo: s.photo_file,
-                        personSex: s.sex, personBirthYear: s.birth_year, personDeathYear: s.death_year,
+                        personId: s.id, personSex: s.sex, personBirthYear: s.birth_year, personDeathYear: s.death_year,
                         name: spouseName
                     });
                 }
@@ -1135,7 +1135,7 @@ function buildEvents(data) {
                         c.birth_place || ''
                     ].filter(Boolean),
                     photo: c.photo_file,
-                    personSex: c.sex, personBirthYear: c.birth_year, personDeathYear: c.death_year,
+                    personId: c.id, personSex: c.sex, personBirthYear: c.birth_year, personDeathYear: c.death_year,
                     name: childName
                 });
             }
@@ -1156,7 +1156,7 @@ function buildEvents(data) {
                             c.death_place || ''
                         ].filter(Boolean),
                         photo: c.photo_file,
-                        personSex: c.sex, personBirthYear: c.birth_year, personDeathYear: c.death_year,
+                        personId: c.id, personSex: c.sex, personBirthYear: c.birth_year, personDeathYear: c.death_year,
                         name: childName
                     });
                 }
@@ -1186,7 +1186,7 @@ function buildEvents(data) {
                             photo: m.spouse_photo,
                             name: spouseName,
                             childPhoto: c.photo_file,
-                            childSex: c.sex, childBirthYear: c.birth_year, childDeathYear: c.death_year,
+                            childId: c.id, childSex: c.sex, childBirthYear: c.birth_year, childDeathYear: c.death_year,
                             childName: childName,
                             isChildMarriage: true
                         });
@@ -1432,9 +1432,9 @@ function buildEvents(data) {
 
                         const photos = [];
                         if (child.photo_file) {
-                            photos.push({ name: childName, photo: child.photo_file, personSex: child.sex, personBirthYear: child.birth_year, personDeathYear: child.death_year });
+                            photos.push({ name: childName, personId: child.id, photo: child.photo_file, personSex: child.sex, personBirthYear: child.birth_year, personDeathYear: child.death_year });
                         } else {
-                            photos.push({ name: childName, photo: null, personSex: child.sex, personBirthYear: child.birth_year, personDeathYear: child.death_year });
+                            photos.push({ name: childName, personId: child.id, photo: null, personSex: child.sex, personBirthYear: child.birth_year, personDeathYear: child.death_year });
                         }
                         if (partnership.partner_photo) {
                             photos.push({ name: partnerName, photo: partnership.partner_photo });
@@ -1530,17 +1530,21 @@ function renderTimelineSection() {
 function renderGraphicMode(events) {
     const graphicHtml = events.map((e, idx) => {
         let photosHtml = '';
-        const thumbDiv = (photo, sex, by, dy, name) => {
+        const thumbDiv = (photo, sex, by, dy, name, id) => {
             const img = photo
                 ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${photo}" alt="${name}">`
                 : `<div class="w-8 h-8 rounded-full border border-outline-variant/30 bg-surface-container-high flex items-center justify-center flex-shrink-0">${personSvg(sex, by, dy, 20)}</div>`;
-            return `<div class="flex items-center gap-1">${img}<span class="text-sm font-bold">${name}</span></div>`;
+            const inner = `${img}<span class="text-sm font-bold">${name}</span>`;
+            // Si hay id (familiar del árbol), el chip es un enlace a su dossier.
+            return id
+                ? `<a href="${_lhref('/dossier.html?id=' + String(id).replace(/@/g, ''))}" class="flex items-center gap-1 hover:opacity-70 transition-opacity" style="text-decoration:none;color:inherit;">${inner}</a>`
+                : `<div class="flex items-center gap-1">${inner}</div>`;
         };
 
         if (e.isChildMarriage) {
             photosHtml = `
                 <div class="flex items-center gap-2 mb-3">
-                    ${thumbDiv(e.childPhoto, e.childSex, e.childBirthYear, e.childDeathYear, e.childName)}
+                    ${thumbDiv(e.childPhoto, e.childSex, e.childBirthYear, e.childDeathYear, e.childName, e.childId)}
                     <span class="text-xs text-outline mx-1">${_i18nT('common.and', null, 'y')}</span>
                     ${thumbDiv(e.photo, null, null, null, e.name)}
                 </div>
@@ -1548,12 +1552,12 @@ function renderGraphicMode(events) {
         } else if (e.photos && e.photos.length > 0) {
             photosHtml = `
                 <div class="flex items-center gap-3 mb-2">
-                    ${e.photos.map(p => thumbDiv(p.photo, p.personSex, p.personBirthYear, p.personDeathYear, p.name))
+                    ${e.photos.map(p => thumbDiv(p.photo, p.personSex, p.personBirthYear, p.personDeathYear, p.name, p.personId))
                         .join(`<span class="text-xs text-outline mx-1">${_i18nT('common.and', null, 'y')}</span>`)}
                 </div>
             `;
         } else if (e.photo || e.personSex !== undefined) {
-            photosHtml = `<div class="flex items-center gap-3 mb-2">${thumbDiv(e.photo, e.personSex, e.personBirthYear, e.personDeathYear, e.name)}</div>`;
+            photosHtml = `<div class="flex items-center gap-3 mb-2">${thumbDiv(e.photo, e.personSex, e.personBirthYear, e.personDeathYear, e.name, e.personId)}</div>`;
         }
 
         return `
