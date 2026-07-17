@@ -653,24 +653,61 @@ if (document.readyState === 'loading') {
 // ---------------------------------------------------------------------------
 
 let _zoomLevel = 4;
+let _panX = 0, _panY = 0;               // desplazamiento (en unidades translate)
+let _dragging = false;
+let _dragStartX = 0, _dragStartY = 0, _panStartX = 0, _panStartY = 0;
 
-function _zoomMouseMove(e) {
+function _applyZoomTransform() {
     const img = document.getElementById('zoom-mode-img');
-    if (!img) return;
-    const dx = e.clientX - window.innerWidth / 2;
-    const dy = e.clientY - window.innerHeight / 2;
-    // translate is in scaled space: viewport offset = scale × translate
-    // to pan by (N-1)×dx in viewport, translate = -dx×(N-1)/N
-    const f = (_zoomLevel - 1) / _zoomLevel;
-    img.style.transform = `scale(${_zoomLevel}) translate(${-dx * f}px, ${-dy * f}px)`;
+    // transform: scale(N) translate(t) → desplazamiento visual = N × t
+    if (img) img.style.transform = `scale(${_zoomLevel}) translate(${_panX}px, ${_panY}px)`;
+}
+
+function _clampPan() {
+    // Evita perder la foto: el borde no puede pasar del centro del viewport.
+    // Desplazamiento visual = zoom × translate; se usa el viewport como cota.
+    const maxX = (_zoomLevel - 1) / (2 * _zoomLevel) * window.innerWidth;
+    const maxY = (_zoomLevel - 1) / (2 * _zoomLevel) * window.innerHeight;
+    _panX = Math.max(-maxX, Math.min(maxX, _panX));
+    _panY = Math.max(-maxY, Math.min(maxY, _panY));
+}
+
+function _zoomPointerDown(e) {
+    _dragging = true;
+    _dragStartX = e.clientX;
+    _dragStartY = e.clientY;
+    _panStartX = _panX;
+    _panStartY = _panY;
+    const overlay = document.getElementById('zoom-mode-overlay');
+    if (overlay) overlay.style.cursor = 'grabbing';
+    document.addEventListener('pointermove', _zoomPointerMove);
+    document.addEventListener('pointerup', _zoomPointerUp);
+    e.preventDefault();
+}
+
+function _zoomPointerMove(e) {
+    if (!_dragging) return;
+    // Arrastre en px de pantalla → translate = px / zoom (porque visual = zoom × translate)
+    _panX = _panStartX + (e.clientX - _dragStartX) / _zoomLevel;
+    _panY = _panStartY + (e.clientY - _dragStartY) / _zoomLevel;
+    _clampPan();
+    _applyZoomTransform();
+}
+
+function _zoomPointerUp() {
+    _dragging = false;
+    const overlay = document.getElementById('zoom-mode-overlay');
+    if (overlay) overlay.style.cursor = 'grab';
+    document.removeEventListener('pointermove', _zoomPointerMove);
+    document.removeEventListener('pointerup', _zoomPointerUp);
 }
 
 function _applyZoom(delta) {
     _zoomLevel = Math.max(1, Math.min(10, _zoomLevel + delta));
     const label = document.getElementById('zoom-level-label');
     if (label) label.textContent = `${_zoomLevel}×`;
-    const img = document.getElementById('zoom-mode-img');
-    if (img) img.style.transform = `scale(${_zoomLevel}) translate(0px,0px)`;
+    _panX = 0; _panY = 0;   // recentrar al cambiar de nivel
+    _applyZoomTransform();
 }
 
 function _zoomKeyHandler(e) {
@@ -695,12 +732,14 @@ function _makeZoomBtn(label, title, clickFn) {
 window.enterZoomMode = function() {
     if (!_currentPhotoData || document.getElementById('zoom-mode-overlay')) return;
     _zoomLevel = 4;
+    _panX = 0; _panY = 0;
 
     const overlay = document.createElement('div');
     overlay.id = 'zoom-mode-overlay';
     overlay.style.cssText = [
         'position:fixed', 'top:0', 'left:0', 'width:100%', 'height:100%',
-        'z-index:2000', 'background:#000', 'overflow:hidden', 'cursor:crosshair',
+        'z-index:2000', 'background:#000', 'overflow:hidden', 'cursor:grab',
+        'touch-action:none',   // el arrastre no debe hacer scroll/zoom del navegador
     ].join(';');
 
     const img = document.createElement('img');
@@ -743,14 +782,17 @@ window.enterZoomMode = function() {
     overlay.appendChild(controls);
     document.body.appendChild(overlay);
 
-    overlay.addEventListener('mousemove', _zoomMouseMove);
+    overlay.addEventListener('pointerdown', _zoomPointerDown);
     document.addEventListener('keydown', _zoomKeyHandler);
 };
 
 function exitZoomMode() {
     const overlay = document.getElementById('zoom-mode-overlay');
     if (!overlay) return;
-    overlay.removeEventListener('mousemove', _zoomMouseMove);
+    overlay.removeEventListener('pointerdown', _zoomPointerDown);
+    document.removeEventListener('pointermove', _zoomPointerMove);
+    document.removeEventListener('pointerup', _zoomPointerUp);
     document.removeEventListener('keydown', _zoomKeyHandler);
+    _dragging = false;
     overlay.remove();
 }
