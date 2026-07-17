@@ -524,13 +524,14 @@ function renderFamilyTree(data) {
 
     const alignClass = spousesList.length === 1 ? 'items-center' : 'items-start';
     html += `
-        <div class="relative w-full flex justify-center ${alignClass} gap-16 my-6">
+        <div class="relative w-full flex justify-center ${alignClass} gap-4 sm:gap-16 my-6">
     `;
 
-    // Invisible spacer on the left to center main person
+    // Invisible spacer on the left to center main person (solo en pantallas
+    // anchas; en móvil se oculta para que el cónyuge no quede cortado a la derecha)
     if (spousesList.length > 0) {
         html += `
-                <div class="flex flex-col items-center node-card invisible" aria-hidden="true">
+                <div class="hidden sm:flex flex-col items-center node-card invisible" aria-hidden="true">
                     <div class="w-20 h-20 mb-2"></div>
                     <h4 class="text-[11px]">.</h4>
                     <span class="text-[10px]">.</span>
@@ -1507,12 +1508,12 @@ function renderTimelineSection() {
     `;
 
     const html = `
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
             <h2 class="font-headline text-3xl text-primary flex items-center gap-4">
                 <span class="material-symbols-outlined">event_note</span>
                 ${_i18nT('pages.dossier.timeline_title', null, 'Cronograma Biográfico')}
             </h2>
-            <div class="flex gap-2">
+            <div class="flex gap-2 shrink-0">
                 <button onclick="setTimelineMode('graphic')" class="px-4 py-2 text-xs font-bold uppercase rounded-lg transition-colors ${timelineMode === 'graphic' ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">${_i18nT('pages.dossier.mode_graphic', null, 'Gráfico')}</button>
                 <button onclick="setTimelineMode('list')" class="px-4 py-2 text-xs font-bold uppercase rounded-lg transition-colors ${timelineMode === 'list' ? 'bg-primary text-white' : 'border border-outline-variant text-outline-variant hover:bg-outline-variant/10'}">${_i18nT('pages.dossier.mode_list', null, 'Lista')}</button>
             </div>
