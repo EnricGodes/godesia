@@ -346,6 +346,45 @@ window.highlightFaceBox = function(personId, show) {
 };
 
 /**
+ * Tap en una persona etiquetada.
+ * Desktop: navega al dossier (como siempre).
+ * Móvil: primer tap SELECCIONA → muestra el recuadro verde sobre la foto y un
+ * botón "Ver dossier" en la fila (así se pueden ver los tags sin salir del
+ * modal); segundo tap sobre la misma la deselecciona.
+ */
+window.onTagPersonClick = function(rowEl, personId) {
+    if (!window.matchMedia('(max-width: 767px)').matches) {
+        gotoPersonDossier(personId);
+        return;
+    }
+    const wasSelected = rowEl.getAttribute('data-tag-selected') === '1';
+    // Limpiar cualquier selección previa (fila, fondo, botón y face boxes)
+    document.querySelectorAll('[data-tag-row="1"]').forEach(function(r) {
+        r.removeAttribute('data-tag-selected');
+        r.style.backgroundColor = 'transparent';
+        const b = r.querySelector('[data-tag-dossier-btn]');
+        if (b) b.remove();
+    });
+    ((_currentPhotoData && _currentPhotoData.tagged_people) || []).forEach(function(pp) {
+        highlightFaceBox(pp.person_id, false);
+    });
+    if (wasSelected) return;   // segundo tap → solo deselecciona
+
+    rowEl.setAttribute('data-tag-selected', '1');
+    rowEl.style.backgroundColor = 'rgba(45, 75, 51, 0.1)';
+    highlightFaceBox(personId, true);
+
+    const btn = document.createElement('a');
+    btn.setAttribute('data-tag-dossier-btn', '1');
+    btn.href = _pmHref('/dossier.html?id=' + personId.replace(/@/g, ''));
+    btn.textContent = _pmT('photo_modal.view_dossier', null, 'Ver dossier');
+    btn.style.cssText = 'flex-shrink:0;background:#2D4B33;color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;text-decoration:none;white-space:nowrap;';
+    // Que el tap en el botón navegue sin disparar el onclick de la fila (deseleccionar).
+    btn.addEventListener('click', function(e) { e.stopPropagation(); });
+    rowEl.appendChild(btn);
+};
+
+/**
  * Render the modal content
  */
 function renderPhotoModal() {
@@ -396,10 +435,10 @@ function renderPhotoModal() {
                  const cleanId = person.person_id.replace(/@/g, '');
                  const displayName = formatNameWithNickname(person.name, person.nickname, person.given_name, person.surname);
                  return `
-                 <div style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px; border-radius: 6px; transition: background-color 0.2s;"
-                      onmouseover="this.style.backgroundColor='rgba(45, 75, 51, 0.1)'; highlightFaceBox('${person.person_id}', true)"
-                      onmouseout="this.style.backgroundColor='transparent'; highlightFaceBox('${person.person_id}', false)"
-                      onclick="gotoPersonDossier('${person.person_id}')">
+                 <div data-tag-row="1" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px; border-radius: 6px; transition: background-color 0.2s;"
+                      onmouseover="if(!window.matchMedia('(max-width:767px)').matches){this.style.backgroundColor='rgba(45, 75, 51, 0.1)'; highlightFaceBox('${person.person_id}', true)}"
+                      onmouseout="if(!window.matchMedia('(max-width:767px)').matches){this.style.backgroundColor='transparent'; highlightFaceBox('${person.person_id}', false)}"
+                      onclick="onTagPersonClick(this, '${person.person_id}')">
                    ${person.photo_file
                      ? `<img src="/photos/${person.photo_file}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(114, 121, 113, 0.3); flex-shrink: 0;">`
                      : `<div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f1eee5; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">${personSvg(person.sex, person.birth_year, person.death_year, 20)}</div>`}

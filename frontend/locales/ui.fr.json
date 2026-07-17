@@ -552,7 +552,8 @@
     "show_panel": "Afficher le panneau",
     "tagged_people": "Personnes identifiées",
     "zoom_in": "Agrandir le zoom",
-    "zoom_out": "Réduire le zoom"
+    "zoom_out": "Réduire le zoom",
+    "view_dossier": "Voir le dossier"
   },
   "saga": {
     "kicker": "Saga familiale",
