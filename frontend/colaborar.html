@@ -222,6 +222,19 @@ if (prePersonId) {
     loadPersonPreview(prePersonId);
 }
 
+// ── Pre-rellenar nombre y email con los datos del usuario logueado (sesión) ──
+(async function prefillFromSession() {
+    try {
+        const res = await fetch('/api/auth/me', { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const u = await res.json();
+        const nameEl = document.getElementById('field-name');
+        const emailEl = document.getElementById('field-email');
+        if (nameEl && !nameEl.value && u.name) nameEl.value = u.name;
+        if (emailEl && !emailEl.value && u.email) emailEl.value = u.email;
+    } catch (_) {}
+})();
+
 // ── Person preview loader ──
 async function loadPersonPreview(id) {
     try {
