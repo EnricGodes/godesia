@@ -39,7 +39,7 @@
         </div>
 
         <div class="bg-white rounded-2xl border border-outline-variant/40 shadow-sm p-6">
-            <div class="flex border-b border-outline-variant/40 mb-5">
+            <div id="lg-tabs" class="flex border-b border-outline-variant/40 mb-5">
                 <button id="tab-login" class="lg-tab active flex-1 pb-2 -mb-px border-b-2 font-bold text-sm" data-i18n="pages.login.tab_login">Entrar</button>
                 <button id="tab-register" class="lg-tab flex-1 pb-2 -mb-px border-b-2 font-bold text-sm" data-i18n="pages.login.tab_register">Registrarse</button>
             </div>
@@ -55,6 +55,22 @@
                     <input type="password" name="password" class="lg-input" required autocomplete="current-password">
                 </div>
                 <button type="submit" class="lg-btn" data-i18n="pages.login.enter">Entrar</button>
+                <p class="text-center pt-1">
+                    <button type="button" id="lg-forgot-link" class="text-xs text-outline hover:text-primary underline" data-i18n="pages.login.forgot">¿Has olvidado tu contraseña?</button>
+                </p>
+            </form>
+
+            <!-- FORGOT PASSWORD -->
+            <form id="form-forgot" class="space-y-3 hidden">
+                <p class="text-sm text-outline" data-i18n="pages.login.forgot_hint">Introduce tu email y te enviaremos un enlace para elegir una nueva contraseña.</p>
+                <div>
+                    <label class="block text-xs font-bold text-outline mb-1 uppercase tracking-wide" data-i18n="pages.login.email">Email</label>
+                    <input type="email" name="email" class="lg-input" required autocomplete="email">
+                </div>
+                <button type="submit" class="lg-btn" data-i18n="pages.login.forgot_submit">Enviar enlace</button>
+                <p class="text-center">
+                    <button type="button" id="lg-back-link" class="text-xs text-outline hover:text-primary underline" data-i18n="pages.login.back_to_login">Volver a entrar</button>
+                </p>
             </form>
 
             <!-- REGISTER -->
@@ -82,22 +98,36 @@
 
     <script>
         const T = (k, fb) => (window.t ? window.t(k, null, fb) : fb);
+        const LANG = window.__I18N_LANG__ || 'es';
         const formLogin = document.getElementById('form-login');
         const formRegister = document.getElementById('form-register');
+        const formForgot = document.getElementById('form-forgot');
+        const tabs = document.getElementById('lg-tabs');
         const tabLogin = document.getElementById('tab-login');
         const tabRegister = document.getElementById('tab-register');
         const msg = document.getElementById('lg-msg');
 
         function showTab(which) {
             const login = which === 'login';
+            tabs.classList.remove('hidden');
             tabLogin.classList.toggle('active', login);
             tabRegister.classList.toggle('active', !login);
             formLogin.classList.toggle('hidden', !login);
             formRegister.classList.toggle('hidden', login);
+            formForgot.classList.add('hidden');
+            msg.classList.add('hidden');
+        }
+        function showForgot() {
+            tabs.classList.add('hidden');
+            formLogin.classList.add('hidden');
+            formRegister.classList.add('hidden');
+            formForgot.classList.remove('hidden');
             msg.classList.add('hidden');
         }
         tabLogin.onclick = () => showTab('login');
         tabRegister.onclick = () => showTab('register');
+        document.getElementById('lg-forgot-link').onclick = showForgot;
+        document.getElementById('lg-back-link').onclick = () => showTab('login');
 
         function showMsg(text, kind) {
             msg.textContent = text;
@@ -141,6 +171,17 @@
             } else {
                 showMsg((r.data && r.data.detail) || T('pages.login.err_generic', 'No se pudo completar el registro.'), 'err');
             }
+        });
+
+        formForgot.addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = formForgot.querySelector('button[type=submit]'); btn.disabled = true;
+            const f = new FormData(formForgot);
+            await post('/api/auth/forgot-password', { email: f.get('email'), lang: LANG });
+            btn.disabled = false;
+            formForgot.reset();
+            // Respuesta genérica (no revelamos si el email existe).
+            showMsg(T('pages.login.forgot_sent', 'Si ese email está registrado, te hemos enviado un enlace para restablecer la contraseña.'), 'ok');
         });
     </script>
 </body>

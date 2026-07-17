@@ -519,7 +519,23 @@
       "err_rate": "Too many attempts. Please wait a few minutes.",
       "err_credentials": "Incorrect email or password.",
       "err_exists": "An account with that email already exists.",
-      "err_generic": "Registration could not be completed."
+      "err_generic": "Registration could not be completed.",
+      "forgot": "Forgot your password?",
+      "forgot_hint": "Enter your email and we'll send you a link to choose a new password.",
+      "forgot_submit": "Send link",
+      "forgot_sent": "If that email is registered, we've sent you a link to reset your password.",
+      "back_to_login": "Back to sign in"
+    },
+    "reset": {
+      "subtitle": "Choose a new password",
+      "password": "New password",
+      "password_confirm": "Repeat password",
+      "submit": "Save password",
+      "ok": "Your password has been updated.",
+      "go_login": "Sign in",
+      "err_token": "The link is invalid or has expired.",
+      "err_mismatch": "Passwords don't match.",
+      "err_generic": "Couldn't change the password."
     }
   },
   "photo_modal": {

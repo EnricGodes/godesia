@@ -519,7 +519,23 @@
       "err_rate": "Zu viele Versuche. Bitte warten Sie einige Minuten.",
       "err_credentials": "E-Mail oder Passwort falsch.",
       "err_exists": "Ein Konto mit dieser E-Mail existiert bereits.",
-      "err_generic": "Registrierung konnte nicht abgeschlossen werden."
+      "err_generic": "Registrierung konnte nicht abgeschlossen werden.",
+      "forgot": "Passwort vergessen?",
+      "forgot_hint": "Gib deine E-Mail ein und wir senden dir einen Link, um ein neues Passwort zu wählen.",
+      "forgot_submit": "Link senden",
+      "forgot_sent": "Falls diese E-Mail registriert ist, haben wir dir einen Link zum Zurücksetzen des Passworts gesendet.",
+      "back_to_login": "Zurück zur Anmeldung"
+    },
+    "reset": {
+      "subtitle": "Wähle ein neues Passwort",
+      "password": "Neues Passwort",
+      "password_confirm": "Passwort wiederholen",
+      "submit": "Passwort speichern",
+      "ok": "Dein Passwort wurde aktualisiert.",
+      "go_login": "Anmelden",
+      "err_token": "Der Link ist ungültig oder abgelaufen.",
+      "err_mismatch": "Die Passwörter stimmen nicht überein.",
+      "err_generic": "Passwort konnte nicht geändert werden."
     }
   },
   "photo_modal": {

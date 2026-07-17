@@ -519,7 +519,23 @@
       "err_rate": "Trop de tentatives. Attendez quelques minutes.",
       "err_credentials": "E-mail ou mot de passe incorrect.",
       "err_exists": "Un compte existe déjà avec cet e-mail.",
-      "err_generic": "L'inscription n'a pas pu être effectuée."
+      "err_generic": "L'inscription n'a pas pu être effectuée.",
+      "forgot": "Mot de passe oublié ?",
+      "forgot_hint": "Saisissez votre e-mail et nous vous enverrons un lien pour choisir un nouveau mot de passe.",
+      "forgot_submit": "Envoyer le lien",
+      "forgot_sent": "Si cet e-mail est enregistré, nous vous avons envoyé un lien pour réinitialiser votre mot de passe.",
+      "back_to_login": "Retour à la connexion"
+    },
+    "reset": {
+      "subtitle": "Choisissez un nouveau mot de passe",
+      "password": "Nouveau mot de passe",
+      "password_confirm": "Répétez le mot de passe",
+      "submit": "Enregistrer le mot de passe",
+      "ok": "Votre mot de passe a été mis à jour.",
+      "go_login": "Se connecter",
+      "err_token": "Le lien est invalide ou a expiré.",
+      "err_mismatch": "Les mots de passe ne correspondent pas.",
+      "err_generic": "Impossible de changer le mot de passe."
     }
   },
   "photo_modal": {

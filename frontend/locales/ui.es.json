@@ -519,7 +519,23 @@
       "err_rate": "Demasiados intentos. Espera unos minutos.",
       "err_credentials": "Email o contraseña incorrectos.",
       "err_exists": "Ya existe una cuenta con ese email.",
-      "err_generic": "No se pudo completar el registro."
+      "err_generic": "No se pudo completar el registro.",
+      "forgot": "¿Has olvidado tu contraseña?",
+      "forgot_hint": "Introduce tu email y te enviaremos un enlace para elegir una nueva contraseña.",
+      "forgot_submit": "Enviar enlace",
+      "forgot_sent": "Si ese email está registrado, te hemos enviado un enlace para restablecer la contraseña.",
+      "back_to_login": "Volver a entrar"
+    },
+    "reset": {
+      "subtitle": "Elige una nueva contraseña",
+      "password": "Nueva contraseña",
+      "password_confirm": "Repite la contraseña",
+      "submit": "Guardar contraseña",
+      "ok": "Tu contraseña se ha actualizado.",
+      "go_login": "Entrar",
+      "err_token": "El enlace no es válido o ha caducado.",
+      "err_mismatch": "Las contraseñas no coinciden.",
+      "err_generic": "No se pudo cambiar la contraseña."
     }
   },
   "photo_modal": {

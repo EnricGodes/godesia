@@ -519,7 +519,23 @@
       "err_rate": "Massa intents. Espera uns minuts.",
       "err_credentials": "Correu o contrasenya incorrectes.",
       "err_exists": "Ja existeix un compte amb aquest correu.",
-      "err_generic": "No s'ha pogut completar el registre."
+      "err_generic": "No s'ha pogut completar el registre.",
+      "forgot": "Has oblidat la contrasenya?",
+      "forgot_hint": "Introdueix el teu email i t'enviarem un enllaç per triar una nova contrasenya.",
+      "forgot_submit": "Enviar enllaç",
+      "forgot_sent": "Si aquest email està registrat, t'hem enviat un enllaç per restablir la contrasenya.",
+      "back_to_login": "Tornar a entrar"
+    },
+    "reset": {
+      "subtitle": "Tria una nova contrasenya",
+      "password": "Nova contrasenya",
+      "password_confirm": "Repeteix la contrasenya",
+      "submit": "Desar contrasenya",
+      "ok": "La teva contrasenya s'ha actualitzat.",
+      "go_login": "Entrar",
+      "err_token": "L'enllaç no és vàlid o ha caducat.",
+      "err_mismatch": "Les contrasenyes no coincideixen.",
+      "err_generic": "No s'ha pogut canviar la contrasenya."
     }
   },
   "photo_modal": {
