@@ -566,7 +566,7 @@ function renderFamilyTree(data) {
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${spouseDisplayName}</h4>
                         <span class="text-[10px] opacity-60 text-center">${formatYears(s.birth_year, s.death_year, s.is_alive)}</span>
-                        ${s.marriage_date ? `<span class="text-[9px] opacity-50 text-center">${s.marriage_date}</span>` : ''}
+                        ${s.marriage_date ? `<span class="text-[9px] opacity-50 inline-flex items-center gap-0.5" title="${_i18nT('common.marriage', null, 'Matrimonio')}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><circle cx="9.5" cy="14" r="5.5"/><circle cx="14.5" cy="10" r="5.5"/></svg>${s.marriage_date}</span>` : ''}
                         ${s.divorce ? `<span class="text-[9px] opacity-40 text-center italic">${_i18nT('common.divorced', null, 'divorciado')} ${s.divorce.date || ''}</span>` : ''}
                         ${recentDeathTag(s)}
                     </div>
