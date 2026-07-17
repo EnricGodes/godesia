@@ -42,6 +42,11 @@ def send_email(to: str, subject: str, html: str) -> bool:
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
+            "Accept": "application/json",
+            # La API de Resend está tras Cloudflare, que bloquea el User-Agent
+            # por defecto de urllib ("Python-urllib/x.y") con error 1010. Con un
+            # User-Agent propio la petición pasa.
+            "User-Agent": "Godesia-Mailer/1.0 (+https://godes.org)",
         },
     )
     try:
