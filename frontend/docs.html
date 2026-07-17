@@ -80,6 +80,15 @@
         .person-pill:hover { background: #f1eee5; }
         .person-pill.active { background: #d4e4d6; color: #2D4B33; font-weight: 600; }
         .doc-type-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; background: #2D4B33; color: #fff; letter-spacing: 0.02em; }
+        /* ── Móvil ── */
+        @media (max-width: 767px) {
+            .bento-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 639px) {
+            .bento-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: minmax(120px, auto); }
+            .bento-hero, .bento-med { grid-column: span 2; grid-row: span 2; }
+            .toolbar-search { min-width: 100%; max-width: 100%; flex-basis: 100%; }
+        }
     </style>
 </head>
 <body class="bg-surface font-body text-on-surface">
@@ -154,7 +163,7 @@
         <!-- Toolbar -->
         <div class="px-6 py-3 flex flex-wrap items-center gap-3 border-b border-outline-variant/20 bg-surface-container/40">
             <!-- Search -->
-            <div class="relative flex-1 min-w-[180px] max-w-sm">
+            <div class="toolbar-search relative flex-1 min-w-[180px] max-w-sm">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-base">search</span>
                 <input id="photo-search" type="text" placeholder="Título, persona, año..." data-i18n-placeholder="pages.albums.search_placeholder"
                        class="w-full pl-9 pr-4 py-1.5 bg-surface-container-lowest rounded-xl text-sm border

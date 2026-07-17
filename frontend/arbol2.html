@@ -120,8 +120,19 @@
       display: block;
     }
 
-    /* ── Sidebar ── */
-    #a2-sidebar { font-family: Manrope, sans-serif; }
+    /* ── Sidebar ── (geometría en CSS para poder redefinirla en móvil sin !important;
+       arbol2.js solo togglea display:block/none) */
+    #a2-sidebar {
+      display: none;
+      position: absolute; top: 0; right: 0;
+      width: 300px; height: 100%;
+      background: #fcf9f0;
+      border-left: 1px solid #d9d5cc;
+      box-shadow: -4px 0 24px rgba(0,0,0,.14);
+      z-index: 150;
+      overflow-y: auto;
+      font-family: Manrope, sans-serif;
+    }
     .a2-field { margin-bottom: 12px; }
     .a2-label {
       font-size: 0.68rem;
@@ -132,13 +143,29 @@
       margin-bottom: 2px;
     }
     .a2-value { font-size: 0.875rem; color: #1c1c17; }
+
+    /* ── Móvil ── */
+    @media (max-width: 767px) {
+      #a2-toolbar { left: 8px; right: 8px; top: 8px; flex-wrap: wrap; }
+      #a2-toolbar > div:first-child { flex: 1; min-width: 120px; }
+      #a2-search { width: 100%; box-sizing: border-box; }
+      #a2-results { left: 0; min-width: 0; width: calc(100vw - 16px); max-width: 340px; }
+      /* Panel de persona como hoja inferior */
+      #a2-sidebar {
+        top: auto; bottom: 0; left: 0; right: 0;
+        width: 100%; height: auto; max-height: 60vh;
+        border-left: none; border-top: 1px solid #d9d5cc;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -4px 24px rgba(0,0,0,.16);
+      }
+    }
   </style>
 </head>
 <body>
   <div class="tree-app" style="position:relative;display:flex;flex-direction:column;overflow:hidden;">
 
     <!-- Barra de controles -->
-    <div style="position:absolute;top:10px;left:10px;z-index:100;display:flex;gap:8px;align-items:center;">
+    <div id="a2-toolbar" style="position:absolute;top:10px;left:10px;z-index:100;display:flex;gap:8px;align-items:center;">
       <div style="position:relative;">
         <input type="text" id="a2-search" placeholder="Buscar una persona..." data-i18n-placeholder="pages.tree.search_placeholder" autocomplete="off">
         <div id="a2-results"></div>
@@ -151,17 +178,8 @@
     <!-- Contenedor del árbol -->
     <div id="FamilyChart" class="f3" style="flex:1;width:100%;"></div>
 
-    <!-- Panel lateral -->
-    <div id="a2-sidebar" style="
-      display:none;
-      position:absolute;top:0;right:0;
-      width:300px;height:100%;
-      background:#fcf9f0;
-      border-left:1px solid #d9d5cc;
-      box-shadow:-4px 0 24px rgba(0,0,0,.14);
-      z-index:150;
-      overflow-y:auto;">
-    </div>
+    <!-- Panel lateral (geometría en el <style>; arbol2.js togglea display) -->
+    <div id="a2-sidebar"></div>
 
   </div>
 

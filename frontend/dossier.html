@@ -76,6 +76,16 @@
         .leaflet-popup-content-wrapper { background: #fcf9f0; border: 1px solid rgba(114,121,113,0.2); border-radius: 0.5rem; box-shadow: 0 4px 16px rgba(28,28,23,0.1); color: #1c1c17; }
         .leaflet-popup-tip { background: #fcf9f0; }
         .leaflet-popup-close-button { color: #727971 !important; }
+        /* ── Móvil ── */
+        @media (max-width: 767px) {
+            .bento-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 639px) {
+            .bento-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: minmax(120px, auto); }
+            .bento-hero, .bento-med { grid-column: span 2; grid-row: span 2; }
+            #residences-map { height: 280px; }
+            #vital-map { height: 240px; }
+        }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -98,7 +108,7 @@
         <!-- 1. HEADER -->
         <header class="flex flex-col md:flex-row gap-12 items-start md:items-center mb-20">
             <div class="relative">
-                <div id="hero-photo" class="w-64 h-80 bg-surface-container-highest overflow-hidden shadow-2xl heritage-border">
+                <div id="hero-photo" class="w-64 max-w-full h-80 bg-surface-container-highest overflow-hidden shadow-2xl heritage-border">
                     <img class="w-full h-full object-cover" alt="Foto" src=""/>
                 </div>
             </div>

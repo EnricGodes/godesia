@@ -118,6 +118,26 @@ nav {
     transform: translateX(0);
 }
 
+/* Móvil: el panel de persona pasa a hoja inferior */
+@media (max-width: 767px) {
+    #person-panel {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: auto;
+        max-height: 65vh;
+        border-left: none;
+        border-top: 1px solid var(--outline-variant);
+        border-radius: 16px 16px 0 0;
+        transform: translateY(100%);
+    }
+    #person-panel.open {
+        transform: translateY(0);
+    }
+}
+
 #person-panel-close {
     position: absolute;
     top: 12px;

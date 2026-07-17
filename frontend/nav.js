@@ -120,6 +120,38 @@
     );
   }
 
+  /* Sección acordeón del drawer móvil — reutiliza renderDropdownItems (i18n,
+     lhref, página activa) para que el contenido coincida con los dropdowns. */
+  function renderDrawerSection(id, label, items) {
+    return (
+      `<button type="button" class="gn-acc-btn" data-acc="gn-acc-${id}">` +
+        `<span>${label}</span>${chevronSVG()}` +
+      `</button>` +
+      `<div id="gn-acc-${id}" class="gn-acc-body" hidden>` +
+        renderDropdownItems(items) +
+      `</div>`
+    );
+  }
+
+  function renderDrawer() {
+    const arbolActive = isActivePage('/arbol2.html') ? ' gn-drawer-active' : '';
+    const chatActive  = isActivePage('/chat.html')   ? ' gn-drawer-active' : '';
+    return (
+      `<div id="gn-drawer">` +
+        `<div id="gn-drawer-backdrop"></div>` +
+        `<div id="gn-drawer-panel">` +
+          `<a href="${lhref('/arbol2.html')}" class="gn-drawer-link${arbolActive}">${t('nav.tree', null, 'Árbol')}</a>` +
+          renderDrawerSection('ramas',      t('nav.menu_branches', null, 'Ramas familiares'), RAMAS) +
+          `<a href="${lhref('/chat.html')}" class="gn-drawer-link${chatActive}">${t('nav.chat', null, 'Consultas')}</a>` +
+          renderDrawerSection('album',      t('nav.menu_album', null, 'Álbum'),          ALBUM) +
+          renderDrawerSection('documentos', t('nav.menu_documents', null, 'Documentos'), DOCUMENTOS) +
+          renderDrawerSection('diversos',   t('nav.menu_misc', null, 'Diversos'),        DIVERSOS) +
+          `<a href="${lhref('/colaborar.html')}" class="gn-drawer-link gn-drawer-pill">${t('nav.collaborate', null, 'Colaborar')}</a>` +
+        `</div>` +
+      `</div>`
+    );
+  }
+
   function renderNav() {
     const arbolActive  = isActivePage('/arbol2.html')  ? ' bg-white/20 font-semibold' : '';
     const chatActive   = isActivePage('/chat.html')    ? ' bg-white/20 font-semibold' : '';
@@ -134,12 +166,15 @@
 
           /* ── Col 1: Logo (far left) ── */
           `<div class="flex items-center">` +
+            `<button type="button" id="gn-burger" aria-label="${t('nav.menu', null, 'Menú')}" aria-expanded="false">` +
+              `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>` +
+            `</button>` +
             `<a href="${lhref('/')}" class="text-lg font-bold text-white hover:text-white/80 transition-colors"` +
             ` style="font-family:'Noto Serif',serif;letter-spacing:-.01em">Godesia</a>` +
           `</div>` +
 
           /* ── Col 2: Nav items ── */
-          `<div class="flex items-center gap-0.5">` +
+          `<div class="gn-center flex items-center gap-0.5">` +
             `<a href="${lhref('/arbol2.html')}" class="${linkCls}${arbolActive}">${t('nav.tree', null, 'Árbol')}</a>` +
             renderDropdown('ramas',      t('nav.menu_branches', null, 'Ramas familiares'), RAMAS) +
             `<a href="${lhref('/chat.html')}" class="${linkCls}${chatActive}">${t('nav.chat', null, 'Consultas')}</a>` +
@@ -172,8 +207,8 @@
               `</svg>` +
             `</a>` +
 
-            /* Search input (appears below on toggle) */
-            `<div id="gn-search-expanded" style="display:none;width:calc(40vw - 2rem);max-width:720px;right:1rem;z-index:10000">` +
+            /* Search input (appears below on toggle) — dims via CSS (responsive) */
+            `<div id="gn-search-expanded" style="display:none;z-index:10000">` +
               `<div class="bg-white rounded-2xl shadow-2xl p-6 border border-[#e5e2da]">` +
                 /* Título */
                 `<h3 style="font-family:'Noto Serif',serif;font-size:1.1rem;color:#2D4B33;margin:0 0 0.75rem 0;font-weight:600">${t('nav.search_title', null, 'Buscador')}</h3>` +
@@ -195,7 +230,8 @@
           `</div>` +
 
         `</div>` +
-      `</nav>`
+      `</nav>` +
+      renderDrawer()
     );
   }
 
@@ -250,6 +286,48 @@
       #gn-search-expanded {
         position: fixed !important;
         z-index: 10000 !important;
+        right: 1rem;
+        width: calc(40vw - 2rem);
+        max-width: 720px;
+      }
+      /* ── Hamburguesa + drawer móvil ── */
+      #gn-burger {
+        display: none; border: none; background: transparent; color: #fff;
+        width: 36px; height: 36px; align-items: center; justify-content: center;
+        border-radius: 8px; cursor: pointer; margin-right: 4px; padding: 0;
+      }
+      #gn-burger:hover { background-color: rgba(255,255,255,0.15); }
+      #gn-drawer-backdrop {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+        z-index: 9998; opacity: 0; pointer-events: none; transition: opacity .25s ease;
+      }
+      #gn-drawer.gn-open #gn-drawer-backdrop { opacity: 1; pointer-events: auto; }
+      #gn-drawer-panel {
+        position: fixed; top: 0; left: 0; bottom: 0; width: min(78vw, 320px);
+        background: #2D4B33; z-index: 9999; overflow-y: auto;
+        padding: 64px 12px 24px; box-shadow: 2px 0 24px rgba(0,0,0,0.25);
+        transform: translateX(-100%); transition: transform .25s ease;
+        -webkit-overflow-scrolling: touch;
+      }
+      #gn-drawer.gn-open #gn-drawer-panel { transform: translateX(0); }
+      .gn-drawer-link, .gn-acc-btn {
+        display: flex; width: 100%; box-sizing: border-box; align-items: center;
+        justify-content: space-between; gap: 8px; padding: 12px 14px;
+        border-radius: 10px; color: rgba(255,255,255,0.92); font-size: 0.95rem;
+        font-weight: 500; background: none; border: none; text-align: left;
+        cursor: pointer; text-decoration: none; font-family: inherit;
+      }
+      .gn-drawer-link:hover, .gn-acc-btn:hover { background: rgba(255,255,255,0.12); }
+      .gn-drawer-active { background: rgba(255,255,255,0.2); font-weight: 600; }
+      .gn-drawer-pill { border: 1px solid rgba(255,255,255,0.8); justify-content: center; margin-top: 12px; }
+      .gn-acc-body { background: #fff; border-radius: 12px; margin: 2px 4px 8px; padding: 6px 0; }
+      .gn-acc-btn .gn-chevron { transition: transform .2s; }
+      @media (min-width: 768px) { #gn-drawer { display: none !important; } }
+      @media (max-width: 767px) {
+        #gn-burger { display: flex; }
+        #godesia-nav .gn-center { display: none !important; }
+        #gn-colaborar-btn { display: none !important; }
+        #gn-search-expanded { left: .5rem !important; right: .5rem !important; width: auto !important; max-width: none !important; }
       }
     `;
     document.head.appendChild(style);
@@ -314,11 +392,16 @@
   // ─── Behaviour ────────────────────────────────────────────────────────────
 
   let openMenu = null; // { menu: HTMLElement, chevron: HTMLElement, btn: HTMLElement }
+  let closeDrawerFn = () => {}; // lo define init() cuando monta el drawer móvil
 
   function positionMenu(btn, menu) {
     const rect = btn.getBoundingClientRect();
     menu.style.top  = (rect.bottom + 4) + 'px';
-    menu.style.left = rect.left + 'px';
+    // Acotar al viewport: el menú (min-width 11rem) no debe salirse por la derecha.
+    menu.style.left = '0px';
+    const w = menu.offsetWidth;
+    const left = Math.max(8, Math.min(rect.left, window.innerWidth - w - 8));
+    menu.style.left = left + 'px';
   }
 
   function closeAll() {
@@ -396,6 +479,47 @@
     /* Move gn-menu elements to body (they were rendered as nav siblings in wrapper) */
     [...wrapper.querySelectorAll('.gn-menu')].forEach(m => document.body.appendChild(m));
 
+    /* Drawer móvil (hamburguesa): también sibling del nav → moverlo a body */
+    const drawer = wrapper.querySelector('#gn-drawer');
+    if (drawer) document.body.appendChild(drawer);
+    const burger = navEl.querySelector('#gn-burger');
+    if (drawer && burger) {
+      const backdrop = drawer.querySelector('#gn-drawer-backdrop');
+      const panel    = drawer.querySelector('#gn-drawer-panel');
+      const openDrawer = () => {
+        drawer.classList.add('gn-open');
+        burger.setAttribute('aria-expanded', 'true');
+        document.documentElement.style.overflow = 'hidden';
+      };
+      closeDrawerFn = () => {
+        drawer.classList.remove('gn-open');
+        burger.setAttribute('aria-expanded', 'false');
+        document.documentElement.style.overflow = '';
+      };
+      burger.addEventListener('click', e => {
+        e.stopPropagation();
+        if (drawer.classList.contains('gn-open')) closeDrawerFn();
+        else openDrawer();
+      });
+      backdrop.addEventListener('click', closeDrawerFn);
+      /* Clic dentro del panel: no cerrar por el listener global; cerrar solo si es un enlace */
+      panel.addEventListener('click', e => {
+        e.stopPropagation();
+        if (e.target.closest('a')) closeDrawerFn();
+      });
+      /* Acordeones */
+      panel.querySelectorAll('.gn-acc-btn').forEach(accBtn => {
+        accBtn.addEventListener('click', () => {
+          const body = document.getElementById(accBtn.dataset.acc);
+          const chev = accBtn.querySelector('.gn-chevron');
+          if (!body) return;
+          const isOpen = !body.hasAttribute('hidden');
+          if (isOpen) { body.setAttribute('hidden', ''); if (chev) chev.style.transform = ''; }
+          else        { body.removeAttribute('hidden'); if (chev) chev.style.transform = 'rotate(180deg)'; }
+        });
+      });
+    }
+
     /* Sesión: si hay usuario, el icono pasa a ser botón de "Salir" (con su nombre). */
     (async function updateAuthButton() {
       const btn = document.getElementById('gn-login-btn');
@@ -425,8 +549,8 @@
         const isOpen = menu.style.display !== 'none';
         closeAll();
         if (!isOpen) {
+          menu.style.display = 'block';   // visible antes de medir offsetWidth (clamp)
           positionMenu(btn, menu);
-          menu.style.display = 'block';
           chevron.style.transform = 'rotate(180deg)';
           openMenu = { menu, chevron, btn };
         }
@@ -438,11 +562,17 @@
       if (openMenu) positionMenu(openMenu.btn, openMenu.menu);
     }, { passive: true });
 
-    window.addEventListener('resize', closeAll);
+    /* Resize: cierra dropdowns siempre; cierra el drawer solo si cambia el ANCHO
+       (el teclado en pantalla móvil dispara resize vertical y no debe cerrarlo). */
+    let lastW = window.innerWidth;
+    window.addEventListener('resize', () => {
+      closeAll();
+      if (window.innerWidth !== lastW) { lastW = window.innerWidth; closeDrawerFn(); }
+    });
 
     /* 4. Close on outside click or Escape */
     document.addEventListener('click', closeAll);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAll(); closeDrawerFn(); } });
 
     /* 5. Layout compensation — fixes pages with body{display:flex} or fixed sidebars */
     const bodyFlex      = getComputedStyle(document.body).display === 'flex';
@@ -567,6 +697,13 @@
         )
       ].join('');
       menu.innerHTML = `<div class="bg-white rounded-xl shadow-xl py-1.5 border border-[#e5e2da]" style="min-width:11rem">${links}</div>`;
+      /* Reflejar los mismos tipos en el acordeón del drawer móvil */
+      const accBody = document.getElementById('gn-acc-documentos');
+      if (accBody) {
+        const drawerItems = [{ label: t('nav.all_docs', null, 'Todos los documentos'), href: '/docs.html' }]
+          .concat(items.map(item => ({ label: t('doc_types.' + item.type, null, item.label), href: '/docs.html#' + item.type })));
+        accBody.innerHTML = renderDropdownItems(drawerItems);
+      }
     }).catch(() => {});
   }
 
