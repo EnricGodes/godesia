@@ -74,10 +74,12 @@
             <p class="text-[1.05rem] text-on-surface-variant leading-[1.7] font-light" data-i18n="pages.index.hero_subtitle">Tu linaje es una historia viva. Descubre las conexiones, los documentos y mantén vivos los recuerdos para las generaciones futuras.</p>
         </div>
         <div class="w-full max-w-[700px]">
-            <div class="hero-search-box relative flex items-center bg-surface-container-lowest rounded-2xl pl-6 pr-2 py-2 shadow-[0_12px_40px_rgba(28,28,23,0.08)] border-2 border-transparent transition-colors focus-within:border-[rgba(23,52,30,0.2)]">
-                <span class="material-symbols-outlined text-secondary text-2xl mr-4">auto_awesome</span>
-                <input type="text" id="hero-query" class="flex-1 border-none bg-transparent font-sans text-[1.1rem] text-on-surface outline-none placeholder:text-outline-variant" placeholder="Pregúntame sobre la familia Godes..." data-i18n-placeholder="pages.index.hero_placeholder" autocomplete="off">
-                <button id="hero-send" class="bg-primary text-on-primary border-none py-3 px-7 rounded-xl font-sans text-[0.95rem] font-bold cursor-pointer transition-colors hover:bg-primary-container whitespace-nowrap" data-i18n="pages.index.hero_send">Consultar</button>
+            <div class="hero-search-box relative flex flex-col sm:flex-row items-stretch sm:items-center bg-surface-container-lowest rounded-2xl px-4 py-2 sm:pl-6 sm:pr-2 gap-2 shadow-[0_12px_40px_rgba(28,28,23,0.08)] border-2 border-transparent transition-colors focus-within:border-[rgba(23,52,30,0.2)]">
+                <div class="flex items-center flex-1 min-w-0">
+                    <span class="material-symbols-outlined text-secondary text-2xl mr-4">auto_awesome</span>
+                    <input type="text" id="hero-query" class="flex-1 min-w-0 border-none bg-transparent font-sans text-[1.1rem] text-on-surface outline-none placeholder:text-outline-variant" placeholder="Pregúntame sobre la familia Godes..." data-i18n-placeholder="pages.index.hero_placeholder" autocomplete="off">
+                </div>
+                <button id="hero-send" class="w-full sm:w-auto bg-primary text-on-primary border-none py-3 px-7 rounded-xl font-sans text-[0.95rem] font-bold cursor-pointer transition-colors hover:bg-primary-container whitespace-nowrap" data-i18n="pages.index.hero_send">Consultar</button>
             </div>
             <div class="mt-4 flex gap-2 flex-wrap justify-center items-center">
                 <span class="text-[0.7rem] uppercase tracking-[0.15em] text-on-surface-variant font-bold" data-i18n="pages.index.quick_queries">Consultas rápidas:</span>

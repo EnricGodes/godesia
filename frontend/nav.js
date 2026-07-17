@@ -244,6 +244,8 @@
     style.textContent = `
       #godesia-nav { display: block; }
       #godesia-nav a { text-decoration: none; }
+      /* Los menús desplegables y el drawer viven en <body>, fuera de #godesia-nav */
+      .gn-menu a, #gn-drawer a { text-decoration: none; }
       #godesia-nav .gn-btn {
         border: none; background: none; margin: 0;
         cursor: pointer; -webkit-appearance: none; appearance: none;

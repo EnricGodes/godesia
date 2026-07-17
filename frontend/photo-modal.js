@@ -427,9 +427,24 @@ function renderPhotoModal() {
             #photo-area {
                 transition: flex 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             }
+
+            /* ── Móvil: apilar (foto arriba grande, panel abajo) ── */
+            @media (max-width: 767px) {
+                #photo-modal-flex { flex-direction: column !important; }
+                #photo-area { order: 1; flex: 1 1 auto; min-height: 0; }
+                #photo-sidebar {
+                    order: 2; width: 100% !important; max-height: 40vh; flex-shrink: 0;
+                    border-right: none !important;
+                    border-top: 1px solid rgba(114, 121, 113, 0.2);
+                    padding: 16px 16px 20px !important;
+                }
+                #toggle-sidebar-btn { display: none !important; }
+                #photo-container { padding: 12px !important; }
+                #modal-photo { max-height: 56vh !important; }
+            }
         </style>
 
-        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #fcf9f0; display: flex; flex-direction: row;">
+        <div id="photo-modal-flex" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #fcf9f0; display: flex; flex-direction: row;">
             <!-- Sidebar (left) -->
             <div id="photo-sidebar" style="width: 320px; padding: 32px 24px 24px 24px; border-right: 1px solid rgba(114, 121, 113, 0.2); overflow-y: auto; background-color: #fcf9f0; flex-shrink: 0;">
                 <div id="photo-sidebar-content" style="opacity: 1;">
