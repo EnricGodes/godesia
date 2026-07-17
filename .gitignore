@@ -1,6 +1,12 @@
 .cursor/mcp.json
 data/family_tree.json
 data/photos/
+# BD de autenticación (usuarios reales registrados en producción). Vive dentro
+# del volumen de Railway (data/photos/_auth/) y NUNCA debe ir a git ni pisarse
+# con la de local. Ya cubierta por data/photos/, se declara aparte por seguridad.
+data/photos/_auth/
+_auth/
+**/auth.db
 __pycache__/
 *.pyc
 .env
