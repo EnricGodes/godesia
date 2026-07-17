@@ -32,6 +32,7 @@ import test_bank
 from admin_routes import router as admin_router, init_admin, init_log_capture
 from palazuelos_routes import router as palazuelos_router, init_palazuelos
 import auth
+import notifications
 from geocode_utils import normalize_place, build_queries, geocode_with_cache
 
 BASE_DIR = Path(__file__).parent.parent
@@ -147,6 +148,7 @@ async def startup():
     init_palazuelos(db_conn, BASE_DIR)
     auth.init_auth(PHOTOS_DIR)   # BD de usuarios en el volumen (PHOTOS_DIR/_auth)
     print(f"Auth: {'DESACTIVADA (AUTH_DISABLED=1)' if auth.AUTH_DISABLED else 'activa'}")
+    notifications.init_notifications(db_conn)   # avisos por email al admin
     i18n_pages.init_i18n(db_conn, BASE_DIR)
 
     # LLM engine (optional, only if API key is set)
@@ -811,6 +813,8 @@ async def submit_suggestion(
         )
         db_conn.commit()
 
+    notifications.notify_new_suggestion(name, email, type, person_id, message)
+
     return {"status": "ok", "id": submission_id}
 
 
@@ -890,6 +894,7 @@ async def api_get_settings():
     return {
         "tree_default_person": get_setting(db_conn, "tree_default_person", "I4"),
         "active_languages": i18n_pages.get_active_languages(),
+        "notify_email": get_setting(db_conn, "notify_email", notifications.DEFAULT_NOTIFY_EMAIL),
     }
 
 
@@ -902,9 +907,14 @@ class SettingBody(BaseModel):
 async def api_post_settings(body: SettingBody):
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicialitzada")
-    allowed_keys = {"tree_default_person", "active_languages"}
+    allowed_keys = {"tree_default_person", "active_languages", "notify_email"}
     if body.key not in allowed_keys:
         raise HTTPException(status_code=400, detail=f"Clau no permesa: {body.key}")
+    if body.key == "notify_email":
+        email = (body.value or "").strip()
+        if email and not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+            raise HTTPException(status_code=400, detail="Email de aviso no válido")
+        body = SettingBody(key=body.key, value=email)
     if body.key == "active_languages":
         try:
             langs = json.loads(body.value)

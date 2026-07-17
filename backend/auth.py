@@ -203,6 +203,11 @@ async def register(payload: dict = Body(...)):
         conn.commit()
     finally:
         conn.close()
+    try:
+        from notifications import notify_new_registration
+        notify_new_registration(name, email)   # aviso al admin (best-effort, en 2º plano)
+    except Exception as e:
+        print(f"[auth] Aviso de registro no enviado: {e}")
     return {"ok": True, "status": "pending"}
 
 

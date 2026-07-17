@@ -1566,6 +1566,22 @@ const Config = (() => {
         });
 
         _initLanguages(settings.active_languages || []);
+
+        // Email de avisos (nuevos registros / aportaciones)
+        const notifyInput = document.getElementById('config-notify-email');
+        notifyInput.value = settings.notify_email || '';
+        document.getElementById('config-notify-save').addEventListener('click', async () => {
+            try {
+                await apiFetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: 'notify_email', value: notifyInput.value.trim() })
+                });
+                const msg = document.getElementById('config-notify-msg');
+                msg.style.display = 'inline';
+                setTimeout(() => { msg.style.display = 'none'; }, 2500);
+            } catch (e) { alert('Error guardando: ' + e.message); }
+        });
     }
 
     // ── Idiomas activos ──────────────────────────────────────────────────
