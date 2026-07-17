@@ -24,11 +24,17 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 DEFAULT_LANG = "es"
 LANG_COOKIE = "godesia_lang"
 
-# Idiomas por defecto si settings no define active_languages
+# Idiomas por defecto si settings no define active_languages.
+# Se incluyen los 5 con traducciones de UI (ui.{code}.json); los contenidos sin
+# traducir degradan a español. Robusto ante deploys: godesia.db se sobrescribe en
+# cada despliegue, así que el valor por defecto (no la fila de settings) es lo que
+# realmente manda en producción salvo que el admin lo cambie y se haga "Publicar".
 DEFAULT_LANGUAGES = [
     {"code": "es", "label": "Español"},
     {"code": "ca", "label": "Català"},
     {"code": "en", "label": "English"},
+    {"code": "fr", "label": "Français"},
+    {"code": "de", "label": "Deutsch"},
 ]
 
 # Páginas internas: se sirven sin prefijo, sin i18n y fuera del sitemap
