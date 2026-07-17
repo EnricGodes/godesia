@@ -359,6 +359,20 @@ async def photo_details(photo_id: int, lang: str = "es"):
     return localize_dates_deep(photo_data, _lang_param(lang))
 
 
+@app.get("/api/photo/by-file/{filename}")
+async def photo_details_by_file(filename: str, lang: str = "es"):
+    """Igual que /api/photo/{id} pero busca por nombre de archivo (estable).
+    Las páginas de saga referencian por filename porque los id autoincrement
+    de la tabla photos cambian al reimportar el GEDCOM."""
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    row = db_conn.execute("SELECT id FROM photos WHERE filename = ?", (filename,)).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Foto no encontrada")
+    photo_data = get_photo_details(db_conn, row[0])
+    return localize_dates_deep(photo_data, _lang_param(lang))
+
+
 @app.post("/api/admin/sync-photos")
 async def sync_photos_endpoint():
     """

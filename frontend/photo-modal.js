@@ -98,6 +98,37 @@ window.openPhotoModal = async function(photoId) {
 };
 
 /**
+ * Abrir el modal por NOMBRE DE ARCHIVO (estable) en vez de por id numérico.
+ * Los id autoincrement de la tabla photos cambian al reimportar el GEDCOM, así
+ * que las páginas de saga referencian por filename (derivado del src de la img).
+ */
+window.openPhotoModalFile = async function(filename) {
+    if (!filename) return;
+    try {
+        const path = `/api/photo/by-file/${encodeURIComponent(filename)}`;
+        const res = await fetch(window.I18N ? I18N.apiUrl(path) : path);
+        if (!res.ok) { console.error('Photo not found:', filename); return; }
+        _currentPhotoData = await res.json();
+        _sidebarVisible = true;
+        renderPhotoModal();
+        const overlay = document.getElementById('photo-modal-overlay');
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        document.addEventListener('keydown', _modalKeyHandler);
+    } catch (e) {
+        console.error('Error loading photo:', e);
+    }
+};
+
+/** Abrir el modal desde un <img>, tomando el filename de su atributo src. */
+window.openPhotoModalFromImg = function(imgEl) {
+    if (!imgEl) return;
+    const src = imgEl.getAttribute('src') || '';
+    const filename = src.split('/').pop().split('?')[0];
+    openPhotoModalFile(filename);
+};
+
+/**
  * Resolve the image URL for the current photo: photos from the GEDCOM catalog
  * live in /photos/, but the modal also accepts arbitrary URLs (src_url),
  * e.g. niche photos in /cemetery_photos/.
