@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godesia</title>
+    <meta name="robots" content="noindex">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: {
+            'primary': '#17341e', 'primary-container': '#2d4b33', 'on-primary': '#ffffff',
+            'surface': '#fbf9f2', 'on-surface': '#1c1c17', 'outline': '#7c7a6e',
+            'outline-variant': '#cdcabb',
+        }, fontFamily: { sans: ['Manrope', 'sans-serif'], serif: ['Noto Serif', 'serif'] } } } };
+    </script>
+    <style>
+        body { background: #fbf9f2; font-family: 'Manrope', sans-serif; color: #1c1c17; }
+        .lg-tab.active { color: #17341e; border-color: #17341e; }
+        .lg-tab { color: #7c7a6e; border-color: transparent; }
+        .lg-input { border: 1px solid #cdcabb; border-radius: 0.6rem; padding: 0.65rem 0.85rem; width: 100%; font-size: 0.95rem; background: #fff; }
+        .lg-input:focus { outline: none; border-color: #2d4b33; box-shadow: 0 0 0 3px rgba(45,75,51,0.12); }
+        .lg-btn { background: #17341e; color: #fff; border-radius: 0.6rem; padding: 0.7rem; width: 100%; font-weight: 700; font-size: 0.95rem; transition: opacity .15s; }
+        .lg-btn:hover { opacity: 0.9; } .lg-btn:disabled { opacity: 0.55; cursor: default; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-4 py-10">
+    <div class="w-full max-w-sm">
+        <div class="flex flex-col items-center mb-6">
+            <div class="w-14 h-14 rounded-xl bg-primary-container flex items-center justify-center mb-3">
+                <span class="material-symbols-outlined text-on-primary text-[1.8rem]">diversity_3</span>
+            </div>
+            <h1 class="font-serif text-2xl text-primary italic">Godesia</h1>
+            <p class="text-sm text-outline mt-1 text-center" data-i18n="pages.login.subtitle">El árbol de la familia Godes</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-outline-variant/40 shadow-sm p-6">
+            <div class="flex border-b border-outline-variant/40 mb-5">
+                <button id="tab-login" class="lg-tab active flex-1 pb-2 -mb-px border-b-2 font-bold text-sm" data-i18n="pages.login.tab_login">Entrar</button>
+                <button id="tab-register" class="lg-tab flex-1 pb-2 -mb-px border-b-2 font-bold text-sm" data-i18n="pages.login.tab_register">Registrarse</button>
+            </div>
+
+            <!-- LOGIN -->
+            <form id="form-login" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-outline mb-1 uppercase tracking-wide" data-i18n="pages.login.email">Email</label>
+                    <input type="email" name="email" class="lg-input" required autocomplete="email">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-outline mb-1 uppercase tracking-wide" data-i18n="pages.login.password">Contraseña</label>
+                    <input type="password" name="password" class="lg-input" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="lg-btn" data-i18n="pages.login.enter">Entrar</button>
+            </form>
+
+            <!-- REGISTER -->
+            <form id="form-register" class="space-y-3 hidden">
+                <div>
+                    <label class="block text-xs font-bold text-outline mb-1 uppercase tracking-wide" data-i18n="pages.login.name">Nombre</label>
+                    <input type="text" name="name" class="lg-input" required autocomplete="name">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-outline mb-1 uppercase tracking-wide" data-i18n="pages.login.email">Email</label>
+                    <input type="email" name="email" class="lg-input" required autocomplete="email">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-outline mb-1 uppercase tracking-wide" data-i18n="pages.login.password">Contraseña</label>
+                    <input type="password" name="password" class="lg-input" required minlength="6" autocomplete="new-password">
+                </div>
+                <p class="text-xs text-outline" data-i18n="pages.login.register_hint">Tu registro quedará pendiente de aprobación antes de poder acceder.</p>
+                <button type="submit" class="lg-btn" data-i18n="pages.login.register">Registrarse</button>
+            </form>
+
+            <div id="lg-msg" class="hidden mt-4 text-sm rounded-lg px-3 py-2"></div>
+        </div>
+        <p class="text-center text-xs text-outline/70 mt-6" data-i18n="pages.login.private_note">Acceso reservado a la familia. Contenido no público.</p>
+    </div>
+
+    <script>
+        const T = (k, fb) => (window.t ? window.t(k, null, fb) : fb);
+        const formLogin = document.getElementById('form-login');
+        const formRegister = document.getElementById('form-register');
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+        const msg = document.getElementById('lg-msg');
+
+        function showTab(which) {
+            const login = which === 'login';
+            tabLogin.classList.toggle('active', login);
+            tabRegister.classList.toggle('active', !login);
+            formLogin.classList.toggle('hidden', !login);
+            formRegister.classList.toggle('hidden', login);
+            msg.classList.add('hidden');
+        }
+        tabLogin.onclick = () => showTab('login');
+        tabRegister.onclick = () => showTab('register');
+
+        function showMsg(text, kind) {
+            msg.textContent = text;
+            msg.className = 'mt-4 text-sm rounded-lg px-3 py-2 ' + (
+                kind === 'ok' ? 'bg-primary/10 text-primary' : 'bg-red-50 text-red-700');
+        }
+
+        async function post(url, body) {
+            const res = await fetch(url, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body), credentials: 'same-origin'
+            });
+            let data = {};
+            try { data = await res.json(); } catch (e) {}
+            return { ok: res.ok, status: res.status, data };
+        }
+
+        formLogin.addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = formLogin.querySelector('button'); btn.disabled = true;
+            const f = new FormData(formLogin);
+            const r = await post('/api/auth/login', { email: f.get('email'), password: f.get('password') });
+            btn.disabled = false;
+            if (r.ok) { window.location.href = '/'; return; }
+            if (r.status === 403) showMsg(T('pages.login.err_pending', 'Tu acceso está pendiente de aprobación.'), 'err');
+            else if (r.status === 429) showMsg(T('pages.login.err_rate', 'Demasiados intentos. Espera unos minutos.'), 'err');
+            else showMsg(T('pages.login.err_credentials', 'Email o contraseña incorrectos.'), 'err');
+        });
+
+        formRegister.addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = formRegister.querySelector('button'); btn.disabled = true;
+            const f = new FormData(formRegister);
+            const r = await post('/api/auth/register', { name: f.get('name'), email: f.get('email'), password: f.get('password') });
+            btn.disabled = false;
+            if (r.ok) {
+                formRegister.reset();
+                showMsg(T('pages.login.register_ok', 'Registro recibido. Podrás entrar cuando se apruebe tu acceso.'), 'ok');
+            } else if (r.status === 409) {
+                showMsg(T('pages.login.err_exists', 'Ya existe una cuenta con ese email.'), 'err');
+            } else {
+                showMsg((r.data && r.data.detail) || T('pages.login.err_generic', 'No se pudo completar el registro.'), 'err');
+            }
+        });
+    </script>
+</body>
+</html>

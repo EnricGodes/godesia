@@ -396,6 +396,24 @@
     /* Move gn-menu elements to body (they were rendered as nav siblings in wrapper) */
     [...wrapper.querySelectorAll('.gn-menu')].forEach(m => document.body.appendChild(m));
 
+    /* Sesión: si hay usuario, el icono pasa a ser botón de "Salir" (con su nombre). */
+    (async function updateAuthButton() {
+      const btn = document.getElementById('gn-login-btn');
+      if (!btn) return;
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const u = await res.json();
+        btn.setAttribute('href', '#');
+        btn.setAttribute('title', (u.name || u.email || '') + ' · ' + t('nav.logout', null, 'Salir'));
+        btn.addEventListener('click', async e => {
+          e.preventDefault();
+          try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); } catch (err) {}
+          window.location.href = '/login.html';
+        });
+      } catch (e) { /* sin sesión: se queda como enlace a /login.html */ }
+    })();
+
     /* 2. Dropdown toggle — each .gn-dropdown has data-menu-id pointing to its menu */
     navEl.querySelectorAll('.gn-dropdown').forEach(dd => {
       const btn     = dd.querySelector('.gn-btn');

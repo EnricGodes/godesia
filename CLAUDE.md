@@ -155,6 +155,16 @@ El banco de pruebas (`data/test_bank.json`, gestionado por `backend/test_bank.py
 - Es **independiente** de `test_bank.py`/`test_oracle.py` (banco viejo de parentesco), que no se toca.
 - **Fuera de alcance por hueco de datos** (no de patrón): `divorce_date`/`divorce_place` (la columna `marriages.divorce_date` está vacía → arreglo en MyHeritage, no en el router).
 
+## Acceso privado (login + registro con aprobación)
+
+Toda la web es privada: cada página, foto y API de datos requiere una sesión de un usuario **aprobado**. Implementado en `backend/auth.py` (solo stdlib: `hashlib.pbkdf2_hmac` + `secrets`, sin dependencias nuevas).
+
+- **Dónde viven los usuarios:** BD SQLite APARTE en el volumen persistente de Railway, `PHOTOS_DIR/_auth/auth.db` (`data/photos/_auth/`). **Nunca** en `data/godesia.db`: el repo es público y esa BD se commitea y se sobrescribe en cada deploy. El dir `_auth/` se crea solo al arrancar (`auth.init_auth(PHOTOS_DIR)` en el startup de `app.py`).
+- **Flujo:** registro (nombre + email + contraseña) → cuenta `pending` → el usuario NO puede entrar hasta que se aprueba en el admin (pestaña **Usuarios**, badge con el nº de pendientes). Estados: `pending` | `approved` | `rejected`. Sesiones en tabla `sessions` (no JWT → revocables al rechazar/quitar acceso), cookie `godesia_session` HttpOnly, TTL 30 días.
+- **Middleware** (`auth.auth_middleware`, registrado el ÚLTIMO en `app.py` para ser la capa MÁS EXTERNA, delante del i18n): sin sesión válida, las páginas HTML redirigen a `/{lang}/login.html` y las APIs/assets devuelven 401. Público sin sesión: `/api/auth/*`, `/admin` y `/api/admin/*` (**/admin queda sin proteger por decisión explícita**), la página de login y assets mínimos (`/i18n.js`, `/style.css`, `/locales/`, iconos…). Las rutas `/photos/_auth*` y `/cemetery_photos/_auth*` devuelven **403** siempre (la BD de auth no es descargable aunque viva en el volumen público). El endpoint `/api/admin/upload-photos` solo acepta imágenes por su nombre base → nunca escribe en `_auth/`.
+- **Interruptor de emergencia:** env `AUTH_DISABLED=1` desactiva la puerta por completo (dev local / rescate).
+- Los harness (`regression_check.py`, `parity_check.py`) no pasan por HTTP → no les afecta la auth.
+
 ## Git Workflow
 
 This project uses GitHub (EnricGodes/godesia) for version control. As work is completed, commit changes with clean, descriptive commit messages and push to GitHub.

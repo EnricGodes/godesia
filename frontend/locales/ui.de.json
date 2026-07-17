@@ -202,7 +202,8 @@
     "search_title": "Suche",
     "sidebar_subtitle": "Erkunde deine Abstammung",
     "sidebar_title": "Familienzweige",
-    "tree": "Stammbaum"
+    "tree": "Stammbaum",
+    "logout": "Abmelden"
   },
   "pages": {
     "albums": {
@@ -501,6 +502,24 @@
       "zoom_in": "Vergrößern",
       "zoom_out": "Verkleinern",
       "zoom_reset": "Zentrieren"
+    },
+    "login": {
+      "subtitle": "Der Stammbaum der Familie Godes",
+      "tab_login": "Anmelden",
+      "tab_register": "Registrieren",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "name": "Name",
+      "enter": "Anmelden",
+      "register": "Registrieren",
+      "register_hint": "Ihre Registrierung muss vor dem Zugang genehmigt werden.",
+      "private_note": "Nur für die Familie. Private Inhalte.",
+      "register_ok": "Registrierung erhalten. Sie können sich anmelden, sobald Ihr Zugang genehmigt ist.",
+      "err_pending": "Ihr Zugang wartet auf Genehmigung.",
+      "err_rate": "Zu viele Versuche. Bitte warten Sie einige Minuten.",
+      "err_credentials": "E-Mail oder Passwort falsch.",
+      "err_exists": "Ein Konto mit dieser E-Mail existiert bereits.",
+      "err_generic": "Registrierung konnte nicht abgeschlossen werden."
     }
   },
   "photo_modal": {

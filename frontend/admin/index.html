@@ -29,6 +29,10 @@
                 <span class="nav-icon">✉</span> Aportaciones
                 <span class="nav-badge" id="badge-suggestions"></span>
             </a>
+            <a data-section="users">
+                <span class="nav-icon">👤</span> Usuarios
+                <span class="nav-badge alert" id="badge-users"></span>
+            </a>
             <a data-section="queries">
                 <span class="nav-icon">?</span> Preguntas no resueltas
                 <span class="nav-badge alert" id="badge-queries"></span>
@@ -221,6 +225,18 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <section id="s-users" class="admin-section">
+            <h1 class="section-title">Usuarios</h1>
+            <p class="section-subtitle">Acceso a la web: aprueba o rechaza los registros. La web es privada; solo los usuarios aprobados pueden entrar.</p>
+            <div class="toolbar">
+                <button class="btn btn-secondary btn-sm" onclick="Users.load()">↻ Actualizar</button>
+            </div>
+            <h3 style="margin:1rem 0 0.5rem">Pendientes de aprobación</h3>
+            <div id="users-pending"></div>
+            <h3 style="margin:1.5rem 0 0.5rem">Con acceso aprobado</h3>
+            <div id="users-approved"></div>
         </section>
 
         <!-- QUERIES -->

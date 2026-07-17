@@ -202,7 +202,8 @@
     "search_title": "Search",
     "sidebar_subtitle": "Explore your lineage",
     "sidebar_title": "Family Branches",
-    "tree": "Tree"
+    "tree": "Tree",
+    "logout": "Log out"
   },
   "pages": {
     "albums": {
@@ -501,6 +502,24 @@
       "zoom_in": "Zoom in",
       "zoom_out": "Zoom out",
       "zoom_reset": "Center"
+    },
+    "login": {
+      "subtitle": "The Godes family tree",
+      "tab_login": "Log in",
+      "tab_register": "Sign up",
+      "email": "Email",
+      "password": "Password",
+      "name": "Name",
+      "enter": "Log in",
+      "register": "Sign up",
+      "register_hint": "Your registration will be pending approval before you can access.",
+      "private_note": "Family access only. Private content.",
+      "register_ok": "Registration received. You'll be able to log in once your access is approved.",
+      "err_pending": "Your access is pending approval.",
+      "err_rate": "Too many attempts. Please wait a few minutes.",
+      "err_credentials": "Incorrect email or password.",
+      "err_exists": "An account with that email already exists.",
+      "err_generic": "Registration could not be completed."
     }
   },
   "photo_modal": {

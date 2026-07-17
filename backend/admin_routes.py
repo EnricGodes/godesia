@@ -2152,6 +2152,9 @@ async def list_photos():
     return {"count": len(files), "files": files}
 
 
+_ALLOWED_PHOTO_EXT = (".jpg", ".jpeg", ".png")
+
+
 @router.post("/upload-photos")
 async def upload_photos(files: list[UploadFile] = File(...)):
     """Bulk upload photos to the data/photos directory (for volume sync)."""
@@ -2161,13 +2164,19 @@ async def upload_photos(files: list[UploadFile] = File(...)):
     saved = []
     skipped = []
     for f in files:
-        dest = photos_dir / f.filename
-        if dest.exists():
+        # Solo imágenes por su nombre base: nunca subdirectorios ni path traversal.
+        # Esto impide en particular escribir en photos/_auth (la BD de usuarios).
+        name = Path(f.filename or "").name
+        if not name or Path(name).suffix.lower() not in _ALLOWED_PHOTO_EXT:
             skipped.append(f.filename)
+            continue
+        dest = photos_dir / name
+        if dest.exists():
+            skipped.append(name)
         else:
             content = await f.read()
             dest.write_bytes(content)
-            saved.append(f.filename)
+            saved.append(name)
 
     return {"saved": len(saved), "skipped": len(skipped), "files": saved}
 

@@ -202,7 +202,8 @@
     "search_title": "Recherche",
     "sidebar_subtitle": "Explorez votre lignée",
     "sidebar_title": "Branches familiales",
-    "tree": "Arbre"
+    "tree": "Arbre",
+    "logout": "Se déconnecter"
   },
   "pages": {
     "albums": {
@@ -501,6 +502,24 @@
       "zoom_in": "Agrandir",
       "zoom_out": "Réduire",
       "zoom_reset": "Centrer"
+    },
+    "login": {
+      "subtitle": "L'arbre de la famille Godes",
+      "tab_login": "Se connecter",
+      "tab_register": "S'inscrire",
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "name": "Nom",
+      "enter": "Se connecter",
+      "register": "S'inscrire",
+      "register_hint": "Votre inscription sera en attente d'approbation avant l'accès.",
+      "private_note": "Accès réservé à la famille. Contenu privé.",
+      "register_ok": "Inscription reçue. Vous pourrez vous connecter une fois l'accès approuvé.",
+      "err_pending": "Votre accès est en attente d'approbation.",
+      "err_rate": "Trop de tentatives. Attendez quelques minutes.",
+      "err_credentials": "E-mail ou mot de passe incorrect.",
+      "err_exists": "Un compte existe déjà avec cet e-mail.",
+      "err_generic": "L'inscription n'a pas pu être effectuée."
     }
   },
   "photo_modal": {

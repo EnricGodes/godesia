@@ -56,7 +56,7 @@ document.addEventListener('keydown', e => {
 // Navigation
 // ---------------------------------------------------------------------------
 
-const sections = ['status', 'import', 'suggestions', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'comparador', 'classifier', 'palazuelos', 'dedup', 'cemeteries', 'config'];
+const sections = ['status', 'import', 'suggestions', 'users', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'comparador', 'classifier', 'palazuelos', 'dedup', 'cemeteries', 'config'];
 const initialized = {};
 
 function showSection(name) {
@@ -69,7 +69,7 @@ function showSection(name) {
 
     if (!initialized[name]) {
         initialized[name] = true;
-        const ctrl = { status: Status, import: Import, suggestions: Suggestions,
+        const ctrl = { status: Status, import: Import, suggestions: Suggestions, users: Users,
                        queries: Queries, geocoder: Geocoder, anecdotes: Anecdotes,
                        minibios: Minibios, tests: Tests,
                        config: Config, comparador: Comparador,
@@ -466,6 +466,111 @@ const Suggestions = {
         } catch (e) { alert(e.message); }
     },
 };
+
+// ---------------------------------------------------------------------------
+// Users section (acceso a la web)
+// ---------------------------------------------------------------------------
+const Users = {
+    init() { this.load(); },
+
+    async load() {
+        await Promise.all([this.loadPending(), this.loadApproved()]);
+    },
+
+    async loadPending() {
+        const el = document.getElementById('users-pending');
+        el.innerHTML = '<div class="empty-state">Cargando…</div>';
+        try {
+            const items = await apiFetch('/api/admin/users?status=pending');
+            const badge = document.getElementById('badge-users');
+            if (badge) badge.textContent = items.length || '';
+            if (!items.length) {
+                el.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div>No hay solicitudes pendientes.</div>';
+                return;
+            }
+            el.innerHTML = `<table class="admin-table">
+                <thead><tr><th>Fecha</th><th>Nombre</th><th>Email</th><th></th></tr></thead>
+                <tbody>${items.map(u => `
+                    <tr>
+                        <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${esc((u.created_at || '').slice(0, 16).replace('T', ' '))}</td>
+                        <td><strong>${esc(u.name || '—')}</strong></td>
+                        <td style="font-size:0.82rem;">${esc(u.email || '—')}</td>
+                        <td>
+                            <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
+                                <button class="btn btn-primary btn-sm" onclick="Users.approve(${u.id})">Aprobar</button>
+                                <button class="btn btn-danger btn-sm" onclick="Users.reject(${u.id})">Rechazar</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('')}</tbody>
+            </table>`;
+        } catch (e) {
+            el.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
+        }
+    },
+
+    async loadApproved() {
+        const el = document.getElementById('users-approved');
+        el.innerHTML = '<div class="empty-state">Cargando…</div>';
+        try {
+            const items = await apiFetch('/api/admin/users?status=approved');
+            if (!items.length) {
+                el.innerHTML = '<div class="empty-state">Nadie con acceso todavía.</div>';
+                return;
+            }
+            el.innerHTML = `<table class="admin-table">
+                <thead><tr><th>Nombre</th><th>Email</th><th>Alta</th><th>Último acceso</th><th></th></tr></thead>
+                <tbody>${items.map(u => `
+                    <tr>
+                        <td><strong>${esc(u.name || '—')}</strong></td>
+                        <td style="font-size:0.82rem;">${esc(u.email || '—')}</td>
+                        <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${esc((u.approved_at || u.created_at || '').slice(0, 10))}</td>
+                        <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${u.last_login_at ? esc(u.last_login_at.slice(0, 16).replace('T', ' ')) : '—'}</td>
+                        <td>
+                            <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
+                                <button class="btn btn-danger btn-sm" onclick="Users.remove(${u.id})">Quitar acceso</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('')}</tbody>
+            </table>`;
+        } catch (e) {
+            el.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
+        }
+    },
+
+    async approve(id) {
+        try {
+            await apiFetch(`/api/admin/users/${id}/approve`, { method: 'POST' });
+            this.load();
+        } catch (e) { alert(e.message); }
+    },
+
+    async reject(id) {
+        if (!confirm('¿Rechazar esta solicitud? El usuario no podrá acceder.')) return;
+        try {
+            await apiFetch(`/api/admin/users/${id}/reject`, { method: 'POST' });
+            this.load();
+        } catch (e) { alert(e.message); }
+    },
+
+    async remove(id) {
+        if (!confirm('¿Quitar el acceso a este usuario? Se cerrará su sesión y se borrará su cuenta.')) return;
+        try {
+            await apiFetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+            this.load();
+        } catch (e) { alert(e.message); }
+    },
+};
+
+// Badge de usuarios pendientes al cargar el admin (sin abrir la sección).
+(async () => {
+    try {
+        const d = await apiFetch('/api/admin/users/pending-count');
+        const badge = document.getElementById('badge-users');
+        if (badge && d && d.count) badge.textContent = d.count;
+    } catch (e) { /* silencioso */ }
+})();
 
 // ---------------------------------------------------------------------------
 // Unresolved Queries section

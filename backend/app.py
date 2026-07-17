@@ -31,6 +31,7 @@ from i18n_dates import format_gedcom_date, localize_dates_deep, validate_lang
 import test_bank
 from admin_routes import router as admin_router, init_admin, init_log_capture
 from palazuelos_routes import router as palazuelos_router, init_palazuelos
+import auth
 from geocode_utils import normalize_place, build_queries, geocode_with_cache
 
 BASE_DIR = Path(__file__).parent.parent
@@ -44,6 +45,8 @@ CEMETERY_PHOTOS_DIR = DATA_DIR / "cemetery_photos"
 app = FastAPI(title="Godesia", description="Consulta genealógica en lenguaje natural")
 app.include_router(admin_router)
 app.include_router(palazuelos_router)
+app.include_router(auth.auth_router)
+app.include_router(auth.auth_admin_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -53,6 +56,9 @@ app.add_middleware(
 )
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 app.middleware("http")(i18n_pages.i18n_middleware)
+# La puerta de acceso se registra la ÚLTIMA para ser la capa MÁS EXTERNA: debe
+# gatear ANTES de que el i18n redirija/sirva páginas localizadas.
+app.middleware("http")(auth.auth_middleware)
 
 db_conn = None
 router = None
@@ -139,6 +145,8 @@ async def startup():
 
     init_admin(db_conn, BASE_DIR)
     init_palazuelos(db_conn, BASE_DIR)
+    auth.init_auth(PHOTOS_DIR)   # BD de usuarios en el volumen (PHOTOS_DIR/_auth)
+    print(f"Auth: {'DESACTIVADA (AUTH_DISABLED=1)' if auth.AUTH_DISABLED else 'activa'}")
     i18n_pages.init_i18n(db_conn, BASE_DIR)
 
     # LLM engine (optional, only if API key is set)

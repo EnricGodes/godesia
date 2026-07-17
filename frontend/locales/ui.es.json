@@ -202,7 +202,8 @@
     "search_title": "Buscador",
     "sidebar_subtitle": "Explora tu linaje",
     "sidebar_title": "Ramas Familiares",
-    "tree": "Árbol"
+    "tree": "Árbol",
+    "logout": "Salir"
   },
   "pages": {
     "albums": {
@@ -501,6 +502,24 @@
       "zoom_in": "Ampliar",
       "zoom_out": "Reducir",
       "zoom_reset": "Centrar"
+    },
+    "login": {
+      "subtitle": "El árbol de la familia Godes",
+      "tab_login": "Entrar",
+      "tab_register": "Registrarse",
+      "email": "Email",
+      "password": "Contraseña",
+      "name": "Nombre",
+      "enter": "Entrar",
+      "register": "Registrarse",
+      "register_hint": "Tu registro quedará pendiente de aprobación antes de poder acceder.",
+      "private_note": "Acceso reservado a la familia. Contenido no público.",
+      "register_ok": "Registro recibido. Podrás entrar cuando se apruebe tu acceso.",
+      "err_pending": "Tu acceso está pendiente de aprobación.",
+      "err_rate": "Demasiados intentos. Espera unos minutos.",
+      "err_credentials": "Email o contraseña incorrectos.",
+      "err_exists": "Ya existe una cuenta con ese email.",
+      "err_generic": "No se pudo completar el registro."
     }
   },
   "photo_modal": {

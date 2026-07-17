@@ -202,7 +202,8 @@
     "search_title": "Cercador",
     "sidebar_subtitle": "Explora el teu llinatge",
     "sidebar_title": "Branques familiars",
-    "tree": "Arbre"
+    "tree": "Arbre",
+    "logout": "Sortir"
   },
   "pages": {
     "albums": {
@@ -501,6 +502,24 @@
       "zoom_in": "Ampliar",
       "zoom_out": "Reduir",
       "zoom_reset": "Centrar"
+    },
+    "login": {
+      "subtitle": "L'arbre de la família Godes",
+      "tab_login": "Entrar",
+      "tab_register": "Registrar-se",
+      "email": "Correu",
+      "password": "Contrasenya",
+      "name": "Nom",
+      "enter": "Entrar",
+      "register": "Registrar-se",
+      "register_hint": "El teu registre quedarà pendent d'aprovació abans de poder accedir.",
+      "private_note": "Accés reservat a la família. Contingut no públic.",
+      "register_ok": "Registre rebut. Podràs entrar quan s'aprovi el teu accés.",
+      "err_pending": "El teu accés està pendent d'aprovació.",
+      "err_rate": "Massa intents. Espera uns minuts.",
+      "err_credentials": "Correu o contrasenya incorrectes.",
+      "err_exists": "Ja existeix un compte amb aquest correu.",
+      "err_generic": "No s'ha pogut completar el registre."
     }
   },
   "photo_modal": {
