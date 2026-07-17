@@ -1785,7 +1785,16 @@ function renderResidences(residences, events, person) {
         _pinned_first: true,
     }] : [];
 
-    const rest = [...(residences || []), ...fromEvents];
+    // Descartar entradas sin ningún contenido (p.ej. filas de residencia vacías
+    // del GEDCOM: sin dirección, ciudad, país, fecha, nota ni coordenadas) que
+    // se pintaban como un recuadro vacío.
+    const _txt = v => (typeof v === 'string' ? v.trim() : v);
+    const hasResidenceContent = r => !!(
+        _txt(r.address) || _txt(r.city) || _txt(r.country) ||
+        _txt(r.date) || _txt(r.note) || _txt(r.source_type) || (r.lat && r.lng)
+    );
+
+    const rest = [...(residences || []), ...fromEvents].filter(hasResidenceContent);
     const all = [...birthEntry, ...rest];
     if (!all.length) { section.style.display = 'none'; return; }
     section.style.display = 'block';
