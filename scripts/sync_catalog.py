@@ -883,6 +883,28 @@ def main():
 
         extra_photos, extra_albums = parse_extra_gedcom_photos(extra_ged, palaz_map)
 
+        # Colisión de IDs de álbum entre GEDCOMs: MyHeritage numera los álbumes por
+        # árbol, así que @A800001@ = "Godes Molina" en el GEDCOM Godes pero
+        # "Valdelcubo" en el de Palazuelos. Sin corregirlo, las fotos de Palazuelos
+        # heredaban el título del álbum Godes (aparecían mezcladas). Se renombran los
+        # álbumes de Palazuelos que colisionan con un álbum Godes de DISTINTO título,
+        # dándoles su propio espacio de IDs (@A800001@ -> @PA800001@).
+        def _ns_album(aid):
+            return "@P" + aid[1:] if aid and aid.startswith("@") else aid
+        _collide = {
+            aid for aid, ainfo in extra_albums.items()
+            if aid in albums and albums[aid].get("title") != ainfo.get("title")
+        }
+        if _collide:
+            extra_albums = {
+                (_ns_album(aid) if aid in _collide else aid): ainfo
+                for aid, ainfo in extra_albums.items()
+            }
+            for _photo in extra_photos.values():
+                if _photo.album_id in _collide:
+                    _photo.album_id = _ns_album(_photo.album_id)
+            print(f"  Álbumes Palazuelos renombrados por colisión: {sorted(_collide)}")
+
         def _merge_tags_into_winner(loser_photo, loser_fname):
             """Transfer tagged_people from a blocklisted loser to its kept winner.
 
