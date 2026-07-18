@@ -145,7 +145,10 @@
     "Religión": "Religion",
     "Reunión Familiar": "Family Reunion",
     "Servicio Militar": "Military Service",
-    "Trabajo": "Work"
+    "Trabajo": "Work",
+    "Exposición": "Exhibition",
+    "Jurado": "Jury",
+    "Proyecto profesional": "Professional project"
   },
   "events": {
     "anecdote": "Anecdote",

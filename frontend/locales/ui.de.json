@@ -145,7 +145,10 @@
     "Religión": "Religion",
     "Reunión Familiar": "Familientreffen",
     "Servicio Militar": "Militärdienst",
-    "Trabajo": "Arbeit"
+    "Trabajo": "Arbeit",
+    "Exposición": "Ausstellung",
+    "Jurado": "Jury",
+    "Proyecto profesional": "Berufliches Projekt"
   },
   "events": {
     "anecdote": "Anekdote",

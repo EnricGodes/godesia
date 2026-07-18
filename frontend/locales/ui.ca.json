@@ -145,7 +145,10 @@
     "Religión": "Religió",
     "Reunión Familiar": "Reunió Familiar",
     "Servicio Militar": "Servei Militar",
-    "Trabajo": "Feina"
+    "Trabajo": "Feina",
+    "Exposición": "Exposició",
+    "Jurado": "Jurat",
+    "Proyecto profesional": "Projecte professional"
   },
   "events": {
     "anecdote": "Anècdota",
