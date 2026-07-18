@@ -202,7 +202,13 @@ def _page_url(page, lang):
 def _build_head_block(page, lang, ui, langs):
     page_key = Path(page).stem
     meta = (ui or {}).get("pages", {}).get(page_key, {})
-    lines = [f'<link rel="canonical" href="{_page_url(page, lang)}">']
+    lines = [
+        '<link rel="icon" type="image/svg+xml" href="/favicon.svg">',
+        '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">',
+        '<link rel="icon" href="/favicon.ico" sizes="any">',
+        '<link rel="apple-touch-icon" href="/favicon-180.png">',
+        f'<link rel="canonical" href="{_page_url(page, lang)}">',
+    ]
     for l in langs:
         lines.append(
             f'<link rel="alternate" hreflang="{l["code"]}" href="{_page_url(page, l["code"])}">'
