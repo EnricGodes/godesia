@@ -273,6 +273,7 @@ tr.is-hidden { display: none; }
 .eg-footer__grid { display: flex; flex-wrap: wrap; gap: 30px 60px; justify-content: space-between; }
 .eg-footer__nav { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: .88rem; }
 .eg-footer small { color: rgba(255,255,255,.5); font-size: .78rem; }
+.eg-footer__bottom { margin-top: 26px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 
 /* ── Utilidades ────────────────────────────────────────────────────────── */
 .eg-note { font-size: .82rem; color: var(--secondary); font-style: italic; }

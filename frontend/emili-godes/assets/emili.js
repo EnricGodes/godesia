@@ -9,14 +9,12 @@
   var BASE = '/emili-godes/';
 
   var NAV = [
-    { href: 'index.html',          es: 'Inicio',                 ca: 'Inici' },
-    { href: 'biografia.html',      es: 'Biografía',              ca: 'Biografia' },
-    { href: 'obra.html',           es: 'La obra',                ca: "L'obra" },
-    { href: 'mirada-moderna.html', es: 'Una mirada moderna',     ca: 'Una mirada moderna' },
-    { href: 'destacadas.html',     es: 'Fotografías destacadas', ca: 'Fotografies destacades' },
-    { href: 'legado.html',         es: 'Reconocimiento y legado', ca: 'Reconeixement i llegat' },
-    { href: 'archivo.html',        es: 'El archivo',             ca: "L'arxiu" },
-    { href: 'investigacion.html',  es: 'La investigación',       ca: 'La recerca' }
+    { href: 'biografia.html',      es: 'Biografía',      ca: 'Biografia' },
+    { href: 'obra.html',           es: 'Obra',           ca: 'Obra' },
+    { href: 'mirada-moderna.html', es: 'Mirada',         ca: 'Mirada' },
+    { href: 'destacadas.html',     es: 'Destacadas',     ca: 'Destacades' },
+    { href: 'legado.html',         es: 'Reconocimiento', ca: 'Reconeixement' },
+    { href: 'investigacion.html',  es: 'Estudio',        ca: 'Estudi' }
   ];
 
   var STR = {
@@ -80,16 +78,9 @@
     header.className = 'eg-header';
     header.innerHTML =
       '<div class="eg-header__inner">' +
-        '<a class="eg-brand" href="' + BASE + 'index.html">Emili Godes' +
-          '<small data-es="' + STR.tagline.es + '" data-ca="' + STR.tagline.ca + '">' + STR.tagline.es + '</small>' +
-        '</a>' +
+        '<a class="eg-brand" href="' + BASE + 'index.html">Emili Godes</a>' +
         '<nav class="eg-nav">' + navLinks + '</nav>' +
         '<div class="eg-tools">' +
-          '<div class="eg-lang" role="group" aria-label="Idioma / Llengua">' +
-            '<button type="button" data-lang="es" aria-label="Castellano">ES</button>' +
-            '<span>·</span>' +
-            '<button type="button" data-lang="ca" aria-label="Català">CA</button>' +
-          '</div>' +
           '<a class="eg-back" href="/" data-es="' + STR.back.es + '" data-ca="' + STR.back.ca + '">' + STR.back.es + '</a>' +
         '</div>' +
         '<button class="eg-burger" type="button" aria-label="Menú" aria-expanded="false"><span class="material-symbols-outlined">menu</span></button>' +
@@ -120,11 +111,6 @@
     header.querySelector('.eg-burger').addEventListener('click', function () { drawer.classList.add('open'); backdrop.classList.add('open'); this.setAttribute('aria-expanded', 'true'); });
     drawer.querySelector('.eg-drawer__close').addEventListener('click', closeDrawer);
     backdrop.addEventListener('click', closeDrawer);
-
-    // Toggle de idioma (header + drawer)
-    document.querySelectorAll('.eg-lang button').forEach(function (btn) {
-      btn.addEventListener('click', function () { setLang(this.dataset.lang); });
-    });
   }
 
   // ── Footer ────────────────────────────────────────────────────────────────
@@ -142,7 +128,14 @@
         '</div>' +
         '<nav class="eg-footer__nav">' + links + '</nav>' +
       '</div>' +
-      '<div class="eg-container" style="margin-top:26px"><small>© Familia Godes · Emili Godes 1895–1970</small></div>';
+      '<div class="eg-container eg-footer__bottom">' +
+        '<small>© Familia Godes · Emili Godes 1895–1970</small>' +
+        '<div class="eg-lang" role="group" aria-label="Idioma / Llengua">' +
+          '<button type="button" data-lang="es" aria-label="Castellano">ES</button>' +
+          '<span>·</span>' +
+          '<button type="button" data-lang="ca" aria-label="Català">CA</button>' +
+        '</div>' +
+      '</div>';
     document.body.appendChild(footer);
   }
 
@@ -286,6 +279,11 @@
   function init() {
     buildHeader();
     buildFooter();
+    // Selector de idioma por delegación (cubre pie y drawer, creados en distinto momento)
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest && e.target.closest('.eg-lang button');
+      if (btn) setLang(btn.dataset.lang);
+    });
     applyLang(getLang());
     loadObra();
     loadDestacadas();
