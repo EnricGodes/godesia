@@ -50,6 +50,12 @@
       var v = nodes[i].getAttribute('data-' + lang);
       if (v != null) nodes[i].textContent = v;
     }
+    // data-alt-es / data-alt-ca en imágenes (texto alternativo bilingüe)
+    var imgs = document.querySelectorAll('[data-alt-es]');
+    for (var k = 0; k < imgs.length; k++) {
+      var av = imgs[k].getAttribute('data-alt-' + lang);
+      if (av != null) imgs[k].setAttribute('alt', av);
+    }
     // botones del selector
     var b = document.querySelectorAll('.eg-lang button');
     for (var j = 0; j < b.length; j++) b[j].classList.toggle('is-active', b[j].dataset.lang === lang);
