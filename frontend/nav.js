@@ -57,6 +57,7 @@
   const DIVERSOS = [
     { label: t('nav.casas_godes', null, 'Casas Godes'), href: null },
     { label: t('nav.cemeteries', null, 'Cementerios'),  href: '/cementerios.html' },
+    { label: 'Emili Godes', href: '/emili-godes/', raw: true },
   ];
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -90,8 +91,10 @@
         const active = isActivePage(item.href)
           ? 'font-semibold text-[#2D4B33] bg-[#f1eee5]'
           : 'text-[#1c1c17] hover:bg-[#f1eee5]';
+        /* item.raw: enlace fuera del sistema i18n (microsites), sin prefijo de idioma */
+        const url = item.raw ? item.href : lhref(item.href);
         return (
-          `<a href="${lhref(item.href)}" class="block px-4 py-2 text-sm ${active} rounded-md transition-colors">` +
+          `<a href="${url}" class="block px-4 py-2 text-sm ${active} rounded-md transition-colors">` +
           `${item.label}</a>`
         );
       }

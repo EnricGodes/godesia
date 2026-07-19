@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reconocimiento y legado · Emili Godes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { corePlugins: { preflight: false }, theme: { extend: { colors: {
+      'primary':'#17341e','primary-container':'#2d4b33','secondary':'#78583e','surface':'#fcf9f0',
+      'surface-container':'#f1eee5','on-surface':'#1c1c17','on-surface-variant':'#424842','outline-variant':'#c2c8bf' },
+      fontFamily:{ serif:["'Noto Serif'",'serif'], sans:["'Manrope'",'sans-serif'] } } } };
+  </script>
+  <link rel="stylesheet" href="/emili-godes/assets/emili.css">
+</head>
+<body>
+
+  <section class="eg-section">
+    <div class="eg-container">
+      <p class="eg-kicker" data-es="Reconocimiento y legado" data-ca="Reconeixement i llegat">Reconocimiento y legado</p>
+      <h1 class="eg-page-title" data-es="Trayectoria y recuperación" data-ca="Trajectòria i recuperació">Trayectoria y recuperación</h1>
+      <div class="lang-es eg-lead"><p>Emili Godes fue reconocido en vida por su dominio técnico, su sensibilidad artística y su capacidad para trabajar en ámbitos muy diferentes. Participó en concursos, exposiciones y jurados, publicó imágenes en revistas especializadas y mantuvo relaciones profesionales con artistas, científicos y fotógrafos de su generación.</p><p>Su legado, sin embargo, quedó disperso entre instituciones, empresas, publicaciones y colecciones particulares. Desde los años ochenta, diferentes exposiciones, investigaciones y fondos patrimoniales han contribuido a recuperar una obra mucho más amplia que la que durante años se conoció públicamente.</p></div>
+      <div class="lang-ca eg-lead"><p>Emili Godes va ser reconegut en vida pel seu domini tècnic, la seva sensibilitat artística i la seva capacitat per treballar en àmbits molt diferents. Va participar en concursos, exposicions i jurats, va publicar imatges en revistes especialitzades i va mantenir relacions professionals amb artistes, científics i fotògrafs de la seva generació.</p><p>El seu llegat, però, va quedar dispers entre institucions, empreses, publicacions i col·leccions particulars. Des dels anys vuitanta, diverses exposicions, investigacions i fons patrimonials han contribuït a recuperar una obra molt més àmplia que la que durant anys es va conèixer públicament.</p></div>
+    </div>
+  </section>
+
+  <!-- Premios y exposiciones con filtro por década -->
+  <section class="eg-section eg-section--tint">
+    <div class="eg-container">
+      <h2 style="font-size:1.7rem" data-es="Premios, concursos y exposiciones" data-ca="Premis, concursos i exposicions">Premios, concursos y exposiciones</h2>
+      <div class="eg-filterbar" data-decade-filter>
+        <span class="eg-chip is-active" data-decade="all" data-es="Todas" data-ca="Totes">Todas</span>
+        <span class="eg-chip" data-decade="1910">1910s</span>
+        <span class="eg-chip" data-decade="1920">1920s</span>
+        <span class="eg-chip" data-decade="1930">1930s</span>
+        <span class="eg-chip" data-decade="1940">1940s</span>
+        <span class="eg-chip" data-decade="1950">1950s</span>
+      </div>
+
+      <div data-decades>
+        <h3 style="margin:24px 0 0;font-size:1.2rem" data-es="Premios y concursos" data-ca="Premis i concursos">Premios y concursos</h3>
+        <div class="eg-tablewrap">
+          <table class="eg-table">
+            <thead><tr><th data-es="Año" data-ca="Any">Año</th><th data-es="Reconocimiento" data-ca="Reconeixement">Reconocimiento</th><th data-es="Lugar / entidad" data-ca="Lloc / entitat">Lugar / entidad</th><th data-es="Estado" data-ca="Estat">Estado</th></tr></thead>
+            <tbody>
+              <tr data-decade="1910"><td>1915</td><td>Primer premio en el concurso fotográfico C.B.O. de San José (medalla en la familia).</td><td>Barcelona</td><td class="eg-note">Documentado por medalla familiar</td></tr>
+              <tr data-decade="1920"><td>1921</td><td>Premio en el Concurso Fotográfico de la Exposición de Barcelona (lema «Montserrat»).</td><td>Barcelona</td><td class="eg-note">Categoría no identificada</td></tr>
+              <tr data-decade="1920"><td>1922–1923</td><td>Primer premio del concurso «La hermosa España» (Ernemann).</td><td>Dresde</td><td class="eg-note">Lugar del fallo no consta</td></tr>
+              <tr data-decade="1920"><td>1924</td><td>Premio en el concurso de la Congregación Mariana de Igualada.</td><td>Igualada</td><td class="eg-note">Categoría no identificada</td></tr>
+              <tr data-decade="1920"><td>1924</td><td>Primer premio de la Exposición de Bellas Artes.</td><td>Córdoba</td><td class="eg-note">Documentado (GEDCOM)</td></tr>
+              <tr data-decade="1920"><td>1925</td><td>Premio en el concurso «Jardines de España» (Perfumerías Gal).</td><td>—</td><td class="eg-note">Lugar pendiente</td></tr>
+              <tr data-decade="1920"><td>1925</td><td>Primer premio del concurso fotográfico del Ateneo Obrero.</td><td>Gijón</td><td class="eg-note">Documentado (GEDCOM)</td></tr>
+              <tr data-decade="1920"><td>1926</td><td>Premio en el concurso regional organizado por Casa Cuyàs.</td><td>Barcelona</td><td class="eg-note">Categoría no identificada</td></tr>
+              <tr data-decade="1920"><td>1926</td><td>Segundo premio en el concurso fotográfico de Agfa.</td><td>Berlín</td><td class="eg-note">Documentado (GEDCOM)</td></tr>
+              <tr data-decade="1920"><td>1927</td><td>Medalla de bronce en el Salón Español del Foment de les Arts Decoratives por el bromóleo «Peixaters».</td><td>Barcelona</td><td class="eg-note">Obra y premio identificados</td></tr>
+              <tr data-decade="1920"><td>1927</td><td>Premio de honor en el Concurso de Arte de la Sociedad Cordobesa de Arqueología y Excursionismo.</td><td>Córdoba</td><td class="eg-note">Documentado (GEDCOM)</td></tr>
+              <tr data-decade="1920"><td>1927</td><td>Premio en el VI Salón Internacional de la Real Sociedad Fotográfica.</td><td>Madrid</td><td class="eg-note">Categoría no identificada</td></tr>
+              <tr data-decade="1920"><td>1929</td><td>Premio en un concurso de la Federación Hotelera.</td><td>—</td><td class="eg-note">Faltan datos del certamen</td></tr>
+              <tr data-decade="1940"><td>1941</td><td>Tercer premio (Cosmos Fotográfico) en el II Concurso Libre de la Agrupació Fotogràfica de Catalunya.</td><td>Barcelona</td><td class="eg-note">Documentado (GEDCOM)</td></tr>
+              <tr data-decade="1940"><td>1945</td><td>Tercer premio cedido por N. Cuyàs.</td><td>—</td><td class="eg-note">Medalla familiar</td></tr>
+              <tr data-decade="1940"><td>1946</td><td>Premio en el VI Concurso Libre de la Agrupació Fotogràfica de Catalunya.</td><td>Barcelona</td><td class="eg-note">Categoría no identificada</td></tr>
+              <tr data-decade="1940"><td>1948</td><td>Premio en el XI Concurso Nacional de Cine Amateur por «La rata al servicio de la humanidad» (con F. García del Cid).</td><td>Barcelona</td><td class="eg-note">Documentado (GEDCOM)</td></tr>
+              <tr data-decade="1940"><td>c. 1949</td><td>«Màgica Nit»: medalla de plata, mejor film infantil, mejor interpretación femenina y revelación extraordinaria.</td><td>—</td><td class="eg-note">Testimonio grabado de Godes</td></tr>
+              <tr data-decade="1940 1950"><td>desp. 1945</td><td>«Màgica Nit»: medalla de oro en Salerno.</td><td>Salerno</td><td class="eg-note">Año y certamen pendientes</td></tr>
+              <tr data-decade="1950"><td>1951</td><td>Premio en el II Salón Nacional de Fotografía Artística.</td><td>Camprodon</td><td class="eg-note">Categoría no identificada</td></tr>
+              <tr data-decade="1950"><td>1952</td><td>Premio en el III Salón Nacional de Fotografía Artística.</td><td>Camprodon</td><td class="eg-note">Categoría no identificada</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin:30px 0 0;font-size:1.2rem" data-es="Exposiciones y salones" data-ca="Exposicions i salons">Exposiciones y salones</h3>
+        <div class="eg-tablewrap">
+          <table class="eg-table">
+            <thead><tr><th data-es="Año" data-ca="Any">Año</th><th data-es="Exposición" data-ca="Exposició">Exposición</th><th data-es="Lugar" data-ca="Lloc">Lugar</th><th data-es="Contenido" data-ca="Contingut">Contenido</th></tr></thead>
+            <tbody>
+              <tr data-decade="1920"><td>1927</td><td>VI Salón Internacional de la Real Sociedad Fotográfica</td><td>Madrid</td><td>Presentó «Pajarita» y «Las Ermitas», entre otras.</td></tr>
+              <tr data-decade="1930"><td>1930</td><td>Exposición junto a Antoni Arissa y Narcís Ricart</td><td>Huelva</td><td>Fotógrafos catalanes invitados por la agrupación local.</td></tr>
+              <tr data-decade="1930"><td>1932</td><td>I Salón Nacional de Fotografía Publicitaria</td><td>Barcelona</td><td>La crítica destacó su modernidad, objetividad y luminosidad.</td></tr>
+              <tr data-decade="1940"><td>1944–1945</td><td>«Fotografías de Emilio Godes» (exposición individual)</td><td>Galería El Jardín, Barcelona</td><td>21 fotografías de aproximación y fotomacrografías. Única individual conocida en vida.</td></tr>
+              <tr data-decade="1940"><td>1945</td><td>Serie de fotomacrografías</td><td>Igualada</td><td>Presentación de la serie mostrada el año anterior en Barcelona.</td></tr>
+              <tr data-decade="1940"><td>1946</td><td>X Salón de Arte Fotográfico Internacional</td><td>Buenos Aires</td><td>Participación vinculada a la Agrupació Fotogràfica de Catalunya.</td></tr>
+              <tr data-decade="1950"><td>1955</td><td>Festival Internacional de Cinematografía a Paso Reducido</td><td>Salerno</td><td>Se presentó «Todo es según el color…».</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="lang-es eg-prose eg-mt-lg"><p>La relación de premios muestra una actividad artística sostenida desde 1915 hasta los años cincuenta. Godes fue reconocido tanto por fotografías individuales como por series, bromóleos y películas, lo que confirma que su práctica creativa acompañó toda su trayectoria profesional.</p></div>
+      <div class="lang-ca eg-prose eg-mt-lg"><p>La relació de premis mostra una activitat artística sostinguda des de 1915 fins als anys cinquanta. Godes va ser reconegut tant per fotografies individuals com per sèries, bromolis i pel·lícules, fet que confirma que la seva pràctica creativa va acompanyar tota la seva trajectòria professional.</p></div>
+    </div>
+  </section>
+
+  <!-- Publicaciones -->
+  <section class="eg-section">
+    <div class="eg-container eg-container--narrow">
+      <h2 style="font-size:1.7rem" data-es="Publicaciones" data-ca="Publicacions">Publicaciones</h2>
+      <ul class="eg-prose" style="margin-top:12px">
+        <li><strong>Radium</strong> — <span class="lang-es">publicación técnica vinculada a Casa Riba, relevante en su formación.</span><span class="lang-ca">publicació tècnica vinculada a Casa Riba, rellevant en la seva formació.</span></li>
+        <li><strong>Art</strong> — <span class="lang-es">reproducciones y fotografías de artistas; el GEDCOM recoge ~150 fotografías (1933–1936).</span><span class="lang-ca">reproduccions i fotografies d’artistes; el GEDCOM recull ~150 fotografies (1933–1936).</span></li>
+        <li><strong>La Gaseta de les Arts</strong> — <span class="lang-es">reproducciones de obras de arte.</span><span class="lang-ca">reproduccions d’obres d’art.</span></li>
+        <li><strong>D’Ací i d’Allà</strong> — <span class="lang-es">reproducciones y cultura visual.</span><span class="lang-ca">reproduccions i cultura visual.</span></li>
+        <li><strong>El Progreso Fotográfico</strong> — <span class="lang-es">artículos y referencias a su obra artística.</span><span class="lang-ca">articles i referències a la seva obra artística.</span></li>
+        <li><strong>Meridià</strong> — <span class="lang-es">artículo de Sebastià Gasch (1938) con cinco fotografías de aproximación.</span><span class="lang-ca">article de Sebastià Gasch (1938) amb cinc fotografies d’aproximació.</span></li>
+        <li><strong>El Español</strong> — <span class="lang-es">artículo de Carlos Sindreu (1955) con nueve microfotografías.</span><span class="lang-ca">article de Carlos Sindreu (1955) amb nou microfotografies.</span></li>
+        <li><strong>Diario de Barcelona</strong> — <span class="lang-es">artículo de 1956 con tres fotografías de la serie.</span><span class="lang-ca">article de 1956 amb tres fotografies de la sèrie.</span></li>
+        <li><strong>San Jorge</strong> — <span class="lang-es">artículo de Carlos Sindreu (1963) con nueve fotografías.</span><span class="lang-ca">article de Carlos Sindreu (1963) amb nou fotografies.</span></li>
+        <li><strong>Arxius de l’Escola Superior d’Agricultura</strong> — <span class="lang-es">publicaciones científicas con fotografías de Godes (años treinta a mediados de los cincuenta).</span><span class="lang-ca">publicacions científiques amb fotografies de Godes (anys trenta a mitjan cinquanta).</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Jurados -->
+  <section class="eg-section eg-section--tint">
+    <div class="eg-container eg-container--narrow">
+      <h2 style="font-size:1.7rem" data-es="Participación como jurado" data-ca="Participació com a jurat">Participación como jurado</h2>
+      <div class="eg-tablewrap">
+        <table class="eg-table">
+          <thead><tr><th data-es="Año" data-ca="Any">Año</th><th data-es="Concurso" data-ca="Concurs">Concurso</th><th data-es="Contexto" data-ca="Context">Contexto</th></tr></thead>
+          <tbody>
+            <tr><td>1927</td><td>Agrupación Excursionista Júpiter</td><td>Con M. Huertas, J. Pla Janini, C. Carbonell y N. Ricart.</td></tr>
+            <tr><td>1932</td><td>VI Concurso del Ateneu Obrer Martinenc</td><td>Con Rafael Salcedo y Narcís Ricart.</td></tr>
+            <tr><td>1935</td><td>Agrupación Fotográfica Saint Victor</td><td>Presidida por A. Arissa; con N. Ricart y P. Català Pic.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Red profesional -->
+  <section class="eg-section">
+    <div class="eg-container">
+      <h2 style="font-size:1.7rem" data-es="Relaciones con artistas, fotógrafos y científicos" data-ca="Relacions amb artistes, fotògrafs i científics">Relaciones con artistas, fotógrafos y científicos</h2>
+      <div class="eg-grid" style="margin-top:16px">
+        <div class="eg-card"><h3 data-es="Cultura fotográfica" data-ca="Cultura fotogràfica">Cultura fotográfica</h3><p>Antoni Arissa · Narcís Ricart · Pere Català Pic · Josep Sala · Josep Masana · Josep Maria Lladó · Gabriel Casas · Claudi Carbonell · Joaquim Pla Janini · Sebastià Gasch · Carlos Sindreu</p></div>
+        <div class="eg-card"><h3 data-es="Ciencia e instituciones" data-ca="Ciència i institucions">Ciencia e instituciones</h3><p>Francisco García del Cid · Escola Superior d’Agricultura · Cátedra de Entomología (UB) · Institut d’Investigacions Pesqueres · Laboratorios del Dr. Esteve · Antoni Puigvert</p></div>
+        <div class="eg-card"><h3 data-es="Arte y cine" data-ca="Art i cinema">Arte y cine</h3><p>Artistas y escultores (reproducciones de obra) · Galerías y publicaciones de arte · Estudios cinematográficos Orphea y otros productores</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Colecciones -->
+  <section class="eg-section eg-section--tint">
+    <div class="eg-container">
+      <h2 style="font-size:1.7rem" data-es="Colecciones e instituciones" data-ca="Col·leccions i institucions">Colecciones e instituciones</h2>
+      <div class="eg-inst"><h3>Museu Nacional d’Art de Catalunya — MNAC</h3><p class="lang-es">Fotografías artísticas, fotogramas, imágenes de aproximación, motivos vegetales y arquitectura. Parte procede del depósito y donación de Maria Rosa Godes y de la Col·lecció Nacional de Fotografia.</p><p class="lang-ca">Fotografies artístiques, fotogrames, imatges d’aproximació, motius vegetals i arquitectura. Part procedeix del dipòsit i donació de Maria Rosa Godes i de la Col·lecció Nacional de Fotografia.</p></div>
+      <div class="eg-inst"><h3>Arxiu Històric Fotogràfic del IEFC</h3><p class="lang-es">La Colección Godes conserva 1.164 imágenes (897 negativos y 267 positivos), fechadas entre los años veinte y los sesenta: fotografía artística y documental, paisaje, ciencia, medicina, retratos, familia e industria.</p><p class="lang-ca">La Col·lecció Godes conserva 1.164 imatges (897 negatius i 267 positius), datades entre els anys vint i els seixanta: fotografia artística i documental, paisatge, ciència, medicina, retrats, família i indústria.</p></div>
+      <div class="eg-inst"><h3>Filmoteca de Catalunya</h3><p class="lang-es">Materiales de su trabajo de foto fija cinematográfica; permite identificar su participación en numerosas películas.</p><p class="lang-ca">Materials del seu treball de foto fixa cinematogràfica; permet identificar la seva participació en nombroses pel·lícules.</p></div>
+      <div class="eg-inst"><h3>Arxiu Fotogràfic de Barcelona</h3><p class="lang-es">Parte del reportaje de las obras de Montjuïc y de la Exposición Internacional de Barcelona de 1929.</p><p class="lang-ca">Part del reportatge de les obres de Montjuïc i de l’Exposició Internacional de Barcelona de 1929.</p></div>
+      <div class="eg-inst"><h3>Archivo Municipal de Córdoba · Museo Reina Sofía</h3><p class="lang-es">Reportaje de Córdoba (adquirido y difundido localmente). El GEDCOM también refiere fondos en el Reina Sofía, pendientes de confirmar inventario.</p><p class="lang-ca">Reportatge de Còrdova (adquirit i difós localment). El GEDCOM també refereix fons al Reina Sofía, pendents de confirmar inventari.</p></div>
+    </div>
+  </section>
+
+  <!-- Recuperación historiográfica -->
+  <section class="eg-section">
+    <div class="eg-container eg-container--narrow">
+      <h2 style="font-size:1.7rem" data-es="Recuperación historiográfica" data-ca="Recuperació historiogràfica">Recuperación historiográfica</h2>
+      <ul class="eg-prose" style="margin-top:12px">
+        <li class="lang-es">Recuperación del reportaje de Córdoba y su exposición en 1985, <em>Còrdova anys ’20: Fotografies d’Emili Godes</em> (IEFC).</li>
+        <li class="lang-ca">Recuperació del reportatge de Còrdova i la seva exposició el 1985, <em>Còrdova anys ’20: Fotografies d’Emili Godes</em> (IEFC).</li>
+        <li class="lang-es">Inclusión en exposiciones colectivas sobre las vanguardias fotográficas españolas.</li>
+        <li class="lang-ca">Inclusió en exposicions col·lectives sobre les avantguardes fotogràfiques espanyoles.</li>
+        <li class="lang-es">Exposición monográfica de fotomacrografía en la Primavera Fotogràfica de 1996.</li>
+        <li class="lang-ca">Exposició monogràfica de fotomacrografia a la Primavera Fotogràfica de 1996.</li>
+        <li class="lang-es">Incorporación de fotografías a fondos del MNAC, el IEFC, la Filmoteca y otras instituciones.</li>
+        <li class="lang-ca">Incorporació de fotografies a fons del MNAC, l’IEFC, la Filmoteca i altres institucions.</li>
+        <li class="lang-es">La investigación de Laia Foix y la colaboración de la familia Godes en la identificación y datación.</li>
+        <li class="lang-ca">La recerca de Laia Foix i la col·laboració de la família Godes en la identificació i datació.</li>
+      </ul>
+      <p class="eg-note" style="margin-top:18px" data-es="Tratamiento de la certeza: se distingue entre documentado, testimonio familiar, referencia bibliográfica y pendiente de confirmar. Una medalla familiar sin inscripción suficiente no se presenta como premio plenamente identificado." data-ca="Tractament de la certesa: es distingeix entre documentat, testimoni familiar, referència bibliogràfica i pendent de confirmar. Una medalla familiar sense inscripció suficient no es presenta com a premi plenament identificat.">Tratamiento de la certeza: se distingue entre documentado, testimonio familiar, referencia bibliográfica y pendiente de confirmar.</p>
+
+      <div class="eg-related">
+        <a href="/emili-godes/archivo.html" data-es="El archivo →" data-ca="L’arxiu →">El archivo →</a>
+        <a href="/emili-godes/investigacion.html" data-es="La investigación →" data-ca="La recerca →">La investigación →</a>
+      </div>
+    </div>
+  </section>
+
+  <script src="/emili-godes/assets/emili.js"></script>
+</body>
+</html>
