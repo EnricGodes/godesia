@@ -560,6 +560,35 @@ def get_connection(db_path):
         "ALTER TABLE niches ADD COLUMN fs_url TEXT",
         # Nicho habilitado/deshabilitado: si 0, no se muestra en la app pública.
         "ALTER TABLE niches ADD COLUMN enabled INTEGER DEFAULT 1",
+        # Clasificador asistido del archivo de Emili Godes (datos manuales/LLM; ningún
+        # script de import las toca → sobreviven a reimportaciones GEDCOM, como cemeteries).
+        """CREATE TABLE IF NOT EXISTS emili_photos (
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
+               orig_filename TEXT UNIQUE NOT NULL,
+               carpeta TEXT, serie TEXT, serie_num INTEGER,
+               status TEXT NOT NULL DEFAULT 'pendiente',
+               origen TEXT,
+               proyecto TEXT, categoria TEXT,
+               fecha_estimada TEXT, fecha_certeza TEXT,
+               lugar TEXT, descripcion TEXT,
+               sugerencia TEXT, confianza REAL, razonamiento TEXT,
+               new_filename TEXT, dest_path TEXT,
+               batch_id INTEGER,
+               created_at TEXT DEFAULT (datetime('now')),
+               updated_at TEXT DEFAULT (datetime('now'))
+           )""",
+        "CREATE INDEX IF NOT EXISTS idx_emili_photos_status ON emili_photos(status)",
+        "CREATE INDEX IF NOT EXISTS idx_emili_photos_serie ON emili_photos(serie, serie_num)",
+        "CREATE INDEX IF NOT EXISTS idx_emili_photos_batch ON emili_photos(batch_id)",
+        """CREATE TABLE IF NOT EXISTS emili_batches (
+               id INTEGER PRIMARY KEY AUTOINCREMENT,
+               anthropic_batch_id TEXT,
+               status TEXT DEFAULT 'creado',
+               num_imgs INTEGER DEFAULT 0,
+               coste_estimado REAL DEFAULT 0,
+               created_at TEXT DEFAULT (datetime('now')),
+               ended_at TEXT
+           )""",
     ]:
         try:
             conn.execute(stmt)

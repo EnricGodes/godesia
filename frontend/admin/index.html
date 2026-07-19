@@ -69,6 +69,10 @@
             <a data-section="cemeteries">
                 <span class="nav-icon">✝</span> Cementerios
             </a>
+            <a data-section="emili">
+                <span class="nav-icon">🅔</span> Emili Godes
+                <span class="nav-badge" id="badge-emili"></span>
+            </a>
             <a data-section="config">
                 <span class="nav-icon">⚙</span> Configuración
             </a>
@@ -1033,6 +1037,45 @@
             </div>
         </section>
 
+        <!-- EMILI GODES -->
+        <section id="s-emili" class="admin-section">
+            <h1 class="section-title">Emili Godes — clasificador del archivo</h1>
+            <p class="section-subtitle">Clasifica el archivo fotográfico (IEFC + MNAC) con ayuda de Claude Sonnet 4.6 (Batch API). Solo funciona en local. Datos manuales: sobreviven a re-importaciones.</p>
+
+            <div id="emili-unavailable" style="display:none;" class="empty-state">El archivo local no está disponible en este entorno. Esta herramienta solo funciona en local.</div>
+
+            <div id="emili-main">
+                <div class="stat-grid" id="emili-stats" style="margin-bottom:1rem;"></div>
+
+                <div class="toolbar">
+                    <div class="toolbar-right" style="gap:.5rem;flex-wrap:wrap;">
+                        <button class="btn btn-secondary btn-sm" onclick="Emili.scan()">↻ Escanear archivo</button>
+                        <label style="font-size:.85rem;">Lote:
+                            <select id="emili-limit" onchange="Emili.updateEstimate()">
+                                <option value="16" selected>16 (prueba)</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="250">250</option>
+                            </select>
+                        </label>
+                        <span id="emili-estimate" style="font-size:.85rem;color:#727971;"></span>
+                        <button class="btn btn-primary btn-sm" id="emili-analyze-btn" onclick="Emili.analyze()">▶ Analizar lote</button>
+                        <button class="btn btn-secondary btn-sm" onclick="Emili.poll()">⇩ Recoger lote</button>
+                        <button class="btn btn-secondary btn-sm" onclick="Emili.export()">⇪ Exportar (inventario + obra.json)</button>
+                    </div>
+                </div>
+
+                <div id="emili-job" style="display:none;background:#12120f;border:1px solid #2a2a24;border-radius:8px;padding:.75rem 1rem;margin:.75rem 0;font-size:.85rem;">
+                    <div id="emili-job-phase" style="font-weight:600;"></div>
+                    <div id="emili-job-log" style="max-height:140px;overflow:auto;font-family:monospace;font-size:.75rem;color:#9aa093;margin-top:.4rem;"></div>
+                </div>
+
+                <h2 style="font-size:1rem;margin-top:1.25rem;">Revisión (analizadas)</h2>
+                <p class="section-subtitle" style="margin-top:.2rem;">Edita las fichas y aprueba. Al aprobar, la imagen se optimiza, renombra y archiva.</p>
+                <div id="emili-review"></div>
+            </div>
+        </section>
+
     </main>
 </div>
 
@@ -1049,6 +1092,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="admin_cemeteries.js?v=20260612.2"></script>
+<script src="admin_emili.js?v=20260719.1"></script>
 <script src="admin.js?v=20260612.2"></script>
 </body>
 </html>

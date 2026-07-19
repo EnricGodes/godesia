@@ -2790,3 +2790,244 @@ async def delete_niche_record(record_id: int):
     if cur.rowcount == 0:
         raise HTTPException(status_code=404, detail="Registro no encontrado")
     return {"ok": True}
+
+
+# ===========================================================================
+# Emili Godes — clasificador asistido del archivo fotográfico
+# ===========================================================================
+
+import emili_classifier as _emili  # noqa: E402
+
+_emili_job = {
+    "status": "idle",            # idle | running | done | error
+    "phase": "",                 # enviando | esperando | ingiriendo
+    "message": "",
+    "batch_db_id": None,
+    "anthropic_batch_id": None,
+    "num_imgs": 0,
+    "coste_estimado": 0.0,
+    "ingested": 0,
+    "log": [],
+    "error": None,
+}
+_emili_job_lock = threading.Lock()
+
+# Tope de coste por lote (dólares). Bloquea lanzamientos que lo superen.
+EMILI_COST_CAP = 1.0
+
+
+def _emili_log(msg: str):
+    with _emili_job_lock:
+        _emili_job["log"].append(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
+        _emili_job["log"] = _emili_job["log"][-200:]
+    logging.getLogger("emili").info(msg)
+
+
+def _emili_require_archive():
+    if not _emili.archive_available(_base_dir):
+        raise HTTPException(status_code=409,
+                            detail="Archivo local no disponible (solo funciona en local).")
+
+
+def _run_emili_analyze(db_path: Path, base_dir: Path, limit: int):
+    import sqlite3 as _sqlite3  # noqa: PLC0415
+    import time as _time  # noqa: PLC0415
+    conn = _sqlite3.connect(str(db_path))
+    conn.row_factory = _sqlite3.Row
+    try:
+        with _emili_job_lock:
+            _emili_job["phase"] = "enviando"
+        info = _emili.submit_batch(conn, base_dir, limit, log=_emili_log)
+        with _emili_job_lock:
+            _emili_job.update({
+                "batch_db_id": info["batch_db_id"],
+                "anthropic_batch_id": info["anthropic_batch_id"],
+                "num_imgs": info["num_imgs"],
+                "coste_estimado": info["coste_estimado"],
+                "phase": "esperando",
+            })
+        # Poll hasta que el batch termine (máx ~40 min de espera activa).
+        deadline = _time.time() + 40 * 60
+        while _time.time() < deadline:
+            _time.sleep(20)
+            res = _emili.poll_and_ingest(conn, base_dir, info["batch_db_id"], log=_emili_log)
+            if res["status"] == "ended":
+                with _emili_job_lock:
+                    _emili_job.update({"status": "done", "phase": "ingiriendo",
+                                       "ingested": res.get("ingested", 0)})
+                _emili_log(f"Lote completado: {res.get('ingested', 0)} fichas.")
+                return
+            with _emili_job_lock:
+                _emili_job["message"] = f"Batch {res['status']}…"
+        _emili_log("Espera agotada; el batch sigue en Anthropic. Usa 'Recoger lote' más tarde.")
+        with _emili_job_lock:
+            _emili_job["status"] = "done"
+            _emili_job["phase"] = "pendiente-recoger"
+    except Exception as exc:  # noqa: BLE001
+        with _emili_job_lock:
+            _emili_job["status"] = "error"
+            _emili_job["error"] = str(exc)
+        _emili_log(f"ERROR: {exc}")
+    finally:
+        conn.close()
+
+
+class EmiliAnalyzeBody(BaseModel):
+    limit: int = 16
+
+
+class EmiliApproveBody(BaseModel):
+    ids: list[int]
+
+
+class EmiliPatchBody(BaseModel):
+    proyecto: Optional[str] = None
+    categoria: Optional[str] = None
+    fecha_estimada: Optional[str] = None
+    fecha_certeza: Optional[str] = None
+    lugar: Optional[str] = None
+    descripcion: Optional[str] = None
+
+
+@router.get("/emili/stats")
+async def emili_stats():
+    db = _db()
+    s = _emili.stats(db)
+    s["archive_available"] = _emili.archive_available(_base_dir)
+    s["categories"] = _emili.CATEGORIES
+    s["cost_cap"] = EMILI_COST_CAP
+    return s
+
+
+@router.post("/emili/scan")
+async def emili_scan():
+    _emili_require_archive()
+    db = _db()
+    return _emili.scan(db, _base_dir)
+
+
+@router.get("/emili/estimate")
+async def emili_estimate(limit: int = 16):
+    db = _db()
+    pending = db.execute(
+        "SELECT COUNT(*) n FROM emili_photos WHERE status='pendiente'"
+    ).fetchone()["n"]
+    n = min(limit, pending) if limit and limit > 0 else pending
+    return {"pending": pending, "n": n, "coste_estimado": _emili.estimate_cost(n),
+            "cost_cap": EMILI_COST_CAP}
+
+
+@router.post("/emili/analyze")
+async def emili_analyze(body: EmiliAnalyzeBody):
+    _emili_require_archive()
+    db = _db()
+    pending = db.execute(
+        "SELECT COUNT(*) n FROM emili_photos WHERE status='pendiente'"
+    ).fetchone()["n"]
+    n = min(body.limit, pending) if body.limit and body.limit > 0 else pending
+    if n <= 0:
+        raise HTTPException(status_code=400, detail="No hay imágenes pendientes.")
+    coste = _emili.estimate_cost(n)
+    if coste > EMILI_COST_CAP:
+        raise HTTPException(status_code=400,
+                            detail=f"Coste estimado ${coste} supera el tope ${EMILI_COST_CAP}. "
+                                   f"Baja el tamaño del lote.")
+    with _emili_job_lock:
+        if _emili_job["status"] == "running":
+            raise HTTPException(status_code=409, detail="Ya hay un lote en curso.")
+        _emili_job.update({"status": "running", "phase": "enviando", "message": "",
+                           "batch_db_id": None, "anthropic_batch_id": None,
+                           "num_imgs": n, "coste_estimado": coste, "ingested": 0,
+                           "log": [], "error": None})
+    db_path = _base_dir / "data" / "godesia.db"
+    threading.Thread(target=_run_emili_analyze, args=(db_path, _base_dir, body.limit),
+                     daemon=True).start()
+    return {"status": "started", "n": n, "coste_estimado": coste}
+
+
+@router.get("/emili/status")
+async def emili_status():
+    with _emili_job_lock:
+        return dict(_emili_job)
+
+
+@router.post("/emili/poll")
+async def emili_poll():
+    """Recoge manualmente el último batch en curso (por si expiró la espera activa)."""
+    db = _db()
+    row = db.execute(
+        "SELECT id FROM emili_batches WHERE status!='ended' ORDER BY id DESC LIMIT 1"
+    ).fetchone()
+    if not row:
+        return {"status": "sin-lotes-pendientes"}
+    return _emili.poll_and_ingest(db, _base_dir, row["id"], log=_emili_log)
+
+
+@router.get("/emili/review")
+async def emili_review(status: str = "analizada", limit: int = 300):
+    db = _db()
+    rows = db.execute(
+        "SELECT id, orig_filename, carpeta, serie, serie_num, status, proyecto, categoria, "
+        "fecha_estimada, fecha_certeza, lugar, descripcion, confianza, razonamiento, new_filename "
+        "FROM emili_photos WHERE status=? ORDER BY proyecto, serie, serie_num LIMIT ?",
+        (status, int(limit)),
+    ).fetchall()
+    return {"items": [dict(r) for r in rows]}
+
+
+@router.patch("/emili/photo/{pid}")
+async def emili_patch(pid: int, body: EmiliPatchBody):
+    db = _db()
+    fields, vals = [], []
+    for k, v in body.dict(exclude_unset=True).items():
+        fields.append(f"{k}=?")
+        vals.append(v)
+    if not fields:
+        return {"ok": True}
+    vals.append(pid)
+    cur = db.execute(
+        f"UPDATE emili_photos SET {', '.join(fields)}, updated_at=datetime('now') WHERE id=?",
+        vals,
+    )
+    db.commit()
+    if cur.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Foto no encontrada")
+    return {"ok": True}
+
+
+@router.post("/emili/approve")
+async def emili_approve(body: EmiliApproveBody):
+    _emili_require_archive()
+    db = _db()
+    return _emili.approve(db, _base_dir, body.ids, log=_emili_log)
+
+
+@router.post("/emili/export")
+async def emili_export():
+    import importlib.util as _ilu  # noqa: PLC0415
+    script = _base_dir / "scripts" / "emili_export.py"
+    spec = _ilu.spec_from_file_location("emili_export", script)
+    mod = _ilu.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.export(_db(), _base_dir)
+
+
+@router.get("/emili/thumb/{pid}")
+async def emili_thumb(pid: int):
+    from fastapi.responses import Response  # noqa: PLC0415
+    from PIL import Image, ImageOps  # noqa: PLC0415
+    db = _db()
+    row = db.execute("SELECT carpeta, orig_filename FROM emili_photos WHERE id=?", (pid,)).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Foto no encontrada")
+    src = _emili.image_path(_base_dir, row["carpeta"], row["orig_filename"])
+    if not src.exists():
+        raise HTTPException(status_code=404, detail="Archivo no disponible")
+    img = Image.open(src)
+    img = ImageOps.exif_transpose(img)
+    if img.mode not in ("RGB", "L"):
+        img = img.convert("RGB")
+    img.thumbnail((360, 360))
+    buf = io.BytesIO()
+    img.save(buf, "JPEG", quality=78)
+    return Response(content=buf.getvalue(), media_type="image/jpeg")
