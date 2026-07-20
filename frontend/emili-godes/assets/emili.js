@@ -7,6 +7,7 @@
   'use strict';
 
   var BASE = '/emili-godes/';
+  var _obraRerender = null;   // hook: re-render del explorador al cambiar idioma
 
   var NAV = [
     { href: 'biografia.html',      es: 'Biografía',      ca: 'Biografia' },
@@ -57,8 +58,8 @@
     // botones del selector
     var b = document.querySelectorAll('.eg-lang button');
     for (var j = 0; j < b.length; j++) b[j].classList.toggle('is-active', b[j].dataset.lang === lang);
-    document.title = document.title; // no-op, título ya bilingüe si procede
     window.EG.lang = lang;
+    if (_obraRerender) _obraRerender();
   }
   function t(obj) { return obj[getLang()] || obj.es; }
 
@@ -274,8 +275,364 @@
     });
   }
 
+  // ── Explorador de La obra (tipo álbumes) ────────────────────────────────────
+  var OBRA_TEXTS = {
+    fotografia_artistica: { es: ['Fotografía artística', 'La fotografía artística fue una dimensión constante en la trayectoria de Emili Godes. Desde sus primeros trabajos y participaciones en concursos hasta sus series de Córdoba, sus imágenes exploran la composición, la atmósfera, la luz y la capacidad de la fotografía para construir una mirada personal sobre el mundo.\n\nEsta categoría incluye únicamente imágenes concebidas principalmente como creación fotográfica, no cualquier fotografía visualmente atractiva realizada dentro de un encargo profesional.'],
+      ca: ['Fotografia artística', 'La fotografia artística va ser una dimensió constant en la trajectòria d’Emili Godes. Des dels seus primers treballs i participacions en concursos fins a les seves sèries de Còrdova, les seves imatges exploren la composició, l’atmosfera, la llum i la capacitat de la fotografia per construir una mirada personal sobre el món.\n\nAquesta categoria inclou únicament imatges concebudes principalment com a creació fotogràfica, no qualsevol fotografia visualment atractiva realitzada dins d’un encàrrec professional.'] },
+    fotografia_industrial: { es: ['Fotografía industrial', 'Godes realizó una extensa producción industrial para empresas y fábricas. Sus imágenes documentan instalaciones, procesos de fabricación, maquinaria, trabajadores y productos, pero no se limitan a registrar lo que encuentra: ordenan el espacio, estudian la luz y convierten la industria en una imagen de modernidad y progreso.'],
+      ca: ['Fotografia industrial', 'Godes va realitzar una extensa producció industrial per a empreses i fàbriques. Les seves imatges documenten instal·lacions, processos de fabricació, maquinària, treballadors i productes, però no es limiten a registrar allò que troben: ordenen l’espai, estudien la llum i converteixen la indústria en una imatge de modernitat i progrés.'] },
+    publicidad: { es: ['Publicidad y encargo', 'La fotografía publicitaria exigía claridad, precisión y capacidad para convertir un producto o un servicio en una imagen atractiva. Godes trabajó para distintas empresas y aplicó a estos encargos recursos asociados a la fotografía moderna: encuadres rigurosos, contrastes, geometrías y una atención especial a la iluminación.'],
+      ca: ['Publicitat i encàrrec', 'La fotografia publicitària exigia claredat, precisió i capacitat per convertir un producte o un servei en una imatge atractiva. Godes va treballar per a diverses empreses i va aplicar a aquests encàrrecs recursos associats a la fotografia moderna: enquadraments rigorosos, contrastos, geometries i una atenció especial a la il·luminació.'] },
+    ciencia_medicina: { es: ['Ciencia y medicina', 'La relación de Godes con científicos, médicos e instituciones de investigación lo llevó a trabajar con plantas, insectos, estructuras naturales, operaciones e investigaciones médicas. En estas imágenes la precisión técnica y la utilidad documental conviven con una fuerte dimensión visual. Su colaboración con Francisco García del Cid y la Escola Superior d’Agricultura fue clave.'],
+      ca: ['Ciència i medicina', 'La relació de Godes amb científics, metges i institucions de recerca el va portar a treballar amb plantes, insectes, estructures naturals, operacions i investigacions mèdiques. En aquestes imatges la precisió tècnica i la utilitat documental conviuen amb una forta dimensió visual. La seva col·laboració amb Francisco García del Cid i l’Escola Superior d’Agricultura va ser clau.'] },
+    reproduccion_arte: { es: ['Reproducción de obras de arte', 'Godes fotografió pinturas, esculturas, cerámicas, piezas de joyería y otras obras artísticas para artistas, galerías, publicaciones y catálogos. Esta actividad exigía dominar la iluminación, la reproducción tonal, la escala y la fidelidad al original, y lo mantuvo en contacto directo con la producción artística de su época.'],
+      ca: ['Reproducció d’obres d’art', 'Godes va fotografiar pintures, escultures, ceràmiques, peces de joieria i altres obres artístiques per a artistes, galeries, publicacions i catàlegs. Aquesta activitat exigia dominar la il·luminació, la reproducció tonal, l’escala i la fidelitat a l’original, i el va mantenir en contacte directe amb la producció artística del seu temps.'] },
+    foto_fija_cine: { es: ['Fotografía y cine', 'Desde los años treinta Godes trabajó como fotógrafo de foto fija, principalmente para los estudios Orphea. Documentó escenas, rodajes, decorados, actores y materiales de producción. La investigación ha identificado su participación en más de cincuenta películas.'],
+      ca: ['Fotografia i cinema', 'Des dels anys trenta Godes va treballar com a fotògraf de foto fixa, principalment per als estudis Orphea. Va documentar escenes, rodatges, decorats, actors i materials de producció. La recerca ha identificat la seva participació en més de cinquanta pel·lícules.'] },
+    arquitectura_instalaciones: { es: ['Arquitectura e instalaciones', 'La arquitectura aparece en muchos de sus reportajes: edificios, fábricas, laboratorios, instalaciones científicas, espacios expositivos y residencias. Godes utilizó la cámara para explicar cómo se organizan los espacios y cómo la arquitectura representa una idea de progreso, eficacia o distinción.'],
+      ca: ['Arquitectura i instal·lacions', 'L’arquitectura apareix en molts dels seus reportatges: edificis, fàbriques, laboratoris, instal·lacions científiques, espais expositius i residències. Godes va utilitzar la càmera per explicar com s’organitzen els espais i com l’arquitectura representa una idea de progrés, eficàcia o distinció.'] },
+    reportajes_urbanos_documentales: { es: ['Reportajes urbanos y documentales', 'Los reportajes de Córdoba, Barcelona y otros entornos muestran la capacidad de Godes para observar ciudades, calles, monumentos, actividades y transformaciones sociales. Son imágenes documentales, pero también construcciones visuales en las que importan la perspectiva, la luz, la escala y el ritmo.'],
+      ca: ['Reportatges urbans i documentals', 'Els reportatges de Còrdova, Barcelona i altres entorns mostren la capacitat de Godes per observar ciutats, carrers, monuments, activitats i transformacions socials. Són imatges documentals, però també construccions visuals en què importen la perspectiva, la llum, l’escala i el ritme.'] },
+    experimentacion_fotografica: { es: ['Experimentación fotográfica', 'Godes exploró dobles exposiciones, fotogramas, encuadres poco convencionales, contrastes, ampliaciones y técnicas de aproximación. En esta categoría se reúnen las imágenes en las que la investigación formal y técnica es el elemento principal.'],
+      ca: ['Experimentació fotogràfica', 'Godes va explorar dobles exposicions, fotogrames, enquadraments poc convencionals, contrastos, ampliacions i tècniques d’aproximació. En aquesta categoria es reuneixen les imatges en què la recerca formal i tècnica és l’element principal.'] },
+  };
+  var UI = {
+    themes: { es: 'Temáticas', ca: 'Temàtiques' },
+    decades: { es: 'Décadas', ca: 'Dècades' },
+    all: { es: 'Todas', ca: 'Totes' },
+    search: { es: 'Buscar proyecto, lugar…', ca: 'Cerca projecte, lloc…' },
+    sortCount: { es: 'Más fotos', ca: 'Més fotos' },
+    sortName: { es: 'Nombre A–Z', ca: 'Nom A–Z' },
+    sortDate: { es: 'Fecha', ca: 'Data' },
+    photos: { es: 'fotos', ca: 'fotos' },
+    pick: { es: 'Elige una temática en el panel izquierdo para empezar a explorar.', ca: 'Tria una temàtica al panell esquerre per començar a explorar.' },
+    noresults: { es: 'Sin resultados con estos filtros.', ca: 'Sense resultats amb aquests filtres.' },
+    backAll: { es: 'Todos los proyectos', ca: 'Tots els projectes' },
+    sf: { es: 's. f.', ca: 's. d.' },
+  };
+
+  var obra = { data: null, ambito: null, project: null, decade: 'all', q: '', sort: 'count' };
+
+  function esc(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function norm(s) { return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+
+  function initObra() {
+    var root = document.getElementById('eg-obra');
+    if (!root) return;
+    fetch(BASE + 'data/obra.json').then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        obra.data = d || { ambito_order: [], ambitos: {}, decades: [] };
+        if (obra.data.ambito_order.length) obra.ambito = obra.data.ambito_order[0];
+        _obraRerender = renderObra;
+        _obraFromHash();
+        window.addEventListener('hashchange', function () { _obraFromHash(); renderObra(); });
+        renderObra();
+      }).catch(function () {
+        document.getElementById('eg-obra-main').innerHTML =
+          '<p class="eg-empty">No se pudo cargar el catálogo.</p>';
+      });
+  }
+
+  function _obraFromHash() {
+    var h = decodeURIComponent((location.hash || '').replace(/^#/, ''));
+    if (!h) return;
+    var parts = h.split('/');
+    if (obra.data.ambitos[parts[0]]) {
+      obra.ambito = parts[0]; obra.project = parts[1] || null;
+      obra._pendingPhoto = (parts[1] && parts[2] != null && parts[2] !== '') ? parseInt(parts[2], 10) : null;
+    }
+  }
+  function _obraSetHash() {
+    var h = obra.ambito ? obra.ambito + (obra.project ? '/' + obra.project : '') : '';
+    if (decodeURIComponent((location.hash || '').replace(/^#/, '')) !== h) {
+      history.replaceState(null, '', h ? '#' + h : location.pathname);
+    }
+  }
+  function renderObra() {
+    if (!obra.data) return;
+    _obraSetHash();
+    renderSide();
+    renderMain();
+    if (obra._pendingPhoto != null && obra._photos && obra._photos[obra._pendingPhoto]) {
+      var idx = obra._pendingPhoto; obra._pendingPhoto = null;
+      egViewerOpen(obra._photos, idx);
+    } else { obra._pendingPhoto = null; }
+  }
+
+  function renderSide() {
+    var d = obra.data;
+    var themes = d.ambito_order.map(function (k) {
+      var a = d.ambitos[k]; if (!a) return '';
+      var label = (OBRA_TEXTS[k] ? OBRA_TEXTS[k][getLang()][0] : k);
+      var active = k === obra.ambito ? ' is-active' : '';
+      return '<button class="eg-side-link' + active + '" onclick="EG.obraTheme(\'' + k + '\')">' +
+        '<span>' + esc(label) + '</span><span class="eg-side-count">' + a.count + '</span></button>';
+    }).join('');
+    var decs = ['<span class="eg-chip' + (obra.decade === 'all' ? ' is-active' : '') + '" onclick="EG.obraDecade(\'all\')">' + t(UI.all) + '</span>']
+      .concat((d.decades || []).map(function (dc) {
+        return '<span class="eg-chip' + (obra.decade === dc ? ' is-active' : '') + '" onclick="EG.obraDecade(\'' + dc + '\')">' + dc + 's</span>';
+      })).join('');
+    document.getElementById('eg-obra-side').innerHTML =
+      '<h4>' + t(UI.themes) + '</h4>' + themes +
+      '<h4 style="margin-top:20px">' + t(UI.decades) + '</h4><div class="eg-side-decades">' + decs + '</div>';
+  }
+
+  function _matchDecade(photos) {
+    if (obra.decade === 'all') return true;
+    return photos.some(function (p) { return p.decada === obra.decade; });
+  }
+
+  function renderMain() {
+    var main = document.getElementById('eg-obra-main');
+    if (!obra.ambito) { main.innerHTML = '<p class="eg-empty">' + t(UI.pick) + '</p>'; return; }
+    var a = obra.data.ambitos[obra.ambito];
+    var txt = OBRA_TEXTS[obra.ambito];
+    var header = '';
+    if (txt) {
+      header = '<p class="eg-kicker">' + esc(txt[getLang()][0]) + '</p>' +
+        '<div class="lang-es eg-prose" style="max-width:760px">' + txt.es[1].split('\n\n').map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') + '</div>' +
+        '<div class="lang-ca eg-prose" style="max-width:760px">' + txt.ca[1].split('\n\n').map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') + '</div>';
+    }
+    var toolbar = '<div class="eg-obra-toolbar">' +
+      '<input type="search" value="' + esc(obra.q) + '" placeholder="' + t(UI.search) + '" oninput="EG.obraSearch(this.value)">' +
+      '<select onchange="EG.obraSort(this.value)">' +
+        '<option value="count"' + (obra.sort==='count'?' selected':'') + '>' + t(UI.sortCount) + '</option>' +
+        '<option value="name"' + (obra.sort==='name'?' selected':'') + '>' + t(UI.sortName) + '</option>' +
+        '<option value="date"' + (obra.sort==='date'?' selected':'') + '>' + t(UI.sortDate) + '</option>' +
+      '</select></div>';
+
+    if (!obra.project) {
+      main.innerHTML = header + toolbar + renderProjects(a);
+    } else {
+      main.innerHTML = renderProjectPhotos();
+    }
+  }
+
+  function renderProjects(a) {
+    var q = norm(obra.q);
+    var list = a.projects.filter(function (p) {
+      if (!_matchDecade(p.photos)) return false;
+      if (q && norm(p.nombre + ' ' + p.lugar).indexOf(q) === -1) return false;
+      return true;
+    });
+    list = list.slice().sort(function (x, y) {
+      if (obra.sort === 'name') return x.nombre.localeCompare(y.nombre);
+      if (obra.sort === 'date') return (x.fecha || '').localeCompare(y.fecha || '');
+      return y.count - x.count;
+    });
+    if (!list.length) return '<p class="eg-empty">' + t(UI.noresults) + '</p>';
+    var cards = list.map(function (p) {
+      var meta = [p.lugar, p.decada !== 'sf' ? p.decada + 's' : ''].filter(Boolean).join(' · ');
+      return '<button class="eg-projcard" onclick="EG.obraOpen(\'' + p.slug + '\')">' +
+        '<div class="eg-projcard__cover">' + (p.cover ? '<img loading="lazy" src="' + p.cover + '" alt="">' : '') + '</div>' +
+        '<div class="eg-projcard__body">' +
+          '<div class="eg-projcard__name">' + esc(p.nombre) + '</div>' +
+          (meta ? '<div class="eg-projcard__meta">' + esc(meta) + '</div>' : '') +
+          '<div class="eg-projcard__count">' + p.count + ' ' + t(UI.photos) + '</div>' +
+        '</div></button>';
+    }).join('');
+    return '<div class="eg-projgrid">' + cards + '</div>';
+  }
+
+  function _currentProject() {
+    var a = obra.data.ambitos[obra.ambito];
+    return a && a.projects.filter(function (p) { return p.slug === obra.project; })[0];
+  }
+
+  function renderProjectPhotos() {
+    var p = _currentProject();
+    if (!p) { obra.project = null; return renderProjects(obra.data.ambitos[obra.ambito]); }
+    var q = norm(obra.q);
+    var photos = p.photos.filter(function (ph) {
+      if (obra.decade !== 'all' && ph.decada !== obra.decade) return false;
+      if (q && norm((ph.descripcion || '') + ' ' + (ph.lugar || '')).indexOf(q) === -1) return false;
+      return true;
+    });
+    var themeLabel = OBRA_TEXTS[obra.ambito] ? OBRA_TEXTS[obra.ambito][getLang()][0] : obra.ambito;
+    var crumbs = '<div class="eg-crumbs"><a onclick="EG.obraBack()">' + esc(themeLabel) + '</a> ▸ <span>' + esc(p.nombre) + '</span></div>';
+    var meta = [p.lugar, p.fecha, p.count + ' ' + t(UI.photos)].filter(Boolean).join(' · ');
+    var head = '<h2 style="font-size:1.5rem;margin:.2rem 0 0">' + esc(p.nombre) + '</h2>' +
+      (meta ? '<p class="eg-projcard__meta" style="margin-bottom:.5rem">' + esc(meta) + '</p>' : '') +
+      '<div class="eg-obra-toolbar"><a class="eg-chip" onclick="EG.obraBack()">← ' + t(UI.backAll) + '</a>' +
+      '<input type="search" value="' + esc(obra.q) + '" placeholder="' + t(UI.search) + '" oninput="EG.obraSearch(this.value)"></div>';
+    if (!photos.length) return crumbs + head + '<p class="eg-empty">' + t(UI.noresults) + '</p>';
+    var cells = photos.map(function (ph, i) {
+      return '<div class="eg-photocell" onclick="EG.obraPhoto(\'' + p.slug + '\',' + i + ')">' +
+        (ph.image ? '<img loading="lazy" src="' + ph.image + '" alt="' + esc(ph.titulo) + '">' : '') + '</div>';
+    }).join('');
+    // guardamos la lista filtrada para el modal
+    obra._photos = photos;
+    return crumbs + head + '<div class="eg-photogrid">' + cells + '</div>';
+  }
+
+  // ── Visor de fotos (estilo Godesia: ficha lateral, flechas, zoom, compartir) ─
+  var viewer = { photos: [], i: 0, ambito: '', project: '', sidebar: true };
+
+  function VW() { return {
+    L: getLang(),
+    tr: function (es, ca) { return getLang() === 'ca' ? ca : es; }
+  }; }
+
+  function _vwFilename(ph) {
+    var parts = [];
+    if (ph.titulo) parts.push(ph.titulo);
+    var ym = (ph.fecha || '').match(/\d{4}/); if (ym) parts.push(ym[0]);
+    if (ph.lugar && ph.lugar !== 'por determinar') parts.push(ph.lugar);
+    var base = parts.join('_').replace(/[\/\\:*?"<>|]/g, '').replace(/\s+/g, ' ').trim() || 'emili-godes';
+    var ext = (ph.image || '').match(/\.[a-zA-Z0-9]+$/);
+    return base + (ext ? ext[0] : '.jpg');
+  }
+
+  function egViewerOpen(photos, i) {
+    viewer.photos = photos || []; viewer.i = i || 0;
+    viewer.ambito = obra.ambito; viewer.project = obra.project;
+    if (!document.getElementById('eg-viewer')) {
+      var ov = document.createElement('div'); ov.id = 'eg-viewer'; document.body.appendChild(ov);
+    }
+    egViewerRender();
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', egViewerKey);
+  }
+
+  function egViewerRender() {
+    var v = VW(), ph = viewer.photos[viewer.i]; if (!ph) return;
+    var proj = _currentProject();
+    var theme = OBRA_TEXTS[viewer.ambito] ? OBRA_TEXTS[viewer.ambito][v.L][0] : '';
+    var many = viewer.photos.length > 1;
+    var rows = [
+      [v.tr('Categoría', 'Categoria'), ph.categoria],
+      [v.tr('Fecha', 'Data'), ph.fecha + (ph.fecha_certeza && ph.fecha_certeza !== 'exacta' ? ' (' + ph.fecha_certeza + ')' : '')],
+      [v.tr('Lugar', 'Lloc'), ph.lugar && ph.lugar !== 'por determinar' ? ph.lugar : ''],
+      [v.tr('Década', 'Dècada'), ph.decada && ph.decada !== 'sf' ? ph.decada + 's' : ''],
+      [v.tr('Signatura', 'Signatura'), ph.orig],
+    ].filter(function (r) { return r[1]; });
+    var fichaRows = rows.map(function (r) {
+      return '<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid rgba(114,121,113,.15)">' +
+        '<span style="color:#727971;font-size:12px">' + esc(r[0]) + '</span>' +
+        '<span style="color:#1c1c17;font-size:12.5px;text-align:right">' + esc(r[1]) + '</span></div>';
+    }).join('');
+    var albumHtml = proj ? '<div style="margin-bottom:24px"><h3 style="font-size:11px;font-weight:700;color:#727971;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px">' + v.tr('Álbum', 'Àlbum') + '</h3>' +
+        '<button onclick="EG.egViewerToProject()" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#17341e;font-weight:600;background:none;border:0;cursor:pointer;padding:0;text-align:left">' +
+        '<span class="material-symbols-outlined" style="font-size:16px;color:#727971">photo_album</span>' + esc(proj.nombre) + '</button></div>' : '';
+
+    var sidebar =
+      (theme ? '<div style="font-size:11px;color:#727971;margin-bottom:16px">' + esc(theme) + '</div>' : '') +
+      '<h2 style="font-size:20px;font-weight:700;color:#17341e;font-family:\'Noto Serif\',serif;margin:0 0 14px;line-height:1.3">' + esc(ph.titulo || '') + '</h2>' +
+      '<div style="margin-bottom:24px">' + fichaRows + '</div>' +
+      (ph.descripcion ? '<div style="margin-bottom:24px"><h3 style="font-size:11px;font-weight:700;color:#727971;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px">' + v.tr('Descripción', 'Descripció') + '</h3>' +
+        '<p style="font-size:13px;color:#424842;line-height:1.65">' + esc(ph.descripcion) + '</p></div>' : '') +
+      albumHtml +
+      (many ? '<div style="font-size:12px;color:#727971">' + (viewer.i + 1) + ' / ' + viewer.photos.length + '</div>' : '');
+
+    function btn(onclick, title, right, svg) {
+      return '<button onclick="' + onclick + '" title="' + title + '" class="eg-vw-btn" style="position:absolute;top:16px;right:' + right + 'px;z-index:50">' + svg + '</button>';
+    }
+    var ic = { close: '✕', dl: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 19h16"/></svg>',
+      share: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
+      zoom: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' };
+
+    var arrows = many ?
+      '<button onclick="EG.egViewerNav(-1)" title="' + v.tr('Anterior', 'Anterior') + '" class="eg-vw-arrow" style="left:16px">‹</button>' +
+      '<button onclick="EG.egViewerNav(1)" title="' + v.tr('Siguiente', 'Següent') + '" class="eg-vw-arrow" style="right:16px">›</button>' : '';
+
+    document.getElementById('eg-viewer').innerHTML =
+      '<div class="eg-vw-flex" id="eg-vw-flex">' +
+        '<aside class="eg-vw-side" id="eg-vw-side">' + sidebar + '</aside>' +
+        '<div class="eg-vw-area">' +
+          '<button onclick="EG.egViewerSidebar()" title="' + v.tr('Panel', 'Panell') + '" class="eg-vw-btn eg-vw-toggle" style="position:absolute;top:16px;left:16px;z-index:50">' + (viewer.sidebar ? '←' : '→') + '</button>' +
+          btn('EG.egViewerShare()', v.tr('Compartir', 'Comparteix'), 166, ic.share) +
+          btn('EG.egViewerDownload()', v.tr('Descargar', 'Descarrega'), 116, ic.dl) +
+          btn('EG.egViewerZoom()', 'Zoom', 66, ic.zoom) +
+          btn('EG.egViewerClose()', v.tr('Cerrar', 'Tanca'), 16, ic.close) +
+          arrows +
+          '<div class="eg-vw-photo"><img id="eg-vw-img" src="' + ph.image + '" alt="' + esc(ph.titulo || '') + '"></div>' +
+        '</div>' +
+      '</div>';
+    document.getElementById('eg-viewer').classList.add('open');
+    document.getElementById('eg-vw-side').style.display = viewer.sidebar ? '' : 'none';
+  }
+
+  function egViewerKey(e) {
+    if (document.getElementById('eg-zoom')) { if (e.key === 'Escape') egZoomExit(); return; }
+    if (e.key === 'Escape') egViewerClose();
+    else if (e.key === 'ArrowLeft') egViewerNav(-1);
+    else if (e.key === 'ArrowRight') egViewerNav(1);
+  }
+
+  // ── Zoom (x4, pan, +/-) ─────────────────────────────────────────────────────
+  var _zL = 4, _pX = 0, _pY = 0, _drag = false, _dsX = 0, _dsY = 0, _psX = 0, _psY = 0;
+  function _zApply() { var im = document.getElementById('eg-zoom-img'); if (im) im.style.transform = 'scale(' + _zL + ') translate(' + _pX + 'px,' + _pY + 'px)'; }
+  function _zClamp() {
+    var mx = (_zL - 1) / (2 * _zL) * window.innerWidth, my = (_zL - 1) / (2 * _zL) * window.innerHeight;
+    _pX = Math.max(-mx, Math.min(mx, _pX)); _pY = Math.max(-my, Math.min(my, _pY));
+  }
+  function _zDown(e) { _drag = true; _dsX = e.clientX; _dsY = e.clientY; _psX = _pX; _psY = _pY;
+    document.addEventListener('pointermove', _zMove); document.addEventListener('pointerup', _zUp); e.preventDefault(); }
+  function _zMove(e) { if (!_drag) return; _pX = _psX + (e.clientX - _dsX) / _zL; _pY = _psY + (e.clientY - _dsY) / _zL; _zClamp(); _zApply(); }
+  function _zUp() { _drag = false; document.removeEventListener('pointermove', _zMove); document.removeEventListener('pointerup', _zUp); }
+  function _zStep(d) { _zL = Math.max(1, Math.min(10, _zL + d)); var l = document.getElementById('eg-zoom-lbl'); if (l) l.textContent = _zL + '×'; _pX = 0; _pY = 0; _zApply(); }
+  function egZoomEnter() {
+    var ph = viewer.photos[viewer.i]; if (!ph || document.getElementById('eg-zoom')) return;
+    _zL = 4; _pX = 0; _pY = 0;
+    var ov = document.createElement('div'); ov.id = 'eg-zoom';
+    ov.innerHTML = '<img id="eg-zoom-img" src="' + ph.image + '">' +
+      '<button id="eg-zoom-x" title="Esc">✕</button>' +
+      '<div id="eg-zoom-ctrls"><button data-z="-1">−</button><span id="eg-zoom-lbl">4×</span><button data-z="1">+</button></div>';
+    document.body.appendChild(ov);
+    ov.querySelector('#eg-zoom-x').onclick = egZoomExit;
+    ov.querySelectorAll('[data-z]').forEach(function (b) { b.onclick = function () { _zStep(parseInt(b.dataset.z, 10)); }; });
+    ov.addEventListener('pointerdown', _zDown);
+  }
+  function egZoomExit() { var ov = document.getElementById('eg-zoom'); if (!ov) return;
+    document.removeEventListener('pointermove', _zMove); document.removeEventListener('pointerup', _zUp); _drag = false; ov.remove(); }
+
+  function egToast(msg) {
+    var t = document.createElement('div'); t.className = 'eg-toast'; t.textContent = msg;
+    document.body.appendChild(t); requestAnimationFrame(function () { t.style.opacity = '1'; });
+    setTimeout(function () { t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 250); }, 2200);
+  }
+
   // ── Init ────────────────────────────────────────────────────────────────────
-  window.EG = { lang: getLang(), setLang: setLang, openLightbox: openLightbox, t: t };
+  window.EG = {
+    lang: getLang(), setLang: setLang, openLightbox: openLightbox, t: t,
+    obraTheme: function (k) { obra.ambito = k; obra.project = null; obra.q = ''; renderObra(); window.scrollTo({top:0,behavior:'smooth'}); },
+    obraDecade: function (d) { obra.decade = d; renderObra(); },
+    obraSearch: function (v) { obra.q = v; renderMain(); },
+    obraSort: function (v) { obra.sort = v; renderMain(); },
+    obraOpen: function (slug) { obra.project = slug; renderObra(); window.scrollTo({top:0,behavior:'smooth'}); },
+    obraBack: function () { obra.project = null; renderObra(); },
+    obraPhoto: function (slug, i) { if (obra._photos && obra._photos[i] != null) egViewerOpen(obra._photos, i); },
+    egViewerNav: function (d) { var n = viewer.photos.length; if (!n) return; viewer.i = (viewer.i + d + n) % n; egViewerRender(); },
+    egViewerClose: function () { egZoomExit(); document.removeEventListener('keydown', egViewerKey); var el = document.getElementById('eg-viewer'); if (el) { el.classList.remove('open'); el.innerHTML = ''; } document.body.style.overflow = ''; },
+    egViewerSidebar: function () { viewer.sidebar = !viewer.sidebar; egViewerRender(); },
+    egViewerZoom: function () { egZoomEnter(); },
+    egViewerToProject: function () { this.egViewerClose(); },
+    egViewerDownload: function () {
+      var ph = viewer.photos[viewer.i]; if (!ph || !ph.image) return;
+      fetch(ph.image).then(function (r) { return r.blob(); }).then(function (b) {
+        var u = URL.createObjectURL(b), a = document.createElement('a');
+        a.href = u; a.download = _vwFilename(ph); document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u);
+      }).catch(function () { egToast(getLang() === 'ca' ? 'No s’ha pogut descarregar' : 'No se pudo descargar'); });
+    },
+    egViewerShare: function () {
+      var ph = viewer.photos[viewer.i]; if (!ph) return;
+      var url = location.origin + ph.image, title = ph.titulo || 'Emili Godes';
+      if (navigator.share) {
+        var data = { title: title, text: title, url: url };
+        if (navigator.canShare) {
+          fetch(ph.image).then(function (r) { return r.blob(); }).then(function (b) {
+            var f = new File([b], _vwFilename(ph), { type: b.type || 'image/jpeg' });
+            if (navigator.canShare({ files: [f] })) data = { files: [f], title: title };
+            navigator.share(data).catch(function () {});
+          }).catch(function () { navigator.share(data).catch(function () {}); });
+        } else { navigator.share(data).catch(function () {}); }
+        return;
+      }
+      navigator.clipboard && navigator.clipboard.writeText(url).then(function () {
+        egToast(getLang() === 'ca' ? 'Enllaç copiat' : 'Enlace copiado');
+      }).catch(function () { prompt('URL:', url); });
+    },
+  };
   function init() {
     buildHeader();
     buildFooter();
@@ -288,6 +645,7 @@
     loadObra();
     loadDestacadas();
     initDecadeFilter();
+    initObra();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

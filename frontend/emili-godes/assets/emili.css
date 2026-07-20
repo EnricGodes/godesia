@@ -266,6 +266,50 @@ tr.is-hidden { display: none; }
 .eg-lb__close { position: fixed; top: 18px; right: 22px; background: none; border: 0; color: #fff; cursor: pointer; }
 .eg-lb__close .material-symbols-outlined { font-size: 34px; }
 
+/* ── Visor de fotos (estilo Godesia) ────────────────────────────────────── */
+#eg-viewer { position: fixed; inset: 0; z-index: 1000; display: none; }
+#eg-viewer.open { display: block; }
+.eg-vw-flex { position: fixed; inset: 0; background: var(--surface); display: flex; }
+.eg-vw-side { width: 320px; padding: 32px 24px 24px; border-right: 1px solid rgba(114,121,113,.2);
+  overflow-y: auto; background: var(--surface); flex-shrink: 0; }
+.eg-vw-area { flex: 1; position: relative; min-width: 0; display: flex; }
+.eg-vw-photo { flex: 1; display: flex; align-items: center; justify-content: center;
+  background: #e5e2da; overflow: hidden; padding: 24px; }
+.eg-vw-photo img { max-width: 100%; max-height: calc(100vh - 48px); object-fit: contain; display: block; }
+.eg-vw-btn { width: 40px; height: 40px; background: rgba(252,249,240,.95); color: var(--primary);
+  border: 1px solid rgba(114,121,113,.3); border-radius: 50%; cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  transition: background .2s, color .2s; }
+.eg-vw-btn:hover { background: var(--primary); color: #fff; }
+.eg-vw-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 50;
+  width: 44px; height: 44px; background: rgba(252,249,240,.95); color: var(--primary);
+  border: 1px solid rgba(114,121,113,.3); border-radius: 50%; cursor: pointer; font-size: 24px;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  transition: background .2s, color .2s; }
+.eg-vw-arrow:hover { background: var(--primary); color: #fff; }
+#eg-zoom { position: fixed; inset: 0; z-index: 2000; background: #000; overflow: hidden; cursor: grab; touch-action: none; }
+#eg-zoom img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transform-origin: center; pointer-events: none; }
+#eg-zoom-x { position: absolute; top: 16px; right: 16px; z-index: 10; width: 40px; height: 40px;
+  background: rgba(252,249,240,.95); color: var(--primary); border: 1px solid rgba(114,121,113,.3);
+  border-radius: 50%; cursor: pointer; font-size: 18px; }
+#eg-zoom-ctrls { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 12px; z-index: 10; }
+#eg-zoom-ctrls button { width: 40px; height: 40px; background: rgba(252,249,240,.95); color: var(--primary);
+  border: 1px solid rgba(114,121,113,.3); border-radius: 50%; cursor: pointer; font-size: 20px; }
+#eg-zoom-lbl { color: rgba(255,255,255,.85); font-size: 15px; font-weight: 700; min-width: 36px; text-align: center; }
+.eg-toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: var(--primary);
+  color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; z-index: 3000;
+  box-shadow: 0 4px 16px rgba(0,0,0,.25); opacity: 0; transition: opacity .2s; }
+@media (max-width: 767px) {
+  .eg-vw-flex { flex-direction: column; }
+  .eg-vw-area { order: 1; flex: 1 1 auto; min-height: 0; }
+  .eg-vw-side { order: 2; width: 100% !important; max-height: 42vh; border-right: 0;
+    border-top: 1px solid rgba(114,121,113,.2); padding: 16px 16px 20px; }
+  .eg-vw-toggle { display: none !important; }
+  .eg-vw-photo { padding: 12px; }
+  .eg-vw-photo img { max-height: 54vh; }
+}
+
 /* ── Footer ────────────────────────────────────────────────────────────── */
 .eg-footer { background: var(--primary); color: rgba(255,255,255,.75); padding: 44px 0; margin-top: 0; }
 .eg-footer a { color: rgba(255,255,255,.85); text-decoration: none; }
@@ -274,6 +318,61 @@ tr.is-hidden { display: none; }
 .eg-footer__nav { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: .88rem; }
 .eg-footer small { color: rgba(255,255,255,.5); font-size: .78rem; }
 .eg-footer__bottom { margin-top: 26px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+/* ── Explorador de La obra (tipo álbumes) ──────────────────────────────── */
+.eg-obra { display: grid; grid-template-columns: 264px 1fr; gap: 0; align-items: start;
+  max-width: var(--eg-maxw); margin: 0 auto; }
+.eg-obra-side { position: sticky; top: var(--eg-header-h); align-self: start;
+  max-height: calc(100vh - var(--eg-header-h)); overflow-y: auto;
+  background: var(--surface-container-low); border-right: 1px solid var(--outline-variant);
+  padding: 22px 16px; }
+.eg-obra-side h4 { font-size: .72rem; text-transform: uppercase; letter-spacing: .16em;
+  color: var(--secondary); margin: 0 0 10px; font-family: 'Manrope', sans-serif; }
+.eg-side-link { display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 8px 10px; border-radius: 8px; font-size: .86rem; color: var(--on-surface-variant);
+  cursor: pointer; transition: background .15s, color .15s; border: 0; background: none;
+  width: 100%; text-align: left; }
+.eg-side-link:hover { background: var(--surface-container-high); color: var(--primary); }
+.eg-side-link.is-active { background: var(--surface-container-high); color: var(--primary); font-weight: 600; }
+.eg-side-count { font-size: .72rem; color: var(--on-surface-variant); background: var(--surface);
+  border-radius: 999px; padding: 1px 8px; }
+.eg-side-decades { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.eg-side-decades .eg-chip { padding: 4px 10px; font-size: .78rem; }
+
+.eg-obra-main { padding: 28px clamp(16px, 3vw, 40px); min-width: 0; min-height: 60vh; }
+.eg-obra-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 8px 0 20px; }
+.eg-obra-toolbar input, .eg-obra-toolbar select {
+  font: inherit; font-size: .85rem; padding: 7px 12px; border: 1px solid var(--outline-variant);
+  border-radius: 999px; background: var(--surface-container-lowest); color: var(--on-surface); }
+.eg-obra-toolbar input { flex: 1; min-width: 160px; }
+.eg-crumbs { font-size: .85rem; color: var(--on-surface-variant); margin-bottom: 6px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.eg-crumbs a { color: var(--primary); text-decoration: none; cursor: pointer; }
+.eg-crumbs a:hover { text-decoration: underline; }
+
+.eg-projgrid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); margin-top: 18px; }
+.eg-projcard { background: var(--surface-container-lowest); border: 1px solid var(--outline-variant);
+  border-radius: 14px; overflow: hidden; cursor: pointer; text-align: left;
+  transition: transform .15s, box-shadow .15s; display: flex; flex-direction: column; padding: 0; }
+.eg-projcard:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(28,28,23,.1); }
+.eg-projcard__cover { aspect-ratio: 4/3; background: var(--surface-container-high); overflow: hidden; }
+.eg-projcard__cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.eg-projcard__body { padding: 12px 14px; }
+.eg-projcard__name { font-family: 'Noto Serif', serif; font-size: 1.02rem; color: var(--primary); line-height: 1.25; }
+.eg-projcard__meta { font-size: .78rem; color: var(--on-surface-variant); margin-top: 4px; }
+.eg-projcard__count { font-size: .72rem; color: var(--secondary); margin-top: 6px; }
+
+.eg-photogrid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); margin-top: 18px; }
+.eg-photocell { aspect-ratio: 1/1; border-radius: 10px; overflow: hidden; cursor: pointer;
+  background: var(--surface-container-high); border: 1px solid var(--outline-variant); position: relative; }
+.eg-photocell img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .2s; }
+.eg-photocell:hover img { transform: scale(1.04); }
+
+.eg-obra-mobiletoggle { display: none; }
+@media (max-width: 860px) {
+  .eg-obra { grid-template-columns: 1fr; }
+  .eg-obra-side { position: static; max-height: none; border-right: 0;
+    border-bottom: 1px solid var(--outline-variant); }
+}
 
 /* ── Utilidades ────────────────────────────────────────────────────────── */
 .eg-note { font-size: .82rem; color: var(--secondary); font-style: italic; }
