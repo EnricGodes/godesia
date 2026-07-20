@@ -33,7 +33,7 @@
   function getLang() {
     var l = null;
     try { l = localStorage.getItem('emili_lang'); } catch (e) {}
-    return l === 'ca' ? 'ca' : 'es';
+    return l === 'es' ? 'es' : 'ca';   // por defecto catalán; solo 'es' si el usuario lo eligió
   }
   function setLang(lang) {
     lang = lang === 'ca' ? 'ca' : 'es';
