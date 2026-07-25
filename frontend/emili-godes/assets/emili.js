@@ -191,29 +191,28 @@
     }).catch(function () { renderFeatured(mount, []); });
   }
   function renderFeatured(mount, items) {
-    var lang = getLang();
     if (!items.length) {
       mount.innerHTML = '<div class="eg-empty"><span class="material-symbols-outlined">photo_library</span>' +
         '<span data-es="' + STR.soon.es + '" data-ca="' + STR.soon.ca + '">' + STR.soon.es + '</span></div>';
       return;
     }
+    items.sort(function (a, b) { return (a.orden || 0) - (b.orden || 0); });
+    window.__destacadas = items;
     var grid = document.createElement('div');
     grid.className = 'eg-featgrid';
-    items.sort(function (a, b) { return (a.orden || 0) - (b.orden || 0); });
-    items.forEach(function (it) {
+    items.forEach(function (it, i) {
       var card = document.createElement('article');
       card.className = 'eg-feat';
       var img = it.image
-        ? '<div class="eg-feat__img"><img loading="lazy" src="' + it.image + '" alt=""></div>'
+        ? '<div class="eg-feat__img"><img src="' + it.image + '" alt="' + esc(L(it, 'titulo')) + '"></div>'
         : '<div class="eg-feat__img"><span class="material-symbols-outlined" style="font-size:40px">image</span></div>';
-      var meta = [it.fecha, it.institucion, it.num_catalogo].filter(Boolean).join(' · ');
+      var meta = [it.fecha, L(it, 'lugar'), it.fondo].filter(Boolean).join(' · ');
       card.innerHTML = img +
         '<div class="eg-feat__body">' +
-          '<div class="eg-feat__title">' + (it['titulo_' + lang] || it.titulo_es || '') + '</div>' +
-          '<div class="eg-feat__meta">' + meta + '</div>' +
-          '<div class="eg-feat__why">' + (it['porque_' + lang] || it.porque_es || '') + '</div>' +
-          (it.fuente ? '<div class="eg-feat__src">' + it.fuente + '</div>' : '') +
+          '<div class="eg-feat__title">' + esc(L(it, 'titulo')) + '</div>' +
+          '<div class="eg-feat__meta">' + esc(meta) + '</div>' +
         '</div>';
+      if (it.image) { card.style.cursor = 'pointer'; card.addEventListener('click', function () { EG.destacadaOpen(i); }); }
       grid.appendChild(card);
     });
     mount.innerHTML = '';
@@ -299,6 +298,7 @@
   var UI = {
     themes: { es: 'Temáticas', ca: 'Temàtiques' },
     decades: { es: 'Décadas', ca: 'Dècades' },
+    funds: { es: 'Fondos', ca: 'Fons' },
     all: { es: 'Todas', ca: 'Totes' },
     search: { es: 'Buscar proyecto, lugar…', ca: 'Cerca projecte, lloc…' },
     sortCount: { es: 'Más fotos', ca: 'Més fotos' },
@@ -311,10 +311,16 @@
     sf: { es: 's. f.', ca: 's. d.' },
   };
 
-  var obra = { data: null, ambito: null, project: null, decade: 'all', q: '', sort: 'count' };
+  var obra = { data: null, ambito: null, project: null, decade: 'all', fondo: 'all', q: '', sort: 'date' };
 
   function esc(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function norm(s) { return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  // Campo biling\u00fce: obj[f+'_'+lang] \u2192 obj[f+'_es'] \u2192 obj[f] \u2192 ''
+  function L(obj, f) {
+    if (!obj) return '';
+    var lang = getLang(), v = obj[f + '_' + lang];
+    return (v != null ? v : null) || obj[f + '_es'] || obj[f] || '';
+  }
 
   function initObra() {
     var root = document.getElementById('eg-obra');
@@ -372,14 +378,23 @@
       .concat((d.decades || []).map(function (dc) {
         return '<span class="eg-chip' + (obra.decade === dc ? ' is-active' : '') + '" onclick="EG.obraDecade(\'' + dc + '\')">' + dc + 's</span>';
       })).join('');
+    var fonds = ['<span class="eg-chip' + (obra.fondo === 'all' ? ' is-active' : '') + '" onclick="EG.obraFondo(-1)">' + t(UI.all) + '</span>']
+      .concat((d.fondos || []).map(function (f, i) {
+        return '<span class="eg-chip' + (obra.fondo === f ? ' is-active' : '') + '" onclick="EG.obraFondo(' + i + ')">' + esc(f) + '</span>';
+      })).join('');
     document.getElementById('eg-obra-side').innerHTML =
       '<h4>' + t(UI.themes) + '</h4>' + themes +
-      '<h4 style="margin-top:20px">' + t(UI.decades) + '</h4><div class="eg-side-decades">' + decs + '</div>';
+      '<h4 style="margin-top:20px">' + t(UI.decades) + '</h4><div class="eg-side-decades">' + decs + '</div>' +
+      '<h4 style="margin-top:20px">' + t(UI.funds) + '</h4><div class="eg-side-decades">' + fonds + '</div>';
   }
 
   function _matchDecade(photos) {
     if (obra.decade === 'all') return true;
     return photos.some(function (p) { return p.decada === obra.decade; });
+  }
+  function _matchFondo(photos) {
+    if (obra.fondo === 'all') return true;
+    return photos.some(function (p) { return p.fondo === obra.fondo; });
   }
 
   function renderMain() {
@@ -412,21 +427,24 @@
     var q = norm(obra.q);
     var list = a.projects.filter(function (p) {
       if (!_matchDecade(p.photos)) return false;
-      if (q && norm(p.nombre + ' ' + p.lugar).indexOf(q) === -1) return false;
+      if (!_matchFondo(p.photos)) return false;
+      if (q && norm(L(p, 'nombre') + ' ' + L(p, 'lugar')).indexOf(q) === -1) return false;
       return true;
     });
     list = list.slice().sort(function (x, y) {
-      if (obra.sort === 'name') return x.nombre.localeCompare(y.nombre);
-      if (obra.sort === 'date') return (x.fecha || '').localeCompare(y.fecha || '');
+      if (obra.sort === 'name') return L(x, 'nombre').localeCompare(L(y, 'nombre'));
+      if (obra.sort === 'date') return (x.year || 9999) - (y.year || 9999);
       return y.count - x.count;
     });
     if (!list.length) return '<p class="eg-empty">' + t(UI.noresults) + '</p>';
     var cards = list.map(function (p) {
-      var meta = [p.lugar, p.decada !== 'sf' ? p.decada + 's' : ''].filter(Boolean).join(' · ');
-      return '<button class="eg-projcard" onclick="EG.obraOpen(\'' + p.slug + '\')">' +
+      var meta = [L(p, 'lugar'), p.decada !== 'sf' ? p.decada + 's' : ''].filter(Boolean).join(' · ');
+      // proyecto de una sola foto → abre el visor directamente (sin página intermedia)
+      var onclick = p.count === 1 ? 'EG.obraOpenSingle(\'' + p.slug + '\')' : 'EG.obraOpen(\'' + p.slug + '\')';
+      return '<button class="eg-projcard" onclick="' + onclick + '">' +
         '<div class="eg-projcard__cover">' + (p.cover ? '<img loading="lazy" src="' + p.cover + '" alt="">' : '') + '</div>' +
         '<div class="eg-projcard__body">' +
-          '<div class="eg-projcard__name">' + esc(p.nombre) + '</div>' +
+          '<div class="eg-projcard__name">' + esc(L(p, 'nombre')) + '</div>' +
           (meta ? '<div class="eg-projcard__meta">' + esc(meta) + '</div>' : '') +
           '<div class="eg-projcard__count">' + p.count + ' ' + t(UI.photos) + '</div>' +
         '</div></button>';
@@ -435,6 +453,7 @@
   }
 
   function _currentProject() {
+    if (!obra.data) return null;
     var a = obra.data.ambitos[obra.ambito];
     return a && a.projects.filter(function (p) { return p.slug === obra.project; })[0];
   }
@@ -445,20 +464,21 @@
     var q = norm(obra.q);
     var photos = p.photos.filter(function (ph) {
       if (obra.decade !== 'all' && ph.decada !== obra.decade) return false;
-      if (q && norm((ph.descripcion || '') + ' ' + (ph.lugar || '')).indexOf(q) === -1) return false;
+      if (obra.fondo !== 'all' && ph.fondo !== obra.fondo) return false;
+      if (q && norm(L(ph, 'descripcion') + ' ' + L(ph, 'lugar')).indexOf(q) === -1) return false;
       return true;
     });
     var themeLabel = OBRA_TEXTS[obra.ambito] ? OBRA_TEXTS[obra.ambito][getLang()][0] : obra.ambito;
-    var crumbs = '<div class="eg-crumbs"><a onclick="EG.obraBack()">' + esc(themeLabel) + '</a> ▸ <span>' + esc(p.nombre) + '</span></div>';
-    var meta = [p.lugar, p.fecha, p.count + ' ' + t(UI.photos)].filter(Boolean).join(' · ');
-    var head = '<h2 style="font-size:1.5rem;margin:.2rem 0 0">' + esc(p.nombre) + '</h2>' +
+    var crumbs = '<div class="eg-crumbs"><a onclick="EG.obraBack()">' + esc(themeLabel) + '</a> ▸ <span>' + esc(L(p, 'nombre')) + '</span></div>';
+    var meta = [L(p, 'lugar'), p.fecha, p.count + ' ' + t(UI.photos)].filter(Boolean).join(' · ');
+    var head = '<h2 style="font-size:1.5rem;margin:.2rem 0 0">' + esc(L(p, 'nombre')) + '</h2>' +
       (meta ? '<p class="eg-projcard__meta" style="margin-bottom:.5rem">' + esc(meta) + '</p>' : '') +
       '<div class="eg-obra-toolbar"><a class="eg-chip" onclick="EG.obraBack()">← ' + t(UI.backAll) + '</a>' +
       '<input type="search" value="' + esc(obra.q) + '" placeholder="' + t(UI.search) + '" oninput="EG.obraSearch(this.value)"></div>';
     if (!photos.length) return crumbs + head + '<p class="eg-empty">' + t(UI.noresults) + '</p>';
     var cells = photos.map(function (ph, i) {
       return '<div class="eg-photocell" onclick="EG.obraPhoto(\'' + p.slug + '\',' + i + ')">' +
-        (ph.image ? '<img loading="lazy" src="' + ph.image + '" alt="' + esc(ph.titulo) + '">' : '') + '</div>';
+        (ph.image ? '<img loading="lazy" src="' + ph.image + '" alt="' + esc(L(ph, 'titulo')) + '">' : '') + '</div>';
     }).join('');
     // guardamos la lista filtrada para el modal
     obra._photos = photos;
@@ -483,9 +503,11 @@
     return base + (ext ? ext[0] : '.jpg');
   }
 
-  function egViewerOpen(photos, i) {
+  function egViewerOpen(photos, i, ctx) {
     viewer.photos = photos || []; viewer.i = i || 0;
-    viewer.ambito = obra.ambito; viewer.project = obra.project;
+    viewer.ambito = ctx && ('ambito' in ctx) ? ctx.ambito : obra.ambito;
+    viewer.project = ctx && ('project' in ctx) ? ctx.project : obra.project;
+    viewer.projObj = (ctx && ctx.projObj) || null;
     if (!document.getElementById('eg-viewer')) {
       var ov = document.createElement('div'); ov.id = 'eg-viewer'; document.body.appendChild(ov);
     }
@@ -496,14 +518,15 @@
 
   function egViewerRender() {
     var v = VW(), ph = viewer.photos[viewer.i]; if (!ph) return;
-    var proj = _currentProject();
+    var proj = viewer.projObj || _currentProject();
     var theme = OBRA_TEXTS[viewer.ambito] ? OBRA_TEXTS[viewer.ambito][v.L][0] : '';
     var many = viewer.photos.length > 1;
     var rows = [
-      [v.tr('Categoría', 'Categoria'), ph.categoria],
+      [v.tr('Categoría', 'Categoria'), L(ph, 'categoria')],
       [v.tr('Fecha', 'Data'), ph.fecha + (ph.fecha_certeza && ph.fecha_certeza !== 'exacta' ? ' (' + ph.fecha_certeza + ')' : '')],
-      [v.tr('Lugar', 'Lloc'), ph.lugar && ph.lugar !== 'por determinar' ? ph.lugar : ''],
+      [v.tr('Lugar', 'Lloc'), L(ph, 'lugar') && L(ph, 'lugar') !== 'por determinar' ? L(ph, 'lugar') : ''],
       [v.tr('Década', 'Dècada'), ph.decada && ph.decada !== 'sf' ? ph.decada + 's' : ''],
+      [v.tr('Fondo', 'Fons'), ph.fondo],
       [v.tr('Signatura', 'Signatura'), ph.orig],
     ].filter(function (r) { return r[1]; });
     var fichaRows = rows.map(function (r) {
@@ -513,14 +536,17 @@
     }).join('');
     var albumHtml = proj ? '<div style="margin-bottom:24px"><h3 style="font-size:11px;font-weight:700;color:#727971;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px">' + v.tr('Álbum', 'Àlbum') + '</h3>' +
         '<button onclick="EG.egViewerToProject()" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#17341e;font-weight:600;background:none;border:0;cursor:pointer;padding:0;text-align:left">' +
-        '<span class="material-symbols-outlined" style="font-size:16px;color:#727971">photo_album</span>' + esc(proj.nombre) + '</button></div>' : '';
+        '<span class="material-symbols-outlined" style="font-size:16px;color:#727971">photo_album</span>' + esc(L(proj, 'nombre')) + '</button></div>' : '';
 
+    var desc = L(ph, 'descripcion');
+    // El título del modal es el título de la obra (nombre del proyecto), no la descripción.
+    var vwTitle = proj ? L(proj, 'nombre') : L(ph, 'titulo');
     var sidebar =
       (theme ? '<div style="font-size:11px;color:#727971;margin-bottom:16px">' + esc(theme) + '</div>' : '') +
-      '<h2 style="font-size:20px;font-weight:700;color:#17341e;font-family:\'Noto Serif\',serif;margin:0 0 14px;line-height:1.3">' + esc(ph.titulo || '') + '</h2>' +
+      '<h2 style="font-size:20px;font-weight:700;color:#17341e;font-family:\'Noto Serif\',serif;margin:0 0 14px;line-height:1.3">' + esc(vwTitle) + '</h2>' +
       '<div style="margin-bottom:24px">' + fichaRows + '</div>' +
-      (ph.descripcion ? '<div style="margin-bottom:24px"><h3 style="font-size:11px;font-weight:700;color:#727971;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px">' + v.tr('Descripción', 'Descripció') + '</h3>' +
-        '<p style="font-size:13px;color:#424842;line-height:1.65">' + esc(ph.descripcion) + '</p></div>' : '') +
+      (desc ? '<div style="margin-bottom:24px"><h3 style="font-size:11px;font-weight:700;color:#727971;text-transform:uppercase;letter-spacing:.08em;margin:0 0 10px">' + v.tr('Descripción', 'Descripció') + '</h3>' +
+        '<p style="font-size:13px;color:#424842;line-height:1.65;white-space:pre-line">' + esc(desc) + '</p></div>' : '') +
       albumHtml +
       (many ? '<div style="font-size:12px;color:#727971">' + (viewer.i + 1) + ' / ' + viewer.photos.length + '</div>' : '');
 
@@ -545,7 +571,7 @@
           btn('EG.egViewerZoom()', 'Zoom', 66, ic.zoom) +
           btn('EG.egViewerClose()', v.tr('Cerrar', 'Tanca'), 16, ic.close) +
           arrows +
-          '<div class="eg-vw-photo"><img id="eg-vw-img" src="' + ph.image + '" alt="' + esc(ph.titulo || '') + '"></div>' +
+          '<div class="eg-vw-photo"><img id="eg-vw-img" src="' + ph.image + '" alt="' + esc(vwTitle) + '"></div>' +
         '</div>' +
       '</div>';
     document.getElementById('eg-viewer').classList.add('open');
@@ -597,11 +623,22 @@
     lang: getLang(), setLang: setLang, openLightbox: openLightbox, t: t,
     obraTheme: function (k) { obra.ambito = k; obra.project = null; obra.q = ''; renderObra(); window.scrollTo({top:0,behavior:'smooth'}); },
     obraDecade: function (d) { obra.decade = d; renderObra(); },
+    obraFondo: function (i) { obra.fondo = (i < 0) ? 'all' : (obra.data.fondos[i] || 'all'); renderObra(); },
     obraSearch: function (v) { obra.q = v; renderMain(); },
     obraSort: function (v) { obra.sort = v; renderMain(); },
     obraOpen: function (slug) { obra.project = slug; renderObra(); window.scrollTo({top:0,behavior:'smooth'}); },
+    obraOpenSingle: function (slug) {
+      var a = obra.data.ambitos[obra.ambito];
+      var p = a && a.projects.filter(function (x) { return x.slug === slug; })[0];
+      if (!p || !p.photos.length) return;
+      egViewerOpen(p.photos, 0, { ambito: obra.ambito, project: slug, projObj: p });
+    },
     obraBack: function () { obra.project = null; renderObra(); },
     obraPhoto: function (slug, i) { if (obra._photos && obra._photos[i] != null) egViewerOpen(obra._photos, i); },
+    destacadaOpen: function (i) {
+      var items = window.__destacadas || []; if (items[i] == null) return;
+      egViewerOpen(items, i, { ambito: items[i].ambito || '', project: null, projObj: null });
+    },
     egViewerNav: function (d) { var n = viewer.photos.length; if (!n) return; viewer.i = (viewer.i + d + n) % n; egViewerRender(); },
     egViewerClose: function () { egZoomExit(); document.removeEventListener('keydown', egViewerKey); var el = document.getElementById('eg-viewer'); if (el) { el.classList.remove('open'); el.innerHTML = ''; } document.body.style.overflow = ''; },
     egViewerSidebar: function () { viewer.sidebar = !viewer.sidebar; egViewerRender(); },

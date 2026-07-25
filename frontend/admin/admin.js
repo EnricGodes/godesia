@@ -56,7 +56,7 @@ document.addEventListener('keydown', e => {
 // Navigation
 // ---------------------------------------------------------------------------
 
-const sections = ['status', 'import', 'suggestions', 'users', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'comparador', 'classifier', 'palazuelos', 'dedup', 'cemeteries', 'emili', 'config'];
+const sections = ['status', 'import', 'suggestions', 'users', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'comparador', 'classifier', 'palazuelos', 'dedup', 'cemeteries', 'config'];
 const initialized = {};
 
 function showSection(name) {
@@ -74,7 +74,7 @@ function showSection(name) {
                        minibios: Minibios, tests: Tests,
                        config: Config, comparador: Comparador,
                        classifier: DocClassifier, palazuelos: Palazuelos,
-                       dedup: Dedup, cemeteries: Cemeteries, emili: Emili }[name];
+                       dedup: Dedup, cemeteries: Cemeteries }[name];
         if (ctrl?.init) ctrl.init();
         else if (ctrl?.onActivate) ctrl.onActivate();
     }
