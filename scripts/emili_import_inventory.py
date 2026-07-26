@@ -387,6 +387,9 @@ def build_destacadas_json(records):
     out = []
     for i, r in enumerate(dest, start=1):
         obj = photo_obj(r)
+        # El título de la destacada es el nombre de la obra (proyecto), no la descripción.
+        obj["titulo_es"] = r["proyecto_es"]
+        obj["titulo_ca"] = r["proyecto_ca"]
         obj["ambito"] = r["categoria_slug"]
         obj["orden"] = i
         out.append(obj)

@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-26 11:43:51",
+ "generated_at": "2026-07-26 11:47:40",
  "ambito_order": [
   "foto_fija_cine",
   "fotografia_industrial",
@@ -3924,9 +3924,9 @@
      ]
     },
     {
-     "slug": "actividad-pesquera-en-el-puerto-de-barcelona-probable",
-     "nombre_es": "Actividad pesquera en el puerto de Barcelona, probable",
-     "nombre_ca": "Activitat pesquera al port de Barcelona, probable",
+     "slug": "peixaters",
+     "nombre_es": "Peixaters",
+     "nombre_ca": "Peixaters",
      "lugar_es": "Puerto de Barcelona / Barceloneta, probable",
      "lugar_ca": "Port de Barcelona / Barceloneta, probable",
      "fecha": "ca. 1930",
