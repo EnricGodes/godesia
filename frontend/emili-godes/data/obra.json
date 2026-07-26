@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-25 18:40:50",
+ "generated_at": "2026-07-26 11:43:51",
  "ambito_order": [
   "foto_fija_cine",
   "fotografia_industrial",
@@ -3561,68 +3561,6 @@
      ]
     },
     {
-     "slug": "papallona",
-     "nombre_es": "Papallona",
-     "nombre_ca": "Papallona",
-     "lugar_es": "Obra no exposada",
-     "lugar_ca": "Obra no exposada",
-     "fecha": "1930",
-     "year": 1930,
-     "decada": "1930",
-     "count": 3,
-     "cover": "/photos/emili-godes/202490-000_011056.jpg",
-     "fondos": [
-      "MNAC"
-     ],
-     "photos": [
-      {
-       "orig": "202490-000_011056.jpg",
-       "image": "/photos/emili-godes/202490-000_011056.jpg",
-       "titulo_es": "Papallona",
-       "titulo_ca": "Papallona",
-       "descripcion_es": "m.i. 27,4 x 42,7 cm\nDipòsit de Maria Rosa Godes, filla de l'artista, 1997; donació, 2005\nNúm. del catàleg:\n202490-000\nSegle: XX\nTema: Figura animal\nGelatina i plata sobre paper baritat\nCopyright:\n© Maria Rosa Godes",
-       "descripcion_ca": "m.i. 27,4 x 42,7 cm\nDipòsit de Maria Rosa Godes, filla de l'artista, 1997; donació, 2005\nNúm. del catàleg:\n202490-000\nSegle: XX\nTema: Figura animal\nGelatina i plata sobre paper baritat\nCopyright:\n© Maria Rosa Godes",
-       "fecha": "1930",
-       "lugar_es": "Obra no exposada",
-       "lugar_ca": "Obra no exposada",
-       "categoria_es": "Fotografía artística",
-       "categoria_ca": "Fotografia artística",
-       "fondo": "MNAC",
-       "decada": "1930"
-      },
-      {
-       "orig": "202493-000_011059.jpg",
-       "image": "/photos/emili-godes/202493-000_011059.jpg",
-       "titulo_es": "Papallona",
-       "titulo_ca": "Papallona",
-       "descripcion_es": "m.i. 27,4 x 42,7 cm\nDipòsit de Maria Rosa Godes, filla de l'artista, 1997; donació, 2005\nNúm. del catàleg:\n202493-000\nSegle: XX\nTema: Figura animal\nGelatina i plata sobre paper baritat\nCopyright:\n© Maria Rosa Godes",
-       "descripcion_ca": "m.i. 27,4 x 42,7 cm\nDipòsit de Maria Rosa Godes, filla de l'artista, 1997; donació, 2005\nNúm. del catàleg:\n202493-000\nSegle: XX\nTema: Figura animal\nGelatina i plata sobre paper baritat\nCopyright:\n© Maria Rosa Godes",
-       "fecha": "1930",
-       "lugar_es": "Sala 060",
-       "lugar_ca": "Sala 060",
-       "categoria_es": "Fotografía artística",
-       "categoria_ca": "Fotografia artística",
-       "fondo": "MNAC",
-       "decada": "1930"
-      },
-      {
-       "orig": "202499-000_011065.jpg",
-       "image": "/photos/emili-godes/202499-000_011065.jpg",
-       "titulo_es": "Papallona",
-       "titulo_ca": "Papallona",
-       "descripcion_es": "m.i. 26,5 x 36,5 cm\nDipòsit de Maria Rosa Godes, filla de l'artista, 1997; donació, 2005\nNúm. del catàleg:\n202490-000\nSegle: XX\nTema: Figura animal\nGelatina i plata sobre paper baritat\nCopyright:\n© Maria Rosa Godes",
-       "descripcion_ca": "m.i. 26,5 x 36,5 cm\nDipòsit de Maria Rosa Godes, filla de l'artista, 1997; donació, 2005\nNúm. del catàleg:\n202490-000\nSegle: XX\nTema: Figura animal\nGelatina i plata sobre paper baritat\nCopyright:\n© Maria Rosa Godes",
-       "fecha": "1930",
-       "lugar_es": "Obra no exposada",
-       "lugar_ca": "Obra no exposada",
-       "categoria_es": "Fotografía artística",
-       "categoria_ca": "Fotografia artística",
-       "fondo": "MNAC",
-       "decada": "1930"
-      }
-     ]
-    },
-    {
      "slug": "cactus",
      "nombre_es": "Cactus",
      "nombre_ca": "Cactus",
@@ -3792,6 +3730,101 @@
        "categoria_ca": "Fotografia artística",
        "fondo": "IEFC",
        "decada": "1940"
+      }
+     ]
+    },
+    {
+     "slug": "papallona",
+     "nombre_es": "Papallona",
+     "nombre_ca": "Papallona",
+     "lugar_es": "Sala 060",
+     "lugar_ca": "Sala 060",
+     "fecha": "1930",
+     "year": 1930,
+     "decada": "1930",
+     "count": 2,
+     "cover": "/photos/emili-godes/202490-000_011056.jpg",
+     "fondos": [
+      "MNAC"
+     ],
+     "photos": [
+      {
+       "orig": "202490-000_011056.jpg",
+       "image": "/photos/emili-godes/202490-000_011056.jpg",
+       "titulo_es": "Papallona",
+       "titulo_ca": "Papallona",
+       "descripcion_es": "m.i. 27,4 x 42,7 cm\nDipòsit de Maria Rosa Godes, filla de l'artista, 1997; donació, 2005\nNúm. del catàleg:\n202490-000\nSegle: XX\nTema: Figura animal\nGelatina i plata sobre paper baritat\nCopyright:\n© Maria Rosa Godes",
+       "descripcion_ca": "m.i. 27,4 x 42,7 cm\nDipòsit de Maria Rosa Godes, filla de l'artista, 1997; donació, 2005\nNúm. del catàleg:\n202490-000\nSegle: XX\nTema: Figura animal\nGelatina i plata sobre paper baritat\nCopyright:\n© Maria Rosa Godes",
+       "fecha": "1930",
+       "lugar_es": "Obra no exposada",
+       "lugar_ca": "Obra no exposada",
+       "categoria_es": "Fotografía artística",
+       "categoria_ca": "Fotografia artística",
+       "fondo": "MNAC",
+       "decada": "1930"
+      },
+      {
+       "orig": "202493-000_011059.jpg",
+       "image": "/photos/emili-godes/202493-000_011059.jpg",
+       "titulo_es": "Papallona",
+       "titulo_ca": "Papallona",
+       "descripcion_es": "m.i. 27,4 x 42,7 cm\nDipòsit de Maria Rosa Godes, filla de l'artista, 1997; donació, 2005\nNúm. del catàleg:\n202493-000\nSegle: XX\nTema: Figura animal\nGelatina i plata sobre paper baritat\nCopyright:\n© Maria Rosa Godes",
+       "descripcion_ca": "m.i. 27,4 x 42,7 cm\nDipòsit de Maria Rosa Godes, filla de l'artista, 1997; donació, 2005\nNúm. del catàleg:\n202493-000\nSegle: XX\nTema: Figura animal\nGelatina i plata sobre paper baritat\nCopyright:\n© Maria Rosa Godes",
+       "fecha": "1930",
+       "lugar_es": "Sala 060",
+       "lugar_ca": "Sala 060",
+       "categoria_es": "Fotografía artística",
+       "categoria_ca": "Fotografia artística",
+       "fondo": "MNAC",
+       "decada": "1930"
+      }
+     ]
+    },
+    {
+     "slug": "rosa",
+     "nombre_es": "Rosa",
+     "nombre_ca": "Rosa",
+     "lugar_es": "Obra no exposada",
+     "lugar_ca": "Obra no exposada",
+     "fecha": "1930",
+     "year": 1930,
+     "decada": "1930",
+     "count": 2,
+     "cover": "/photos/emili-godes/202499-000_011065.jpg",
+     "fondos": [
+      "MNAC",
+      "Museo Universidad de Navarra"
+     ],
+     "photos": [
+      {
+       "orig": "202499-000_011065.jpg",
+       "image": "/photos/emili-godes/202499-000_011065.jpg",
+       "titulo_es": "Rosa",
+       "titulo_ca": "Rosa",
+       "descripcion_es": "Fotografia\nc. 1930\n\nm.i. 23,9 x 17,9 cm\n\n\nDipòsit de Maria Rosa Godes, filla de l'artista, 1997; donació, 2005\n\nNúm. del catàleg: \n202499-000\n\nSegle: XX\nTema: Motiu vegetal\nGelatina i plata sobre paper baritat\nCopyright: \n© Maria Rosa Godes",
+       "descripcion_ca": "Fotografia\nc. 1930\n\nm.i. 23,9 x 17,9 cm\n\n\nDipòsit de Maria Rosa Godes, filla de l'artista, 1997; donació, 2005\n\nNúm. del catàleg: \n202499-000\n\nSegle: XX\nTema: Motiu vegetal\nGelatina i plata sobre paper baritat\nCopyright: \n© Maria Rosa Godes",
+       "fecha": "1930",
+       "lugar_es": "Obra no exposada",
+       "lugar_ca": "Obra no exposada",
+       "categoria_es": "Fotografía artística",
+       "categoria_ca": "Fotografia artística",
+       "fondo": "MNAC",
+       "decada": "1930"
+      },
+      {
+       "orig": "32_5395_rosa.jpg",
+       "image": "/photos/emili-godes/32_5395_rosa.jpg",
+       "titulo_es": "Rosa",
+       "titulo_ca": "Rosa",
+       "descripcion_es": "Autor: Emili Godés Hurtado\nCategoría: Fotografía\nTécnica: Gelatina de revelado químico\nNº inventario: MUN-005451\nSiglo: XX\nDimensiones:\nMedidas Mancha: 29,1 x 40,2 cm\nMedidas SP 1: 29,1 x 40,2 cm\nTemáticas: Varios",
+       "descripcion_ca": "Autor: Emili Godés Hurtado\nCategoria: Fotografia\nTècnica: Gelatina de revelatge químic\nNúm. d'inventari: MUN-005451\nSegle: XX\nDimensions:\nMides de la taca: 29,1 x 40,2 cm\nMides SP 1: 29,1 x 40,2 cm\nTemàtiques: Diversos",
+       "fecha": "1930",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía artística",
+       "categoria_ca": "Fotografia artística",
+       "fondo": "Museo Universidad de Navarra",
+       "decada": "1930"
       }
      ]
     },
@@ -5416,38 +5449,6 @@
        "titulo_ca": "Planta crassa",
        "descripcion_es": "Autor: Emili Godés Hurtado\nCategoría: Fotografía\nNº inventario: MUN-008643\nSiglo: XX\nDimensiones:\nMedidas Mancha: 17,7x23,6 cm\nMedidas SP 1: 17,7x23,6 cm\nMedidas SP 2: 40x50 cm\nTemáticas: Artes plásticas y literarias, Varios",
        "descripcion_ca": "Autor: Emili Godés Hurtado\nCategoria: Fotografia\nNúm. d'inventari: MUN-008643\nSegle: XX\nDimensions:\nMides de la taca: 17,7x23,6 cm\nMides SP 1: 17,7x23,6 cm\nMides SP 2: 40x50 cm\nTemàtiques: Arts plàstiques i literàries, diverses",
-       "fecha": "1930",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía artística",
-       "categoria_ca": "Fotografia artística",
-       "fondo": "Museo Universidad de Navarra",
-       "decada": "1930"
-      }
-     ]
-    },
-    {
-     "slug": "rosa",
-     "nombre_es": "Rosa",
-     "nombre_ca": "Rosa",
-     "lugar_es": "",
-     "lugar_ca": "",
-     "fecha": "1930",
-     "year": 1930,
-     "decada": "1930",
-     "count": 1,
-     "cover": "/photos/emili-godes/32_5395_rosa.jpg",
-     "fondos": [
-      "Museo Universidad de Navarra"
-     ],
-     "photos": [
-      {
-       "orig": "32_5395_rosa.jpg",
-       "image": "/photos/emili-godes/32_5395_rosa.jpg",
-       "titulo_es": "Rosa",
-       "titulo_ca": "Rosa",
-       "descripcion_es": "Autor: Emili Godés Hurtado\nCategoría: Fotografía\nTécnica: Gelatina de revelado químico\nNº inventario: MUN-005451\nSiglo: XX\nDimensiones:\nMedidas Mancha: 29,1 x 40,2 cm\nMedidas SP 1: 29,1 x 40,2 cm\nTemáticas: Varios",
-       "descripcion_ca": "Autor: Emili Godés Hurtado\nCategoria: Fotografia\nTècnica: Gelatina de revelatge químic\nNúm. d'inventari: MUN-005451\nSegle: XX\nDimensions:\nMides de la taca: 29,1 x 40,2 cm\nMides SP 1: 29,1 x 40,2 cm\nTemàtiques: Diversos",
        "fecha": "1930",
        "lugar_es": "",
        "lugar_ca": "",
