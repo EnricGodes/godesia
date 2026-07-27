@@ -168,6 +168,12 @@ body.eg-ca span.lang-es { display: none; }
 .eg-stage { display: grid; grid-template-columns: 1fr; gap: 8px; padding: 28px 0; border-top: 1px solid var(--outline-variant); }
 .eg-stage__num { font-family: 'Noto Serif', serif; font-size: 2.4rem; color: var(--surface-dim); line-height: 1; }
 .eg-stage h3 { font-size: 1.5rem; margin: 0 0 .3em; }
+/* Pareja de fotos con pie dentro de cada etapa biográfica */
+.eg-figs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0 2px; }
+.eg-fig { margin: 0; }
+.eg-fig img { width: 100%; height: auto; display: block; border-radius: 10px; background: var(--surface-container-high); }
+.eg-fig figcaption { font-size: .8rem; color: var(--on-surface-variant); margin-top: 6px; line-height: 1.4; }
+@media (max-width: 620px) { .eg-figs { grid-template-columns: 1fr; } }
 
 /* ── Línea temporal ────────────────────────────────────────────────────── */
 .eg-timeline { position: relative; margin: 24px 0 0; padding-left: 28px; }
