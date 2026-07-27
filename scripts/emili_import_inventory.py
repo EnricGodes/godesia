@@ -61,6 +61,7 @@ FOLDER = {
     "MNAC": "MNAC",
     "Museo Reina Sofia": "Museo Reina Sofia",
     "Museo Universidad de Navarra": "Museo Universidad de Navarra/imagenes",
+    "Arxiu Fotogràfic de Barcelona": "Arxiu Fotogràfic de Barcelona",
 }
 
 # categoría (ES, tal cual en el Excel) → (slug que YA existe en OBRA_TEXTS de emili.js, ES, CA)

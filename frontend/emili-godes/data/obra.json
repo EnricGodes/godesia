@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-07-26 11:47:40",
+ "generated_at": "2026-07-27 07:49:25",
  "ambito_order": [
   "foto_fija_cine",
   "fotografia_industrial",
@@ -6897,7 +6897,7 @@
    ]
   },
   "fotografia_industrial": {
-   "count": 369,
+   "count": 372,
    "decades": [
     "1900",
     "1910",
@@ -6909,6 +6909,7 @@
     "1970"
    ],
    "fondos": [
+    "Arxiu Fotogràfic de Barcelona",
     "IEFC"
    ],
    "projects": [
@@ -12722,6 +12723,68 @@
        "categoria_ca": "Fotografia industrial",
        "fondo": "IEFC",
        "decada": "1950"
+      }
+     ]
+    },
+    {
+     "slug": "obras-de-urbanizacion-de-la-montana-de-montjuic",
+     "nombre_es": "Obras de urbanización de la montaña de Montjuïc",
+     "nombre_ca": "Obres d'urbanització de la muntanya de Montjuïc",
+     "lugar_es": "Montjuïc, Barcelona",
+     "lugar_ca": "Montjuïc, Barcelona",
+     "fecha": "1920",
+     "year": 1920,
+     "decada": "1920",
+     "count": 3,
+     "cover": "/photos/emili-godes/bcn007919.jpg",
+     "fondos": [
+      "Arxiu Fotogràfic de Barcelona"
+     ],
+     "photos": [
+      {
+       "orig": "bcn007919.jpg",
+       "image": "/photos/emili-godes/bcn007919.jpg",
+       "titulo_es": "Obras de urbanización de la montaña de Montjuïc. Parque de Laribal.",
+       "titulo_ca": "Obres d'urbanització de la muntanya de Montjuïc. Parc de Laribal.",
+       "descripcion_es": "Obras de urbanización de la montaña de Montjuïc. Parque de Laribal.",
+       "descripcion_ca": "Obres d'urbanització de la muntanya de Montjuïc. Parc de Laribal.",
+       "fecha": "1920",
+       "lugar_es": "Montjuïc, Barcelona",
+       "lugar_ca": "Montjuïc, Barcelona",
+       "categoria_es": "Fotografía industrial",
+       "categoria_ca": "Fotografia industrial",
+       "fondo": "Arxiu Fotogràfic de Barcelona",
+       "decada": "1920"
+      },
+      {
+       "orig": "bcn007920.jpg",
+       "image": "/photos/emili-godes/bcn007920.jpg",
+       "titulo_es": "Obras de urbanización de la montaña de Montjuïc. Plaza de las Bellas Artes. Columnas de…",
+       "titulo_ca": "Obres d'urbanització de la muntanya de Montjuïc. Plaça de les Belles Arts. Columnes d'en…",
+       "descripcion_es": "Obras de urbanización de la montaña de Montjuïc. Plaza de las Bellas Artes. Columnas de entrada.",
+       "descripcion_ca": "Obres d'urbanització de la muntanya de Montjuïc. Plaça de les Belles Arts. Columnes d'entrada.",
+       "fecha": "1920",
+       "lugar_es": "Montjuïc, Barcelona",
+       "lugar_ca": "Montjuïc, Barcelona",
+       "categoria_es": "Fotografía industrial",
+       "categoria_ca": "Fotografia industrial",
+       "fondo": "Arxiu Fotogràfic de Barcelona",
+       "decada": "1920"
+      },
+      {
+       "orig": "bcn007921.jpg",
+       "image": "/photos/emili-godes/bcn007921.jpg",
+       "titulo_es": "Obras de urbanización de la montaña de Montjuïc. Parque de Laribal. Trabajos de reconstr…",
+       "titulo_ca": "Obres d'urbanització de la muntanya de Montjuïc. Parc de Laribal. Treballs de reconstruc…",
+       "descripcion_es": "Obras de urbanización de la montaña de Montjuïc. Parque de Laribal. Trabajos de reconstrucción del Teatro Naturaleza.",
+       "descripcion_ca": "Obres d'urbanització de la muntanya de Montjuïc. Parc de Laribal. Treballs de reconstrucció del Teatre Naturalesa.",
+       "fecha": "1920",
+       "lugar_es": "Montjuïc, Barcelona",
+       "lugar_ca": "Montjuïc, Barcelona",
+       "categoria_es": "Fotografía industrial",
+       "categoria_ca": "Fotografia industrial",
+       "fondo": "Arxiu Fotogràfic de Barcelona",
+       "decada": "1920"
       }
      ]
     },
@@ -42869,7 +42932,8 @@
   "IEFC",
   "Museo Universidad de Navarra",
   "MNAC",
-  "Museo Reina Sofia"
+  "Museo Reina Sofia",
+  "Arxiu Fotogràfic de Barcelona"
  ],
- "total": 2657
+ "total": 2660
 }
