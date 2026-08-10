@@ -56,9 +56,13 @@ a { color: inherit; }
 .lang-ca { display: none; }
 body.eg-ca .lang-es { display: none; }
 body.eg-ca .lang-ca { display: revert; }
-/* inline variants keep the flow inline */
+/* Variantes inline: mantienen el flujo del texto, pero solo una visible a la vez.
+   `span.lang-ca` necesita su propia regla de ocultación: gana en especificidad a
+   `.lang-ca` de arriba y, sin ella, el catalán se mostraba pegado al castellano. */
 span.lang-es, span.lang-ca { display: inline; }
+span.lang-ca { display: none; }
 body.eg-ca span.lang-es { display: none; }
+body.eg-ca span.lang-ca { display: inline; }
 
 /* ── Header / navegación propia ────────────────────────────────────────── */
 .eg-header {
@@ -209,12 +213,23 @@ body.eg-ca span.lang-es { display: none; }
 .eg-ambito__head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
 .eg-ambito__n { font-family: 'Noto Serif', serif; font-size: 1.5rem; color: var(--secondary); }
 
-/* ── Etiquetas de evidencia ────────────────────────────────────────────── */
-.eg-evi { display: inline-flex; align-items: center; gap: 5px; font-size: .68rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: .08em; padding: 3px 9px; border-radius: 999px; }
-.eg-evi--doc { background: #e3ede4; color: var(--primary); }
-.eg-evi--obs { background: #f3e7d6; color: var(--secondary); }
-.eg-evi--cur { background: #ece7f0; color: #5b4a70; }
+/* ── Comparativas: una obra de Godes junto a las de sus coetáneos ──────── */
+.eg-comp { margin-top: 26px; padding: 20px; border: 1px solid var(--outline-variant);
+  border-radius: 14px; background: var(--surface-container); }
+.eg-comp__title { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em;
+  color: var(--secondary); margin: 0 0 14px; }
+.eg-comp__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; }
+.eg-comp figure { margin: 0; display: flex; flex-direction: column; }
+.eg-comp__img { border-radius: 8px; overflow: hidden; background: #fff; line-height: 0;
+  border: 1px solid var(--outline-variant); }
+.eg-comp__img img { width: 100%; height: auto; display: block; }
+.eg-comp figure.is-godes .eg-comp__img { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+.eg-comp figcaption { font-size: .76rem; line-height: 1.5; color: var(--on-surface-variant); margin-top: 10px; }
+.eg-comp__who { display: block; font-weight: 700; color: var(--on-surface); }
+.eg-comp figure.is-godes .eg-comp__who { color: var(--primary); }
+.eg-comp__src { display: block; margin-top: 3px; font-size: .7rem; color: var(--secondary); }
+.eg-comp__src a { color: inherit; text-decoration: underline; }
+.eg-comp__foot { font-size: .72rem; color: var(--secondary); font-style: italic; margin: 14px 0 0; }
 
 /* ── Tablas (legado) ───────────────────────────────────────────────────── */
 .eg-tablewrap { overflow-x: auto; margin-top: 18px; border: 1px solid var(--outline-variant); border-radius: 14px; }
