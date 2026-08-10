@@ -4,7 +4,8 @@ genera todo lo que consume el microsite (BD + imágenes + JSON).
 Fuente:
   _resources/emili-godes/archivo/inventario_maestro_consolidado_traduccion.xlsx
   + fotos en _resources/emili-godes/archivo/{Filmoteca/imagenes, IEFC/_procesadas,
-    MNAC, Museo Reina Sofia, Museo Universidad de Navarra/imagenes}
+    IEFC/Fotos familiares/_procesada, MNAC, Museo Reina Sofia,
+    Museo Universidad de Navarra/imagenes}
 
 Hace, en un solo paso (idempotente, re-ejecutable):
   1. Lee el Excel y colapsa duplicados por nombre de archivo (columna `original`).
@@ -54,14 +55,14 @@ DEST_JSON = BASE / "frontend" / "emili-godes" / "data" / "destacadas.json"
 MAX_SIDE = 1000
 JPEG_Q = 60
 
-# fondo (columna del Excel) → carpeta relativa dentro de ARCHIVE
+# fondo (columna del Excel) → carpetas relativas dentro de ARCHIVE (se indexan todas juntas)
 FOLDER = {
-    "IEFC": "IEFC/_procesadas",
-    "Filmoteca de Catalunya": "Filmoteca/imagenes",
-    "MNAC": "MNAC",
-    "Museo Reina Sofia": "Museo Reina Sofia",
-    "Museo Universidad de Navarra": "Museo Universidad de Navarra/imagenes",
-    "Arxiu Fotogràfic de Barcelona": "Arxiu Fotogràfic de Barcelona",
+    "IEFC": ["IEFC/_procesadas", "IEFC/Fotos familiares/_procesada"],
+    "Filmoteca de Catalunya": ["Filmoteca/imagenes"],
+    "MNAC": ["MNAC"],
+    "Museo Reina Sofia": ["Museo Reina Sofia"],
+    "Museo Universidad de Navarra": ["Museo Universidad de Navarra/imagenes"],
+    "Arxiu Fotogràfic de Barcelona": ["Arxiu Fotogràfic de Barcelona"],
 }
 
 # categoría (ES, tal cual en el Excel) → (slug que YA existe en OBRA_TEXTS de emili.js, ES, CA)
@@ -75,6 +76,7 @@ CATS = {
     "Publicidad y encargo": ("publicidad", "Publicidad y encargo", "Publicitat i encàrrec"),
     "Reproducción de obras de arte": ("reproduccion_arte", "Reproducción de obras de arte", "Reproducció d'obres d'art"),
     "Experimentación fotográfica": ("experimentacion_fotografica", "Experimentación fotográfica", "Experimentació fotogràfica"),
+    "Fotografía familiar": ("fotografia_familiar", "Fotografía familiar", "Fotografia familiar"),
 }
 CAT_FALLBACK = ("sin_categoria", "Sin categoría", "Sense categoria")
 IMG_EXT = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ""}
@@ -102,11 +104,14 @@ def decade_of(fecha):
 
 
 def build_folder_index():
-    idx = {}
-    for fondo, rel in FOLDER.items():
-        d = ARCHIVE / rel
+    """Indexa, por fondo, TODAS sus carpetas juntas. Los valores son (carpeta, nombre_real)."""
+    idx, collisions = {}, []
+    for fondo, rels in FOLDER.items():
         byfull, bystem = {}, defaultdict(list)
-        if d.is_dir():
+        for rel in rels:
+            d = ARCHIVE / rel
+            if not d.is_dir():
+                continue
             for fn in os.listdir(d):
                 if fn.startswith("."):
                     continue
@@ -115,9 +120,18 @@ def build_folder_index():
                     continue
                 if fp.suffix.lower() not in IMG_EXT:
                     continue
-                byfull[fn.lower()] = fn
-                bystem[os.path.splitext(fn)[0].lower()].append(fn)
-        idx[fondo] = (byfull, bystem, d)
+                key = fn.lower()
+                if key in byfull:         # mismo nombre en dos carpetas del fondo → ambiguo
+                    collisions.append((fondo, fn, byfull[key][0], d))
+                byfull[key] = (d, fn)
+                bystem[os.path.splitext(fn)[0].lower()].append((d, fn))
+        idx[fondo] = (byfull, bystem)
+    if collisions:
+        print(f"\n⚠️  {len(collisions)} nombres DUPLICADOS entre carpetas del mismo fondo "
+              f"(gana la última carpeta; renombra para desambiguar):")
+        for fondo, fn, d1, d2 in collisions:
+            print(f"     [{fondo}] {fn}: {d1.name} ↔ {d2.name}")
+        print()
     return idx
 
 
@@ -126,14 +140,14 @@ def locate_file(idx, fondo, orig):
     le falta la extensión, stem exacto (ci) si es inequívoco. Nunca fuzzy (no colapsa sufijos)."""
     if fondo not in idx:
         return None
-    byfull, bystem, d = idx[fondo]
+    byfull, bystem = idx[fondo]
     o = orig.lower()
     if o in byfull:                       # nombre completo exacto
-        return d, byfull[o]
+        return byfull[o]
     stem = os.path.splitext(o)[0]
     cands = bystem.get(stem)              # stem exacto (p. ej. Excel sin extensión)
     if cands and len(cands) == 1:
-        return d, cands[0]
+        return cands[0]
     return None
 
 
@@ -250,7 +264,7 @@ def process_images(records, idx, force=False):
             print(f"  [SIN ARCHIVO] {rec['fondo']}: {rec['orig']}")
             continue
         d, realname = loc
-        used_real[rec["fondo"]].add(realname)
+        used_real[rec["fondo"]].add((d, realname))
         out_name = os.path.splitext(rec["orig"])[0] + ".jpg"
         try:
             res = rescale(d / realname, OUT_IMG_DIR / out_name, force=force)
@@ -269,10 +283,11 @@ def process_images(records, idx, force=False):
 def reverse_coverage(idx, used_real):
     """Archivos físicos que NO tienen ficha en el Excel (quedarían sin publicar)."""
     orphans = []
-    for fondo, (byfull, bystem, d) in idx.items():
-        for realname in byfull.values():
-            if realname not in used_real.get(fondo, set()):
-                orphans.append((fondo, realname))
+    for fondo, (byfull, _bystem) in idx.items():
+        used = used_real.get(fondo, set())
+        for d, realname in byfull.values():
+            if (d, realname) not in used:
+                orphans.append((fondo, str(d.relative_to(ARCHIVE)), realname))
     return sorted(set(orphans))
 
 
@@ -415,8 +430,8 @@ def main():
     if orphans:
         print(f"\n⚠️  COBERTURA INVERSA: {len(orphans)} archivos físicos SIN ficha en el Excel "
               f"(quedan sin publicar):")
-        for fondo, fn in orphans:
-            print(f"     [{fondo}] {fn}")
+        for fondo, rel, fn in orphans:
+            print(f"     [{fondo}] {rel}/{fn}")
         print("   → catalógalos en el Excel y relanza esta importación.\n")
     else:
         print("  cobertura inversa: OK, todos los archivos físicos tienen ficha.")

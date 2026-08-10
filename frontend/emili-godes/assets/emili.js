@@ -294,6 +294,8 @@
       ca: ['Reportatges urbans i documentals', 'Els reportatges de Còrdova, Barcelona i altres entorns mostren la capacitat de Godes per observar ciutats, carrers, monuments, activitats i transformacions socials. Són imatges documentals, però també construccions visuals en què importen la perspectiva, la llum, l’escala i el ritme.'] },
     experimentacion_fotografica: { es: ['Experimentación fotográfica', 'Godes exploró dobles exposiciones, fotogramas, encuadres poco convencionales, contrastes, ampliaciones y técnicas de aproximación. En esta categoría se reúnen las imágenes en las que la investigación formal y técnica es el elemento principal.'],
       ca: ['Experimentació fotogràfica', 'Godes va explorar dobles exposicions, fotogrames, enquadraments poc convencionals, contrastos, ampliacions i tècniques d’aproximació. En aquesta categoria es reuneixen les imatges en què la recerca formal i tècnica és l’element principal.'] },
+    fotografia_familiar: { es: ['Fotografía familiar', 'Godes dirigió la cámara también hacia los suyos. Estas imágenes retratan a la familia Godes entre las décadas de 1910 y 1920: retratos de su hija Montserrat, de sus hermanos y de sus padres, primeras comuniones, bodas, excursiones a Montserrat, la nevada de 1924 y la vida cotidiana en la casa de la calle Bertran de Barcelona.\n\nEl conjunto incluye placas estereoscópicas para taxifoto y constituye, además de un álbum familiar, un banco de pruebas donde ensayó encuadres, luz y retrato con los modelos que tenía más cerca.'],
+      ca: ['Fotografia familiar', 'Godes va dirigir la càmera també cap als seus. Aquestes imatges retraten la família Godes entre les dècades de 1910 i 1920: retrats de la seva filla Montserrat, dels seus germans i dels seus pares, primeres comunions, casaments, excursions a Montserrat, la nevada del 1924 i la vida quotidiana a la casa del carrer Bertran de Barcelona.\n\nEl conjunt inclou plaques estereoscòpiques per a taxifot i constitueix, a més d’un àlbum familiar, un banc de proves on va assajar enquadraments, llum i retrat amb els models que tenia més a prop.'] },
   };
   var UI = {
     themes: { es: 'Temáticas', ca: 'Temàtiques' },
@@ -322,13 +324,26 @@
     return (v != null ? v : null) || obj[f + '_es'] || obj[f] || '';
   }
 
+  // Etiqueta de una temática en el idioma activo (cae al slug si no está en OBRA_TEXTS).
+  function ambitoLabel(k) {
+    var txt = OBRA_TEXTS[k];
+    return (txt && txt[getLang()]) ? txt[getLang()][0] : k;
+  }
+  // Temáticas ordenadas alfabéticamente por su etiqueta en el idioma activo.
+  function orderedAmbitos() {
+    if (!obra.data) return [];
+    return (obra.data.ambito_order || []).slice().sort(function (a, b) {
+      return ambitoLabel(a).localeCompare(ambitoLabel(b), getLang(), { sensitivity: 'base' });
+    });
+  }
+
   function initObra() {
     var root = document.getElementById('eg-obra');
     if (!root) return;
     fetch(BASE + 'data/obra.json').then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         obra.data = d || { ambito_order: [], ambitos: {}, decades: [] };
-        if (obra.data.ambito_order.length) obra.ambito = obra.data.ambito_order[0];
+        if (obra.data.ambito_order.length) obra.ambito = orderedAmbitos()[0];
         _obraRerender = renderObra;
         _obraFromHash();
         window.addEventListener('hashchange', function () { _obraFromHash(); renderObra(); });
@@ -367,9 +382,9 @@
 
   function renderSide() {
     var d = obra.data;
-    var themes = d.ambito_order.map(function (k) {
+    var themes = orderedAmbitos().map(function (k) {
       var a = d.ambitos[k]; if (!a) return '';
-      var label = (OBRA_TEXTS[k] ? OBRA_TEXTS[k][getLang()][0] : k);
+      var label = ambitoLabel(k);
       var active = k === obra.ambito ? ' is-active' : '';
       return '<button class="eg-side-link' + active + '" onclick="EG.obraTheme(\'' + k + '\')">' +
         '<span>' + esc(label) + '</span><span class="eg-side-count">' + a.count + '</span></button>';

@@ -1,11 +1,12 @@
 {
- "generated_at": "2026-07-27 07:49:25",
+ "generated_at": "2026-08-10 19:48:10",
  "ambito_order": [
   "foto_fija_cine",
   "fotografia_industrial",
+  "fotografia_familiar",
+  "reportajes_urbanos_documentales",
   "fotografia_artistica",
   "ciencia_medicina",
-  "reportajes_urbanos_documentales",
   "arquitectura_instalaciones",
   "publicidad",
   "reproduccion_arte"
@@ -40869,9 +40870,10 @@
    ]
   },
   "reportajes_urbanos_documentales": {
-   "count": 122,
+   "count": 130,
    "decades": [
     "1910",
+    "1920",
     "1930",
     "1950",
     "1960"
@@ -42772,6 +42774,83 @@
      ]
     },
     {
+     "slug": "camprodon-y-el-pirineo-catalan",
+     "nombre_es": "Camprodon y el Pirineo catalán",
+     "nombre_ca": "Camprodó y el Pirineu català",
+     "lugar_es": "Camprodó, Girona",
+     "lugar_ca": "Camprodó, Girona",
+     "fecha": "c. 1965–1975",
+     "year": 1965,
+     "decada": "1960",
+     "count": 4,
+     "cover": "/photos/emili-godes/FCP-23-91.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-91.JPG",
+       "image": "/photos/emili-godes/FCP-23-91.jpg",
+       "titulo_es": "Vista panorámica de Camprodon entre árboles, con el casco urbano y las montañas del Piri…",
+       "titulo_ca": "Vista panorámica de Camprodon entre árboles, con el casco urbano y las montañas del Piri…",
+       "descripcion_es": "Vista panorámica de Camprodon entre árboles, con el casco urbano y las montañas del Pirineo al fondo.",
+       "descripcion_ca": "Vista panorámica de Camprodon entre árboles, con el casco urbano y las montañas del Pirineo al fondo.",
+       "fecha": "c. 1965–1975",
+       "lugar_es": "Camprodó, Girona",
+       "lugar_ca": "Camprodó, Girona",
+       "categoria_es": "Reportajes urbanos y documentales",
+       "categoria_ca": "Reportatges urbans i documentals",
+       "fondo": "IEFC",
+       "decada": "1960"
+      },
+      {
+       "orig": "FCP-23-92.JPG",
+       "image": "/photos/emili-godes/FCP-23-92.jpg",
+       "titulo_es": "Vista del Pont Nou de piedra sobre el río y de las viviendas tradicionales situadas junt…",
+       "titulo_ca": "Vista del Pont Nou de piedra sobre el río y de las viviendas tradicionales situadas junt…",
+       "descripcion_es": "Vista del Pont Nou de piedra sobre el río y de las viviendas tradicionales situadas junto a la ribera.",
+       "descripcion_ca": "Vista del Pont Nou de piedra sobre el río y de las viviendas tradicionales situadas junto a la ribera.",
+       "fecha": "c. 1965–1975",
+       "lugar_es": "Camprodó, Girona",
+       "lugar_ca": "Camprodó, Girona",
+       "categoria_es": "Reportajes urbanos y documentales",
+       "categoria_ca": "Reportatges urbans i documentals",
+       "fondo": "IEFC",
+       "decada": "1960"
+      },
+      {
+       "orig": "FCP-23-93.JPG",
+       "image": "/photos/emili-godes/FCP-23-93.jpg",
+       "titulo_es": "Panorámica del núcleo urbano de Camprodon con el relieve pirenaico al fondo vista desde…",
+       "titulo_ca": "Panorámica del núcleo urbano de Camprodon con el relieve pirenaico al fondo vista desde…",
+       "descripcion_es": "Panorámica del núcleo urbano de Camprodon con el relieve pirenaico al fondo vista desde las afueras del pueblo.",
+       "descripcion_ca": "Panorámica del núcleo urbano de Camprodon con el relieve pirenaico al fondo vista desde las afueras del pueblo.",
+       "fecha": "c. 1965–1975",
+       "lugar_es": "Camprodó, Girona",
+       "lugar_ca": "Camprodó, Girona",
+       "categoria_es": "Reportajes urbanos y documentales",
+       "categoria_ca": "Reportatges urbans i documentals",
+       "fondo": "IEFC",
+       "decada": "1960"
+      },
+      {
+       "orig": "FCP-23-94.JPG",
+       "image": "/photos/emili-godes/FCP-23-94.jpg",
+       "titulo_es": "Fachadas de casas tradicionales construidas junto al cauce del río en el casco histórico.",
+       "titulo_ca": "Fachadas de casas tradicionales construidas junto al cauce del río en el casco histórico.",
+       "descripcion_es": "Fachadas de casas tradicionales construidas junto al cauce del río en el casco histórico.",
+       "descripcion_ca": "Fachadas de casas tradicionales construidas junto al cauce del río en el casco histórico.",
+       "fecha": "c. 1965–1975",
+       "lugar_es": "Camprodó, Girona",
+       "lugar_ca": "Camprodó, Girona",
+       "categoria_es": "Reportajes urbanos y documentales",
+       "categoria_ca": "Reportatges urbans i documentals",
+       "fondo": "IEFC",
+       "decada": "1960"
+      }
+     ]
+    },
+    {
      "slug": "audiencia-con-pablo-vi-josep-esteve-soler",
      "nombre_es": "Audiencia con Pablo VI - Josep Esteve Soler (?)",
      "nombre_ca": "Audiència amb Pau VI - Josep Esteve Soler (?)",
@@ -42815,6 +42894,53 @@
        "categoria_ca": "Reportatges urbans i documentals",
        "fondo": "IEFC",
        "decada": "1960"
+      }
+     ]
+    },
+    {
+     "slug": "pescadores",
+     "nombre_es": "Pescadores",
+     "nombre_ca": "Pescadors",
+     "lugar_es": "Localización no identificada",
+     "lugar_ca": "Localización no identificada",
+     "fecha": "c. 1925–1935",
+     "year": 1925,
+     "decada": "1920",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-59.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-59.JPG",
+       "image": "/photos/emili-godes/FCP-23-59.jpg",
+       "titulo_es": "Embarcación con dos pescadores navegando al contraluz sobre aguas tranquilas, con el ref…",
+       "titulo_ca": "Embarcación con dos pescadores navegando al contraluz sobre aguas tranquilas, con el ref…",
+       "descripcion_es": "Embarcación con dos pescadores navegando al contraluz sobre aguas tranquilas, con el reflejo del sol formando una composición de fuerte carácter gráfico.",
+       "descripcion_ca": "Embarcación con dos pescadores navegando al contraluz sobre aguas tranquilas, con el reflejo del sol formando una composición de fuerte carácter gráfico.",
+       "fecha": "c. 1925–1935",
+       "lugar_es": "Localización no identificada",
+       "lugar_ca": "Localización no identificada",
+       "categoria_es": "Reportajes urbanos y documentales",
+       "categoria_ca": "Reportatges urbans i documentals",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-60.JPG",
+       "image": "/photos/emili-godes/FCP-23-60.jpg",
+       "titulo_es": "Embarcación solitaria faenando sobre un lago o embalse al atardecer, con el reflejo del…",
+       "titulo_ca": "Embarcación solitaria faenando sobre un lago o embalse al atardecer, con el reflejo del…",
+       "descripcion_es": "Embarcación solitaria faenando sobre un lago o embalse al atardecer, con el reflejo del sol sobre el agua y montañas en el horizonte.",
+       "descripcion_ca": "Embarcación solitaria faenando sobre un lago o embalse al atardecer, con el reflejo del sol sobre el agua y montañas en el horizonte.",
+       "fecha": "c. 1925–1935",
+       "lugar_es": "Localización no identificada",
+       "lugar_ca": "Localización no identificada",
+       "categoria_es": "Reportajes urbanos y documentales",
+       "categoria_ca": "Reportatges urbans i documentals",
+       "fondo": "IEFC",
+       "decada": "1920"
       }
      ]
     },
@@ -42913,11 +43039,3876 @@
        "decada": "1910"
       }
      ]
+    },
+    {
+     "slug": "nevada-de-1924-a-sant-gervasi",
+     "nombre_es": "Nevada de 1924 a Sant Gervasi",
+     "nombre_ca": "La nevada de 1924 a Sant Gervasi",
+     "lugar_es": "Sant Gervasi",
+     "lugar_ca": "Sant Gervasi",
+     "fecha": "1924",
+     "year": 1924,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-63.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-63.jpg",
+       "image": "/photos/emili-godes/FCP-23-63.jpg",
+       "titulo_es": "Tranvía circulando bajo una intensa nevada en la estación de la línea de Sant Gervasi, c…",
+       "titulo_ca": "Tramvia circulant sota una intensa nevada a l'estació de la línia de Sant Gervasi, amb l…",
+       "descripcion_es": "Tranvía circulando bajo una intensa nevada en la estación de la línea de Sant Gervasi, con andenes y vías cubiertos de nieve.",
+       "descripcion_ca": "Tramvia circulant sota una intensa nevada a l'estació de la línia de Sant Gervasi, amb les andanes i les vies cobertes de neu.",
+       "fecha": "1924",
+       "lugar_es": "Sant Gervasi",
+       "lugar_ca": "Sant Gervasi",
+       "categoria_es": "Reportajes urbanos y documentales",
+       "categoria_ca": "Reportatges urbans i documentals",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "nevada-de-1924-en-sant-gervasi",
+     "nombre_es": "Nevada de 1924 en Sant Gervasi",
+     "nombre_ca": "La nevada de 1924 a Sant Gervasi",
+     "lugar_es": "Sant Gervasi",
+     "lugar_ca": "Sant Gervasi",
+     "fecha": "1924",
+     "year": 1924,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-90.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-90.JPG",
+       "image": "/photos/emili-godes/FCP-23-90.jpg",
+       "titulo_es": "Vista elevada de una calle en fuerte pendiente del barrio de Sant Gervasi completamente…",
+       "titulo_ca": "Vista elevada d'un carrer amb un fort pendent del barri de Sant Gervasi completament cob…",
+       "descripcion_es": "Vista elevada de una calle en fuerte pendiente del barrio de Sant Gervasi completamente cubierta por la nieve tras la gran nevada de 1924. La imagen muestra viviendas unifamiliares y el paisaje urbano transformado por el temporal.",
+       "descripcion_ca": "Vista elevada d'un carrer amb un fort pendent del barri de Sant Gervasi completament cobert de neu després de la gran nevada de 1924. La imatge mostra habitatges unifamiliars i el paisatge urbà transformat pel temporal.",
+       "fecha": "1924",
+       "lugar_es": "Sant Gervasi",
+       "lugar_ca": "Sant Gervasi",
+       "categoria_es": "Reportajes urbanos y documentales",
+       "categoria_ca": "Reportatges urbans i documentals",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    }
+   ]
+  },
+  "fotografia_familiar": {
+   "count": 149,
+   "decades": [
+    "1870",
+    "1880",
+    "1890",
+    "1900",
+    "1910",
+    "1920"
+   ],
+   "fondos": [
+    "IEFC"
+   ],
+   "projects": [
+    {
+     "slug": "montserrat-godes-diago",
+     "nombre_es": "Montserrat Godes Diago",
+     "nombre_ca": "Montserrat Godes Diago",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1921",
+     "year": 1921,
+     "decada": "1920",
+     "count": 15,
+     "cover": "/photos/emili-godes/FCP-23-1.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-1.jpg",
+       "image": "/photos/emili-godes/FCP-23-1.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "Retrato",
+       "descripcion_ca": "Retrat",
+       "fecha": "1921",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-10",
+       "image": "/photos/emili-godes/FCP-23-10.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "Retrato",
+       "descripcion_ca": "Retrat",
+       "fecha": "1922",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-123",
+       "image": "/photos/emili-godes/FCP-23-123.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1922",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-124",
+       "image": "/photos/emili-godes/FCP-23-124.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-126",
+       "image": "/photos/emili-godes/FCP-23-126.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1921",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-127",
+       "image": "/photos/emili-godes/FCP-23-127.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-129",
+       "image": "/photos/emili-godes/FCP-23-129.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1921",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-17",
+       "image": "/photos/emili-godes/FCP-23-17.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "Retrato",
+       "descripcion_ca": "Retrat",
+       "fecha": "1922",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-18",
+       "image": "/photos/emili-godes/FCP-23-18.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1921",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-4",
+       "image": "/photos/emili-godes/FCP-23-4.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1921",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-44",
+       "image": "/photos/emili-godes/FCP-23-44.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1921",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-45",
+       "image": "/photos/emili-godes/FCP-23-45.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1921",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-5",
+       "image": "/photos/emili-godes/FCP-23-5.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "Retrato",
+       "descripcion_ca": "Retrat",
+       "fecha": "1922",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-8",
+       "image": "/photos/emili-godes/FCP-23-8.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "Retrato",
+       "descripcion_ca": "Retrat",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-83",
+       "image": "/photos/emili-godes/FCP-23-83.jpg",
+       "titulo_es": "Montserrat Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "emili-godes-hurtado",
+     "nombre_es": "Emili Godes Hurtado",
+     "nombre_ca": "Emili Godes Hurtado",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1918",
+     "year": 1918,
+     "decada": "1910",
+     "count": 8,
+     "cover": "/photos/emili-godes/FCP-23-28.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-28",
+       "image": "/photos/emili-godes/FCP-23-28.jpg",
+       "titulo_es": "Emili Godes Hurtado",
+       "titulo_ca": "Emili Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1918",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-74",
+       "image": "/photos/emili-godes/FCP-23-74.jpg",
+       "titulo_es": "Emili Godes Hurtado",
+       "titulo_ca": "Emili Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-76",
+       "image": "/photos/emili-godes/FCP-23-76.jpg",
+       "titulo_es": "Emili Godes Hurtado",
+       "titulo_ca": "Emili Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-79",
+       "image": "/photos/emili-godes/FCP-23-79.jpg",
+       "titulo_es": "Emili Godes Hurtado",
+       "titulo_ca": "Emili Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-80",
+       "image": "/photos/emili-godes/FCP-23-80.jpg",
+       "titulo_es": "Emili Godes Hurtado",
+       "titulo_ca": "Emili Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-84",
+       "image": "/photos/emili-godes/FCP-23-84.jpg",
+       "titulo_es": "Emili Godes Hurtado",
+       "titulo_ca": "Emili Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-88",
+       "image": "/photos/emili-godes/FCP-23-88.jpg",
+       "titulo_es": "Emili Godes Hurtado",
+       "titulo_ca": "Emili Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-89",
+       "image": "/photos/emili-godes/FCP-23-89.jpg",
+       "titulo_es": "Emili Godes Hurtado",
+       "titulo_ca": "Emili Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "ramon-godes-hurtado",
+     "nombre_es": "Ramón Godes Hurtado",
+     "nombre_ca": "Ramón Godes Hurtado",
+     "lugar_es": "Plaça Figuerola, Barcelona",
+     "lugar_ca": "Plaça Figuerola, Barcelona",
+     "fecha": "1915",
+     "year": 1915,
+     "decada": "1910",
+     "count": 6,
+     "cover": "/photos/emili-godes/FCP-23-128.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-128",
+       "image": "/photos/emili-godes/FCP-23-128.jpg",
+       "titulo_es": "Ramón Godes Hurtado",
+       "titulo_ca": "Ramón Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1915",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-143",
+       "image": "/photos/emili-godes/FCP-23-143.jpg",
+       "titulo_es": "Ramón Godes Hurtado",
+       "titulo_ca": "Ramón Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1920",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-144",
+       "image": "/photos/emili-godes/FCP-23-144.jpg",
+       "titulo_es": "Ramón Godes Hurtado",
+       "titulo_ca": "Ramón Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1915",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-33",
+       "image": "/photos/emili-godes/FCP-23-33.jpg",
+       "titulo_es": "Ramón Godes Hurtado",
+       "titulo_ca": "Ramón Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1915",
+       "lugar_es": "Plaça Figuerola, Barcelona",
+       "lugar_ca": "Plaça Figuerola, Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-34",
+       "image": "/photos/emili-godes/FCP-23-34.jpg",
+       "titulo_es": "Ramón Godes Hurtado",
+       "titulo_ca": "Ramón Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1916",
+       "lugar_es": "",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-37",
+       "image": "/photos/emili-godes/FCP-23-37.jpg",
+       "titulo_es": "Ramón Godes Hurtado",
+       "titulo_ca": "Ramón Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1915",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "emili-godes-i-antonia-diago-a-montserrat-taxiphote",
+     "nombre_es": "Emili Godes i Antònia Diago a Montserrat [taxiphote]",
+     "nombre_ca": "Emili Godes i Antònia Diago a Montserrat [taxiphote]",
+     "lugar_es": "Montserrat",
+     "lugar_ca": "Montserrat",
+     "fecha": "1919",
+     "year": 1919,
+     "decada": "1910",
+     "count": 5,
+     "cover": "/photos/emili-godes/FCP-23-104.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-104",
+       "image": "/photos/emili-godes/FCP-23-104.jpg",
+       "titulo_es": "Emili Godes i Antònia Diago a Montserrat [taxiphote]",
+       "titulo_ca": "Emili Godes i Antònia Diago a Montserrat [taxiphote]",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "Montserrat",
+       "lugar_ca": "Montserrat",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-105",
+       "image": "/photos/emili-godes/FCP-23-105.jpg",
+       "titulo_es": "Emili Godes i Antònia Diago a Montserrat [taxiphote]",
+       "titulo_ca": "Emili Godes i Antònia Diago a Montserrat [taxiphote]",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "Montserrat",
+       "lugar_ca": "Montserrat",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-108",
+       "image": "/photos/emili-godes/FCP-23-108.jpg",
+       "titulo_es": "Emili Godes i Antònia Diago a Montserrat [taxiphote]",
+       "titulo_ca": "Emili Godes i Antònia Diago a Montserrat [taxiphote]",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "Montserrat",
+       "lugar_ca": "Montserrat",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-109",
+       "image": "/photos/emili-godes/FCP-23-109.jpg",
+       "titulo_es": "Emili Godes i Antònia Diago a Montserrat [taxiphote]",
+       "titulo_ca": "Emili Godes i Antònia Diago a Montserrat [taxiphote]",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "Montserrat",
+       "lugar_ca": "Montserrat",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-99",
+       "image": "/photos/emili-godes/FCP-23-99.jpg",
+       "titulo_es": "Emili Godes i Antònia Diago a Montserrat [taxiphote]",
+       "titulo_ca": "Emili Godes i Antònia Diago a Montserrat [taxiphote]",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "Montserrat",
+       "lugar_ca": "Montserrat",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "visita-diago-almuzara-taxiphote",
+     "nombre_es": "Visita Diago Almuzara [taxiphote]",
+     "nombre_ca": "Visita Diago Almuzara [taxiphote]",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1919",
+     "year": 1919,
+     "decada": "1910",
+     "count": 5,
+     "cover": "/photos/emili-godes/FCP-23-100.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-100",
+       "image": "/photos/emili-godes/FCP-23-100.jpg",
+       "titulo_es": "Nicómedes Diago, Dolores Almuzara, Antònia Diago, Emili Godes",
+       "titulo_ca": "Nicómedes Diago, Dolores Almuzara, Antònia Diago, Emili Godes",
+       "descripcion_es": "Nicómedes Diago, Dolores Almuzara, Antònia Diago, Emili Godes",
+       "descripcion_ca": "Nicómedes Diago, Dolores Almuzara, Antònia Diago, Emili Godes",
+       "fecha": "1919",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-102",
+       "image": "/photos/emili-godes/FCP-23-102.jpg",
+       "titulo_es": "Antònia Diago, Emili Godes",
+       "titulo_ca": "Antònia Diago, Emili Godes",
+       "descripcion_es": "Antònia Diago, Emili Godes",
+       "descripcion_ca": "Antònia Diago, Emili Godes",
+       "fecha": "1919",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-110",
+       "image": "/photos/emili-godes/FCP-23-110.jpg",
+       "titulo_es": "Nicómedes Diago, Dolores Almuzara, Antònia Diago, Emili Godes",
+       "titulo_ca": "Nicómedes Diago, Dolores Almuzara, Antònia Diago, Emili Godes",
+       "descripcion_es": "Nicómedes Diago, Dolores Almuzara, Antònia Diago, Emili Godes",
+       "descripcion_ca": "Nicómedes Diago, Dolores Almuzara, Antònia Diago, Emili Godes",
+       "fecha": "1919",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-96",
+       "image": "/photos/emili-godes/FCP-23-96.jpg",
+       "titulo_es": "Nicómedes Diago, Dolores Almuzara, Antònia Diago, Emili Godes",
+       "titulo_ca": "Nicómedes Diago, Dolores Almuzara, Antònia Diago, Emili Godes",
+       "descripcion_es": "Nicómedes Diago, Dolores Almuzara, Antònia Diago, Emili Godes",
+       "descripcion_ca": "Nicómedes Diago, Dolores Almuzara, Antònia Diago, Emili Godes",
+       "fecha": "1919",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-98",
+       "image": "/photos/emili-godes/FCP-23-98.jpg",
+       "titulo_es": "Nicómedes Diago, Dolores Almuzara, Antònia Diago",
+       "titulo_ca": "Nicómedes Diago, Dolores Almuzara, Antònia Diago",
+       "descripcion_es": "Nicómedes Diago, Dolores Almuzara, Antònia Diago",
+       "descripcion_ca": "Nicómedes Diago, Dolores Almuzara, Antònia Diago",
+       "fecha": "1919",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "emili-godes-hurtado-antonia-diago-almuzara",
+     "nombre_es": "Emili Godes Hurtado, Antònia Diago Almuzara",
+     "nombre_ca": "Emili Godes Hurtado, Antònia Diago Almuzara",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1921",
+     "year": 1920,
+     "decada": "1920",
+     "count": 3,
+     "cover": "/photos/emili-godes/FCP-23-25.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-25",
+       "image": "/photos/emili-godes/FCP-23-25.jpg",
+       "titulo_es": "Emili Godes Hurtado, Antònia Diago Almuzara",
+       "titulo_ca": "Emili Godes Hurtado, Antònia Diago Almuzara",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1921",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-81",
+       "image": "/photos/emili-godes/FCP-23-81.jpg",
+       "titulo_es": "Emili Godes Hurtado, Antònia Diago Almuzara",
+       "titulo_ca": "Emili Godes Hurtado, Antònia Diago Almuzara",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1925",
+       "lugar_es": "Bertran, 39 Barcelona",
+       "lugar_ca": "Bertran, 39 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-82",
+       "image": "/photos/emili-godes/FCP-23-82.jpg",
+       "titulo_es": "Emili Godes Hurtado, Antònia Diago Almuzara",
+       "titulo_ca": "Emili Godes Hurtado, Antònia Diago Almuzara",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1920",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "emilia-hurtado-giro",
+     "nombre_es": "Emilia Hurtado Giró",
+     "nombre_ca": "Emilia Hurtado Giró",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1893",
+     "year": 1893,
+     "decada": "1890",
+     "count": 3,
+     "cover": "/photos/emili-godes/FCP-23-146.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-146",
+       "image": "/photos/emili-godes/FCP-23-146.jpg",
+       "titulo_es": "Emilia Hurtado Giró",
+       "titulo_ca": "Emilia Hurtado Giró",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1895",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1890"
+      },
+      {
+       "orig": "FCP-23-161",
+       "image": "/photos/emili-godes/FCP-23-161.jpg",
+       "titulo_es": "Emilia Hurtado Giró",
+       "titulo_ca": "Emilia Hurtado Giró",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1895",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1890"
+      },
+      {
+       "orig": "FCP-23-51",
+       "image": "/photos/emili-godes/FCP-23-51.jpg",
+       "titulo_es": "Emilia Hurtado Giró",
+       "titulo_ca": "Emilia Hurtado Giró",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1893",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1890"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-caballeria",
+     "nombre_es": "Artur Godes Caballeria",
+     "nombre_ca": "Artur Godes Caballeria",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1888",
+     "year": 1888,
+     "decada": "1880",
+     "count": 3,
+     "cover": "/photos/emili-godes/FCP-23-154.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-154",
+       "image": "/photos/emili-godes/FCP-23-154.jpg",
+       "titulo_es": "Artur Godes Caballeria",
+       "titulo_ca": "Artur Godes Caballeria",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1888",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1880"
+      },
+      {
+       "orig": "FCP-23-53",
+       "image": "/photos/emili-godes/FCP-23-53.jpg",
+       "titulo_es": "Artur Godes Caballeria",
+       "titulo_ca": "Artur Godes Caballeria",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1893",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1890"
+      },
+      {
+       "orig": "FCP-23-72",
+       "image": "/photos/emili-godes/FCP-23-72.jpg",
+       "titulo_es": "Artur Godes Caballeria",
+       "titulo_ca": "Artur Godes Caballeria",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1911",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-caballeria-emili-hurtado-giro",
+     "nombre_es": "Artur Godes Caballeria, Emili Hurtado Giró",
+     "nombre_ca": "Artur Godes Caballeria, Emili Hurtado Giró",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1911",
+     "year": 1911,
+     "decada": "1910",
+     "count": 3,
+     "cover": "/photos/emili-godes/FCP-23-158.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-158",
+       "image": "/photos/emili-godes/FCP-23-158.jpg",
+       "titulo_es": "Artur Godes Caballeria, Emili Hurtado Giró",
+       "titulo_ca": "Artur Godes Caballeria, Emili Hurtado Giró",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1915",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-159",
+       "image": "/photos/emili-godes/FCP-23-159.jpg",
+       "titulo_es": "Artur Godes Caballeria, Emili Hurtado Giró",
+       "titulo_ca": "Artur Godes Caballeria, Emili Hurtado Giró",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1920",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-75",
+       "image": "/photos/emili-godes/FCP-23-75.jpg",
+       "titulo_es": "Artur Godes Caballeria, Emili Hurtado Giró",
+       "titulo_ca": "Artur Godes Caballeria, Emili Hurtado Giró",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1911",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "antonia-diago-a-montserrat-taxiphote",
+     "nombre_es": "Antònia Diago a Montserrat [taxiphote]",
+     "nombre_ca": "Antònia Diago a Montserrat [taxiphote]",
+     "lugar_es": "Montserrat",
+     "lugar_ca": "Montserrat",
+     "fecha": "1919",
+     "year": 1919,
+     "decada": "1910",
+     "count": 3,
+     "cover": "/photos/emili-godes/FCP-23-111.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-111",
+       "image": "/photos/emili-godes/FCP-23-111.jpg",
+       "titulo_es": "Antònia Diago a Montserrat [taxiphote]",
+       "titulo_ca": "Antònia Diago a Montserrat [taxiphote]",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "Montserrat",
+       "lugar_ca": "Montserrat",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-113",
+       "image": "/photos/emili-godes/FCP-23-113.jpg",
+       "titulo_es": "Antònia Diago a Montserrat [taxiphote]",
+       "titulo_ca": "Antònia Diago a Montserrat [taxiphote]",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "Montserrat",
+       "lugar_ca": "Montserrat",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-97",
+       "image": "/photos/emili-godes/FCP-23-97.jpg",
+       "titulo_es": "Antònia Diago a Montserrat [taxiphote]",
+       "titulo_ca": "Antònia Diago a Montserrat [taxiphote]",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "Montserrat",
+       "lugar_ca": "Montserrat",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "festa-major-sant-gervasi",
+     "nombre_es": "Festa Major Sant Gervasi",
+     "nombre_ca": "Festa Major Sant Gervasi",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1915",
+     "year": 1915,
+     "decada": "1910",
+     "count": 3,
+     "cover": "/photos/emili-godes/FCP-23-115.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-115",
+       "image": "/photos/emili-godes/FCP-23-115.jpg",
+       "titulo_es": "Artur Godes Caballeria, Emili Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Gode…",
+       "titulo_ca": "Artur Godes Caballeria, Emili Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Gode…",
+       "descripcion_es": "Artur Godes Caballeria, Emili Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago",
+       "descripcion_ca": "Artur Godes Caballeria, Emili Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-120",
+       "image": "/photos/emili-godes/FCP-23-120.jpg",
+       "titulo_es": "Artur Godes Caballeria, Emili Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Gode…",
+       "titulo_ca": "Artur Godes Caballeria, Emili Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Gode…",
+       "descripcion_es": "Artur Godes Caballeria, Emili Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago",
+       "descripcion_ca": "Artur Godes Caballeria, Emili Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-132",
+       "image": "/photos/emili-godes/FCP-23-132.jpg",
+       "titulo_es": "Festa Major Sant Gervasi",
+       "titulo_ca": "Festa Major Sant Gervasi",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1915",
+       "lugar_es": "Bertran, Barcelona",
+       "lugar_ca": "Bertran, Barcelona",
+       "categoria_es": "Reportajes urbanos y documentales",
+       "categoria_ca": "Reportatges urbans i documentals",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "ernest-godes-emili-godes",
+     "nombre_es": "Ernest Godes, Emili Godes",
+     "nombre_ca": "Ernest Godes, Emili Godes",
+     "lugar_es": "Escola de párvulos al barri de Sta. Maria del Mar. Barcelona",
+     "lugar_ca": "Escola de párvulos al barri de Sta. Maria del Mar. Barcelona",
+     "fecha": "1899",
+     "year": 1899,
+     "decada": "1890",
+     "count": 3,
+     "cover": "/photos/emili-godes/FCP-23-130.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-130",
+       "image": "/photos/emili-godes/FCP-23-130.jpg",
+       "titulo_es": "Ernest Godes, Emili Godes",
+       "titulo_ca": "Ernest Godes, Emili Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1900",
+       "lugar_es": "Escola de párvulos al barri de Sta. Maria del Mar. Barcelona",
+       "lugar_ca": "Escola de párvulos al barri de Sta. Maria del Mar. Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1900"
+      },
+      {
+       "orig": "FCP-23-134",
+       "image": "/photos/emili-godes/FCP-23-134.jpg",
+       "titulo_es": "Ernest Godes, Emili Godes",
+       "titulo_ca": "Ernest Godes, Emili Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1899",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1890"
+      },
+      {
+       "orig": "FCP-23-136",
+       "image": "/photos/emili-godes/FCP-23-136.jpg",
+       "titulo_es": "Ernest Godes, Emili Godes",
+       "titulo_ca": "Ernest Godes, Emili Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1920",
+       "lugar_es": "Port de Barcelona",
+       "lugar_ca": "Port de Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "ernest-y-emili",
+     "nombre_es": "Ernest y Emili",
+     "nombre_ca": "Ernest i Emili",
+     "lugar_es": "Barcelona",
+     "lugar_ca": "Barcelona",
+     "fecha": "1900",
+     "year": 1900,
+     "decada": "1900",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-3.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-3.jpg",
+       "image": "/photos/emili-godes/FCP-23-3.jpg",
+       "titulo_es": "Ernest Godes Hurtado y Emili Godes Hurtado",
+       "titulo_ca": "Ernest i Emili",
+       "descripcion_es": "Ernest Godes Hurtado y Emili Godes Hurtado",
+       "descripcion_ca": "",
+       "fecha": "1920",
+       "lugar_es": "Barcelona",
+       "lugar_ca": "Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-70",
+       "image": "/photos/emili-godes/FCP-23-70.jpg",
+       "titulo_es": "Ernest Godes Hurtado y Emili Godes Hurtado",
+       "titulo_ca": "Ernest Godes Hurtado i Emili Godes Hurtado",
+       "descripcion_es": "Ernest Godes Hurtado y Emili Godes Hurtado",
+       "descripcion_ca": "Ernest Godes Hurtado i Emili Godes Hurtado",
+       "fecha": "1900",
+       "lugar_es": "Parc de la Ciutadella, Barcelona",
+       "lugar_ca": "Parc de la Ciutadella, Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1900"
+      }
+     ]
+    },
+    {
+     "slug": "joan-pujol-godes",
+     "nombre_es": "Joan Pujol Godes",
+     "nombre_ca": "Joan Pujol Godes",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1926",
+     "year": 1926,
+     "decada": "1920",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-2.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-2",
+       "image": "/photos/emili-godes/FCP-23-2.jpg",
+       "titulo_es": "Joan Pujol Godes",
+       "titulo_ca": "Joan Pujol Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1926",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-48",
+       "image": "/photos/emili-godes/FCP-23-48.jpg",
+       "titulo_es": "Joan Pujol Godes",
+       "titulo_ca": "Joan Pujol Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1926",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "familia-godes-meses-despues-de-la-muerte-de-artur",
+     "nombre_es": "Familia Godes meses después de la muerte de Artur",
+     "nombre_ca": "Família Godes mesos després de la mort de l'Artur",
+     "lugar_es": "Teixonera, Barcelona",
+     "lugar_ca": "Teixonera, Barcelona",
+     "fecha": "1926",
+     "year": 1926,
+     "decada": "1920",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-11.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-11",
+       "image": "/photos/emili-godes/FCP-23-11.jpg",
+       "titulo_es": "Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Rosa Godes Hurtado, Me…",
+       "titulo_ca": "Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Rosa Godes Hurtado, Me…",
+       "descripcion_es": "Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Joan Pujol Pont, Montserrat Godes Diago, Jesus Godes Diago, Joan Pujol Godes",
+       "descripcion_ca": "Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Joan Pujol Pont, Montserrat Godes Diago, Jesus Godes Diago, Joan Pujol Godes",
+       "fecha": "1926",
+       "lugar_es": "Teixonera, Barcelona",
+       "lugar_ca": "Teixonera, Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-73",
+       "image": "/photos/emili-godes/FCP-23-73.jpg",
+       "titulo_es": "Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Rosa Godes Hurtado, Me…",
+       "titulo_ca": "Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Rosa Godes Hurtado, Me…",
+       "descripcion_es": "Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Joan Pujol Pont, Montserrat Godes Diago, Jesus Godes Diago, Joan Pujol Godes",
+       "descripcion_ca": "Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Joan Pujol Pont, Montserrat Godes Diago, Jesus Godes Diago, Joan Pujol Godes",
+       "fecha": "1926",
+       "lugar_es": "Teixonera, Barcelona",
+       "lugar_ca": "Teixonera, Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "rosa-godes-hurtado-i-merce-godes-hurtado",
+     "nombre_es": "Rosa Godes Hurtado i Merce Godes Hurtado",
+     "nombre_ca": "Rosa Godes Hurtado i Merce Godes Hurtado",
+     "lugar_es": "Bertran, Barcelona",
+     "lugar_ca": "Bertran, Barcelona",
+     "fecha": "1917",
+     "year": 1917,
+     "decada": "1910",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-12.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-12",
+       "image": "/photos/emili-godes/FCP-23-12.jpg",
+       "titulo_es": "Rosa Godes Hurtado i Merce Godes Hurtado",
+       "titulo_ca": "Rosa Godes Hurtado i Merce Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1917",
+       "lugar_es": "Bertran, Barcelona",
+       "lugar_ca": "Bertran, Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-78",
+       "image": "/photos/emili-godes/FCP-23-78.jpg",
+       "titulo_es": "Rosa Godes Hurtado i Merce Godes Hurtado",
+       "titulo_ca": "Rosa Godes Hurtado i Merce Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1917",
+       "lugar_es": "Bertran, Barcelona",
+       "lugar_ca": "Bertran, Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "montserrat-godes-jesus-godes-artur-godes-artur-godes",
+     "nombre_es": "Montserrat Godes, Jesus Godes, Artur Godes, Artur Godes",
+     "nombre_ca": "Montserrat Godes, Jesus Godes, Artur Godes, Artur Godes",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-21.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-21",
+       "image": "/photos/emili-godes/FCP-23-21.jpg",
+       "titulo_es": "Montserrat Godes, Jesus Godes, Artur Godes, Artur Godes",
+       "titulo_ca": "Montserrat Godes, Jesus Godes, Artur Godes, Artur Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-58",
+       "image": "/photos/emili-godes/FCP-23-58.jpg",
+       "titulo_es": "Montserrat Godes, Jesus Godes, Artur Godes, Artur Godes",
+       "titulo_ca": "Montserrat Godes, Jesus Godes, Artur Godes, Artur Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1924",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "ramon-godes-hurtado-montserrat-godes-diago",
+     "nombre_es": "Ramón Godes Hurtado, Montserrat Godes Diago",
+     "nombre_ca": "Ramón Godes Hurtado, Montserrat Godes Diago",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-23.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-23",
+       "image": "/photos/emili-godes/FCP-23-23.jpg",
+       "titulo_es": "Ramón Godes Hurtado, Montserrat Godes Diago",
+       "titulo_ca": "Ramón Godes Hurtado, Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-43",
+       "image": "/photos/emili-godes/FCP-23-43.jpg",
+       "titulo_es": "Ramón Godes Hurtado, Montserrat Godes Diago",
+       "titulo_ca": "Ramón Godes Hurtado, Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "merce-godes-caballeria",
+     "nombre_es": "Mercè Godes Caballeria",
+     "nombre_ca": "Mercè Godes Caballeria",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1907",
+     "year": 1907,
+     "decada": "1900",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-49.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-49",
+       "image": "/photos/emili-godes/FCP-23-49.jpg",
+       "titulo_es": "Mercè Godes Caballeria",
+       "titulo_ca": "Mercè Godes Caballeria",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1915",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-87",
+       "image": "/photos/emili-godes/FCP-23-87.jpg",
+       "titulo_es": "Mercè Godes Caballeria",
+       "titulo_ca": "Mercè Godes Caballeria",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1907",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1900"
+      }
+     ]
+    },
+    {
+     "slug": "mercedes-godes-hurtado-rosa-godes-hurtado",
+     "nombre_es": "Mercedes Godes Hurtado, Rosa Godes Hurtado",
+     "nombre_ca": "Mercedes Godes Hurtado, Rosa Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1924",
+     "year": 1924,
+     "decada": "1920",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-57.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-57",
+       "image": "/photos/emili-godes/FCP-23-57.jpg",
+       "titulo_es": "Mercedes Godes Hurtado, Rosa Godes Hurtado",
+       "titulo_ca": "Mercedes Godes Hurtado, Rosa Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1924",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-64",
+       "image": "/photos/emili-godes/FCP-23-64.jpg",
+       "titulo_es": "Mercedes Godes Hurtado, Rosa Godes Hurtado",
+       "titulo_ca": "Mercedes Godes Hurtado, Rosa Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1924",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "nevada-1924-en-la-calle-bertran-67",
+     "nombre_es": "Nevada 1924 en la calle Bertran, 67",
+     "nombre_ca": "Nevada 1924 en la calle Bertran, 67",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1924",
+     "year": 1924,
+     "decada": "1920",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-54.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-54",
+       "image": "/photos/emili-godes/FCP-23-54.jpg",
+       "titulo_es": "Emilia Hurtado, Mercedes Godes, Antònia Diago, Rosa Godes",
+       "titulo_ca": "Emilia Hurtado, Mercedes Godes, Antònia Diago, Rosa Godes",
+       "descripcion_es": "Emilia Hurtado, Mercedes Godes, Antònia Diago, Rosa Godes",
+       "descripcion_ca": "Emilia Hurtado, Mercedes Godes, Antònia Diago, Rosa Godes",
+       "fecha": "1924",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-66",
+       "image": "/photos/emili-godes/FCP-23-66.jpg",
+       "titulo_es": "Mercedes Godes, Antònia Diago, Rosa Godes",
+       "titulo_ca": "Mercedes Godes, Antònia Diago, Rosa Godes",
+       "descripcion_es": "Mercedes Godes, Antònia Diago, Rosa Godes",
+       "descripcion_ca": "Mercedes Godes, Antònia Diago, Rosa Godes",
+       "fecha": "1924",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "antonia-diago-taxiphote",
+     "nombre_es": "Antònia Diago [taxiphote]",
+     "nombre_ca": "Antònia Diago [taxiphote]",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1919",
+     "year": 1919,
+     "decada": "1910",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-101.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-101.JPG",
+       "image": "/photos/emili-godes/FCP-23-101.jpg",
+       "titulo_es": "Una mujer permanece sentada sobre un murete frente a un paisaje montañoso. La escena par…",
+       "titulo_ca": "Una dona seu sobre un mur davant d'un paisatge muntanyós. L'escena sembla correspondre a…",
+       "descripcion_es": "Una mujer permanece sentada sobre un murete frente a un paisaje montañoso. La escena parece corresponder a una parada durante la misma excursión documentada en la serie estereoscópica.",
+       "descripcion_ca": "Una dona seu sobre un mur davant d'un paisatge muntanyós. L'escena sembla correspondre a una parada durant la mateixa excursió documentada en la sèrie estereoscòpica.",
+       "fecha": "1919",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-95.JPG",
+       "image": "/photos/emili-godes/FCP-23-95.jpg",
+       "titulo_es": "Retrato de una mujer apoyada en una balaustrada de piedra en un mirador con amplio paisa…",
+       "titulo_ca": "Retrat d'una dona recolzada en una balustrada de pedra en un mirador amb un ampli paisat…",
+       "descripcion_es": "Retrato de una mujer apoyada en una balaustrada de piedra en un mirador con amplio paisaje al fondo. La fotografía forma parte de una serie estereoscópica realizada durante un viaje por Aragón, probablemente en Teruel.",
+       "descripcion_ca": "Retrat d'una dona recolzada en una balustrada de pedra en un mirador amb un ampli paisatge al fons. La fotografia forma part d'una sèrie estereoscòpica realitzada durant un viatge per l'Aragó, probablement a Terol.",
+       "fecha": "1919",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "emili-hurtado-rusca",
+     "nombre_es": "Emili Hurtado Rusca",
+     "nombre_ca": "Emili Hurtado Rusca",
+     "lugar_es": "Barcelona",
+     "lugar_ca": "Barcelona",
+     "fecha": "1920",
+     "year": 1920,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-71.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-71.jpg",
+       "image": "/photos/emili-godes/FCP-23-71.jpg",
+       "titulo_es": "Emili Hurtado Rusca",
+       "titulo_ca": "Emili Hurtado Rusca",
+       "descripcion_es": "Retrato",
+       "descripcion_ca": "Retrat",
+       "fecha": "1920",
+       "lugar_es": "Barcelona",
+       "lugar_ca": "Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-caballeria-josep-godes-hurtado-emilia-hurtado-giro-ramon-godes-hurtado-arturo-godes-hurtado-i-montserrat-godes-diago",
+     "nombre_es": "Artur Godes Caballeria, Josep Godes Hurtado, Emilia Hurtado Giró, Ramon Godes Hurtado, Arturo Godes Hurtado i Montserrat Godes Diago",
+     "nombre_ca": "Artur Godes Caballeria, Josep Godes Hurtado, Emilia Hurtado Giró, Ramon Godes Hurtado, Arturo Godes Hurtado i Montserrat Godes Diago",
+     "lugar_es": "Teixonera, Barcelona",
+     "lugar_ca": "Teixonera, Barcelona",
+     "fecha": "1924",
+     "year": 1924,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-6.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-6",
+       "image": "/photos/emili-godes/FCP-23-6.jpg",
+       "titulo_es": "Artur Godes Caballeria, Josep Godes Hurtado, Emilia Hurtado Giró, Ramon Godes Hurtado, Arturo Godes Hurtado i Montserrat Godes Diago",
+       "titulo_ca": "Artur Godes Caballeria, Josep Godes Hurtado, Emilia Hurtado Giró, Ramon Godes Hurtado, Arturo Godes Hurtado i Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1924",
+       "lugar_es": "Teixonera, Barcelona",
+       "lugar_ca": "Teixonera, Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "jesus-godes-diago",
+     "nombre_es": "Jesus Godes Diago",
+     "nombre_ca": "Jesus Godes Diago",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-9.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-9",
+       "image": "/photos/emili-godes/FCP-23-9.jpg",
+       "titulo_es": "Jesus Godes Diago",
+       "titulo_ca": "Jesus Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-caballeria-montserrat-godes-diago-i-artur-godes-hurtado",
+     "nombre_es": "Artur Godes Caballeria, Montserrat Godes Diago i Artur Godes Hurtado",
+     "nombre_ca": "Artur Godes Caballeria, Montserrat Godes Diago i Artur Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-7.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-7",
+       "image": "/photos/emili-godes/FCP-23-7.jpg",
+       "titulo_es": "Artur Godes Caballeria, Montserrat Godes Diago i Artur Godes Hurtado",
+       "titulo_ca": "Artur Godes Caballeria, Montserrat Godes Diago i Artur Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "primera-comunion-de-merce-godes-hurtado-y-rosa-godes-hurtado",
+     "nombre_es": "Primera comunión de Mercè Godes Hurtado y Rosa Godes Hurtado",
+     "nombre_ca": "Primera comunió de Mercè Godes Hurtado i Rosa Godes Hurtado",
+     "lugar_es": "Barcelona",
+     "lugar_ca": "Barcelona",
+     "fecha": "1910",
+     "year": 1910,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-13.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-13",
+       "image": "/photos/emili-godes/FCP-23-13.jpg",
+       "titulo_es": "Primera comunión de Mercè Godes Hurtado y Rosa Godes Hurtado",
+       "titulo_ca": "Primera comunió de Mercè Godes Hurtado i Rosa Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1910",
+       "lugar_es": "Barcelona",
+       "lugar_ca": "Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "josep-maria-bep-godes-hurtado",
+     "nombre_es": "Josep Maria \"Bep\" Godes Hurtado",
+     "nombre_ca": "Josep Maria \"Bep\" Godes Hurtado",
+     "lugar_es": "Barcelona",
+     "lugar_ca": "Barcelona",
+     "fecha": "1908",
+     "year": 1908,
+     "decada": "1900",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-157.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-157",
+       "image": "/photos/emili-godes/FCP-23-157.jpg",
+       "titulo_es": "Josep Maria \"Bep\" Godes Hurtado",
+       "titulo_ca": "Josep Maria \"Bep\" Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1908",
+       "lugar_es": "Barcelona",
+       "lugar_ca": "Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1900"
+      }
+     ]
+    },
+    {
+     "slug": "primera-comunion-josep-maria-godes-hurtado",
+     "nombre_es": "Primera comunión Josep Maria Godes Hurtado",
+     "nombre_ca": "Primera comunió Josep Maria Godes Hurtado",
+     "lugar_es": "Barcelona",
+     "lugar_ca": "Barcelona",
+     "fecha": "1915",
+     "year": 1915,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-15.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-15",
+       "image": "/photos/emili-godes/FCP-23-15.jpg",
+       "titulo_es": "Primera comunión Josep Maria Godes Hurtado",
+       "titulo_ca": "Primera comunió Josep Maria Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1915",
+       "lugar_es": "Barcelona",
+       "lugar_ca": "Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "ramon-godes-hurtado-i-montserrat-godes-diago",
+     "nombre_es": "Ramón Godes Hurtado i Montserrat Godes Diago",
+     "nombre_ca": "Ramón Godes Hurtado i Montserrat Godes Diago",
+     "lugar_es": "Palau Desvalls-Laberint d Horta",
+     "lugar_ca": "Palau Desvalls-Laberint d Horta",
+     "fecha": "1922",
+     "year": 1922,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-14.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-14",
+       "image": "/photos/emili-godes/FCP-23-14.jpg",
+       "titulo_es": "Ramón Godes Hurtado i Montserrat Godes Diago",
+       "titulo_ca": "Ramón Godes Hurtado i Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1922",
+       "lugar_es": "Palau Desvalls-Laberint d Horta",
+       "lugar_ca": "Palau Desvalls-Laberint d Horta",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "joan-pujol-godes-montserrat-godes-diago-artur-godes-hurtado-ernest-godes-hurtado",
+     "nombre_es": "Joan Pujol Godes, Montserrat Godes Diago, Artur Godes Hurtado, Ernest Godes Hurtado",
+     "nombre_ca": "Joan Pujol Godes, Montserrat Godes Diago, Artur Godes Hurtado, Ernest Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-19.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-19",
+       "image": "/photos/emili-godes/FCP-23-19.jpg",
+       "titulo_es": "Joan Pujol Godes, Montserrat Godes Diago, Artur Godes Hurtado, Ernest Godes Hurtado",
+       "titulo_ca": "Joan Pujol Godes, Montserrat Godes Diago, Artur Godes Hurtado, Ernest Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "arturo-godes-hurtado-montserrat-godes-diago-jesus-godes-diago",
+     "nombre_es": "Arturo Godes Hurtado, Montserrat Godes Diago, Jesus Godes Diago",
+     "nombre_ca": "Arturo Godes Hurtado, Montserrat Godes Diago, Jesus Godes Diago",
+     "lugar_es": "Bertran, 39 Barcelona",
+     "lugar_ca": "Bertran, 39 Barcelona",
+     "fecha": "1925",
+     "year": 1925,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-16.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-16",
+       "image": "/photos/emili-godes/FCP-23-16.jpg",
+       "titulo_es": "Arturo Godes Hurtado, Montserrat Godes Diago, Jesus Godes Diago",
+       "titulo_ca": "Arturo Godes Hurtado, Montserrat Godes Diago, Jesus Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1925",
+       "lugar_es": "Bertran, 39 Barcelona",
+       "lugar_ca": "Bertran, 39 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "joan-pujol-godes-josep-maria-godes-hurtado-montserrat-godes-diago-artur-godes-hurtado-ramon-gh",
+     "nombre_es": "Joan Pujol Godes, Josep Maria Godes Hurtado, Montserrat Godes Diago, Artur Godes Hurtado, Ramón GH",
+     "nombre_ca": "Joan Pujol Godes, Josep Maria Godes Hurtado, Montserrat Godes Diago, Artur Godes Hurtado, Ramón GH",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1924",
+     "year": 1924,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-20.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-20",
+       "image": "/photos/emili-godes/FCP-23-20.jpg",
+       "titulo_es": "Joan Pujol Godes, Josep Maria Godes Hurtado, Montserrat Godes Diago, Artur Godes Hurtado, Ramón GH",
+       "titulo_ca": "Joan Pujol Godes, Josep Maria Godes Hurtado, Montserrat Godes Diago, Artur Godes Hurtado, Ramón GH",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1924",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-caballeria-emilia-hurtado-giro-montserrat-godes-diago-jesus-godes-diago",
+     "nombre_es": "Artur Godes Caballeria, Emilia Hurtado Giró, Montserrat Godes Diago, Jesus Godes Diago",
+     "nombre_ca": "Artur Godes Caballeria, Emilia Hurtado Giró, Montserrat Godes Diago, Jesus Godes Diago",
+     "lugar_es": "Teixonera, Barcelona",
+     "lugar_ca": "Teixonera, Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-22.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-22",
+       "image": "/photos/emili-godes/FCP-23-22.jpg",
+       "titulo_es": "Artur Godes Caballeria, Emilia Hurtado Giró, Montserrat Godes Diago, Jesus Godes Diago",
+       "titulo_ca": "Artur Godes Caballeria, Emilia Hurtado Giró, Montserrat Godes Diago, Jesus Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Teixonera, Barcelona",
+       "lugar_ca": "Teixonera, Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "nicomedes-diago-marin-antonia-diago-almuzara-emili-godes-i-hurtado-y-dolores-almuzara-ardanuy",
+     "nombre_es": "Nicomedes Diago Marin, Antònia Diago Almuzara, Emili Godes i Hurtado y Dolores Almuzara Ardanuy",
+     "nombre_ca": "Nicomedes Diago Marin, Antònia Diago Almuzara, Emili Godes i Hurtado y Dolores Almuzara Ardanuy",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1925",
+     "year": 1925,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-24.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-24",
+       "image": "/photos/emili-godes/FCP-23-24.jpg",
+       "titulo_es": "Nicomedes Diago Marin, Antònia Diago Almuzara, Emili Godes i Hurtado y Dolores Almuzara Ardanuy",
+       "titulo_ca": "Nicomedes Diago Marin, Antònia Diago Almuzara, Emili Godes i Hurtado y Dolores Almuzara Ardanuy",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1925",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "festa-major-de-sant-gervasi",
+     "nombre_es": "Festa major de Sant Gervasi",
+     "nombre_ca": "Festa major de Sant Gervasi",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1919",
+     "year": 1919,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-27.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-27",
+       "image": "/photos/emili-godes/FCP-23-27.jpg",
+       "titulo_es": "Mercè Godes Caballeria, Emilia Hurtado Giró, Ernest Godes Hurtado, Rosa Godes Hurtado, M…",
+       "titulo_ca": "Mercè Godes Caballeria, Emilia Hurtado Giró, Ernest Godes Hurtado, Rosa Godes Hurtado, M…",
+       "descripcion_es": "Mercè Godes Caballeria, Emilia Hurtado Giró, Ernest Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Joan Pujol Pont, Asunción Diago Almuzara",
+       "descripcion_ca": "Mercè Godes Caballeria, Emilia Hurtado Giró, Ernest Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Joan Pujol Pont, Asunción Diago Almuzara",
+       "fecha": "1919",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "antonia-diago-almuzara-montserrat-godes-diago",
+     "nombre_es": "Antònia Diago Almuzara, Montserrat Godes Diago",
+     "nombre_ca": "Antònia Diago Almuzara, Montserrat Godes Diago",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-26.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-26",
+       "image": "/photos/emili-godes/FCP-23-26.jpg",
+       "titulo_es": "Antònia Diago Almuzara, Montserrat Godes Diago",
+       "titulo_ca": "Antònia Diago Almuzara, Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "emili-godes-antonia-diago-montserrat-godes-jesus-godes",
+     "nombre_es": "Emili Godes, Antònia Diago, Montserrat Godes, Jesus Godes",
+     "nombre_ca": "Emili Godes, Antònia Diago, Montserrat Godes, Jesus Godes",
+     "lugar_es": "Teixonera, Barcelona",
+     "lugar_ca": "Teixonera, Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-29.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-29",
+       "image": "/photos/emili-godes/FCP-23-29.jpg",
+       "titulo_es": "Emili Godes, Antònia Diago, Montserrat Godes, Jesus Godes",
+       "titulo_ca": "Emili Godes, Antònia Diago, Montserrat Godes, Jesus Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Teixonera, Barcelona",
+       "lugar_ca": "Teixonera, Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "emili-godes-antonia-diago-montserrat-godes",
+     "nombre_es": "Emili Godes, Antònia Diago, Montserrat Godes",
+     "nombre_ca": "Emili Godes, Antònia Diago, Montserrat Godes",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1922",
+     "year": 1922,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-30.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-30",
+       "image": "/photos/emili-godes/FCP-23-30.jpg",
+       "titulo_es": "Emili Godes, Antònia Diago, Montserrat Godes",
+       "titulo_ca": "Emili Godes, Antònia Diago, Montserrat Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1922",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "hermanos-godes-hurtado",
+     "nombre_es": "Hermanos Godes Hurtado",
+     "nombre_ca": "Germans Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1915",
+     "year": 1915,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-31.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-31",
+       "image": "/photos/emili-godes/FCP-23-31.jpg",
+       "titulo_es": "Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, J…",
+       "titulo_ca": "Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, J…",
+       "descripcion_es": "Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado",
+       "descripcion_ca": "Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado",
+       "fecha": "1915",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "primera-comunion-emili-godes-hurtado-i-ernest-godes-hurtado",
+     "nombre_es": "Primera comunión Emili Godes Hurtado i Ernest Godes Hurtado",
+     "nombre_ca": "Primera comunió Emili Godes Hurtado i Ernest Godes Hurtado",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1903",
+     "year": 1903,
+     "decada": "1900",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-32.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-32",
+       "image": "/photos/emili-godes/FCP-23-32.jpg",
+       "titulo_es": "Primera comunión Emili Godes Hurtado i Ernest Godes Hurtado",
+       "titulo_ca": "Primera comunió Emili Godes Hurtado i Ernest Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1903",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1900"
+      }
+     ]
+    },
+    {
+     "slug": "rosa-godes-hurtado-ramon-godes-hurtado",
+     "nombre_es": "Rosa Godes Hurtado, Ramon Godes Hurtado",
+     "nombre_ca": "Rosa Godes Hurtado, Ramon Godes Hurtado",
+     "lugar_es": "Plaça Figuerola, Barcelona",
+     "lugar_ca": "Plaça Figuerola, Barcelona",
+     "fecha": "1916",
+     "year": 1916,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-35.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-35",
+       "image": "/photos/emili-godes/FCP-23-35.jpg",
+       "titulo_es": "Rosa Godes Hurtado, Ramon Godes Hurtado",
+       "titulo_ca": "Rosa Godes Hurtado, Ramon Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1916",
+       "lugar_es": "Plaça Figuerola, Barcelona",
+       "lugar_ca": "Plaça Figuerola, Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "primos-godes-hurtado-y-godes-diago",
+     "nombre_es": "Primos Godes Hurtado y Godes Diago",
+     "nombre_ca": "Cosins Godes Hurtado i Godes Diago",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1925",
+     "year": 1925,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-36.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-36",
+       "image": "/photos/emili-godes/FCP-23-36.jpg",
+       "titulo_es": "Mercè Godes Caballeria, Emilia Hurtado Giró, Ramón Godes Hurtado, Artur Godes Hurtado, A…",
+       "titulo_ca": "Mercè Godes Caballeria, Emilia Hurtado Giró, Ramón Godes Hurtado, Artur Godes Hurtado, A…",
+       "descripcion_es": "Mercè Godes Caballeria, Emilia Hurtado Giró, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago, Jesus Godes Diago",
+       "descripcion_ca": "Mercè Godes Caballeria, Emilia Hurtado Giró, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago, Jesus Godes Diago",
+       "fecha": "1925",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "els-godes-de-sarria-i-els-godes-de-sant-gervasi",
+     "nombre_es": "Els Godes de Sarrià i els Godes de Sant Gervasi",
+     "nombre_ca": "Els Godes de Sarrià i els Godes de Sant Gervasi",
+     "lugar_es": "Carrer Padró de la Creu, Sarrià",
+     "lugar_ca": "Carrer Padró de la Creu, Sarrià",
+     "fecha": "1922",
+     "year": 1922,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-38.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-38",
+       "image": "/photos/emili-godes/FCP-23-38.jpg",
+       "titulo_es": "Artur Godes Caballeria, Pau Godes Caballeria, Emili Godes Hurtado, Ernest Godes Hurtado,…",
+       "titulo_ca": "Artur Godes Caballeria, Pau Godes Caballeria, Emili Godes Hurtado, Ernest Godes Hurtado,…",
+       "descripcion_es": "Artur Godes Caballeria, Pau Godes Caballeria, Emili Godes Hurtado, Ernest Godes Hurtado, Pasqual Godes Terrats",
+       "descripcion_ca": "Artur Godes Caballeria, Pau Godes Caballeria, Emili Godes Hurtado, Ernest Godes Hurtado, Pasqual Godes Terrats",
+       "fecha": "1922",
+       "lugar_es": "Carrer Padró de la Creu, Sarrià",
+       "lugar_ca": "Carrer Padró de la Creu, Sarrià",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "mercedes-godes-hurtado",
+     "nombre_es": "Mercedes Godes Hurtado",
+     "nombre_ca": "Mercedes Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1925",
+     "year": 1925,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-39.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-39",
+       "image": "/photos/emili-godes/FCP-23-39.jpg",
+       "titulo_es": "Mercedes Godes Hurtado",
+       "titulo_ca": "Mercedes Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1925",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "montserrat-godes-diago-jesus-godes-diago",
+     "nombre_es": "Montserrat Godes Diago, Jesus Godes Diago",
+     "nombre_ca": "Montserrat Godes Diago, Jesus Godes Diago",
+     "lugar_es": "Teixonera, Barcelona",
+     "lugar_ca": "Teixonera, Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-40.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-40",
+       "image": "/photos/emili-godes/FCP-23-40.jpg",
+       "titulo_es": "Montserrat Godes Diago, Jesus Godes Diago",
+       "titulo_ca": "Montserrat Godes Diago, Jesus Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Teixonera, Barcelona",
+       "lugar_ca": "Teixonera, Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-caballeria-emilia-hurtado-giro",
+     "nombre_es": "Artur Godes Caballeria, Emilia Hurtado Giró",
+     "nombre_ca": "Artur Godes Caballeria, Emilia Hurtado Giró",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1915",
+     "year": 1915,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-41.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-41",
+       "image": "/photos/emili-godes/FCP-23-41.jpg",
+       "titulo_es": "Artur Godes Caballeria, Emilia Hurtado Giró",
+       "titulo_ca": "Artur Godes Caballeria, Emilia Hurtado Giró",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1915",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "mercedes-godes-hurtado-ramon-godes-hurtado-antonia-diago",
+     "nombre_es": "Mercedes Godes Hurtado, Ramón Godes Hurtado, Antònia Diago",
+     "nombre_ca": "Mercedes Godes Hurtado, Ramón Godes Hurtado, Antònia Diago",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1926",
+     "year": 1926,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-42.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-42",
+       "image": "/photos/emili-godes/FCP-23-42.jpg",
+       "titulo_es": "Mercedes Godes Hurtado, Ramón Godes Hurtado, Antònia Diago",
+       "titulo_ca": "Mercedes Godes Hurtado, Ramón Godes Hurtado, Antònia Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1926",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "montserrat-godes-diago-jesus-godes-diago-antonia-diago-almuzara",
+     "nombre_es": "Montserrat Godes Diago, Jesus Godes Diago, Antònia Diago Almuzara",
+     "nombre_ca": "Montserrat Godes Diago, Jesus Godes Diago, Antònia Diago Almuzara",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-46.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-46",
+       "image": "/photos/emili-godes/FCP-23-46.jpg",
+       "titulo_es": "Montserrat Godes Diago, Jesus Godes Diago, Antònia Diago Almuzara",
+       "titulo_ca": "Montserrat Godes Diago, Jesus Godes Diago, Antònia Diago Almuzara",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-emilia-giro-e-hijos-celebrando-la-navidad",
+     "nombre_es": "Artur Godes, Emilia Giró e hijos celebrando la Navidad",
+     "nombre_ca": "Artur Godes, Emilia Giró i fills celebrant Nadal",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1921",
+     "year": 1921,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-47.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-47",
+       "image": "/photos/emili-godes/FCP-23-47.jpg",
+       "titulo_es": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Rosa Godes Hurtado,…",
+       "titulo_ca": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Rosa Godes Hurtado,…",
+       "descripcion_es": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago",
+       "descripcion_ca": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago",
+       "fecha": "1921",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "the-kid-charles-chaplin",
+     "nombre_es": "The Kid, Charles Chaplin",
+     "nombre_ca": "The Kid, Charles Chaplin",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-62.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-62",
+       "image": "/photos/emili-godes/FCP-23-62.jpg",
+       "titulo_es": "Mercedes Godes Hurtado i Montserrat Godes Diago",
+       "titulo_ca": "Mercedes Godes Hurtado i Montserrat Godes Diago",
+       "descripcion_es": "Mercedes Godes Hurtado i Montserrat Godes Diago",
+       "descripcion_ca": "Mercedes Godes Hurtado i Montserrat Godes Diago",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "rosa-godes-hurtado-emilia-hurtado-giro-artur-godes-caballeria-josep-bep-godes-hurtado-mercedes-godes-hurtado-ernest-godes-hurtado",
+     "nombre_es": "Rosa Godes Hurtado , Emilia Hurtado Giró, Artur Godes Caballeria, Josep (Bep) Godes Hurtado, Mercedes Godes Hurtado, Ernest Godes Hurtado",
+     "nombre_ca": "Rosa Godes Hurtado , Emilia Hurtado Giró, Artur Godes Caballeria, Josep (Bep) Godes Hurtado, Mercedes Godes Hurtado, Ernest Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1912",
+     "year": 1912,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-67.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-67",
+       "image": "/photos/emili-godes/FCP-23-67.jpg",
+       "titulo_es": "Rosa Godes Hurtado , Emilia Hurtado Giró, Artur Godes Caballeria, Josep (Bep) Godes Hurtado, Mercedes Godes Hurtado, Ernest Godes Hurtado",
+       "titulo_ca": "Rosa Godes Hurtado , Emilia Hurtado Giró, Artur Godes Caballeria, Josep (Bep) Godes Hurtado, Mercedes Godes Hurtado, Ernest Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1912",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "los-godes-y-pau-godes",
+     "nombre_es": "Los Godes y Pau Godes",
+     "nombre_ca": "Els Godes i Pau Godes",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-56.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-56",
+       "image": "/photos/emili-godes/FCP-23-56.jpg",
+       "titulo_es": "Pau Godes Caballeria, Rosa Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago…",
+       "titulo_ca": "Pau Godes Caballeria, Rosa Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago…",
+       "descripcion_es": "Pau Godes Caballeria, Rosa Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago, Emili Godes Hurtado, Artur Godes Caballeria, Emilia Hurtado Giró, Mercè Godes Caballeria, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Artur Godes Hurtado, Ramón Godes Hurtado",
+       "descripcion_ca": "Pau Godes Caballeria, Rosa Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago, Emili Godes Hurtado, Artur Godes Caballeria, Emilia Hurtado Giró, Mercè Godes Caballeria, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Artur Godes Hurtado, Ramón Godes Hurtado",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "merce-godes-caballeria-emilia-hurtado-giro-montserrat-godes-diago-jesus-godes-diago",
+     "nombre_es": "Mercè Godes Caballeria, Emilia Hurtado Giró, Montserrat Godes Diago, Jesus Godes Diago",
+     "nombre_ca": "Mercè Godes Caballeria, Emilia Hurtado Giró, Montserrat Godes Diago, Jesus Godes Diago",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-55.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-55",
+       "image": "/photos/emili-godes/FCP-23-55.jpg",
+       "titulo_es": "Mercè Godes Caballeria, Emilia Hurtado Giró, Montserrat Godes Diago, Jesus Godes Diago",
+       "titulo_ca": "Mercè Godes Caballeria, Emilia Hurtado Giró, Montserrat Godes Diago, Jesus Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "escaleras-de-bertran-39",
+     "nombre_es": "Escaleras de Bertran, 39",
+     "nombre_ca": "Escales de Bertran, 39",
+     "lugar_es": "Bertran, 39 Barcelona",
+     "lugar_ca": "Bertran, 39 Barcelona",
+     "fecha": "1926",
+     "year": 1926,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-65.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-65",
+       "image": "/photos/emili-godes/FCP-23-65.jpg",
+       "titulo_es": "Mercè Godes Caballeria; Emili Godes Hurtado i la seva esposa Antònia Diago Almuzara; Emi…",
+       "titulo_ca": "Mercè Godes Caballeria; Emili Godes Hurtado i la seva esposa Antònia Diago Almuzara; Emi…",
+       "descripcion_es": "Mercè Godes Caballeria; Emili Godes Hurtado i la seva esposa Antònia Diago Almuzara; Emilia Hurtado Giró i Montserrat Godes Diago; Ramon Godes Hurtado i Artur Godes Hurtado; Jesús Godes Diago",
+       "descripcion_ca": "Mercè Godes Caballeria; Emili Godes Hurtado i la seva esposa Antònia Diago Almuzara; Emilia Hurtado Giró i Montserrat Godes Diago; Ramon Godes Hurtado i Artur Godes Hurtado; Jesús Godes Diago",
+       "fecha": "1926",
+       "lugar_es": "Bertran, 39 Barcelona",
+       "lugar_ca": "Bertran, 39 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-emilia-hurtado-mercedes-godes-josep-maria-godes",
+     "nombre_es": "Artur Godes, Emilia Hurtado, Mercedes Godes, Josep Maria Godes",
+     "nombre_ca": "Artur Godes, Emilia Hurtado, Mercedes Godes, Josep Maria Godes",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1911",
+     "year": 1911,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-68.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-68",
+       "image": "/photos/emili-godes/FCP-23-68.jpg",
+       "titulo_es": "Artur Godes, Emilia Hurtado, Mercedes Godes, Josep Maria Godes",
+       "titulo_ca": "Artur Godes, Emilia Hurtado, Mercedes Godes, Josep Maria Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1911",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "merce-godes-caballeria-bep-godes-hurtado",
+     "nombre_es": "Mercè Godes Caballeria, Bep Godes Hurtado",
+     "nombre_ca": "Mercè Godes Caballeria, Bep Godes Hurtado",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-69.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-69",
+       "image": "/photos/emili-godes/FCP-23-69.jpg",
+       "titulo_es": "Mercè Godes Caballeria, Bep Godes Hurtado",
+       "titulo_ca": "Mercè Godes Caballeria, Bep Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-hurtado-montserrat-godes-diago-fernando-figuerola-diago",
+     "nombre_es": "Artur Godes Hurtado, Montserrat Godes Diago, Fernando Figuerola Diago",
+     "nombre_ca": "Artur Godes Hurtado, Montserrat Godes Diago, Fernando Figuerola Diago",
+     "lugar_es": "Sant Gervasi",
+     "lugar_ca": "Sant Gervasi",
+     "fecha": "1924",
+     "year": 1924,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-77.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-77",
+       "image": "/photos/emili-godes/FCP-23-77.jpg",
+       "titulo_es": "Artur Godes Hurtado, Montserrat Godes Diago, Fernando Figuerola Diago",
+       "titulo_ca": "Artur Godes Hurtado, Montserrat Godes Diago, Fernando Figuerola Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1924",
+       "lugar_es": "Sant Gervasi",
+       "lugar_ca": "Sant Gervasi",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-hurtado-montserrat-godes-hurtado-jesus-godes-diago",
+     "nombre_es": "Artur Godes Hurtado, Montserrat Godes Hurtado, Jesús Godes Diago",
+     "nombre_ca": "Artur Godes Hurtado, Montserrat Godes Hurtado, Jesús Godes Diago",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1926",
+     "year": 1926,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-50.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-50",
+       "image": "/photos/emili-godes/FCP-23-50.jpg",
+       "titulo_es": "Artur Godes Hurtado, Montserrat Godes Hurtado, Jesús Godes Diago",
+       "titulo_ca": "Artur Godes Hurtado, Montserrat Godes Hurtado, Jesús Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1926",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-caballeria-francesc-ferrer-capara",
+     "nombre_es": "Artur Godes Caballeria, Francesc Ferrer Caparà",
+     "nombre_ca": "Artur Godes Caballeria, Francesc Ferrer Caparà",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-52.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-52",
+       "image": "/photos/emili-godes/FCP-23-52.jpg",
+       "titulo_es": "Artur Godes Caballeria, Francesc Ferrer Caparà",
+       "titulo_ca": "Artur Godes Caballeria, Francesc Ferrer Caparà",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "boda-emili-y-antonia",
+     "nombre_es": "Boda Emili y Antònia",
+     "nombre_ca": "Boda Emili i Antònia",
+     "lugar_es": "Esglesia de la Bonanova",
+     "lugar_ca": "Esglesia de la Bonanova",
+     "fecha": "1920",
+     "year": 1920,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-85.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-85",
+       "image": "/photos/emili-godes/FCP-23-85.jpg",
+       "titulo_es": "Emili Godes Hurtado, Antònia Diago Almuzara",
+       "titulo_ca": "Emili Godes Hurtado, Antònia Diago Almuzara",
+       "descripcion_es": "Emili Godes Hurtado, Antònia Diago Almuzara",
+       "descripcion_ca": "Emili Godes Hurtado, Antònia Diago Almuzara",
+       "fecha": "1920",
+       "lugar_es": "Esglesia de la Bonanova",
+       "lugar_ca": "Esglesia de la Bonanova",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "antonia-diago-montserrat-godes",
+     "nombre_es": "Antònia Diago, Montserrat Godes",
+     "nombre_ca": "Antònia Diago, Montserrat Godes",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1922",
+     "year": 1922,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-86.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-86",
+       "image": "/photos/emili-godes/FCP-23-86.jpg",
+       "titulo_es": "Antònia Diago, Montserrat Godes",
+       "titulo_ca": "Antònia Diago, Montserrat Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1922",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "emili-godes-a-montserrat-taxiphote",
+     "nombre_es": "Emili Godes a Montserrat [taxiphote]",
+     "nombre_ca": "Emili Godes a Montserrat [taxiphote]",
+     "lugar_es": "Montserrat",
+     "lugar_ca": "Montserrat",
+     "fecha": "1919",
+     "year": 1919,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-112.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-112",
+       "image": "/photos/emili-godes/FCP-23-112.jpg",
+       "titulo_es": "Emili Godes a Montserrat [taxiphote]",
+       "titulo_ca": "Emili Godes a Montserrat [taxiphote]",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "Montserrat",
+       "lugar_ca": "Montserrat",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "poble-espanyol-taxiphote",
+     "nombre_es": "Poble Espanyol [taxiphote]",
+     "nombre_ca": "Poble Espanyol [taxiphote]",
+     "lugar_es": "Poble Espanyol",
+     "lugar_ca": "Poble Espanyol",
+     "fecha": "1919",
+     "year": 1919,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-106.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-106.JPG",
+       "image": "/photos/emili-godes/FCP-23-106.jpg",
+       "titulo_es": "Réplica de la torre mudéjar de la iglesia de Utebo en Zaragoza.",
+       "titulo_ca": "Réplica de la torre mudéjar de la iglesia de Utebo en Zaragoza.",
+       "descripcion_es": "Réplica de la torre mudéjar de la iglesia de Utebo en Zaragoza.",
+       "descripcion_ca": "Réplica de la torre mudéjar de la iglesia de Utebo en Zaragoza.",
+       "fecha": "1919",
+       "lugar_es": "Poble Espanyol",
+       "lugar_ca": "Poble Espanyol",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "diorama-naval-estereoscopico-taxiphote",
+     "nombre_es": "Diorama naval estereoscópico [taxiphote]",
+     "nombre_ca": "Diorama naval estereoscòpic [taxiphote]",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1919",
+     "year": 1919,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-107.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-107.JPG",
+       "image": "/photos/emili-godes/FCP-23-107.jpg",
+       "titulo_es": "Fotografía estereoscópica de un modelo de velero presentado en una vitrina para demostra…",
+       "titulo_ca": "Fotografia estereoscòpica d'un model de veler exposat en una vitrina per demostrar un ef…",
+       "descripcion_es": "Fotografía estereoscópica de un modelo de velero presentado en una vitrina para demostrar un efecto de silueta. La localización no ha podido determinarse.",
+       "descripcion_ca": "Fotografia estereoscòpica d'un model de veler exposat en una vitrina per demostrar un efecte de silueta. No s'ha pogut determinar la localització.",
+       "fecha": "1919",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-ramon-godes-josep-maria-godes-taxiphote",
+     "nombre_es": "Artur Godes, Ramón Godes, Josep Maria Godes [taxiphote]",
+     "nombre_ca": "Artur Godes, Ramón Godes, Josep Maria Godes [taxiphote]",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1919",
+     "year": 1919,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-103.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-103",
+       "image": "/photos/emili-godes/FCP-23-103.jpg",
+       "titulo_es": "Artur Godes, Ramón Godes, Josep Maria Godes [taxiphote]",
+       "titulo_ca": "Artur Godes, Ramón Godes, Josep Maria Godes [taxiphote]",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1919",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "montserrat-godes-josep-maria-godes-ramon-godes",
+     "nombre_es": "Montserrat Godes, Josep Maria Godes, Ramón Godes",
+     "nombre_ca": "Montserrat Godes, Josep Maria Godes, Ramón Godes",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-114.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-114",
+       "image": "/photos/emili-godes/FCP-23-114.jpg",
+       "titulo_es": "Montserrat Godes, Josep Maria Godes, Ramón Godes",
+       "titulo_ca": "Montserrat Godes, Josep Maria Godes, Ramón Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "familia-godes-sentada-sillas",
+     "nombre_es": "Família Godes sentada sillas",
+     "nombre_ca": "Família Godes asseguda cadires",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-148.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-148",
+       "image": "/photos/emili-godes/FCP-23-148.jpg",
+       "titulo_es": "Pau Godes Caballeria, Mercè Godes Caballeria, Artur Godes Caballeria, Emilia Hurtado Gir…",
+       "titulo_ca": "Pau Godes Caballeria, Mercè Godes Caballeria, Artur Godes Caballeria, Emilia Hurtado Gir…",
+       "descripcion_es": "Pau Godes Caballeria, Mercè Godes Caballeria, Artur Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Rosa Godes Hurtado, Antònia Diago Almuzara, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Montserrat Godes Diago, Artur Godes Hurtado",
+       "descripcion_ca": "Pau Godes Caballeria, Mercè Godes Caballeria, Artur Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Rosa Godes Hurtado, Antònia Diago Almuzara, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Montserrat Godes Diago, Artur Godes Hurtado",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-hurtado-montserrat-godes-diago-jesus-godes-diago-ramon-godes-hurtado",
+     "nombre_es": "Artur Godes Hurtado, Montserrat Godes Diago, Jesús Godes Diago, Ramon Godes Hurtado",
+     "nombre_ca": "Artur Godes Hurtado, Montserrat Godes Diago, Jesús Godes Diago, Ramon Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1924",
+     "year": 1924,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-117.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-117",
+       "image": "/photos/emili-godes/FCP-23-117.jpg",
+       "titulo_es": "Artur Godes Hurtado, Montserrat Godes Diago, Jesús Godes Diago, Ramon Godes Hurtado",
+       "titulo_ca": "Artur Godes Hurtado, Montserrat Godes Diago, Jesús Godes Diago, Ramon Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1924",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-hurtado-jesus-godes-diago-montserrat-godes-diago",
+     "nombre_es": "Artur Godes Hurtado, Jesus Godes Diago, Montserrat Godes Diago",
+     "nombre_ca": "Artur Godes Hurtado, Jesus Godes Diago, Montserrat Godes Diago",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-116.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-116",
+       "image": "/photos/emili-godes/FCP-23-116.jpg",
+       "titulo_es": "Artur Godes Hurtado, Jesus Godes Diago, Montserrat Godes Diago",
+       "titulo_ca": "Artur Godes Hurtado, Jesus Godes Diago, Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "visita-familia-diago-almuzara",
+     "nombre_es": "Visita familia Diago Almuzara",
+     "nombre_ca": "Visita familia Diago Almuzara",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1922",
+     "year": 1922,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-118.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-118",
+       "image": "/photos/emili-godes/FCP-23-118.jpg",
+       "titulo_es": "Joana Diago Almuzara, Ramona DA, Dolores DA, Dolores Almuzara Ardanuy, Ramon Figuerola,…",
+       "titulo_ca": "Joana Diago Almuzara, Ramona DA, Dolores DA, Dolores Almuzara Ardanuy, Ramon Figuerola,…",
+       "descripcion_es": "Joana Diago Almuzara, Ramona DA, Dolores DA, Dolores Almuzara Ardanuy, Ramon Figuerola, Fernando Figuerola Diago, Asunción DA, Nicomedes Diago Marin, Montserrat, Emili, Antonia, Sebastià DA, Felip DA, Antonio DA",
+       "descripcion_ca": "Joana Diago Almuzara, Ramona DA, Dolores DA, Dolores Almuzara Ardanuy, Ramon Figuerola, Fernando Figuerola Diago, Asunción DA, Nicomedes Diago Marin, Montserrat, Emili, Antonia, Sebastià DA, Felip DA, Antonio DA",
+       "fecha": "1922",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-hurtado-montserrat-godes-diago",
+     "nombre_es": "Artur Godes Hurtado, Montserrat Godes Diago",
+     "nombre_ca": "Artur Godes Hurtado, Montserrat Godes Diago",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1922",
+     "year": 1922,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-119.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-119",
+       "image": "/photos/emili-godes/FCP-23-119.jpg",
+       "titulo_es": "Artur Godes Hurtado, Montserrat Godes Diago",
+       "titulo_ca": "Artur Godes Hurtado, Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1922",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "emili-godes-montserrat-godes-antonia-diago-dolores-almuzara-emilia-giro-artur-godes-genaro-lacoste-mercedes-godes-merce-sagarra-eugenia-gurth-dolors-godes-francesc-ferrer-rosa-godes-joan-pujol-artur-godes-josep-maria-godes-ramon-godes",
+     "nombre_es": "Emili Godes, Montserrat Godes, Antònia Diago, Dolores Almuzara, Emilia Giró, Artur Godes, Genaro Lacoste, Mercedes Godes, Mercè Sagarra, Eugenia Gurth, Dolors Godes, Francesc Ferrer, Rosa Godes, Joan Pujol, Artur Godes, Josep Maria Godes, Ramón Godes",
+     "nombre_ca": "Emili Godes, Montserrat Godes, Antònia Diago, Dolores Almuzara, Emilia Giró, Artur Godes, Genaro Lacoste, Mercedes Godes, Mercè Sagarra, Eugenia Gurth, Dolors Godes, Francesc Ferrer, Rosa Godes, Joan Pujol, Artur Godes, Josep Maria Godes, Ramón Godes",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1922",
+     "year": 1922,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-121.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-121",
+       "image": "/photos/emili-godes/FCP-23-121.jpg",
+       "titulo_es": "Emili Godes, Montserrat Godes, Antònia Diago, Dolores Almuzara, Emilia Giró, Artur Godes, Genaro Lacoste, Mercedes Godes, Mercè Sagarra, Eugenia Gurth, Dolors Godes, Francesc Ferrer, Rosa Godes, Joan Pujol, Artur Godes, Josep Maria Godes, Ramón Godes",
+       "titulo_ca": "Emili Godes, Montserrat Godes, Antònia Diago, Dolores Almuzara, Emilia Giró, Artur Godes, Genaro Lacoste, Mercedes Godes, Mercè Sagarra, Eugenia Gurth, Dolors Godes, Francesc Ferrer, Rosa Godes, Joan Pujol, Artur Godes, Josep Maria Godes, Ramón Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1922",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "dolors-godes-caballeria-francesc-ferrer-capara",
+     "nombre_es": "Dolors Godes Caballeria, Francesc Ferrer Caparà",
+     "nombre_ca": "Dolors Godes Caballeria, Francesc Ferrer Caparà",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1925",
+     "year": 1925,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-122.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-122",
+       "image": "/photos/emili-godes/FCP-23-122.jpg",
+       "titulo_es": "Dolors Godes Caballeria, Francesc Ferrer Caparà",
+       "titulo_ca": "Dolors Godes Caballeria, Francesc Ferrer Caparà",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1925",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "emili-godes-hurtado-antonia-diago-almuzara-montserrat-godes-diago",
+     "nombre_es": "Emili Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago",
+     "nombre_ca": "Emili Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-125.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-125",
+       "image": "/photos/emili-godes/FCP-23-125.jpg",
+       "titulo_es": "Emili Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago",
+       "titulo_ca": "Emili Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "emilia-hurtado-giro-rosa-godes-hurtado-ernest-godes-hurtado-emili-godes-hurtado",
+     "nombre_es": "Emilia Hurtado Giró, Rosa Godes Hurtado, Ernest Godes Hurtado, Emili Godes Hurtado",
+     "nombre_ca": "Emilia Hurtado Giró, Rosa Godes Hurtado, Ernest Godes Hurtado, Emili Godes Hurtado",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1900",
+     "year": 1900,
+     "decada": "1900",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-131.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-131",
+       "image": "/photos/emili-godes/FCP-23-131.jpg",
+       "titulo_es": "Emilia Hurtado Giró, Rosa Godes Hurtado, Ernest Godes Hurtado, Emili Godes Hurtado",
+       "titulo_ca": "Emilia Hurtado Giró, Rosa Godes Hurtado, Ernest Godes Hurtado, Emili Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1900",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1900"
+      }
+     ]
+    },
+    {
+     "slug": "familia-godes-hurtado",
+     "nombre_es": "Família Godes Hurtado",
+     "nombre_ca": "Família Godes Hurtado",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1907",
+     "year": 1907,
+     "decada": "1900",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-139.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-139",
+       "image": "/photos/emili-godes/FCP-23-139.jpg",
+       "titulo_es": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado…",
+       "titulo_ca": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado…",
+       "descripcion_es": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado",
+       "descripcion_ca": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado",
+       "fecha": "1907",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1900"
+      }
+     ]
+    },
+    {
+     "slug": "familia-godes-lacoste",
+     "nombre_es": "Família Godes - Lacoste",
+     "nombre_ca": "Família Godes - Lacoste",
+     "lugar_es": "Can Segarra. Bertran 60-62",
+     "lugar_ca": "Can Segarra. Bertran 60-62",
+     "fecha": "1922",
+     "year": 1922,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-133.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-133",
+       "image": "/photos/emili-godes/FCP-23-133.jpg",
+       "titulo_es": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Rosa Godes Hurtado,…",
+       "titulo_ca": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Rosa Godes Hurtado,…",
+       "descripcion_es": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Joan Pujol Pont, Montserrat Godes Diago, Juana Lacoste Hurtado, Isabel Lacoste Hurtado, Eugenia Guth Köenig, Germaine Lacoste Guth, Mercè Sagarra Parcerisas, Jaume Bagés Carbó",
+       "descripcion_ca": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Joan Pujol Pont, Montserrat Godes Diago, Juana Lacoste Hurtado, Isabel Lacoste Hurtado, Eugenia Guth Köenig, Germaine Lacoste Guth, Mercè Sagarra Parcerisas, Jaume Bagés Carbó",
+       "fecha": "1922",
+       "lugar_es": "Can Segarra. Bertran 60-62",
+       "lugar_ca": "Can Segarra. Bertran 60-62",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "famila-godes",
+     "nombre_es": "Famíla Godes",
+     "nombre_ca": "Famíla Godes",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1922",
+     "year": 1922,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-135.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-135",
+       "image": "/photos/emili-godes/FCP-23-135.jpg",
+       "titulo_es": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado…",
+       "titulo_ca": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado…",
+       "descripcion_es": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Joan Pujol Pont, Montserrat Godes Diago",
+       "descripcion_ca": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Joan Pujol Pont, Montserrat Godes Diago",
+       "fecha": "1922",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "germans-godes-hurtado",
+     "nombre_es": "Germans Godes Hurtado",
+     "nombre_ca": "Germans Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1910",
+     "year": 1910,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-137.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-137",
+       "image": "/photos/emili-godes/FCP-23-137.jpg",
+       "titulo_es": "Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes…",
+       "titulo_ca": "Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes…",
+       "descripcion_es": "Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado",
+       "descripcion_ca": "Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado",
+       "fecha": "1910",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "escala-musical",
+     "nombre_es": "Escala musical",
+     "nombre_ca": "Escala musical",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1917",
+     "year": 1917,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-138.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-138",
+       "image": "/photos/emili-godes/FCP-23-138.jpg",
+       "titulo_es": "Artur Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Ernest Godes Hurtado,…",
+       "titulo_ca": "Artur Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Ernest Godes Hurtado,…",
+       "descripcion_es": "Artur Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado",
+       "descripcion_ca": "Artur Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado",
+       "fecha": "1917",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "excursio-montserrat",
+     "nombre_es": "Excursió Montserrat",
+     "nombre_ca": "Excursió Montserrat",
+     "lugar_es": "Montserrat",
+     "lugar_ca": "Montserrat",
+     "fecha": "1925",
+     "year": 1925,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-141.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-141",
+       "image": "/photos/emili-godes/FCP-23-141.jpg",
+       "titulo_es": "Mercè Godes Caballeria, Emilia Hurtado Giró, Dolores \"Lola\" Molina Beca",
+       "titulo_ca": "Mercè Godes Caballeria, Emilia Hurtado Giró, Dolores \"Lola\" Molina Beca",
+       "descripcion_es": "Mercè Godes Caballeria, Emilia Hurtado Giró, Dolores \"Lola\" Molina Beca",
+       "descripcion_ca": "Mercè Godes Caballeria, Emilia Hurtado Giró, Dolores \"Lola\" Molina Beca",
+       "fecha": "1925",
+       "lugar_es": "Montserrat",
+       "lugar_ca": "Montserrat",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "visita-godes-molina",
+     "nombre_es": "Visita Godes Molina",
+     "nombre_ca": "Visita Godes Molina",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1925",
+     "year": 1925,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-142.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-142",
+       "image": "/photos/emili-godes/FCP-23-142.jpg",
+       "titulo_es": "Emili Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes H…",
+       "titulo_ca": "Emili Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes H…",
+       "descripcion_es": "Emili Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Dolores \"Lola\" Molina Beca, Montserrat Godes Diago, Jesus Godes Diago",
+       "descripcion_ca": "Emili Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Ramón Godes Hurtado, Artur Godes Hurtado, Dolores \"Lola\" Molina Beca, Montserrat Godes Diago, Jesus Godes Diago",
+       "fecha": "1925",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "platja-de-montgat",
+     "nombre_es": "Platja de Montgat",
+     "nombre_ca": "Platja de Montgat",
+     "lugar_es": "Montgat",
+     "lugar_ca": "Montgat",
+     "fecha": "1922",
+     "year": 1922,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-147.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-147",
+       "image": "/photos/emili-godes/FCP-23-147.jpg",
+       "titulo_es": "Emilia Hurtado Giró, Rosa Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Artur Godes Hu…",
+       "titulo_ca": "Emilia Hurtado Giró, Rosa Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Artur Godes Hu…",
+       "descripcion_es": "Emilia Hurtado Giró, Rosa Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago, Juana \"Juanita\" Diago Almuzara",
+       "descripcion_ca": "Emilia Hurtado Giró, Rosa Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado, Artur Godes Hurtado, Antònia Diago Almuzara, Montserrat Godes Diago, Juana \"Juanita\" Diago Almuzara",
+       "fecha": "1922",
+       "lugar_es": "Montgat",
+       "lugar_ca": "Montgat",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "ernest-godes-hurtado-emili-godes-hurtado-francesc-ferrer-capara-oncle-francisquet-marit-de-dolores-godes-caballeria-i-artur-godes-caballeria",
+     "nombre_es": "Ernest Godes Hurtado, Emili Godes Hurtado, Francesc Ferrer Caparà (oncle Francisquet, marit de Dolores Godes Caballeria) i Artur Godes Caballeria",
+     "nombre_ca": "Ernest Godes Hurtado, Emili Godes Hurtado, Francesc Ferrer Caparà (oncle Francisquet, marit de Dolores Godes Caballeria) i Artur Godes Caballeria",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1920",
+     "year": 1920,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-156.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-156",
+       "image": "/photos/emili-godes/FCP-23-156.jpg",
+       "titulo_es": "Ernest Godes Hurtado, Emili Godes Hurtado, Francesc Ferrer Caparà (oncle Francisquet, marit de Dolores Godes Caballeria) i Artur Godes Caballeria",
+       "titulo_ca": "Ernest Godes Hurtado, Emili Godes Hurtado, Francesc Ferrer Caparà (oncle Francisquet, marit de Dolores Godes Caballeria) i Artur Godes Caballeria",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1920",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-hurtado",
+     "nombre_es": "Artur Godes Hurtado",
+     "nombre_ca": "Artur Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1921",
+     "year": 1921,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-140.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-140",
+       "image": "/photos/emili-godes/FCP-23-140.jpg",
+       "titulo_es": "Artur Godes Hurtado",
+       "titulo_ca": "Artur Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1921",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-hurtado-montserrat-godes-diago-ramon-godes-hurtado",
+     "nombre_es": "Artur Godes Hurtado, Montserrat Godes Diago, Ramón Godes Hurtado",
+     "nombre_ca": "Artur Godes Hurtado, Montserrat Godes Diago, Ramón Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1921",
+     "year": 1921,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-149.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-149",
+       "image": "/photos/emili-godes/FCP-23-149.jpg",
+       "titulo_es": "Artur Godes Hurtado, Montserrat Godes Diago, Ramón Godes Hurtado",
+       "titulo_ca": "Artur Godes Hurtado, Montserrat Godes Diago, Ramón Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1921",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "josep-maria-gh-ramon-gh-artur-gh-antonia-da-montserrat-gd-jesus-gd",
+     "nombre_es": "Josep Maria GH, Ramón GH, Artur GH, Antònia DA, Montserrat GD, Jesus GD",
+     "nombre_ca": "Josep Maria GH, Ramón GH, Artur GH, Antònia DA, Montserrat GD, Jesus GD",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1925",
+     "year": 1925,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-153.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-153",
+       "image": "/photos/emili-godes/FCP-23-153.jpg",
+       "titulo_es": "Josep Maria GH, Ramón GH, Artur GH, Antònia DA, Montserrat GD, Jesus GD",
+       "titulo_ca": "Josep Maria GH, Ramón GH, Artur GH, Antònia DA, Montserrat GD, Jesus GD",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1925",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "emili-hurtado-rusca-1835-de-barcelona-i-la-seva-esposa-rosa-giro-estilles-1848-1877-de-constanti-tarragona",
+     "nombre_es": "Emili Hurtado Rusca (1835 - ) de Barcelona, i la seva esposa Rosa Giró Estil·les (1848 - 1877) de Constantí (Tarragona)",
+     "nombre_ca": "Emili Hurtado Rusca (1835 - ) de Barcelona, i la seva esposa Rosa Giró Estil·les (1848 - 1877) de Constantí (Tarragona)",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1870",
+     "year": 1870,
+     "decada": "1870",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-162.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-162",
+       "image": "/photos/emili-godes/FCP-23-162.jpg",
+       "titulo_es": "Emili Hurtado Rusca (1835 - ) de Barcelona, i la seva esposa Rosa Giró Estil·les (1848 - 1877) de Constantí (Tarragona)",
+       "titulo_ca": "Emili Hurtado Rusca (1835 - ) de Barcelona, i la seva esposa Rosa Giró Estil·les (1848 - 1877) de Constantí (Tarragona)",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1870",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1870"
+      }
+     ]
+    },
+    {
+     "slug": "rosa-godes-hurtado-mercedes-godes-hurtado",
+     "nombre_es": "Rosa Godes Hurtado, Mercedes Godes Hurtado",
+     "nombre_ca": "Rosa Godes Hurtado, Mercedes Godes Hurtado",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1917",
+     "year": 1917,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-160.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-160",
+       "image": "/photos/emili-godes/FCP-23-160.jpg",
+       "titulo_es": "Rosa Godes Hurtado, Mercedes Godes Hurtado",
+       "titulo_ca": "Rosa Godes Hurtado, Mercedes Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1917",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "ramona-monros-canabes",
+     "nombre_es": "Ramona Monrós Canabes",
+     "nombre_ca": "Ramona Monrós Canabes",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1912",
+     "year": 1912,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-155.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-155",
+       "image": "/photos/emili-godes/FCP-23-155.jpg",
+       "titulo_es": "Ramona Monrós Canabes",
+       "titulo_ca": "Ramona Monrós Canabes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1912",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
     }
    ]
   }
  },
  "decades": [
+  "1870",
+  "1880",
+  "1890",
   "1900",
   "1910",
   "1920",
@@ -42935,5 +46926,5 @@
   "Museo Reina Sofia",
   "Arxiu Fotogràfic de Barcelona"
  ],
- "total": 2660
+ "total": 2817
 }
