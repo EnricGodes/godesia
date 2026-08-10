@@ -644,9 +644,25 @@
     document.getElementById('eg-vw-side').style.display = viewer.sidebar ? '' : 'none';
   }
 
+  // Declaradas como funciones (no solo colgadas de window.EG): egViewerKey las llama sin
+  // prefijo y, como propiedades del objeto, no existen como identificadores → ReferenceError.
+  function egViewerNav(d) {
+    var n = viewer.photos.length; if (!n) return;
+    viewer.i = (viewer.i + d + n) % n;
+    egViewerRender();
+  }
+
+  function egViewerClose() {
+    egZoomExit();
+    document.removeEventListener('keydown', egViewerKey);
+    var el = document.getElementById('eg-viewer');
+    if (el) { el.classList.remove('open'); el.innerHTML = ''; }
+    document.body.style.overflow = '';
+  }
+
   function egViewerKey(e) {
     if (document.getElementById('eg-zoom')) { if (e.key === 'Escape') egZoomExit(); return; }
-    if (e.key === 'Escape') egViewerClose();
+    if (e.key === 'Escape') { e.preventDefault(); egViewerClose(); }
     else if (e.key === 'ArrowLeft') egViewerNav(-1);
     else if (e.key === 'ArrowRight') egViewerNav(1);
   }
@@ -711,11 +727,11 @@
       var items = window.__destacadas || []; if (items[i] == null) return;
       egViewerOpen(items, i, { ambito: items[i].ambito || '', project: null, projObj: null });
     },
-    egViewerNav: function (d) { var n = viewer.photos.length; if (!n) return; viewer.i = (viewer.i + d + n) % n; egViewerRender(); },
-    egViewerClose: function () { egZoomExit(); document.removeEventListener('keydown', egViewerKey); var el = document.getElementById('eg-viewer'); if (el) { el.classList.remove('open'); el.innerHTML = ''; } document.body.style.overflow = ''; },
+    egViewerNav: egViewerNav,
+    egViewerClose: egViewerClose,
     egViewerSidebar: function () { viewer.sidebar = !viewer.sidebar; egViewerRender(); },
     egViewerZoom: function () { egZoomEnter(); },
-    egViewerToProject: function () { this.egViewerClose(); },
+    egViewerToProject: function () { egViewerClose(); },
     egViewerDownload: function () {
       var ph = viewer.photos[viewer.i]; if (!ph || !ph.image) return;
       fetch(ph.image).then(function (r) { return r.blob(); }).then(function (b) {
