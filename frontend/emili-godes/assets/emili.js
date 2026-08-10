@@ -299,6 +299,7 @@
   };
   var UI = {
     themes: { es: 'Temáticas', ca: 'Temàtiques' },
+    allThemes: { es: 'Todas las temáticas', ca: 'Totes les temàtiques' },
     decades: { es: 'Décadas', ca: 'Dècades' },
     funds: { es: 'Fondos', ca: 'Fons' },
     all: { es: 'Todas', ca: 'Totes' },
@@ -382,13 +383,16 @@
 
   function renderSide() {
     var d = obra.data;
-    var themes = orderedAmbitos().map(function (k) {
-      var a = d.ambitos[k]; if (!a) return '';
-      var label = ambitoLabel(k);
-      var active = k === obra.ambito ? ' is-active' : '';
-      return '<button class="eg-side-link' + active + '" onclick="EG.obraTheme(\'' + k + '\')">' +
-        '<span>' + esc(label) + '</span><span class="eg-side-count">' + a.count + '</span></button>';
-    }).join('');
+    var themes = '<button class="eg-side-link' + (obra.ambito === null ? ' is-active' : '') +
+      '" onclick="EG.obraAllThemes()"><span>' + esc(t(UI.allThemes)) + '</span>' +
+      '<span class="eg-side-count">' + (d.total || '') + '</span></button>' +
+      orderedAmbitos().map(function (k) {
+        var a = d.ambitos[k]; if (!a) return '';
+        var label = ambitoLabel(k);
+        var active = k === obra.ambito ? ' is-active' : '';
+        return '<button class="eg-side-link' + active + '" onclick="EG.obraTheme(\'' + k + '\')">' +
+          '<span>' + esc(label) + '</span><span class="eg-side-count">' + a.count + '</span></button>';
+      }).join('');
     var decs = ['<span class="eg-chip' + (obra.decade === 'all' ? ' is-active' : '') + '" onclick="EG.obraDecade(\'all\')">' + t(UI.all) + '</span>']
       .concat((d.decades || []).map(function (dc) {
         return '<span class="eg-chip' + (obra.decade === dc ? ' is-active' : '') + '" onclick="EG.obraDecade(\'' + dc + '\')">' + dc + 's</span>';
@@ -414,6 +418,7 @@
 
   function renderMain() {
     var main = document.getElementById('eg-obra-main');
+    if (obra.ambito === null) { main.innerHTML = renderFlat(); return; }
     if (!obra.ambito) { main.innerHTML = '<p class="eg-empty">' + t(UI.pick) + '</p>'; return; }
     var a = obra.data.ambitos[obra.ambito];
     var txt = OBRA_TEXTS[obra.ambito];
@@ -436,6 +441,52 @@
     } else {
       main.innerHTML = renderProjectPhotos();
     }
+  }
+
+  // Al filtrar por década o fondo se sale de la agrupación temática: las fotos que casan
+  // pueden estar en cualquier temática y obligarían a adivinar en cuál buscar.
+  // `obra.ambito === null` ES el modo transversal; quitar los filtros no lo deshace
+  // (se sale eligiendo una temática en el panel).
+  function _syncCrossTheme() {
+    if (obra.decade !== 'all' || obra.fondo !== 'all') { obra.ambito = null; obra.project = null; }
+  }
+
+  function _filterLabel() {
+    return [obra.decade !== 'all' ? obra.decade + 's' : '', obra.fondo !== 'all' ? obra.fondo : '']
+      .filter(Boolean).join(' · ');
+  }
+
+  // Vista transversal: todas las fotos que casan con los filtros, de cualquier temática.
+  function renderFlat() {
+    var q = norm(obra.q), photos = [];
+    orderedAmbitos().forEach(function (k) {
+      var a = obra.data.ambitos[k]; if (!a) return;
+      a.projects.forEach(function (p) {
+        p.photos.forEach(function (ph) {
+          if (obra.decade !== 'all' && ph.decada !== obra.decade) return;
+          if (obra.fondo !== 'all' && ph.fondo !== obra.fondo) return;
+          if (q && norm(L(ph, 'descripcion') + ' ' + L(ph, 'lugar') + ' ' + L(p, 'nombre')).indexOf(q) === -1) return;
+          photos.push(ph);
+        });
+      });
+    });
+    photos.sort(function (x, y) {                       // cronológico; sin fecha, al final
+      var dx = x.decada === 'sf' ? '9999' : x.decada, dy = y.decada === 'sf' ? '9999' : y.decada;
+      return dx === dy ? (x.orig || '').localeCompare(y.orig || '') : (dx < dy ? -1 : 1);
+    });
+    var label = _filterLabel();
+    var head = '<p class="eg-kicker">' + esc(t(UI.allThemes)) + '</p>' +
+      (label ? '<h2 style="font-size:1.5rem;margin:.2rem 0 .1rem">' + esc(label) + '</h2>' : '') +
+      '<p class="eg-projcard__meta" style="margin-bottom:.6rem">' + photos.length + ' ' + t(UI.photos) + '</p>' +
+      '<div class="eg-obra-toolbar"><input type="search" value="' + esc(obra.q) +
+      '" placeholder="' + t(UI.search) + '" oninput="EG.obraSearch(this.value)"></div>';
+    obra._photos = photos;                              // el visor navega sobre esta lista
+    if (!photos.length) return head + '<p class="eg-empty">' + t(UI.noresults) + '</p>';
+    var cells = photos.map(function (ph, i) {
+      return '<div class="eg-photocell" onclick="EG.obraPhotoFlat(' + i + ')">' +
+        (ph.image ? '<img loading="lazy" src="' + ph.image + '" alt="' + esc(L(ph, 'titulo')) + '">' : '') + '</div>';
+    }).join('');
+    return head + '<div class="eg-photogrid">' + cells + '</div>';
   }
 
   function renderProjects(a) {
@@ -637,8 +688,9 @@
   window.EG = {
     lang: getLang(), setLang: setLang, openLightbox: openLightbox, t: t,
     obraTheme: function (k) { obra.ambito = k; obra.project = null; obra.q = ''; renderObra(); window.scrollTo({top:0,behavior:'smooth'}); },
-    obraDecade: function (d) { obra.decade = d; renderObra(); },
-    obraFondo: function (i) { obra.fondo = (i < 0) ? 'all' : (obra.data.fondos[i] || 'all'); renderObra(); },
+    obraAllThemes: function () { obra.ambito = null; obra.project = null; obra.q = ''; renderObra(); window.scrollTo({top:0,behavior:'smooth'}); },
+    obraDecade: function (d) { obra.decade = d; _syncCrossTheme(); renderObra(); },
+    obraFondo: function (i) { obra.fondo = (i < 0) ? 'all' : (obra.data.fondos[i] || 'all'); _syncCrossTheme(); renderObra(); },
     obraSearch: function (v) { obra.q = v; renderMain(); },
     obraSort: function (v) { obra.sort = v; renderMain(); },
     obraOpen: function (slug) { obra.project = slug; renderObra(); window.scrollTo({top:0,behavior:'smooth'}); },
@@ -650,6 +702,11 @@
     },
     obraBack: function () { obra.project = null; renderObra(); },
     obraPhoto: function (slug, i) { if (obra._photos && obra._photos[i] != null) egViewerOpen(obra._photos, i); },
+    // En transversal no hay proyecto ni temática únicos: la ficha del visor sale de la propia foto.
+    obraPhotoFlat: function (i) {
+      if (!obra._photos || obra._photos[i] == null) return;
+      egViewerOpen(obra._photos, i, { ambito: '', project: null, projObj: null });
+    },
     destacadaOpen: function (i) {
       var items = window.__destacadas || []; if (items[i] == null) return;
       egViewerOpen(items, i, { ambito: items[i].ambito || '', project: null, projObj: null });
