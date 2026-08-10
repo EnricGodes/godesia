@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-08-10 19:48:10",
+ "generated_at": "2026-08-10 19:57:26",
  "ambito_order": [
   "foto_fija_cine",
   "fotografia_industrial",
@@ -40870,7 +40870,7 @@
    ]
   },
   "reportajes_urbanos_documentales": {
-   "count": 130,
+   "count": 131,
    "decades": [
     "1910",
     "1920",
@@ -42945,6 +42945,53 @@
      ]
     },
     {
+     "slug": "nevada-de-1924-a-sant-gervasi",
+     "nombre_es": "Nevada de 1924 a Sant Gervasi",
+     "nombre_ca": "La nevada de 1924 a Sant Gervasi",
+     "lugar_es": "Sant Gervasi",
+     "lugar_ca": "Sant Gervasi",
+     "fecha": "1924",
+     "year": 1924,
+     "decada": "1920",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-61.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-61.JPG",
+       "image": "/photos/emili-godes/FCP-23-61.jpg",
+       "titulo_es": "Grupo de vecinos caminando por una calle completamente cubierta de nieve durante la gran…",
+       "titulo_ca": "Grup de veïns caminant per un carrer completament cobert de neu durant la gran nevada de…",
+       "descripcion_es": "Grupo de vecinos caminando por una calle completamente cubierta de nieve durante la gran nevada de 1924.",
+       "descripcion_ca": "Grup de veïns caminant per un carrer completament cobert de neu durant la gran nevada de 1924.",
+       "fecha": "1924",
+       "lugar_es": "Sant Gervasi",
+       "lugar_ca": "Sant Gervasi",
+       "categoria_es": "Reportajes urbanos y documentales",
+       "categoria_ca": "Reportatges urbans i documentals",
+       "fondo": "IEFC",
+       "decada": "1920"
+      },
+      {
+       "orig": "FCP-23-63.jpg",
+       "image": "/photos/emili-godes/FCP-23-63.jpg",
+       "titulo_es": "Tranvía circulando bajo una intensa nevada en la estación de la línea de Sant Gervasi, c…",
+       "titulo_ca": "Tramvia circulant sota una intensa nevada a l'estació de la línia de Sant Gervasi, amb l…",
+       "descripcion_es": "Tranvía circulando bajo una intensa nevada en la estación de la línea de Sant Gervasi, con andenes y vías cubiertos de nieve.",
+       "descripcion_ca": "Tramvia circulant sota una intensa nevada a l'estació de la línia de Sant Gervasi, amb les andanes i les vies cobertes de neu.",
+       "fecha": "1924",
+       "lugar_es": "Sant Gervasi",
+       "lugar_ca": "Sant Gervasi",
+       "categoria_es": "Reportajes urbanos y documentales",
+       "categoria_ca": "Reportatges urbans i documentals",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
      "slug": "exhibicion-gimnastica",
      "nombre_es": "Exhibición gimnástica",
      "nombre_ca": "exhibició gimnàstica",
@@ -43041,38 +43088,6 @@
      ]
     },
     {
-     "slug": "nevada-de-1924-a-sant-gervasi",
-     "nombre_es": "Nevada de 1924 a Sant Gervasi",
-     "nombre_ca": "La nevada de 1924 a Sant Gervasi",
-     "lugar_es": "Sant Gervasi",
-     "lugar_ca": "Sant Gervasi",
-     "fecha": "1924",
-     "year": 1924,
-     "decada": "1920",
-     "count": 1,
-     "cover": "/photos/emili-godes/FCP-23-63.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-63.jpg",
-       "image": "/photos/emili-godes/FCP-23-63.jpg",
-       "titulo_es": "Tranvía circulando bajo una intensa nevada en la estación de la línea de Sant Gervasi, c…",
-       "titulo_ca": "Tramvia circulant sota una intensa nevada a l'estació de la línia de Sant Gervasi, amb l…",
-       "descripcion_es": "Tranvía circulando bajo una intensa nevada en la estación de la línea de Sant Gervasi, con andenes y vías cubiertos de nieve.",
-       "descripcion_ca": "Tramvia circulant sota una intensa nevada a l'estació de la línia de Sant Gervasi, amb les andanes i les vies cobertes de neu.",
-       "fecha": "1924",
-       "lugar_es": "Sant Gervasi",
-       "lugar_ca": "Sant Gervasi",
-       "categoria_es": "Reportajes urbanos y documentales",
-       "categoria_ca": "Reportatges urbans i documentals",
-       "fondo": "IEFC",
-       "decada": "1920"
-      }
-     ]
-    },
-    {
      "slug": "nevada-de-1924-en-sant-gervasi",
      "nombre_es": "Nevada de 1924 en Sant Gervasi",
      "nombre_ca": "La nevada de 1924 a Sant Gervasi",
@@ -43107,7 +43122,7 @@
    ]
   },
   "fotografia_familiar": {
-   "count": 149,
+   "count": 150,
    "decades": [
     "1870",
     "1880",
@@ -44791,9 +44806,9 @@
      ]
     },
     {
-     "slug": "artur-godes-caballeria-montserrat-godes-diago-i-artur-godes-hurtado",
-     "nombre_es": "Artur Godes Caballeria, Montserrat Godes Diago i Artur Godes Hurtado",
-     "nombre_ca": "Artur Godes Caballeria, Montserrat Godes Diago i Artur Godes Hurtado",
+     "slug": "montserrat-godes-diago-i-artur-godes-hurtado",
+     "nombre_es": "Montserrat Godes Diago i Artur Godes Hurtado",
+     "nombre_ca": "Montserrat Godes Diago i Artur Godes Hurtado",
      "lugar_es": "Bertran, 67 Barcelona",
      "lugar_ca": "Bertran, 67 Barcelona",
      "fecha": "1923",
@@ -44808,8 +44823,8 @@
       {
        "orig": "FCP-23-7",
        "image": "/photos/emili-godes/FCP-23-7.jpg",
-       "titulo_es": "Artur Godes Caballeria, Montserrat Godes Diago i Artur Godes Hurtado",
-       "titulo_ca": "Artur Godes Caballeria, Montserrat Godes Diago i Artur Godes Hurtado",
+       "titulo_es": "Montserrat Godes Diago i Artur Godes Hurtado",
+       "titulo_ca": "Montserrat Godes Diago i Artur Godes Hurtado",
        "descripcion_es": "",
        "descripcion_ca": "",
        "fecha": "1923",
@@ -46743,6 +46758,38 @@
      ]
     },
     {
+     "slug": "artur-godes-caballeria-montserrat-godes-diago-i-artur-godes-hurtado",
+     "nombre_es": "Artur Godes Caballeria, Montserrat Godes Diago i Artur Godes Hurtado",
+     "nombre_ca": "Artur Godes Caballeria, Montserrat Godes Diago i Artur Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1923",
+     "year": 1923,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-145.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-145",
+       "image": "/photos/emili-godes/FCP-23-145.jpg",
+       "titulo_es": "Artur Godes Caballeria, Montserrat Godes Diago i Artur Godes Hurtado",
+       "titulo_ca": "Artur Godes Caballeria, Montserrat Godes Diago i Artur Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1923",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
      "slug": "artur-godes-hurtado-montserrat-godes-diago-ramon-godes-hurtado",
      "nombre_es": "Artur Godes Hurtado, Montserrat Godes Diago, Ramón Godes Hurtado",
      "nombre_ca": "Artur Godes Hurtado, Montserrat Godes Diago, Ramón Godes Hurtado",
@@ -46926,5 +46973,5 @@
   "Museo Reina Sofia",
   "Arxiu Fotogràfic de Barcelona"
  ],
- "total": 2817
+ "total": 2819
 }
