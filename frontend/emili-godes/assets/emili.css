@@ -230,6 +230,9 @@ body.eg-ca span.lang-ca { display: inline; }
 .eg-comp figcaption { font-size: .76rem; line-height: 1.5; color: var(--on-surface-variant); margin-top: 10px; }
 .eg-comp__who { display: block; font-weight: 700; color: var(--on-surface); }
 .eg-comp figure.is-godes .eg-comp__who { color: var(--primary); }
+/* Por qué esa foto pertenece a la corriente. Sin `display`: lo controlan las reglas .lang-* */
+.eg-comp__why { margin-top: 7px; padding-left: 9px; border-left: 2px solid var(--outline-variant);
+  font-size: .74rem; line-height: 1.55; }
 .eg-comp__src { display: block; margin-top: 3px; font-size: .7rem; color: var(--secondary); }
 .eg-comp__src a { color: inherit; text-decoration: underline; }
 .eg-comp__foot { font-size: .72rem; color: var(--secondary); font-style: italic; margin: 14px 0 0; }
