@@ -221,7 +221,8 @@ body.eg-ca span.lang-ca { display: inline; }
   border-radius: 14px; background: var(--surface-container); }
 .eg-comp__title { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em;
   color: var(--secondary); margin: 0 0 14px; }
-.eg-comp__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; }
+.eg-comp__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+@media (max-width: 560px) { .eg-comp__grid { grid-template-columns: 1fr; } }
 .eg-comp figure { margin: 0; display: flex; flex-direction: column; }
 .eg-comp__img { border-radius: 8px; overflow: hidden; background: #fff; line-height: 0;
   border: 1px solid var(--outline-variant); }
