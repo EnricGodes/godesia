@@ -177,6 +177,9 @@ body.eg-ca span.lang-ca { display: inline; }
 .eg-fig { margin: 0; }
 .eg-fig img { width: 100%; height: auto; display: block; border-radius: 10px; background: var(--surface-container-high); }
 .eg-fig figcaption { font-size: .8rem; color: var(--on-surface-variant); margin-top: 6px; line-height: 1.4; }
+/* Variante galería: más columnas y proporciones naturales (mezcla de verticales y horizontales) */
+.eg-figs--grid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; align-items: start; margin-top: 22px; }
+.eg-figs--grid .eg-fig img { border-radius: 12px; }
 @media (max-width: 620px) { .eg-figs { grid-template-columns: 1fr; } }
 
 /* ── Línea temporal ────────────────────────────────────────────────────── */
