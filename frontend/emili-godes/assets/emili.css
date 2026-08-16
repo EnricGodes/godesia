@@ -212,7 +212,10 @@ body.eg-ca span.lang-ca { display: inline; }
 .eg-empty .material-symbols-outlined { font-size: 34px; color: var(--surface-dim); display: block; margin: 0 auto 8px; }
 
 /* ── Ámbito (bloque en La obra / conceptos en Mirada moderna) ──────────── */
-.eg-ambito { padding: 48px 0; border-top: 1px solid var(--outline-variant); scroll-margin-top: 80px; }
+/* scroll-margin = alto del header pegajoso + un respiro, para que el ancla
+   deje el filete superior de la sección justo debajo de la cabecera. */
+.eg-ambito { padding: 48px 0; border-top: 1px solid var(--outline-variant);
+  scroll-margin-top: calc(var(--eg-header-h) + 16px); }
 .eg-ambito__head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
 .eg-ambito__n { font-family: 'Noto Serif', serif; font-size: 1.5rem; color: var(--secondary); }
 
