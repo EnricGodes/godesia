@@ -1,10 +1,10 @@
 {
- "generated_at": "2026-09-06 20:51:37",
+ "generated_at": "2026-09-06 21:08:01",
  "ambito_order": [
   "foto_fija_cine",
   "fotografia_industrial",
-  "reportajes_urbanos_documentales",
   "fotografia_familiar",
+  "reportajes_urbanos_documentales",
   "fotografia_artistica",
   "ciencia_medicina",
   "arquitectura_instalaciones",
@@ -43073,7 +43073,7 @@
    ]
   },
   "fotografia_familiar": {
-   "count": 129,
+   "count": 133,
    "decades": [
     "1910",
     "1920"
@@ -46376,6 +46376,134 @@
        "decada": "1910"
       }
      ]
+    },
+    {
+     "slug": "germans-godes-hurtado",
+     "nombre_es": "Germans Godes Hurtado",
+     "nombre_ca": "Germans Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1910",
+     "year": 1910,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-137.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-137",
+       "image": "/photos/emili-godes/FCP-23-137.jpg",
+       "titulo_es": "Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes…",
+       "titulo_ca": "Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes…",
+       "descripcion_es": "Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado",
+       "descripcion_ca": "Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado",
+       "fecha": "1910",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "rosa-godes-hurtado-emilia-hurtado-giro-artur-godes-caballeria-josep-bep-godes-hurtado-mercedes-godes-hurtado-ernest-godes-hurtado",
+     "nombre_es": "Rosa Godes Hurtado , Emilia Hurtado Giró, Artur Godes Caballeria, Josep (Bep) Godes Hurtado, Mercedes Godes Hurtado, Ernest Godes Hurtado",
+     "nombre_ca": "Rosa Godes Hurtado , Emilia Hurtado Giró, Artur Godes Caballeria, Josep (Bep) Godes Hurtado, Mercedes Godes Hurtado, Ernest Godes Hurtado",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1912",
+     "year": 1912,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-67.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-67",
+       "image": "/photos/emili-godes/FCP-23-67.jpg",
+       "titulo_es": "Rosa Godes Hurtado , Emilia Hurtado Giró, Artur Godes Caballeria, Josep (Bep) Godes Hurtado, Mercedes Godes Hurtado, Ernest Godes Hurtado",
+       "titulo_ca": "Rosa Godes Hurtado , Emilia Hurtado Giró, Artur Godes Caballeria, Josep (Bep) Godes Hurtado, Mercedes Godes Hurtado, Ernest Godes Hurtado",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1912",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-emilia-hurtado-mercedes-godes-josep-maria-godes",
+     "nombre_es": "Artur Godes, Emilia Hurtado, Mercedes Godes, Josep Maria Godes",
+     "nombre_ca": "Artur Godes, Emilia Hurtado, Mercedes Godes, Josep Maria Godes",
+     "lugar_es": "Bertran, 67 Barcelona",
+     "lugar_ca": "Bertran, 67 Barcelona",
+     "fecha": "1911",
+     "year": 1911,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-68.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-68",
+       "image": "/photos/emili-godes/FCP-23-68.jpg",
+       "titulo_es": "Artur Godes, Emilia Hurtado, Mercedes Godes, Josep Maria Godes",
+       "titulo_ca": "Artur Godes, Emilia Hurtado, Mercedes Godes, Josep Maria Godes",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1911",
+       "lugar_es": "Bertran, 67 Barcelona",
+       "lugar_ca": "Bertran, 67 Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
+     "slug": "artur-godes-caballeria",
+     "nombre_es": "Artur Godes Caballeria",
+     "nombre_ca": "Artur Godes Caballeria",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1911",
+     "year": 1911,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-72.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-72",
+       "image": "/photos/emili-godes/FCP-23-72.jpg",
+       "titulo_es": "Artur Godes Caballeria",
+       "titulo_ca": "Artur Godes Caballeria",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1911",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
     }
    ]
   }
@@ -46398,5 +46526,5 @@
   "Museo Reina Sofia",
   "Arxiu Fotogràfic de Barcelona"
  ],
- "total": 2797
+ "total": 2801
 }
