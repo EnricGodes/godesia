@@ -1,10 +1,10 @@
 {
- "generated_at": "2026-08-15 21:46:55",
+ "generated_at": "2026-09-06 20:51:37",
  "ambito_order": [
   "foto_fija_cine",
   "fotografia_industrial",
-  "fotografia_familiar",
   "reportajes_urbanos_documentales",
+  "fotografia_familiar",
   "fotografia_artistica",
   "ciencia_medicina",
   "arquitectura_instalaciones",
@@ -12871,7 +12871,7 @@
    ]
   },
   "ciencia_medicina": {
-   "count": 127,
+   "count": 126,
    "decades": [
     "1940",
     "1950",
@@ -14938,38 +14938,6 @@
        "categoria_ca": "Ciència i medicina",
        "fondo": "IEFC",
        "decada": "1950"
-      }
-     ]
-    },
-    {
-     "slug": "observatorio-fabra-reforestacion-de-collserola",
-     "nombre_es": "Observatorio Fabra – Reforestación de Collserola",
-     "nombre_ca": "Observatori Fabra – Reforestació de Collserola",
-     "lugar_es": "Barcelona",
-     "lugar_ca": "Barcelona",
-     "fecha": "1964",
-     "year": 1964,
-     "decada": "1960",
-     "count": 1,
-     "cover": "/photos/emili-godes/ACP-23-191.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "ACP-23-191",
-       "image": "/photos/emili-godes/ACP-23-191.jpg",
-       "titulo_es": "Reproducción de fotografía comparativa del Observatorio Fabra mostrando el estado de la…",
-       "titulo_ca": "La reproducció de la fotografia comparada de l'Observatori Fabra va començar a manifesta…",
-       "descripcion_es": "Reproducción de fotografía comparativa del Observatorio Fabra mostrando el estado de la repoblación forestal iniciada en 1945.",
-       "descripcion_ca": "La reproducció de la fotografia comparada de l'Observatori Fabra va començar a manifestar-se l'estat de la repoblació forestal.",
-       "fecha": "1964",
-       "lugar_es": "Barcelona",
-       "lugar_ca": "Barcelona",
-       "categoria_es": "Ciencia y medicina",
-       "categoria_ca": "Ciència i medicina",
-       "fondo": "IEFC",
-       "decada": "1960"
       }
      ]
     }
@@ -43105,12 +43073,8 @@
    ]
   },
   "fotografia_familiar": {
-   "count": 150,
+   "count": 129,
    "decades": [
-    "1870",
-    "1880",
-    "1890",
-    "1900",
     "1910",
     "1920"
    ],
@@ -43851,192 +43815,6 @@
      ]
     },
     {
-     "slug": "emilia-hurtado-giro",
-     "nombre_es": "Emilia Hurtado Giró",
-     "nombre_ca": "Emilia Hurtado Giró",
-     "lugar_es": "",
-     "lugar_ca": "",
-     "fecha": "1893",
-     "year": 1893,
-     "decada": "1890",
-     "count": 3,
-     "cover": "/photos/emili-godes/FCP-23-146.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-146",
-       "image": "/photos/emili-godes/FCP-23-146.jpg",
-       "titulo_es": "Emilia Hurtado Giró",
-       "titulo_ca": "Emilia Hurtado Giró",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1895",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1890"
-      },
-      {
-       "orig": "FCP-23-161",
-       "image": "/photos/emili-godes/FCP-23-161.jpg",
-       "titulo_es": "Emilia Hurtado Giró",
-       "titulo_ca": "Emilia Hurtado Giró",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1895",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1890"
-      },
-      {
-       "orig": "FCP-23-51",
-       "image": "/photos/emili-godes/FCP-23-51.jpg",
-       "titulo_es": "Emilia Hurtado Giró",
-       "titulo_ca": "Emilia Hurtado Giró",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1893",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1890"
-      }
-     ]
-    },
-    {
-     "slug": "artur-godes-caballeria",
-     "nombre_es": "Artur Godes Caballeria",
-     "nombre_ca": "Artur Godes Caballeria",
-     "lugar_es": "",
-     "lugar_ca": "",
-     "fecha": "1888",
-     "year": 1888,
-     "decada": "1880",
-     "count": 3,
-     "cover": "/photos/emili-godes/FCP-23-154.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-154",
-       "image": "/photos/emili-godes/FCP-23-154.jpg",
-       "titulo_es": "Artur Godes Caballeria",
-       "titulo_ca": "Artur Godes Caballeria",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1888",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1880"
-      },
-      {
-       "orig": "FCP-23-53",
-       "image": "/photos/emili-godes/FCP-23-53.jpg",
-       "titulo_es": "Artur Godes Caballeria",
-       "titulo_ca": "Artur Godes Caballeria",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1893",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1890"
-      },
-      {
-       "orig": "FCP-23-72",
-       "image": "/photos/emili-godes/FCP-23-72.jpg",
-       "titulo_es": "Artur Godes Caballeria",
-       "titulo_ca": "Artur Godes Caballeria",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1911",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1910"
-      }
-     ]
-    },
-    {
-     "slug": "artur-godes-caballeria-emili-hurtado-giro",
-     "nombre_es": "Artur Godes Caballeria, Emili Hurtado Giró",
-     "nombre_ca": "Artur Godes Caballeria, Emili Hurtado Giró",
-     "lugar_es": "",
-     "lugar_ca": "",
-     "fecha": "1911",
-     "year": 1911,
-     "decada": "1910",
-     "count": 3,
-     "cover": "/photos/emili-godes/FCP-23-158.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-158",
-       "image": "/photos/emili-godes/FCP-23-158.jpg",
-       "titulo_es": "Artur Godes Caballeria, Emili Hurtado Giró",
-       "titulo_ca": "Artur Godes Caballeria, Emili Hurtado Giró",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1915",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1910"
-      },
-      {
-       "orig": "FCP-23-159",
-       "image": "/photos/emili-godes/FCP-23-159.jpg",
-       "titulo_es": "Artur Godes Caballeria, Emili Hurtado Giró",
-       "titulo_ca": "Artur Godes Caballeria, Emili Hurtado Giró",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1920",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1920"
-      },
-      {
-       "orig": "FCP-23-75",
-       "image": "/photos/emili-godes/FCP-23-75.jpg",
-       "titulo_es": "Artur Godes Caballeria, Emili Hurtado Giró",
-       "titulo_ca": "Artur Godes Caballeria, Emili Hurtado Giró",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1911",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1910"
-      }
-     ]
-    },
-    {
      "slug": "antonia-diago-a-montserrat-taxiphote",
      "nombre_es": "Antònia Diago a Montserrat [taxiphote]",
      "nombre_ca": "Antònia Diago a Montserrat [taxiphote]",
@@ -44157,115 +43935,6 @@
        "categoria_ca": "Reportatges urbans i documentals",
        "fondo": "IEFC",
        "decada": "1910"
-      }
-     ]
-    },
-    {
-     "slug": "ernest-godes-emili-godes",
-     "nombre_es": "Ernest Godes, Emili Godes",
-     "nombre_ca": "Ernest Godes, Emili Godes",
-     "lugar_es": "Escola de párvulos al barri de Sta. Maria del Mar. Barcelona",
-     "lugar_ca": "Escola de párvulos al barri de Sta. Maria del Mar. Barcelona",
-     "fecha": "1899",
-     "year": 1899,
-     "decada": "1890",
-     "count": 3,
-     "cover": "/photos/emili-godes/FCP-23-130.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-130",
-       "image": "/photos/emili-godes/FCP-23-130.jpg",
-       "titulo_es": "Ernest Godes, Emili Godes",
-       "titulo_ca": "Ernest Godes, Emili Godes",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1900",
-       "lugar_es": "Escola de párvulos al barri de Sta. Maria del Mar. Barcelona",
-       "lugar_ca": "Escola de párvulos al barri de Sta. Maria del Mar. Barcelona",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1900"
-      },
-      {
-       "orig": "FCP-23-134",
-       "image": "/photos/emili-godes/FCP-23-134.jpg",
-       "titulo_es": "Ernest Godes, Emili Godes",
-       "titulo_ca": "Ernest Godes, Emili Godes",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1899",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1890"
-      },
-      {
-       "orig": "FCP-23-136",
-       "image": "/photos/emili-godes/FCP-23-136.jpg",
-       "titulo_es": "Ernest Godes, Emili Godes",
-       "titulo_ca": "Ernest Godes, Emili Godes",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1920",
-       "lugar_es": "Port de Barcelona",
-       "lugar_ca": "Port de Barcelona",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1920"
-      }
-     ]
-    },
-    {
-     "slug": "ernest-y-emili",
-     "nombre_es": "Ernest y Emili",
-     "nombre_ca": "Ernest i Emili",
-     "lugar_es": "Barcelona",
-     "lugar_ca": "Barcelona",
-     "fecha": "1900",
-     "year": 1900,
-     "decada": "1900",
-     "count": 2,
-     "cover": "/photos/emili-godes/FCP-23-3.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-3.jpg",
-       "image": "/photos/emili-godes/FCP-23-3.jpg",
-       "titulo_es": "Ernest Godes Hurtado y Emili Godes Hurtado",
-       "titulo_ca": "Ernest i Emili",
-       "descripcion_es": "Ernest Godes Hurtado y Emili Godes Hurtado",
-       "descripcion_ca": "",
-       "fecha": "1920",
-       "lugar_es": "Barcelona",
-       "lugar_ca": "Barcelona",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1920"
-      },
-      {
-       "orig": "FCP-23-70",
-       "image": "/photos/emili-godes/FCP-23-70.jpg",
-       "titulo_es": "Ernest Godes Hurtado y Emili Godes Hurtado",
-       "titulo_ca": "Ernest Godes Hurtado i Emili Godes Hurtado",
-       "descripcion_es": "Ernest Godes Hurtado y Emili Godes Hurtado",
-       "descripcion_ca": "Ernest Godes Hurtado i Emili Godes Hurtado",
-       "fecha": "1900",
-       "lugar_es": "Parc de la Ciutadella, Barcelona",
-       "lugar_ca": "Parc de la Ciutadella, Barcelona",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1900"
       }
      ]
     },
@@ -44505,53 +44174,6 @@
      ]
     },
     {
-     "slug": "merce-godes-caballeria",
-     "nombre_es": "Mercè Godes Caballeria",
-     "nombre_ca": "Mercè Godes Caballeria",
-     "lugar_es": "",
-     "lugar_ca": "",
-     "fecha": "1907",
-     "year": 1907,
-     "decada": "1900",
-     "count": 2,
-     "cover": "/photos/emili-godes/FCP-23-49.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-49",
-       "image": "/photos/emili-godes/FCP-23-49.jpg",
-       "titulo_es": "Mercè Godes Caballeria",
-       "titulo_ca": "Mercè Godes Caballeria",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1915",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1910"
-      },
-      {
-       "orig": "FCP-23-87",
-       "image": "/photos/emili-godes/FCP-23-87.jpg",
-       "titulo_es": "Mercè Godes Caballeria",
-       "titulo_ca": "Mercè Godes Caballeria",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1907",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1900"
-      }
-     ]
-    },
-    {
      "slug": "mercedes-godes-hurtado-rosa-godes-hurtado",
      "nombre_es": "Mercedes Godes Hurtado, Rosa Godes Hurtado",
      "nombre_ca": "Mercedes Godes Hurtado, Rosa Godes Hurtado",
@@ -44646,6 +44268,53 @@
      ]
     },
     {
+     "slug": "artur-godes-caballeria-emili-hurtado-giro",
+     "nombre_es": "Artur Godes Caballeria, Emili Hurtado Giró",
+     "nombre_ca": "Artur Godes Caballeria, Emili Hurtado Giró",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1915",
+     "year": 1915,
+     "decada": "1910",
+     "count": 2,
+     "cover": "/photos/emili-godes/FCP-23-158.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-158",
+       "image": "/photos/emili-godes/FCP-23-158.jpg",
+       "titulo_es": "Artur Godes Caballeria, Emili Hurtado Giró",
+       "titulo_ca": "Artur Godes Caballeria, Emili Hurtado Giró",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1915",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      },
+      {
+       "orig": "FCP-23-159",
+       "image": "/photos/emili-godes/FCP-23-159.jpg",
+       "titulo_es": "Artur Godes Caballeria, Emili Hurtado Giró",
+       "titulo_ca": "Artur Godes Caballeria, Emili Hurtado Giró",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1920",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
      "slug": "antonia-diago-taxiphote",
      "nombre_es": "Antònia Diago [taxiphote]",
      "nombre_ca": "Antònia Diago [taxiphote]",
@@ -44714,6 +44383,38 @@
        "titulo_ca": "Emili Hurtado Rusca",
        "descripcion_es": "Retrato",
        "descripcion_ca": "Retrat",
+       "fecha": "1920",
+       "lugar_es": "Barcelona",
+       "lugar_ca": "Barcelona",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1920"
+      }
+     ]
+    },
+    {
+     "slug": "ernest-y-emili",
+     "nombre_es": "Ernest y Emili",
+     "nombre_ca": "Ernest i Emili",
+     "lugar_es": "Barcelona",
+     "lugar_ca": "Barcelona",
+     "fecha": "1920",
+     "year": 1920,
+     "decada": "1920",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-3.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-3.jpg",
+       "image": "/photos/emili-godes/FCP-23-3.jpg",
+       "titulo_es": "Ernest Godes Hurtado y Emili Godes Hurtado",
+       "titulo_ca": "Ernest i Emili",
+       "descripcion_es": "Ernest Godes Hurtado y Emili Godes Hurtado",
+       "descripcion_ca": "",
        "fecha": "1920",
        "lugar_es": "Barcelona",
        "lugar_ca": "Barcelona",
@@ -44817,70 +44518,6 @@
        "categoria_ca": "Fotografia familiar",
        "fondo": "IEFC",
        "decada": "1920"
-      }
-     ]
-    },
-    {
-     "slug": "primera-comunion-de-merce-godes-hurtado-y-rosa-godes-hurtado",
-     "nombre_es": "Primera comunión de Mercè Godes Hurtado y Rosa Godes Hurtado",
-     "nombre_ca": "Primera comunió de Mercè Godes Hurtado i Rosa Godes Hurtado",
-     "lugar_es": "Barcelona",
-     "lugar_ca": "Barcelona",
-     "fecha": "1910",
-     "year": 1910,
-     "decada": "1910",
-     "count": 1,
-     "cover": "/photos/emili-godes/FCP-23-13.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-13",
-       "image": "/photos/emili-godes/FCP-23-13.jpg",
-       "titulo_es": "Primera comunión de Mercè Godes Hurtado y Rosa Godes Hurtado",
-       "titulo_ca": "Primera comunió de Mercè Godes Hurtado i Rosa Godes Hurtado",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1910",
-       "lugar_es": "Barcelona",
-       "lugar_ca": "Barcelona",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1910"
-      }
-     ]
-    },
-    {
-     "slug": "josep-maria-bep-godes-hurtado",
-     "nombre_es": "Josep Maria \"Bep\" Godes Hurtado",
-     "nombre_ca": "Josep Maria \"Bep\" Godes Hurtado",
-     "lugar_es": "Barcelona",
-     "lugar_ca": "Barcelona",
-     "fecha": "1908",
-     "year": 1908,
-     "decada": "1900",
-     "count": 1,
-     "cover": "/photos/emili-godes/FCP-23-157.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-157",
-       "image": "/photos/emili-godes/FCP-23-157.jpg",
-       "titulo_es": "Josep Maria \"Bep\" Godes Hurtado",
-       "titulo_ca": "Josep Maria \"Bep\" Godes Hurtado",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1908",
-       "lugar_es": "Barcelona",
-       "lugar_ca": "Barcelona",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1900"
       }
      ]
     },
@@ -45269,38 +44906,6 @@
      ]
     },
     {
-     "slug": "primera-comunion-emili-godes-hurtado-i-ernest-godes-hurtado",
-     "nombre_es": "Primera comunión Emili Godes Hurtado i Ernest Godes Hurtado",
-     "nombre_ca": "Primera comunió Emili Godes Hurtado i Ernest Godes Hurtado",
-     "lugar_es": "",
-     "lugar_ca": "",
-     "fecha": "1903",
-     "year": 1903,
-     "decada": "1900",
-     "count": 1,
-     "cover": "/photos/emili-godes/FCP-23-32.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-32",
-       "image": "/photos/emili-godes/FCP-23-32.jpg",
-       "titulo_es": "Primera comunión Emili Godes Hurtado i Ernest Godes Hurtado",
-       "titulo_ca": "Primera comunió Emili Godes Hurtado i Ernest Godes Hurtado",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1903",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1900"
-      }
-     ]
-    },
-    {
      "slug": "rosa-godes-hurtado-ramon-godes-hurtado",
      "nombre_es": "Rosa Godes Hurtado, Ramon Godes Hurtado",
      "nombre_ca": "Rosa Godes Hurtado, Ramon Godes Hurtado",
@@ -45589,6 +45194,38 @@
      ]
     },
     {
+     "slug": "merce-godes-caballeria",
+     "nombre_es": "Mercè Godes Caballeria",
+     "nombre_ca": "Mercè Godes Caballeria",
+     "lugar_es": "",
+     "lugar_ca": "",
+     "fecha": "1915",
+     "year": 1915,
+     "decada": "1910",
+     "count": 1,
+     "cover": "/photos/emili-godes/FCP-23-49.jpg",
+     "fondos": [
+      "IEFC"
+     ],
+     "photos": [
+      {
+       "orig": "FCP-23-49",
+       "image": "/photos/emili-godes/FCP-23-49.jpg",
+       "titulo_es": "Mercè Godes Caballeria",
+       "titulo_ca": "Mercè Godes Caballeria",
+       "descripcion_es": "",
+       "descripcion_ca": "",
+       "fecha": "1915",
+       "lugar_es": "",
+       "lugar_ca": "",
+       "categoria_es": "Fotografía familiar",
+       "categoria_ca": "Fotografia familiar",
+       "fondo": "IEFC",
+       "decada": "1910"
+      }
+     ]
+    },
+    {
      "slug": "the-kid-charles-chaplin",
      "nombre_es": "The Kid, Charles Chaplin",
      "nombre_ca": "The Kid, Charles Chaplin",
@@ -45617,38 +45254,6 @@
        "categoria_ca": "Fotografia familiar",
        "fondo": "IEFC",
        "decada": "1920"
-      }
-     ]
-    },
-    {
-     "slug": "rosa-godes-hurtado-emilia-hurtado-giro-artur-godes-caballeria-josep-bep-godes-hurtado-mercedes-godes-hurtado-ernest-godes-hurtado",
-     "nombre_es": "Rosa Godes Hurtado , Emilia Hurtado Giró, Artur Godes Caballeria, Josep (Bep) Godes Hurtado, Mercedes Godes Hurtado, Ernest Godes Hurtado",
-     "nombre_ca": "Rosa Godes Hurtado , Emilia Hurtado Giró, Artur Godes Caballeria, Josep (Bep) Godes Hurtado, Mercedes Godes Hurtado, Ernest Godes Hurtado",
-     "lugar_es": "Bertran, 67 Barcelona",
-     "lugar_ca": "Bertran, 67 Barcelona",
-     "fecha": "1912",
-     "year": 1912,
-     "decada": "1910",
-     "count": 1,
-     "cover": "/photos/emili-godes/FCP-23-67.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-67",
-       "image": "/photos/emili-godes/FCP-23-67.jpg",
-       "titulo_es": "Rosa Godes Hurtado , Emilia Hurtado Giró, Artur Godes Caballeria, Josep (Bep) Godes Hurtado, Mercedes Godes Hurtado, Ernest Godes Hurtado",
-       "titulo_ca": "Rosa Godes Hurtado , Emilia Hurtado Giró, Artur Godes Caballeria, Josep (Bep) Godes Hurtado, Mercedes Godes Hurtado, Ernest Godes Hurtado",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1912",
-       "lugar_es": "Bertran, 67 Barcelona",
-       "lugar_ca": "Bertran, 67 Barcelona",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1910"
       }
      ]
     },
@@ -45745,38 +45350,6 @@
        "categoria_ca": "Fotografia familiar",
        "fondo": "IEFC",
        "decada": "1920"
-      }
-     ]
-    },
-    {
-     "slug": "artur-godes-emilia-hurtado-mercedes-godes-josep-maria-godes",
-     "nombre_es": "Artur Godes, Emilia Hurtado, Mercedes Godes, Josep Maria Godes",
-     "nombre_ca": "Artur Godes, Emilia Hurtado, Mercedes Godes, Josep Maria Godes",
-     "lugar_es": "Bertran, 67 Barcelona",
-     "lugar_ca": "Bertran, 67 Barcelona",
-     "fecha": "1911",
-     "year": 1911,
-     "decada": "1910",
-     "count": 1,
-     "cover": "/photos/emili-godes/FCP-23-68.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-68",
-       "image": "/photos/emili-godes/FCP-23-68.jpg",
-       "titulo_es": "Artur Godes, Emilia Hurtado, Mercedes Godes, Josep Maria Godes",
-       "titulo_ca": "Artur Godes, Emilia Hurtado, Mercedes Godes, Josep Maria Godes",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1911",
-       "lugar_es": "Bertran, 67 Barcelona",
-       "lugar_ca": "Bertran, 67 Barcelona",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1910"
       }
      ]
     },
@@ -46389,66 +45962,34 @@
      ]
     },
     {
-     "slug": "emilia-hurtado-giro-rosa-godes-hurtado-ernest-godes-hurtado-emili-godes-hurtado",
-     "nombre_es": "Emilia Hurtado Giró, Rosa Godes Hurtado, Ernest Godes Hurtado, Emili Godes Hurtado",
-     "nombre_ca": "Emilia Hurtado Giró, Rosa Godes Hurtado, Ernest Godes Hurtado, Emili Godes Hurtado",
-     "lugar_es": "",
-     "lugar_ca": "",
-     "fecha": "1900",
-     "year": 1900,
-     "decada": "1900",
+     "slug": "ernest-godes-emili-godes",
+     "nombre_es": "Ernest Godes, Emili Godes",
+     "nombre_ca": "Ernest Godes, Emili Godes",
+     "lugar_es": "Port de Barcelona",
+     "lugar_ca": "Port de Barcelona",
+     "fecha": "1920",
+     "year": 1920,
+     "decada": "1920",
      "count": 1,
-     "cover": "/photos/emili-godes/FCP-23-131.jpg",
+     "cover": "/photos/emili-godes/FCP-23-136.jpg",
      "fondos": [
       "IEFC"
      ],
      "photos": [
       {
-       "orig": "FCP-23-131",
-       "image": "/photos/emili-godes/FCP-23-131.jpg",
-       "titulo_es": "Emilia Hurtado Giró, Rosa Godes Hurtado, Ernest Godes Hurtado, Emili Godes Hurtado",
-       "titulo_ca": "Emilia Hurtado Giró, Rosa Godes Hurtado, Ernest Godes Hurtado, Emili Godes Hurtado",
+       "orig": "FCP-23-136",
+       "image": "/photos/emili-godes/FCP-23-136.jpg",
+       "titulo_es": "Ernest Godes, Emili Godes",
+       "titulo_ca": "Ernest Godes, Emili Godes",
        "descripcion_es": "",
        "descripcion_ca": "",
-       "fecha": "1900",
-       "lugar_es": "",
-       "lugar_ca": "",
+       "fecha": "1920",
+       "lugar_es": "Port de Barcelona",
+       "lugar_ca": "Port de Barcelona",
        "categoria_es": "Fotografía familiar",
        "categoria_ca": "Fotografia familiar",
        "fondo": "IEFC",
-       "decada": "1900"
-      }
-     ]
-    },
-    {
-     "slug": "familia-godes-hurtado",
-     "nombre_es": "Família Godes Hurtado",
-     "nombre_ca": "Família Godes Hurtado",
-     "lugar_es": "",
-     "lugar_ca": "",
-     "fecha": "1907",
-     "year": 1907,
-     "decada": "1900",
-     "count": 1,
-     "cover": "/photos/emili-godes/FCP-23-139.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-139",
-       "image": "/photos/emili-godes/FCP-23-139.jpg",
-       "titulo_es": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado…",
-       "titulo_ca": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado…",
-       "descripcion_es": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado",
-       "descripcion_ca": "Artur Godes Caballeria, Mercè Godes Caballeria, Emilia Hurtado Giró, Emili Godes Hurtado, Ernest Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado",
-       "fecha": "1907",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1900"
+       "decada": "1920"
       }
      ]
     },
@@ -46513,38 +46054,6 @@
        "categoria_ca": "Fotografia familiar",
        "fondo": "IEFC",
        "decada": "1920"
-      }
-     ]
-    },
-    {
-     "slug": "germans-godes-hurtado",
-     "nombre_es": "Germans Godes Hurtado",
-     "nombre_ca": "Germans Godes Hurtado",
-     "lugar_es": "Bertran, 67 Barcelona",
-     "lugar_ca": "Bertran, 67 Barcelona",
-     "fecha": "1910",
-     "year": 1910,
-     "decada": "1910",
-     "count": 1,
-     "cover": "/photos/emili-godes/FCP-23-137.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-137",
-       "image": "/photos/emili-godes/FCP-23-137.jpg",
-       "titulo_es": "Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes…",
-       "titulo_ca": "Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes…",
-       "descripcion_es": "Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado",
-       "descripcion_ca": "Emili Godes Hurtado, Rosa Godes Hurtado, Mercedes Godes Hurtado, Josep Maria \"Bep\" Godes Hurtado",
-       "fecha": "1910",
-       "lugar_es": "Bertran, 67 Barcelona",
-       "lugar_ca": "Bertran, 67 Barcelona",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1910"
       }
      ]
     },
@@ -46837,38 +46346,6 @@
      ]
     },
     {
-     "slug": "emili-hurtado-rusca-1835-de-barcelona-i-la-seva-esposa-rosa-giro-estilles-1848-1877-de-constanti-tarragona",
-     "nombre_es": "Emili Hurtado Rusca (1835 - ) de Barcelona, i la seva esposa Rosa Giró Estil·les (1848 - 1877) de Constantí (Tarragona)",
-     "nombre_ca": "Emili Hurtado Rusca (1835 - ) de Barcelona, i la seva esposa Rosa Giró Estil·les (1848 - 1877) de Constantí (Tarragona)",
-     "lugar_es": "",
-     "lugar_ca": "",
-     "fecha": "1870",
-     "year": 1870,
-     "decada": "1870",
-     "count": 1,
-     "cover": "/photos/emili-godes/FCP-23-162.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-162",
-       "image": "/photos/emili-godes/FCP-23-162.jpg",
-       "titulo_es": "Emili Hurtado Rusca (1835 - ) de Barcelona, i la seva esposa Rosa Giró Estil·les (1848 - 1877) de Constantí (Tarragona)",
-       "titulo_ca": "Emili Hurtado Rusca (1835 - ) de Barcelona, i la seva esposa Rosa Giró Estil·les (1848 - 1877) de Constantí (Tarragona)",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1870",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1870"
-      }
-     ]
-    },
-    {
      "slug": "rosa-godes-hurtado-mercedes-godes-hurtado",
      "nombre_es": "Rosa Godes Hurtado, Mercedes Godes Hurtado",
      "nombre_ca": "Rosa Godes Hurtado, Mercedes Godes Hurtado",
@@ -46899,46 +46376,11 @@
        "decada": "1910"
       }
      ]
-    },
-    {
-     "slug": "ramona-monros-canabes",
-     "nombre_es": "Ramona Monrós Canabes",
-     "nombre_ca": "Ramona Monrós Canabes",
-     "lugar_es": "",
-     "lugar_ca": "",
-     "fecha": "1912",
-     "year": 1912,
-     "decada": "1910",
-     "count": 1,
-     "cover": "/photos/emili-godes/FCP-23-155.jpg",
-     "fondos": [
-      "IEFC"
-     ],
-     "photos": [
-      {
-       "orig": "FCP-23-155",
-       "image": "/photos/emili-godes/FCP-23-155.jpg",
-       "titulo_es": "Ramona Monrós Canabes",
-       "titulo_ca": "Ramona Monrós Canabes",
-       "descripcion_es": "",
-       "descripcion_ca": "",
-       "fecha": "1912",
-       "lugar_es": "",
-       "lugar_ca": "",
-       "categoria_es": "Fotografía familiar",
-       "categoria_ca": "Fotografia familiar",
-       "fondo": "IEFC",
-       "decada": "1910"
-      }
-     ]
     }
    ]
   }
  },
  "decades": [
-  "1870",
-  "1880",
-  "1890",
   "1900",
   "1910",
   "1920",
@@ -46956,5 +46398,5 @@
   "Museo Reina Sofia",
   "Arxiu Fotogràfic de Barcelona"
  ],
- "total": 2819
+ "total": 2797
 }
