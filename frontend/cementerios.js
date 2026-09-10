@@ -20,7 +20,7 @@ const Cementerios = {
     async init() {
         this.map = L.map('cem-map', { zoomControl: true });
         this.map.setView([40.2, -3.5], 6);
-        this._setBase('osm');
+        this._setBase('gray');
 
         try {
             [this.cemeteries, this.overview] = await Promise.all([
@@ -54,13 +54,20 @@ const Cementerios = {
                 { attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics', maxNativeZoom: 19, maxZoom: 22 }
             );
         } else {
-            // OSM estándar (sin API key; CARTO pasó a exigirla y marcaba los tiles
-            // con "API KEY REQUIRED"). className 'tiles-muted' apaga el color
-            // para recuperar el aspecto claro de la vista general.
-            this.baseLayer = L.tileLayer(
-                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                { attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19, className: 'tiles-muted' }
-            );
+            // Esri Light Gray Canvas (sin API key; CARTO pasó a exigirla y marcaba
+            // los tiles con "API KEY REQUIRED"): fondo gris mínimo, sin carreteras
+            // ni límites marítimos. Base + capa de rótulos (ciudades) por separado.
+            // Solo llega a zoom 16 nativo; de sobra para la vista general.
+            this.baseLayer = L.layerGroup([
+                L.tileLayer(
+                    'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+                    { attribution: 'Tiles © Esri — Esri, HERE, Garmin, FAO, NOAA, USGS', maxNativeZoom: 16, maxZoom: 19 }
+                ),
+                L.tileLayer(
+                    'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+                    { maxNativeZoom: 16, maxZoom: 19, pane: 'shadowPane' }
+                ),
+            ]);
         }
         this.baseLayer.addTo(this.map);
     },
@@ -143,7 +150,7 @@ const Cementerios = {
         document.getElementById('cem-subtitle').textContent =
             _i18nT('pages.cemeteries.subtitle', null, 'Los lugares de sepultura de la familia. Haz zoom en un cementerio para descubrir sus nichos.');
         if (this.clusterGroup) { this.clusterGroup.remove(); this.clusterGroup = null; }
-        this._setBase('osm');
+        this._setBase('gray');
 
         if (this.cemLayer) this.cemLayer.remove();
         this.cemLayer = L.layerGroup().addTo(this.map);
