@@ -75,6 +75,10 @@ def init_auth(photos_dir):
     conn = _connect()
     try:
         conn.executescript(_SCHEMA)
+        # Migración suave: idioma con el que se registró (para el email de aprobación)
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(users)")}
+        if "lang" not in cols:
+            conn.execute("ALTER TABLE users ADD COLUMN lang TEXT NOT NULL DEFAULT 'es'")
         conn.commit()
     finally:
         conn.close()
@@ -193,13 +197,14 @@ async def register(payload: dict = Body(...)):
         raise HTTPException(400, "Nombre o email no válidos.")
     if len(pwd) < _MIN_PWD:
         raise HTTPException(400, f"La contraseña debe tener al menos {_MIN_PWD} caracteres.")
+    lang = _valid_lang(payload.get("lang") or "es")
     conn = _connect()
     try:
         if conn.execute("SELECT 1 FROM users WHERE email = ? COLLATE NOCASE", (email,)).fetchone():
             raise HTTPException(409, "Ya existe una cuenta con ese email.")
         conn.execute(
-            "INSERT INTO users(name, email, password_hash, status) VALUES (?,?,?, 'pending')",
-            (name, email, _hash_password(pwd)))
+            "INSERT INTO users(name, email, password_hash, status, lang) VALUES (?,?,?, 'pending', ?)",
+            (name, email, _hash_password(pwd), lang))
         conn.commit()
     finally:
         conn.close()
@@ -314,6 +319,78 @@ _RESET_EMAIL = {
 }
 
 
+# Email que recibe el usuario cuando el admin aprueba su acceso. {name}, {url}.
+_APPROVED_EMAIL = {
+    "es": {
+        "subject": "Tu acceso a Godesia está activado",
+        "html": "<p>Hola {name},</p><p>Tu solicitud de acceso a <strong>Godesia</strong>, "
+                "el archivo de la familia Godes, ha sido aprobada. Ya puedes entrar con tu "
+                "email y la contraseña que elegiste al registrarte:</p>"
+                '<p><a href="{url}" style="background:#17341e;color:#fff;padding:10px 18px;'
+                'border-radius:8px;text-decoration:none;display:inline-block">Entrar en Godesia</a></p>'
+                "<p>O copia este enlace: <br>{url}</p>"
+                "<p>Si has olvidado la contraseña, en la página de acceso puedes pedir una nueva.</p>",
+    },
+    "ca": {
+        "subject": "El teu accés a Godesia està activat",
+        "html": "<p>Hola {name},</p><p>La teva sol·licitud d'accés a <strong>Godesia</strong>, "
+                "l'arxiu de la família Godes, ha estat aprovada. Ja pots entrar amb el teu "
+                "email i la contrasenya que vas triar en registrar-te:</p>"
+                '<p><a href="{url}" style="background:#17341e;color:#fff;padding:10px 18px;'
+                'border-radius:8px;text-decoration:none;display:inline-block">Entrar a Godesia</a></p>'
+                "<p>O copia aquest enllaç: <br>{url}</p>"
+                "<p>Si has oblidat la contrasenya, a la pàgina d'accés pots demanar-ne una de nova.</p>",
+    },
+    "en": {
+        "subject": "Your Godesia access is active",
+        "html": "<p>Hi {name},</p><p>Your request to access <strong>Godesia</strong>, "
+                "the Godes family archive, has been approved. You can now sign in with your "
+                "email and the password you chose when registering:</p>"
+                '<p><a href="{url}" style="background:#17341e;color:#fff;padding:10px 18px;'
+                'border-radius:8px;text-decoration:none;display:inline-block">Sign in to Godesia</a></p>'
+                "<p>Or copy this link: <br>{url}</p>"
+                "<p>If you forgot your password, you can request a new one on the sign-in page.</p>",
+    },
+    "fr": {
+        "subject": "Votre accès à Godesia est activé",
+        "html": "<p>Bonjour {name},</p><p>Votre demande d'accès à <strong>Godesia</strong>, "
+                "les archives de la famille Godes, a été approuvée. Vous pouvez maintenant vous "
+                "connecter avec votre e-mail et le mot de passe choisi à l'inscription :</p>"
+                '<p><a href="{url}" style="background:#17341e;color:#fff;padding:10px 18px;'
+                'border-radius:8px;text-decoration:none;display:inline-block">Se connecter à Godesia</a></p>'
+                "<p>Ou copiez ce lien : <br>{url}</p>"
+                "<p>Si vous avez oublié votre mot de passe, vous pouvez en demander un nouveau sur la page de connexion.</p>",
+    },
+    "de": {
+        "subject": "Dein Zugang zu Godesia ist freigeschaltet",
+        "html": "<p>Hallo {name},</p><p>Deine Zugangsanfrage für <strong>Godesia</strong>, "
+                "das Archiv der Familie Godes, wurde genehmigt. Du kannst dich jetzt mit deiner "
+                "E-Mail und dem bei der Registrierung gewählten Passwort anmelden:</p>"
+                '<p><a href="{url}" style="background:#17341e;color:#fff;padding:10px 18px;'
+                'border-radius:8px;text-decoration:none;display:inline-block">Bei Godesia anmelden</a></p>'
+                "<p>Oder kopiere diesen Link: <br>{url}</p>"
+                "<p>Falls du dein Passwort vergessen hast, kannst du auf der Anmeldeseite ein neues anfordern.</p>",
+    },
+}
+
+
+def _send_approved_email(request, email, name, lang):
+    """Avisa al usuario de que ya puede entrar. Devuelve True si Resend lo aceptó."""
+    from mailer import send_email
+    lang = _valid_lang(lang or "es")
+    url = f"{_reset_base_url(request)}/{lang}/login.html"
+    tpl = _APPROVED_EMAIL.get(lang, _APPROVED_EMAIL["es"])
+    html = tpl["html"].format(name=_html.escape(name or ""), url=url)
+    try:
+        ok = bool(send_email(email, tpl["subject"], html))
+    except Exception as e:
+        print(f"[auth] Error enviando email de aprobación a {email}: {e}")
+        ok = False
+    if not ok:
+        print(f"[auth] No se pudo enviar el email de aprobación a {email}")
+    return ok
+
+
 def _valid_lang(lang):
     try:
         from i18n import active_codes
@@ -426,15 +503,44 @@ async def pending_count():
         conn.close()
 
 
+def _user_row(conn, uid):
+    return conn.execute("SELECT id, name, email, status, lang FROM users WHERE id = ?", (uid,)).fetchone()
+
+
 @auth_admin_router.post("/users/{uid}/approve")
-async def approve_user(uid: int):
+async def approve_user(uid: int, request: Request):
+    """Aprueba y avisa al usuario por email de que ya puede entrar.
+    `email_sent` indica si Resend aceptó el envío (False = configurar RESEND_API_KEY
+    o reenviar desde el admin con /users/{uid}/notify)."""
     conn = _connect()
     try:
+        row = _user_row(conn, uid)
+        if not row:
+            raise HTTPException(404, "Usuario no encontrado.")
         conn.execute("UPDATE users SET status = 'approved', approved_at = datetime('now') WHERE id = ?", (uid,))
         conn.commit()
     finally:
         conn.close()
-    return {"ok": True}
+    sent = _send_approved_email(request, row["email"], row["name"], row["lang"])
+    return {"ok": True, "email_sent": sent}
+
+
+@auth_admin_router.post("/users/{uid}/notify")
+async def notify_approved_user(uid: int, request: Request):
+    """Reenvía el email de acceso activado a un usuario ya aprobado."""
+    conn = _connect()
+    try:
+        row = _user_row(conn, uid)
+    finally:
+        conn.close()
+    if not row:
+        raise HTTPException(404, "Usuario no encontrado.")
+    if row["status"] != "approved":
+        raise HTTPException(409, "El usuario no está aprobado.")
+    sent = _send_approved_email(request, row["email"], row["name"], row["lang"])
+    if not sent:
+        raise HTTPException(502, "No se pudo enviar el email (¿RESEND_API_KEY configurada?).")
+    return {"ok": True, "email_sent": True}
 
 
 @auth_admin_router.post("/users/{uid}/reject")

@@ -528,6 +528,7 @@ const Users = {
                         <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${u.last_login_at ? esc(u.last_login_at.slice(0, 16).replace('T', ' ')) : '—'}</td>
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
+                                <button class="btn btn-secondary btn-sm" title="Reenviar el email de acceso activado" onclick="Users.notify(${u.id})">Reenviar aviso</button>
                                 <button class="btn btn-danger btn-sm" onclick="Users.remove(${u.id})">Quitar acceso</button>
                             </div>
                         </td>
@@ -541,8 +542,18 @@ const Users = {
 
     async approve(id) {
         try {
-            await apiFetch(`/api/admin/users/${id}/approve`, { method: 'POST' });
+            const r = await apiFetch(`/api/admin/users/${id}/approve`, { method: 'POST' });
             this.load();
+            if (r && r.email_sent === false) {
+                alert('Acceso aprobado, pero NO se pudo enviar el email de aviso al usuario (¿RESEND_API_KEY configurada?). Puedes reenviarlo desde la lista de usuarios con acceso.');
+            }
+        } catch (e) { alert(e.message); }
+    },
+
+    async notify(id) {
+        try {
+            await apiFetch(`/api/admin/users/${id}/notify`, { method: 'POST' });
+            alert('Email de acceso activado enviado.');
         } catch (e) { alert(e.message); }
     },
 

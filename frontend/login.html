@@ -161,7 +161,7 @@
             e.preventDefault();
             const btn = formRegister.querySelector('button'); btn.disabled = true;
             const f = new FormData(formRegister);
-            const r = await post('/api/auth/register', { name: f.get('name'), email: f.get('email'), password: f.get('password') });
+            const r = await post('/api/auth/register', { name: f.get('name'), email: f.get('email'), password: f.get('password'), lang: LANG });
             btn.disabled = false;
             if (r.ok) {
                 formRegister.reset();

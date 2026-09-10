@@ -392,10 +392,11 @@ function renderVitalMap(points) {
 
     setTimeout(() => {
         const map = L.map('vital-map', { scrollWheelZoom: false });
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
-            subdomains: 'abcd',
+        // OSM estándar (CARTO exige API key desde 2026); tiles desaturados vía CSS
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
             maxZoom: 19,
+            className: 'tiles-muted',
         }).addTo(map);
 
         // Jitter markers sharing identical coords
@@ -1849,10 +1850,11 @@ function renderResidences(residences, events, person) {
     // Defer Leaflet init until after browser reflows the newly-visible section
     setTimeout(() => {
         const map = L.map('residences-map', { scrollWheelZoom: true });
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
-            subdomains: 'abcd',
+        // OSM estándar (CARTO exige API key desde 2026); tiles desaturados vía CSS
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
             maxZoom: 19,
+            className: 'tiles-muted',
         }).addTo(map);
 
         const markerHtml = (n, isBirth) => isBirth
