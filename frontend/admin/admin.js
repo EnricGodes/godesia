@@ -470,6 +470,16 @@ const Suggestions = {
 // ---------------------------------------------------------------------------
 // Users section (acceso a la web)
 // ---------------------------------------------------------------------------
+/* Fechas de auth: llegan en UTC (ISO con Z); se muestran en hora de Barcelona. */
+function fmtUserDate(iso, withTime) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d)) return esc(iso);
+    const opts = { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit' };
+    if (withTime) Object.assign(opts, { hour: '2-digit', minute: '2-digit', hour12: false });
+    return d.toLocaleString('es-ES', opts).replace(',', '');
+}
+
 const Users = {
     init() { this.load(); },
 
@@ -492,7 +502,7 @@ const Users = {
                 <thead><tr><th>Fecha</th><th>Nombre</th><th>Email</th><th></th></tr></thead>
                 <tbody>${items.map(u => `
                     <tr>
-                        <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${esc((u.created_at || '').slice(0, 16).replace('T', ' '))}</td>
+                        <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${fmtUserDate(u.created_at, true)}</td>
                         <td><strong>${esc(u.name || '—')}</strong></td>
                         <td style="font-size:0.82rem;">${esc(u.email || '—')}</td>
                         <td>
@@ -524,8 +534,8 @@ const Users = {
                     <tr>
                         <td><strong>${esc(u.name || '—')}</strong></td>
                         <td style="font-size:0.82rem;">${esc(u.email || '—')}</td>
-                        <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${esc((u.approved_at || u.created_at || '').slice(0, 10))}</td>
-                        <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${u.last_login_at ? esc(u.last_login_at.slice(0, 16).replace('T', ' ')) : '—'}</td>
+                        <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${fmtUserDate(u.approved_at || u.created_at, false)}</td>
+                        <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${fmtUserDate(u.last_login_at, true)}</td>
                         <td>
                             <div style="display:flex;gap:0.4rem;justify-content:flex-end;">
                                 <button class="btn btn-secondary btn-sm" title="Reenviar el email de acceso activado" onclick="Users.notify(${u.id})">Reenviar aviso</button>

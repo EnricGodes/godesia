@@ -120,6 +120,29 @@ def _create_session(conn, user_id):
     return token
 
 
+# Último acceso: se actualiza al cargar cualquier página con sesión (no solo al
+# hacer login, que con cookies de 30 días casi nunca ocurre). Throttle en memoria
+# para no escribir en la BD en cada petición.
+_LAST_ACCESS_EVERY = 300  # segundos
+_last_access = {}
+
+
+def _touch_last_access(user_id):
+    now = time.time()
+    if now - _last_access.get(user_id, 0) < _LAST_ACCESS_EVERY:
+        return
+    _last_access[user_id] = now
+    try:
+        conn = _connect()
+        try:
+            conn.execute("UPDATE users SET last_login_at = datetime('now') WHERE id = ?", (user_id,))
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"[auth] No se pudo actualizar last_login_at: {e}")
+
+
 def get_session_user(token):
     """Usuario (dict) de una cookie de sesión válida y APROBADO, o None."""
     if not token or _db_path is None:
@@ -488,9 +511,19 @@ async def list_users(status: str = ""):
         else:
             rows = conn.execute(
                 f"SELECT {_USER_COLS} FROM users ORDER BY created_at DESC").fetchall()
-        return [dict(r) for r in rows]
+        return [_with_utc_marker(dict(r)) for r in rows]
     finally:
         conn.close()
+
+
+def _with_utc_marker(row):
+    """SQLite guarda datetime('now') en UTC sin indicarlo ('YYYY-MM-DD HH:MM:SS').
+    Se devuelve como ISO con 'Z' para que el admin lo muestre en hora local."""
+    for k in ("created_at", "approved_at", "last_login_at"):
+        v = row.get(k)
+        if v and len(v) == 19 and v[10] == " ":
+            row[k] = v.replace(" ", "T") + "Z"
+    return row
 
 
 @auth_admin_router.get("/users/pending-count")
@@ -612,6 +645,8 @@ async def auth_middleware(request, call_next):
     user = get_session_user(request.cookies.get(SESSION_COOKIE))
     if user:
         request.state.user = user
+        if _wants_html(request, path):
+            _touch_last_access(user["id"])
         return await call_next(request)
     # 4. Sin acceso: página → redirige al login localizado; API/asset → 401.
     if _wants_html(request, path):
