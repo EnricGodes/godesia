@@ -560,33 +560,6 @@ def get_connection(db_path):
         "ALTER TABLE niches ADD COLUMN fs_url TEXT",
         # Nicho habilitado/deshabilitado: si 0, no se muestra en la app pública.
         "ALTER TABLE niches ADD COLUMN enabled INTEGER DEFAULT 1",
-        # Obra de Emili Godes importada desde inventario_maestro_consolidado_traduccion.xlsx
-        # (datos curados a mano; ningún script de import GEDCOM las nombra → sobreviven a
-        # reimportaciones, como cemeteries). Poblada por scripts/emili_import_inventory.py.
-        """CREATE TABLE IF NOT EXISTS emili_works (
-               id INTEGER PRIMARY KEY AUTOINCREMENT,
-               orig_filename TEXT UNIQUE NOT NULL,
-               image_file TEXT,
-               fondo TEXT,
-               categoria_es TEXT, categoria_ca TEXT, categoria_slug TEXT,
-               proyecto_es TEXT, proyecto_ca TEXT, proyecto_slug TEXT,
-               descripcion_es TEXT, descripcion_ca TEXT,
-               lugar_es TEXT, lugar_ca TEXT,
-               fecha_estimada TEXT, decada_start INTEGER,
-               destacado INTEGER DEFAULT 0,
-               created_at TEXT DEFAULT (datetime('now'))
-           )""",
-        "CREATE INDEX IF NOT EXISTS idx_emili_works_cat ON emili_works(categoria_slug)",
-        "CREATE INDEX IF NOT EXISTS idx_emili_works_proj ON emili_works(proyecto_slug)",
-        "CREATE INDEX IF NOT EXISTS idx_emili_works_dec ON emili_works(decada_start)",
-        "CREATE INDEX IF NOT EXISTS idx_emili_works_dest ON emili_works(destacado)",
-        # Décadas (1910–1920, 1920–1930, …). Tabla de apoyo pedida explícitamente.
-        """CREATE TABLE IF NOT EXISTS emili_decades (
-               decade_start INTEGER PRIMARY KEY,
-               decade_end INTEGER,
-               label TEXT,
-               num_works INTEGER DEFAULT 0
-           )""",
     ]:
         try:
             conn.execute(stmt)

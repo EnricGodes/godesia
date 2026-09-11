@@ -608,6 +608,7 @@ _PUBLIC_PREFIXES = (
     "/api/auth/", "/admin", "/api/admin/", "/locales/",
     "/i18n.js", "/footer.js", "/nav.js", "/style.css", "/icons/", "/favicon",
     "/sitemap", "/robots.txt", "/manifest",
+    "/emili-godes",  # redirección 301 a emili.godes.org (web independiente)
 )
 
 

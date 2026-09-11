@@ -5,8 +5,8 @@ The endpoint skips files that already exist, so re-running is safe.
 
 Usage:
     python3 scripts/upload_photos_to_railway.py                       # data/photos/ (nivel raíz)
-    python3 scripts/upload_photos_to_railway.py --subdir emili-godes  # data/photos/emili-godes/
-    python3 scripts/upload_photos_to_railway.py --subdir emili-godes --new-only  # solo las que faltan
+    python3 scripts/upload_photos_to_railway.py --subdir palazuelos  # data/photos/palazuelos/
+    python3 scripts/upload_photos_to_railway.py --subdir palazuelos --new-only  # solo las que faltan
 """
 
 import argparse
@@ -49,7 +49,7 @@ def upload_batch(paths: list[Path], subdir: str) -> dict:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--subdir", default="", help="Subcarpeta bajo data/photos/ (p. ej. emili-godes)")
+    parser.add_argument("--subdir", default="", help="Subcarpeta bajo data/photos/ (p. ej. palazuelos)")
     parser.add_argument("--new-only", action="store_true", help="Solo fotos que aún no están en Railway")
     args = parser.parse_args()
 

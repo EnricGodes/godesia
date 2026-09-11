@@ -57,7 +57,7 @@
   const DIVERSOS = [
     { label: t('nav.casas_godes', null, 'Casas Godes'), href: 'https://cases.godes.org/', raw: true, blank: true },
     { label: t('nav.cemeteries', null, 'Cementerios'),  href: '/cementerios.html' },
-    { label: 'Emili Godes', href: '/emili-godes/', raw: true },
+    { label: 'Emili Godes', href: 'https://emili.godes.org/', raw: true, blank: true },
   ];
 
   // ─── Helpers ──────────────────────────────────────────────────────────────

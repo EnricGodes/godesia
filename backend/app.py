@@ -965,6 +965,17 @@ async def robots(request: Request):
     return PlainTextResponse(f"User-agent: *\nDisallow: /admin/\n\nSitemap: {base}/sitemap.xml\n")
 
 
+# La web de Emili Godes vive ahora en su propio proyecto (EnricGodes/emili-godes, Cloudflare Pages).
+# Los enlaces antiguos /emili-godes/* redirigen allí de forma permanente.
+EMILI_GODES_URL = "https://emili.godes.org/"
+
+
+@app.get("/emili-godes")
+@app.get("/emili-godes/{rest:path}")
+async def emili_godes_redirect(rest: str = ""):
+    return RedirectResponse(EMILI_GODES_URL, status_code=301)
+
+
 # Serve photos
 if PHOTOS_DIR.exists():
     app.mount("/photos", StaticFiles(directory=str(PHOTOS_DIR)), name="photos")

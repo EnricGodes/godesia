@@ -2143,7 +2143,7 @@ async def classifier_reclassify_tags():
 
 import re as _re
 
-# Subcarpeta segura bajo data/photos/ (p. ej. "emili-godes"). Debe empezar por alfanumérico
+# Subcarpeta segura bajo data/photos/ (p. ej. "palazuelos"). Debe empezar por alfanumérico
 # → excluye "_auth" (la BD de usuarios) y cualquier traversal (sin '/', '.', ni '_' inicial).
 _SAFE_SUBDIR = _re.compile(r"^[a-z0-9][a-z0-9-]*$")
 
