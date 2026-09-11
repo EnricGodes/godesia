@@ -2160,7 +2160,7 @@ def _photos_target_dir(subdir: str) -> Path:
 @router.get("/list-photos")
 async def list_photos(subdir: str = ""):
     """Return the set of photo filenames present on the volume (for upload diff).
-    Pass ?subdir=emili-godes to list a whitelisted subfolder."""
+    Pass ?subdir=palazuelos to list a whitelisted subfolder."""
     photos_dir = _photos_target_dir(subdir)
     if not photos_dir.exists():
         return {"count": 0, "files": []}
