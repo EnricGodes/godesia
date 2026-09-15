@@ -3466,10 +3466,10 @@
   },
   {
     "godes_id": "@I500820@",
-    "palaz_id": null,
-    "palaz_name": null,
-    "confidence": 0,
-    "match_type": "rejected"
+    "palaz_id": "@I519085@",
+    "palaz_name": "Nico Abu-Sabbah Godes",
+    "confidence": 100,
+    "match_type": "manual"
   },
   {
     "godes_id": "@I500821@",
@@ -5934,6 +5934,76 @@
     "palaz_name": "Manel Jordi Vidal Planells",
     "confidence": 100,
     "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501408@",
+    "palaz_id": "@I505528@",
+    "palaz_name": "Arteaga Goizueta",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501412@",
+    "palaz_id": "@I501478@",
+    "palaz_name": "Rosa Masvidal",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501413@",
+    "palaz_id": "@I501479@",
+    "palaz_name": "Xavier Mestre Masvidal",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501414@",
+    "palaz_id": "@I501480@",
+    "palaz_name": "Jordi Mestre Masvidal",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501415@",
+    "palaz_id": "@I501229@",
+    "palaz_name": "Antonio Mestre",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501416@",
+    "palaz_id": "@I507108@",
+    "palaz_name": "Francisca Domingo",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501417@",
+    "palaz_id": "@I515168@",
+    "palaz_name": "Josep Badia",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501418@",
+    "palaz_id": "@I501232@",
+    "palaz_name": "Josefa Cabeza",
+    "confidence": 100,
+    "match_type": "manual"
+  },
+  {
+    "godes_id": "@I501419@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
+  },
+  {
+    "godes_id": "@I501420@",
+    "palaz_id": null,
+    "palaz_name": null,
+    "confidence": 0,
+    "match_type": "rejected"
   },
   {
     "godes_id": "@I53@",
