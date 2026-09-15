@@ -19,7 +19,7 @@ ENDPOINT = f"{BASE_URL}/api/admin/upload-photos"
 LIST_ENDPOINT = f"{BASE_URL}/api/admin/list-photos"
 PHOTOS_DIR = Path(__file__).parent.parent / "data" / "photos"
 BATCH_SIZE = 10  # conservador para no exceder límites de tamaño de request
-EXT = (".jpg", ".jpeg", ".png")
+EXT = (".jpg", ".jpeg", ".png", ".pdf")  # PDFs: documentos que la galería abre desde /photos/
 
 
 def local_dir(subdir: str) -> Path:
@@ -40,7 +40,7 @@ def get_new_photos(subdir: str) -> list[Path]:
 
 
 def upload_batch(paths: list[Path], subdir: str) -> dict:
-    files = [("files", (p.name, p.read_bytes(), "image/jpeg")) for p in paths]
+    files = [("files", (p.name, p.read_bytes(), "application/pdf" if p.suffix.lower() == ".pdf" else "image/jpeg")) for p in paths]
     data = {"subdir": subdir} if subdir else None
     r = requests.post(ENDPOINT, files=files, data=data, timeout=180)
     r.raise_for_status()

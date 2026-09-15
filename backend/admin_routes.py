@@ -2165,11 +2165,11 @@ async def list_photos(subdir: str = ""):
     if not photos_dir.exists():
         return {"count": 0, "files": []}
     files = [p.name for p in photos_dir.iterdir()
-             if p.suffix.lower() in (".jpg", ".jpeg", ".png")]
+             if p.suffix.lower() in _ALLOWED_PHOTO_EXT]
     return {"count": len(files), "files": files}
 
 
-_ALLOWED_PHOTO_EXT = (".jpg", ".jpeg", ".png")
+_ALLOWED_PHOTO_EXT = (".jpg", ".jpeg", ".png", ".pdf")  # .pdf: documentos de la galería (docs.js los abre desde /photos/)
 
 
 @router.post("/upload-photos")
