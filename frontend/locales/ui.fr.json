@@ -300,7 +300,7 @@
       "view_dossier": "Voir le dossier complet",
       "view_tree": "Voir dans l’arbre",
       "welcome": "Bonjour ! Je suis Godesia, votre assistant généalogique de la famille Godes.",
-      "welcome_hint": "Posez-moi vos questions en espagnol. Par exemple : <em>\"¿Quién era el padre de Artur Godes?\"</em>, <em>\"¿Cuándo nació Ernest Godes Hurtado?\"</em>, <em>\"¿Cuántos hijos tuvo...?\"</em>, <em>\"¿Dónde murió...?\"</em> ou écrivez simplement un nom pour le rechercher."
+      "welcome_hint": "Posez-moi vos questions. Par exemple : <em>\"Qui était le père d’Artur Godes ?\"</em>, <em>\"Quand est né Ernest Godes Hurtado ?\"</em>, <em>\"Combien d’enfants a eu... ?\"</em>, <em>\"Où est mort... ?\"</em> ou écrivez simplement un nom pour le rechercher."
     },
     "colaborar": {
       "meta_title": "Contribuer | Godesia"
