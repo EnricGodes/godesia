@@ -791,6 +791,9 @@ def get_spouses(conn, person_id):
                 "person": dict(spouse),
                 "marriage_date": r["date"],
                 "marriage_place": r["place"],
+                "divorce_date": r["divorce_date"],
+                "divorce_place": r["divorce_place"],
+                "divorced": bool(r["divorce_date"] or r["divorce_place"] or r["divorce_note"]),
             })
     return result
 

@@ -161,8 +161,19 @@ def _sql_norm(text: str) -> str:
     Kept minimal (no punctuation rewriting) so LIKE wildcards and spacing still work.
     Used on both sides of comparisons (user input AND DB data) so accented characters
     match their unaccented equivalents universally.
+
+    El guion sí se convierte en espacio: los nombres compuestos aparecen de las
+    dos formas ("Francisco-Javier" en la pregunta, "Francisco Javier" en la BD) y
+    al aplicarse a ambos lados siguen coincidiendo entre ellos.
     """
-    return _strip_accents(text or "").lower()
+    return (_strip_accents(text or "").lower()
+            .replace("-", " ").replace("\u00aa", "a").replace("\u00ba", "o"))
+
+
+def _exact_cmp(text: str) -> str:
+    """Comparación CON acentos (solo minúsculas y espacios colapsados): distingue
+    "María" de "Marià", que al quitar acentos serían la misma persona."""
+    return re.sub(r"\s+", " ", (text or "").strip().lower())
 
 
 def _norm_cmp(text: str) -> str:
@@ -407,6 +418,7 @@ class QueryRouter:
             (r"(?:qu[eé]\s+parentesco\s+ten[ií]a\s+.+\s+con\s+.+\s+y\s+cu[aá]l\s+de\s+los\s+dos\s+era\s+mayor)", "handle_relationship_and_older"),
             (r"(?:con\s+qu[eé]\s+(?:mujer|persona|hombre)\s+(?:form[oó]|enlaz[oó])\s+familia\s+.+|con\s+qu[eé]\s+(?:mujer|persona|hombre)\s+casó\s+.+)", "handle_spouse_with_person_type"),
             (r"(?:cu[aá]ndo\s+se\s+cas[oó]\s+.+|en\s+qu[eé]\s+(?:fecha|a[nñ]o|d[ií]a)\s+se\s+cas[oó]\s+.+|d[oó]nde\s+se\s+cas[oó]\s+.+|en\s+qu[eé]\s+(?:lugar|iglesia|sitio)\s+se\s+cas[oó]\s+.+)", "handle_marriage_date_place"),
+            (r"(?:divorci|divorce|se\s+separ[oó])", "handle_divorce"),
             (r"(?:con\s+qui[eé]n\s+se\s+cas[oó]\s+.+\s+y\s+en\s+qu[eé]\s+fecha\s+fue\s+la\s+boda)", "handle_spouse_and_wedding_date"),
             (r"(?:qui[eé]n\s+era\s+el\s+padre\s+de\s+la\s+madre\s+de\s+.+)", "handle_father_of_mother"),
             (r"(?:qu[eé]\s+hijos\s+de\s+.+\s+nacieron\s+en\s+.+)", "handle_children_born_in_place"),
@@ -416,7 +428,7 @@ class QueryRouter:
             (r"(?:cu[aá]ntos?\s+hijos\s+sobrevivieron\s+a\s+.+)", "handle_surviving_children_count"),
             (r"(?:qui[eé]n\s+naci[oó]\s+en\s+(?:el\s+)?a[nñ]o|who\s+was\s+born\s+in\s+the\s+year|qui[eé]n\s+naci[oó]\s+en\s+\d{4})", "handle_birth_year_search"),
             (r"(?:qui[eé]n(?:es)?\s+(?:falleci[oó]|muri[oó])\s+en\s+(?:el\s+a[nñ]o\s+)?\d{4}|who\s+died\s+in\s+(?:the\s+year\s+)?\d{4})", "handle_death_year_search"),
-            (r"(?:qu[eé]\s+edad\s+consta\s+en\s+(?:la\s+)?(?:defunci[oó]n|muerte)\s+de|(?:con|a)\s+qu[eé]\s+edad\s+(?:falleci[oó]|muri[oó])|qu[eé]\s+edad\s+ten[ií]a\s+(?:al\s+(?:morir|fallecer)|cuando\s+(?:muri[oó]|falleci[oó])))", "handle_death_age"),
+            (r"(?:qu[eé]\s+edad\s+consta\s+en\s+(?:la\s+)?(?:defunci[oó]n|muerte)\s+de|(?:con|a)\s+qu[eé]\s+edad\s+(?:falleci[oó]|muri[oó])|qu[eé]\s+edad\s+ten[ií]a\s+(?:.+?\s+)?(?:al\s+(?:morir|fallecer)|cuando\s+(?:muri[oó]|falleci[oó])))", "handle_death_age"),
             (r"(?:qu[eé]\s+causa\s+de\s+(?:defunci[oó]n|muerte)\s+consta|cu[aá]l\s+fue\s+la\s+causa\s+de\s+(?:muerte|defunci[oó]n|fallecimiento)|(?:qu[eé]\s+(?:enfermedad\s+o\s+causa|causa\s+o\s+enfermedad))\s+(?:provoc[oó]|caus[oó])|de\s+qu[eé]\s+(?:muri[oó]|falleci[oó]))", "handle_death_cause"),
             (r"(?:cu[aá]ntos?\s+a[nñ]os\s+vivi[oó]\s+.+|qu[eé]\s+edad\s+(?:alcanz[oó]|tuvo\s+al\s+morir)\s+.+)", "handle_lifespan"),
             (r"(?:qui[eé]nes\s+(?:eran|fueron|son)\s+los\s+hijos\s+de\s+.+\s+y\s+.+|qu[eé]\s+hijos\s+tuvo\s+en\s+com[uú]n\s+.+\s+y\s+.+|hijos\s+(?:en\s+com[uú]n\s+)?(?:de\s+)?la\s+pareja\s+(?:formada\s+por|de)\s+.+\s+y\s+.+)", "handle_couple_children"),
@@ -433,6 +445,7 @@ class QueryRouter:
             (r"(?:se\s+confirm[oó]|confirmaci[oó]n\s+consta)", "handle_event_field"),
             (r"primera\s+comuni[oó]n", "handle_event_field"),
             (r"(?:servicio|alistamiento)\s+militar", "handle_event_field"),
+            (r"(?:testamento|reuni[oó]n\s+familiar)", "handle_event_field"),
             (r"nacionalidad\s+de", "handle_event_field"),
             (r"religi[oó]n\s+(?:consta|de|ten[ií]a|era)", "handle_event_field"),
             (r"problema\s+de\s+salud", "handle_event_field"),
@@ -457,6 +470,7 @@ class QueryRouter:
             (r"(?:abuela\s+materna|[àa]via\s+matern|abuela\s+por\s+v[ií]a\s+materna|abuela\s+por\s+parte\s+de\s+madre|abuela\s+de\s+l[ií]nea\s+materna|qu[eé]\s+abuela\s+ten[ií]a\s+por\s+v[ií]a\s+materna|qu[eé]\s+abuela\s+ten[ií]a\s+por\s+parte\s+de\s+madre)", "handle_maternal_grandmother"),
             # --- Parentescos raros (ANTES de los genéricos, que los absorberían) ---
             (r"(?:medi[oa]s?\s+cu[ñn]ad[oa]s?)", "handle_medio_cuñados"),
+            (r"(?:herman[oa]s?\s+(?:completos?|completas?|carnales?|de\s+padre\s+y\s+madre|de\s+doble\s+v[ií]nculo))", "handle_full_siblings"),
             (r"(?:medi[oa]s?\s+herman[oa]s?|hermanastr[oa]s?)", "handle_half_siblings"),
             (r"(?:medi[oa]s?\s+t[ií][oa]s?)", "handle_half_uncles"),
             (r"(?:medi[oa]s?\s+prim[oa]s?)", "handle_half_cousins"),
@@ -547,7 +561,7 @@ class QueryRouter:
             (r"(?:(?:qu[eé]\s+)?actividad\s+militar\s+tuvo\s+.+|servicio\s+militar\s+de\s+.+|datos?\s+militar(?:es)?\s+de\s+.+)", "handle_military"),
             (r"(?:qui[eé]nes\s+participaron\s+en\s+(?:la\s+)?guerra|qui[eé]nes\s+fueron\s+a\s+la\s+guerra|combatientes\s+del\s+[aá]rbol)", "handle_military_all"),
             # Burial
-            (r"(?:d[oó]nde\s+(?:fue\s+enterrad[oa]|est[aá]\s+(?:enterrad[oa]|sepultad[oa])|recibi[oó]\s+sepultura)\s+.+|sepultura\s+de\s+.+|tumba\s+de\s+.+|(?:qu[eé]\s+)?lugar\s+de\s+entierro\s+consta\s+para\s+.+)", "handle_burial"),
+            (r"(?:d[oó]nde\s+(?:fue\s+enterrad[oa]|est[aá]\s+(?:enterrad[oa]|sepultad[oa])|recibi[oó]\s+sepultura)\s+.+|sepultura\s+de\s+.+|tumba\s+de\s+.+|(?:qu[eé]\s+)?(?:lugar|fecha)\s+de\s+entierro\s+consta\s+para\s+.+)", "handle_burial"),
             (r"(?:qui[eé]nes\s+(?:fueron\s+enterrados|est[aá]n\s+enterrados|est[aá]n\s+sepultados)\s+en\s+.+|enterramientos\s+en\s+.+)", "handle_burial_place"),
             # Baptism
             (r"(?:cu[aá]ndo\s+(?:fue\s+)?bautizad[oa]\s+.+|(?:fecha|d[ií]a)\s+(?:del?\s+)?bautismo\s+de\s+.+|bautismo\s+de\s+.+)", "handle_baptism"),
@@ -574,9 +588,9 @@ class QueryRouter:
             (r"^(?:cu[nñ]adas?|sister[s-]in.law)\s+.+$", "handle_sisters_in_law"),
             (r"^(?:cu[nñ]ados?|brother[s-]in.law)\s+.+$", "handle_brothers_in_law"),
             (r"^(?:donde|d[oó]nde)\s+naci[oó]\s+.+$|(?:cu[aá]l\s+(?:fue|es)\s+(?:el\s+lugar|la\s+ciudad|la\s+localidad|el\s+pueblo)\s+(?:de\s+)?(?:nacimiento|origen|natal)|qu[eé]\s+lugar.*nacimiento|en\s+qu[eé]\s+(?:lugar|localidad|pueblo|ciudad)\s+naci[oó]|de\s+d[oó]nde\s+era\s+natural)\s+.+", "handle_birth_place_of_person"),
-            (r"(?:d[oó]nde\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:lugar|sitio|ciudad|pueblo)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+(?:el\s+lugar|la\s+ciudad)\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+lugar\s+de\s+(?:fallecimiento|defunci[oó]n)\s+(?:tiene|consta)|lugar\s+de\s+defunci[oó]n\s+de)\s+.+", "handle_death_place_of_person"),
+            (r"(?:d[oó]nde\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:lugar|sitio|ciudad|pueblo|localidad|poblaci[oó]n|municipio)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+(?:el\s+lugar|la\s+ciudad)\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+lugar\s+de\s+(?:fallecimiento|defunci[oó]n)\s+(?:tiene|consta)|lugar\s+de\s+defunci[oó]n\s+de)\s+.+", "handle_death_place_of_person"),
             (r"(?:(?:cuando|cu[aá]ndo|en\s+qu[eé]\s+momento)\s+(?:naci[oó]|fue\s+nacid[oa]|fue\s+born)|cu[aá]ndo\s+consta\s+que\s+naci[oó]|en\s+qu[eé]\s+(?:a[nñ]o|fecha|d[ií]a)\s+naci[oó]|qu[eé]\s+a[nñ]o\s+naci[oó]|en\s+qu[eé]\s+fecha.*naci|qu[eé]\s+fecha\s+de\s+nacimiento\s+consta|a[nñ]o\s+de\s+nacimiento\s+de|cu[aá]l\s+(?:fue|es)\s+(?:la\s+)?fecha\s+(?:exacta\s+)?(?:de\s+)?nacimiento)\s+.+", "handle_birth_date_of_person"),
-            (r"(?:cu[aá]ndo\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:fecha|a[nñ]o|d[ií]a)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+la\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+fecha\s+de\s+defunci[oó]n\s+(?:tiene|consta)|hay\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de|cu[aá]ndo\s+se\s+produjo\s+la\s+defunci[oó]n\s+de|fue\s+(?:enterrad[oa]|sepultad[oa]))\s+.+", "handle_death_date_of_person"),
+            (r"(?:cu[aá]ndo\s+(?:falleci[oó]|muri[oó])|en\s+qu[eé]\s+(?:fecha|a[nñ]o|d[ií]a)\s+(?:falleci[oó]|muri[oó])|cu[aá]l\s+fue\s+la\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)|qu[eé]\s+fecha\s+de\s+(?:defunci[oó]n|muerte|fallecimiento)\s+(?:tiene|consta)(?:\s+para)?|hay\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de|cu[aá]ndo\s+se\s+produjo\s+la\s+defunci[oó]n\s+de|fue\s+(?:enterrad[oa]|sepultad[oa]))\s+.+", "handle_death_date_of_person"),
             (r"^(?:profesi[oó]n|oficio|ocupaci[oó]n|trabajo|empleo|qu[eé]\s+oficio|qu[eé]\s+hac[ií]a|cu[aá]l\s+(?:era|fue)\s+(?:el\s+medio\s+de\s+vida|el\s+oficio|la\s+profesi[oó]n|la\s+ocupaci[oó]n))\s+(?:de\s+)?.+$", "handle_occupation_natural"),
             (r"(?:residencia[s]?|domicilio[s]?|d[óo]nde\s+(?:viv[ií]a|vivia|vive|vivi[oó]|ha\s+vivido|residi[oó]|resid[ií]a|habit[oó]|estuvo\s+domiciliad[oa])|en\s+qu[eé]\s+(?:domicilio[s]?|direcci(?:[oó]n|ones)|casa[s]?)\s+(?:estuvo|vivi[oó]|residi[oó])|qu[eé]\s+(?:domicilio[s]?|direcci(?:[oó]n|ones))\s+tuvo|cu[aá]l(?:es)?\s+(?:fue(?:ron)?|era[n]?|es|son)\s+(?:el\s+|la\s+|los\s+|las\s+)?(?:domicilio[s]?|direcci(?:[oó]n|ones)|primer\s+domicilio|residencia[s]?))\s+", "handle_last_residence"),
             (r"^(?:notas?|apuntes?)\s+(?:biogr[aá]ficas?\s+)?de\s+.+$", "handle_notes_field"),
@@ -804,6 +818,10 @@ class QueryRouter:
             name_norm = _norm_cmp(rr["name"])
             tokens = set(_tokenize_name(rr["name"]))
             s = 0
+            # Coincidencia literal (acentos incluidos): manda sobre la que solo
+            # coincide al despojar acentos.
+            if _exact_cmp(rr["name"]) == _exact_cmp(name_fragment):
+                s += 2000
             if name_norm == query_norm:
                 s += 1000
             # Nickname exact match
@@ -1677,6 +1695,18 @@ class QueryRouter:
                 out.append(r)
         return out
 
+    def handle_full_siblings(self, q):
+        return self._kin_answer(q, r"(?:herman[oa]s?\s+(?:completos?|completas?|carnales?|de\s+padre\s+y\s+madre|de\s+doble\s+v[ií]nculo))",
+                                "hermanos de padre y madre", self._compute_full_siblings)
+
+    def _compute_full_siblings(self, p):
+        """Hermanos de doble vínculo: comparten padre Y madre, ambos conocidos."""
+        fid, mid = p.get("father_id"), p.get("mother_id")
+        if not (fid and mid):
+            return []
+        return [s for s in self._siblings_excl(p)
+                if s.get("father_id") == fid and s.get("mother_id") == mid]
+
     def handle_half_siblings(self, q):
         return self._kin_answer(q, r"(?:medi[oa]s?\s+herman[oa]s?|hermanastr[oa]s?)", "medios hermanos o hermanastros", self._compute_half_siblings)
 
@@ -2490,7 +2520,7 @@ class QueryRouter:
             return None
 
         # Determine if asking for date or place
-        is_date_query = bool(re.search(r"cu[aá]ndo|fecha|a[nñ]o|d[ií]a", q, re.I))
+        is_date_query = bool(re.search(r"\bcu[aá]ndo\b|\bfecha\b|\ba[nñ]o\b|\bd[ií]a\b", q, re.I))
 
         spouses = get_spouses(self.conn, person['id'])
         if not spouses:
@@ -2528,6 +2558,51 @@ class QueryRouter:
             answer = _t("handle_marriage_date_place.2", a=person['name']) + " y ".join(parts) + "."
 
         return {"answer": answer, "people_mentioned": [p['id'] for p in people], "people_with_photos": self._people_payload(people)}
+
+    def handle_divorce(self, question):
+        """Fecha o lugar del divorcio: "¿cuándo/dónde se divorció X?", "¿qué
+        fecha de divorcio consta para X?". El dato vive en marriages
+        (divorce_date/divorce_place), que sync_catalog llena desde "1 DIV"."""
+        q = _clean_question(question)
+        # El sujeto puede ir tras "de/para" ("divorcio de X", "divorci consta
+        # para X"), tras el verbo ("se divorció X", "es va divorciar X") o
+        # delante ("X se divorció"). Las reescrituras ca/en/fr dejan la raíz
+        # divorci-/divorce-, de ahí el \w* en vez de terminaciones cerradas.
+        div = r"(?:divorci\w*|divorce\w*|separaci[oó]n|separ[oó])"
+        m = (re.search(rf"{div}\s+(?:consta\s+|constan\s+)?(?:de|para)\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(rf"se\s+{div}\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(rf"{div}\s+(.+?)(?:\?|$)", q, re.I) or
+             re.search(rf"(.+?)\s+(?:se\s+)?{div}", q, re.I))
+        if not m:
+            return None
+        person, _ = self._resolve_person(m.group(1).strip())
+        if not person:
+            return None
+
+        # "dónde/en qué lugar" pide lugar; el resto (cuándo, qué fecha, año…) fecha
+        wants_place = bool(re.search(r"d[oó]nde|lugar|ciudad|poblaci[oó]n", q, re.I))
+
+        people = [person]
+        parts = []
+        for sp in get_spouses(self.conn, person['id']):
+            sp = _as_dict(sp)
+            if not sp.get('divorced'):
+                continue
+            spouse = _as_dict(sp['person']) if sp.get('person') else None
+            if spouse:
+                people.append(spouse)
+            value = sp.get('divorce_place') if wants_place else _render_date(sp.get('divorce_date'))
+            key = "handle_divorce.3" if wants_place else "handle_divorce.2"
+            parts.append(_t(key, a=_person_link(spouse) if spouse else "?", b=value)
+                         if value else _t("handle_divorce.4", a=_person_link(spouse) if spouse else "?"))
+
+        if not parts:
+            return {"answer": _t("handle_divorce.1", a=person['name']),
+                    "people_mentioned": [person['id']],
+                    "people_with_photos": self._people_payload([person])}
+        return {"answer": "\n".join(parts),
+                "people_mentioned": [p['id'] for p in people],
+                "people_with_photos": self._people_payload(people)}
 
     def handle_father_of_mother(self, question):
         q = _clean_question(question)
@@ -3933,7 +4008,7 @@ class QueryRouter:
     def handle_burial(self, question):
         q = _clean_question(question)
         m = (re.search(r"(?:enterrad[oa]|sepultad[oa]|sepultura\s+de|tumba\s+de|recibi[oó]\s+sepultura)\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"lugar\s+de\s+entierro\s+consta\s+para\s+(.+?)(?:\?|$)", q, re.I))
+             re.search(r"(?:lugar|fecha)\s+de\s+entierro\s+consta\s+para\s+(.+?)(?:\?|$)", q, re.I))
         if not m:
             return None
         person, _ = self._resolve_person(m.group(1))
@@ -4293,7 +4368,7 @@ class QueryRouter:
 
     def handle_death_place_of_person(self, question):
         """Handle 'Donde/falleció X?' - return X's death place"""
-        subject = (self._extract_subject_name_from_pattern(question, r"(?:d[oó]nde|en\s+qu[eé]\s+(?:lugar|sitio|ciudad|pueblo))\s+(?:falleci[oó]|muri[oó])\s+(.+?)(?:\?|$)") or
+        subject = (self._extract_subject_name_from_pattern(question, r"(?:d[oó]nde|en\s+qu[eé]\s+(?:lugar|sitio|ciudad|pueblo|localidad|poblaci[oó]n|municipio))\s+(?:falleci[oó]|muri[oó])\s+(.+?)(?:\?|$)") or
                   self._extract_subject_name_from_pattern(question, r"(?:cu[aá]l\s+fue\s+(?:el\s+lugar|la\s+ciudad)\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de|lugar\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de)\s+(.+?)(?:\?|$)") or
                   self._extract_subject_name_from_pattern(question, r"(?:qu[eé]\s+lugar\s+de\s+(?:fallecimiento|defunci[oó]n)\s+(?:tiene|consta)\s+(?:de\s+)?)\s*(.+?)(?:\?|$)"))
         if not subject:
@@ -4329,7 +4404,7 @@ class QueryRouter:
         """Handle 'Cuando murio/falleció X?' - return X's death date"""
         subject = (self._extract_subject_name_from_pattern(question, r"(?:cu[aá]ndo|en\s+qu[eé]\s+(?:fecha|a[nñ]o|d[ií]a))\s+(?:falleci[oó]|muri[oó]|fue\s+enterrad[oa])\s+(.+?)(?:\?|$)") or
                   self._extract_subject_name_from_pattern(question, r"(?:cu[aá]l\s+fue\s+la\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de)\s+(.+?)(?:\?|$)") or
-                  self._extract_subject_name_from_pattern(question, r"(?:qu[eé]\s+fecha\s+de\s+defunci[oó]n\s+(?:tiene|consta)\s+(?:de\s+)?)\s*(.+?)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"(?:qu[eé]\s+fecha\s+de\s+(?:defunci[oó]n|muerte|fallecimiento)\s+(?:tiene|consta)\s+(?:para\s+|de\s+)?)\s*(.+?)(?:\?|$)") or
                   self._extract_subject_name_from_pattern(question, r"(?:hay\s+fecha\s+de\s+(?:fallecimiento|defunci[oó]n)\s+de)\s+(.+?)(?:\?|$)") or
                   self._extract_subject_name_from_pattern(question, r"(?:cu[aá]ndo\s+se\s+produjo\s+la\s+defunci[oó]n\s+de)\s+(.+?)(?:\?|$)"))
         if not subject:
@@ -4363,6 +4438,8 @@ class QueryRouter:
         (r"confirmaci[oó]n\s+consta\s+para\s+(.+?)(?:\?|$)", "Confirmación"),
         (r"primera\s+comuni[oó]n\s+consta\s+para\s+(.+?)(?:\?|$)", "Primera Comunión"),
         (r"(?:servicio|alistamiento)\s+militar\s+(?:consta\s+para|de)\s+(.+?)(?:\?|$)", "%Militar%"),
+        (r"testamento\s+(?:consta\s+para|de|tiene)\s+(.+?)(?:\?|$)", "Testamento"),
+        (r"reuni[oó]n\s+familiar\s+(?:consta\s+para|de)\s+(.+?)(?:\?|$)", "Reunión Familiar"),
         (r"nacionalidad\s+de\s+(.+?)(?:\?|$)", "Nacionalidad"),
         (r"religi[oó]n\s+(?:consta\s+para|de|(?:que\s+)?ten[ií]a|era\s+la\s+de)\s+(.+?)(?:\?|$)", "Religión"),
         (r"problema\s+de\s+salud\s+.*?\s+(?:para|de)\s+(.+?)(?:\?|$)", "Enfermedad"),
@@ -4419,7 +4496,8 @@ class QueryRouter:
         """'¿Qué edad consta en la defunción de X?' / '¿Con qué edad falleció X?'"""
         subject = (self._extract_subject_name_from_pattern(question, r"edad\s+consta\s+en\s+(?:la\s+)?(?:defunci[oó]n|muerte)\s+de\s+(.+?)(?:\?|$)") or
                    self._extract_subject_name_from_pattern(question, r"(?:con|a)\s+qu[eé]\s+edad\s+(?:falleci[oó]|muri[oó])\s+(.+?)(?:\?|$)") or
-                   self._extract_subject_name_from_pattern(question, r"edad\s+ten[ií]a\s+(?:al\s+(?:morir|fallecer)|cuando\s+(?:muri[oó]|falleci[oó]))\s+(.+?)(?:\?|$)"))
+                   self._extract_subject_name_from_pattern(question, r"edad\s+ten[ií]a\s+(.+?)\s+al\s+(?:morir|fallecer)(?:\?|$)") or
+                  self._extract_subject_name_from_pattern(question, r"edad\s+ten[ií]a\s+(?:al\s+(?:morir|fallecer)|cuando\s+(?:muri[oó]|falleci[oó]))\s+(.+?)(?:\?|$)"))
         if not subject:
             return None
         person, _ = self._resolve_person(subject)

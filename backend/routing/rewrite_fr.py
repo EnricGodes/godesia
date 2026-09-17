@@ -334,6 +334,7 @@ TOKEN_MAP = {
     "formation": "formacion", "partenaires": "conyuges", "partenaire": "conyuge",
     "adresses": "domicilios", "paternelle": "paterna", "maternelle": "materna",
     "baptise": "bautizado", "baptisee": "bautizada",
+    "divorce": "divorcio", "divorcee": "divorciada",
     # consultas rápidas de la home
     "membres": "miembros", "membre": "miembro", "vivant": "vivo",
     "vivants": "vivos", "vivante": "viva", "vivantes": "vivas",

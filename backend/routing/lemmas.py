@@ -124,8 +124,9 @@ RULES = {
         (set(), {"consuegro", "consuegros"}, set(), "handle_consuegros", "consuegros de {s}"),
         (set(), {"cunado", "cunados"}, set(), "handle_brothers_in_law", "cuñados de {s}"),
         (set(), {"cunada", "cunadas"}, set(), "handle_sisters_in_law", "cuñada de {s}"),
-        (set(), {"nuera", "nueras"}, set(), "handle_daughters_in_law", "nueras de {s}"),
-        (set(), {"yerno", "yernos"}, set(), "handle_sons_in_law", "yernos de {s}"),
+        # "yernos y nueras" lleva ambos tokens → cede al patrón que los da juntos.
+        (set(), {"nuera", "nueras"}, {"yerno", "yernos"}, "handle_daughters_in_law", "nueras de {s}"),
+        (set(), {"yerno", "yernos"}, {"nuera", "nueras"}, "handle_sons_in_law", "yernos de {s}"),
     ],
     "greatgrandparents": [
         (set(), {"rama"}, set(), "handle_great_grandparents", "bisabuelos de {s}"),
@@ -159,6 +160,11 @@ RULES = {
 # --- Desambiguadores globales: si aparece cualquiera, cedemos al router ------
 # NO son ruido: redirigen a un handler más específico (conteos→*_count, extremos)
 # o a una intención no migrada (lugar/fecha). Garantía de cero regresiones.
+# "hermanos completos" / "hermanos de padre y madre" = doble vínculo: relación
+# propia (handle_full_siblings del router de patrones), no una pregunta por el
+# padre ni por la madre.
+FULL_SIBLING_CUES = {"completo", "completos", "completa", "completas", "carnales"}
+
 GLOBAL_CEDE = {
     "cuantos", "cuantas", "cuanta", "cuanto", "numero", "cantidad",
     "muchos", "muchas", "pocos", "pocas", "bastantes", "numerosos", "numerosas",

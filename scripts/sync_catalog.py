@@ -53,6 +53,7 @@ _EVENT_TAG_TYPE = {
     "CENS": "Censo", "EDUC": "Educación", "BAPM": "Bautismo", "CHR": "Bautizo",
     "CONF": "Confirmación", "FCOM": "Primera Comunión", "EMIG": "Emigración",
     "IMMI": "Inmigración", "NATI": "Nacionalidad", "RELI": "Religión", "DSCR": "Descripción",
+    "WILL": "Testamento",
 }
 _EVENT_TAGS = set(_EVENT_TAG_TYPE) | {"EVEN"}
 
@@ -678,7 +679,9 @@ def parse_gedcom_people(lines):
             fam_id = match.group(1)
             husb_id = None
             wife_id = None
-            marr_data = {"date": None, "place": None, "divorced": False}
+            marr_data = {"date": None, "place": None, "divorced": False,
+                         "divorce_date": None, "divorce_place": None,
+                         "divorce_note": None}
             chil_list = []
 
             while i < len(lines):
@@ -711,7 +714,20 @@ def parse_gedcom_people(lines):
                             marr_data["place"] = marr_line.split("PLAC", 1)[1].strip()
                         j += 1
                 elif next_line.startswith("1 DIV"):
+                    # "1 DIV Y" puede traer debajo fecha, lugar y nota del
+                    # divorcio; sin leerlas, marriages.divorce_date se queda
+                    # vacía y el router no puede responder por el divorcio.
                     marr_data["divorced"] = True
+                    j = i + 1
+                    while j < len(lines) and lines[j].startswith("2"):
+                        div_line = lines[j].rstrip("\n")
+                        if "DATE" in div_line:
+                            marr_data["divorce_date"] = div_line.split("DATE", 1)[1].strip()
+                        elif "PLAC" in div_line:
+                            marr_data["divorce_place"] = div_line.split("PLAC", 1)[1].strip()
+                        elif "NOTE" in div_line and not marr_data["divorce_note"]:
+                            marr_data["divorce_note"] = div_line.split("NOTE", 1)[1].strip()
+                        j += 1
 
                 i += 1
 
@@ -720,6 +736,9 @@ def parse_gedcom_people(lines):
                     "husb": husb_id, "wife": wife_id,
                     "date": marr_data["date"], "place": marr_data["place"],
                     "divorced": marr_data.get("divorced", False),
+                    "divorce_date": marr_data.get("divorce_date"),
+                    "divorce_place": marr_data.get("divorce_place"),
+                    "divorce_note": marr_data.get("divorce_note"),
                 }
 
             for chil_id in chil_list:
@@ -1058,6 +1077,7 @@ def main():
             person["baptism_date"] = convert_date_to_spanish(person["baptism_date"])
         for marr in marriages.values():
             marr["date"] = convert_date_to_spanish(marr["date"])
+            marr["divorce_date"] = convert_date_to_spanish(marr.get("divorce_date"))
         for occs in occupations.values():
             for occ in occs:
                 occ["date"] = convert_date_to_spanish(occ["date"])
@@ -1130,10 +1150,12 @@ def main():
         cursor.execute("DELETE FROM marriages")
         for fam_id, marr in marriages.items():
             cursor.execute("""
-                INSERT INTO marriages (person1_id, person2_id, date, place, divorce_note)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO marriages (person1_id, person2_id, date, place,
+                                       divorce_date, divorce_place, divorce_note)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (marr["husb"], marr["wife"], marr["date"], marr["place"],
-                  "Y" if marr.get("divorced") else None))
+                  marr.get("divorce_date"), marr.get("divorce_place"),
+                  marr.get("divorce_note") or ("Y" if marr.get("divorced") else None)))
 
         # DELETE + re-insert ocupaciones, residencias, notas (1-to-many)
         cursor.execute("DELETE FROM occupations")
