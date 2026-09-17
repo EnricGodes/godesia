@@ -4374,7 +4374,10 @@
       "Antonio Artamendi Jorda",
       "Carmen Quintana Barberà",
       "María Dolores Torras Plà",
-      "Montserrat Godes Diago"
+      "Montserrat Godes Diago",
+      "Montserrat Matas Cardelús",
+      "Teresa Matas Cardelús",
+      "Maria Mercé Matas Cardelús"
     ],
     "answer_type": "person_list",
     "category": "siblings_in_law",
@@ -4390,7 +4393,10 @@
       "@I500983@",
       "@I500788@",
       "@I500789@",
-      "@I36@"
+      "@I36@",
+      "@I501405@",
+      "@I501406@",
+      "@I501407@"
     ]
   },
   {
@@ -5321,7 +5327,8 @@
       "Martí Cabestany Casal",
       "Nico Abu-Sabbah Godes",
       "Triana Rodríguez Godes",
-      "Àlex Fité Godes"
+      "Àlex Fité Godes",
+      "Clara de Pablo Cabestany"
     ],
     "answer_type": "person_list",
     "category": "great_great_grandchildren",
@@ -5351,7 +5358,8 @@
       "@I500211@",
       "@I500820@",
       "@I500365@",
-      "@I500085@"
+      "@I500085@",
+      "@I501420@"
     ]
   },
   {
@@ -9889,7 +9897,13 @@
       "Rosa ¿Senba?",
       "Teresa Caralt",
       "Xavier Sisternas Surís",
-      "Úrsula Martí"
+      "Úrsula Martí",
+      "Antonio Mestre Domingo",
+      "Gertrudis Badia Cabeza",
+      "Antonio Mestre",
+      "Francisca Domingo",
+      "Jose Badia",
+      "Josefa Cabeza"
     ],
     "answer_type": "person_list",
     "category": "known_ancestors",
@@ -9941,7 +9955,13 @@
       "@I500497@",
       "@I500172@",
       "@I140@",
-      "@I500226@"
+      "@I500226@",
+      "@I501409@",
+      "@I501410@",
+      "@I501415@",
+      "@I501416@",
+      "@I501417@",
+      "@I501418@"
     ]
   },
   {
@@ -10243,7 +10263,8 @@
       "Berta Barahona Lleixà",
       "Clàudia Cabestany Casal",
       "Jan Barahona Lleixà",
-      "Martí Cabestany Casal"
+      "Martí Cabestany Casal",
+      "Clara de Pablo Cabestany"
     ],
     "answer_type": "person_list",
     "category": "second_cousins",
@@ -10259,7 +10280,8 @@
       "@I500918@",
       "@I500821@",
       "@I500371@",
-      "@I500211@"
+      "@I500211@",
+      "@I501420@"
     ]
   },
   {
@@ -13960,7 +13982,9 @@
     "question": "¿Quiénes fueron los tatarabuelos de Joel Mestre Montaner?",
     "answer": [
       "Anna Terrats Bertrán",
-      "Pau Godes Caballeria"
+      "Pau Godes Caballeria",
+      "Antonio Mestre Domingo",
+      "Gertrudis Badia Cabeza"
     ],
     "answer_type": "person_list",
     "category": "great_great_grandparents",
@@ -13974,7 +13998,9 @@
     ],
     "answer_entity_ids": [
       "@I9@",
-      "@I7@"
+      "@I7@",
+      "@I501409@",
+      "@I501410@"
     ]
   },
   {
@@ -16774,14 +16800,14 @@
   },
   {
     "id": "q0804",
-    "question": "¿Qué nietos varones tuvo Anita Bausis Llestas?",
+    "question": "¿Qué nietos varones tuvo Ana Bausis Llestas?",
     "answer": [
       "Alfons Puig Casamitjana",
       "Juan Puig Casamitjana"
     ],
     "answer_type": "person_list",
     "category": "grandsons",
-    "person": "Anita Bausis Llestas",
+    "person": "Ana Bausis Llestas",
     "person_id": "@I501269@",
     "relation": "grandsons",
     "source_tags": [
@@ -19337,7 +19363,9 @@
     "question": "¿Qué consuegros constan para Dolores Carreras Moyá?",
     "answer": [
       "Antònia Diago Almuzara",
-      "Emili Godes Hurtado"
+      "Emili Godes Hurtado",
+      "Joaquim Matas Pagés",
+      "Magdalena Cardelús Costa"
     ],
     "answer_type": "person_list",
     "category": "co_parents_in_law",
@@ -19351,7 +19379,9 @@
     ],
     "answer_entity_ids": [
       "@I17@",
-      "@I10@"
+      "@I10@",
+      "@I501403@",
+      "@I501404@"
     ]
   },
   {
@@ -19784,7 +19814,10 @@
       "Josep Mª Cabestany Carreras",
       "Lluís Cabestany Carreras",
       "Maria Dolores Cabestany Carreras",
-      "Maria Teresa Cabestany Carreras"
+      "Maria Teresa Cabestany Carreras",
+      "Montserrat Matas Cardelús",
+      "Teresa Matas Cardelús",
+      "Maria Mercé Matas Cardelús"
     ],
     "answer_type": "person_list",
     "category": "great_uncles_aunts",
@@ -19801,7 +19834,10 @@
       "@I500070@",
       "@I500071@",
       "@I500073@",
-      "@I500072@"
+      "@I500072@",
+      "@I501405@",
+      "@I501406@",
+      "@I501407@"
     ]
   },
   {
