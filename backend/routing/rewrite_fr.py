@@ -334,4 +334,8 @@ TOKEN_MAP = {
     "formation": "formacion", "partenaires": "conyuges", "partenaire": "conyuge",
     "adresses": "domicilios", "paternelle": "paterna", "maternelle": "materna",
     "baptise": "bautizado", "baptisee": "bautizada",
+    # consultas rápidas de la home
+    "membres": "miembros", "membre": "miembro", "vivant": "vivo",
+    "vivants": "vivos", "vivante": "viva", "vivantes": "vivas",
+    "anniversaires": "aniversarios", "anniversaire": "aniversario",
 }

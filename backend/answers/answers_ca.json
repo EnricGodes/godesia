@@ -31,6 +31,7 @@
   "handle_anniversaries.3": "any",
   "handle_anniversaries.4": "anys",
   "handle_anniversaries.5": "<strong>{a} {b}</strong> · {c}{d}",
+  "handle_anniversaries.6": " — fa {a} {b}",
   "handle_are_cousins.1": "Sí, {a} i {b} eren cosins germans.",
   "handle_are_cousins.2": "No, {a} i {b} no eren cosins germans; la relació documentada entre tots dos era de {c}.",
   "handle_are_cousins.3": "No, {a} i {b} no consten com a cosins germans.",

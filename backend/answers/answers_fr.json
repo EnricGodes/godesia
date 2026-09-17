@@ -31,6 +31,7 @@
   "handle_anniversaries.3": "an",
   "handle_anniversaries.4": "ans",
   "handle_anniversaries.5": "<strong>{a} {b}</strong> · {c}{d}",
+  "handle_anniversaries.6": " — fête ses {a} {b}",
   "handle_are_cousins.1": "Oui, {a} et {b} étaient cousins germains.",
   "handle_are_cousins.2": "Non, {a} et {b} n’étaient pas cousins germains ; la relation documentée entre eux était {c}.",
   "handle_are_cousins.3": "Non, {a} et {b} ne sont pas enregistrés comme cousins germains.",

@@ -31,6 +31,7 @@
   "handle_anniversaries.3": "año",
   "handle_anniversaries.4": "años",
   "handle_anniversaries.5": "<strong>{a} {b}</strong> · {c}{d}",
+  "handle_anniversaries.6": " — cumple {a} {b}",
   "handle_are_cousins.1": "Sí, {a} y {b} eran primos hermanos.",
   "handle_are_cousins.2": "No, {a} y {b} no eran primos hermanos; la relación documentada entre ambos era de {c}.",
   "handle_are_cousins.3": "No, {a} y {b} no constan como primos hermanos.",

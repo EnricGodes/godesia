@@ -367,9 +367,9 @@ class QueryRouter:
 
         self.patterns: List[Tuple[str, str]] = [
             # Home hero-chips: aggregate/overview queries (high priority)
-            (r"(?:estad[íi]stic|cu[áa]nt[oa]s\s+(?:miembros|person[ae]s|individu)[^?]*(?:famili|godes)|quant[se]?\s+membres|family\s+statistics|how\s+many\s+(?:members|people)[^?]*family)", "handle_family_stats"),
-            (r"(?:qui[eé]n(?:es)?\s+(?:est[áa]n?\s+)?viv[oa]s?|miembros?\s+vivos?|personas?\s+viv[oa]s|persones?\s+vives?|qui\s+est[àa]\s+viu|who\s+(?:is|are)\s+aliv|living\s+members?)", "handle_living_members"),
-            (r"(?:aniversari|cumplea|onom[àa]stic|birthday|anniversar)", "handle_anniversaries"),
+            (r"(?:estad[íi]stic|statistik|cu[áa]nt[oa]s\s+(?:miembros?|person[ae]s|individu)[^?]*(?:famili|godes)|quant[se]?\s+membres|family\s+statistics|how\s+many\s+(?:members|people)[^?]*family|wie\s+viele\s+mitglieder)", "handle_family_stats"),
+            (r"(?:qui[eé]n(?:es)?\s+(?:es\s+|est[áa]n?\s+)?viv[oa]s?|miembros?\s+vivos?|personas?\s+viv[oa]s|persones?\s+vives?|qui\s+est[àa]\s+viu|who\s+(?:is|are)\s+aliv|living\s+members?|wer\s+lebt|lebende\s+(?:mitglieder|personen))", "handle_living_members"),
+            (r"(?:aniversari|cumplea|onom[àa]stic|birthday|anniversa|jahrestag|geburtstag)", "handle_anniversaries"),
             (r"(?:qu[eé]\s+persona\s+(?:tuvo|tenia)\s+m[aá]s\s+hijos|cu[aá]l\s+es\s+la\s+persona\s+con\s+m[aá]s\s+hijos\s+registrados)", "handle_max_children_person"),
             (r"(?:qui[eé]n\s+(?:vivio|vivi[oó]|fue)\s+m[aá]s\s+a[nñ]os|qui[eé]n\s+es\s+la\s+persona\s+m[aá]s\s+longeva\s+del\s+[aá]rbol|cu[aá]l\s+es\s+la\s+persona\s+m[aá]s\s+longeva\s+del\s+[aá]rbol)", "handle_max_longevity_person"),
             (r"(?:cu[aá]l\s+es\s+la\s+media\s+de\s+hijos|cu[aá]l\s+es\s+la\s+media\s+de\s+hijos\?)", "handle_average_children"),
@@ -1138,8 +1138,8 @@ class QueryRouter:
         c = self.conn
         month = _dt.date.today().month
         this_year = _dt.date.today().year
-        months = ["", "enero", "febrero", "marzo", "abril", "mayo", "junio",
-                  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+        lang = _current_lang.get()
+        months = _MONTHS.get(lang, _MONTHS["es"])
         rows = [dict(r) for r in c.execute(
             "SELECT id, name, birth_day, birth_year, is_alive, photo_file "
             "FROM people WHERE birth_month = ? AND birth_day IS NOT NULL "
@@ -1147,7 +1147,7 @@ class QueryRouter:
             "ORDER BY birth_day, birth_year",
             (month,)
         ).fetchall()]
-        mes = months[month]
+        mes = months[month - 1]
         if not rows:
             return {"answer": _t("handle_anniversaries.2", a=mes),
                     "people_mentioned": [], "people_with_photos": []}
@@ -1161,7 +1161,7 @@ class QueryRouter:
             if by:
                 age = this_year - by
                 yr = _t("handle_anniversaries.3") if age == 1 else _t("handle_anniversaries.4")
-                extra = f" — cumple {age} {yr}"
+                extra = _t("handle_anniversaries.6", a=age, b=yr)
             parts.append(_t("handle_anniversaries.5", a=day, b=mes, c=link, d=extra))
         return {
             "answer": "\n".join(parts),

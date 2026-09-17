@@ -31,6 +31,7 @@
   "handle_anniversaries.3": "Jahr",
   "handle_anniversaries.4": "Jahre",
   "handle_anniversaries.5": "<strong>{a} {b}</strong> · {c}{d}",
+  "handle_anniversaries.6": " — wird {a} {b} alt",
   "handle_are_cousins.1": "Ja, {a} und {b} waren Cousins/Cousinen ersten Grades.",
   "handle_are_cousins.2": "Nein, {a} und {b} waren keine Cousins/Cousinen ersten Grades; die dokumentierte Beziehung zwischen ihnen war {c}.",
   "handle_are_cousins.3": "Nein, {a} und {b} sind nicht als Cousins/Cousinen ersten Grades erfasst.",

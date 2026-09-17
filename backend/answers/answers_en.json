@@ -31,6 +31,7 @@
   "handle_anniversaries.3": "year",
   "handle_anniversaries.4": "years",
   "handle_anniversaries.5": "<strong>{a} {b}</strong> · {c}{d}",
+  "handle_anniversaries.6": " — turns {a} {b}",
   "handle_are_cousins.1": "Yes, {a} and {b} were first cousins.",
   "handle_are_cousins.2": "No, {a} and {b} were not first cousins; the documented relationship between them was {c}.",
   "handle_are_cousins.3": "No, {a} and {b} are not recorded as first cousins.",

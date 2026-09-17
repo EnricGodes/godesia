@@ -383,7 +383,11 @@ document.getElementById('hero-query').addEventListener('keydown', e => {
 
 document.querySelectorAll('.hero-chip').forEach(chip => {
     chip.addEventListener('click', () => {
-        const q = chip.dataset.q;
+        // La pregunta viaja en el idioma de navegación (el router entiende
+        // es/ca/en/fr/de para estas tres); data-q queda de red de seguridad.
+        const q = chip.dataset.i18nQ
+            ? _i18nT(chip.dataset.i18nQ, null, chip.dataset.q)
+            : chip.dataset.q;
         if (window.smartSearch) {
             window.smartSearch(q);
         } else {

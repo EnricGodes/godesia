@@ -300,4 +300,8 @@ TOKEN_MAP = {
     "religion": "religion", "nationality": "nacionalidad",
     "education": "educacion", "confirmation": "confirmacion",
     "move": "mudanza", "moved": "mudanza",
+    # consultas rápidas de la home
+    "members": "miembros", "member": "miembro", "alive": "vivo",
+    "living": "vivos", "anniversaries": "aniversarios",
+    "anniversary": "aniversario",
 }

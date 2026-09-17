@@ -258,6 +258,7 @@ TOKEN_MAP = {
     "nacionalitat": "nacionalidad", "religio": "religion",
     "educacio": "educacion", "formacio": "formacion",
     "malaltia": "enfermedad", "entitat": "entidad", "membre": "miembro",
+    "membres": "miembros",
     "consten": "constan", "viure": "vivir", "visque": "vivio",
     # evento genérico y campos
     "fet": "hecho", "documentat": "documentado", "documentada": "documentada",
