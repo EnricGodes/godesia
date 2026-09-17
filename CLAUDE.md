@@ -153,7 +153,8 @@ El banco de pruebas (`data/test_bank.json`, gestionado por `backend/test_bank.py
 - **`scripts/regression_check.py`** enruta las 1000 preguntas y las clasifica PASS/FAIL/UNRESOLVED comparando por `answer_type`: personas (con `answer_entity_ids`) por **match exacto de IDs** (`people_mentioned − sujeto`), lugar/texto por **contención normalizada**, fecha a **nivel de año** (el router reduce fechas GEDCOM a año). Congela `data/gedcom_regression_baseline.json` (`{id: estado}`) y reporta **REGRESIONES** (pass→no) y **MEJORAS** (fail→pass) por categoría; sale con código ≠ 0 si hay regresiones (uso CI).
 - **Flujo al tocar el router:** implementar → `python3 scripts/regression_check.py` (0 regresiones + subida de MEJORAS) → `--update-baseline` → commit del baseline. Tras añadir patrones, re-correr también `scripts/parity_check.py --lang ca|en|fr` (la paridad multiidioma debe seguir 100%).
 - Es **independiente** de `test_bank.py`/`test_oracle.py` (banco viejo de parentesco), que no se toca.
-- **Fuera de alcance por hueco de datos** (no de patrón): `divorce_date`/`divorce_place` (la columna `marriages.divorce_date` está vacía → arreglo en MyHeritage, no en el router).
+- **Arbitrar un fallo antes de tocar el router**: `scripts/verify_kinship_answers.py` calcula el parentesco desde las tablas sin pasar por el router. Si coincide con el router, lo viejo es el banco (gente añadida en una importación posterior) y hay que refrescar sus `answer_entity_ids`; si al banco le faltan personas, el bug es del router.
+- **Antes de dar un hueco por upstream, mira el .ged**: `sync_catalog.py` lee la etiqueta pero a veces descarta sus subetiquetas. Así estaban vacíos `marriages.divorce_*` (de `1 DIV`) y el testamento (de `1 WILL`), que SÍ venían en el GEDCOM. `scripts/backfill_gedcom_gaps.py` los aplica a la BD en uso sin reimportar el catálogo.
 
 ## Acceso privado (login + registro con aprobación)
 
