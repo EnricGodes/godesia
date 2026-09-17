@@ -96,6 +96,7 @@ const Cementerios = {
             nichesEl.innerHTML = `<p class="text-xs text-on-surface-variant px-1">${_i18nT('pages.cemeteries.no_niches', null, 'Sin nichos registrados.')}</p>`;
         } else {
             // Agrupados por cementerio
+            const noLoc = _i18nT('pages.cemeteries.no_location', null, 'Sin ubicación en el mapa');
             const byCem = {};
             this.overview.niches.forEach(n => {
                 (byCem[n.cemetery_id] = byCem[n.cemetery_id] || { name: n.cemetery_name, niches: [] }).niches.push(n);
@@ -106,7 +107,11 @@ const Cementerios = {
                     <a class="sidebar-link flex items-center justify-between gap-2" data-niche="${n.id}"
                        onclick="Cementerios.locateNiche(${n.id})">
                         <span class="truncate">${esc(this._nicheLabel(n))}</span>
-                        <span class="text-[10px] text-outline shrink-0">${n.people_count}</span>
+                        <span class="flex items-center gap-1 shrink-0">
+                            ${n.lat == null ? `<span class="material-symbols-outlined text-outline text-[13px]"
+                                 title="${esc(noLoc)}">location_off</span>` : ''}
+                            <span class="text-[10px] text-outline">${n.people_count}</span>
+                        </span>
                     </a>`).join('')}
             `).join('');
         }
@@ -229,8 +234,12 @@ const Cementerios = {
             },
         });
         this.nicheMarkers = {};
+        this.nichesById = {};
         const points = [];
         detail.niches.forEach(n => {
+            this.nichesById[n.id] = n;
+            // Sin coordenadas no hay marcador, pero el nicho existe: su panel se
+            // abre igual desde el sidebar o desde un enlace ?niche=.
             if (n.lat == null) return;
             points.push([n.lat, n.lng]);
             const m = L.marker([n.lat, n.lng], {
@@ -243,11 +252,12 @@ const Cementerios = {
         });
         this.map.addLayer(this.clusterGroup);
 
-        if (focusNicheId && this.nicheMarkers[focusNicheId]) {
-            const { marker, niche } = this.nicheMarkers[focusNicheId];
-            this.openNichePanel(niche);
+        const focus = focusNicheId ? this.nichesById[focusNicheId] : null;
+        if (focus) this.openNichePanel(focus);
+
+        if (focus && focus.lat != null) {
             if (highlight) this._highlightNiche(focusNicheId);
-            this.map.flyTo([niche.lat, niche.lng], 19, { duration: 1.2 });
+            this.map.flyTo([focus.lat, focus.lng], 19, { duration: 1.2 });
         } else if (points.length) {
             this.map.flyToBounds(L.latLngBounds(points), { padding: [60, 60], maxZoom: 18 });
         } else if (detail.lat != null) {
@@ -278,7 +288,10 @@ const Cementerios = {
     openNichePanel(n) {
         this._markSidebarNiche(n.id);
         document.getElementById('np-title').textContent = this._nicheLabel(n);
-        document.getElementById('np-location').textContent = n.title ? n.name : '';
+        const locParts = [];
+        if (n.title) locParts.push(n.name);
+        if (n.lat == null) locParts.push(_i18nT('pages.cemeteries.no_location', null, 'Sin ubicación en el mapa'));
+        document.getElementById('np-location').textContent = locParts.join(' · ');
         const cemEl = document.getElementById('np-cemetery');
         cemEl.innerHTML = esc(`${this.current.name}${this.current.city ? ' · ' + this.current.city : ''}`) +
             (n.fs_url
