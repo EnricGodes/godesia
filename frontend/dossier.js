@@ -372,22 +372,6 @@ function renderPerfil(data, displayName) {
         });
 }
 
-// Basemap simplificado para los mapas del dossier: Esri Light Gray Canvas
-// (calles y agua en gris claro, sin relieve ni fronteras marítimas) + una capa
-// separada de etiquetas. Sin API key, a diferencia de CARTO desde 2026.
-// El canvas de Esri solo llega a z16: maxNativeZoom escala los tiles de 16
-// más allá en vez de servir el cartel "Map data not yet available".
-function addSimpleBasemap(map) {
-    const esri = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
-    const opts = { maxNativeZoom: 16, maxZoom: 19 };
-    L.tileLayer(esri + 'World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-        ...opts,
-        attribution: 'Tiles © <a href="https://www.esri.com/">Esri</a> — Esri, HERE, Garmin, © OpenStreetMap contributors',
-        className: 'tiles-muted',
-    }).addTo(map);
-    L.tileLayer(esri + 'World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', opts).addTo(map);
-}
-
 const VITAL_ICONS = {
     birth: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2d4b33" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M16.874 12C17.5826 13.037 18 14.3093 18 15.6842C18 16.5017 17.8524 17.2829 17.5838 18M7.12605 12C6.41738 13.037 6 14.3093 6 15.6842C6 19.1723 8.68629 22 12 22C14.5371 22 16.7064 20.3424 17.5838 18M17.5838 18C14.8509 16.8 12.0559 14.8333 11 14"/></svg>`,
     marriage: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#78583e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="16.5" r="5.5"/><circle cx="15.5" cy="16.5" r="5.5"/><path d="M12 9C12 9 16 7.14706 16 4.13889C16 2.95761 15.1579 2 14 2C13.0526 2 12.4211 2.41176 12 3.23529C11.5789 2.41176 10.9474 2 10 2C8.84211 2 8 2.95761 8 4.13889C8 7.14706 12 9 12 9Z"/></svg>`,
@@ -408,7 +392,7 @@ function renderVitalMap(points) {
 
     setTimeout(() => {
         const map = L.map('vital-map', { scrollWheelZoom: false });
-        addSimpleBasemap(map);
+        GodesiaBasemap.add(map);
 
         // Jitter markers sharing identical coords
         const seen = {};
@@ -1861,7 +1845,7 @@ function renderResidences(residences, events, person) {
     // Defer Leaflet init until after browser reflows the newly-visible section
     setTimeout(() => {
         const map = L.map('residences-map', { scrollWheelZoom: true });
-        addSimpleBasemap(map);
+        GodesiaBasemap.add(map);
 
         const markerHtml = (n, isBirth) => isBirth
             ? `<div style="background:#78583e;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25);">★</div>`

@@ -54,20 +54,9 @@ const Cementerios = {
                 { attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics', maxNativeZoom: 19, maxZoom: 22 }
             );
         } else {
-            // Esri Light Gray Canvas (sin API key; CARTO pasó a exigirla y marcaba
-            // los tiles con "API KEY REQUIRED"): fondo gris mínimo, sin carreteras
-            // ni límites marítimos. Base + capa de rótulos (ciudades) por separado.
-            // Solo llega a zoom 16 nativo; de sobra para la vista general.
-            this.baseLayer = L.layerGroup([
-                L.tileLayer(
-                    'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-                    { attribution: 'Tiles © Esri — Esri, HERE, Garmin, FAO, NOAA, USGS', maxNativeZoom: 16, maxZoom: 19 }
-                ),
-                L.tileLayer(
-                    'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
-                    { maxNativeZoom: 16, maxZoom: 19, pane: 'shadowPane' }
-                ),
-            ]);
+            // Vista general: basemap propio en los colores del design system.
+            this.baseLayer = GodesiaBasemap.add(this.map);
+            return;
         }
         this.baseLayer.addTo(this.map);
     },
