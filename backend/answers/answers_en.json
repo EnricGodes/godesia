@@ -382,5 +382,16 @@
   "handle_family_stats.8": "🌿 <strong>Living</strong> · {a} · <strong>Deceased</strong> · {b}",
   "frag.birthplace_unknown": "undocumented birthplace",
   "frag.marriage_paren": " (marriage: {a})",
-  "handle_name_matches.1": "I found several matches:"
+  "handle_name_matches.1": "I found several matches:",
+  "handle_birth_place_period.before": "The people born before {a} were",
+  "handle_birth_place_period.after": "The people born after {a} were",
+  "handle_birth_place_period.between": "The people born between {a} and {b} were",
+  "handle_birth_place_period.before.place": "The people born in {a} before {b} were",
+  "handle_birth_place_period.after.place": "The people born in {a} after {b} were",
+  "handle_birth_place_period.between.place": "The people born in {a} between {b} and {c} were",
+  "handle_death_age.1": "The age recorded at the death of {a} is {b}.",
+  "handle_death_age.2": "No age at death is recorded for {a}.",
+  "handle_death_cause.1": "The cause of death recorded for {a} is {b}.",
+  "handle_death_cause.2": "No cause of death is recorded for {a}.",
+  "handle_event_field.1": "The record of {a} states: {b}."
 }

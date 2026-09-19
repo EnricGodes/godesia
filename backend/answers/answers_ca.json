@@ -382,5 +382,16 @@
   "handle_family_stats.8": "🌿 <strong>Vius</strong> · {a} · <strong>Difunts</strong> · {b}",
   "frag.birthplace_unknown": "lloc de naixement no documentat",
   "frag.marriage_paren": " (matrimoni: {a})",
-  "handle_name_matches.1": "He trobat diverses coincidències:"
+  "handle_name_matches.1": "He trobat diverses coincidències:",
+  "handle_birth_place_period.before": "Les persones nascudes abans de {a} van ser",
+  "handle_birth_place_period.after": "Les persones nascudes després de {a} van ser",
+  "handle_birth_place_period.between": "Les persones nascudes entre {a} i {b} van ser",
+  "handle_birth_place_period.before.place": "Les persones nascudes a {a} abans de {b} van ser",
+  "handle_birth_place_period.after.place": "Les persones nascudes a {a} després de {b} van ser",
+  "handle_birth_place_period.between.place": "Les persones nascudes a {a} entre {b} i {c} van ser",
+  "handle_death_age.1": "L'edat que consta a la defunció de {a} és {b}.",
+  "handle_death_age.2": "No consta l'edat de defunció de {a}.",
+  "handle_death_cause.1": "La causa de mort que consta per a {a} és {b}.",
+  "handle_death_cause.2": "No consta la causa de mort de {a}.",
+  "handle_event_field.1": "A la fitxa de {a} consta: {b}."
 }

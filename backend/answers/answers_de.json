@@ -382,5 +382,16 @@
   "handle_family_stats.8": "🌿 <strong>Lebende</strong> · {a} · <strong>Verstorbene</strong> · {b}",
   "frag.birthplace_unknown": "nicht dokumentierter Geburtsort",
   "frag.marriage_paren": " (Heirat: {a})",
-  "handle_name_matches.1": "Ich habe mehrere Übereinstimmungen gefunden:"
+  "handle_name_matches.1": "Ich habe mehrere Übereinstimmungen gefunden:",
+  "handle_birth_place_period.before": "Die vor {a} geborenen Personen waren",
+  "handle_birth_place_period.after": "Die nach {a} geborenen Personen waren",
+  "handle_birth_place_period.between": "Die zwischen {a} und {b} geborenen Personen waren",
+  "handle_birth_place_period.before.place": "Die in {a} vor {b} geborenen Personen waren",
+  "handle_birth_place_period.after.place": "Die in {a} nach {b} geborenen Personen waren",
+  "handle_birth_place_period.between.place": "Die in {a} zwischen {b} und {c} geborenen Personen waren",
+  "handle_death_age.1": "Das beim Tod von {a} vermerkte Alter ist {b}.",
+  "handle_death_age.2": "Für {a} ist kein Sterbealter vermerkt.",
+  "handle_death_cause.1": "Die für {a} vermerkte Todesursache ist {b}.",
+  "handle_death_cause.2": "Für {a} ist keine Todesursache vermerkt.",
+  "handle_event_field.1": "In der Akte von {a} steht: {b}."
 }

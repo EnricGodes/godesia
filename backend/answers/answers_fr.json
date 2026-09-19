@@ -382,5 +382,16 @@
   "handle_family_stats.8": "🌿 <strong>Vivants</strong> · {a} · <strong>Décédés</strong> · {b}",
   "frag.birthplace_unknown": "lieu de naissance non documenté",
   "frag.marriage_paren": " (mariage : {a})",
-  "handle_name_matches.1": "J’ai trouvé plusieurs correspondances :"
+  "handle_name_matches.1": "J’ai trouvé plusieurs correspondances :",
+  "handle_birth_place_period.before": "Les personnes nées avant {a} étaient",
+  "handle_birth_place_period.after": "Les personnes nées après {a} étaient",
+  "handle_birth_place_period.between": "Les personnes nées entre {a} et {b} étaient",
+  "handle_birth_place_period.before.place": "Les personnes nées à {a} avant {b} étaient",
+  "handle_birth_place_period.after.place": "Les personnes nées à {a} après {b} étaient",
+  "handle_birth_place_period.between.place": "Les personnes nées à {a} entre {b} et {c} étaient",
+  "handle_death_age.1": "L'âge indiqué au décès de {a} est {b}.",
+  "handle_death_age.2": "L'âge au décès de {a} n'est pas documenté.",
+  "handle_death_cause.1": "La cause de décès indiquée pour {a} est {b}.",
+  "handle_death_cause.2": "La cause de décès de {a} n'est pas documentée.",
+  "handle_event_field.1": "La fiche de {a} indique : {b}."
 }

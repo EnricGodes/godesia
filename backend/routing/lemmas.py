@@ -182,6 +182,8 @@ GLOBAL_CEDE = {
     "descendencia", "descendientes", "vivos", "vivas", "longeva", "longevo",
     # comparaciones / superlativos ("vivió más años", "más hijos") → analítico
     "mas",
+    # "cuántos años vivió X" es longevidad (handle_lifespan), no domicilio
+    "anos",
     # parentescos raros → handlers dedicados (medio hermano, doble primo, primo
     # tercero, tío político, hermanastro…). Hacen ceder el compuesto al patrón.
     "medio", "media", "medios", "medias", "doble", "dobles",

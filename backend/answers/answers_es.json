@@ -387,5 +387,11 @@
   "handle_family_stats.8": "🌿 <strong>Vivos</strong> · {a} · <strong>Fallecidos</strong> · {b}",
   "frag.birthplace_unknown": "lugar de nacimiento no documentado",
   "frag.marriage_paren": " (matrimonio: {a})",
-  "handle_name_matches.1": "He encontrado varias coincidencias:"
+  "handle_name_matches.1": "He encontrado varias coincidencias:",
+  "handle_birth_place_period.before": "Las personas nacidas antes de {a} fueron",
+  "handle_birth_place_period.after": "Las personas nacidas después de {a} fueron",
+  "handle_birth_place_period.between": "Las personas nacidas entre {a} y {b} fueron",
+  "handle_birth_place_period.before.place": "Las personas nacidas en {a} antes de {b} fueron",
+  "handle_birth_place_period.after.place": "Las personas nacidas en {a} después de {b} fueron",
+  "handle_birth_place_period.between.place": "Las personas nacidas en {a} entre {b} y {c} fueron"
 }

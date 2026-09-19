@@ -97,6 +97,7 @@ PHRASE_RULES = [
     (r"\bmes grans\b", "mayores"),
     (r"\bmes petit\b", "menor"),
     (r"\bmes petita\b", "menor"),
+    (r"\b(la )?persona mes jove\b", r"\1persona mas joven"),
     (r"\bmes jove\b", "menor"),
     (r"\bhi havia\b", "habia"),
     (r"\bhi ha\b", "hay"),
@@ -117,6 +118,7 @@ PERIPHRASIS = {
     "fer": ("hizo", "hicieron"),
     "provocar": ("provoco", "provocaron"),
     "estar": ("estuvo", "estuvieron"),
+    "sobreviure": ("sobrevivio", "sobrevivieron"),
 }
 
 # ── N-gramas (largo→corto), antes del barrido token a token ──────────────────
@@ -142,6 +144,10 @@ MULTIWORD_MAP = [
     # artefacto del banco: "va néixer el <año/lugar>" → "nació en <…>".
     # OJO: una fecha completa DD/MM/AAAA conserva "el" (así lo espera el patrón
     # español de nacimiento por fecha), solo el año suelto o el lugar usan "en".
+    (r"\bel mateix any\b", "el mismo ano"),
+    (r"\ba la decada de\b", "en la decada de"),
+    # "va néixer a Barcelona el 1917" → "nació en Barcelona en 1917" (año suelto)
+    (r"\bel (\d{4})\b", r"en \1"),
     (r"\bnacio el el\b", "nacio en el"),
     (r"\bnacio el (\d{4})\b", r"nacio en \1"),
     (r"\bnacio el (?=[a-zà-ÿ])", "nacio en "),
@@ -266,4 +272,9 @@ TOKEN_MAP = {
     "esdeveniments": "eventos", "centre": "centro", "mig": "medio",
     "premi": "premio", "funeral": "funeral", "obituari": "obituario",
     "reunio": "reunion", "servei": "servicio", "allistament": "alistamiento",
+    # periodos / comparaciones ("abans de 1950", "el mateix any que", "segle")
+    "abans": "antes", "despres": "despues", "mateix": "mismo", "mateixa": "misma",
+    "segle": "siglo", "familia": "familia", "deu": "diez", "vint": "veinte",
+    "posicio": "posicion", "naixement": "nacimiento", "naixements": "nacimientos",
+    "decada": "decada",
 }

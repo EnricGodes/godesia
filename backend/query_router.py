@@ -463,6 +463,12 @@ class QueryRouter:
             (r"(?:nombre\s+compuesto\s+como|compound\s+name\s+like)", "handle_compound_given_name"),
             (r"(?:qu[eé]\s+registro\s+corresponde\s+a|which\s+record\s+matches)", "handle_record_lookup"),
             (r"(?:qu[eé]\s+personas\s+nacieron\s+en|cu[aá]ntas\s+personas\s+nacieron\s+en|which\s+people\s+were\s+born\s+in)", "handle_birth_place_people"),
+            # "quién (de la familia) nació en LUGAR antes de / después de / entre AÑO(S)" y
+            # "quién nació antes de AÑO" (sin lugar). Va después de los patrones por año
+            # exacto ("quién nació en 1917", "quién nació en LUGAR en 1917").
+            (r"(?:qui[eé]n(?:es)?|qu[eé]\s+(?:personas|miembros|gente))\s+(?:de\s+la\s+fam[ií]lia\s+)?(?:naci[oó]|nacieron)\s+(?:en\s+.+?\s+)?(?:antes\s+de(?:l\s+a[nñ]o)?|despu[eé]s\s+de(?:l\s+a[nñ]o)?|entre)\s+\d{4}", "handle_birth_place_period"),
+            # "quién (de la familia) nació en LUGAR" (sin año) → lista por lugar de nacimiento
+            (r"(?:qui[eé]n(?:es)?|qu[eé]\s+(?:miembros|gente))\s+(?:de\s+la\s+fam[ií]lia\s+)?(?:naci[oó]|nacieron)\s+en\s+(?!(?:el\s+)?(?:a[nñ]o|mism[oa]|\d{4}))", "handle_birth_place_people"),
             (r"(?:de\s+qu[eé]\s+(?:matrimonio(?:\s+o\s+pareja)?|pareja)\s+naci[oó])", "handle_birth_union"),
             (r"(?:padres\s+y\s+los\s+hijos|pares\s+i\s+els\s+fills)", "handle_parents_and_children"),
             (r"(?:cu[aá]ntos?\s+herman|quants?\s+germans?|qu[eé]\s+n[uú]mero\s+de\s+hermanos|qu[eé]\s+cantidad\s+de\s+hermanos|eran\s+muchos\s+los\s+hermanos|cu[aá]ntos\s+eran\s+en\s+total\s+los\s+hermanos|cu[aá]ntos?\s+hermanos\s+se\s+le\s+conocen)", "handle_siblings_count"),
@@ -2275,7 +2281,8 @@ class QueryRouter:
     def handle_age_at_first_child(self, question):
         q = _clean_question(question)
         m = (re.search(r"(?:a\s+)?qu[eé]\s+edad\s+(?:tuvo|ten[ií]a.*cuando\s+naci[oó])\s+su\s+primer\s+hij[oa]\s+(.+?)(?:\?|$)", q, re.I) or
-             re.search(r"cu[aá]ntos?\s+a[nñ]os\s+ten[ií]a\s+(.+?)\s+cuando\s+naci[oó]\s+su\s+primer\s+hij[oa](?:,\s+(.+?))?(?:\?|$)", q, re.I))
+             re.search(r"cu[aá]ntos?\s+a[nñ]os\s+ten[ií]a\s+(.+?)\s+cuando\s+naci[oó]\s+su\s+primer\s+hij[oa](?:,\s+(.+?))?(?:\?|$)", q, re.I) or
+             re.search(r"qu[eé]\s+edad\s+ten[ií]a\s+(.+?)\s+(?:cuando\s+naci[oó]|al\s+nacer)\s+su\s+primer\s+hij[oa](?:,\s+(.+?))?(?:\?|$)", q, re.I))
         if not m:
             return None
         parent, _ = self._resolve_person(m.group(1))
@@ -2975,7 +2982,8 @@ class QueryRouter:
         return self._build_info_response(person)
 
     def handle_birth_place_people(self, question):
-        place = self._extract_place_after(question, r"(?:personas\s+nacieron\s+en|people\s+were\s+born\s+in)\s+(.+?)(?:\?|$)")
+        place = (self._extract_place_after(question, r"(?:personas\s+nacieron\s+en|people\s+were\s+born\s+in)\s+(.+?)(?:\?|$)") or
+                 self._extract_place_after(question, r"(?:qui[eé]n(?:es)?|qu[eé]\s+(?:miembros|gente))\s+(?:de\s+la\s+fam[ií]lia\s+)?(?:naci[oó]|nacieron)\s+en\s+(.+?)(?:\?|$)"))
         if not place:
             return None
         rows=[_as_dict(r) for r in self.conn.execute(
@@ -2985,6 +2993,42 @@ class QueryRouter:
         answer=self._list_people_answer(_t("handle_birth_place_people.1", a=place), rows)
         return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
+
+    def handle_birth_place_period(self, question):
+        """'¿Quién (de la familia) nació en Alàs antes de 1950?' / '…después de 1900' /
+        '…entre 1740 y 1800'. El lugar es opcional ('¿quién nació antes de 1800?')."""
+        q = _clean_question(question)
+        m = re.search(
+            r"(?:naci[oó]|nacieron)\s+(?:en\s+(?P<place>.+?)\s+)?"
+            r"(?:(?P<before>antes\s+de(?:l\s+a[nñ]o)?)|(?P<after>despu[eé]s\s+de(?:l\s+a[nñ]o)?)|(?P<between>entre))\s+"
+            r"(?P<y1>\d{4})(?:\s+(?:y|e|i|and)\s+(?P<y2>\d{4}))?", q, re.I)
+        if not m:
+            return None
+        place = (m.group("place") or "").strip().rstrip("?.!,;:")
+        y1 = int(m.group("y1"))
+        y2 = int(m.group("y2")) if m.group("y2") else None
+        if m.group("before"):
+            cond, params, key = "birth_year < ?", [y1], "handle_birth_place_period.before"
+        elif m.group("after"):
+            cond, params, key = "birth_year > ?", [y1], "handle_birth_place_period.after"
+        else:
+            if y2 is None:
+                return None
+            lo, hi = sorted((y1, y2))
+            cond, params, key = "birth_year BETWEEN ? AND ?", [lo, hi], "handle_birth_place_period.between"
+            y1, y2 = lo, hi
+        sql = ("SELECT id, name, birth_year, death_year, birth_place, photo_file, is_alive FROM people "
+               "WHERE birth_year IS NOT NULL AND " + cond)
+        if place:
+            sql += " AND NORMALIZE(birth_place) LIKE '%' || NORMALIZE(?) || '%'"
+            params.append(place)
+        rows = [_as_dict(r) for r in self.conn.execute(sql + " ORDER BY birth_year, name LIMIT 100", params).fetchall()]
+        if place:
+            prefix = _t(key + ".place", a=place, b=y1, c=y2)
+        else:
+            prefix = _t(key, a=y1, b=y2)
+        answer = self._list_people_answer(prefix, rows)
+        return {"answer": answer, "people_mentioned": [r['id'] for r in rows], "people_with_photos": self._people_payload(rows[:25])}
 
     def _all_people_basic(self):
         rows = self.conn.execute(
@@ -4497,6 +4541,7 @@ class QueryRouter:
         subject = (self._extract_subject_name_from_pattern(question, r"edad\s+consta\s+en\s+(?:la\s+)?(?:defunci[oó]n|muerte)\s+de\s+(.+?)(?:\?|$)") or
                    self._extract_subject_name_from_pattern(question, r"(?:con|a)\s+qu[eé]\s+edad\s+(?:falleci[oó]|muri[oó])\s+(.+?)(?:\?|$)") or
                    self._extract_subject_name_from_pattern(question, r"edad\s+ten[ií]a\s+(.+?)\s+al\s+(?:morir|fallecer)(?:\?|$)") or
+                   self._extract_subject_name_from_pattern(question, r"edad\s+ten[ií]a\s+(.+?)\s+cuando\s+(?:muri[oó]|falleci[oó])(?:\?|$)") or
                   self._extract_subject_name_from_pattern(question, r"edad\s+ten[ií]a\s+(?:al\s+(?:morir|fallecer)|cuando\s+(?:muri[oó]|falleci[oó]))\s+(.+?)(?:\?|$)"))
         if not subject:
             return None
