@@ -1584,8 +1584,12 @@ const Transfer = (() => {
         return v ? [v] : [];
     }
 
+    // Los valores se guardan en un array y el botón los referencia por índice:
+    // meter el texto (con comillas) dentro de onclick="…" rompía el atributo.
+    let vals = [];
     function _copyBtn(text) {
-        return `<button class="tp-copy" title="Copiar" onclick="Transfer.copy(this, ${JSON.stringify(text)})">📋</button>`;
+        vals.push(text);
+        return `<button class="tp-copy" title="Copiar" onclick="Transfer.copy(this, ${vals.length - 1})">📋</button>`;
     }
 
     function _cell(v) {
@@ -1602,6 +1606,7 @@ const Transfer = (() => {
     function render() {
         const el = _panel();
         const d = data;
+        vals = [];
         const rows = d.fields.filter(f => !onlyDiff || !f.same);
         const nav = d.nav;
         el.innerHTML = `
@@ -1641,11 +1646,13 @@ const Transfer = (() => {
                 </table>
             </div>`;
         el.style.display = 'block';
+        document.body.classList.add('has-transfer-panel');
     }
 
     // navigator.clipboard exige que el documento tenga el foco (lo pierde al
     // abrir las ventanas de MyHeritage) → fallback con execCommand('copy').
-    async function copy(btn, text) {
+    async function copy(btn, idx) {
+        const text = vals[idx];
         let ok = false;
         window.focus();
         try { await navigator.clipboard.writeText(text); ok = true; } catch (_) {}
@@ -1677,6 +1684,7 @@ const Transfer = (() => {
     async function done() {
         await apiFetch(`/api/admin/palazuelos/transfer/${encodeURIComponent(data.godes.id)}/done`, { method: 'POST' });
         _refreshRow(data.godes.id, true);
+        if (document.getElementById('cmp-results-list')) Comparador.loadResults();
         if (data.nav.next_godes_id) go(data.nav.next_godes_id);
         else { data.transferred_at = new Date().toISOString(); render(); }
     }
@@ -1686,6 +1694,7 @@ const Transfer = (() => {
         data.transferred_at = null;
         _refreshRow(data.godes.id, false);
         render();
+        if (document.getElementById('cmp-results-list')) Comparador.loadResults();
     }
 
     function _refreshRow(godesId, doneFlag) {
@@ -1694,7 +1703,11 @@ const Transfer = (() => {
         if (btn) { btn.textContent = doneFlag ? '⇄ ✓' : '⇄'; btn.style.background = doneFlag ? '#e8f5e9' : ''; }
     }
 
-    function close() { const el = document.getElementById('transfer-panel'); if (el) el.style.display = 'none'; }
+    function close() {
+        const el = document.getElementById('transfer-panel');
+        if (el) el.style.display = 'none';
+        document.body.classList.remove('has-transfer-panel');
+    }
 
     return { open, openWindows, copy, toggleDiff, go, done, undo, close };
 })();

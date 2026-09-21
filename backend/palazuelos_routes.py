@@ -957,6 +957,12 @@ async def transfer_done(godes_id: str):
     db = _db()
     godes_id = "@" + godes_id.strip("@") + "@"
     db.execute("UPDATE palazuelos_map SET transferred_at=datetime('now') WHERE godes_id=?", (godes_id,))
+    # La fila del Comparador para esta persona queda descartada (como su ✕):
+    # ya está traspasada, no tiene que seguir contando como "con diferencias".
+    for r in db.execute("SELECT diff_types FROM compare_results WHERE db_person_id=?", (godes_id,)).fetchall():
+        db.execute("INSERT OR REPLACE INTO compare_dismissed (db_person_id, diff_types) VALUES (?, ?)",
+                   (godes_id, r[0]))
+    db.execute("DELETE FROM compare_results WHERE db_person_id=?", (godes_id,))
     db.commit()
     _export_map_json()
     return {"ok": True}
@@ -967,6 +973,7 @@ async def transfer_undo(godes_id: str):
     db = _db()
     godes_id = "@" + godes_id.strip("@") + "@"
     db.execute("UPDATE palazuelos_map SET transferred_at=NULL WHERE godes_id=?", (godes_id,))
+    db.execute("DELETE FROM compare_dismissed WHERE db_person_id=?", (godes_id,))
     db.commit()
     _export_map_json()
     return {"ok": True}

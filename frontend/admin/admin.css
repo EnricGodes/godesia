@@ -650,7 +650,7 @@ body {
 }
 .transfer-panel .tp-head {
     display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
-    padding: .5rem 1rem; background: #f1eee5; border-bottom: 1px solid #c2c8bf;
+    padding: .7rem 1.25rem; background: #f1eee5; border-bottom: 1px solid #c2c8bf;
 }
 .transfer-panel .tp-title small { color: #9e9b94; margin-left: .25rem; }
 .transfer-panel .tp-side { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: #78583e; }
@@ -658,10 +658,11 @@ body {
 .transfer-panel .tp-actions { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
 .transfer-panel .tp-toggle { font-size: .75rem; color: #5a5a4e; margin-right: .5rem; user-select: none; }
 .transfer-panel .tp-pos { font-size: .75rem; color: #5a5a4e; min-width: 4.5rem; text-align: center; }
-.transfer-panel .tp-body { overflow: auto; max-height: calc(55vh - 3.2rem); }
+.transfer-panel .tp-body { overflow: auto; max-height: calc(55vh - 3.2rem); padding: .5rem 1rem 1.5rem; }
+body.has-transfer-panel { padding-bottom: 58vh; }
 .transfer-panel .tp-table { width: 100%; border-collapse: collapse; }
 .transfer-panel .tp-table th { text-align: left; padding: .4rem 1rem; font-size: .7rem; text-transform: uppercase; color: #78583e; background: #f6f3ea; position: sticky; top: 0; }
-.transfer-panel .tp-table td { padding: .35rem 1rem; border-top: 1px solid #e6e3da; vertical-align: top; }
+.transfer-panel .tp-table td { padding: .55rem 1rem; border-top: 1px solid #e6e3da; vertical-align: top; line-height: 1.5; }
 .transfer-panel .tp-label { font-weight: 600; color: #424842; white-space: nowrap; }
 .transfer-panel tr.tp-diff td:nth-child(2) { background: #fff8e1; }
 .transfer-panel tr.tp-same td { color: #9e9b94; }
