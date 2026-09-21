@@ -875,7 +875,7 @@ def _transfer_fields(g: dict, pz: dict, db, godes_id: str) -> list:
     bur_p = [" ".join(x for x in (b.get("place"), b.get("place_detail"), f"({b['date']})" if b.get("date") else "") if x)
              for b in pz.get("burial") or []]
     ev_p = [" ".join(x for x in (e.get("type"), e.get("description"), e.get("place"), f"({e['date']})" if e.get("date") else "") if x)
-            for e in pz.get("events") or []]
+            for e in pz.get("events") or [] if (e.get("tag") or "") not in ("_UPD",) and not str(e.get("description", "")).startswith("_UPD")]
 
     spec = [
         ("given_name", "Nombre", g.get("given_name"), pz.get("given_name")),
@@ -896,14 +896,22 @@ def _transfer_fields(g: dict, pz: dict, db, godes_id: str) -> list:
         ("events", "Eventos", ev_g, ev_p),
         ("notes", "Notas", notes_g, [n for n in pz.get("notes") or [] if n]),
     ]
+    # El traspaso es Palazuelos → Godes: solo cuenta como diferencia lo que
+    # Palazuelos APORTA (valor que Godes no tiene o distinto). Si Palazuelos
+    # está vacío no hay nada que copiar → no es diferencia.
     out = []
     for key, label, gv, pv in spec:
         gv = [x for x in gv if x] if isinstance(gv, list) else (gv or "")
         pv = [x for x in pv if x] if isinstance(pv, list) else (pv or "")
         if not gv and not pv:
             continue
-        out.append({"key": key, "label": label, "godes": gv, "palaz": pv,
-                    "same": _norm_val(gv) == _norm_val(pv)})
+        if isinstance(pv, list):
+            have = {_norm_val(x) for x in (gv if isinstance(gv, list) else [gv])}
+            missing = [x for x in pv if _norm_val(x) not in have]
+            same = not missing
+        else:
+            same = (not pv) or _norm_val(gv) == _norm_val(pv)
+        out.append({"key": key, "label": label, "godes": gv, "palaz": pv, "same": same})
     return out
 
 
