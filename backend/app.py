@@ -32,6 +32,7 @@ import test_bank
 from admin_routes import router as admin_router, init_admin, init_log_capture
 from palazuelos_routes import router as palazuelos_router, init_palazuelos
 import auth
+import contributions
 import notifications
 from geocode_utils import normalize_place, build_queries, geocode_with_cache
 
@@ -40,7 +41,6 @@ DATA_DIR = BASE_DIR / "data"
 PHOTOS_DIR = DATA_DIR / "photos"
 FRONTEND_DIR = BASE_DIR / "frontend"
 DB_PATH = DATA_DIR / "godesia.db"
-SUGGESTIONS_DIR = DATA_DIR / "suggestions"
 CEMETERY_PHOTOS_DIR = DATA_DIR / "cemetery_photos"
 
 app = FastAPI(title="Godesia", description="Consulta genealógica en lenguaje natural")
@@ -147,6 +147,7 @@ async def startup():
     init_admin(db_conn, BASE_DIR)
     init_palazuelos(db_conn, BASE_DIR)
     auth.init_auth(PHOTOS_DIR)   # BD de usuarios en el volumen (PHOTOS_DIR/_auth)
+    contributions.init(PHOTOS_DIR)  # aportaciones + consultas no resueltas (PHOTOS_DIR/_contrib)
     print(f"Auth: {'DESACTIVADA (AUTH_DISABLED=1)' if auth.AUTH_DISABLED else 'activa'}")
     notifications.init_notifications(db_conn)   # avisos por email al admin
     i18n_pages.init_i18n(db_conn, BASE_DIR)
@@ -172,20 +173,9 @@ class ConfirmRequest(BaseModel):
 
 
 def log_unresolved_query(question, lang="es", user=None):
-    """Log a query that could not be resolved (with the logged-in user, if any)."""
-    unresolved_file = DATA_DIR / "unresolved_queries.jsonl"
-    now = datetime.now()
-    entry = {
-        "date": now.strftime("%Y-%m-%d"),
-        "time": now.strftime("%H:%M:%S"),
-        "question": question,
-        "lang": lang,
-        "user_name": (user or {}).get("name"),
-        "user_email": (user or {}).get("email"),
-    }
+    """Anota una consulta sin respuesta en el volumen persistente."""
     try:
-        with open(unresolved_file, "a") as f:
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        contributions.log_query(question, lang, user)
     except Exception as e:
         print(f"Error logging unresolved query: {e}")
 
@@ -790,7 +780,7 @@ async def submit_suggestion(
     slug = re.sub(r"[^a-z0-9]", "_", name.lower())[:20].strip("_") or "anonimo"
     submission_id = f"{ts}_{slug}"
 
-    sub_dir = SUGGESTIONS_DIR / submission_id
+    sub_dir = contributions.suggestions_dir() / submission_id
     sub_dir.mkdir(parents=True, exist_ok=True)
 
     saved_files = []
@@ -821,15 +811,7 @@ async def submit_suggestion(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
-    if db_conn:
-        db_conn.execute(
-            "INSERT OR IGNORE INTO suggestions "
-            "(id, name, email, type, person_id, message, files_count, submission_dir) "
-            "VALUES (?,?,?,?,?,?,?,?)",
-            (submission_id, name, email, type, person_id, message,
-             len(saved_files), str(sub_dir)),
-        )
-        db_conn.commit()
+    contributions.add_suggestion(submission_id, name, email, type, person_id, message, saved_files)
 
     notifications.notify_new_suggestion(name, email, type, person_id, message)
 

@@ -4,6 +4,7 @@ import collections
 import contextlib
 import io
 import json
+import contributions
 import logging
 import shutil
 import subprocess
@@ -1485,43 +1486,14 @@ async def compare_dismiss_result(result_id: int):
 
 @router.get("/suggestions")
 async def list_suggestions():
-    db = _db()
-    try:
-        rows = db.execute(
-            "SELECT s.id, s.name, s.email, s.type, s.person_id, "
-            "p.name AS person_name, "
-            "s.message, s.files_count, s.submission_dir, s.created_at, s.resolved_at "
-            "FROM suggestions s "
-            # person_id puede llegar sin arrobas ("I154") desde el dashboard
-            "LEFT JOIN people p ON p.id = '@' || REPLACE(s.person_id, '@', '') || '@' "
-            "ORDER BY s.created_at DESC"
-        ).fetchall()
-    except Exception:
-        rows = db.execute(
-            "SELECT s.id, s.name, s.email, s.type, s.person_id, "
-            "NULL AS person_name, "
-            "s.message, s.files_count, s.submission_dir, s.created_at "
-            "FROM suggestions s ORDER BY s.created_at DESC"
-        ).fetchall()
-    out = []
-    for r in rows:
-        d = dict(r)
-        # El submission.json guarda más campos que la tabla (context, files)
-        try:
-            meta = json.loads((Path(d["submission_dir"]) / "submission.json").read_text(encoding="utf-8"))
-            d["context"] = meta.get("context") or {}
-            d["files"] = meta.get("files") or []
-        except Exception:
-            d["context"], d["files"] = {}, []
-        out.append(d)
-    return out
+    return contributions.list_suggestions(_db())
 
 
 @router.get("/suggestions/{suggestion_id}/files")
 async def suggestion_files(suggestion_id: str):
     if ".." in suggestion_id:
         raise HTTPException(status_code=400, detail="Path inválido")
-    base = _base_dir / "data" / "suggestions" / suggestion_id
+    base = contributions.suggestions_dir() / suggestion_id
     if not base.exists():
         raise HTTPException(status_code=404, detail="Submission no encontrada")
     files = []
@@ -1539,7 +1511,7 @@ async def suggestion_files(suggestion_id: str):
 async def suggestion_file(suggestion_id: str, filename: str):
     if ".." in suggestion_id or ".." in filename:
         raise HTTPException(status_code=400, detail="Path inválido")
-    path = _base_dir / "data" / "suggestions" / suggestion_id / filename
+    path = contributions.suggestions_dir() / suggestion_id / filename
     if not path.exists():
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
     return FileResponse(str(path))
@@ -1547,26 +1519,14 @@ async def suggestion_file(suggestion_id: str, filename: str):
 
 @router.post("/suggestions/{suggestion_id}/resolve")
 async def resolve_suggestion(suggestion_id: str):
-    db = _db()
-    now = datetime.now().isoformat()
-    try:
-        db.execute("UPDATE suggestions SET resolved_at=? WHERE id=?", (now, suggestion_id))
-        db.commit()
-    except Exception:
-        pass
-    return {"status": "ok", "resolved_at": now}
+    return {"status": "ok", "resolved_at": contributions.resolve_suggestion(suggestion_id)}
 
 
 @router.delete("/suggestions/{suggestion_id}")
 async def delete_suggestion(suggestion_id: str):
     if ".." in suggestion_id:
         raise HTTPException(status_code=400, detail="Path inválido")
-    db = _db()
-    db.execute("DELETE FROM suggestions WHERE id=?", (suggestion_id,))
-    db.commit()
-    sub_dir = _base_dir / "data" / "suggestions" / suggestion_id
-    if sub_dir.exists():
-        shutil.rmtree(sub_dir)
+    contributions.delete_suggestion(suggestion_id)
     return {"status": "ok"}
 
 
@@ -1575,7 +1535,7 @@ async def delete_suggestion(suggestion_id: str):
 # ---------------------------------------------------------------------------
 
 def _queries_path() -> Path:
-    return _base_dir / "data" / "unresolved_queries.jsonl"
+    return contributions.queries_path()
 
 
 @router.get("/queries")

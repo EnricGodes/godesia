@@ -635,7 +635,7 @@ def _wants_html(request, path):
 async def auth_middleware(request, call_next):
     path = request.url.path
     # 1. La BD de auth vive en el volumen público de fotos → NUNCA descargable.
-    if path.startswith("/photos/_auth") or path.startswith("/cemetery_photos/_auth"):
+    if path.startswith(("/photos/_auth", "/photos/_contrib", "/cemetery_photos/_auth", "/cemetery_photos/_contrib")):
         return JSONResponse({"error": "forbidden"}, status_code=403)
     if AUTH_DISABLED:
         return await call_next(request)
