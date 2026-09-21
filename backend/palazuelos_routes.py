@@ -1,5 +1,6 @@
 """Palazuelos → Godes synchronization: matching, photo discovery, download."""
 
+import codecs
 import json
 import re
 import threading
@@ -10,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from admin_routes import (
@@ -55,8 +56,18 @@ def _db():
     return _db_conn
 
 
+def _volume_ged_path() -> Path:
+    """Copia en el volumen persistente de Railway (docs/ no se sube al repo:
+    el GEDCOM lleva datos personales de 20k personas). /photos/_gedcom → 403."""
+    return _base_dir / "data" / "photos" / "_gedcom" / "palazuelos.ged"
+
+
 def _default_ged_path() -> Path:
-    return _base_dir / "docs" / "palazuelos.ged"
+    vol = _volume_ged_path()
+    local = _base_dir / "docs" / "palazuelos.ged"
+    if vol.exists() and (not local.exists() or vol.stat().st_mtime >= local.stat().st_mtime):
+        return vol
+    return local if local.exists() else vol
 
 
 # Caché del GEDCOM Palazuelos parseado (19,5k INDI: parsearlo por petición
@@ -655,6 +666,36 @@ async def build_map_status():
             "log": list(_job["log"]),
             "result": _job["result"],
         }
+
+
+@router.get("/ged-status")
+async def ged_status():
+    """Qué palazuelos.ged usa el servidor (para el botón de subida del admin)."""
+    p = _default_ged_path()
+    if not p.exists():
+        return {"present": False}
+    st = p.stat()
+    return {"present": True, "path": str(p.relative_to(_base_dir)), "size": st.st_size,
+            "modified": datetime.fromtimestamp(st.st_mtime).isoformat(timespec="seconds"),
+            "individuals": len(_palaz_data()["individuals"])}
+
+
+@router.post("/upload-ged")
+async def upload_ged(file: UploadFile = File(...)):
+    """Sube palazuelos.ged al volumen persistente (sobrescribe la copia anterior)."""
+    head = await file.read(64)
+    if not head.lstrip(codecs.BOM_UTF8).startswith(b"0 HEAD"):
+        raise HTTPException(400, "No parece un fichero GEDCOM (debe empezar por '0 HEAD')")
+    dest = _volume_ged_path()
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dest.with_suffix(".ged.tmp")
+    with tmp.open("wb") as out:
+        out.write(head)
+        while chunk := await file.read(1 << 20):
+            out.write(chunk)
+    tmp.replace(dest)
+    _palaz_cache["data"] = None
+    return await ged_status()
 
 
 @router.get("/map")

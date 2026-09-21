@@ -2927,9 +2927,33 @@ const Palazuelos = (() => {
         }
     }
 
-    function onActivate() { loadMap(); }
+    async function loadGedStatus() {
+        const el = document.getElementById('palaz-ged-status');
+        try {
+            const st = await apiFetch('/api/admin/palazuelos/ged-status');
+            el.innerHTML = st.present
+                ? `GEDCOM: <code>${esc(st.path)}</code> · ${(st.size / 1048576).toFixed(1)} MB · ${st.individuals.toLocaleString()} personas · ${esc(st.modified.replace('T', ' '))}`
+                : '<span style="color:#d32f2f;">GEDCOM: no hay palazuelos.ged en el servidor — súbelo aquí.</span>';
+        } catch (e) { el.textContent = 'GEDCOM: ' + e.message; }
+    }
 
-    return { buildMap, loadMap, filterMap, setFilter, onTypeahead, hideDropdown,
+    async function uploadGed(input) {
+        const f = input.files[0];
+        if (!f) return;
+        const el = document.getElementById('palaz-ged-status');
+        el.textContent = `Subiendo ${f.name} (${(f.size / 1048576).toFixed(1)} MB)…`;
+        const fd = new FormData();
+        fd.append('file', f);
+        try {
+            await apiFetch('/api/admin/palazuelos/upload-ged', { method: 'POST', body: fd });
+            await loadGedStatus();
+        } catch (e) { el.textContent = 'Error: ' + e.message; }
+        input.value = '';
+    }
+
+    function onActivate() { loadMap(); loadGedStatus(); }
+
+    return { buildMap, loadMap, filterMap, setFilter, onTypeahead, hideDropdown, uploadGed,
              selectCandidate, confirmMatch, rejectMatch,
              loadPendingPhotos, updateSelCount, downloadSelected,
              dismissPersonPhotos, selectPersonPhotos, openPhotoByIdx, openExistingByIdx, openPhotoModal,

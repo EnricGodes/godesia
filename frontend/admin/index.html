@@ -700,9 +700,15 @@
             <div class="info-card">
                 <h3>1. Construir mapa de correspondencias</h3>
                 <p style="font-size:.82rem;color:#727971;margin-bottom:.75rem;">
-                    Lee <code>docs/palazuelos.ged</code> y busca la mejor correspondencia para cada persona de Godes.
+                    Lee <code>palazuelos.ged</code> y busca la mejor correspondencia para cada persona de Godes.
                     Las correcciones manuales se preservan.
                 </p>
+                <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.75rem;font-size:.82rem;">
+                    <span id="palaz-ged-status" style="color:#727971;">GEDCOM: …</span>
+                    <label class="btn btn-secondary btn-sm" style="cursor:pointer;">Subir palazuelos.ged
+                        <input type="file" accept=".ged" style="display:none;" onchange="Palazuelos.uploadGed(this)">
+                    </label>
+                </div>
                 <div class="toolbar">
                     <button class="btn btn-primary" id="btn-build-map" onclick="Palazuelos.buildMap()">Construir mapa</button>
                     <span id="palaz-build-status" style="font-size:.82rem;color:#727971;margin-left:.75rem;"></span>

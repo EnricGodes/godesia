@@ -144,6 +144,7 @@ Los dos árboles viven en el mismo sitio MyHeritage (`380341641`, "Arbol familia
 - **URL a una persona**: `{mh_tree_url}` con `{tree}` y `{indiv}` = ID del árbol + número del xref GEDCOM a 6 cifras (`@I16@` en el árbol 5 → `rootIndividualID=5000016`; el número del xref es el `RIN MH:I16` de MyHeritage). Verificado el 21/09/2026. Plantilla e IDs de árbol son settings (`mh_tree_url`, `mh_tree_id_palazuelos`, `mh_tree_id_godes`, defaults en `MH_DEFAULTS`) editables en admin → Configuración.
 - `palazuelos_map.transferred_at` marca las parejas ya traspasadas («✓ Hecho y siguiente»); se exporta también a `data/palazuelos_map.json`.
 - El GEDCOM Palazuelos parseado se cachea en memoria (`_palaz_data()`, invalidado por mtime).
+- **`palazuelos.ged` NO va al repo** (20 MB de datos personales de 20k personas y el repo es público). En producción vive en el volumen: `data/photos/_gedcom/palazuelos.ged`, subido desde admin → Sync Palazuelos → «Subir palazuelos.ged» (`POST /api/admin/palazuelos/upload-ged`). `_default_ged_path()` usa la copia del volumen si es más nueva que `docs/palazuelos.ged` (local). Todo `/photos/_*` devuelve 403.
 
 ## QA automático del QueryRouter (banco de preguntas)
 
