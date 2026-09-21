@@ -770,13 +770,24 @@ _MONTH_ES = {"ene": "jan", "feb": "feb", "mar": "mar", "abr": "apr", "may": "may
              "dic": "dec", "des": "dec", "gen": "jan", "febr": "feb", "juny": "jun", "sept": "sep", "oct": "oct", "nov": "nov", "març": "mar", "abr": "apr", "maig": "may", "ag": "aug"}
 
 
+_GED_DATE_RE = re.compile(r"^(?:ABT|EST|CAL|BEF|AFT|INT|FROM|TO|BET)\b|^\d{1,2} [A-Z]{3} \d{4}$|^[A-Z]{3} \d{4}$")
+
+
 def _norm_val(v) -> str:
-    """Comparación laxa: espacios, mayúsculas y meses en español/catalán vs GEDCOM."""
+    """Comparación laxa: espacios, mayúsculas, meses es/ca vs GEDCOM y
+    modificadores GEDCOM (BEF/AFT/ABT/BET…AND) traducidos como en la BD."""
     if v is None:
         return ""
     if isinstance(v, list):
         return " | ".join(_norm_val(x) for x in v)
-    t = re.sub(r"\s+", " ", str(v)).strip().lower().replace(".", "")
+    t = re.sub(r"\s+", " ", str(v)).strip()
+    if _GED_DATE_RE.match(t):
+        from database import convert_date_to_spanish
+        try:
+            t = convert_date_to_spanish(t)
+        except Exception:
+            pass
+    t = t.lower().replace(".", "")
     return " ".join(_MONTH_ES.get(w, w) for w in t.split(" "))
 
 
