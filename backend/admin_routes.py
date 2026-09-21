@@ -1422,10 +1422,17 @@ async def compare_status():
 async def compare_results_list():
     db = _db()
     try:
+        # compare_results vive en godesia.db (se restaura del repo en cada deploy);
+        # los descartes (✕) y las marcas "traspasado" de la Cabina viven en
+        # decisions.db (volumen) → se aplican aquí, en lectura, no solo al re-comparar.
         rows = db.execute(
-            "SELECT id, db_person_id, db_person_name, ged_person_id, ged_person_name, "
-            "match_score, diff_types, diff_details, created_at "
-            "FROM compare_results ORDER BY match_score ASC, id ASC"
+            "SELECT cr.id, cr.db_person_id, cr.db_person_name, cr.ged_person_id, cr.ged_person_name, "
+            "cr.match_score, cr.diff_types, cr.diff_details, cr.created_at "
+            "FROM compare_results cr "
+            "LEFT JOIN compare_dismissed cd ON cd.db_person_id = cr.db_person_id "
+            "LEFT JOIN palazuelos_map pm ON pm.godes_id = cr.db_person_id "
+            "WHERE cd.db_person_id IS NULL AND pm.transferred_at IS NULL "
+            "ORDER BY cr.match_score ASC, cr.id ASC"
         ).fetchall()
         last_run = db.execute("SELECT MAX(created_at) FROM compare_results").fetchone()[0]
         return {"rows": [dict(r) for r in rows], "total_count": len(rows), "last_run": last_run}
