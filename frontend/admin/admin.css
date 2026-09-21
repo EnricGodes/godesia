@@ -671,3 +671,4 @@ body {
 .transfer-panel .tp-copy:hover { opacity: 1; }
 .transfer-panel .tp-empty { color: #c2c8bf; }
 .transfer-panel .tp-fam td { background: #f6f3ea; font-size: .78rem; }
+.transfer-panel .tp-warn { margin: .5rem 1rem; padding: .4rem .7rem; background: #fff3e0; border: 1px solid #ffcc80; border-radius: 6px; font-size: .78rem; }
