@@ -1492,7 +1492,8 @@ async def list_suggestions():
             "p.name AS person_name, "
             "s.message, s.files_count, s.submission_dir, s.created_at, s.resolved_at "
             "FROM suggestions s "
-            "LEFT JOIN people p ON s.person_id = p.id "
+            # person_id puede llegar sin arrobas ("I154") desde el dashboard
+            "LEFT JOIN people p ON p.id = '@' || REPLACE(s.person_id, '@', '') || '@' "
             "ORDER BY s.created_at DESC"
         ).fetchall()
     except Exception:
@@ -1502,7 +1503,18 @@ async def list_suggestions():
             "s.message, s.files_count, s.submission_dir, s.created_at "
             "FROM suggestions s ORDER BY s.created_at DESC"
         ).fetchall()
-    return [dict(r) for r in rows]
+    out = []
+    for r in rows:
+        d = dict(r)
+        # El submission.json guarda más campos que la tabla (context, files)
+        try:
+            meta = json.loads((Path(d["submission_dir"]) / "submission.json").read_text(encoding="utf-8"))
+            d["context"] = meta.get("context") or {}
+            d["files"] = meta.get("files") or []
+        except Exception:
+            d["context"], d["files"] = {}, []
+        out.append(d)
+    return out
 
 
 @router.get("/suggestions/{suggestion_id}/files")

@@ -403,10 +403,16 @@ const Suggestions = {
                         <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${esc(s.created_at?.slice(0,16).replace('T',' '))}</td>
                         <td><strong>${esc(s.name || '—')}</strong>${s.email ? `<br><small style="color:#727971;">${esc(s.email)}</small>` : ''}</td>
                         <td style="font-size:0.82rem;">${s.person_name
-                            ? `<a href="/index.html?person=${esc(s.person_id)}" target="_blank" style="color:var(--primary,#17341e);font-weight:600;">${esc(s.person_name)}</a>`
+                            ? `<a href="/dossier.html?id=${esc(s.person_id)}" target="_blank" style="color:var(--primary,#17341e);font-weight:600;">${esc(s.person_name)}</a><br><small style="color:#727971;">${esc(s.person_id)}</small>`
                             : s.person_id ? `<span style="color:#727971;font-size:0.75rem;">${esc(s.person_id)}</span>` : '—'}</td>
                         <td><span class="badge badge-pending">${esc(s.type || '—')}</span></td>
-                        <td style="max-width:240px;font-size:0.8rem;">${esc((s.message || '').slice(0, 100))}${(s.message || '').length > 100 ? '…' : ''}</td>
+                        <td style="max-width:280px;font-size:0.8rem;">${esc(s.message || '')}${s.context && (s.context.source_url || s.context.language)
+                            ? `<div style="margin-top:.3rem;font-size:0.7rem;color:#727971;">${[
+                                s.context.source_url ? `Desde: ${esc(s.context.source_url.replace(/^https?:\/\/[^/]+/, ''))}` : '',
+                                s.context.language ? esc(s.context.language) : '',
+                                s.context.user_agent ? esc(Suggestions.browser(s.context.user_agent)) : '',
+                                s.context.screen ? esc(s.context.screen) : '',
+                              ].filter(Boolean).join(' · ')}</div>` : ''}</td>
                         <td style="text-align:center;">
                             ${s.files_count > 0
                                 ? `<button class="btn btn-secondary btn-sm" onclick="Suggestions.viewFiles('${esc(s.id)}', '${esc(s.name || s.id)}')">${s.files_count} archivo${s.files_count > 1 ? 's' : ''}</button>`
@@ -427,6 +433,12 @@ const Suggestions = {
         } catch (e) {
             el.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
         }
+    },
+
+    browser(ua) {
+        const m = ua.match(/(Edg|Chrome|Firefox|Safari)\/[\d.]+/);
+        const os = /Windows/.test(ua) ? 'Windows' : /Mac OS/.test(ua) ? 'Mac' : /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : '';
+        return [m ? m[1].replace('Edg', 'Edge') : '', os].filter(Boolean).join(' / ');
     },
 
     async viewFiles(id, name) {
@@ -623,6 +635,7 @@ const Queries = {
                     <th style="width:32px;"><input type="checkbox" onchange="Queries.toggleAll(this)"/></th>
                     <th style="width:90px;">Data</th>
                     <th style="width:60px;">Hora</th>
+                    <th style="width:180px;">Usuario</th>
                     <th>Pregunta</th>
                 </tr></thead>
                 <tbody>${this.items.map((q, i) => `
@@ -630,6 +643,9 @@ const Queries = {
                         <td><input type="checkbox" data-idx="${q.index}" onchange="Queries.toggleOne(this)"/></td>
                         <td style="font-size:0.78rem;color:#727971;">${esc(q.date)}</td>
                         <td style="font-size:0.78rem;color:#727971;">${esc(q.time)}</td>
+                        <td style="font-size:0.78rem;">${q.user_name
+                            ? `<strong>${esc(q.user_name)}</strong>${q.user_email ? `<br><small style="color:#727971;">${esc(q.user_email)}</small>` : ''}`
+                            : '<span style="color:#c2c8bf;">—</span>'}</td>
                         <td style="font-size:0.84rem;">${esc(q.question)}</td>
                     </tr>
                 `).join('')}</tbody>

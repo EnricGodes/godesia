@@ -171,8 +171,8 @@ class ConfirmRequest(BaseModel):
     lang: str = "es"
 
 
-def log_unresolved_query(question, lang="es"):
-    """Log a query that could not be resolved."""
+def log_unresolved_query(question, lang="es", user=None):
+    """Log a query that could not be resolved (with the logged-in user, if any)."""
     unresolved_file = DATA_DIR / "unresolved_queries.jsonl"
     now = datetime.now()
     entry = {
@@ -180,6 +180,8 @@ def log_unresolved_query(question, lang="es"):
         "time": now.strftime("%H:%M:%S"),
         "question": question,
         "lang": lang,
+        "user_name": (user or {}).get("name"),
+        "user_email": (user or {}).get("email"),
     }
     try:
         with open(unresolved_file, "a") as f:
@@ -189,7 +191,7 @@ def log_unresolved_query(question, lang="es"):
 
 
 @app.post("/api/query")
-async def query(req: QueryRequest):
+async def query(req: QueryRequest, request: Request):
     """Intenta responder desde SQLite. Si no puede, anota la consulta."""
     if not router:
         raise HTTPException(status_code=503, detail="Motor no inicializado")
@@ -201,7 +203,7 @@ async def query(req: QueryRequest):
     # Check if router couldn't resolve the question (flag estructural,
     # independiente del idioma de la respuesta)
     if result and result.get("unresolved"):
-        log_unresolved_query(req.question, lang)
+        log_unresolved_query(req.question, lang, getattr(request.state, "user", None))
 
     return result
 
@@ -782,6 +784,8 @@ async def submit_suggestion(
     files: list[UploadFile] = File(default=[]),
 ):
     """Save a user suggestion with optional file attachments."""
+    if person_id:
+        person_id = "@" + person_id.strip("@") + "@"
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     slug = re.sub(r"[^a-z0-9]", "_", name.lower())[:20].strip("_") or "anonimo"
     submission_id = f"{ts}_{slug}"
