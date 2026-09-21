@@ -1556,15 +1556,15 @@ const Transfer = (() => {
         return el;
     }
 
-    // Dos PESTAÑAS con nombre (mh_palaz / mh_godes). MyHeritage no permite
-    // iframes y Chrome no expone su "vista dividida" a la web: el usuario las
-    // pone en vista dividida una vez (clic derecho en la pestaña → "Añadir a
-    // una vista dividida") y a partir de ahí la Cabina navega esas mismas
-    // pestañas al cambiar de persona, conservando la división.
+    // Dos ventanas con nombre, mitad de pantalla cada una (Palazuelos a la
+    // izquierda, Godes a la derecha): al pasar a la siguiente persona se
+    // reutilizan en vez de abrir más.
     function openWindows() {
         if (!data) return;
-        winL = window.open(data.palaz.mh_url, 'mh_palaz');
-        winR = window.open(data.godes.mh_url, 'mh_godes');
+        const W = Math.floor(screen.availWidth / 2), H = screen.availHeight;
+        const feat = (left) => `left=${left},top=0,width=${W},height=${H},menubar=no,toolbar=no,location=yes`;
+        winL = window.open(data.palaz.mh_url, 'mh_palaz', feat(0));
+        winR = window.open(data.godes.mh_url, 'mh_godes', feat(W));
         blocked = !winL || !winR;
         window.focus();
     }
@@ -1614,7 +1614,7 @@ const Transfer = (() => {
                 </div>
                 <div class="tp-actions">
                     <label class="tp-toggle"><input type="checkbox" ${onlyDiff ? 'checked' : ''} onchange="Transfer.toggleDiff(this.checked)"> solo diferencias</label>
-                    <button class="btn btn-secondary btn-sm" onclick="Transfer.openWindows()" title="Abre/reabre las pestañas MyHeritage 'Palazuelos' y 'Godes'. Ponlas una vez en vista dividida (clic derecho en la pestaña → Añadir a una vista dividida): la Cabina las reutiliza al cambiar de persona.">↺ Pestañas MH</button>
+                    <button class="btn btn-secondary btn-sm" onclick="Transfer.openWindows()" title="Reabrir las dos ventanas de MyHeritage">↺ Ventanas</button>
                     <a class="btn btn-secondary btn-sm" href="${esc(d.palaz.mh_url)}" target="mh_palaz">MH Palazuelos</a>
                     <a class="btn btn-secondary btn-sm" href="${esc(d.godes.mh_url)}" target="mh_godes">MH Godes</a>
                     <button class="btn btn-secondary btn-sm" ${nav.prev_godes_id ? '' : 'disabled'} onclick="Transfer.go('${esc(nav.prev_godes_id || '')}')">◀</button>
@@ -1627,7 +1627,7 @@ const Transfer = (() => {
                 </div>
             </div>
             <div class="tp-body">
-                ${blocked ? '<div class="tp-warn">Chrome ha bloqueado las pestañas de MyHeritage. Usa los enlaces «MH Palazuelos» / «MH Godes» o permite las ventanas emergentes para este sitio.</div>' : ''}
+                ${blocked ? '<div class="tp-warn">Chrome ha bloqueado las ventanas de MyHeritage. Usa los enlaces «MH Palazuelos» / «MH Godes» o permite las ventanas emergentes para este sitio.</div>' : ''}
                 <table class="tp-table">
                     <thead><tr><th style="width:150px;">Campo</th><th>Palazuelos (origen)</th><th>Godes (destino)</th></tr></thead>
                     <tbody>
