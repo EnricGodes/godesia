@@ -393,5 +393,22 @@
   "handle_birth_place_period.between": "Las personas nacidas entre {a} y {b} fueron",
   "handle_birth_place_period.before.place": "Las personas nacidas en {a} antes de {b} fueron",
   "handle_birth_place_period.after.place": "Las personas nacidas en {a} después de {b} fueron",
-  "handle_birth_place_period.between.place": "Las personas nacidas en {a} entre {b} y {c} fueron"
+  "handle_birth_place_period.between.place": "Las personas nacidas en {a} entre {b} y {c} fueron",
+  "kin_nouns.la misma persona": "la misma persona",
+  "kin_nouns.padre": "padre",
+  "kin_nouns.madre": "madre",
+  "kin_nouns.progenitor/a": "progenitor/a",
+  "kin_nouns.hijo": "hijo",
+  "kin_nouns.hija": "hija",
+  "kin_nouns.hijo/a": "hijo/a",
+  "kin_nouns.hermanos": "hermanos",
+  "kin_nouns.abuelo": "abuelo",
+  "kin_nouns.abuela": "abuela",
+  "kin_nouns.abuelo/a": "abuelo/a",
+  "kin_nouns.nieto": "nieto",
+  "kin_nouns.nieta": "nieta",
+  "kin_nouns.nieto/a": "nieto/a",
+  "kin_nouns.primos hermanos": "primos hermanos",
+  "kin_nouns.relación no determinada": "relación no determinada",
+  "kin_nouns.sin parentesco directo documentado": "sin parentesco directo documentado"
 }

@@ -1041,23 +1041,23 @@ class QueryRouter:
         a = _as_dict(a)
         b = _as_dict(b)
         if a["id"] == b["id"]:
-            return "la misma persona"
+            return _noun("la misma persona")
         if self._is_parent_of(a, b):
-            return _sexed_role(a, "padre", "madre", "progenitor/a")
+            return _noun(_sexed_role(a, "padre", "madre", "progenitor/a"))
         if self._is_parent_of(b, a):
-            return _sexed_role(a, "hijo", "hija", "hijo/a")
+            return _noun(_sexed_role(a, "hijo", "hija", "hijo/a"))
         if self._same_parents(a, b):
-            return "hermanos"
+            return _noun("hermanos")
         if self._is_grandparent_of(a, b):
-            return _sexed_role(a, "abuelo", "abuela", "abuelo/a")
+            return _noun(_sexed_role(a, "abuelo", "abuela", "abuelo/a"))
         if self._is_grandparent_of(b, a):
-            return _sexed_role(a, "nieto", "nieta", "nieto/a")
+            return _noun(_sexed_role(a, "nieto", "nieta", "nieto/a"))
         if self._is_uncle_aunt_of(a, b):
             return _t("_relationship_label.1")
         if self._is_uncle_aunt_of(b, a):
             return _t("_relationship_label.2")
         if self._is_first_cousin(a, b):
-            return "primos hermanos"
+            return _noun("primos hermanos")
         rel = self._get_marriage_or_partnership(a["id"], b["id"])
         if rel:
             return _t("_relationship_label.3")
@@ -2475,7 +2475,7 @@ class QueryRouter:
         b, _ = self._resolve_person(names[1])
         if not a or not b:
             return None
-        rel = self._relationship_label(a, b) or "relación no determinada"
+        rel = self._relationship_label(a, b) or _noun("relación no determinada")
         if a.get('birth_year') and b.get('birth_year'):
             if a['birth_year'] < b['birth_year']:
                 older = a['name']
@@ -3631,10 +3631,10 @@ class QueryRouter:
         parts = []
         people = [a, target]
         if father:
-            parts.append(_t("handle_relationship_with_parents_of.2", a=_person_link(father), b=self._relationship_label(a, father) or 'sin parentesco directo documentado'))
+            parts.append(_t("handle_relationship_with_parents_of.2", a=_person_link(father), b=self._relationship_label(a, father) or _noun("sin parentesco directo documentado")))
             people.append(father)
         if mother:
-            parts.append(_t("handle_relationship_with_parents_of.3", a=_person_link(mother), b=self._relationship_label(a, mother) or 'sin parentesco directo documentado'))
+            parts.append(_t("handle_relationship_with_parents_of.3", a=_person_link(mother), b=self._relationship_label(a, mother) or _noun("sin parentesco directo documentado")))
             people.append(mother)
         ans = _t("handle_relationship_with_parents_of.1", a=_person_link(a), b=_person_link(target)) + "; ".join(parts) + "."
         return {"answer": ans, "people_mentioned": [p['id'] for p in people if p], "people_with_photos": self._people_payload([p for p in people if p])}

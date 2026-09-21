@@ -393,5 +393,22 @@
   "handle_death_age.2": "No consta l'edat de defunció de {a}.",
   "handle_death_cause.1": "La causa de mort que consta per a {a} és {b}.",
   "handle_death_cause.2": "No consta la causa de mort de {a}.",
-  "handle_event_field.1": "A la fitxa de {a} consta: {b}."
+  "handle_event_field.1": "A la fitxa de {a} consta: {b}.",
+  "kin_nouns.la misma persona": "la mateixa persona",
+  "kin_nouns.padre": "pare",
+  "kin_nouns.madre": "mare",
+  "kin_nouns.progenitor/a": "progenitor/a",
+  "kin_nouns.hijo": "fill",
+  "kin_nouns.hija": "filla",
+  "kin_nouns.hijo/a": "fill/a",
+  "kin_nouns.hermanos": "germans",
+  "kin_nouns.abuelo": "avi",
+  "kin_nouns.abuela": "àvia",
+  "kin_nouns.abuelo/a": "avi/àvia",
+  "kin_nouns.nieto": "nét",
+  "kin_nouns.nieta": "néta",
+  "kin_nouns.nieto/a": "nét/a",
+  "kin_nouns.primos hermanos": "cosins germans",
+  "kin_nouns.relación no determinada": "relació no determinada",
+  "kin_nouns.sin parentesco directo documentado": "sense parentiu directe documentat"
 }

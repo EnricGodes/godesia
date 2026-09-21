@@ -393,5 +393,22 @@
   "handle_death_age.2": "L'âge au décès de {a} n'est pas documenté.",
   "handle_death_cause.1": "La cause de décès indiquée pour {a} est {b}.",
   "handle_death_cause.2": "La cause de décès de {a} n'est pas documentée.",
-  "handle_event_field.1": "La fiche de {a} indique : {b}."
+  "handle_event_field.1": "La fiche de {a} indique : {b}.",
+  "kin_nouns.la misma persona": "la même personne",
+  "kin_nouns.padre": "père",
+  "kin_nouns.madre": "mère",
+  "kin_nouns.progenitor/a": "parent",
+  "kin_nouns.hijo": "fils",
+  "kin_nouns.hija": "fille",
+  "kin_nouns.hijo/a": "enfant",
+  "kin_nouns.hermanos": "frères et sœurs",
+  "kin_nouns.abuelo": "grand-père",
+  "kin_nouns.abuela": "grand-mère",
+  "kin_nouns.abuelo/a": "grand-parent",
+  "kin_nouns.nieto": "petit-fils",
+  "kin_nouns.nieta": "petite-fille",
+  "kin_nouns.nieto/a": "petit-enfant",
+  "kin_nouns.primos hermanos": "cousins germains",
+  "kin_nouns.relación no determinada": "relation non déterminée",
+  "kin_nouns.sin parentesco directo documentado": "sans parenté directe documentée"
 }

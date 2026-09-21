@@ -393,5 +393,22 @@
   "handle_death_age.2": "Für {a} ist kein Sterbealter vermerkt.",
   "handle_death_cause.1": "Die für {a} vermerkte Todesursache ist {b}.",
   "handle_death_cause.2": "Für {a} ist keine Todesursache vermerkt.",
-  "handle_event_field.1": "In der Akte von {a} steht: {b}."
+  "handle_event_field.1": "In der Akte von {a} steht: {b}.",
+  "kin_nouns.la misma persona": "dieselbe Person",
+  "kin_nouns.padre": "Vater",
+  "kin_nouns.madre": "Mutter",
+  "kin_nouns.progenitor/a": "Elternteil",
+  "kin_nouns.hijo": "Sohn",
+  "kin_nouns.hija": "Tochter",
+  "kin_nouns.hijo/a": "Kind",
+  "kin_nouns.hermanos": "Geschwister",
+  "kin_nouns.abuelo": "Großvater",
+  "kin_nouns.abuela": "Großmutter",
+  "kin_nouns.abuelo/a": "Großelternteil",
+  "kin_nouns.nieto": "Enkel",
+  "kin_nouns.nieta": "Enkelin",
+  "kin_nouns.nieto/a": "Enkelkind",
+  "kin_nouns.primos hermanos": "Cousins ersten Grades",
+  "kin_nouns.relación no determinada": "Verwandtschaft nicht bestimmt",
+  "kin_nouns.sin parentesco directo documentado": "keine dokumentierte direkte Verwandtschaft"
 }

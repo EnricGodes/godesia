@@ -393,5 +393,22 @@
   "handle_death_age.2": "No age at death is recorded for {a}.",
   "handle_death_cause.1": "The cause of death recorded for {a} is {b}.",
   "handle_death_cause.2": "No cause of death is recorded for {a}.",
-  "handle_event_field.1": "The record of {a} states: {b}."
+  "handle_event_field.1": "The record of {a} states: {b}.",
+  "kin_nouns.la misma persona": "the same person",
+  "kin_nouns.padre": "father",
+  "kin_nouns.madre": "mother",
+  "kin_nouns.progenitor/a": "parent",
+  "kin_nouns.hijo": "son",
+  "kin_nouns.hija": "daughter",
+  "kin_nouns.hijo/a": "child",
+  "kin_nouns.hermanos": "siblings",
+  "kin_nouns.abuelo": "grandfather",
+  "kin_nouns.abuela": "grandmother",
+  "kin_nouns.abuelo/a": "grandparent",
+  "kin_nouns.nieto": "grandson",
+  "kin_nouns.nieta": "granddaughter",
+  "kin_nouns.nieto/a": "grandchild",
+  "kin_nouns.primos hermanos": "first cousins",
+  "kin_nouns.relación no determinada": "undetermined relationship",
+  "kin_nouns.sin parentesco directo documentado": "no documented direct kinship"
 }
