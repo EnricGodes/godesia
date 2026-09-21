@@ -42,12 +42,6 @@ def init_palazuelos(db_conn, base_dir: Path):
     global _db_conn, _base_dir
     _db_conn = db_conn
     _base_dir = base_dir
-    # Marca "ya traspasado a MyHeritage" de la Cabina de traspaso (idempotente)
-    try:
-        db_conn.execute("ALTER TABLE palazuelos_map ADD COLUMN transferred_at TEXT")
-        db_conn.commit()
-    except Exception:
-        pass
 
 
 def _db():
@@ -506,16 +500,7 @@ def _run_build_map(ged_path: str, db_path: str):
 
         # Save to DB
         _jlog("Desant correspondències a la BD…")
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS palazuelos_map (
-                godes_id TEXT PRIMARY KEY,
-                palaz_id TEXT,
-                palaz_name TEXT,
-                confidence INTEGER DEFAULT 0,
-                match_type TEXT DEFAULT 'auto',
-                updated_at TEXT DEFAULT (datetime('now'))
-            )
-        """)
+        # palazuelos_map vive en decisions.db (adjunta por get_connection)
         for row in rows_to_upsert:
             conn.execute("""
                 INSERT INTO palazuelos_map (godes_id, palaz_id, palaz_name, confidence, match_type, updated_at)
@@ -829,7 +814,7 @@ def _godes_family(pid: str, db) -> dict:
     return {"parents": parents, "spouses": spouses, "children": children}
 
 
-def _transfer_list(db, only_diff: bool = False) -> list:
+def _transfer_list(db) -> list:
     """Parejas confirmadas (manual o conf>=80) ordenadas por nombre Godes."""
     rows = db.execute("""
         SELECT pm.godes_id FROM palazuelos_map pm JOIN people p ON p.id = pm.godes_id
@@ -837,6 +822,31 @@ def _transfer_list(db, only_diff: bool = False) -> list:
           AND (pm.match_type = 'manual' OR pm.confidence >= 80)
         ORDER BY p.name""").fetchall()
     return [r[0] for r in rows]
+
+
+# Cola de la Cabina: parejas confirmadas CON diferencias y aún no traspasadas.
+# Se cachea por (mtime del GEDCOM, última modificación del mapa, nº filas).
+_queue_cache = {"key": None, "ids": None}
+
+
+def _transfer_queue(db, data: dict) -> list:
+    key = (_palaz_cache["mtime"],
+           db.execute("SELECT MAX(updated_at), MAX(transferred_at), COUNT(*) FROM palazuelos_map").fetchone())
+    if _queue_cache["ids"] is not None and _queue_cache["key"] == key:
+        return _queue_cache["ids"]
+    ids = []
+    for gid in _transfer_list(db):
+        pm = db.execute("SELECT palaz_id, transferred_at FROM palazuelos_map WHERE godes_id=?", (gid,)).fetchone()
+        if pm["transferred_at"]:
+            continue
+        g = db.execute("SELECT * FROM people WHERE id=?", (gid,)).fetchone()
+        pz = data["individuals"].get(pm["palaz_id"])
+        if not g or not pz:
+            continue
+        if any(not f["same"] for f in _transfer_fields(dict(g), pz, db, gid)):
+            ids.append(gid)
+    _queue_cache["key"], _queue_cache["ids"] = key, ids
+    return ids
 
 
 def _transfer_fields(g: dict, pz: dict, db, godes_id: str) -> list:
@@ -904,11 +914,22 @@ async def transfer_detail(godes_id: str):
 
     fields = _transfer_fields(g, pz, db, godes_id)
 
-    ids = _transfer_list(db)
-    pos = ids.index(godes_id) if godes_id in ids else -1
-    nav = {"pos": pos + 1, "total": len(ids),
-           "prev_godes_id": ids[pos - 1] if pos > 0 else None,
-           "next_godes_id": ids[pos + 1] if 0 <= pos < len(ids) - 1 else None}
+    # Navegación por la cola (con diferencias, pendientes). Si la persona actual
+    # no está en la cola (ya hecha / sin diferencias), prev/next son los vecinos
+    # más cercanos por orden alfabético.
+    ids = _transfer_queue(db, data)
+    if godes_id in ids:
+        pos = ids.index(godes_id)
+        prev_id = ids[pos - 1] if pos > 0 else None
+        next_id = ids[pos + 1] if pos < len(ids) - 1 else None
+        pos_label = pos + 1
+    else:
+        all_ids = _transfer_list(db)
+        here = all_ids.index(godes_id) if godes_id in all_ids else -1
+        before = [i for i in ids if i in all_ids and all_ids.index(i) < here]
+        after = [i for i in ids if i in all_ids and all_ids.index(i) > here]
+        prev_id, next_id, pos_label = (before[-1] if before else None), (after[0] if after else None), None
+    nav = {"pos": pos_label, "total": len(ids), "prev_godes_id": prev_id, "next_godes_id": next_id}
 
     return {
         "godes": {"id": godes_id, "name": g.get("name"), "mh_url": _mh_person_url("mh_tree_id_godes", godes_id)},

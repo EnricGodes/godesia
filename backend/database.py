@@ -255,15 +255,6 @@ CREATE TABLE IF NOT EXISTS photo_classifications (
     updated_at    TEXT DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS palazuelos_map (
-    godes_id TEXT PRIMARY KEY,
-    palaz_id TEXT,
-    palaz_name TEXT,
-    confidence INTEGER DEFAULT 0,
-    match_type TEXT DEFAULT 'auto',
-    updated_at TEXT DEFAULT (datetime('now'))
-);
-
 CREATE TABLE IF NOT EXISTS palazuelos_imports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     palaz_photo_rin TEXT,
@@ -484,11 +475,67 @@ def convert_date_to_spanish(date_str):
     return original
 
 
+# ── Decisiones del admin que deben sobrevivir a los deploys ──────────────────
+# Railway sustituye data/godesia.db por la copia del repo en cada deploy, así
+# que las decisiones tomadas en producción (emparejamientos manuales Palazuelos,
+# marcas "traspasado", descartes del Comparador) viven en una BD APARTE en el
+# volumen persistente, ADJUNTA (ATTACH) a la conexión principal como `dec`.
+# Las consultas siguen usando el nombre sin cualificar: SQLite lo resuelve en
+# `dec` porque la tabla ya no existe en main (se migra y se borra al arrancar).
+DECISIONS_SCHEMA = """
+CREATE TABLE IF NOT EXISTS dec.palazuelos_map (
+    godes_id TEXT PRIMARY KEY,
+    palaz_id TEXT,
+    palaz_name TEXT,
+    confidence INTEGER DEFAULT 0,
+    match_type TEXT DEFAULT 'auto',
+    updated_at TEXT DEFAULT (datetime('now')),
+    transferred_at TEXT
+);
+CREATE TABLE IF NOT EXISTS dec.compare_dismissed (
+    db_person_id TEXT PRIMARY KEY,
+    diff_types   TEXT,
+    dismissed_at TEXT DEFAULT (datetime('now'))
+);
+"""
+DECISION_TABLES = ("palazuelos_map", "compare_dismissed")
+
+
+def decisions_db_path(db_path) -> Path:
+    return Path(db_path).parent / "photos" / "_contrib" / "decisions.db"
+
+
+def attach_decisions(conn, db_path):
+    """Adjunta decisions.db como `dec`, crea sus tablas y migra (una vez) las
+    filas que aún estén en main, borrando después la tabla de main."""
+    dec_path = decisions_db_path(db_path)
+    try:
+        dec_path.parent.mkdir(parents=True, exist_ok=True)
+        conn.execute("ATTACH DATABASE ? AS dec", (str(dec_path),))
+    except sqlite3.OperationalError:
+        return  # ya adjunta (misma conexión) o volumen no disponible
+    conn.executescript(DECISIONS_SCHEMA)
+    for table in DECISION_TABLES:
+        in_main = conn.execute(
+            "SELECT 1 FROM main.sqlite_master WHERE type='table' AND name=?", (table,)
+        ).fetchone()
+        if not in_main:
+            continue
+        cols = [r[1] for r in conn.execute(f"PRAGMA main.table_info({table})")]
+        dec_cols = [r[1] for r in conn.execute(f"PRAGMA dec.table_info({table})")]
+        common = ", ".join(c for c in cols if c in dec_cols)
+        if conn.execute(f"SELECT COUNT(*) FROM dec.{table}").fetchone()[0] == 0:
+            conn.execute(f"INSERT OR IGNORE INTO dec.{table} ({common}) SELECT {common} FROM main.{table}")
+        conn.execute(f"DROP TABLE main.{table}")
+    conn.commit()
+
+
 def get_connection(db_path):
     """Create a SQLite connection with row factory and custom functions."""
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
+    attach_decisions(conn, db_path)
     # Register custom function for accent-insensitive search
     conn.create_function("NORMALIZE", 1, _normalize_accent)
     # Migrate: add columns that may be missing from older schemas

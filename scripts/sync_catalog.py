@@ -886,6 +886,8 @@ def main():
     extra_ged = base / "docs" / "palazuelos.ged"
     if extra_ged.exists():
         db_tmp = sqlite3.connect(db_path)
+        from database import attach_decisions
+        attach_decisions(db_tmp, db_path)  # palazuelos_map vive en decisions.db
         palaz_map = dict(db_tmp.execute(
             "SELECT palaz_id, godes_id FROM palazuelos_map WHERE palaz_id IS NOT NULL AND palaz_id != ''"
         ).fetchall())

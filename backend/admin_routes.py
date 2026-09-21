@@ -1219,7 +1219,7 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
 
         # Ensure dismiss table exists and load current dismissals
         conn.execute("""
-            CREATE TABLE IF NOT EXISTS compare_dismissed (
+            CREATE TABLE IF NOT EXISTS dec.compare_dismissed (
                 db_person_id TEXT PRIMARY KEY,
                 diff_types   TEXT,
                 dismissed_at TEXT DEFAULT (datetime('now'))
@@ -1465,7 +1465,7 @@ async def compare_dismiss_result(result_id: int):
     if not row:
         raise HTTPException(404, "Result not found")
     db.execute("""
-        CREATE TABLE IF NOT EXISTS compare_dismissed (
+        CREATE TABLE IF NOT EXISTS dec.compare_dismissed (
             db_person_id TEXT PRIMARY KEY,
             diff_types   TEXT,
             dismissed_at TEXT DEFAULT (datetime('now'))

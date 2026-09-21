@@ -1617,12 +1617,12 @@ const Transfer = (() => {
                     <button class="btn btn-secondary btn-sm" onclick="Transfer.openWindows()" title="Reabrir las dos ventanas de MyHeritage">↺ Ventanas</button>
                     <a class="btn btn-secondary btn-sm" href="${esc(d.palaz.mh_url)}" target="mh_palaz">MH Palazuelos</a>
                     <a class="btn btn-secondary btn-sm" href="${esc(d.godes.mh_url)}" target="mh_godes">MH Godes</a>
-                    <button class="btn btn-secondary btn-sm" ${nav.prev_godes_id ? '' : 'disabled'} onclick="Transfer.go('${esc(nav.prev_godes_id || '')}')">◀</button>
-                    <span class="tp-pos">${nav.pos} / ${nav.total}</span>
-                    <button class="btn btn-secondary btn-sm" ${nav.next_godes_id ? '' : 'disabled'} onclick="Transfer.go('${esc(nav.next_godes_id || '')}')">▶</button>
+                    <button class="btn btn-secondary btn-sm" title="Anterior con diferencias pendiente" ${nav.prev_godes_id ? '' : 'disabled'} onclick="Transfer.go('${esc(nav.prev_godes_id || '')}')">◀</button>
+                    <span class="tp-pos" title="Pendientes con diferencias">${nav.pos ? nav.pos + ' / ' : ''}${nav.total} pend.</span>
+                    <button class="btn btn-secondary btn-sm" title="Siguiente con diferencias pendiente" ${nav.next_godes_id ? '' : 'disabled'} onclick="Transfer.go('${esc(nav.next_godes_id || '')}')">▶</button>
                     ${d.transferred_at
                         ? `<button class="btn btn-secondary btn-sm" onclick="Transfer.undo()">deshacer ✓</button>`
-                        : `<button class="btn btn-sm" style="background:#2d4b33;color:#fff;" onclick="Transfer.done()">✓ Hecho y siguiente</button>`}
+                        : `<button class="btn btn-sm" style="background:#2d4b33;color:#fff;" title="Marca esta pareja como traspasada a MyHeritage (✓ en la lista, no vuelve a salir en la cola) y pasa a la siguiente pendiente" onclick="Transfer.done()">✓ Hecho y siguiente</button>`}
                     <button class="btn btn-secondary btn-sm" onclick="Transfer.close()">✕</button>
                 </div>
             </div>
@@ -1643,10 +1643,23 @@ const Transfer = (() => {
         el.style.display = 'block';
     }
 
+    // navigator.clipboard exige que el documento tenga el foco (lo pierde al
+    // abrir las ventanas de MyHeritage) → fallback con execCommand('copy').
     async function copy(btn, text) {
-        try { await navigator.clipboard.writeText(text); } catch (_) {}
+        let ok = false;
+        window.focus();
+        try { await navigator.clipboard.writeText(text); ok = true; } catch (_) {}
+        if (!ok) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;left:-9999px;top:0;';
+            document.body.appendChild(ta);
+            ta.focus(); ta.select();
+            try { ok = document.execCommand('copy'); } catch (_) {}
+            ta.remove();
+        }
         const old = btn.textContent;
-        btn.textContent = '✓';
+        btn.textContent = ok ? '✓' : '✗';
         setTimeout(() => { btn.textContent = old; }, 900);
     }
 
