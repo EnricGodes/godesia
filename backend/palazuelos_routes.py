@@ -41,6 +41,12 @@ def init_palazuelos(db_conn, base_dir: Path):
     global _db_conn, _base_dir
     _db_conn = db_conn
     _base_dir = base_dir
+    # Marca "ya traspasado a MyHeritage" de la Cabina de traspaso (idempotente)
+    try:
+        db_conn.execute("ALTER TABLE palazuelos_map ADD COLUMN transferred_at TEXT")
+        db_conn.commit()
+    except Exception:
+        pass
 
 
 def _db():
@@ -51,6 +57,54 @@ def _db():
 
 def _default_ged_path() -> Path:
     return _base_dir / "docs" / "palazuelos.ged"
+
+
+# Caché del GEDCOM Palazuelos parseado (19,5k INDI: parsearlo por petición
+# tarda segundos). Se invalida cuando cambia el mtime del fichero.
+_palaz_cache = {"mtime": None, "data": None}
+
+
+def _palaz_data() -> dict:
+    ged_path = _default_ged_path()
+    if not ged_path.exists():
+        raise HTTPException(404, "palazuelos.ged no trobat")
+    mtime = ged_path.stat().st_mtime
+    if _palaz_cache["data"] is None or _palaz_cache["mtime"] != mtime:
+        from gedcom_parser import parse_gedcom
+        _palaz_cache["data"] = parse_gedcom(str(ged_path))
+        _palaz_cache["mtime"] = mtime
+    return _palaz_cache["data"]
+
+
+# ── MyHeritage: enlaces directos a una persona en cada árbol ─────────────────
+# Ambos árboles viven en el mismo sitio MyHeritage; el número del xref GEDCOM
+# (@I1543@) es el RIN de MyHeritage (1 RIN MH:I1543). El ID de individuo que
+# acepta la URL del árbol es {treeId}{RIN a 6 cifras}: Artur @I16@ en el árbol
+# Godes (5) → rootIndividualID=5000016 (verificado 21/09/2026). Plantilla e IDs
+# de árbol son ajustes (settings) editables en admin → Configuración.
+MH_DEFAULTS = {
+    "mh_tree_url": "https://www.myheritage.es/family-trees/arbol-familiar-palazuelos-salvado/"
+                   "OYYV7S4KDS66QHEY2TNYYNVUPL3FOZY?familyTreeID={tree}&rootIndividualID={indiv}",
+    "mh_tree_id_palazuelos": "3",
+    "mh_tree_id_godes": "5",
+}
+
+
+def _mh_setting(key: str) -> str:
+    from database import get_setting
+    return get_setting(_db(), key, MH_DEFAULTS[key]) or MH_DEFAULTS[key]
+
+
+def _mh_person_url(tree_key: str, xref: Optional[str]) -> Optional[str]:
+    if not xref:
+        return None
+    rin = re.sub(r"\D", "", xref)
+    if not rin:
+        return None
+    tree = _mh_setting(tree_key)
+    indiv = f"{tree}{int(rin):06d}"
+    return (_mh_setting("mh_tree_url").replace("{tree}", tree)
+            .replace("{indiv}", indiv).replace("{rin}", rin))
 
 
 # ---------------------------------------------------------------------------
@@ -506,9 +560,9 @@ def _export_map_json():
         return
     try:
         rows = _db_conn.execute("""
-            SELECT godes_id, palaz_id, palaz_name, confidence, match_type
+            SELECT godes_id, palaz_id, palaz_name, confidence, match_type, transferred_at
             FROM palazuelos_map
-            WHERE match_type IN ('manual', 'rejected')
+            WHERE match_type IN ('manual', 'rejected') OR transferred_at IS NOT NULL
             ORDER BY godes_id
         """).fetchall()
         entries = [dict(r) for r in rows]
@@ -609,6 +663,7 @@ async def get_map(status_filter: Optional[str] = None):
     try:
         rows = db.execute("""
             SELECT pm.godes_id, pm.palaz_id, pm.palaz_name, pm.confidence, pm.match_type, pm.updated_at,
+                   pm.transferred_at,
                    p.name AS godes_name, p.birth_year, p.death_year
             FROM palazuelos_map pm
             JOIN people p ON pm.godes_id = p.id
@@ -655,13 +710,7 @@ async def update_map(godes_id: str, body: UpdateMapRequest):
 @router.get("/candidates")
 async def search_candidates(q: str = "", limit: int = 15):
     """Search Palazuelos individuals by name for the manual typeahead."""
-    ged_path = _default_ged_path()
-    if not ged_path.exists():
-        raise HTTPException(404, "palazuelos.ged no trobat")
-
-    from gedcom_parser import parse_gedcom
-    data = parse_gedcom(str(ged_path))
-    indis = data["individuals"]
+    indis = _palaz_data()["individuals"]
 
     q_canon = _canonicalize_person_name(q)
     results = []
@@ -683,6 +732,171 @@ async def search_candidates(q: str = "", limit: int = 15):
 
     results.sort(key=lambda x: -x["score"])
     return {"candidates": results[:limit]}
+
+
+# ---------------------------------------------------------------------------
+# Cabina de traspaso: campos lado a lado (Godes BD vs Palazuelos GEDCOM) con
+# enlaces directos a MyHeritage, para copiar/pegar entre árboles.
+# ---------------------------------------------------------------------------
+
+_MONTH_ES = {"ene": "jan", "feb": "feb", "mar": "mar", "abr": "apr", "may": "may", "jun": "jun",
+             "jul": "jul", "ago": "aug", "sep": "sep", "set": "sep", "oct": "oct", "nov": "nov",
+             "dic": "dec", "des": "dec", "gen": "jan", "febr": "feb", "juny": "jun", "sept": "sep", "oct": "oct", "nov": "nov", "març": "mar", "abr": "apr", "maig": "may", "ag": "aug"}
+
+
+def _norm_val(v) -> str:
+    """Comparación laxa: espacios, mayúsculas y meses en español/catalán vs GEDCOM."""
+    if v is None:
+        return ""
+    if isinstance(v, list):
+        return " | ".join(_norm_val(x) for x in v)
+    t = re.sub(r"\s+", " ", str(v)).strip().lower().replace(".", "")
+    return " ".join(_MONTH_ES.get(w, w) for w in t.split(" "))
+
+
+def _ged_place_str(d: dict) -> str:
+    return (d or {}).get("place") or ""
+
+
+def _palaz_family(pid: str, data: dict) -> dict:
+    indis, fams = data["individuals"], data["families"]
+    indi = indis.get(pid) or {}
+    name = lambda x: (indis.get(x) or {}).get("name") or x
+    parents, spouses, children = [], [], []
+    fc = indi.get("family_child")
+    if fc and fc in fams:
+        parents = [name(x) for x in (fams[fc].get("husband"), fams[fc].get("wife")) if x]
+    for fs in indi.get("family_spouse") or []:
+        f = fams.get(fs) or {}
+        other = f.get("wife") if f.get("husband") == pid else f.get("husband")
+        if other:
+            spouses.append(name(other))
+        children += [name(c) for c in f.get("children") or []]
+    return {"parents": parents, "spouses": spouses, "children": children}
+
+
+def _godes_family(pid: str, db) -> dict:
+    row = db.execute("SELECT father_name, mother_name FROM people WHERE id=?", (pid,)).fetchone()
+    parents = [x for x in (row or ()) if x]
+    spouses = [r[0] for r in db.execute("""
+        SELECT p.name FROM marriages m JOIN people p
+          ON p.id = CASE WHEN m.person1_id=? THEN m.person2_id ELSE m.person1_id END
+        WHERE m.person1_id=? OR m.person2_id=?""", (pid, pid, pid)).fetchall()]
+    children = [r[0] for r in db.execute("""
+        SELECT p.name FROM children c JOIN people p ON p.id=c.child_id
+        WHERE c.parent_id=? ORDER BY p.birth_year""", (pid,)).fetchall()]
+    return {"parents": parents, "spouses": spouses, "children": children}
+
+
+def _transfer_list(db, only_diff: bool = False) -> list:
+    """Parejas confirmadas (manual o conf>=80) ordenadas por nombre Godes."""
+    rows = db.execute("""
+        SELECT pm.godes_id FROM palazuelos_map pm JOIN people p ON p.id = pm.godes_id
+        WHERE pm.palaz_id IS NOT NULL AND pm.match_type != 'rejected'
+          AND (pm.match_type = 'manual' OR pm.confidence >= 80)
+        ORDER BY p.name""").fetchall()
+    return [r[0] for r in rows]
+
+
+def _transfer_fields(g: dict, pz: dict, db, godes_id: str) -> list:
+    occ_g = [r[0] for r in db.execute("SELECT title FROM occupations WHERE person_id=?", (godes_id,))]
+    res_g = [" ".join(x for x in (r[0], r[1], r[2], f"({r[3]})" if r[3] else "") if x) for r in db.execute(
+        "SELECT address, city, country, date FROM residences WHERE person_id=?", (godes_id,))]
+    bur_g = [" ".join(x for x in (r[0], r[1], f"({r[2]})" if r[2] else "") if x) for r in db.execute(
+        "SELECT place, place_detail, date FROM burial WHERE person_id=?", (godes_id,))]
+    ev_g = [" ".join(x for x in (r[0], r[1], r[2], f"({r[3]})" if r[3] else "") if x) for r in db.execute(
+        "SELECT type, description, place, date FROM events WHERE person_id=?", (godes_id,))]
+    notes_g = [r[0] for r in db.execute("SELECT content FROM notes WHERE person_id=?", (godes_id,)) if r[0]]
+
+    res_p = [" ".join(x for x in (r.get("address"), r.get("place"), f"({r['date']})" if r.get("date") else "") if x)
+             for r in pz.get("residences") or []]
+    bur_p = [" ".join(x for x in (b.get("place"), b.get("place_detail"), f"({b['date']})" if b.get("date") else "") if x)
+             for b in pz.get("burial") or []]
+    ev_p = [" ".join(x for x in (e.get("type"), e.get("description"), e.get("place"), f"({e['date']})" if e.get("date") else "") if x)
+            for e in pz.get("events") or []]
+
+    spec = [
+        ("given_name", "Nombre", g.get("given_name"), pz.get("given_name")),
+        ("surname", "Apellidos", g.get("surname"), pz.get("surname")),
+        ("nickname", "Apodo", g.get("nickname"), pz.get("nickname")),
+        ("sex", "Sexo", g.get("sex"), pz.get("sex")),
+        ("birth_date", "Nacimiento · fecha", g.get("birth_date"), (pz.get("birth") or {}).get("date")),
+        ("birth_place", "Nacimiento · lugar", g.get("birth_place"), _ged_place_str(pz.get("birth"))),
+        ("baptism_date", "Bautismo · fecha", g.get("baptism_date"), (pz.get("baptism") or {}).get("date")),
+        ("baptism_place", "Bautismo · lugar", g.get("baptism_place"), _ged_place_str(pz.get("baptism"))),
+        ("death_date", "Defunción · fecha", g.get("death_date"), (pz.get("death") or {}).get("date")),
+        ("death_place", "Defunción · lugar", g.get("death_place"), _ged_place_str(pz.get("death"))),
+        ("death_cause", "Defunción · causa", g.get("death_cause"), (pz.get("death") or {}).get("cause")),
+        ("death_age", "Defunción · edad", g.get("death_age"), (pz.get("death") or {}).get("age")),
+        ("burial", "Enterramiento", bur_g, bur_p),
+        ("occupations", "Ocupaciones", occ_g, [o.get("title") for o in pz.get("occupations") or []]),
+        ("residences", "Residencias", res_g, res_p),
+        ("events", "Eventos", ev_g, ev_p),
+        ("notes", "Notas", notes_g, [n for n in pz.get("notes") or [] if n]),
+    ]
+    out = []
+    for key, label, gv, pv in spec:
+        gv = [x for x in gv if x] if isinstance(gv, list) else (gv or "")
+        pv = [x for x in pv if x] if isinstance(pv, list) else (pv or "")
+        if not gv and not pv:
+            continue
+        out.append({"key": key, "label": label, "godes": gv, "palaz": pv,
+                    "same": _norm_val(gv) == _norm_val(pv)})
+    return out
+
+
+@router.get("/transfer/{godes_id}")
+async def transfer_detail(godes_id: str):
+    db = _db()
+    godes_id = "@" + godes_id.strip("@") + "@"
+    pm = db.execute("SELECT palaz_id, transferred_at FROM palazuelos_map WHERE godes_id=?", (godes_id,)).fetchone()
+    if not pm or not pm["palaz_id"]:
+        raise HTTPException(404, "Aquesta persona no té parella a Palazuelos")
+    g = db.execute("SELECT * FROM people WHERE id=?", (godes_id,)).fetchone()
+    if not g:
+        raise HTTPException(404, "Persona Godes no trobada")
+    g = dict(g)
+    data = _palaz_data()
+    pz = data["individuals"].get(pm["palaz_id"])
+    if not pz:
+        raise HTTPException(404, f"{pm['palaz_id']} no és al GEDCOM Palazuelos")
+
+    fields = _transfer_fields(g, pz, db, godes_id)
+
+    ids = _transfer_list(db)
+    pos = ids.index(godes_id) if godes_id in ids else -1
+    nav = {"pos": pos + 1, "total": len(ids),
+           "prev_godes_id": ids[pos - 1] if pos > 0 else None,
+           "next_godes_id": ids[pos + 1] if 0 <= pos < len(ids) - 1 else None}
+
+    return {
+        "godes": {"id": godes_id, "name": g.get("name"), "mh_url": _mh_person_url("mh_tree_id_godes", godes_id)},
+        "palaz": {"id": pm["palaz_id"], "name": pz.get("name"), "mh_url": _mh_person_url("mh_tree_id_palazuelos", pm["palaz_id"])},
+        "fields": fields,
+        "family": {"godes": _godes_family(godes_id, db), "palaz": _palaz_family(pm["palaz_id"], data)},
+        "nav": nav,
+        "transferred_at": pm["transferred_at"],
+    }
+
+
+@router.post("/transfer/{godes_id}/done")
+async def transfer_done(godes_id: str):
+    db = _db()
+    godes_id = "@" + godes_id.strip("@") + "@"
+    db.execute("UPDATE palazuelos_map SET transferred_at=datetime('now') WHERE godes_id=?", (godes_id,))
+    db.commit()
+    _export_map_json()
+    return {"ok": True}
+
+
+@router.post("/transfer/{godes_id}/undo")
+async def transfer_undo(godes_id: str):
+    db = _db()
+    godes_id = "@" + godes_id.strip("@") + "@"
+    db.execute("UPDATE palazuelos_map SET transferred_at=NULL WHERE godes_id=?", (godes_id,))
+    db.commit()
+    _export_map_json()
+    return {"ok": True}
 
 
 @router.get("/thumb")

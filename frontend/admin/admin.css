@@ -639,3 +639,35 @@ body {
 .test-row-fail td { background: #fff1f2; }
 .test-answer { font-size: 0.78rem; color: #3d3d37; max-width: 280px; }
 .test-handler { font-size: 0.68rem; font-family: monospace; color: #727971; }
+
+
+/* ── Cabina de traspaso Palazuelos → Godes ─────────────────────────────── */
+.transfer-panel {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+    max-height: 55vh; display: none; flex-direction: column;
+    background: #fcf9f0; border-top: 2px solid #2d4b33;
+    box-shadow: 0 -6px 24px rgba(0,0,0,.15); font-size: .82rem;
+}
+.transfer-panel .tp-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    padding: .5rem 1rem; background: #f1eee5; border-bottom: 1px solid #c2c8bf;
+}
+.transfer-panel .tp-title small { color: #9e9b94; margin-left: .25rem; }
+.transfer-panel .tp-side { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: #78583e; }
+.transfer-panel .tp-arrow { margin: 0 .6rem; color: #2d4b33; font-weight: 700; }
+.transfer-panel .tp-actions { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
+.transfer-panel .tp-toggle { font-size: .75rem; color: #5a5a4e; margin-right: .5rem; user-select: none; }
+.transfer-panel .tp-pos { font-size: .75rem; color: #5a5a4e; min-width: 4.5rem; text-align: center; }
+.transfer-panel .tp-body { overflow: auto; max-height: calc(55vh - 3.2rem); }
+.transfer-panel .tp-table { width: 100%; border-collapse: collapse; }
+.transfer-panel .tp-table th { text-align: left; padding: .4rem 1rem; font-size: .7rem; text-transform: uppercase; color: #78583e; background: #f6f3ea; position: sticky; top: 0; }
+.transfer-panel .tp-table td { padding: .35rem 1rem; border-top: 1px solid #e6e3da; vertical-align: top; }
+.transfer-panel .tp-label { font-weight: 600; color: #424842; white-space: nowrap; }
+.transfer-panel tr.tp-diff td:nth-child(2) { background: #fff8e1; }
+.transfer-panel tr.tp-same td { color: #9e9b94; }
+.transfer-panel .tp-val { display: flex; align-items: flex-start; gap: .4rem; }
+.transfer-panel .tp-val span { white-space: pre-wrap; word-break: break-word; }
+.transfer-panel .tp-copy { border: none; background: transparent; cursor: pointer; font-size: .85rem; padding: 0 .2rem; opacity: .55; }
+.transfer-panel .tp-copy:hover { opacity: 1; }
+.transfer-panel .tp-empty { color: #c2c8bf; }
+.transfer-panel .tp-fam td { background: #f6f3ea; font-size: .78rem; }

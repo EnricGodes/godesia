@@ -137,6 +137,14 @@ La sección Cementerios (`frontend/cementerios.html`) muestra dónde está enter
 
 La tabla GEDCOM `burial` solo actúa como sugerencia en el gestor (`GET /api/admin/cemeteries/{id}/burial-suggestions`, matching por nombre sin acentos ni espacios); la verdad de los nichos es siempre la tabla manual. El dossier muestra la sección "Sepultura" cuando la persona tiene nicho asignado (clave `niche` en `/api/dossier/{id}`), con deep-link `?niche={id}` al mapa.
 
+## Cabina de traspaso Palazuelos → Godes (MyHeritage)
+
+Los dos árboles viven en el mismo sitio MyHeritage (`380341641`, "Arbol familiar Palazuelos-Salvadó"): Palazuelos = `familyTreeID=3`, Godes = `familyTreeID=5`. MyHeritage no tiene API de escritura, así que el traspaso de datos es manual; la Cabina (`backend/palazuelos_routes.py` `/api/admin/palazuelos/transfer/{godes_id}`, objeto `Transfer` en `frontend/admin/admin.js`) lo acelera: el botón **⇄** de una pareja confirmada de `palazuelos_map` (pestañas Sync Palazuelos y Comparador) abre dos ventanas de Chrome lado a lado centradas en la persona en cada árbol y un panel inferior con los campos de ambos lados y botón «copiar» por valor.
+
+- **URL a una persona**: `{mh_tree_url}` con `{tree}` y `{indiv}` = ID del árbol + número del xref GEDCOM a 6 cifras (`@I16@` en el árbol 5 → `rootIndividualID=5000016`; el número del xref es el `RIN MH:I16` de MyHeritage). Verificado el 21/09/2026. Plantilla e IDs de árbol son settings (`mh_tree_url`, `mh_tree_id_palazuelos`, `mh_tree_id_godes`, defaults en `MH_DEFAULTS`) editables en admin → Configuración.
+- `palazuelos_map.transferred_at` marca las parejas ya traspasadas («✓ Hecho y siguiente»); se exporta también a `data/palazuelos_map.json`.
+- El GEDCOM Palazuelos parseado se cachea en memoria (`_palaz_data()`, invalidado por mtime).
+
 ## QA automático del QueryRouter (banco de preguntas)
 
 El banco de pruebas (`data/test_bank.json`, gestionado por `backend/test_bank.py`) tiene un verificador automático que sustituye la revisión manual de la pestaña Tests del admin:

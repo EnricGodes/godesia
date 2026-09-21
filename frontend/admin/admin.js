@@ -1538,6 +1538,151 @@ Status.init();
 })();
 
 // ---------------------------------------------------------------------------
+// Cabina de traspaso Palazuelos → Godes (MyHeritage lado a lado + copiar campos)
+// ---------------------------------------------------------------------------
+
+const Transfer = (() => {
+    let data = null;
+    let onlyDiff = true;
+    let winL = null, winR = null;
+
+    function _panel() {
+        let el = document.getElementById('transfer-panel');
+        if (el) return el;
+        el = document.createElement('div');
+        el.id = 'transfer-panel';
+        el.className = 'transfer-panel';
+        document.body.appendChild(el);
+        return el;
+    }
+
+    // Dos ventanas con nombre, mitad de pantalla cada una: al pasar a la
+    // siguiente persona se reutilizan en vez de abrir más.
+    function openWindows() {
+        if (!data) return;
+        const W = Math.floor(screen.availWidth / 2), H = screen.availHeight;
+        const feat = (left) => `left=${left},top=0,width=${W},height=${H},menubar=no,toolbar=no,location=yes`;
+        winL = window.open(data.palaz.mh_url, 'mh_palaz', feat(0));
+        winR = window.open(data.godes.mh_url, 'mh_godes', feat(W));
+        if (!winL || !winR) alert('Chrome ha bloqueado las ventanas emergentes: permítelas para este sitio.');
+    }
+
+    async function open(godesId, withWindows = true) {
+        if (!godesId) return;
+        try {
+            data = await apiFetch(`/api/admin/palazuelos/transfer/${encodeURIComponent(godesId)}`);
+        } catch (e) { alert(e.message); return; }
+        if (withWindows) openWindows();
+        render();
+    }
+
+    function _val(v) {
+        if (Array.isArray(v)) return v;
+        return v ? [v] : [];
+    }
+
+    function _copyBtn(text) {
+        return `<button class="tp-copy" title="Copiar" onclick="Transfer.copy(this, ${JSON.stringify(text)})">📋</button>`;
+    }
+
+    function _cell(v) {
+        const items = _val(v);
+        if (!items.length) return '<span class="tp-empty">—</span>';
+        return items.map(t => `<div class="tp-val"><span>${esc(t)}</span>${_copyBtn(t)}</div>`).join('');
+    }
+
+    function _fam(f) {
+        const line = (label, arr) => arr && arr.length ? `<div><b>${label}:</b> ${arr.map(esc).join(', ')}</div>` : '';
+        return line('Padres', f.parents) + line('Cónyuges', f.spouses) + line('Hijos', f.children) || '<span class="tp-empty">—</span>';
+    }
+
+    function render() {
+        const el = _panel();
+        const d = data;
+        const rows = d.fields.filter(f => !onlyDiff || !f.same);
+        const nav = d.nav;
+        el.innerHTML = `
+            <div class="tp-head">
+                <div class="tp-title">
+                    <span class="tp-side">Palazuelos</span> <b>${esc(d.palaz.name)}</b> <small>${esc(d.palaz.id)}</small>
+                    <span class="tp-arrow">→</span>
+                    <span class="tp-side">Godes</span> <b>${esc(d.godes.name)}</b> <small>${esc(d.godes.id)}</small>
+                    ${d.transferred_at ? '<span class="badge badge-resolved" style="margin-left:.5rem;">✓ traspasado</span>' : ''}
+                </div>
+                <div class="tp-actions">
+                    <label class="tp-toggle"><input type="checkbox" ${onlyDiff ? 'checked' : ''} onchange="Transfer.toggleDiff(this.checked)"> solo diferencias</label>
+                    <button class="btn btn-secondary btn-sm" onclick="Transfer.openWindows()" title="Reabrir las dos ventanas de MyHeritage">↺ Ventanas</button>
+                    <a class="btn btn-secondary btn-sm" href="${esc(d.palaz.mh_url)}" target="mh_palaz">MH Palazuelos</a>
+                    <a class="btn btn-secondary btn-sm" href="${esc(d.godes.mh_url)}" target="mh_godes">MH Godes</a>
+                    <button class="btn btn-secondary btn-sm" ${nav.prev_godes_id ? '' : 'disabled'} onclick="Transfer.go('${esc(nav.prev_godes_id || '')}')">◀</button>
+                    <span class="tp-pos">${nav.pos} / ${nav.total}</span>
+                    <button class="btn btn-secondary btn-sm" ${nav.next_godes_id ? '' : 'disabled'} onclick="Transfer.go('${esc(nav.next_godes_id || '')}')">▶</button>
+                    ${d.transferred_at
+                        ? `<button class="btn btn-secondary btn-sm" onclick="Transfer.undo()">deshacer ✓</button>`
+                        : `<button class="btn btn-sm" style="background:#2d4b33;color:#fff;" onclick="Transfer.done()">✓ Hecho y siguiente</button>`}
+                    <button class="btn btn-secondary btn-sm" onclick="Transfer.close()">✕</button>
+                </div>
+            </div>
+            <div class="tp-body">
+                <table class="tp-table">
+                    <thead><tr><th style="width:150px;">Campo</th><th>Palazuelos (origen)</th><th>Godes (destino)</th></tr></thead>
+                    <tbody>
+                        ${rows.map(f => `<tr class="${f.same ? 'tp-same' : 'tp-diff'}">
+                            <td class="tp-label">${esc(f.label)}</td>
+                            <td>${_cell(f.palaz)}</td>
+                            <td>${_cell(f.godes)}</td>
+                        </tr>`).join('') || '<tr><td colspan="3" class="tp-empty" style="text-align:center;padding:1rem;">Sin diferencias</td></tr>'}
+                        <tr class="tp-fam"><td class="tp-label">Familia</td><td>${_fam(d.family.palaz)}</td><td>${_fam(d.family.godes)}</td></tr>
+                    </tbody>
+                </table>
+            </div>`;
+        el.style.display = 'block';
+    }
+
+    async function copy(btn, text) {
+        try { await navigator.clipboard.writeText(text); } catch (_) {}
+        const old = btn.textContent;
+        btn.textContent = '✓';
+        setTimeout(() => { btn.textContent = old; }, 900);
+    }
+
+    function toggleDiff(v) { onlyDiff = v; render(); }
+
+    // Cambiar de persona: las ventanas con nombre navegan solas vía target=,
+    // pero sin gesto de usuario window.open puede bloquearse → usamos location.
+    async function go(godesId) {
+        if (!godesId) return;
+        await open(godesId, false);
+        try { if (winL && !winL.closed) winL.location = data.palaz.mh_url; else winL = window.open(data.palaz.mh_url, 'mh_palaz'); } catch (_) {}
+        try { if (winR && !winR.closed) winR.location = data.godes.mh_url; else winR = window.open(data.godes.mh_url, 'mh_godes'); } catch (_) {}
+    }
+
+    async function done() {
+        await apiFetch(`/api/admin/palazuelos/transfer/${encodeURIComponent(data.godes.id)}/done`, { method: 'POST' });
+        _refreshRow(data.godes.id, true);
+        if (data.nav.next_godes_id) go(data.nav.next_godes_id);
+        else { data.transferred_at = new Date().toISOString(); render(); }
+    }
+
+    async function undo() {
+        await apiFetch(`/api/admin/palazuelos/transfer/${encodeURIComponent(data.godes.id)}/undo`, { method: 'POST' });
+        data.transferred_at = null;
+        _refreshRow(data.godes.id, false);
+        render();
+    }
+
+    function _refreshRow(godesId, doneFlag) {
+        const tr = document.querySelector(`#palaz-map-body tr[data-godes-id="${CSS.escape(godesId)}"]`);
+        const btn = tr && tr.querySelector('button[onclick^="Transfer.open"]');
+        if (btn) { btn.textContent = doneFlag ? '⇄ ✓' : '⇄'; btn.style.background = doneFlag ? '#e8f5e9' : ''; }
+    }
+
+    function close() { const el = document.getElementById('transfer-panel'); if (el) el.style.display = 'none'; }
+
+    return { open, openWindows, copy, toggleDiff, go, done, undo, close };
+})();
+
+// ---------------------------------------------------------------------------
 // Configuració
 // ---------------------------------------------------------------------------
 
@@ -1603,6 +1748,26 @@ const Config = (() => {
         });
 
         _initLanguages(settings.active_languages || []);
+
+        // MyHeritage (Cabina de traspaso Palazuelos → Godes)
+        for (const key of ['mh_tree_url', 'mh_tree_id_palazuelos', 'mh_tree_id_godes']) {
+            const input = document.getElementById('config-' + key);
+            if (input) input.value = settings[key] || '';
+        }
+        document.getElementById('config-mh-save').addEventListener('click', async () => {
+            try {
+                for (const key of ['mh_tree_url', 'mh_tree_id_palazuelos', 'mh_tree_id_godes']) {
+                    await apiFetch('/api/settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ key, value: document.getElementById('config-' + key).value.trim() })
+                    });
+                }
+                const msg = document.getElementById('config-mh-msg');
+                msg.style.display = 'inline';
+                setTimeout(() => { msg.style.display = 'none'; }, 2500);
+            } catch (e) { alert('Error guardando: ' + e.message); }
+        });
 
         // Email de avisos (nuevos registros / aportaciones)
         const notifyInput = document.getElementById('config-notify-email');
@@ -1887,7 +2052,8 @@ const Comparador = {
                             <button class="btn btn-secondary btn-sm"
                                 onclick="Comparador.toggleDetail(${row.id}, this)">▸ Ver</button>
                         </td>
-                        <td>
+                        <td style="white-space:nowrap;">
+                            <button class="btn btn-secondary btn-sm" title="Cabina de traspaso (MyHeritage lado a lado)" onclick="Transfer.open('${esc(row.db_person_id || '')}')">⇄</button>
                             <button class="btn btn-sm" style="background:#f1eee5;color:#727971;border:1px solid #c2c8bf;" title="Descartar (no reaparece si no hay cambios)" onclick="Comparador.dismissRow(${row.id})">✕</button>
                         </td>
                     </tr>
@@ -2433,6 +2599,11 @@ const Palazuelos = (() => {
                 </div>
             </td>
             <td style="white-space:nowrap;">
+                ${(cat === 'confirmed')
+                    ? `<button class="btn btn-secondary btn-sm" title="Cabina de traspaso: abrir ambos árboles en MyHeritage y copiar campos"
+                               style="${e.transferred_at ? 'background:#e8f5e9;border-color:#a5d6a7;' : ''}"
+                               onclick="Transfer.open('${esc(e.godes_id)}')">⇄${e.transferred_at ? ' ✓' : ''}</button> `
+                    : ''}
                 ${confirmBtn}
                 <button class="btn btn-secondary btn-sm" title="Rechazar" onclick="Palazuelos.rejectMatch('${esc(e.godes_id)}')">✕</button>
             </td>

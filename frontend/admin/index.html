@@ -514,6 +514,27 @@
                       style="font-size:.8rem;color:#2d4b33;display:none;">✓ Guardado</span>
             </div>
 
+            <div class="card" style="max-width:640px;margin-top:1.5rem;">
+                <h2 class="card-title">MyHeritage (cabina de traspaso)</h2>
+                <p class="card-subtitle">Enlaces directos a una persona en cada árbol. Plantilla con <code>{tree}</code> (ID del árbol) e
+                    <code>{indiv}</code> = árbol + número del registro a 6 cifras (<code>@I16@</code> en el árbol 5 → 5000016).
+                    También <code>{rin}</code> (número sin prefijo).</p>
+                <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:.75rem;">
+                    <input type="text" id="config-mh_tree_url" placeholder="https://www.myheritage.es/family-trees/…?familyTreeID={tree}&rootIndividualID={indiv}"
+                        style="padding:8px 12px;border:1px solid #c2c8bf;border-radius:8px;font-family:Manrope,sans-serif;font-size:.8rem;box-sizing:border-box;">
+                    <div style="display:flex;gap:8px;">
+                        <input type="text" id="config-mh_tree_id_palazuelos" placeholder="ID árbol Palazuelos (3)"
+                            style="flex:1;padding:8px 12px;border:1px solid #c2c8bf;border-radius:8px;font-family:Manrope,sans-serif;font-size:.875rem;box-sizing:border-box;">
+                        <input type="text" id="config-mh_tree_id_godes" placeholder="ID árbol Godes (5)"
+                            style="flex:1;padding:8px 12px;border:1px solid #c2c8bf;border-radius:8px;font-family:Manrope,sans-serif;font-size:.875rem;box-sizing:border-box;">
+                        <button id="config-mh-save"
+                            style="padding:8px 16px;background:#2d4b33;color:#fff;border:none;border-radius:8px;
+                                   cursor:pointer;font-family:Manrope,sans-serif;font-size:.875rem;">Guardar</button>
+                    </div>
+                </div>
+                <span id="config-mh-msg" style="font-size:.8rem;color:#2d4b33;display:none;">✓ Guardado</span>
+            </div>
+
             <div class="card" style="max-width:480px;margin-top:1.5rem;">
                 <h2 class="card-title">Avisos por email</h2>
                 <p class="card-subtitle">Dirección que recibe un aviso cuando alguien se registra en la web o

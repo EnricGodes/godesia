@@ -30,6 +30,7 @@ import i18n as i18n_pages
 from i18n_dates import format_gedcom_date, localize_dates_deep, validate_lang
 import test_bank
 from admin_routes import router as admin_router, init_admin, init_log_capture
+import palazuelos_routes
 from palazuelos_routes import router as palazuelos_router, init_palazuelos
 import auth
 import contributions
@@ -895,6 +896,7 @@ async def api_get_settings():
         "tree_default_person": get_setting(db_conn, "tree_default_person", "I4"),
         "active_languages": i18n_pages.get_active_languages(),
         "notify_email": get_setting(db_conn, "notify_email", notifications.DEFAULT_NOTIFY_EMAIL),
+        **{k: get_setting(db_conn, k, v) for k, v in palazuelos_routes.MH_DEFAULTS.items()},
     }
 
 
@@ -907,7 +909,7 @@ class SettingBody(BaseModel):
 async def api_post_settings(body: SettingBody):
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicialitzada")
-    allowed_keys = {"tree_default_person", "active_languages", "notify_email"}
+    allowed_keys = {"tree_default_person", "active_languages", "notify_email", *palazuelos_routes.MH_DEFAULTS}
     if body.key not in allowed_keys:
         raise HTTPException(status_code=400, detail=f"Clau no permesa: {body.key}")
     if body.key == "notify_email":
