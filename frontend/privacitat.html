@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godesia</title>
+    <meta name="robots" content="noindex">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { corePlugins: { preflight: false }, theme: { extend: { colors: {
+            'primary': '#17341e', 'primary-container': '#2d4b33', 'on-primary': '#ffffff',
+            'surface': '#fbf9f2', 'on-surface': '#1c1c17', 'outline': '#7c7a6e',
+            'outline-variant': '#cdcabb',
+        }, fontFamily: { sans: ['Manrope', 'sans-serif'], serif: ['Noto Serif', 'serif'] } } } };
+    </script>
+    <style>
+        body { background: #fbf9f2; font-family: 'Manrope', sans-serif; color: #1c1c17; }
+        .pv-wrap { max-width: 46rem; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
+        .pv-sec { margin-top: 2.25rem; }
+        .pv-sec h2 { font-family: 'Noto Serif', serif; font-size: 1.15rem; color: #17341e; margin-bottom: .6rem; }
+        .pv-body { font-size: .93rem; line-height: 1.75; color: #35352d; }
+        .pv-body p { margin: 0 0 .75rem; }
+        .pv-body ul { margin: 0 0 .75rem; padding-left: 1.1rem; list-style: disc; }
+        .pv-body li { margin-bottom: .35rem; }
+        .pv-body strong { color: #17341e; }
+        .pv-body a { color: #2d4b33; text-decoration: underline; }
+        .pv-card { background: #fff; border: 1px solid rgba(205,202,187,.6); border-radius: 1rem; padding: 1.25rem 1.4rem; }
+    </style>
+</head>
+<body>
+    <div class="pv-wrap">
+        <a href="/" class="text-sm" style="color:#2d4b33;text-decoration:none;" data-i18n="pages.privacy.back">← Volver a Godesia</a>
+
+        <h1 class="font-serif text-3xl text-primary mt-4" data-i18n="pages.privacy.title">Privacidad y protección de datos</h1>
+        <p class="text-sm text-outline mt-2" data-i18n="pages.privacy.updated">Última actualización: 22 de septiembre de 2026</p>
+
+        <div class="pv-body mt-5 pv-card" data-i18n-html="pages.privacy.intro">
+            <p>Godesia es un archivo genealógico familiar privado, sin ánimo de lucro y sin publicidad.</p>
+        </div>
+
+        <div class="pv-sec"><h2 data-i18n="pages.privacy.h_controller">Responsable</h2>
+            <div class="pv-body" data-i18n-html="pages.privacy.controller"></div></div>
+
+        <div class="pv-sec"><h2 data-i18n="pages.privacy.h_data">Qué datos hay aquí</h2>
+            <div class="pv-body" data-i18n-html="pages.privacy.data"></div></div>
+
+        <div class="pv-sec"><h2 data-i18n="pages.privacy.h_purpose">Para qué se usan y con qué base legal</h2>
+            <div class="pv-body" data-i18n-html="pages.privacy.purpose"></div></div>
+
+        <div class="pv-sec"><h2 data-i18n="pages.privacy.h_hosting">Dónde se alojan</h2>
+            <div class="pv-body" data-i18n-html="pages.privacy.hosting"></div></div>
+
+        <div class="pv-sec"><h2 data-i18n="pages.privacy.h_third">Terceros que intervienen</h2>
+            <div class="pv-body" data-i18n-html="pages.privacy.third"></div></div>
+
+        <div class="pv-sec"><h2 data-i18n="pages.privacy.h_security">Seguridad</h2>
+            <div class="pv-body" data-i18n-html="pages.privacy.security"></div></div>
+
+        <div class="pv-sec"><h2 data-i18n="pages.privacy.h_retention">Conservación</h2>
+            <div class="pv-body" data-i18n-html="pages.privacy.retention"></div></div>
+
+        <div class="pv-sec"><h2 data-i18n="pages.privacy.h_deceased">Personas fallecidas</h2>
+            <div class="pv-body" data-i18n-html="pages.privacy.deceased"></div></div>
+
+        <div class="pv-sec"><h2 data-i18n="pages.privacy.h_rights">Tus derechos</h2>
+            <div class="pv-body" data-i18n-html="pages.privacy.rights"></div></div>
+
+        <div class="pv-sec"><h2 data-i18n="pages.privacy.h_cookies">Cookies</h2>
+            <div class="pv-body" data-i18n-html="pages.privacy.cookies"></div></div>
+
+        <div class="pv-sec"><h2 data-i18n="pages.privacy.h_changes">Cambios</h2>
+            <div class="pv-body" data-i18n-html="pages.privacy.changes"></div></div>
+    </div>
+
+    <script src="/i18n.js"></script>
+</body>
+</html>

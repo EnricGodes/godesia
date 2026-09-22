@@ -613,7 +613,7 @@ _PUBLIC_PREFIXES = (
 
 
 # Páginas HTML accesibles sin sesión (con o sin prefijo de idioma).
-_PUBLIC_PAGES = ("login.html", "reset-password.html")
+_PUBLIC_PAGES = ("login.html", "reset-password.html", "privacitat.html")
 
 
 def _is_public_page(path):

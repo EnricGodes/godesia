@@ -85,24 +85,6 @@
     ],
     "until": "fins a"
   },
-  "doc_types": {
-    "bautisme": "Baptismes",
-    "biografia": "Biografies",
-    "carta": "Cartes",
-    "defuncio": "Defuncions",
-    "document": "Documents",
-    "matrimoni": "Matrimonis",
-    "naixement": "Naixements",
-    "padro": "Padrons",
-    "testament": "Testaments",
-    "certificat": "Certificats",
-    "dibuix": "Dibuixos i plànols",
-    "arbre": "Arbres genealògics",
-    "transcripcio": "Transcripcions",
-    "poema": "Poemes",
-    "invitacio": "Invitacions",
-    "Diversos": "Diversos"
-  },
   "doc_tags": {
     "Bautismo": "Baptisme",
     "Biografia": "Biografia",
@@ -118,6 +100,24 @@
     "Obituario": "Obituari",
     "Padrón": "Padró"
   },
+  "doc_types": {
+    "Diversos": "Diversos",
+    "arbre": "Arbres genealògics",
+    "bautisme": "Baptismes",
+    "biografia": "Biografies",
+    "carta": "Cartes",
+    "certificat": "Certificats",
+    "defuncio": "Defuncions",
+    "dibuix": "Dibuixos i plànols",
+    "document": "Documents",
+    "invitacio": "Invitacions",
+    "matrimoni": "Matrimonis",
+    "naixement": "Naixements",
+    "padro": "Padrons",
+    "poema": "Poemes",
+    "testament": "Testaments",
+    "transcripcio": "Transcripcions"
+  },
   "event_types": {
     "Afiliación": "Afiliació",
     "Alistamiento Militar": "Allistament Militar",
@@ -132,9 +132,11 @@
     "Enfermedad": "Malaltia",
     "Evento": "Esdeveniment",
     "Evento Personalizado": "Esdeveniment Personalitzat",
+    "Exposición": "Exposició",
     "Funeral": "Funeral",
     "Idioma": "Idioma",
     "Inmigración": "Immigració",
+    "Jurado": "Jurat",
     "Mudanza": "Mudança",
     "Nacionalidad": "Nacionalitat",
     "Número de Referencia": "Número de Referència",
@@ -142,13 +144,11 @@
     "Onomástica": "Onomàstica",
     "Premio": "Premi",
     "Primera Comunión": "Primera Comunió",
+    "Proyecto profesional": "Projecte professional",
     "Religión": "Religió",
     "Reunión Familiar": "Reunió Familiar",
     "Servicio Militar": "Servei Militar",
-    "Trabajo": "Feina",
-    "Exposición": "Exposició",
-    "Jurado": "Jurat",
-    "Proyecto profesional": "Projecte professional"
+    "Trabajo": "Feina"
   },
   "events": {
     "anecdote": "Anècdota",
@@ -182,6 +182,7 @@
     "nav_home": "Inici",
     "nav_title": "Navegació",
     "nav_tree": "Arbre",
+    "privacy": "Privacitat",
     "project_title": "Projecte",
     "tagline": "Arxiu genealògic digital de la família Godes. Preservant la memòria familiar per a les generacions futures.",
     "team_title": "Equip de recerca"
@@ -195,6 +196,7 @@
     "collaborate": "Col·laborar",
     "coming_soon": "Properament",
     "family_photos": "Fotos familiars",
+    "logout": "Sortir",
     "menu_album": "Àlbum",
     "menu_branches": "Branques familiars",
     "menu_documents": "Documents",
@@ -205,8 +207,7 @@
     "search_title": "Cercador",
     "sidebar_subtitle": "Explora el teu llinatge",
     "sidebar_title": "Branques familiars",
-    "tree": "Arbre",
-    "logout": "Sortir"
+    "tree": "Arbre"
   },
   "pages": {
     "albums": {
@@ -484,6 +485,29 @@
       "stats_title": "Pols del llegat",
       "updated_label": "Dades actualitzades"
     },
+    "login": {
+      "back_to_login": "Tornar a entrar",
+      "email": "Correu",
+      "enter": "Entrar",
+      "err_credentials": "Correu o contrasenya incorrectes.",
+      "err_exists": "Ja existeix un compte amb aquest correu.",
+      "err_generic": "No s'ha pogut completar el registre.",
+      "err_pending": "El teu accés està pendent d'aprovació.",
+      "err_rate": "Massa intents. Espera uns minuts.",
+      "forgot": "Has oblidat la contrasenya?",
+      "forgot_hint": "Introdueix el teu email i t'enviarem un enllaç per triar una nova contrasenya.",
+      "forgot_sent": "Si aquest email està registrat, t'hem enviat un enllaç per restablir la contrasenya.",
+      "forgot_submit": "Enviar enllaç",
+      "name": "Nom",
+      "password": "Contrasenya",
+      "private_note": "Accés reservat a la família. Contingut no públic.",
+      "register": "Registrar-se",
+      "register_hint": "El teu registre quedarà pendent d'aprovació abans de poder accedir.",
+      "register_ok": "Registre rebut. Podràs entrar quan s'aprovi el teu accés.",
+      "subtitle": "L'arbre de la família Godes",
+      "tab_login": "Entrar",
+      "tab_register": "Registrar-se"
+    },
     "mestre_godes": {
       "meta_title": "Subbranca Mestre Godes - Godesia"
     },
@@ -492,6 +516,34 @@
     },
     "nolla_godes": {
       "meta_title": "Subbranca Nolla Godes - Godesia"
+    },
+    "privacy": {
+      "back": "← Tornar a Godesia",
+      "changes": "<p>Si aquesta política canvia, s'actualitzarà la data de la capçalera i, si el canvi és rellevant, s'avisarà per correu les persones amb compte.</p>",
+      "controller": "<p><strong>Enric Godes</strong> — contacte: <a href=\"mailto:egodes@vasava.es\">egodes@vasava.es</a>.</p><p>Finalitat del tractament: conservar i compartir l'arxiu genealògic de la família Godes dins d'un cercle familiar tancat.</p>",
+      "cookies": "<p>Es fa servir una <strong>única galeta tècnica</strong>, <code>godesia_session</code>, que manté la sessió iniciada durant 30 dies. És imprescindible per poder entrar i, com que és estrictament necessària, no requereix consentiment previ. No hi ha galetes analítiques ni publicitàries, ni galetes de tercers.</p>",
+      "data": "<ul><li><strong>Dades genealògiques:</strong> noms, dates i llocs de naixement, bateig, matrimoni i defunció, oficis, residències, sepultures, fotografies, documents i notes familiars. La majoria corresponen a <strong>persones difuntes</strong> (unes 1.300 de les 1.489 fitxes).</li><li><strong>Persones vives:</strong> unes 170 fitxes, amb dades aportades per la família mateixa.</li><li><strong>Comptes d'usuari:</strong> nom, adreça electrònica, contrasenya xifrada i data del darrer accés.</li><li><strong>Aportacions:</strong> el que envies pel formulari de col·laboració (nom, correu, missatge i fitxers adjunts).</li><li><strong>Registre tècnic:</strong> les preguntes que el cercador no sap respondre, per poder millorar-lo.</li></ul>",
+      "deceased": "<p>El RGPD no s'aplica a les dades de les persones difuntes, que són la major part d'aquest arxiu. Tot i així, els seus hereus o familiars poden demanar la correcció o la retirada de qualsevol fitxa, i s'atendrà igual que si estigués emparada pel reglament (art. 3 de la LOPDGDD).</p>",
+      "h_changes": "Canvis",
+      "h_controller": "Responsable",
+      "h_cookies": "Galetes",
+      "h_data": "Quines dades hi ha",
+      "h_deceased": "Persones difuntes",
+      "h_hosting": "On s'allotgen",
+      "h_purpose": "Per a què es fan servir i amb quina base legal",
+      "h_retention": "Conservació",
+      "h_rights": "Els teus drets",
+      "h_security": "Seguretat",
+      "h_third": "Tercers que hi intervenen",
+      "hosting": "<p>L'aplicació, la base de dades i les fotografies estan allotjades a <strong>Railway</strong> (Railway Corporation, EUA), a la seva regió <strong>us-east4, Virgínia (Estats Units)</strong>.</p><p>Això implica una <strong>transferència internacional de dades</strong> fora de l'Espai Econòmic Europeu, emparada per les clàusules contractuals tipus de la Comissió Europea que incorpora l'acord de tractament de dades de Railway.</p><p>El responsable conserva a més còpies de seguretat als seus equips personals, a Espanya. No existeix cap altra còpia ni cap altre allotjament.</p>",
+      "intro": "<p>Godesia és un arxiu genealògic familiar <strong>privat</strong>, sense ànim de lucre, sense publicitat i tancat als cercadors. Només hi entren les persones a qui s'aprova l'accés una a una. Aquesta pàgina explica quines dades hi ha, on estan allotjades i què pots demanar sobre les teves.</p>",
+      "purpose": "<p>Les dades es fan servir <strong>només</strong> per mantenir l'arxiu genealògic i donar-hi accés a la família.</p><ul><li>Dades genealògiques: interès legítim en la recerca històrica i familiar (art. 6.1.f RGPD).</li><li>Comptes d'usuari: gestió de l'accés sol·licitat per la persona mateixa (art. 6.1.a i 6.1.b RGPD).</li></ul><p>No hi ha decisions automatitzades ni elaboració de perfils. <strong>No es ven, cedeix ni comparteix cap dada amb tercers</strong> amb finalitats comercials, ni hi ha publicitat de cap mena.</p>",
+      "retention": "<ul><li>Les dades genealògiques es conserven de manera indefinida: preservar-les és precisament la finalitat de l'arxiu.</li><li>Els comptes es conserven mentre estiguin actius; si demanes la baixa, s'eliminen juntament amb les seves sessions.</li><li>Les sessions caduquen als 30 dies; els enllaços de recuperació de contrasenya, a les 2 hores.</li></ul>",
+      "rights": "<p>Pots exercir en qualsevol moment els drets d'<strong>accés, rectificació, supressió, limitació, oposició i portabilitat</strong>.</p><p>N'hi ha prou d'escriure a <a href=\"mailto:egodes@vasava.es\">egodes@vasava.es</a> o de fer servir el formulari de col·laboració del web. Es respon en un termini màxim d'un mes. Si demanes que es retiri la teva fitxa o la d'un familiar viu, <strong>es fa sense demanar explicacions</strong>.</p><p>Si consideres que les teves dades no s'han tractat correctament, pots reclamar davant l'Agència Espanyola de Protecció de Dades (<a href=\"https://www.aepd.es\" target=\"_blank\" rel=\"noopener\">www.aepd.es</a>).</p>",
+      "security": "<ul><li>Tot el web exigeix sessió iniciada: pàgines, fotografies, documents i consultes. Sense compte aprovat no hi ha res accessible.</li><li>Els registres s'aproven <strong>manualment, un per un</strong>. L'accés es pot revocar en qualsevol moment i la sessió cau immediatament.</li><li>Les contrasenyes es desen amb <strong>PBKDF2-SHA256 i 200.000 iteracions amb sal aleatòria</strong>: mai en clar. Ningú, tampoc el responsable, no les pot llegir.</li><li>Els comptes viuen en una base de dades <strong>separada</strong> de la genealògica.</li><li>Tota la connexió va xifrada amb HTTPS.</li></ul>",
+      "third": "<ul><li><strong>Railway</strong> — allotjament del servidor i de les dades.</li><li><strong>Resend</strong> — enviament dels correus d'accés i de recuperació de contrasenya; rep l'adreça de correu del destinatari.</li><li><strong>Google Fonts</strong>, el CDN d'estils i els mapes d'<strong>Esri</strong> i <strong>OpenStreetMap</strong> — en carregar la pàgina veuen l'adreça IP del visitant, com a qualsevol web que faci servir aquests serveis. No reben cap dada de l'arbre genealògic.</li></ul><p>No hi ha Google Analytics ni cap altra eina d'analítica, ni rastrejadors, ni píxels publicitaris, ni botons de xarxes socials.</p>",
+      "title": "Privacitat i protecció de dades",
+      "updated": "Darrera actualització: 22 de setembre de 2026"
     },
     "puig_godes": {
       "meta_title": "Subbranca Puig Godes - Godesia"
@@ -502,6 +554,17 @@
     "pujol_perez": {
       "meta_title": "Subbranca Pujol Pérez - Godesia"
     },
+    "reset": {
+      "err_generic": "No s'ha pogut canviar la contrasenya.",
+      "err_mismatch": "Les contrasenyes no coincideixen.",
+      "err_token": "L'enllaç no és vàlid o ha caducat.",
+      "go_login": "Entrar",
+      "ok": "La teva contrasenya s'ha actualitzat.",
+      "password": "Nova contrasenya",
+      "password_confirm": "Repeteix la contrasenya",
+      "submit": "Desar contrasenya",
+      "subtitle": "Tria una nova contrasenya"
+    },
     "tree": {
       "center_tree": "Centrar en l'arbre",
       "load_error": "Error carregant l'arbre: {status}",
@@ -509,40 +572,6 @@
       "zoom_in": "Ampliar",
       "zoom_out": "Reduir",
       "zoom_reset": "Centrar"
-    },
-    "login": {
-      "subtitle": "L'arbre de la família Godes",
-      "tab_login": "Entrar",
-      "tab_register": "Registrar-se",
-      "email": "Correu",
-      "password": "Contrasenya",
-      "name": "Nom",
-      "enter": "Entrar",
-      "register": "Registrar-se",
-      "register_hint": "El teu registre quedarà pendent d'aprovació abans de poder accedir.",
-      "private_note": "Accés reservat a la família. Contingut no públic.",
-      "register_ok": "Registre rebut. Podràs entrar quan s'aprovi el teu accés.",
-      "err_pending": "El teu accés està pendent d'aprovació.",
-      "err_rate": "Massa intents. Espera uns minuts.",
-      "err_credentials": "Correu o contrasenya incorrectes.",
-      "err_exists": "Ja existeix un compte amb aquest correu.",
-      "err_generic": "No s'ha pogut completar el registre.",
-      "forgot": "Has oblidat la contrasenya?",
-      "forgot_hint": "Introdueix el teu email i t'enviarem un enllaç per triar una nova contrasenya.",
-      "forgot_submit": "Enviar enllaç",
-      "forgot_sent": "Si aquest email està registrat, t'hem enviat un enllaç per restablir la contrasenya.",
-      "back_to_login": "Tornar a entrar"
-    },
-    "reset": {
-      "subtitle": "Tria una nova contrasenya",
-      "password": "Nova contrasenya",
-      "password_confirm": "Repeteix la contrasenya",
-      "submit": "Desar contrasenya",
-      "ok": "La teva contrasenya s'ha actualitzat.",
-      "go_login": "Entrar",
-      "err_token": "L'enllaç no és vàlid o ha caducat.",
-      "err_mismatch": "Les contrasenyes no coincideixen.",
-      "err_generic": "No s'ha pogut canviar la contrasenya."
     }
   },
   "photo_modal": {
@@ -558,9 +587,9 @@
     "share": "Compartir foto",
     "show_panel": "Mostrar el panell",
     "tagged_people": "Persones etiquetades",
+    "view_dossier": "Veure dossier",
     "zoom_in": "Ampliar zoom",
-    "zoom_out": "Reduir zoom",
-    "view_dossier": "Veure dossier"
+    "zoom_out": "Reduir zoom"
   },
   "saga": {
     "kicker": "Saga familiar",

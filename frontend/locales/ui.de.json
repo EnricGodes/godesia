@@ -85,24 +85,6 @@
     ],
     "until": "bis"
   },
-  "doc_types": {
-    "bautisme": "Taufen",
-    "biografia": "Biografien",
-    "carta": "Briefe",
-    "defuncio": "Sterbefälle",
-    "document": "Dokumente",
-    "matrimoni": "Eheschließungen",
-    "naixement": "Geburten",
-    "padro": "Einwohnermelderegister",
-    "testament": "Testamente",
-    "certificat": "Zertifikate",
-    "dibuix": "Zeichnungen und Pläne",
-    "arbre": "Stammbäume",
-    "transcripcio": "Transkriptionen",
-    "poema": "Gedichte",
-    "invitacio": "Einladungen",
-    "Diversos": "Verschiedenes"
-  },
   "doc_tags": {
     "Bautismo": "Taufe",
     "Biografia": "Biografie",
@@ -118,6 +100,24 @@
     "Obituario": "Nachruf",
     "Padrón": "Volkszählung"
   },
+  "doc_types": {
+    "Diversos": "Verschiedenes",
+    "arbre": "Stammbäume",
+    "bautisme": "Taufen",
+    "biografia": "Biografien",
+    "carta": "Briefe",
+    "certificat": "Zertifikate",
+    "defuncio": "Sterbefälle",
+    "dibuix": "Zeichnungen und Pläne",
+    "document": "Dokumente",
+    "invitacio": "Einladungen",
+    "matrimoni": "Eheschließungen",
+    "naixement": "Geburten",
+    "padro": "Einwohnermelderegister",
+    "poema": "Gedichte",
+    "testament": "Testamente",
+    "transcripcio": "Transkriptionen"
+  },
   "event_types": {
     "Afiliación": "Zugehörigkeit",
     "Alistamiento Militar": "Militärische Einberufung",
@@ -132,9 +132,11 @@
     "Enfermedad": "Krankheit",
     "Evento": "Ereignis",
     "Evento Personalizado": "Benutzerdefiniertes Ereignis",
+    "Exposición": "Ausstellung",
     "Funeral": "Beerdigung",
     "Idioma": "Sprache",
     "Inmigración": "Einwanderung",
+    "Jurado": "Jury",
     "Mudanza": "Umzug",
     "Nacionalidad": "Staatsangehörigkeit",
     "Número de Referencia": "Referenznummer",
@@ -142,13 +144,11 @@
     "Onomástica": "Namenstag",
     "Premio": "Auszeichnung",
     "Primera Comunión": "Erstkommunion",
+    "Proyecto profesional": "Berufliches Projekt",
     "Religión": "Religion",
     "Reunión Familiar": "Familientreffen",
     "Servicio Militar": "Militärdienst",
-    "Trabajo": "Arbeit",
-    "Exposición": "Ausstellung",
-    "Jurado": "Jury",
-    "Proyecto profesional": "Berufliches Projekt"
+    "Trabajo": "Arbeit"
   },
   "events": {
     "anecdote": "Anekdote",
@@ -182,6 +182,7 @@
     "nav_home": "Startseite",
     "nav_title": "Navigation",
     "nav_tree": "Stammbaum",
+    "privacy": "Datenschutz",
     "project_title": "Projekt",
     "tagline": "Digitales genealogisches Archiv der Familie Godes. Bewahrung der Familienerinnerung für künftige Generationen.",
     "team_title": "Forschungsteam"
@@ -195,6 +196,7 @@
     "collaborate": "Mitwirken",
     "coming_soon": "Demnächst",
     "family_photos": "Familienfotos",
+    "logout": "Abmelden",
     "menu_album": "Album",
     "menu_branches": "Familienzweige",
     "menu_documents": "Dokumente",
@@ -205,8 +207,7 @@
     "search_title": "Suche",
     "sidebar_subtitle": "Erkunde deine Abstammung",
     "sidebar_title": "Familienzweige",
-    "tree": "Stammbaum",
-    "logout": "Abmelden"
+    "tree": "Stammbaum"
   },
   "pages": {
     "albums": {
@@ -484,6 +485,29 @@
       "stats_title": "Puls des Vermächtnisses",
       "updated_label": "Daten aktualisiert"
     },
+    "login": {
+      "back_to_login": "Zurück zur Anmeldung",
+      "email": "E-Mail",
+      "enter": "Anmelden",
+      "err_credentials": "E-Mail oder Passwort falsch.",
+      "err_exists": "Ein Konto mit dieser E-Mail existiert bereits.",
+      "err_generic": "Registrierung konnte nicht abgeschlossen werden.",
+      "err_pending": "Ihr Zugang wartet auf Genehmigung.",
+      "err_rate": "Zu viele Versuche. Bitte warten Sie einige Minuten.",
+      "forgot": "Passwort vergessen?",
+      "forgot_hint": "Gib deine E-Mail ein und wir senden dir einen Link, um ein neues Passwort zu wählen.",
+      "forgot_sent": "Falls diese E-Mail registriert ist, haben wir dir einen Link zum Zurücksetzen des Passworts gesendet.",
+      "forgot_submit": "Link senden",
+      "name": "Name",
+      "password": "Passwort",
+      "private_note": "Nur für die Familie. Private Inhalte.",
+      "register": "Registrieren",
+      "register_hint": "Ihre Registrierung muss vor dem Zugang genehmigt werden.",
+      "register_ok": "Registrierung erhalten. Sie können sich anmelden, sobald Ihr Zugang genehmigt ist.",
+      "subtitle": "Der Stammbaum der Familie Godes",
+      "tab_login": "Anmelden",
+      "tab_register": "Registrieren"
+    },
     "mestre_godes": {
       "meta_title": "Unterzweig Mestre Godes - Godesia"
     },
@@ -492,6 +516,34 @@
     },
     "nolla_godes": {
       "meta_title": "Unterzweig Nolla Godes - Godesia"
+    },
+    "privacy": {
+      "back": "← Zurück zu Godesia",
+      "changes": "<p>Ändert sich diese Erklärung, wird das Datum in der Kopfzeile aktualisiert; bei wesentlichen Änderungen werden Kontoinhaberinnen und Kontoinhaber per E-Mail informiert.</p>",
+      "controller": "<p><strong>Enric Godes</strong> — Kontakt: <a href=\"mailto:egodes@vasava.es\">egodes@vasava.es</a>.</p><p>Zweck: Bewahrung und Weitergabe des genealogischen Archivs der Familie Godes innerhalb eines geschlossenen Familienkreises.</p>",
+      "cookies": "<p>Es wird ein <strong>einziges technisches Cookie</strong> verwendet, <code>godesia_session</code>, das die Anmeldung 30 Tage lang aufrechterhält. Es ist für die Anmeldung unerlässlich und bedarf als unbedingt erforderliches Cookie keiner vorherigen Einwilligung. Es gibt keine Analyse- oder Werbe-Cookies und keine Cookies Dritter.</p>",
+      "data": "<ul><li><strong>Genealogische Daten:</strong> Namen, Daten und Orte von Geburt, Taufe, Heirat und Tod, Berufe, Wohnorte, Grabstätten, Fotografien, Dokumente und Familiennotizen. Der größte Teil betrifft <strong>verstorbene Personen</strong> (etwa 1.300 von 1.489 Einträgen).</li><li><strong>Lebende Personen:</strong> rund 170 Einträge mit Daten, die die Familie selbst beigetragen hat.</li><li><strong>Benutzerkonten:</strong> Name, E-Mail-Adresse, verschlüsseltes Passwort und Datum des letzten Zugriffs.</li><li><strong>Beiträge:</strong> was Sie über das Mitwirkungsformular senden (Name, E-Mail, Nachricht und Anhänge).</li><li><strong>Technisches Protokoll:</strong> Fragen, die die Suche nicht beantworten konnte, zur Verbesserung des Systems.</li></ul>",
+      "deceased": "<p>Die DSGVO gilt nicht für Daten verstorbener Personen, die den größten Teil dieses Archivs ausmachen. Dennoch können deren Erben oder Angehörige die Berichtigung oder Entfernung jedes Eintrags verlangen; solche Anfragen werden so behandelt, als gälte die Verordnung (Art. 3 des spanischen LOPDGDD).</p>",
+      "h_changes": "Änderungen",
+      "h_controller": "Verantwortlicher",
+      "h_cookies": "Cookies",
+      "h_data": "Welche Daten gespeichert sind",
+      "h_deceased": "Verstorbene Personen",
+      "h_hosting": "Wo die Daten gehostet werden",
+      "h_purpose": "Zweck und Rechtsgrundlage",
+      "h_retention": "Speicherdauer",
+      "h_rights": "Ihre Rechte",
+      "h_security": "Sicherheit",
+      "h_third": "Beteiligte Dritte",
+      "hosting": "<p>Anwendung, Datenbank und Fotografien werden bei <strong>Railway</strong> (Railway Corporation, USA) in der Region <strong>us-east4, Virginia (Vereinigte Staaten)</strong> gehostet.</p><p>Damit findet eine <strong>internationale Datenübermittlung</strong> außerhalb des Europäischen Wirtschaftsraums statt, abgesichert durch die Standardvertragsklauseln der Europäischen Kommission, die Bestandteil des Auftragsverarbeitungsvertrags von Railway sind.</p><p>Der Verantwortliche bewahrt zusätzlich Sicherungskopien auf eigenen Geräten in Spanien auf. Weitere Kopien oder Hostings existieren nicht.</p>",
+      "intro": "<p>Godesia ist ein <strong>privates</strong> genealogisches Familienarchiv: nicht kommerziell, werbefrei und für Suchmaschinen gesperrt. Zugang erhalten nur Personen, die einzeln freigeschaltet werden. Diese Seite erklärt, welche Daten gespeichert sind, wo sie liegen und was Sie bezüglich Ihrer eigenen Daten verlangen können.</p>",
+      "purpose": "<p>Die Daten dienen <strong>ausschließlich</strong> dazu, das genealogische Archiv zu pflegen und der Familie Zugang dazu zu geben.</p><ul><li>Genealogische Daten: berechtigtes Interesse an historischer und familiärer Forschung (Art. 6 Abs. 1 lit. f DSGVO).</li><li>Benutzerkonten: Verwaltung des von der Person selbst beantragten Zugangs (Art. 6 Abs. 1 lit. a und b DSGVO).</li></ul><p>Es gibt keine automatisierte Entscheidungsfindung und kein Profiling. <strong>Es werden keine Daten an Dritte verkauft, übertragen oder weitergegeben</strong>, und es gibt keinerlei Werbung.</p>",
+      "retention": "<ul><li>Genealogische Daten werden unbefristet aufbewahrt: ihre Bewahrung ist gerade der Zweck des Archivs.</li><li>Konten bleiben bestehen, solange sie aktiv sind; auf Wunsch werden sie samt ihren Sitzungen gelöscht.</li><li>Sitzungen laufen nach 30 Tagen ab, Links zur Passwort-Wiederherstellung nach 2 Stunden.</li></ul>",
+      "rights": "<p>Sie können jederzeit Ihre Rechte auf <strong>Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch und Datenübertragbarkeit</strong> ausüben.</p><p>Schreiben Sie einfach an <a href=\"mailto:egodes@vasava.es\">egodes@vasava.es</a> oder nutzen Sie das Mitwirkungsformular der Website. Die Antwort erfolgt innerhalb von höchstens einem Monat. Wenn Sie die Entfernung Ihres Eintrags oder des Eintrags einer lebenden verwandten Person verlangen, <strong>geschieht dies ohne Nachfragen</strong>.</p><p>Wenn Sie der Ansicht sind, dass Ihre Daten nicht ordnungsgemäß verarbeitet wurden, können Sie sich bei der spanischen Datenschutzbehörde beschweren (<a href=\"https://www.aepd.es\" target=\"_blank\" rel=\"noopener\">www.aepd.es</a>).</p>",
+      "security": "<ul><li>Die gesamte Website erfordert eine angemeldete Sitzung: Seiten, Fotografien, Dokumente und Abfragen. Ohne freigeschaltetes Konto ist nichts zugänglich.</li><li>Registrierungen werden <strong>einzeln von Hand</strong> freigegeben. Der Zugang kann jederzeit entzogen werden; die Sitzung endet sofort.</li><li>Passwörter werden mit <strong>PBKDF2-SHA256 und 200.000 Iterationen mit zufälligem Salt</strong> gespeichert, niemals im Klartext. Niemand, auch nicht der Verantwortliche, kann sie lesen.</li><li>Die Konten liegen in einer <strong>getrennten</strong> Datenbank, nicht in der genealogischen.</li><li>Die gesamte Verbindung ist mit HTTPS verschlüsselt.</li></ul>",
+      "third": "<ul><li><strong>Railway</strong> — Hosting von Server und Daten.</li><li><strong>Resend</strong> — Versand der Zugangs- und Passwort-Wiederherstellungs-E-Mails; erhält die E-Mail-Adresse des Empfängers.</li><li><strong>Google Fonts</strong>, das Stylesheet-CDN sowie die Karten von <strong>Esri</strong> und <strong>OpenStreetMap</strong> — sie sehen beim Laden der Seite die IP-Adresse der Besucherin oder des Besuchers, wie auf jeder Website, die diese Dienste nutzt. Daten des Stammbaums erhalten sie nicht.</li></ul><p>Es gibt weder Google Analytics noch ein anderes Analysewerkzeug, keine Tracker, keine Werbepixel und keine Social-Media-Buttons.</p>",
+      "title": "Datenschutz",
+      "updated": "Zuletzt aktualisiert: 22. September 2026"
     },
     "puig_godes": {
       "meta_title": "Unterzweig Puig Godes - Godesia"
@@ -502,6 +554,17 @@
     "pujol_perez": {
       "meta_title": "Unterzweig Pujol Pérez - Godesia"
     },
+    "reset": {
+      "err_generic": "Passwort konnte nicht geändert werden.",
+      "err_mismatch": "Die Passwörter stimmen nicht überein.",
+      "err_token": "Der Link ist ungültig oder abgelaufen.",
+      "go_login": "Anmelden",
+      "ok": "Dein Passwort wurde aktualisiert.",
+      "password": "Neues Passwort",
+      "password_confirm": "Passwort wiederholen",
+      "submit": "Passwort speichern",
+      "subtitle": "Wähle ein neues Passwort"
+    },
     "tree": {
       "center_tree": "Im Stammbaum zentrieren",
       "load_error": "Fehler beim Laden des Stammbaums: {status}",
@@ -509,40 +572,6 @@
       "zoom_in": "Vergrößern",
       "zoom_out": "Verkleinern",
       "zoom_reset": "Zentrieren"
-    },
-    "login": {
-      "subtitle": "Der Stammbaum der Familie Godes",
-      "tab_login": "Anmelden",
-      "tab_register": "Registrieren",
-      "email": "E-Mail",
-      "password": "Passwort",
-      "name": "Name",
-      "enter": "Anmelden",
-      "register": "Registrieren",
-      "register_hint": "Ihre Registrierung muss vor dem Zugang genehmigt werden.",
-      "private_note": "Nur für die Familie. Private Inhalte.",
-      "register_ok": "Registrierung erhalten. Sie können sich anmelden, sobald Ihr Zugang genehmigt ist.",
-      "err_pending": "Ihr Zugang wartet auf Genehmigung.",
-      "err_rate": "Zu viele Versuche. Bitte warten Sie einige Minuten.",
-      "err_credentials": "E-Mail oder Passwort falsch.",
-      "err_exists": "Ein Konto mit dieser E-Mail existiert bereits.",
-      "err_generic": "Registrierung konnte nicht abgeschlossen werden.",
-      "forgot": "Passwort vergessen?",
-      "forgot_hint": "Gib deine E-Mail ein und wir senden dir einen Link, um ein neues Passwort zu wählen.",
-      "forgot_submit": "Link senden",
-      "forgot_sent": "Falls diese E-Mail registriert ist, haben wir dir einen Link zum Zurücksetzen des Passworts gesendet.",
-      "back_to_login": "Zurück zur Anmeldung"
-    },
-    "reset": {
-      "subtitle": "Wähle ein neues Passwort",
-      "password": "Neues Passwort",
-      "password_confirm": "Passwort wiederholen",
-      "submit": "Passwort speichern",
-      "ok": "Dein Passwort wurde aktualisiert.",
-      "go_login": "Anmelden",
-      "err_token": "Der Link ist ungültig oder abgelaufen.",
-      "err_mismatch": "Die Passwörter stimmen nicht überein.",
-      "err_generic": "Passwort konnte nicht geändert werden."
     }
   },
   "photo_modal": {
@@ -558,9 +587,9 @@
     "share": "Foto teilen",
     "show_panel": "Panel anzeigen",
     "tagged_people": "Markierte Personen",
+    "view_dossier": "Dossier anzeigen",
     "zoom_in": "Zoom vergrößern",
-    "zoom_out": "Zoom verkleinern",
-    "view_dossier": "Dossier anzeigen"
+    "zoom_out": "Zoom verkleinern"
   },
   "saga": {
     "kicker": "Familiensaga",

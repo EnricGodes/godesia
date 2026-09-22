@@ -68,6 +68,7 @@
             h4(t('footer.project_title', null, 'Proyecto')) +
             '<ul style="' + ulStyle + '">' +
               link('/colaborar.html', t('footer.nav_collaborate', null, 'Colaborar')) +
+              link('/privacitat.html', t('footer.privacy', null, 'Privacidad')) +
             '</ul>' +
           '</div>' +
           '<div>' +

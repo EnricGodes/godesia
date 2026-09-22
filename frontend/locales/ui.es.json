@@ -85,24 +85,6 @@
     ],
     "until": "hasta"
   },
-  "doc_types": {
-    "bautisme": "Bautismos",
-    "biografia": "Biografías",
-    "carta": "Cartas",
-    "defuncio": "Defunciones",
-    "document": "Documentos",
-    "matrimoni": "Matrimonios",
-    "naixement": "Nacimientos",
-    "padro": "Padrones",
-    "testament": "Testamentos",
-    "certificat": "Certificados",
-    "dibuix": "Dibujos y Planos",
-    "arbre": "Árboles Genealógicos",
-    "transcripcio": "Transcripciones",
-    "poema": "Poemas",
-    "invitacio": "Invitaciones",
-    "Diversos": "Diversos"
-  },
   "doc_tags": {
     "Bautismo": "Bautismo",
     "Biografia": "Biografía",
@@ -118,6 +100,24 @@
     "Obituario": "Obituario",
     "Padrón": "Padrón"
   },
+  "doc_types": {
+    "Diversos": "Diversos",
+    "arbre": "Árboles Genealógicos",
+    "bautisme": "Bautismos",
+    "biografia": "Biografías",
+    "carta": "Cartas",
+    "certificat": "Certificados",
+    "defuncio": "Defunciones",
+    "dibuix": "Dibujos y Planos",
+    "document": "Documentos",
+    "invitacio": "Invitaciones",
+    "matrimoni": "Matrimonios",
+    "naixement": "Nacimientos",
+    "padro": "Padrones",
+    "poema": "Poemas",
+    "testament": "Testamentos",
+    "transcripcio": "Transcripciones"
+  },
   "event_types": {
     "Afiliación": "Afiliación",
     "Alistamiento Militar": "Alistamiento Militar",
@@ -132,9 +132,11 @@
     "Enfermedad": "Enfermedad",
     "Evento": "Evento",
     "Evento Personalizado": "Evento Personalizado",
+    "Exposición": "Exposición",
     "Funeral": "Funeral",
     "Idioma": "Idioma",
     "Inmigración": "Inmigración",
+    "Jurado": "Jurado",
     "Mudanza": "Mudanza",
     "Nacionalidad": "Nacionalidad",
     "Número de Referencia": "Número de Referencia",
@@ -142,13 +144,11 @@
     "Onomástica": "Onomástica",
     "Premio": "Premio",
     "Primera Comunión": "Primera Comunión",
+    "Proyecto profesional": "Proyecto profesional",
     "Religión": "Religión",
     "Reunión Familiar": "Reunión Familiar",
     "Servicio Militar": "Servicio Militar",
-    "Trabajo": "Trabajo",
-    "Exposición": "Exposición",
-    "Jurado": "Jurado",
-    "Proyecto profesional": "Proyecto profesional"
+    "Trabajo": "Trabajo"
   },
   "events": {
     "anecdote": "Anécdota",
@@ -182,6 +182,7 @@
     "nav_home": "Inicio",
     "nav_title": "Navegación",
     "nav_tree": "Árbol",
+    "privacy": "Privacidad",
     "project_title": "Proyecto",
     "tagline": "Archivo genealógico digital de la familia Godes. Preservando la memoria familiar para las generaciones futuras.",
     "team_title": "Equipo de investigación"
@@ -195,6 +196,7 @@
     "collaborate": "Colaborar",
     "coming_soon": "Próximamente",
     "family_photos": "Fotos Familiares",
+    "logout": "Salir",
     "menu_album": "Álbum",
     "menu_branches": "Ramas familiares",
     "menu_documents": "Documentos",
@@ -205,8 +207,7 @@
     "search_title": "Buscador",
     "sidebar_subtitle": "Explora tu linaje",
     "sidebar_title": "Ramas Familiares",
-    "tree": "Árbol",
-    "logout": "Salir"
+    "tree": "Árbol"
   },
   "pages": {
     "albums": {
@@ -484,6 +485,29 @@
       "stats_title": "Pulso del Legado",
       "updated_label": "Datos actualizados"
     },
+    "login": {
+      "back_to_login": "Volver a entrar",
+      "email": "Email",
+      "enter": "Entrar",
+      "err_credentials": "Email o contraseña incorrectos.",
+      "err_exists": "Ya existe una cuenta con ese email.",
+      "err_generic": "No se pudo completar el registro.",
+      "err_pending": "Tu acceso está pendiente de aprobación.",
+      "err_rate": "Demasiados intentos. Espera unos minutos.",
+      "forgot": "¿Has olvidado tu contraseña?",
+      "forgot_hint": "Introduce tu email y te enviaremos un enlace para elegir una nueva contraseña.",
+      "forgot_sent": "Si ese email está registrado, te hemos enviado un enlace para restablecer la contraseña.",
+      "forgot_submit": "Enviar enlace",
+      "name": "Nombre",
+      "password": "Contraseña",
+      "private_note": "Acceso reservado a la familia. Contenido no público.",
+      "register": "Registrarse",
+      "register_hint": "Tu registro quedará pendiente de aprobación antes de poder acceder.",
+      "register_ok": "Registro recibido. Podrás entrar cuando se apruebe tu acceso.",
+      "subtitle": "El árbol de la familia Godes",
+      "tab_login": "Entrar",
+      "tab_register": "Registrarse"
+    },
     "mestre_godes": {
       "meta_title": "Subrama Mestre Godes - Godesia"
     },
@@ -492,6 +516,34 @@
     },
     "nolla_godes": {
       "meta_title": "Subrama Nolla Godes - Godesia"
+    },
+    "privacy": {
+      "back": "← Volver a Godesia",
+      "changes": "<p>Si esta política cambia, se actualizará la fecha del encabezado y, si el cambio es relevante, se avisará por correo a las personas con cuenta.</p>",
+      "controller": "<p><strong>Enric Godes</strong> — contacto: <a href=\"mailto:egodes@vasava.es\">egodes@vasava.es</a>.</p><p>Finalidad del tratamiento: conservar y compartir el archivo genealógico de la familia Godes dentro de un círculo familiar cerrado.</p>",
+      "cookies": "<p>Se usa una <strong>única cookie técnica</strong>, <code>godesia_session</code>, que mantiene la sesión iniciada durante 30 días. Es imprescindible para poder entrar y, por ser estrictamente necesaria, no requiere consentimiento previo. No hay cookies analíticas ni publicitarias, ni cookies de terceros.</p>",
+      "data": "<ul><li><strong>Datos genealógicos:</strong> nombres, fechas y lugares de nacimiento, bautismo, matrimonio y defunción, ocupaciones, residencias, sepulturas, fotografías, documentos y notas familiares. La mayoría corresponden a <strong>personas fallecidas</strong> (unas 1.300 de las 1.489 fichas).</li><li><strong>Personas vivas:</strong> unas 170 fichas, con datos aportados por la propia familia.</li><li><strong>Cuentas de usuario:</strong> nombre, correo electrónico, contraseña cifrada y fecha del último acceso.</li><li><strong>Aportaciones:</strong> lo que envías por el formulario de colaboración (nombre, correo, mensaje y archivos adjuntos).</li><li><strong>Registro técnico:</strong> las preguntas que el buscador no sabe responder, para poder mejorarlo.</li></ul>",
+      "deceased": "<p>El RGPD no se aplica a los datos de las personas fallecidas, que son la mayor parte de este archivo. Aun así, sus herederos o familiares pueden solicitar la corrección o la retirada de cualquier ficha, y se atenderá igual que si estuviera amparada por el reglamento (art. 3 de la LOPDGDD).</p>",
+      "h_changes": "Cambios",
+      "h_controller": "Responsable",
+      "h_cookies": "Cookies",
+      "h_data": "Qué datos hay aquí",
+      "h_deceased": "Personas fallecidas",
+      "h_hosting": "Dónde se alojan",
+      "h_purpose": "Para qué se usan y con qué base legal",
+      "h_retention": "Conservación",
+      "h_rights": "Tus derechos",
+      "h_security": "Seguridad",
+      "h_third": "Terceros que intervienen",
+      "hosting": "<p>La aplicación, la base de datos y las fotografías están alojadas en <strong>Railway</strong> (Railway Corporation, EE. UU.), en su región <strong>us-east4, Virginia (Estados Unidos)</strong>.</p><p>Esto supone una <strong>transferencia internacional de datos</strong> fuera del Espacio Económico Europeo, amparada por las cláusulas contractuales tipo de la Comisión Europea que incorpora el acuerdo de tratamiento de datos de Railway.</p><p>El responsable conserva además copias de seguridad en sus equipos personales, en España. No existe ninguna otra copia ni ningún otro alojamiento.</p>",
+      "intro": "<p>Godesia es un archivo genealógico familiar <strong>privado</strong>, sin ánimo de lucro, sin publicidad y cerrado a los buscadores. Solo entran las personas a las que se aprueba el acceso una a una. Esta página explica qué datos hay, dónde están alojados y qué puedes pedir sobre los tuyos.</p>",
+      "purpose": "<p>Los datos se usan <strong>únicamente</strong> para mantener el archivo genealógico y darle acceso a la familia.</p><ul><li>Datos genealógicos: interés legítimo en la investigación histórica y familiar (art. 6.1.f RGPD).</li><li>Cuentas de usuario: gestión del acceso solicitado por la propia persona (art. 6.1.a y 6.1.b RGPD).</li></ul><p>No hay decisiones automatizadas ni elaboración de perfiles. <strong>No se vende, cede ni comparte ningún dato con terceros</strong> con fines comerciales, ni hay publicidad de ningún tipo.</p>",
+      "retention": "<ul><li>Los datos genealógicos se conservan de forma indefinida: preservarlos es precisamente la finalidad del archivo.</li><li>Las cuentas se conservan mientras estén activas; si pides la baja, se eliminan junto con sus sesiones.</li><li>Las sesiones caducan a los 30 días; los enlaces de recuperación de contraseña, a las 2 horas.</li></ul>",
+      "rights": "<p>Puedes ejercer en cualquier momento los derechos de <strong>acceso, rectificación, supresión, limitación, oposición y portabilidad</strong>.</p><p>Basta con escribir a <a href=\"mailto:egodes@vasava.es\">egodes@vasava.es</a> o usar el formulario de colaboración del web. Se responde en un plazo máximo de un mes. Si pides que se retire tu ficha o la de un familiar vivo, <strong>se hace sin pedir explicaciones</strong>.</p><p>Si consideras que tus datos no se han tratado correctamente, puedes reclamar ante la Agencia Española de Protección de Datos (<a href=\"https://www.aepd.es\" target=\"_blank\" rel=\"noopener\">www.aepd.es</a>).</p>",
+      "security": "<ul><li>Todo el sitio exige sesión iniciada: páginas, fotografías, documentos y consultas. Sin cuenta aprobada no es accesible nada.</li><li>Los registros se aprueban <strong>manualmente, uno a uno</strong>. El acceso se puede revocar en cualquier momento y la sesión cae de inmediato.</li><li>Las contraseñas se guardan con <strong>PBKDF2-SHA256 y 200.000 iteraciones con sal aleatoria</strong>: nunca en claro. Nadie, tampoco el responsable, puede leerlas.</li><li>Las cuentas viven en una base de datos <strong>separada</strong> de la genealógica.</li><li>Toda la conexión va cifrada con HTTPS.</li></ul>",
+      "third": "<ul><li><strong>Railway</strong> — alojamiento del servidor y de los datos.</li><li><strong>Resend</strong> — envío de los correos de acceso y de recuperación de contraseña; recibe la dirección de correo del destinatario.</li><li><strong>Google Fonts</strong>, el CDN de estilos y los mapas de <strong>Esri</strong> y <strong>OpenStreetMap</strong> — al cargar la página ven la dirección IP del visitante, como en cualquier web que use estos servicios. No reciben ningún dato del árbol genealógico.</li></ul><p>No hay Google Analytics ni ninguna otra herramienta de analítica, ni rastreadores, ni píxeles publicitarios, ni botones de redes sociales.</p>",
+      "title": "Privacidad y protección de datos",
+      "updated": "Última actualización: 22 de septiembre de 2026"
     },
     "puig_godes": {
       "meta_title": "Subrama Puig Godes - Godesia"
@@ -502,6 +554,17 @@
     "pujol_perez": {
       "meta_title": "Subrama Pujol Pérez - Godesia"
     },
+    "reset": {
+      "err_generic": "No se pudo cambiar la contraseña.",
+      "err_mismatch": "Las contraseñas no coinciden.",
+      "err_token": "El enlace no es válido o ha caducado.",
+      "go_login": "Entrar",
+      "ok": "Tu contraseña se ha actualizado.",
+      "password": "Nueva contraseña",
+      "password_confirm": "Repite la contraseña",
+      "submit": "Guardar contraseña",
+      "subtitle": "Elige una nueva contraseña"
+    },
     "tree": {
       "center_tree": "Centrar en el árbol",
       "load_error": "Error cargando árbol: {status}",
@@ -509,40 +572,6 @@
       "zoom_in": "Ampliar",
       "zoom_out": "Reducir",
       "zoom_reset": "Centrar"
-    },
-    "login": {
-      "subtitle": "El árbol de la familia Godes",
-      "tab_login": "Entrar",
-      "tab_register": "Registrarse",
-      "email": "Email",
-      "password": "Contraseña",
-      "name": "Nombre",
-      "enter": "Entrar",
-      "register": "Registrarse",
-      "register_hint": "Tu registro quedará pendiente de aprobación antes de poder acceder.",
-      "private_note": "Acceso reservado a la familia. Contenido no público.",
-      "register_ok": "Registro recibido. Podrás entrar cuando se apruebe tu acceso.",
-      "err_pending": "Tu acceso está pendiente de aprobación.",
-      "err_rate": "Demasiados intentos. Espera unos minutos.",
-      "err_credentials": "Email o contraseña incorrectos.",
-      "err_exists": "Ya existe una cuenta con ese email.",
-      "err_generic": "No se pudo completar el registro.",
-      "forgot": "¿Has olvidado tu contraseña?",
-      "forgot_hint": "Introduce tu email y te enviaremos un enlace para elegir una nueva contraseña.",
-      "forgot_submit": "Enviar enlace",
-      "forgot_sent": "Si ese email está registrado, te hemos enviado un enlace para restablecer la contraseña.",
-      "back_to_login": "Volver a entrar"
-    },
-    "reset": {
-      "subtitle": "Elige una nueva contraseña",
-      "password": "Nueva contraseña",
-      "password_confirm": "Repite la contraseña",
-      "submit": "Guardar contraseña",
-      "ok": "Tu contraseña se ha actualizado.",
-      "go_login": "Entrar",
-      "err_token": "El enlace no es válido o ha caducado.",
-      "err_mismatch": "Las contraseñas no coinciden.",
-      "err_generic": "No se pudo cambiar la contraseña."
     }
   },
   "photo_modal": {
@@ -558,9 +587,9 @@
     "share": "Compartir foto",
     "show_panel": "Mostrar panel",
     "tagged_people": "Personas Etiquetadas",
+    "view_dossier": "Ver dossier",
     "zoom_in": "Ampliar zoom",
-    "zoom_out": "Reducir zoom",
-    "view_dossier": "Ver dossier"
+    "zoom_out": "Reducir zoom"
   },
   "saga": {
     "kicker": "Saga familiar",
