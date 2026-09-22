@@ -6,6 +6,7 @@ import io
 import json
 import contributions
 import logging
+import os
 import shutil
 import subprocess
 import sys
@@ -134,6 +135,9 @@ async def admin_status():
         "gedcom_file": ged_file,
         "server_time": datetime.now().isoformat(),
         "restart_command": restart_cmd,
+        # Región del contenedor: hace falta para la política de privacidad
+        # (dónde se alojan los datos) y para saber si es una región de la UE.
+        "region": os.environ.get("RAILWAY_REPLICA_REGION") or os.environ.get("RAILWAY_REGION") or "local",
     }
 
 
