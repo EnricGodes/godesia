@@ -888,9 +888,13 @@ def main():
         db_tmp = sqlite3.connect(db_path)
         from database import attach_decisions
         attach_decisions(db_tmp, db_path)  # palazuelos_map vive en decisions.db
-        palaz_map = dict(db_tmp.execute(
+        # Solo parejas cuya persona Godes sigue en este GEDCOM: una ficha borrada o
+        # fusionada en MyHeritage conserva su fila en palazuelos_map (decisions.db)
+        # y, sin este filtro, se llevaba las fotos de Palazuelos (p. ej. @I504@ →
+        # @I500601@, el duplicado de Júlia Pascó, en vez de @I125@).
+        palaz_map = {pz: gd for pz, gd in db_tmp.execute(
             "SELECT palaz_id, godes_id FROM palazuelos_map WHERE palaz_id IS NOT NULL AND palaz_id != ''"
-        ).fetchall())
+        ).fetchall() if gd in people}
         # Persistent dedup decisions — survive DROP TABLE photos in Phase 7
         try:
             blocked_map = {r[0]: r[1] for r in db_tmp.execute(

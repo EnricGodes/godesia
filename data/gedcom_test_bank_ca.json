@@ -690,7 +690,7 @@
   },
   {
     "id": "q0046",
-    "question": "Qui van ser els nets de Trinidad GUITERAS FILLOL?",
+    "question": "Qui van ser els nets de Trinidad Guiteras Fillol?",
     "answer": [
       "Eduardo Lagunilla de Plandolit",
       "Joaquín Lagunilla de Plandolit",
@@ -700,7 +700,7 @@
     ],
     "answer_type": "person_list",
     "category": "grandchildren",
-    "person": "Trinidad GUITERAS FILLOL",
+    "person": "Trinidad Guiteras Fillol",
     "person_id": "@I500584@",
     "relation": "grandchildren",
     "source_tags": [
@@ -1477,7 +1477,7 @@
     "question": "Quins cosins segons consten per a Ariadna Puig Ninou?",
     "answer": [
       "Albert Cabestany Pérez",
-      "Anna Godes i Nofre",
+      "Anna Godes Nofre",
       "Carlota Godes Nofre",
       "Carme \"Manen\" Godes Nofre",
       "Cristina Godes Molins",
@@ -2047,7 +2047,7 @@
   {
     "id": "q0113",
     "question": "Quin esdeveniment consta per a Jacques Zimmer?",
-    "answer": "cantonnier",
+    "answer": "Henriette HENSGEN",
     "answer_type": "text",
     "category": "event_custom_event",
     "person": "Jacques Zimmer",
@@ -3482,7 +3482,7 @@
   },
   {
     "id": "q0181",
-    "question": "Quines cosines va tenir Neus Mestre i Farràs?",
+    "question": "Quines cosines va tenir Neus Mestre Farràs?",
     "answer": [
       "Alba Rodriguez Mestre",
       "Clara Sisternas Mestre",
@@ -3491,7 +3491,7 @@
     ],
     "answer_type": "person_list",
     "category": "female_cousins",
-    "person": "Neus Mestre i Farràs",
+    "person": "Neus Mestre Farràs",
     "person_id": "@I132@",
     "relation": "female_cousins",
     "source_tags": [
@@ -4203,14 +4203,14 @@
   },
   {
     "id": "q0207",
-    "question": "Qui són els pares registrats de Josepa Giró Esti.les?",
+    "question": "Qui són els pares registrats de Josepa Giró Estil·les?",
     "answer": [
       "Macià Giró Novell",
       "Rosa Estil·les Vidal"
     ],
     "answer_type": "person_list",
     "category": "parents",
-    "person": "Josepa Giró Esti.les",
+    "person": "Josepa Giró Estil·les",
     "person_id": "@I500189@",
     "relation": "parents",
     "source_tags": [
@@ -5050,10 +5050,10 @@
       "Clara Sisternas Mestre",
       "Joel Mestre Montaner",
       "Lluc Mestre Montaner",
-      "Martí Rodriguez i Mestre",
-      "Neus Mestre i Farràs",
-      "Núria Mestre i Farràs",
-      "Pau Sisternas i Mestre"
+      "Martí Rodriguez Mestre",
+      "Neus Mestre Farràs",
+      "Núria Mestre Farràs",
+      "Pau Sisternas Mestre"
     ],
     "answer_type": "person_list",
     "category": "first_cousins",
@@ -5735,7 +5735,7 @@
     "id": "q0280",
     "question": "Qui són els pares registrats de Rosa Estil·les Vidal?",
     "answer": [
-      "María Vidal",
+      "María Vidal Thomas",
       "Pau Estil·les Brunet"
     ],
     "answer_type": "person_list",
@@ -5829,7 +5829,7 @@
       "Carmen Sunyer Bofill",
       "Dolors Sunyer Vilaseca",
       "Felipe Reverté Planells",
-      "Isabel Reverte Planells",
+      "Isabel Reverté Planells",
       "Joan Anton Vidal Planells",
       "Joan Cornet Planells",
       "Jordi Manel Vidal Planells",
@@ -5846,7 +5846,7 @@
       "Mercedes Pin Planells",
       "Mercedes Sunyer Vilaseca",
       "Mercè Pin Planells",
-      "Montse Cornet Planells",
+      "Montserrat Cornet Planells",
       "Montserrat Sunyer Bofill",
       "Montserrat Sunyer Vilaseca",
       "Nuria Vidal Planells",
@@ -7164,7 +7164,7 @@
     "id": "q0346",
     "question": "Com es deia la mare de Trinidad Mª Enrique Juan de Plandolit Guiteras?",
     "answer": [
-      "Trinidad GUITERAS FILLOL"
+      "Trinidad Guiteras Fillol"
     ],
     "answer_type": "person_list",
     "category": "mother",
@@ -7805,8 +7805,7 @@
     "id": "q0383",
     "question": "On es va casar José Salinas Bainac?",
     "answer": [
-      "Benabarre, Huesca, Aragón, España",
-      "Benabarre (Huesca)"
+      "Benabarre, Huesca"
     ],
     "answer_type": "place",
     "category": "marriage_place",
@@ -8631,13 +8630,13 @@
   },
   {
     "id": "q0418",
-    "question": "Quins nebots varons va tenir Josepa Giró Esti.les?",
+    "question": "Quins nebots varons va tenir Josepa Giró Estil·les?",
     "answer": [
       "Josep Selva Giró"
     ],
     "answer_type": "person_list",
     "category": "nephews",
-    "person": "Josepa Giró Esti.les",
+    "person": "Josepa Giró Estil·les",
     "person_id": "@I500189@",
     "relation": "nephews",
     "source_tags": [
@@ -9734,7 +9733,7 @@
   },
   {
     "id": "q0476",
-    "question": "Qui van ser els rebesavis de Anna Godes i Nofre?",
+    "question": "Qui van ser els rebesavis de Anna Godes Nofre?",
     "answer": [
       "Artur Godes Caballeria",
       "Dolores Almuzara Ardanuy",
@@ -9743,7 +9742,7 @@
     ],
     "answer_type": "person_list",
     "category": "great_great_grandparents",
-    "person": "Anna Godes i Nofre",
+    "person": "Anna Godes Nofre",
     "person_id": "@I68@",
     "relation": "great_great_grandparents",
     "source_tags": [
@@ -9810,7 +9809,7 @@
   },
   {
     "id": "q0478",
-    "question": "Qui van ser els oncles avis de Josepa Giró Esti.les?",
+    "question": "Qui van ser els oncles avis de Josepa Giró Estil·les?",
     "answer": [
       "Francesc Josep Joan Estil·les Brunet",
       "Josep Pau Pere Estil·les Brunet",
@@ -9819,7 +9818,7 @@
     ],
     "answer_type": "person_list",
     "category": "great_uncles_aunts",
-    "person": "Josepa Giró Esti.les",
+    "person": "Josepa Giró Estil·les",
     "person_id": "@I500189@",
     "relation": "great_uncles_aunts",
     "source_tags": [
@@ -9885,7 +9884,7 @@
       "Mariana Fitó Vila",
       "Mariana Gomis Fitó",
       "Mariana Madiroles Caralt",
-      "Mireia Mestre i Campi",
+      "Mireia Mestre Campi",
       "Pasqual Godes Gomis",
       "Pasqual Godes Segura",
       "Pau Cavalleria",
@@ -11579,14 +11578,14 @@
   },
   {
     "id": "q0559",
-    "question": "Quins avis de la branca paterna consten per a Teresa Estil.les Vidal?",
+    "question": "Quins avis de la branca paterna consten per a Teresa Estil·les Vidal?",
     "answer": [
       "Maria Antonia Josepa Brunet Fortuny",
       "Pau Estil·les Manyer"
     ],
     "answer_type": "person_list",
     "category": "paternal_grandparents",
-    "person": "Teresa Estil.les Vidal",
+    "person": "Teresa Estil·les Vidal",
     "person_id": "@I500188@",
     "relation": "paternal_grandparents",
     "source_tags": [
@@ -11817,7 +11816,7 @@
   {
     "id": "q0570",
     "question": "On es va batejar Dolores Casquero Tauler?",
-    "answer": "Palfrugell",
+    "answer": "Palafrugell",
     "answer_type": "place",
     "category": "baptism_place",
     "person": "Dolores Casquero Tauler",
@@ -12014,7 +12013,7 @@
   {
     "id": "q0586",
     "question": "On es va casar Prudencio Palazuelos Martínez?",
-    "answer": "Valdelcubo - España",
+    "answer": "Valdecubo, Guadalajara",
     "answer_type": "place",
     "category": "marriage_place",
     "person": "Prudencio Palazuelos Martínez",
@@ -12596,7 +12595,7 @@
       "Felipe Reverté Planells",
       "Francesc Xavier Sunyer Martín",
       "Francisco-Javier Sunyer Martín",
-      "Isabel Reverte Planells",
+      "Isabel Reverté Planells",
       "Joan Anton Vidal Planells",
       "Joan Cornet Planells",
       "Jordi Manel Vidal Planells",
@@ -12619,7 +12618,7 @@
       "Mercedes Sunyer Vilaseca",
       "Mercè Pin Planells",
       "Miriam Sunyer Martín",
-      "Montse Cornet Planells",
+      "Montserrat Cornet Planells",
       "Montserrat Sunyer Bofill",
       "Montserrat Sunyer Vilaseca",
       "Nuria Vidal Planells",
@@ -12822,8 +12821,8 @@
     "id": "q0617",
     "question": "Quins avis de la branca materna consten per a Josefa Lagunilla de Plandolit?",
     "answer": [
-      "Rafael de Plandolit Esteve",
-      "Trinidad GUITERAS FILLOL"
+      "Rafael de Plandolit de Esteve",
+      "Trinidad Guiteras Fillol"
     ],
     "answer_type": "person_list",
     "category": "maternal_grandparents",
@@ -13375,11 +13374,11 @@
   },
   {
     "id": "q0645",
-    "question": "Quina va ser la data de defunció de Antonia Rusiñol Cucurry?",
+    "question": "Quina va ser la data de defunció de Antonia Rusiñol Cucurny?",
     "answer": "3 de abril de 2002",
     "answer_type": "date",
     "category": "death_date",
-    "person": "Antonia Rusiñol Cucurry",
+    "person": "Antonia Rusiñol Cucurny",
     "person_id": "@I501083@",
     "source_tags": [
       "INDI.DEAT.DATE"
@@ -14417,7 +14416,7 @@
       "Carmen Sunyer Bofill",
       "Dolors Sunyer Vilaseca",
       "Felipe Reverté Planells",
-      "Isabel Reverte Planells",
+      "Isabel Reverté Planells",
       "Joan Anton Vidal Planells",
       "Joan Cornet Planells",
       "Jordi Manel Vidal Planells",
@@ -14434,7 +14433,7 @@
       "Mercedes Pin Planells",
       "Mercedes Sunyer Vilaseca",
       "Mercè Pin Planells",
-      "Montse Cornet Planells",
+      "Montserrat Cornet Planells",
       "Montserrat Sunyer Bofill",
       "Montserrat Sunyer Vilaseca",
       "Nuria Vidal Planells",
@@ -14541,7 +14540,7 @@
     "answer": [
       "Carmen Cornet Planells",
       "Merce Cornet Planells",
-      "Montse Cornet Planells",
+      "Montserrat Cornet Planells",
       "Rosa Cornet Planells"
     ],
     "answer_type": "person_list",
@@ -15202,8 +15201,8 @@
       "Clara Sisternas Mestre",
       "Júlia Mestre Rius",
       "Maria Mestre Rius",
-      "Neus Mestre i Farràs",
-      "Núria Mestre i Farràs"
+      "Neus Mestre Farràs",
+      "Núria Mestre Farràs"
     ],
     "answer_type": "person_list",
     "category": "granddaughters",
@@ -15464,7 +15463,7 @@
       "Felipe Reverté Planells",
       "Francesc Xavier Sunyer Martín",
       "Francisco-Javier Sunyer Martín",
-      "Isabel Reverte Planells",
+      "Isabel Reverté Planells",
       "Joan Anton Vidal Planells",
       "Joan Cornet Planells",
       "Jordi Manel Vidal Planells",
@@ -15483,7 +15482,7 @@
       "Mercedes Sunyer Martín",
       "Mercè Pin Planells",
       "Miriam Sunyer Martín",
-      "Montse Cornet Planells",
+      "Montserrat Cornet Planells",
       "Nuria Vidal Planells",
       "Pedro Reverté Planells",
       "Ramon Sunyer Martín",
@@ -15670,14 +15669,14 @@
   },
   {
     "id": "q0749",
-    "question": "Qui van ser els avis materns de Martí Rodriguez i Mestre?",
+    "question": "Qui van ser els avis materns de Martí Rodriguez Mestre?",
     "answer": [
       "Concepció Campi Roca",
       "Jesus Mestre Godes"
     ],
     "answer_type": "person_list",
     "category": "maternal_grandparents",
-    "person": "Martí Rodriguez i Mestre",
+    "person": "Martí Rodriguez Mestre",
     "person_id": "@I138@",
     "relation": "maternal_grandparents",
     "source_tags": [
@@ -16774,16 +16773,16 @@
   },
   {
     "id": "q0803",
-    "question": "Qui van ser els avis de Maria Eulalia Giró Estil.les?",
+    "question": "Qui van ser els avis de Maria Eulalia Giró Estil·les?",
     "answer": [
       "Eulalia Novell",
       "Macià Giró",
-      "María Vidal",
+      "María Vidal Thomas",
       "Pau Estil·les Brunet"
     ],
     "answer_type": "person_list",
     "category": "grandparents",
-    "person": "Maria Eulalia Giró Estil.les",
+    "person": "Maria Eulalia Giró Estil·les",
     "person_id": "@I500190@",
     "relation": "grandparents",
     "source_tags": [
@@ -16890,7 +16889,8 @@
       "Clara Plomer Garrido",
       "Gil Cardoner Garrido",
       "Ignasi Cardoner Garrido",
-      "Santi Garzón Garrido"
+      "Santi Garzón Garrido",
+      "Miquel Cardoner Garrido"
     ],
     "answer_type": "person_list",
     "category": "great_great_grandchildren",
@@ -16907,7 +16907,8 @@
       "@I500848@",
       "@I500129@",
       "@I500370@",
-      "@I500843@"
+      "@I500843@",
+      "@I501424@"
     ]
   },
   {
@@ -17225,7 +17226,7 @@
     "question": "Qui van ser les nebodes de Salvador Anton Ildefons Estil·les Brunet?",
     "answer": [
       "Rosa Estil·les Vidal",
-      "Teresa Estil.les Vidal"
+      "Teresa Estil·les Vidal"
     ],
     "answer_type": "person_list",
     "category": "nieces",
@@ -17333,7 +17334,7 @@
     "question": "Quins cosins segons consten per a Sergi Cabestany de la Cruz?",
     "answer": [
       "Ana Eiras Cabestany",
-      "Anna Godes i Nofre",
+      "Anna Godes Nofre",
       "Ariadna Puig Ninou",
       "Carlota Godes Nofre",
       "Carme \"Manen\" Godes Nofre",
@@ -17789,7 +17790,7 @@
     "id": "q0853",
     "question": "Quines ties va tenir Maria Godes Brandao?",
     "answer": [
-      "Anna Godes i Nofre",
+      "Anna Godes Nofre",
       "Carlota Godes Nofre",
       "Carme \"Manen\" Godes Nofre"
     ],
@@ -18079,8 +18080,8 @@
     "id": "q0865",
     "question": "Quines netes va tenir Pau Estil·les Brunet?",
     "answer": [
-      "Josepa Giró Esti.les",
-      "Maria Eulalia Giró Estil.les",
+      "Josepa Giró Estil·les",
+      "Maria Eulalia Giró Estil·les",
       "Rosa Giró Estil·les"
     ],
     "answer_type": "person_list",
@@ -18487,7 +18488,8 @@
       "Paula Garrido Ballart",
       "Rosa María Molina Gallardo",
       "Santi Garzón Garrido",
-      "Sònia Garrido Ballart"
+      "Sònia Garrido Ballart",
+      "Miquel Cardoner Garrido"
     ],
     "answer_type": "person_list",
     "category": "known_descendants",
@@ -18536,7 +18538,8 @@
       "@I112@",
       "@I500078@",
       "@I500843@",
-      "@I111@"
+      "@I111@",
+      "@I501424@"
     ]
   },
   {
@@ -18803,7 +18806,7 @@
   },
   {
     "id": "q0891",
-    "question": "Quins cosins segons consten per a Anna Godes i Nofre?",
+    "question": "Quins cosins segons consten per a Anna Godes Nofre?",
     "answer": [
       "Albert Cabestany Pérez",
       "Ariadna Puig Ninou",
@@ -18823,7 +18826,7 @@
     ],
     "answer_type": "person_list",
     "category": "second_cousins",
-    "person": "Anna Godes i Nofre",
+    "person": "Anna Godes Nofre",
     "person_id": "@I68@",
     "relation": "second_cousins",
     "source_tags": [
@@ -19315,9 +19318,9 @@
     "question": "Quins fills va tenir Jesus Mestre Godes?",
     "answer": [
       "Anna Mestre Campi",
-      "Jesus Mestre i Campi",
+      "Jesus Mestre Campi",
       "Marc Mestre Campi",
-      "Mireia Mestre i Campi",
+      "Mireia Mestre Campi",
       "Oriol Mestre Campi"
     ],
     "answer_type": "person_list",
@@ -19452,8 +19455,8 @@
     "answer": [
       "Alba Rodriguez Mestre",
       "Clara Sisternas Mestre",
-      "Neus Mestre i Farràs",
-      "Núria Mestre i Farràs"
+      "Neus Mestre Farràs",
+      "Núria Mestre Farràs"
     ],
     "answer_type": "person_list",
     "category": "female_cousins",
@@ -20405,10 +20408,10 @@
       "Antoni Hurtado Rusca",
       "Isabel Hurtado Rusca",
       "Josep Hurtado Rusca",
-      "Josepa Giró Esti.les",
+      "Josepa Giró Estil·les",
       "Josepa Hurtado Rusca",
       "Manuela Hurtado Rusca",
-      "Maria Eulalia Giró Estil.les",
+      "Maria Eulalia Giró Estil·les",
       "Marià Hurtado Rusca",
       "María Hurtado Rusca"
     ],
