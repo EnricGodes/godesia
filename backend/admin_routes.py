@@ -1378,7 +1378,7 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
 
 @router.post("/compare/start-palazuelos")
 async def compare_start_palazuelos():
-    """Start comparison using docs/palazuelos.ged + palazuelos_map (no upload needed)."""
+    """Start comparison using palazuelos.ged (volume or docs/) + palazuelos_map (no upload needed)."""
     with _cmp_job_lock:
         if _cmp_job["status"] == "running":
             raise HTTPException(status_code=409, detail="Comparació ja en curs")
@@ -1388,11 +1388,14 @@ async def compare_start_palazuelos():
             "finished_at": None, "error": None,
         })
 
-    ged_path = str(_base_dir / "docs" / "palazuelos.ged")
+    # Mismo GEDCOM que la Cabina: en producción vive en el volumen
+    # (data/photos/_gedcom/, subido desde Sync Palazuelos), docs/ solo en local.
+    from palazuelos_routes import _default_ged_path
+    ged_path = str(_default_ged_path())
     if not Path(ged_path).exists():
         with _cmp_job_lock:
             _cmp_job["status"] = "idle"
-        raise HTTPException(404, "docs/palazuelos.ged no trobat. Exporta el GEDCOM des de MyHeritage.")
+        raise HTTPException(404, "palazuelos.ged no trobat. Puja'l des de la pestanya Sync Palazuelos → «Subir palazuelos.ged».")
 
     db_path = str(_base_dir / "data" / "godesia.db")
     threading.Thread(target=_run_comparison, args=(ged_path, db_path, True), daemon=True).start()
