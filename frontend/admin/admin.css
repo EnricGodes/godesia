@@ -675,3 +675,5 @@ body.has-transfer-panel { padding-bottom: 58vh; }
 .transfer-panel .tp-empty { color: #c2c8bf; }
 .transfer-panel .tp-fam td { background: #f6f3ea; font-size: .78rem; }
 .transfer-panel .tp-warn { margin: .5rem 1rem; padding: .4rem .7rem; background: #fff3e0; border: 1px solid #ffcc80; border-radius: 6px; font-size: .78rem; }
+.transfer-panel .tp-warn.tp-double { background: #fdecea; border-color: #f5a3a3; color: #7f1d1d; }
+.transfer-panel .tp-warn.tp-double .btn { margin-left: .25rem; padding: .05rem .4rem; }

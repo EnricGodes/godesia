@@ -849,6 +849,7 @@ def _transfer_queue(db, data: dict) -> list:
     if _queue_cache["ids"] is not None and _queue_cache["key"] == key:
         return _queue_cache["ids"]
     ids = []
+    doubles = double_pairs(db)
     for gid in _transfer_list(db):
         pm = db.execute("SELECT palaz_id, transferred_at FROM palazuelos_map WHERE godes_id=?", (gid,)).fetchone()
         if pm["transferred_at"]:
@@ -857,7 +858,7 @@ def _transfer_queue(db, data: dict) -> list:
         pz = data["individuals"].get(pm["palaz_id"])
         if not g or not pz:
             continue
-        types, _ = fields_to_diff(_transfer_fields(dict(g), pz, db, gid))
+        types, _ = fields_to_diff(_transfer_fields(dict(g), pz, db, gid), doubles.get(gid), pm["palaz_id"])
         # Descartada con ✕ y sin tipos de diferencia nuevos → fuera (misma regla
         # que el Comparador al re-comparar).
         if types and not (gid in dismissed and set(types) <= dismissed[gid]):
@@ -866,17 +867,21 @@ def _transfer_queue(db, data: dict) -> list:
     return ids
 
 
-def _compare_queue(db) -> list:
+def _compare_queue(db, dtype: str = "") -> list:
     """Cola de la Cabina abierta desde el Comparador: sus mismas filas (sin
     descartadas ni traspasadas) y en su mismo orden, solo las que tienen pareja
-    en palazuelos_map (sin pareja la Cabina no puede abrirse)."""
+    en palazuelos_map (sin pareja, o con una pareja que ya no está en el GEDCOM
+    —pair_missing—, la Cabina no puede abrirse). `dtype` = filtro
+    por tipo de diferencia activo en el Comparador (p. ej. double_pair)."""
     rows = db.execute("""
         SELECT cr.db_person_id FROM compare_results cr
         JOIN palazuelos_map pm ON pm.godes_id = cr.db_person_id
         LEFT JOIN compare_dismissed cd ON cd.db_person_id = cr.db_person_id
         WHERE cd.db_person_id IS NULL AND pm.transferred_at IS NULL
           AND pm.palaz_id IS NOT NULL AND pm.match_type != 'rejected'
-        ORDER BY cr.match_score ASC, cr.id ASC""").fetchall()
+          AND ',' || cr.diff_types || ',' NOT LIKE '%,pair_missing,%'
+          AND (? = '' OR ',' || cr.diff_types || ',' LIKE '%,' || ? || ',%')
+        ORDER BY cr.match_score ASC, cr.id ASC""", (dtype, dtype)).fetchall()
     return list(dict.fromkeys(r[0] for r in rows))
 
 
@@ -918,10 +923,35 @@ _FIELD_CATEGORY = {
 }
 
 
-def fields_to_diff(fields: list):
+def double_pairs(db) -> dict:
+    """{godes_id: [otras personas Godes emparejadas con SU misma persona Palazuelos]}.
+    Una persona Palazuelos solo debería corresponder a una Godes: si hay dos, una
+    de las parejas está mal (o hay un duplicado en Godes) y los datos a traspasar
+    pueden ser de otra persona."""
+    by_palaz = {}
+    for gid, pid, name, mt in db.execute("""
+            SELECT pm.godes_id, pm.palaz_id, p.name, pm.match_type
+            FROM palazuelos_map pm JOIN people p ON p.id = pm.godes_id
+            WHERE pm.palaz_id IS NOT NULL AND pm.palaz_id != '' AND pm.match_type != 'rejected'"""):
+        by_palaz.setdefault(pid, []).append({"godes_id": gid, "name": name, "match_type": mt})
+    out = {}
+    for group in by_palaz.values():
+        if len(group) > 1:
+            for g in group:
+                out[g["godes_id"]] = [o for o in group if o["godes_id"] != g["godes_id"]]
+    return out
+
+
+def fields_to_diff(fields: list, others: list = None, palaz_id: str = ""):
     """Diferencias de la Cabina en el formato del Comparador: (diff_types, diff_details).
-    Es el ÚNICO criterio para parejas de palazuelos_map, en las dos pantallas."""
+    Es el ÚNICO criterio para parejas de palazuelos_map, en las dos pantallas.
+    `others`: entrada de double_pairs() para esta persona (pareja doble)."""
     types, details = [], {}
+    if others:
+        types.append("double_pair")
+        details["double_pair"] = [
+            f"⚠ Palazuelos {palaz_id} también está emparejada con {' '.join((o['name'] or '').split())} "
+            f"({o['godes_id']}, {o['match_type']})" for o in others]
     for f in fields:
         if f["same"]:
             continue
@@ -1009,7 +1039,7 @@ def _transfer_fields(g: dict, pz: dict, db, godes_id: str) -> list:
 
 
 @router.get("/transfer/{godes_id}")
-async def transfer_detail(godes_id: str, scope: str = ""):
+async def transfer_detail(godes_id: str, scope: str = "", type: str = ""):
     db = _db()
     godes_id = "@" + godes_id.strip("@") + "@"
     pm = db.execute("SELECT palaz_id, transferred_at FROM palazuelos_map WHERE godes_id=?", (godes_id,)).fetchone()
@@ -1031,7 +1061,7 @@ async def transfer_detail(godes_id: str, scope: str = ""):
     # más cercanos por orden alfabético. Desde el Comparador (scope=compare) la
     # cola es su propia lista: si no, «Hecho y siguiente» saltaba a parejas que
     # el Comparador no cuenta y su contador no bajaba.
-    ids = _compare_queue(db) if scope == "compare" else _transfer_queue(db, data)
+    ids = _compare_queue(db, type) if scope == "compare" else _transfer_queue(db, data)
     if godes_id in ids:
         pos = ids.index(godes_id)
         prev_id = ids[pos - 1] if pos > 0 else None
@@ -1046,6 +1076,7 @@ async def transfer_detail(godes_id: str, scope: str = ""):
         after = [i for i in ids if i in all_ids and all_ids.index(i) > here]
         prev_id, next_id, pos_label = (before[-1] if before else None), (after[0] if after else None), None
     nav = {"pos": pos_label, "total": len(ids), "prev_godes_id": prev_id, "next_godes_id": next_id}
+    also = [dict(o, name=" ".join((o["name"] or "").split())) for o in double_pairs(db).get(godes_id, [])]
 
     return {
         "godes": {"id": godes_id, "name": g.get("name"), "mh_url": _mh_person_url("mh_tree_id_godes", godes_id)},
@@ -1053,6 +1084,7 @@ async def transfer_detail(godes_id: str, scope: str = ""):
         "fields": fields,
         "family": {"godes": _godes_family(godes_id, db), "palaz": _palaz_family(pm["palaz_id"], data)},
         "nav": nav,
+        "also_paired": also,
         "transferred_at": pm["transferred_at"],
     }
 

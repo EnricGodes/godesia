@@ -1548,6 +1548,7 @@ const Transfer = (() => {
     // 'compare' = abierta desde el Comparador: ◀ ▶ y «Hecho y siguiente» siguen
     // su lista (el contador cuadra con «N con diferencias»). '' = cola de la Cabina.
     let scope = '';
+    let ctype = '';   // filtro por tipo del Comparador (solo con scope 'compare')
 
     function _panel() {
         let el = document.getElementById('transfer-panel');
@@ -1573,11 +1574,14 @@ const Transfer = (() => {
     }
     let blocked = false;
 
-    async function open(godesId, withWindows = true, fromScope) {
+    async function open(godesId, withWindows = true, fromScope, fromType) {
         if (!godesId) return;
-        if (fromScope !== undefined) scope = fromScope;
+        if (fromScope !== undefined) { scope = fromScope; ctype = fromType || ''; }
+        const qs = new URLSearchParams();
+        if (scope) qs.set('scope', scope);
+        if (scope && ctype) qs.set('type', ctype);
         try {
-            data = await apiFetch(`/api/admin/palazuelos/transfer/${encodeURIComponent(godesId)}${scope ? '?scope=' + scope : ''}`);
+            data = await apiFetch(`/api/admin/palazuelos/transfer/${encodeURIComponent(godesId)}${qs.toString() ? '?' + qs : ''}`);
         } catch (e) { alert(e.message); return; }
         if (withWindows) openWindows();
         render();
@@ -1636,6 +1640,10 @@ const Transfer = (() => {
                 </div>
             </div>
             <div class="tp-body">
+                ${(d.also_paired || []).length ? `<div class="tp-warn tp-double">⚠ Pareja doble: <b>${esc(d.palaz.name)}</b> (${esc(d.palaz.id)}) de Palazuelos también está emparejada con
+                    ${d.also_paired.map(o => `<b>${esc(o.name)}</b> <small>${esc(o.godes_id)} · ${esc(o.match_type)}</small>
+                        <button class="btn btn-secondary btn-sm" title="Abrir esa otra pareja en la Cabina" onclick="Transfer.go('${esc(o.godes_id)}')">⇄ abrir</button>`).join(' · ')}.
+                    Una de las dos parejas está mal (o hay un duplicado en Godes): revísalo en Sync Palazuelos antes de copiar datos.</div>` : ''}
                 ${blocked ? '<div class="tp-warn">Chrome ha bloqueado las ventanas de MyHeritage. Usa los enlaces «MH Palazuelos» / «MH Godes» o permite las ventanas emergentes para este sitio.</div>' : ''}
                 <table class="tp-table">
                     <thead><tr><th style="width:150px;">Campo</th><th>Palazuelos (origen)</th><th>Godes (destino)</th></tr></thead>
@@ -2036,12 +2044,26 @@ const Comparador = {
                 photos: '📸 Fotos', name: '💬 Nombre', nomatch: '❓ No encontrado',
                 occupations: '💼 Oficios', residences: '🏠 Residencias',
                 events: '🗓 Eventos', sex: '⚥ Sexo',
-                conflict: '⚠ Contradicción',
+                conflict: '⚠ Contradicción', double_pair: '👥 Pareja doble',
+                pair_missing: '🔗 Pareja perdida',
                 possible_match: '🔍 Posible',
             };
 
             this._rows = {};
             d.rows.forEach(r => { this._rows[r.id] = r; });
+
+            // Filtro por tipo: recuento de filas por tipo de diferencia.
+            const typeCount = {};
+            d.rows.forEach(r => (r.diff_types || '').split(',').filter(Boolean)
+                .forEach(t => { typeCount[t] = (typeCount[t] || 0) + 1; }));
+            const sel = document.getElementById('cmp-type-filter');
+            if (sel) {
+                if (this._filter && !typeCount[this._filter]) this._filter = '';
+                sel.innerHTML = '<option value="">Todos los tipos</option>' + Object.keys(typeCount)
+                    .sort((a, b) => typeCount[b] - typeCount[a])
+                    .map(t => `<option value="${esc(t)}" ${t === this._filter ? 'selected' : ''}>${esc(ICONS[t] || t)} (${typeCount[t]})</option>`)
+                    .join('');
+            }
 
             list.innerHTML = `<table class="admin-table">
                 <thead><tr>
@@ -2056,7 +2078,7 @@ const Comparador = {
                 ${d.rows.map(row => {
                     const types  = (row.diff_types || '').split(',').filter(Boolean);
                     const badges = types.map(t =>
-                        `<span class="badge ${t === 'nomatch' || t === 'conflict' ? 'badge-error' : 'badge-pending'}"
+                        `<span class="badge ${['nomatch', 'conflict', 'double_pair', 'pair_missing'].includes(t) ? 'badge-error' : 'badge-pending'}"
                                style="margin:1px 2px;font-size:.72rem;">${esc(ICONS[t] || t)}</span>`
                     ).join('');
                     const scoreColor = row.match_score >= 90 ? '#065f46'
@@ -2065,7 +2087,7 @@ const Comparador = {
                     const dbName = row.db_person_name || row.db_person_id || '';
                     const gedName = row.ged_person_name || '';
                     return `
-                    <tr id="cmp-row-${row.id}">
+                    <tr id="cmp-row-${row.id}" data-types="${esc(',' + (row.diff_types || '') + ',')}">
                         <td style="font-size:.84rem;">
                             <a href="/dossier.html?id=${esc(personId)}" target="_blank"
                                style="color:#2d4b33;font-weight:600;">${esc(dbName)}</a>
@@ -2088,7 +2110,7 @@ const Comparador = {
                                 onclick="Comparador.toggleDetail(${row.id}, this)">▸ Ver</button>
                         </td>
                         <td style="white-space:nowrap;">
-                            <button class="btn btn-secondary btn-sm" title="Cabina de traspaso (MyHeritage lado a lado)" onclick="Transfer.open('${esc(row.db_person_id || '')}', true, 'compare')">⇄</button>
+                            <button class="btn btn-secondary btn-sm" title="Cabina de traspaso (MyHeritage lado a lado)" onclick="Transfer.open('${esc(row.db_person_id || '')}', true, 'compare', Comparador._filter)">⇄</button>
                             <button class="btn btn-sm" style="background:#f1eee5;color:#727971;border:1px solid #c2c8bf;" title="Descartar (no reaparece si no hay cambios)" onclick="Comparador.dismissRow(${row.id})">✕</button>
                         </td>
                     </tr>
@@ -2100,9 +2122,24 @@ const Comparador = {
                     </tr>`;
                 }).join('')}
                 </tbody></table>`;
+            this.applyFilter(this._filter);
         } catch (e) {
             list.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
         }
+    },
+
+    _filter: '',
+
+    // Oculta las filas que no tienen el tipo elegido. La Cabina abierta desde una
+    // fila recorre solo ese tipo (Transfer.open recibe el filtro).
+    applyFilter(type) {
+        this._filter = type || '';
+        document.querySelectorAll('#cmp-results-list tr[id^="cmp-row-"]').forEach(tr => {
+            const show = !this._filter || (tr.dataset.types || '').includes(',' + this._filter + ',');
+            tr.style.display = show ? '' : 'none';
+            const det = document.getElementById(tr.id.replace('cmp-row-', 'cmp-detail-'));
+            if (det && !show) det.style.display = 'none';
+        });
     },
 
     toggleDetail(id, btn) {

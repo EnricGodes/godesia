@@ -603,6 +603,9 @@
                 <div class="toolbar">
                     <span style="font-size:.82rem;color:#727971;" id="cmp-results-meta"></span>
                     <div class="toolbar-right">
+                        <select id="cmp-type-filter" class="btn btn-secondary btn-sm" title="Mostrar solo un tipo de diferencia (la Cabina recorrerá solo esas filas)" onchange="Comparador.applyFilter(this.value)">
+                            <option value="">Todos los tipos</option>
+                        </select>
                         <button class="btn btn-secondary btn-sm" onclick="Comparador.loadResults()">↻ Actualizar</button>
                     </div>
                 </div>

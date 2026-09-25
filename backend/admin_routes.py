@@ -1222,6 +1222,8 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
                 _cmp_log(f"  Avís: no s'ha pogut carregar el mapa ({e}), fent servir matching per nom")
                 use_palazuelos_map = False
 
+        doubles = palazuelos_routes.double_pairs(conn) if use_palazuelos_map else {}
+
         # Ensure dismiss table exists and load current dismissals
         conn.execute("""
             CREATE TABLE IF NOT EXISTS dec.compare_dismissed (
@@ -1300,7 +1302,8 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
                 # y la cola de la Cabina cuenten exactamente lo mismo.
                 full = dict(conn.execute("SELECT * FROM people WHERE id=?", (pid,)).fetchone())
                 diff_types, diff_details = palazuelos_routes.fields_to_diff(
-                    palazuelos_routes._transfer_fields(full, individuals[ged_id], conn, pid))
+                    palazuelos_routes._transfer_fields(full, individuals[ged_id], conn, pid),
+                    doubles.get(pid), ged_id)
             else:
                 diff_types, diff_details = _compute_diff(
                     db_person,
@@ -1318,6 +1321,18 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
                 cnt_map += 1
             else:
                 cnt_name += 1
+
+            # Pareja del mapa que apunta a una persona que ya no está en este
+            # palazuelos.ged (borrada o fusionada en MyHeritage): se avisa en vez
+            # de comparar en silencio con lo que haya encontrado el match por nombre.
+            if (use_palazuelos_map and not matched_via_map and palaz_entry
+                    and palaz_entry.get("palaz_id") and palaz_entry["match_type"] != "rejected"):
+                sugg = (f" El Comparador la ha emparejado por nombre con {individuals[ged_id].get('name')} ({ged_id})."
+                        if ged_id else "")
+                diff_types = ["pair_missing"] + [t for t in diff_types if t != "pair_missing"]
+                diff_details["pair_missing"] = [
+                    f"⚠ Su pareja Palazuelos {palaz_entry['palaz_id']} ({palaz_entry['match_type']}) ya no está "
+                    f"en palazuelos.ged.{sugg} Vuelve a emparejarla en Sync Palazuelos."]
 
             if diff_types:
                 # Skip if these exact diffs (or a subset) were previously dismissed
