@@ -1,0 +1,18 @@
+# Finales de línea LF en todos los ficheros de texto, en cualquier sistema.
+# La carpeta se sincroniza por Synology entre Mac y Windows: con CRLF en Windows
+# (core.autocrlf) el Mac veía cientos de ficheros "modificados" sin cambios reales.
+* text=auto eol=lf
+
+# Binarios: nunca convertir
+*.db     binary
+*.sqlite binary
+*.jpg    binary
+*.jpeg   binary
+*.png    binary
+*.gif    binary
+*.webp   binary
+*.ico    binary
+*.pdf    binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
