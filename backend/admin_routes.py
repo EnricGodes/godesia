@@ -1141,6 +1141,7 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
 
         from gedcom_parser import parse_gedcom
         from database import get_connection as _get_conn
+        import palazuelos_routes
 
         _cmp_log(f"Iniciant comparació: {Path(ged_path).name}"
                  + (" [mapa Palazuelos]" if use_palazuelos_map else ""))
@@ -1293,6 +1294,13 @@ def _run_comparison(ged_path: str, db_path: str, use_palazuelos_map: bool = Fals
                     diff_details["possible_match"] = [
                         f"Coincidència per primer cognom + any de naixement. Nom GEDCOM: '{individuals[ged_id].get('name')}'"
                     ]
+            elif matched_via_map:
+                # Pareja del mapa Palazuelos: mismo criterio que la Cabina de
+                # traspaso (palazuelos_routes), para que la lista del Comparador
+                # y la cola de la Cabina cuenten exactamente lo mismo.
+                full = dict(conn.execute("SELECT * FROM people WHERE id=?", (pid,)).fetchone())
+                diff_types, diff_details = palazuelos_routes.fields_to_diff(
+                    palazuelos_routes._transfer_fields(full, individuals[ged_id], conn, pid))
             else:
                 diff_types, diff_details = _compute_diff(
                     db_person,

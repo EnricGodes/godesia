@@ -666,6 +666,8 @@ body.has-transfer-panel { padding-bottom: 58vh; }
 .transfer-panel .tp-label { font-weight: 600; color: #424842; white-space: nowrap; }
 .transfer-panel tr.tp-diff td:nth-child(2) { background: #fff8e1; }
 .transfer-panel tr.tp-same td { color: #9e9b94; }
+.transfer-panel tr.tp-grave td { background: #fdecea; }
+.transfer-panel tr.tp-grave td.tp-label { color: #991b1b; font-weight: 700; }
 .transfer-panel .tp-val { display: flex; align-items: flex-start; gap: .4rem; }
 .transfer-panel .tp-val span { white-space: pre-wrap; word-break: break-word; }
 .transfer-panel .tp-copy { border: none; background: transparent; cursor: pointer; font-size: .85rem; padding: 0 .2rem; opacity: .55; }

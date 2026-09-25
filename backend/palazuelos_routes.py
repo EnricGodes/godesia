@@ -835,14 +835,17 @@ def _transfer_list(db) -> list:
     return [r[0] for r in rows]
 
 
-# Cola de la Cabina: parejas confirmadas CON diferencias y aún no traspasadas.
+# Cola de la Cabina: parejas confirmadas CON diferencias, aún no traspasadas ni
+# descartadas en el Comparador.
 # Se cachea por (mtime del GEDCOM, última modificación del mapa, nº filas).
 _queue_cache = {"key": None, "ids": None}
 
 
 def _transfer_queue(db, data: dict) -> list:
+    dismissed = _dismissed(db)
     key = (_palaz_cache["mtime"],
-           db.execute("SELECT MAX(updated_at), MAX(transferred_at), COUNT(*) FROM palazuelos_map").fetchone())
+           tuple(db.execute("SELECT MAX(updated_at), MAX(transferred_at), COUNT(*) FROM palazuelos_map").fetchone()),
+           tuple(sorted((k, tuple(sorted(v))) for k, v in dismissed.items())))
     if _queue_cache["ids"] is not None and _queue_cache["key"] == key:
         return _queue_cache["ids"]
     ids = []
@@ -854,10 +857,98 @@ def _transfer_queue(db, data: dict) -> list:
         pz = data["individuals"].get(pm["palaz_id"])
         if not g or not pz:
             continue
-        if any(not f["same"] for f in _transfer_fields(dict(g), pz, db, gid)):
+        types, _ = fields_to_diff(_transfer_fields(dict(g), pz, db, gid))
+        # Descartada con ✕ y sin tipos de diferencia nuevos → fuera (misma regla
+        # que el Comparador al re-comparar).
+        if types and not (gid in dismissed and set(types) <= dismissed[gid]):
             ids.append(gid)
     _queue_cache["key"], _queue_cache["ids"] = key, ids
     return ids
+
+
+def _compare_queue(db) -> list:
+    """Cola de la Cabina abierta desde el Comparador: sus mismas filas (sin
+    descartadas ni traspasadas) y en su mismo orden, solo las que tienen pareja
+    en palazuelos_map (sin pareja la Cabina no puede abrirse)."""
+    rows = db.execute("""
+        SELECT cr.db_person_id FROM compare_results cr
+        JOIN palazuelos_map pm ON pm.godes_id = cr.db_person_id
+        LEFT JOIN compare_dismissed cd ON cd.db_person_id = cr.db_person_id
+        WHERE cd.db_person_id IS NULL AND pm.transferred_at IS NULL
+          AND pm.palaz_id IS NOT NULL AND pm.match_type != 'rejected'
+        ORDER BY cr.match_score ASC, cr.id ASC""").fetchall()
+    return list(dict.fromkeys(r[0] for r in rows))
+
+
+def _is_upd(etype, description) -> bool:
+    """Marca de «última modificación» de MyHeritage (EVEN TYPE _UPD): no es un
+    dato genealógico, nunca cuenta como diferencia."""
+    return (etype or "") == "_UPD" or str(description or "").startswith("_UPD")
+
+
+_YEAR_RE = re.compile(r"\b(1[0-9]\d\d|20\d\d)\b")
+GRAVE_YEAR_GAP = 10
+# Fechas aproximadas o de rango (GEDCOM y su traducción en la BD): «BEF 1912»
+# frente a «Aprox. 1898» no se contradicen → nunca cuentan como graves.
+_APPROX_RE = re.compile(r"\b(abt|bef|aft|bet|from|to|est|cal|int|aprox|antes|despu[eé]s|entre|hacia|desde|hasta|ca?)\b\.?", re.I)
+
+
+def _is_grave(key: str, gv, pv) -> bool:
+    """Contradicción que suele indicar una pareja mal emparejada más que un dato
+    a copiar: sexo opuesto, o fechas exactas separadas por GRAVE_YEAR_GAP años o más."""
+    if key == "sex":
+        return {str(gv).upper(), str(pv).upper()} == {"M", "F"}
+    if key in ("birth_date", "death_date", "baptism_date") and gv and pv:
+        if _APPROX_RE.search(str(gv)) or _APPROX_RE.search(str(pv)):
+            return False
+        yg = {int(y) for y in _YEAR_RE.findall(str(gv))}
+        yp = {int(y) for y in _YEAR_RE.findall(str(pv))}
+        return bool(yg and yp) and min(abs(a - b) for a in yg for b in yp) >= GRAVE_YEAR_GAP
+    return False
+
+
+# Categoría de cada campo de la Cabina en el Comparador (mismos nombres que usa
+# _compute_diff, para que los descartes ✕ antiguos sigan valiendo).
+_FIELD_CATEGORY = {
+    "given_name": "name", "surname": "name", "nickname": "name", "sex": "sex",
+    "birth_date": "dates", "baptism_date": "dates", "death_date": "dates", "death_age": "dates",
+    "birth_place": "places", "baptism_place": "places", "death_place": "places", "burial": "places",
+    "death_cause": "events", "events": "events", "occupations": "occupations",
+    "residences": "residences", "notes": "notes",
+}
+
+
+def fields_to_diff(fields: list):
+    """Diferencias de la Cabina en el formato del Comparador: (diff_types, diff_details).
+    Es el ÚNICO criterio para parejas de palazuelos_map, en las dos pantallas."""
+    types, details = [], {}
+    for f in fields:
+        if f["same"]:
+            continue
+        cat = _FIELD_CATEGORY.get(f["key"], "events")
+        if f["grave"]:
+            cat_list = details.setdefault("conflict", [])
+            if "conflict" not in types:
+                types.insert(0, "conflict")
+        else:
+            cat_list = details.setdefault(cat, [])
+        if cat not in types:
+            types.append(cat)
+        pv = f["palaz"]
+        if isinstance(pv, list):
+            have = {_norm_val(x) for x in f["godes"]}
+            pv = " | ".join(x for x in pv if _norm_val(x) not in have)
+        gv = " | ".join(f["godes"]) if isinstance(f["godes"], list) else f["godes"]
+        cat_list.append(f"{'⚠ ' if f['grave'] else ''}{f['label']}: Godes '{gv or '—'}' → Palazuelos '{pv}'")
+    return types, details
+
+
+def _dismissed(db) -> dict:
+    try:
+        return {r[0]: set((r[1] or "").split(","))
+                for r in db.execute("SELECT db_person_id, diff_types FROM compare_dismissed")}
+    except Exception:
+        return {}
 
 
 def _transfer_fields(g: dict, pz: dict, db, godes_id: str) -> list:
@@ -867,7 +958,8 @@ def _transfer_fields(g: dict, pz: dict, db, godes_id: str) -> list:
     bur_g = [" ".join(x for x in (r[0], r[1], f"({r[2]})" if r[2] else "") if x) for r in db.execute(
         "SELECT place, place_detail, date FROM burial WHERE person_id=?", (godes_id,))]
     ev_g = [" ".join(x for x in (r[0], r[1], r[2], f"({r[3]})" if r[3] else "") if x) for r in db.execute(
-        "SELECT type, description, place, date FROM events WHERE person_id=?", (godes_id,))]
+        "SELECT type, description, place, date FROM events WHERE person_id=?", (godes_id,))
+        if not _is_upd(r[0], r[1])]
     notes_g = [r[0] for r in db.execute("SELECT content FROM notes WHERE person_id=?", (godes_id,)) if r[0]]
 
     res_p = [" ".join(x for x in (r.get("address"), r.get("place"), f"({r['date']})" if r.get("date") else "") if x)
@@ -875,7 +967,7 @@ def _transfer_fields(g: dict, pz: dict, db, godes_id: str) -> list:
     bur_p = [" ".join(x for x in (b.get("place"), b.get("place_detail"), f"({b['date']})" if b.get("date") else "") if x)
              for b in pz.get("burial") or []]
     ev_p = [" ".join(x for x in (e.get("type"), e.get("description"), e.get("place"), f"({e['date']})" if e.get("date") else "") if x)
-            for e in pz.get("events") or [] if (e.get("tag") or "") not in ("_UPD",) and not str(e.get("description", "")).startswith("_UPD")]
+            for e in pz.get("events") or [] if not _is_upd(e.get("type"), e.get("description"))]
 
     spec = [
         ("given_name", "Nombre", g.get("given_name"), pz.get("given_name")),
@@ -911,12 +1003,13 @@ def _transfer_fields(g: dict, pz: dict, db, godes_id: str) -> list:
             same = not missing
         else:
             same = (not pv) or _norm_val(gv) == _norm_val(pv)
-        out.append({"key": key, "label": label, "godes": gv, "palaz": pv, "same": same})
+        out.append({"key": key, "label": label, "godes": gv, "palaz": pv, "same": same,
+                    "grave": (not same) and _is_grave(key, gv, pv)})
     return out
 
 
 @router.get("/transfer/{godes_id}")
-async def transfer_detail(godes_id: str):
+async def transfer_detail(godes_id: str, scope: str = ""):
     db = _db()
     godes_id = "@" + godes_id.strip("@") + "@"
     pm = db.execute("SELECT palaz_id, transferred_at FROM palazuelos_map WHERE godes_id=?", (godes_id,)).fetchone()
@@ -935,13 +1028,17 @@ async def transfer_detail(godes_id: str):
 
     # Navegación por la cola (con diferencias, pendientes). Si la persona actual
     # no está en la cola (ya hecha / sin diferencias), prev/next son los vecinos
-    # más cercanos por orden alfabético.
-    ids = _transfer_queue(db, data)
+    # más cercanos por orden alfabético. Desde el Comparador (scope=compare) la
+    # cola es su propia lista: si no, «Hecho y siguiente» saltaba a parejas que
+    # el Comparador no cuenta y su contador no bajaba.
+    ids = _compare_queue(db) if scope == "compare" else _transfer_queue(db, data)
     if godes_id in ids:
         pos = ids.index(godes_id)
         prev_id = ids[pos - 1] if pos > 0 else None
         next_id = ids[pos + 1] if pos < len(ids) - 1 else None
         pos_label = pos + 1
+    elif scope == "compare":
+        prev_id, next_id, pos_label = None, (ids[0] if ids else None), None
     else:
         all_ids = _transfer_list(db)
         here = all_ids.index(godes_id) if godes_id in all_ids else -1

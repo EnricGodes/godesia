@@ -1545,6 +1545,9 @@ const Transfer = (() => {
     let data = null;
     let onlyDiff = true;
     let winL = null, winR = null;
+    // 'compare' = abierta desde el Comparador: ◀ ▶ y «Hecho y siguiente» siguen
+    // su lista (el contador cuadra con «N con diferencias»). '' = cola de la Cabina.
+    let scope = '';
 
     function _panel() {
         let el = document.getElementById('transfer-panel');
@@ -1570,10 +1573,11 @@ const Transfer = (() => {
     }
     let blocked = false;
 
-    async function open(godesId, withWindows = true) {
+    async function open(godesId, withWindows = true, fromScope) {
         if (!godesId) return;
+        if (fromScope !== undefined) scope = fromScope;
         try {
-            data = await apiFetch(`/api/admin/palazuelos/transfer/${encodeURIComponent(godesId)}`);
+            data = await apiFetch(`/api/admin/palazuelos/transfer/${encodeURIComponent(godesId)}${scope ? '?scope=' + scope : ''}`);
         } catch (e) { alert(e.message); return; }
         if (withWindows) openWindows();
         render();
@@ -1623,7 +1627,7 @@ const Transfer = (() => {
                     <a class="btn btn-secondary btn-sm" href="${esc(d.palaz.mh_url)}" target="mh_palaz">MH Palazuelos</a>
                     <a class="btn btn-secondary btn-sm" href="${esc(d.godes.mh_url)}" target="mh_godes">MH Godes</a>
                     <button class="btn btn-secondary btn-sm" title="Anterior con diferencias pendiente" ${nav.prev_godes_id ? '' : 'disabled'} onclick="Transfer.go('${esc(nav.prev_godes_id || '')}')">◀</button>
-                    <span class="tp-pos" title="Pendientes con diferencias">${nav.pos ? nav.pos + ' / ' : ''}${nav.total} pend.</span>
+                    <span class="tp-pos" title="${scope === 'compare' ? 'Pendientes de la lista del Comparador (con pareja en Palazuelos)' : 'Pendientes con diferencias'}">${nav.pos ? nav.pos + ' / ' : ''}${nav.total} pend.</span>
                     <button class="btn btn-secondary btn-sm" title="Siguiente con diferencias pendiente" ${nav.next_godes_id ? '' : 'disabled'} onclick="Transfer.go('${esc(nav.next_godes_id || '')}')">▶</button>
                     ${d.transferred_at
                         ? `<button class="btn btn-secondary btn-sm" onclick="Transfer.undo()">deshacer ✓</button>`
@@ -1636,8 +1640,8 @@ const Transfer = (() => {
                 <table class="tp-table">
                     <thead><tr><th style="width:150px;">Campo</th><th>Palazuelos (origen)</th><th>Godes (destino)</th></tr></thead>
                     <tbody>
-                        ${rows.map(f => `<tr class="${f.same ? 'tp-same' : 'tp-diff'}">
-                            <td class="tp-label">${esc(f.label)}</td>
+                        ${rows.map(f => `<tr class="${f.same ? 'tp-same' : 'tp-diff'}${f.grave ? ' tp-grave' : ''}">
+                            <td class="tp-label"${f.grave ? ' title="Contradicción grave: revisa que la pareja sea la misma persona antes de copiar"' : ''}>${f.grave ? '⚠ ' : ''}${esc(f.label)}</td>
                             <td>${_cell(f.palaz)}</td>
                             <td>${_cell(f.godes)}</td>
                         </tr>`).join('') || '<tr><td colspan="3" class="tp-empty" style="text-align:center;padding:1rem;">Sin diferencias</td></tr>'}
@@ -2031,7 +2035,8 @@ const Comparador = {
                 dates: '📅 Fechas', places: '📍 Lugares', notes: '📝 Notas',
                 photos: '📸 Fotos', name: '💬 Nombre', nomatch: '❓ No encontrado',
                 occupations: '💼 Oficios', residences: '🏠 Residencias',
-                events: '🗓 Eventos',
+                events: '🗓 Eventos', sex: '⚥ Sexo',
+                conflict: '⚠ Contradicción',
                 possible_match: '🔍 Posible',
             };
 
@@ -2051,7 +2056,7 @@ const Comparador = {
                 ${d.rows.map(row => {
                     const types  = (row.diff_types || '').split(',').filter(Boolean);
                     const badges = types.map(t =>
-                        `<span class="badge ${t === 'nomatch' ? 'badge-error' : 'badge-pending'}"
+                        `<span class="badge ${t === 'nomatch' || t === 'conflict' ? 'badge-error' : 'badge-pending'}"
                                style="margin:1px 2px;font-size:.72rem;">${esc(ICONS[t] || t)}</span>`
                     ).join('');
                     const scoreColor = row.match_score >= 90 ? '#065f46'
@@ -2083,7 +2088,7 @@ const Comparador = {
                                 onclick="Comparador.toggleDetail(${row.id}, this)">▸ Ver</button>
                         </td>
                         <td style="white-space:nowrap;">
-                            <button class="btn btn-secondary btn-sm" title="Cabina de traspaso (MyHeritage lado a lado)" onclick="Transfer.open('${esc(row.db_person_id || '')}')">⇄</button>
+                            <button class="btn btn-secondary btn-sm" title="Cabina de traspaso (MyHeritage lado a lado)" onclick="Transfer.open('${esc(row.db_person_id || '')}', true, 'compare')">⇄</button>
                             <button class="btn btn-sm" style="background:#f1eee5;color:#727971;border:1px solid #c2c8bf;" title="Descartar (no reaparece si no hay cambios)" onclick="Comparador.dismissRow(${row.id})">✕</button>
                         </td>
                     </tr>
@@ -2632,7 +2637,7 @@ const Palazuelos = (() => {
                 ${(cat === 'confirmed')
                     ? `<button class="btn btn-secondary btn-sm" title="Cabina de traspaso: abrir ambos árboles en MyHeritage y copiar campos"
                                style="${e.transferred_at ? 'background:#e8f5e9;border-color:#a5d6a7;' : ''}"
-                               onclick="Transfer.open('${esc(e.godes_id)}')">⇄${e.transferred_at ? ' ✓' : ''}</button> `
+                               onclick="Transfer.open('${esc(e.godes_id)}', true, '')">⇄${e.transferred_at ? ' ✓' : ''}</button> `
                     : ''}
                 ${confirmBtn}
                 <button class="btn btn-secondary btn-sm" title="Rechazar" onclick="Palazuelos.rejectMatch('${esc(e.godes_id)}')">✕</button>
