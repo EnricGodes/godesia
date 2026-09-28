@@ -498,6 +498,8 @@ def _run_clip_scan(db_path: Path, photos_dir: Path, limit: int, rescan_pending: 
 
     conn = _sqlite3.connect(str(db_path))
     conn.row_factory = _sqlite3.Row
+    from database import attach_decisions  # noqa: PLC0415
+    attach_decisions(conn, db_path)  # photo_classifications vive en decisions.db
 
     try:
         origin_filter = "doc_origin IS NULL OR doc_origin = 'clip_pending'" if rescan_pending else "doc_origin IS NULL"
