@@ -152,6 +152,14 @@ Los dos árboles viven en el mismo sitio MyHeritage (`380341641`, "Arbol familia
 - `sync_catalog.py` ignora las parejas de `palazuelos_map` cuya persona Godes ya no está en el GEDCOM (si no, se llevaban las fotos de Palazuelos). El importador NO borra personas que desaparecen del GEDCOM: hay que borrarlas a mano tras comprobar que no tienen familia ni nichos.
 - **`palazuelos.ged` NO va al repo** (20 MB de datos personales de 20k personas y el repo es público). En producción vive en el volumen: `data/photos/_gedcom/palazuelos.ged`, subido desde admin → Sync Palazuelos → «Subir palazuelos.ged» (`POST /api/admin/palazuelos/upload-ged`). `_default_ged_path()` usa la copia del volumen si es más nueva que `docs/palazuelos.ged` (local). Todo `/photos/_*` devuelve 403.
 
+## Crecer el árbol (expansión desde Palazuelos)
+
+Pestaña **Crecer el árbol** del admin (`GET /api/admin/palazuelos/expansion?person_id=&distance=`, objeto `Expansion` en `admin.js`): responde "por dónde crecer" recorriendo **anillos de parentesco sobre el grafo de Palazuelos** (BFS; distancia 1 = padres, hermanos, cónyuges e hijos; cada anillo siguiente añade suegros, cuñados, nietos…) alrededor de una persona de Godes (por defecto Artur Godes Caballeria `@I4@`).
+
+- Cada persona del anillo sale como **En Godes** (con los huecos de datos básicos: nacimiento fecha/lugar, matrimonio fecha, defunción fecha/lugar — en ámbar los que **Palazuelos puede rellenar**, en gris los que faltan en los dos árboles) o **Falta** (con el **ancla**: el pariente que ya está en Godes desde cuya ficha de MyHeritage se puede añadir, y en qué calidad: "añadir como madre de X").
+- Acciones: **⇄** abre la Cabina de traspaso para las que ya están; **＋ Añadir** abre las dos ventanas de MyHeritage (Palazuelos con la persona nueva, Godes con el ancla).
+- Solo recorre el anillo de Palazuelos (decisión explícita): las personas que solo existen en Godes no se listan.
+
 ## QA automático del QueryRouter (banco de preguntas)
 
 El banco de pruebas (`data/test_bank.json`, gestionado por `backend/test_bank.py`) tiene un verificador automático que sustituye la revisión manual de la pestaña Tests del admin:

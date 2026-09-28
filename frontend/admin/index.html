@@ -62,6 +62,9 @@
                 <span class="nav-icon">⇅</span> Sync Palazuelos
                 <span class="nav-badge" id="badge-palazuelos"></span>
             </a>
+            <a data-section="expansion">
+                <span class="nav-icon">◈</span> Crecer el árbol
+            </a>
             <a data-section="dedup">
                 <span class="nav-icon">⊟</span> Dedup fotos
                 <span class="nav-badge" id="badge-dedup"></span>
@@ -692,6 +695,40 @@
                         onclick="DocClassifier.loadPendingQueue(true)">Cargar más…</button>
             </div>
 
+        </section>
+
+        <!-- ── CRECER EL ÁRBOL (expansión desde Palazuelos) ── -->
+        <section id="s-expansion" class="admin-section">
+            <h1 class="section-title">Crecer el árbol</h1>
+            <p class="section-subtitle">Anillos de parentesco alrededor de una persona en el árbol Palazuelos:
+                quién ya está en Godes, a quién le faltan datos básicos y quién falta por añadir.</p>
+
+            <div class="info-card">
+                <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
+                    <div style="position:relative;min-width:260px;">
+                        <label style="display:block;font-size:.72rem;text-transform:uppercase;color:#78583e;font-weight:700;margin-bottom:.3rem;">Persona central</label>
+                        <input type="text" id="exp-person" placeholder="Buscar en Godes…" autocomplete="off"
+                               style="width:100%;padding:.45rem .6rem;border:1px solid #c2c8bf;border-radius:6px;font-size:.85rem;"
+                               oninput="Expansion.onTypeahead(this)" onblur="Expansion.hideDropdown()">
+                        <div id="exp-dropdown" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #c2c8bf;border-radius:6px;z-index:120;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1);"></div>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:.72rem;text-transform:uppercase;color:#78583e;font-weight:700;margin-bottom:.3rem;">Distancia</label>
+                        <div id="exp-dist" class="toolbar" style="gap:.3rem;"></div>
+                    </div>
+                    <div style="flex:1;min-width:220px;font-size:.78rem;color:#727971;" id="exp-center-info"></div>
+                </div>
+                <div id="exp-rings" style="margin-top:1rem;"></div>
+            </div>
+
+            <div class="toolbar" style="margin-top:1.25rem;">
+                <button class="btn btn-secondary btn-sm" id="exp-f-all" onclick="Expansion.setFilter('all')">Todos</button>
+                <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('missing')">Faltan en Godes</button>
+                <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('gaps')">Con huecos</button>
+                <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('actionable')">Huecos que Palazuelos rellena</button>
+            </div>
+
+            <div id="exp-list" style="margin-top:.75rem;"></div>
         </section>
 
         <!-- ── SYNC PALAZUELOS ── -->

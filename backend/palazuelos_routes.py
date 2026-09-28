@@ -1116,6 +1116,203 @@ async def transfer_undo(godes_id: str):
     return {"ok": True}
 
 
+# ---------------------------------------------------------------------------
+# Expansión: por dónde crecer el árbol Godes usando Palazuelos.
+# Anillos de parentesco (BFS sobre el grafo de Palazuelos) alrededor de una
+# persona: distancia 1 = padres, hermanos, cónyuges e hijos; cada anillo
+# siguiente añade los parientes de esos (suegros, cuñados, nietos…).
+# ---------------------------------------------------------------------------
+
+MAX_EXPANSION_DISTANCE = 8
+
+
+def _palaz_neighbours(pid: str, data: dict) -> dict:
+    """{vecino: relación del vecino RESPECTO a pid} en el árbol Palazuelos."""
+    I, F = data["individuals"], data["families"]
+    ind = I.get(pid) or {}
+    out = {}
+    fc = ind.get("family_child")
+    if fc and fc in F:
+        f = F[fc]
+        for key, rel in (("husband", "padre"), ("wife", "madre")):
+            if f.get(key):
+                out.setdefault(f[key], rel)
+        for ch in f.get("children") or []:
+            if ch != pid:
+                out.setdefault(ch, "hermano/a")
+    for fs in ind.get("family_spouse") or []:
+        f = F.get(fs) or {}
+        for key in ("husband", "wife"):
+            if f.get(key) and f[key] != pid:
+                out.setdefault(f[key], "cónyuge")
+        for ch in f.get("children") or []:
+            if ch != pid:
+                out.setdefault(ch, "hijo/a")
+    out.pop(pid, None)
+    return out
+
+
+def _inverse_rel(rel: str, sex: str) -> str:
+    """Relación inversa, en el género de la persona nueva: si el ancla es su
+    hijo, ella es su 'madre' (F) o 'padre' (M)."""
+    m = sex == "M"
+    f = sex == "F"
+    if rel == "hijo/a":
+        return "padre" if m else "madre" if f else "progenitor/a"
+    if rel in ("padre", "madre"):
+        return "hijo" if m else "hija" if f else "hijo/a"
+    if rel == "hermano/a":
+        return "hermano" if m else "hermana" if f else "hermano/a"
+    if rel == "cónyuge":
+        return "esposo" if m else "esposa" if f else "cónyuge"
+    return rel
+
+
+def _palaz_marriage_date(pid: str, data: dict):
+    for fs in (data["individuals"].get(pid) or {}).get("family_spouse") or []:
+        d = ((data["families"].get(fs) or {}).get("marriage") or {}).get("date")
+        if d:
+            return d
+    return None
+
+
+def _has_spouse(pid: str, data: dict) -> bool:
+    for fs in (data["individuals"].get(pid) or {}).get("family_spouse") or []:
+        f = data["families"].get(fs) or {}
+        if f.get("husband") and f.get("wife"):
+            return True
+    return False
+
+
+def _godes_marriage_date(db, godes_id: str):
+    r = db.execute(
+        "SELECT date FROM marriages WHERE (person1_id=? OR person2_id=?) AND date IS NOT NULL AND date!='' LIMIT 1",
+        (godes_id, godes_id)).fetchone()
+    return r[0] if r else None
+
+
+def _basic_gaps(db, godes_id: str, palaz_id: str, data: dict) -> list:
+    """Huecos en los datos básicos de la ficha Godes.
+    status 'palaz' = Palazuelos tiene el dato (se puede copiar ya);
+    status 'none'  = falta en los dos árboles (hay que investigar fuera)."""
+    g = db.execute("SELECT * FROM people WHERE id=?", (godes_id,)).fetchone()
+    if not g:
+        return []
+    g = dict(g)
+    pz = data["individuals"].get(palaz_id) or {}
+    checks = [
+        ("birth_date", "Fecha nac.", g.get("birth_date"), (pz.get("birth") or {}).get("date")),
+        ("birth_place", "Lugar nac.", g.get("birth_place"), (pz.get("birth") or {}).get("place")),
+    ]
+    if _has_spouse(palaz_id, data) or _godes_marriage_date(db, godes_id):
+        checks.append(("marriage_date", "Fecha matr.",
+                       _godes_marriage_date(db, godes_id), _palaz_marriage_date(palaz_id, data)))
+    # Sin datos de defunción y marcada como viva: no es un hueco, es que vive.
+    if not g.get("is_alive") or (pz.get("death") or {}).get("date"):
+        checks += [
+            ("death_date", "Fecha def.", g.get("death_date"), (pz.get("death") or {}).get("date")),
+            ("death_place", "Lugar def.", g.get("death_place"), (pz.get("death") or {}).get("place")),
+        ]
+    gaps = []
+    for key, label, gv, pv in checks:
+        if str(gv or "").strip():
+            continue
+        gaps.append({"key": key, "label": label,
+                     "status": "palaz" if str(pv or "").strip() else "none",
+                     "value": (pv or "") if str(pv or "").strip() else ""})
+    return gaps
+
+
+@router.get("/expansion")
+async def expansion(person_id: str = "@I4@", distance: int = 1):
+    db = _db()
+    data = _palaz_data()
+    godes_id = "@" + person_id.strip("@") + "@"
+    distance = max(1, min(int(distance), MAX_EXPANSION_DISTANCE))
+
+    center = db.execute("SELECT id, name FROM people WHERE id=?", (godes_id,)).fetchone()
+    if not center:
+        raise HTTPException(404, "Persona Godes no trobada")
+    pm = db.execute("SELECT palaz_id FROM palazuelos_map WHERE godes_id=?", (godes_id,)).fetchone()
+    if not pm or not pm["palaz_id"]:
+        raise HTTPException(404, "Aquesta persona no té parella a Palazuelos: no es pot expandir")
+    start = pm["palaz_id"]
+
+    # BFS sobre Palazuelos guardando por quién se ha llegado a cada persona.
+    from collections import deque
+    dist = {start: 0}
+    via = {}
+    q = deque([start])
+    while q:
+        x = q.popleft()
+        if dist[x] >= MAX_EXPANSION_DISTANCE:
+            continue
+        for y, rel in _palaz_neighbours(x, data).items():
+            if y not in dist:
+                dist[y] = dist[x] + 1
+                via[y] = (x, rel)
+                q.append(y)
+
+    # Mapa Palazuelos → Godes
+    pmap = {r["palaz_id"]: (r["godes_id"], r["godes_name"]) for r in db.execute("""
+        SELECT pm.palaz_id, pm.godes_id, p.name AS godes_name
+        FROM palazuelos_map pm JOIN people p ON p.id = pm.godes_id
+        WHERE pm.palaz_id IS NOT NULL AND pm.match_type != 'rejected'""").fetchall()}
+
+    rings = []
+    for d in range(1, MAX_EXPANSION_DISTANCE + 1):
+        ids = [k for k, v in dist.items() if v == d]
+        if not ids:
+            break
+        rings.append({"distance": d, "total": len(ids),
+                      "in_godes": sum(1 for i in ids if i in pmap),
+                      "missing": sum(1 for i in ids if i not in pmap)})
+
+    people = []
+    for pid in sorted((k for k, v in dist.items() if v == distance),
+                      key=lambda x: (data["individuals"].get(x) or {}).get("name") or ""):
+        pz = data["individuals"].get(pid) or {}
+        row = {
+            "palaz_id": pid,
+            "palaz_name": pz.get("name") or pid,
+            "sex": pz.get("sex") or "",
+            "birth_year": _ged_year((pz.get("birth") or {}).get("date") or ""),
+            "death_year": _ged_year((pz.get("death") or {}).get("date") or ""),
+            "relation": (via.get(pid) or ("", ""))[1],
+            # Por quién se ha llegado: el vínculo es "padre DE esta persona".
+            "via_name": (data["individuals"].get((via.get(pid) or ("", ""))[0]) or {}).get("name") or "",
+            "mh_palaz_url": _mh_person_url("mh_tree_id_palazuelos", pid),
+        }
+        if pid in pmap:
+            gid, gname = pmap[pid]
+            row.update({"in_godes": True, "godes_id": gid, "godes_name": gname,
+                        "gaps": _basic_gaps(db, gid, pid, data),
+                        "mh_godes_url": _mh_person_url("mh_tree_id_godes", gid)})
+        else:
+            # Ancla: un pariente de Palazuelos que YA esté en Godes, desde cuya
+            # ficha se puede añadir esta persona en MyHeritage.
+            anchor = None
+            neigh = _palaz_neighbours(pid, data)
+            for npid, rel_of_n in sorted(neigh.items(), key=lambda kv: dist.get(kv[0], 99)):
+                if npid in pmap:
+                    gid, gname = pmap[npid]
+                    anchor = {"palaz_id": npid, "godes_id": gid, "godes_name": gname,
+                              # relación de la persona NUEVA respecto al ancla
+                              "relation": _inverse_rel(rel_of_n, pz.get("sex") or ""),
+                              "mh_godes_url": _mh_person_url("mh_tree_id_godes", gid)}
+                    break
+            row.update({"in_godes": False, "godes_id": None, "godes_name": None,
+                        "gaps": [], "anchor": anchor})
+        people.append(row)
+
+    return {
+        "center": {"godes_id": godes_id, "godes_name": center["name"],
+                   "palaz_id": start,
+                   "palaz_name": (data["individuals"].get(start) or {}).get("name") or start},
+        "distance": distance, "rings": rings, "people": people,
+    }
+
+
 @router.get("/thumb")
 async def photo_thumb(url: str):
     """Proxy a Palazuelos CDN image through the backend (CDN requires auth the browser lacks)."""

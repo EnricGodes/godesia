@@ -56,7 +56,7 @@ document.addEventListener('keydown', e => {
 // Navigation
 // ---------------------------------------------------------------------------
 
-const sections = ['status', 'import', 'suggestions', 'users', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'comparador', 'classifier', 'palazuelos', 'dedup', 'cemeteries', 'config'];
+const sections = ['status', 'import', 'suggestions', 'users', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'comparador', 'classifier', 'palazuelos', 'expansion', 'dedup', 'cemeteries', 'config'];
 const initialized = {};
 
 function showSection(name) {
@@ -74,6 +74,7 @@ function showSection(name) {
                        minibios: Minibios, tests: Tests,
                        config: Config, comparador: Comparador,
                        classifier: DocClassifier, palazuelos: Palazuelos,
+                       expansion: Expansion,
                        dedup: Dedup, cemeteries: Cemeteries }[name];
         if (ctrl?.init) ctrl.init();
         else if (ctrl?.onActivate) ctrl.onActivate();
@@ -1535,6 +1536,166 @@ Status.init();
         document.getElementById('badge-queries').textContent = queries.length || '';
         document.getElementById('badge-geo').textContent = geo.length || '';
     } catch {}
+})();
+
+// ---------------------------------------------------------------------------
+// Crecer el árbol: anillos de parentesco en Palazuelos alrededor de una persona
+// ---------------------------------------------------------------------------
+
+const Expansion = (() => {
+    const DEFAULT_PERSON = '@I4@';       // Artur Godes Caballeria
+    let personId = DEFAULT_PERSON;
+    let distance = 1;
+    let data = null;
+    let filter = 'all';
+    let searchTimer = null;
+
+    function init() { load(); }
+
+    async function load() {
+        const list = document.getElementById('exp-list');
+        list.innerHTML = '<div class="empty-state">Calculando anillos…</div>';
+        try {
+            data = await apiFetch(`/api/admin/palazuelos/expansion?person_id=${encodeURIComponent(personId)}&distance=${distance}`);
+        } catch (e) {
+            list.innerHTML = `<div class="empty-state">${esc(e.message)}</div>`;
+            return;
+        }
+        document.getElementById('exp-person').value = data.center.godes_name;
+        document.getElementById('exp-center-info').innerHTML =
+            `En Palazuelos: <strong>${esc(data.center.palaz_name)}</strong> <small style="color:#9e9b94;">${esc(data.center.palaz_id)}</small>`;
+        renderRings();
+        renderDistances();
+        setFilter(filter);
+    }
+
+    function renderDistances() {
+        document.getElementById('exp-dist').innerHTML = data.rings.map(r =>
+            `<button class="btn btn-sm ${r.distance === distance ? '' : 'btn-secondary'}"
+                     style="${r.distance === distance ? 'background:#2d4b33;color:#fff;' : ''}"
+                     onclick="Expansion.setDistance(${r.distance})">${r.distance}</button>`).join('');
+    }
+
+    function renderRings() {
+        const max = Math.max(...data.rings.map(r => r.total));
+        document.getElementById('exp-rings').innerHTML = `
+            <table class="admin-table" style="font-size:.78rem;">
+                <thead><tr><th style="width:70px;">Distancia</th><th style="width:70px;text-align:right;">Personas</th>
+                    <th style="width:80px;text-align:right;">En Godes</th><th style="width:80px;text-align:right;">Faltan</th><th></th></tr></thead>
+                <tbody>${data.rings.map(r => `
+                    <tr style="${r.distance === distance ? 'background:#f1eee5;font-weight:600;' : 'cursor:pointer;'}" onclick="Expansion.setDistance(${r.distance})">
+                        <td>${r.distance}</td>
+                        <td style="text-align:right;">${r.total}</td>
+                        <td style="text-align:right;color:#2d4b33;">${r.in_godes}</td>
+                        <td style="text-align:right;color:${r.missing ? '#d32f2f' : '#c2c8bf'};">${r.missing || '—'}</td>
+                        <td style="padding-left:.75rem;">
+                            <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;background:#eee;width:${Math.round(100 * r.total / max)}%;min-width:14px;">
+                                <div style="background:#2d4b33;width:${Math.round(100 * r.in_godes / r.total)}%;"></div>
+                                <div style="background:#e57373;flex:1;"></div>
+                            </div>
+                        </td>
+                    </tr>`).join('')}</tbody>
+            </table>`;
+    }
+
+    function _matches(p) {
+        if (filter === 'missing') return !p.in_godes;
+        if (filter === 'gaps') return p.in_godes && p.gaps.length;
+        if (filter === 'actionable') return p.in_godes && p.gaps.some(g => g.status === 'palaz');
+        return true;
+    }
+
+    function renderList() {
+        const rows = data.people.filter(_matches);
+        const el = document.getElementById('exp-list');
+        if (!rows.length) {
+            el.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div>Nada que mostrar con este filtro.</div>';
+            return;
+        }
+        el.innerHTML = `<table class="admin-table">
+            <thead><tr>
+                <th>Persona (Palazuelos)</th><th style="width:70px;">Años</th><th style="width:150px;">Vínculo</th>
+                <th style="width:110px;">Estado</th><th>Datos básicos que faltan</th><th style="width:150px;"></th>
+            </tr></thead>
+            <tbody>${rows.map((p, i) => {
+                const years = [p.birth_year, p.death_year].filter(Boolean).join('–') || '—';
+                const gaps = p.in_godes
+                    ? (p.gaps.length
+                        ? p.gaps.map(g => `<span class="badge" style="margin:1px 2px;font-size:.7rem;background:${g.status === 'palaz' ? '#e65100' : '#9e9b94'};"
+                             title="${g.status === 'palaz' ? 'Palazuelos tiene este dato: ' + esc(g.value) : 'Falta en los dos árboles'}">${esc(g.label)}</span>`).join('')
+                        : '<span style="color:#2d4b33;">✓ completo</span>')
+                    : (p.anchor
+                        ? `<span style="color:#727971;">añadir como <strong>${esc(p.anchor.relation)}</strong> de ${esc(p.anchor.godes_name)}</span>`
+                        : '<span style="color:#d32f2f;">sin pariente en Godes desde el que añadirla</span>');
+                return `<tr>
+                    <td><strong>${esc(p.palaz_name)}</strong><br><small style="color:#9e9b94;">${esc(p.palaz_id)}</small></td>
+                    <td style="font-size:.8rem;color:#727971;">${esc(years)}</td>
+                    <td style="font-size:.8rem;color:#727971;">${p.relation ? esc(p.relation) + (p.via_name ? ` de<br>${esc(p.via_name)}` : '') : '—'}</td>
+                    <td>${p.in_godes
+                        ? '<span class="badge" style="background:#2d4b33;">En Godes</span>'
+                        : '<span class="badge" style="background:#d32f2f;">Falta</span>'}</td>
+                    <td style="font-size:.8rem;">${gaps}</td>
+                    <td style="white-space:nowrap;text-align:right;">
+                        ${p.in_godes
+                            ? `<button class="btn btn-secondary btn-sm" title="Cabina de traspaso (campos lado a lado)" onclick="Transfer.open('${esc(p.godes_id)}')">⇄</button>`
+                            : `<button class="btn btn-secondary btn-sm" title="Abrir Palazuelos y el pariente ancla en Godes" onclick="Expansion.openAdd(${i})">＋ Añadir</button>`}
+                    </td>
+                </tr>`;
+            }).join('')}</tbody>
+        </table>`;
+        _rows = rows;
+    }
+
+    let _rows = [];
+
+    // Mismas ventanas con nombre que la Cabina: Palazuelos a la izquierda con la
+    // persona nueva, Godes a la derecha con el pariente desde el que se añade.
+    function openAdd(idx) {
+        const p = _rows[idx];
+        if (!p) return;
+        const W = Math.floor(screen.availWidth / 2), H = screen.availHeight;
+        const feat = (left) => `left=${left},top=0,width=${W},height=${H},menubar=no,toolbar=no,location=yes`;
+        window.open(p.mh_palaz_url, 'mh_palaz', feat(0));
+        if (p.anchor) window.open(p.anchor.mh_godes_url, 'mh_godes', feat(W));
+        window.focus();
+    }
+
+    function setDistance(d) { distance = d; load(); }
+
+    function setFilter(f) {
+        filter = f;
+        document.querySelectorAll('#s-expansion .toolbar button[onclick^="Expansion.setFilter"]').forEach(b => {
+            const on = b.getAttribute('onclick').includes(`'${f}'`);
+            b.className = on ? 'btn btn-sm' : 'btn btn-secondary btn-sm';
+            b.style.cssText = on ? 'background:#2d4b33;color:#fff;' : '';
+        });
+        renderList();
+    }
+
+    function onTypeahead(input) {
+        clearTimeout(searchTimer);
+        const q = input.value.trim();
+        if (q.length < 2) { hideDropdown(); return; }
+        searchTimer = setTimeout(async () => {
+            try {
+                const r = await apiFetch(`/api/search?q=${encodeURIComponent(q)}&limit=8`);
+                const dd = document.getElementById('exp-dropdown');
+                dd.innerHTML = (r.results || []).map(p => `
+                    <div style="padding:.4rem .6rem;cursor:pointer;font-size:.8rem;border-bottom:1px solid #f1eee5;"
+                         onmousedown="Expansion.select('${esc(p.id)}')">
+                        ${esc(p.name)} <small style="color:#9e9b94;">${[p.birth_year, p.death_year].filter(Boolean).join('–')}</small>
+                    </div>`).join('') || '<div style="padding:.5rem;color:#9e9b94;font-size:.8rem;">Sin resultados</div>';
+                dd.style.display = 'block';
+            } catch (_) {}
+        }, 250);
+    }
+
+    function select(id) { personId = id; hideDropdown(); load(); }
+    function hideDropdown() { setTimeout(() => { const d = document.getElementById('exp-dropdown'); if (d) d.style.display = 'none'; }, 120); }
+
+    function onActivate() { if (!data) load(); }
+
+    return { init, load, setDistance, setFilter, onTypeahead, select, hideDropdown, openAdd, onActivate };
 })();
 
 // ---------------------------------------------------------------------------
