@@ -2483,8 +2483,10 @@ const DocClassifier = {
         const pct = Math.round((item.doc_confidence || 0) * 100);
         const barColor = pct >= 75 ? '#17341e' : pct >= 35 ? '#b45309' : '#6b7280';
         const guessed = _guessDocType(item.title);
+        // Sin propuesta (ni tipo previo ni pista en el título) → 'document' por defecto
+        const selectedType = item.doc_type || guessed || 'document';
         const typeOpts = DOC_TYPE_OPTIONS.map(t =>
-            `<option value="${t}" ${t === guessed ? 'selected' : ''}>${t}</option>`
+            `<option value="${t}" ${t === selectedType ? 'selected' : ''}>${t}</option>`
         ).join('');
         const guessHint = guessed
             ? `<div style="font-size:.7rem;color:#065f46;margin-bottom:.2rem;">🤖 ${guessed}</div>`
