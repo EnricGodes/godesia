@@ -722,10 +722,11 @@
             </div>
 
             <div class="toolbar" style="margin-top:1.25rem;">
-                <button class="btn btn-secondary btn-sm" id="exp-f-all" onclick="Expansion.setFilter('all')">Todos</button>
+                <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('pending')">Pendientes</button>
                 <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('missing')">Faltan en Godes</button>
                 <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('gaps')">Con huecos</button>
                 <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('actionable')">Huecos que Palazuelos rellena</button>
+                <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('everything')">Todos (incl. completos)</button>
             </div>
 
             <div id="exp-list" style="margin-top:.75rem;"></div>

@@ -1547,7 +1547,7 @@ const Expansion = (() => {
     let personId = DEFAULT_PERSON;
     let distance = 1;
     let data = null;
-    let filter = 'all';
+    let filter = 'pending';
     let searchTimer = null;
 
     function init() { load(); }
@@ -1602,17 +1602,23 @@ const Expansion = (() => {
         if (filter === 'missing') return !p.in_godes;
         if (filter === 'gaps') return p.in_godes && p.gaps.length;
         if (filter === 'actionable') return p.in_godes && p.gaps.some(g => g.status === 'palaz');
-        return true;
+        if (filter === 'everything') return true;
+        // 'pending' (por defecto): las fichas ya completas no aportan trabajo.
+        return !p.in_godes || p.gaps.length > 0;
     }
 
     function renderList() {
         const rows = data.people.filter(_matches);
+        const done = data.people.filter(p => p.in_godes && !p.gaps.length).length;
+        const note = (filter !== 'everything' && done)
+            ? `<div style="font-size:.78rem;color:#727971;margin-bottom:.5rem;">${done} ficha${done > 1 ? 's' : ''} completa${done > 1 ? 's' : ''} ocultada${done > 1 ? 's' : ''} · <a href="#" onclick="Expansion.setFilter('everything');return false;" style="color:#2d4b33;">ver todas</a></div>`
+            : '';
         const el = document.getElementById('exp-list');
         if (!rows.length) {
-            el.innerHTML = '<div class="empty-state"><div class="empty-icon">✓</div>Nada que mostrar con este filtro.</div>';
+            el.innerHTML = note + '<div class="empty-state"><div class="empty-icon">✓</div>Nada pendiente en este anillo.</div>';
             return;
         }
-        el.innerHTML = `<table class="admin-table">
+        el.innerHTML = note + `<table class="admin-table">
             <thead><tr>
                 <th>Persona (Palazuelos)</th><th style="width:70px;">Años</th><th style="width:150px;">Vínculo</th>
                 <th style="width:110px;">Estado</th><th>Datos básicos que faltan</th><th style="width:150px;"></th>
