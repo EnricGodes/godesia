@@ -213,11 +213,6 @@ CREATE TABLE IF NOT EXISTS suggestions (
     created_at TEXT DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS settings (
-    key   TEXT PRIMARY KEY,
-    value TEXT
-);
-
 CREATE INDEX IF NOT EXISTS idx_people_birth_md ON people(birth_month, birth_day);
 CREATE INDEX IF NOT EXISTS idx_people_name ON people(name COLLATE NOCASE);
 CREATE INDEX IF NOT EXISTS idx_people_surname ON people(surname COLLATE NOCASE);
@@ -257,78 +252,6 @@ CREATE TABLE IF NOT EXISTS palazuelos_imports (
     downloaded_at TEXT DEFAULT (datetime('now')),
     status TEXT DEFAULT 'downloaded'
 );
-
--- Cemetery/niche data is entered manually in the admin panel and must
--- survive GEDCOM re-imports: sync_catalog.py only touches tables it names.
-CREATE TABLE IF NOT EXISTS cemeteries (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    city TEXT,
-    lat REAL,
-    lng REAL,
-    description TEXT,
-    created_at TEXT DEFAULT (datetime('now')),
-    updated_at TEXT
-);
-
-CREATE TABLE IF NOT EXISTS niches (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cemetery_id INTEGER NOT NULL,
-    name TEXT NOT NULL,
-    title TEXT,
-    lat REAL,
-    lng REAL,
-    photo_file TEXT,
-    record_file TEXT,
-    notes TEXT,
-    fs_url TEXT,
-    created_at TEXT DEFAULT (datetime('now')),
-    updated_at TEXT
-);
-
-CREATE TABLE IF NOT EXISTS niche_photos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    niche_id INTEGER NOT NULL,
-    filename TEXT NOT NULL,
-    kind TEXT DEFAULT 'photo',
-    created_at TEXT DEFAULT (datetime('now'))
-);
-
-CREATE TABLE IF NOT EXISTS niche_people (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    niche_id INTEGER NOT NULL,
-    person_id TEXT NOT NULL,
-    assigned_at TEXT DEFAULT (datetime('now')),
-    UNIQUE(niche_id, person_id)
-);
-
--- Full burial-register rows from archival sources (CementirisBCN.xlsx):
--- every person buried in the niche, whether or not they exist in `people`.
-CREATE TABLE IF NOT EXISTS niche_records (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    niche_id INTEGER NOT NULL,
-    person_id TEXT,
-    name TEXT NOT NULL,
-    burial_date TEXT,
-    death_day TEXT,
-    civil_status TEXT,
-    spouse TEXT,
-    age TEXT,
-    origin TEXT,
-    profession TEXT,
-    address TEXT,
-    parish TEXT,
-    court TEXT,
-    titular TEXT,
-    notes TEXT,
-    fs_url TEXT,
-    created_at TEXT DEFAULT (datetime('now'))
-);
-
-CREATE INDEX IF NOT EXISTS idx_niches_cemetery ON niches(cemetery_id);
-CREATE INDEX IF NOT EXISTS idx_niche_people_person ON niche_people(person_id);
-CREATE INDEX IF NOT EXISTS idx_niche_photos_niche ON niche_photos(niche_id);
-CREATE INDEX IF NOT EXISTS idx_niche_records_niche ON niche_records(niche_id);
 """
 
 
@@ -470,7 +393,7 @@ def convert_date_to_spanish(date_str):
 # Railway sustituye data/godesia.db por la copia del repo en cada deploy, así
 # que las decisiones tomadas en producción (emparejamientos manuales Palazuelos,
 # marcas "traspasado", descartes del Comparador, clasificaciones del
-# clasificador de fotos) viven en una BD APARTE en el
+# clasificador de fotos, settings, cementerios y nichos) viven en una BD APARTE en el
 # volumen persistente, ADJUNTA (ATTACH) a la conexión principal como `dec`.
 # Las consultas siguen usando el nombre sin cualificar: SQLite lo resuelve en
 # `dec` porque la tabla ya no existe en main (se migra y se borra al arrancar).
@@ -497,8 +420,85 @@ CREATE TABLE IF NOT EXISTS dec.photo_classifications (
     doc_confidence REAL,
     updated_at    TEXT DEFAULT (datetime('now'))
 );
+CREATE TABLE IF NOT EXISTS dec.settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT
+);
+-- Cementerios y nichos: datos manuales del admin (ningún script de
+-- importación GEDCOM los nombra).
+CREATE TABLE IF NOT EXISTS dec.cemeteries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    city TEXT,
+    lat REAL,
+    lng REAL,
+    description TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS dec.niches (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cemetery_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    title TEXT,
+    lat REAL,
+    lng REAL,
+    photo_file TEXT,
+    record_file TEXT,
+    notes TEXT,
+    fs_url TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT,
+    enabled INTEGER DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS dec.niche_photos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    niche_id INTEGER NOT NULL,
+    filename TEXT NOT NULL,
+    kind TEXT DEFAULT 'photo',
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS dec.niche_people (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    niche_id INTEGER NOT NULL,
+    person_id TEXT NOT NULL,
+    assigned_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(niche_id, person_id)
+);
+
+-- Full burial-register rows from archival sources (CementirisBCN.xlsx):
+-- every person buried in the niche, whether or not they exist in `people`.
+CREATE TABLE IF NOT EXISTS dec.niche_records (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    niche_id INTEGER NOT NULL,
+    person_id TEXT,
+    name TEXT NOT NULL,
+    burial_date TEXT,
+    death_day TEXT,
+    civil_status TEXT,
+    spouse TEXT,
+    age TEXT,
+    origin TEXT,
+    profession TEXT,
+    address TEXT,
+    parish TEXT,
+    court TEXT,
+    titular TEXT,
+    notes TEXT,
+    fs_url TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS dec.idx_niches_cemetery ON niches(cemetery_id);
+CREATE INDEX IF NOT EXISTS dec.idx_niche_people_person ON niche_people(person_id);
+CREATE INDEX IF NOT EXISTS dec.idx_niche_photos_niche ON niche_photos(niche_id);
+CREATE INDEX IF NOT EXISTS dec.idx_niche_records_niche ON niche_records(niche_id);
 """
-DECISION_TABLES = ("palazuelos_map", "compare_dismissed", "photo_classifications")
+DECISION_TABLES = ("palazuelos_map", "compare_dismissed", "photo_classifications", "settings",
+                   "cemeteries", "niches", "niche_photos", "niche_people", "niche_records")
 
 
 def decisions_db_path(db_path) -> Path:
@@ -598,7 +598,6 @@ def get_connection(db_path):
         "ALTER TABLE geocache ADD COLUMN validated INTEGER DEFAULT 0",
         "CREATE TABLE IF NOT EXISTS suggestions (id TEXT PRIMARY KEY, name TEXT, email TEXT, type TEXT, person_id TEXT, message TEXT, files_count INTEGER DEFAULT 0, submission_dir TEXT, created_at TEXT DEFAULT (datetime('now')))",
         "ALTER TABLE suggestions ADD COLUMN resolved_at TEXT",
-        "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)",
         "CREATE TABLE IF NOT EXISTS compare_results (id INTEGER PRIMARY KEY AUTOINCREMENT, db_person_id TEXT NOT NULL, db_person_name TEXT, ged_person_id TEXT, ged_person_name TEXT, match_score INTEGER DEFAULT 0, diff_types TEXT, diff_details TEXT, created_at TEXT DEFAULT (datetime('now')))",
         "CREATE INDEX IF NOT EXISTS idx_compare_results_person ON compare_results(db_person_id)",
         "ALTER TABLE people ADD COLUMN birth_city TEXT",
@@ -630,25 +629,6 @@ def get_connection(db_path):
         "CREATE TABLE IF NOT EXISTS event_sources (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER NOT NULL, source_ref TEXT, page TEXT, quay INTEGER, data_date TEXT, data_text TEXT)",
         "ALTER TABLE event_sources ADD COLUMN source_title TEXT",
         "CREATE TABLE IF NOT EXISTS event_photos (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER NOT NULL, photo_id INTEGER NOT NULL)",
-        "CREATE TABLE IF NOT EXISTS cemeteries (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, city TEXT, lat REAL, lng REAL, description TEXT, created_at TEXT DEFAULT (datetime('now')), updated_at TEXT)",
-        "CREATE TABLE IF NOT EXISTS niches (id INTEGER PRIMARY KEY AUTOINCREMENT, cemetery_id INTEGER NOT NULL, name TEXT NOT NULL, lat REAL, lng REAL, photo_file TEXT, record_file TEXT, notes TEXT, created_at TEXT DEFAULT (datetime('now')), updated_at TEXT)",
-        "CREATE TABLE IF NOT EXISTS niche_people (id INTEGER PRIMARY KEY AUTOINCREMENT, niche_id INTEGER NOT NULL, person_id TEXT NOT NULL, assigned_at TEXT DEFAULT (datetime('now')), UNIQUE(niche_id, person_id))",
-        "CREATE INDEX IF NOT EXISTS idx_niches_cemetery ON niches(cemetery_id)",
-        "CREATE INDEX IF NOT EXISTS idx_niche_people_person ON niche_people(person_id)",
-        "ALTER TABLE niches ADD COLUMN title TEXT",
-        "CREATE TABLE IF NOT EXISTS niche_photos (id INTEGER PRIMARY KEY AUTOINCREMENT, niche_id INTEGER NOT NULL, filename TEXT NOT NULL, kind TEXT DEFAULT 'photo', created_at TEXT DEFAULT (datetime('now')))",
-        "CREATE INDEX IF NOT EXISTS idx_niche_photos_niche ON niche_photos(niche_id)",
-        # Migrate legacy single-photo columns into niche_photos (idempotent: columns are nulled)
-        "INSERT INTO niche_photos (niche_id, filename, kind) SELECT id, photo_file, 'photo' FROM niches WHERE photo_file IS NOT NULL",
-        "UPDATE niches SET photo_file = NULL WHERE photo_file IS NOT NULL",
-        "INSERT INTO niche_photos (niche_id, filename, kind) SELECT id, record_file, 'record' FROM niches WHERE record_file IS NOT NULL",
-        "UPDATE niches SET record_file = NULL WHERE record_file IS NOT NULL",
-        "CREATE TABLE IF NOT EXISTS niche_records (id INTEGER PRIMARY KEY AUTOINCREMENT, niche_id INTEGER NOT NULL, person_id TEXT, name TEXT NOT NULL, burial_date TEXT, death_day TEXT, civil_status TEXT, spouse TEXT, age TEXT, origin TEXT, profession TEXT, address TEXT, parish TEXT, court TEXT, titular TEXT, notes TEXT, created_at TEXT DEFAULT (datetime('now')))",
-        "CREATE INDEX IF NOT EXISTS idx_niche_records_niche ON niche_records(niche_id)",
-        "ALTER TABLE niche_records ADD COLUMN fs_url TEXT",
-        "ALTER TABLE niches ADD COLUMN fs_url TEXT",
-        # Nicho habilitado/deshabilitado: si 0, no se muestra en la app pública.
-        "ALTER TABLE niches ADD COLUMN enabled INTEGER DEFAULT 1",
     ]:
         try:
             conn.execute(stmt)
