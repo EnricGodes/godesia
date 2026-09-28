@@ -998,6 +998,8 @@ def main():
     print("\nFase 5: Revisando descargas...")
     db_conn = sqlite3.connect(db_path)
     db_conn.row_factory = sqlite3.Row
+    from database import attach_decisions, RESTORE_CLASSIFICATIONS_SQL
+    attach_decisions(db_conn, db_path)  # photo_classifications vive en decisions.db
 
     need_download = []
     skip_count = 0
@@ -1376,51 +1378,10 @@ def main():
         if pending_event_objes:
             print(f"  Fotos de eventos: {len(pending_event_objes)} vinculadas")
 
-        # Restore classifications from photo_classifications (survives DROP TABLE)
-        # Priority (highest last, so it overwrites lower): tag → clip_auto → clip_pending → human
-        # - 'tag':   auto-classified by keyword; restored only where doc_origin still NULL
-        # - 'clip_auto': high-confidence CLIP decision
-        # - 'clip_pending': restore score AND is_document (stays in review queue)
-        # - 'human': user decision is final, overrides everything
-        # Conflict rule: if title classifier says doc (is_document=1) but CLIP backup
-        # says not-doc with low confidence (clip_auto pero is_document=0 y score < THRESH_AUTO_DOC),
-        # downgrade to clip_pending — the photo needs manual review.
+        # Restore classifications from photo_classifications (decisions.db, sobrevive
+        # al DROP TABLE photos). Prioridades en database.RESTORE_CLASSIFICATIONS_SQL.
         try:
-            cursor.executescript("""
-                UPDATE photos SET
-                    is_document   = (SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'tag'),
-                    doc_type      = (SELECT pc.doc_type    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'tag'),
-                    doc_origin    = 'tag'
-                WHERE doc_origin IS NULL
-                  AND filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'tag');
-
-                UPDATE photos SET
-                    doc_origin    = CASE
-                        WHEN is_document = 1
-                         AND (SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto') = 0
-                        THEN 'clip_pending'
-                        ELSE (SELECT pc.doc_origin FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto')
-                    END,
-                    doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto'),
-                    is_document   = CASE WHEN is_document = 0
-                                    THEN (SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto')
-                                    ELSE is_document END
-                WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'clip_auto');
-
-                UPDATE photos SET
-                    is_document   = COALESCE((SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending'), is_document),
-                    doc_type      = COALESCE((SELECT pc.doc_type    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending'), doc_type),
-                    doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending'),
-                    doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending')
-                WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'clip_pending');
-
-                UPDATE photos SET
-                    is_document   = (SELECT pc.is_document   FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
-                    doc_type      = (SELECT pc.doc_type      FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
-                    doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
-                    doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human')
-                WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'human');
-            """)
+            cursor.executescript(RESTORE_CLASSIFICATIONS_SQL)
         except Exception as e:
             print(f"  [avís] No s'han pogut restaurar classificacions: {e}")
 

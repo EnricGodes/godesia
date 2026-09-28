@@ -19,6 +19,7 @@ from database import (
     get_connection, get_tree_data, get_tree_data_flat, get_birthdays_this_week, search_people,
     get_dashboard_data, get_documents, get_person_dossier, convert_date_to_spanish,
     update_all_photo_files, update_all_city_fields, get_photo_details,
+    restore_photo_classifications,
     get_albums_list, get_album_photos, get_photos_people_list,
     get_document_types, get_document_photos, get_document_albums, get_documents_people_list,
     get_setting, set_setting,
@@ -100,6 +101,13 @@ async def startup():
             print(f"✓ Fotos de perfil restauradas para {updated} personas")
     except Exception as e:
         print(f"  Auto-heal de fotos falló: {e}")
+
+    # Las clasificaciones del clasificador de fotos viven en decisions.db (volumen);
+    # photos vuelve a la copia del repo en cada deploy, así que se reaplican aquí.
+    try:
+        restore_photo_classifications(db_conn)
+    except Exception as e:
+        print(f"  Restaurar clasificaciones de fotos falló: {e}")
 
     # AUTO-HEAL: Push geocache lat/lng to residences/events if any rows have null coords.
     # sync_catalog.py wipes and re-inserts residences without lat/lng; this restores them.

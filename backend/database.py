@@ -246,15 +246,6 @@ CREATE TABLE IF NOT EXISTS compare_results (
 );
 CREATE INDEX IF NOT EXISTS idx_compare_results_person ON compare_results(db_person_id);
 
-CREATE TABLE IF NOT EXISTS photo_classifications (
-    filename      TEXT PRIMARY KEY,
-    is_document   INTEGER NOT NULL DEFAULT 0,
-    doc_type      TEXT,
-    doc_origin    TEXT NOT NULL,
-    doc_confidence REAL,
-    updated_at    TEXT DEFAULT (datetime('now'))
-);
-
 CREATE TABLE IF NOT EXISTS palazuelos_imports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     palaz_photo_rin TEXT,
@@ -478,7 +469,8 @@ def convert_date_to_spanish(date_str):
 # ── Decisiones del admin que deben sobrevivir a los deploys ──────────────────
 # Railway sustituye data/godesia.db por la copia del repo en cada deploy, así
 # que las decisiones tomadas en producción (emparejamientos manuales Palazuelos,
-# marcas "traspasado", descartes del Comparador) viven en una BD APARTE en el
+# marcas "traspasado", descartes del Comparador, clasificaciones del
+# clasificador de fotos) viven en una BD APARTE en el
 # volumen persistente, ADJUNTA (ATTACH) a la conexión principal como `dec`.
 # Las consultas siguen usando el nombre sin cualificar: SQLite lo resuelve en
 # `dec` porque la tabla ya no existe en main (se migra y se borra al arrancar).
@@ -497,8 +489,16 @@ CREATE TABLE IF NOT EXISTS dec.compare_dismissed (
     diff_types   TEXT,
     dismissed_at TEXT DEFAULT (datetime('now'))
 );
+CREATE TABLE IF NOT EXISTS dec.photo_classifications (
+    filename      TEXT PRIMARY KEY,
+    is_document   INTEGER NOT NULL DEFAULT 0,
+    doc_type      TEXT,
+    doc_origin    TEXT NOT NULL,
+    doc_confidence REAL,
+    updated_at    TEXT DEFAULT (datetime('now'))
+);
 """
-DECISION_TABLES = ("palazuelos_map", "compare_dismissed")
+DECISION_TABLES = ("palazuelos_map", "compare_dismissed", "photo_classifications")
 
 
 def decisions_db_path(db_path) -> Path:
@@ -530,6 +530,56 @@ def attach_decisions(conn, db_path):
     conn.commit()
 
 
+# Vuelca las clasificaciones guardadas (photo_classifications, en decisions.db)
+# sobre photos, que se recrea en cada sync y vuelve a la copia del repo en cada
+# deploy. Prioridad (la última sobrescribe): tag → clip_auto → clip_pending → human.
+# - 'tag': solo donde doc_origin sigue NULL
+# - 'clip_auto': si el título dice documento pero CLIP dice que no, baja a
+#   clip_pending (necesita revisión manual)
+# - 'clip_pending': restaura score e is_document (sigue en la cola de revisión)
+# - 'human': la decisión del usuario es definitiva
+RESTORE_CLASSIFICATIONS_SQL = """
+    UPDATE photos SET
+        is_document   = (SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'tag'),
+        doc_type      = (SELECT pc.doc_type    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'tag'),
+        doc_origin    = 'tag'
+    WHERE doc_origin IS NULL
+      AND filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'tag');
+
+    UPDATE photos SET
+        doc_origin    = CASE
+            WHEN is_document = 1
+             AND (SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto') = 0
+            THEN 'clip_pending'
+            ELSE (SELECT pc.doc_origin FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto')
+        END,
+        doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto'),
+        is_document   = CASE WHEN is_document = 0
+                        THEN (SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_auto')
+                        ELSE is_document END
+    WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'clip_auto');
+
+    UPDATE photos SET
+        is_document   = COALESCE((SELECT pc.is_document FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending'), is_document),
+        doc_type      = COALESCE((SELECT pc.doc_type    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending'), doc_type),
+        doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending'),
+        doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'clip_pending')
+    WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'clip_pending');
+
+    UPDATE photos SET
+        is_document   = (SELECT pc.is_document   FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
+        doc_type      = (SELECT pc.doc_type      FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
+        doc_origin    = (SELECT pc.doc_origin    FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human'),
+        doc_confidence= (SELECT pc.doc_confidence FROM photo_classifications pc WHERE pc.filename = photos.filename AND pc.doc_origin = 'human')
+    WHERE filename IN (SELECT filename FROM photo_classifications WHERE doc_origin = 'human');
+"""
+
+
+def restore_photo_classifications(conn):
+    conn.executescript(RESTORE_CLASSIFICATIONS_SQL)
+    conn.commit()
+
+
 def get_connection(db_path):
     """Create a SQLite connection with row factory and custom functions."""
     conn = sqlite3.connect(db_path)
@@ -555,14 +605,6 @@ def get_connection(db_path):
         "ALTER TABLE people ADD COLUMN death_city TEXT",
         "ALTER TABLE photos ADD COLUMN doc_origin TEXT",
         "ALTER TABLE photos ADD COLUMN doc_confidence REAL",
-        """CREATE TABLE IF NOT EXISTS photo_classifications (
-               filename TEXT PRIMARY KEY,
-               is_document INTEGER NOT NULL DEFAULT 0,
-               doc_type TEXT,
-               doc_origin TEXT NOT NULL,
-               doc_confidence REAL,
-               updated_at TEXT DEFAULT (datetime('now'))
-           )""",
         "ALTER TABLE photos ADD COLUMN sha256 TEXT",
         "ALTER TABLE photos ADD COLUMN phash TEXT",
         "ALTER TABLE photos ADD COLUMN width INTEGER",

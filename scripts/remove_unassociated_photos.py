@@ -26,7 +26,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "backend"))
 
-from database import update_all_photo_files  # noqa: E402
+from database import attach_decisions, update_all_photo_files  # noqa: E402
 
 DB_PATH = ROOT / "data" / "godesia.db"
 PHOTOS_DIR = ROOT / "data" / "photos"
@@ -37,6 +37,7 @@ FAKE_PERSON_ID = "@I88888888@"
 def main():
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
+    attach_decisions(conn, DB_PATH)  # photo_classifications vive en decisions.db
     conn.execute("PRAGMA foreign_keys = OFF")
     cur = conn.cursor()
 
