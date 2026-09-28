@@ -226,10 +226,12 @@ def _es(key, p):
 
 def _ca(key, p):
     if key == "parent":
-        t = {1: ("pare", "mare"), 2: ("avi", "àvia"), 3: ("besavi", "besàvia"), 4: ("rebesavi", "rebesàvia")}
+        t = {1: ("pare", "mare"), 2: ("avi", "àvia"), 3: ("besavi", "besàvia"), 4: ("rebesavi", "rebesàvia"),
+             5: ("quadravi", "quadràvia")}
         return t.get(p["g"]) or (f"avantpassat ({p['g']} generacions)", f"avantpassada ({p['g']} generacions)")
     if key == "child":
-        t = {1: ("fill", "filla"), 2: ("nét", "néta"), 3: ("besnét", "besnéta"), 4: ("rebesnét", "rebesnéta")}
+        t = {1: ("fill", "filla"), 2: ("nét", "néta"), 3: ("besnét", "besnéta"), 4: ("rebesnét", "rebesnéta"),
+             5: ("quadrinét", "quadrinéta")}
         return t.get(p["g"]) or (f"descendent ({p['g']} generacions)",) * 2
     if key == "sibling":
         return ("mig germà", "mitja germana") if p["half"] else ("germà", "germana")
