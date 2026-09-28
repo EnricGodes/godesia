@@ -143,6 +143,20 @@ function renderDossier(data) {
     }
     document.getElementById('hero-name').textContent = displayName;
 
+    // Parentesco con el usuario (si el admin lo ha asociado a una persona del árbol)
+    let kinEl = document.getElementById('hero-kinship');
+    if (data.kinship) {
+        if (!kinEl) {
+            kinEl = document.createElement('div');
+            kinEl.id = 'hero-kinship';
+            kinEl.className = 'inline-block bg-primary-container text-on-primary-container font-headline italic text-xl px-4 py-1 rounded-full';
+            document.getElementById('hero-name').insertAdjacentElement('afterend', kinEl);
+        }
+        kinEl.textContent = data.kinship;
+    } else if (kinEl) {
+        kinEl.remove();
+    }
+
     const birthYear = person.birth_year || '?';
     const birthPlace = person.birth_city || person.birth_place || 'Barcelona, España';
     const vitalDatesEl = document.getElementById('vital-dates');

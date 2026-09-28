@@ -34,6 +34,7 @@ from admin_routes import router as admin_router, init_admin, init_log_capture
 import palazuelos_routes
 from palazuelos_routes import router as palazuelos_router, init_palazuelos
 import auth
+from kinship import kinship_label
 import contributions
 import notifications
 from geocode_utils import normalize_place, build_queries, geocode_with_cache
@@ -156,6 +157,7 @@ async def startup():
     init_admin(db_conn, BASE_DIR)
     init_palazuelos(db_conn, BASE_DIR)
     auth.init_auth(PHOTOS_DIR)   # BD de usuarios en el volumen (PHOTOS_DIR/_auth)
+    auth.person_name_resolver = _person_name
     contributions.init(PHOTOS_DIR)  # aportaciones + consultas no resueltas (PHOTOS_DIR/_contrib)
     print(f"Auth: {'DESACTIVADA (AUTH_DISABLED=1)' if auth.AUTH_DISABLED else 'activa'}")
     notifications.init_notifications(db_conn)   # avisos por email al admin
@@ -291,8 +293,13 @@ async def dashboard(lang: str = "es"):
     return localize_dates_deep(data, lang)
 
 
+def _person_name(person_id):
+    row = db_conn.execute("SELECT name FROM people WHERE id = ?", (person_id,)).fetchone()
+    return " ".join(row[0].split()) if row else None
+
+
 @app.get("/api/dossier/{person_id}")
-async def dossier(person_id: str, lang: str = "es"):
+async def dossier(person_id: str, request: Request, lang: str = "es"):
     """Complete dossier data for a person."""
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicializada")
@@ -311,6 +318,10 @@ async def dossier(person_id: str, lang: str = "es"):
     else:
         dossier_data["gedcom_date"] = gedcom_export_date or ""
     dossier_data["vital_points"] = _build_vital_points(db_conn, dossier_data)
+    # Parentesco con el usuario registrado asociado a una persona del árbol
+    user = getattr(request.state, "user", None)
+    if user and user.get("person_id"):
+        dossier_data["kinship"] = kinship_label(db_conn, user["person_id"], person_id, lang)
     return localize_dates_deep(dossier_data, lang)
 
 

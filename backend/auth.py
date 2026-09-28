@@ -79,6 +79,10 @@ def init_auth(photos_dir):
         cols = {r[1] for r in conn.execute("PRAGMA table_info(users)")}
         if "lang" not in cols:
             conn.execute("ALTER TABLE users ADD COLUMN lang TEXT NOT NULL DEFAULT 'es'")
+        # Persona del árbol asociada por el admin (ID GEDCOM '@I46@'): el dossier
+        # le muestra el parentesco con cada ficha
+        if "person_id" not in cols:
+            conn.execute("ALTER TABLE users ADD COLUMN person_id TEXT")
         conn.commit()
     finally:
         conn.close()
@@ -150,7 +154,7 @@ def get_session_user(token):
     conn = _connect()
     try:
         row = conn.execute(
-            "SELECT u.id, u.name, u.email, u.status FROM sessions s "
+            "SELECT u.id, u.name, u.email, u.status, u.person_id FROM sessions s "
             "JOIN users u ON u.id = s.user_id "
             "WHERE s.token = ? AND s.expires_at > ?",
             (token, _now().isoformat())).fetchone()
@@ -288,7 +292,7 @@ async def me(request: Request):
     user = getattr(request.state, "user", None) or get_session_user(request.cookies.get(SESSION_COOKIE))
     if not user:
         raise HTTPException(401, "No autenticado.")
-    return {"name": user["name"], "email": user["email"]}
+    return {"name": user["name"], "email": user["email"], "person_id": user.get("person_id")}
 
 
 # ── Recuperación de contraseña ("he olvidado mi contraseña") ─────────────────
@@ -497,7 +501,10 @@ async def reset_password(payload: dict = Body(...)):
 # ── Gestión de usuarios (admin; sin protección, como el resto de /api/admin) ──
 auth_admin_router = APIRouter(prefix="/api/admin", tags=["admin-users"])
 
-_USER_COLS = "id, name, email, status, created_at, approved_at, last_login_at"
+_USER_COLS = "id, name, email, status, created_at, approved_at, last_login_at, person_id"
+
+# app.py lo fija al arrancar: person_id → nombre (la BD del árbol no está aquí)
+person_name_resolver = None
 
 
 @auth_admin_router.get("/users")
@@ -511,9 +518,13 @@ async def list_users(status: str = ""):
         else:
             rows = conn.execute(
                 f"SELECT {_USER_COLS} FROM users ORDER BY created_at DESC").fetchall()
-        return [_with_utc_marker(dict(r)) for r in rows]
+        users = [_with_utc_marker(dict(r)) for r in rows]
     finally:
         conn.close()
+    for u in users:
+        u["person_name"] = (person_name_resolver(u["person_id"])
+                            if u.get("person_id") and person_name_resolver else None)
+    return users
 
 
 def _with_utc_marker(row):
@@ -538,6 +549,25 @@ async def pending_count():
 
 def _user_row(conn, uid):
     return conn.execute("SELECT id, name, email, status, lang FROM users WHERE id = ?", (uid,)).fetchone()
+
+
+@auth_admin_router.post("/users/{uid}/person")
+async def set_user_person(uid: int, payload: dict = Body(...)):
+    """Asocia (o desasocia, con person_id vacío) el usuario a una persona del árbol."""
+    pid = (payload.get("person_id") or "").strip() or None
+    if pid and not pid.startswith("@"):
+        pid = f"@{pid}@"
+    if pid and person_name_resolver and not person_name_resolver(pid):
+        raise HTTPException(404, "Persona no encontrada en el árbol.")
+    conn = _connect()
+    try:
+        if not _user_row(conn, uid):
+            raise HTTPException(404, "Usuario no encontrado.")
+        conn.execute("UPDATE users SET person_id = ? WHERE id = ?", (pid, uid))
+        conn.commit()
+    finally:
+        conn.close()
+    return {"ok": True, "person_id": pid}
 
 
 @auth_admin_router.post("/users/{uid}/approve")

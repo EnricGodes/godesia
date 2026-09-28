@@ -542,11 +542,12 @@ const Users = {
                 return;
             }
             el.innerHTML = `<table class="admin-table">
-                <thead><tr><th>Nombre</th><th>Email</th><th>Alta</th><th>Último acceso</th><th></th></tr></thead>
+                <thead><tr><th>Nombre</th><th>Email</th><th>Persona en el árbol</th><th>Alta</th><th>Último acceso</th><th></th></tr></thead>
                 <tbody>${items.map(u => `
                     <tr>
                         <td><strong>${esc(u.name || '—')}</strong></td>
                         <td style="font-size:0.82rem;">${esc(u.email || '—')}</td>
+                        <td id="user-person-${u.id}" style="font-size:0.82rem;position:relative;">${this._personCell(u)}</td>
                         <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${fmtUserDate(u.approved_at || u.created_at, false)}</td>
                         <td style="white-space:nowrap;font-size:0.75rem;color:#727971;">${fmtUserDate(u.last_login_at, true)}</td>
                         <td>
@@ -561,6 +562,56 @@ const Users = {
         } catch (e) {
             el.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
         }
+    },
+
+    // Persona del árbol asociada: el dossier le muestra el parentesco ("Su hijo")
+    _personCell(u) {
+        if (!u.person_id) {
+            return `<button class="btn btn-secondary btn-sm" onclick="Users.pickPerson(${u.id})">Asociar</button>`;
+        }
+        const pid = u.person_id.replace(/@/g, '');
+        return `<a href="/dossier.html?id=${encodeURIComponent(pid)}" target="_blank">${esc(u.person_name || u.person_id)}</a>
+            <button class="btn btn-secondary btn-sm" style="margin-left:.3rem;" onclick="Users.pickPerson(${u.id})">Cambiar</button>
+            <button class="btn btn-secondary btn-sm" title="Quitar la asociación" onclick="Users.setPerson(${u.id}, '')">✕</button>`;
+    },
+
+    pickPerson(id) {
+        const cell = document.getElementById(`user-person-${id}`);
+        cell.innerHTML = `<input class="form-input" style="font-size:.8rem;padding:3px 6px;width:14rem;"
+                placeholder="Buscar persona…" oninput="Users.onPersonSearch(${id}, this)"
+                onblur="setTimeout(() => Users.loadApproved(), 200)">
+            <div id="user-person-dd-${id}" style="display:none;position:absolute;z-index:20;background:#fff;
+                border:1px solid #e3e0d6;box-shadow:0 4px 12px rgba(0,0,0,.08);width:18rem;max-height:16rem;overflow:auto;"></div>`;
+        cell.querySelector('input').focus();
+    },
+
+    onPersonSearch(id, input) {
+        clearTimeout(this._personTimer);
+        const q = input.value.trim();
+        const dd = document.getElementById(`user-person-dd-${id}`);
+        if (q.length < 2) { dd.style.display = 'none'; return; }
+        this._personTimer = setTimeout(async () => {
+            try {
+                const r = await apiFetch(`/api/search?q=${encodeURIComponent(q)}&limit=8`);
+                dd.innerHTML = (r.results || []).map(p => `
+                    <div style="padding:.4rem .6rem;cursor:pointer;font-size:.8rem;border-bottom:1px solid #f1eee5;"
+                         onmousedown="Users.setPerson(${id}, '${esc(p.id)}')">
+                        ${esc(p.name)} <small style="color:#9e9b94;">${[p.birth_year, p.death_year].filter(Boolean).join('–')}</small>
+                    </div>`).join('') || '<div style="padding:.5rem;color:#9e9b94;font-size:.8rem;">Sin resultados</div>';
+                dd.style.display = 'block';
+            } catch (_) {}
+        }, 250);
+    },
+
+    async setPerson(id, personId) {
+        try {
+            await apiFetch(`/api/admin/users/${id}/person`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ person_id: personId }),
+            });
+        } catch (e) { alert(e.message); }
+        this.loadApproved();
     },
 
     async approve(id) {
