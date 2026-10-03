@@ -690,7 +690,8 @@ async def get_map(status_filter: Optional[str] = None):
         rows = db.execute("""
             SELECT pm.godes_id, pm.palaz_id, pm.palaz_name, pm.confidence, pm.match_type, pm.updated_at,
                    pm.transferred_at,
-                   p.name AS godes_name, p.birth_year, p.death_year
+                   p.name AS godes_name, p.birth_year, p.death_year,
+                   p.father_name AS godes_father, p.mother_name AS godes_mother
             FROM palazuelos_map pm
             JOIN people p ON pm.godes_id = p.id
             ORDER BY
@@ -700,11 +701,12 @@ async def get_map(status_filter: Optional[str] = None):
     except Exception:
         return {"entries": []}
 
-    # Años de Palazuelos (del .ged parseado) para cotejarlos con los de Godes.
+    # Años y padres de Palazuelos (del .ged parseado) para cotejarlos con Godes.
     try:
-        indis = _palaz_data()["individuals"]
+        data = _palaz_data()
+        indis, fams = data["individuals"], data["families"]
     except HTTPException:
-        indis = {}
+        indis, fams = {}, {}
 
     entries = []
     for r in rows:
@@ -712,6 +714,9 @@ async def get_map(status_filter: Optional[str] = None):
         pz = indis.get(d["palaz_id"]) if d["palaz_id"] else None
         d["palaz_birth_year"] = _ged_year((pz.get("birth") or {}).get("date") or "") if pz else None
         d["palaz_death_year"] = _ged_year((pz.get("death") or {}).get("date") or "") if pz else None
+        fam = fams.get((pz or {}).get("family_child")) or {}
+        d["palaz_father"] = (indis.get(fam.get("husband")) or {}).get("name")
+        d["palaz_mother"] = (indis.get(fam.get("wife")) or {}).get("name")
         if status_filter:
             if status_filter == 'confirmed' and d['confidence'] < 80:
                 continue

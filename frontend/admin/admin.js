@@ -2873,6 +2873,12 @@ const Palazuelos = (() => {
         return `<small style="color:#727971;">· ${y(e.palaz_birth_year, e.birth_year)}–${y(e.palaz_death_year, e.death_year)}</small>`;
     }
 
+    // Padres en una línea pequeña bajo el nombre (para cotejar las dos fichas).
+    function _parents(father, mother) {
+        const n = x => x ? esc(String(x).replace(/\s+/g, ' ').trim()) : '<span style="color:#bbb;">?</span>';
+        return `<br><small style="color:#727971;" title="Padre · Madre">Padres: ${n(father)} · ${n(mother)}</small>`;
+    }
+
     function _renderRow(e) {
         const rowBg = e.match_type === 'rejected' ? '#f5f5f5' :
                       !e.palaz_id ? '#fff8f6' :
@@ -2884,9 +2890,9 @@ const Palazuelos = (() => {
                        onclick="Palazuelos.confirmMatch('${esc(e.godes_id)}','${esc(e.palaz_id)}','${esc(e.palaz_name||'')}')">✓</button>`
             : '';
         return `<tr style="background:${rowBg};" data-godes-id="${esc(e.godes_id)}">
-            <td><strong>${esc(e.godes_name)}</strong><br><small style="color:#9e9b94;">${esc(e.godes_id)}</small></td>
+            <td><strong>${esc(e.godes_name)}</strong><br><small style="color:#9e9b94;">${esc(e.godes_id)}</small>${_parents(e.godes_father, e.godes_mother)}</td>
             <td style="font-size:.8rem;color:#727971;">${esc(years)}</td>
-            <td>${e.palaz_id ? `<strong>${esc(e.palaz_name)}</strong><br><small style="color:#9e9b94;">${esc(e.palaz_id)}</small> ${_palazYears(e)}` : '<span style="color:#bbb;">—</span>'}</td>
+            <td>${e.palaz_id ? `<strong>${esc(e.palaz_name)}</strong><br><small style="color:#9e9b94;">${esc(e.palaz_id)}</small> ${_palazYears(e)}${_parents(e.palaz_father, e.palaz_mother)}` : '<span style="color:#bbb;">—</span>'}</td>
             <td style="font-weight:700;color:${e.confidence >= 80 ? '#2d4b33' : e.confidence >= 50 ? '#e65100' : '#d32f2f'};">${e.confidence || 0}</td>
             <td>${_statusBadge(e)}</td>
             <td>
