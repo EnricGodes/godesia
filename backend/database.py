@@ -1813,8 +1813,10 @@ def update_all_parent_names(conn) -> int:
         WHERE father_name IS NOT (SELECT f.name FROM people f WHERE f.id = people.father_id)
            OR mother_name IS NOT (SELECT m.name FROM people m WHERE m.id = people.mother_id)
     """)
-    if cur.rowcount:
-        conn.commit()
+    # Commit SIEMPRE: con 0 filas el UPDATE ya abrió la transacción implícita y,
+    # sin commit, la conexión del servidor retenía el bloqueo de escritura
+    # (sync_catalog fallaba con "database is locked").
+    conn.commit()
     return cur.rowcount
 
 
