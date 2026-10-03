@@ -1427,6 +1427,10 @@ def main():
         updated = update_all_photo_files(db_conn)
         print(f"  Fotos de perfil actualizadas: {updated} personas")
 
+        # father_name/mother_name desde los IDs (aquí solo se guardan los IDs).
+        from database import update_all_parent_names
+        print(f"  Nombres de padres actualizados: {update_all_parent_names(db_conn)} personas")
+
     db_conn.close()
 
     print("\n=== Resumen ===")

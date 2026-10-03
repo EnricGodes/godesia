@@ -1798,6 +1798,26 @@ def get_photo_details(conn, photo_id):
     return photo_dict
 
 
+def update_all_parent_names(conn) -> int:
+    """Rellena people.father_name / mother_name desde father_id / mother_id.
+
+    sync_catalog solo guarda los IDs: las personas nuevas quedaban con los nombres
+    vacíos y las existentes con el nombre de la importación antigua (el router,
+    el motor LLM y el admin leen father_name/mother_name). Se llama al arrancar y
+    al final de cada sync_catalog. Devuelve las filas cambiadas.
+    """
+    cur = conn.execute("""
+        UPDATE people SET
+            father_name = (SELECT f.name FROM people f WHERE f.id = people.father_id),
+            mother_name = (SELECT m.name FROM people m WHERE m.id = people.mother_id)
+        WHERE father_name IS NOT (SELECT f.name FROM people f WHERE f.id = people.father_id)
+           OR mother_name IS NOT (SELECT m.name FROM people m WHERE m.id = people.mother_id)
+    """)
+    if cur.rowcount:
+        conn.commit()
+    return cur.rowcount
+
+
 def update_all_city_fields(conn) -> int:
     """Populate birth_city / death_city for people where they are NULL.
 

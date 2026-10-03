@@ -23,7 +23,7 @@ from pydantic import BaseModel
 from database import (
     get_connection, get_tree_data, get_tree_data_flat, get_birthdays_this_week, search_people,
     get_dashboard_data, get_documents, get_person_dossier, convert_date_to_spanish,
-    update_all_photo_files, update_all_city_fields, get_photo_details,
+    update_all_photo_files, update_all_city_fields, update_all_parent_names, get_photo_details,
     restore_photo_classifications,
     get_albums_list, get_album_photos, get_photos_people_list,
     get_document_types, get_document_photos, get_document_albums, get_documents_people_list,
@@ -142,6 +142,15 @@ async def startup():
                 print(f"✓ Ciudades extraídas para {city_updated} personas")
     except Exception as e:
         print(f"  Auto-heal de ciudades falló: {e}")
+
+    # AUTO-HEAL: father_name/mother_name desde father_id/mother_id (sync_catalog
+    # solo guarda los IDs; el router y el admin leen los nombres).
+    try:
+        n_parents = update_all_parent_names(db_conn)
+        if n_parents:
+            print(f"✓ Nombres de padres actualizados para {n_parents} personas")
+    except Exception as e:
+        print(f"  Auto-heal de nombres de padres falló: {e}")
 
     # Read GEDCOM export date from header (auto-detect most recent .ged file)
     ged_files = sorted((BASE_DIR / "docs").glob("*.ged"), key=lambda p: p.stat().st_mtime, reverse=True)
