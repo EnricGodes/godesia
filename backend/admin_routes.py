@@ -405,6 +405,11 @@ async def import_gedcom(
         with open(ged_path, "wb") as f:
             f.write(content)
         _log_job(f"GEDCOM subido: {file.filename} ({len(content):,} bytes)")
+        # Copia en el volumen (data/uploads se pierde en cada deploy): es la
+        # referencia de «personas que ya no están en el GEDCOM».
+        vol_ged = _godes_ged_path()
+        vol_ged.parent.mkdir(parents=True, exist_ok=True)
+        vol_ged.write_bytes(content)
     else:
         ged_files = sorted(
             (base_dir / "docs").glob("*.ged"),
@@ -437,6 +442,90 @@ async def import_gedcom(
     t.start()
 
     return {"status": "started", "mode": mode}
+
+
+def _godes_ged_path() -> Path:
+    """Último godes.ged importado, en el volumen (/photos/_* → 403)."""
+    return _base_dir / "data" / "photos" / "_gedcom" / "godes.ged"
+
+
+def _godes_ged_ids() -> set:
+    p = _godes_ged_path()
+    if not p.exists():
+        raise HTTPException(404, "No hay copia del último godes.ged: vuelve a importarlo en «Importar».")
+    ids = set()
+    with p.open(encoding="utf-8-sig", errors="replace") as fh:
+        for line in fh:
+            if line.startswith("0 @I") and line.rstrip().endswith(" INDI"):
+                ids.add(line.split()[1])
+    return ids
+
+
+def _person_links(db, pid: str) -> dict:
+    """Lo que impide borrar a una persona sin perder información."""
+    one = lambda sql: db.execute(sql, (pid,) * sql.count("?")).fetchone()[0]
+    try:
+        niche = one("SELECT COUNT(*) FROM niche_people WHERE person_id=?")
+    except Exception:
+        niche = 0
+    return {
+        "children": one("SELECT COUNT(*) FROM people WHERE father_id=? OR mother_id=?"),
+        "marriages": one("SELECT COUNT(*) FROM marriages WHERE person1_id=? OR person2_id=?"),
+        "niche": niche,
+        "anecdotes": one("SELECT COUNT(*) FROM anecdotes WHERE person_id=?"),
+        "photo_tags": one("SELECT COUNT(*) FROM photo_tags WHERE person_id=?"),
+    }
+
+
+@router.get("/people/not-in-gedcom")
+async def people_not_in_gedcom():
+    """Personas de la BD que ya no están en el último godes.ged importado (el
+    importador no borra a nadie: hay que revisarlas y borrarlas a mano)."""
+    db = _db()
+    ged_ids = _godes_ged_ids()
+    out = []
+    for r in db.execute("""SELECT p.id, p.name, p.birth_date, p.death_date,
+                                  fa.name AS father, mo.name AS mother
+                           FROM people p
+                           LEFT JOIN people fa ON fa.id = p.father_id
+                           LEFT JOIN people mo ON mo.id = p.mother_id
+                           ORDER BY p.name""").fetchall():
+        if r["id"] not in ged_ids:
+            out.append({**dict(r), **_person_links(db, r["id"])})
+    return {"people": out, "ged_people": len(ged_ids)}
+
+
+@router.delete("/people/{person_id}")
+async def delete_person(person_id: str):
+    """Borra a una persona que ya no está en godes.ged. Se niega si sigue en el
+    GEDCOM o si tiene hijos, pareja, nicho o anécdotas (eso hay que revisarlo)."""
+    db = _db()
+    if not db.execute("SELECT 1 FROM people WHERE id=?", (person_id,)).fetchone():
+        raise HTTPException(404, f"{person_id} no está en la BD")
+    if person_id in _godes_ged_ids():
+        raise HTTPException(409, f"{person_id} sigue en godes.ged: no se borra")
+    links = _person_links(db, person_id)
+    blocking = {k: v for k, v in links.items() if v and k != "photo_tags"}
+    if blocking:
+        raise HTTPException(409, f"{person_id} tiene vínculos que revisar: {blocking}")
+    deleted = {}
+    for table, where in (("photo_tags", "person_id=?"), ("events", "person_id=?"),
+                         ("notes", "person_id=?"), ("occupations", "person_id=?"),
+                         ("residences", "person_id=?"), ("military", "person_id=?"),
+                         ("burial", "person_id=?"), ("children", "child_id=? OR parent_id=?"),
+                         ("palazuelos_map", "godes_id=?"), ("people", "id=?")):
+        try:
+            cur = db.execute(f"DELETE FROM {table} WHERE {where}", (person_id,) * where.count("?"))
+            deleted[table] = cur.rowcount
+        except Exception:
+            pass  # tabla inexistente en esta BD
+    db.commit()
+    try:
+        from database import update_all_photo_files  # noqa: PLC0415
+        update_all_photo_files(db)
+    except Exception:
+        pass
+    return {"ok": True, "deleted": deleted}
 
 
 @router.get("/import/status")
