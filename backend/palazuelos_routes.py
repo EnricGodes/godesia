@@ -691,7 +691,8 @@ async def get_map(status_filter: Optional[str] = None):
             SELECT pm.godes_id, pm.palaz_id, pm.palaz_name, pm.confidence, pm.match_type, pm.updated_at,
                    pm.transferred_at,
                    p.name AS godes_name, p.birth_year, p.death_year,
-                   p.father_name AS godes_father, p.mother_name AS godes_mother
+                   p.father_name AS godes_father, p.mother_name AS godes_mother,
+                   p.surname AS godes_surname
             FROM palazuelos_map pm
             JOIN people p ON pm.godes_id = p.id
             ORDER BY
@@ -750,7 +751,8 @@ async def update_map(godes_id: str, body: UpdateMapRequest):
 @router.get("/candidates")
 async def search_candidates(q: str = "", limit: int = 15):
     """Search Palazuelos individuals by name for the manual typeahead."""
-    indis = _palaz_data()["individuals"]
+    data = _palaz_data()
+    indis, fams = data["individuals"], data["families"]
 
     q_canon = _canonicalize_person_name(q)
     results = []
@@ -762,11 +764,14 @@ async def search_candidates(q: str = "", limit: int = 15):
         if score > 0 or (q and q.lower() in name.lower()):
             birth_y = _ged_year((indi.get("birth") or {}).get("date") or "")
             death_y = _ged_year((indi.get("death") or {}).get("date") or "")
+            fam = fams.get(indi.get("family_child")) or {}
             results.append({
                 "palaz_id": pid,
                 "name": name,
                 "birth_year": birth_y,
                 "death_year": death_y,
+                "father": (indis.get(fam.get("husband")) or {}).get("name"),
+                "mother": (indis.get(fam.get("wife")) or {}).get("name"),
                 "score": round(score),
             })
 

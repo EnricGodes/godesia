@@ -2900,9 +2900,11 @@ const Palazuelos = (() => {
                     <input type="text" class="palaz-typeahead-input" placeholder="Buscar en Palazuelos…"
                            style="width:100%;font-size:.75rem;padding:.25rem .4rem;border:1px solid #c2c8bf;border-radius:4px;"
                            data-godes-id="${esc(e.godes_id)}"
+                           value="${cat === 'nomatch' ? esc((e.godes_surname || '').replace(/\s+/g, ' ').trim()) : ''}"
+                           onfocus="Palazuelos.onTypeahead(this)"
                            oninput="Palazuelos.onTypeahead(this)"
                            onblur="Palazuelos.hideDropdown(this)"/>
-                    <div class="palaz-typeahead-dropdown" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #c2c8bf;border-radius:4px;z-index:100;max-height:160px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1);"></div>
+                    <div class="palaz-typeahead-dropdown" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #c2c8bf;border-radius:4px;z-index:100;max-height:260px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1);"></div>
                 </div>
             </td>
             <td style="white-space:nowrap;">
@@ -2964,6 +2966,7 @@ const Palazuelos = (() => {
                                 <strong>${esc(c.name)}</strong>
                                 ${years ? `<span style="color:#9e9b94;margin-left:.5rem;">${esc(years)}</span>` : ''}
                                 <span style="color:#9e9b94;float:right;">${c.score}%</span>
+                                <br><span style="color:#727971;">Padres: ${c.father ? esc(c.father) : '?'} · ${c.mother ? esc(c.mother) : '?'}</span>
                             </div>`;
                 }).join('');
                 dropdown.style.display = '';
