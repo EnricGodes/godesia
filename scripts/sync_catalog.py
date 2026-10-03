@@ -883,7 +883,15 @@ def main():
     print(f"  Álbumes: {len(albums)}")
 
     print("\nFase 2b: Parseando GEDCOM auxiliar (Palazuelos)...")
+    # En Railway palazuelos.ged vive en el volumen (no en docs/, que no va al repo):
+    # mismo criterio que palazuelos_routes._default_ged_path(), la copia más nueva.
+    # Sin esto, una importación en producción perdía todas las fotos de Palazuelos.
     extra_ged = base / "docs" / "palazuelos.ged"
+    vol_ged = base / "data" / "photos" / "_gedcom" / "palazuelos.ged"
+    if vol_ged.exists() and (not extra_ged.exists()
+                             or vol_ged.stat().st_mtime >= extra_ged.stat().st_mtime):
+        extra_ged = vol_ged
+    print(f"  Usando {extra_ged.relative_to(base)}")
     if extra_ged.exists():
         db_tmp = sqlite3.connect(db_path)
         from database import attach_decisions
