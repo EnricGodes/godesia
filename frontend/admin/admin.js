@@ -2947,6 +2947,7 @@ const Palazuelos = (() => {
     // ── Typeahead ─────────────────────────────────────────────────────────────
 
     let _taTimer = null;
+    const _candCache = {};   // palaz_id → candidato (años y padres) del desplegable
 
     async function onTypeahead(input) {
         clearTimeout(_taTimer);
@@ -2957,9 +2958,11 @@ const Palazuelos = (() => {
             try {
                 const d = await apiFetch(`/api/admin/palazuelos/candidates?q=${encodeURIComponent(q)}&limit=10`);
                 const cands = d.candidates || [];
+                cands.forEach(c => { _candCache[c.palaz_id] = c; });
                 if (!cands.length) { dropdown.style.display = 'none'; return; }
                 dropdown.innerHTML = cands.map(c => {
-                    const years = [c.birth_year, c.death_year].filter(Boolean).join('–') || '';
+                    // Siempre "nac.–def.": un año suelto no dice si es nacimiento o muerte.
+                    const years = (c.birth_year || c.death_year) ? `${c.birth_year || '?'}–${c.death_year || '?'}` : '';
                     return `<div class="palaz-ta-item" style="padding:.35rem .6rem;cursor:pointer;font-size:.76rem;border-bottom:1px solid #f1eee5;"
                                  onmousedown="Palazuelos.selectCandidate(event,'${esc(input.dataset.godesId)}','${esc(c.palaz_id)}','${esc(c.name)}')"
                                  onmouseover="this.style.background='#f1eee5'" onmouseout="this.style.background=''">
@@ -2995,6 +2998,13 @@ const Palazuelos = (() => {
         evt.preventDefault();
         try {
             await _patchMap(godesId, { palaz_id: palazId, palaz_name: palazName, match_type: 'manual', confidence: 100 });
+            // La fila mostraba aún los años/padres de la pareja anterior.
+            const c = _candCache[palazId], e = _mapData.find(x => x.godes_id === godesId);
+            if (c && e) {
+                Object.assign(e, { palaz_birth_year: c.birth_year, palaz_death_year: c.death_year,
+                                   palaz_father: c.father, palaz_mother: c.mother });
+                _updateRow(godesId);
+            }
         } catch (e) { alert('Error: ' + e.message); }
     }
 
