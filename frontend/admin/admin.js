@@ -2866,8 +2866,9 @@ const Palazuelos = (() => {
 
     // Años de Palazuelos junto al ID; en rojo el que no coincide con Godes.
     function _palazYears(e) {
+        // Los años llegan como números: esc() solo acepta strings.
         const y = (pz, gd) => !pz ? '?' : (gd && String(pz) !== String(gd))
-            ? `<span style="color:#d32f2f;font-weight:700;" title="Godes: ${esc(gd)}">${esc(pz)}</span>` : esc(pz);
+            ? `<span style="color:#d32f2f;font-weight:700;" title="Godes: ${esc(String(gd))}">${esc(String(pz))}</span>` : esc(String(pz));
         if (!e.palaz_birth_year && !e.palaz_death_year) return '<small style="color:#9e9b94;">· —</small>';
         return `<small style="color:#727971;">· ${y(e.palaz_birth_year, e.birth_year)}–${y(e.palaz_death_year, e.death_year)}</small>`;
     }
