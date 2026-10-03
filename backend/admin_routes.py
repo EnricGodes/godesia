@@ -421,8 +421,12 @@ async def import_gedcom(
     # Delete old photos if requested
     if delete_old_photos and photos_dir.exists():
         _log_job("Eliminando fotos antiguas…")
-        shutil.rmtree(photos_dir)
-        photos_dir.mkdir()
+        # Solo ficheros sueltos: data/photos/ es el volumen y sus carpetas _*
+        # guardan la BD principal (_db), usuarios (_auth), aportaciones y
+        # decisiones (_contrib) y palazuelos.ged (_gedcom). Un rmtree las borraba.
+        for p in photos_dir.iterdir():
+            if p.is_file() and not p.name.startswith("_"):
+                p.unlink()
         _log_job("Fotos eliminadas.")
 
     if mode == "fast":

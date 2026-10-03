@@ -6,6 +6,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+# Antes de que ningún import abra la BD: en Railway data/godesia.db pasa a ser un
+# enlace a la BD del volumen (ver db_volume.py), así los deploys no borran datos.
+import db_volume
+print(f"[db] {db_volume.ensure_volume_db(Path(__file__).parent.parent)}")
+
 import re
 import shutil
 from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
