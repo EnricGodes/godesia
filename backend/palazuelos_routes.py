@@ -700,9 +700,18 @@ async def get_map(status_filter: Optional[str] = None):
     except Exception:
         return {"entries": []}
 
+    # Años de Palazuelos (del .ged parseado) para cotejarlos con los de Godes.
+    try:
+        indis = _palaz_data()["individuals"]
+    except HTTPException:
+        indis = {}
+
     entries = []
     for r in rows:
         d = dict(r)
+        pz = indis.get(d["palaz_id"]) if d["palaz_id"] else None
+        d["palaz_birth_year"] = _ged_year((pz.get("birth") or {}).get("date") or "") if pz else None
+        d["palaz_death_year"] = _ged_year((pz.get("death") or {}).get("date") or "") if pz else None
         if status_filter:
             if status_filter == 'confirmed' and d['confidence'] < 80:
                 continue

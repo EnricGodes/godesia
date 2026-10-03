@@ -2864,6 +2864,14 @@ const Palazuelos = (() => {
         return '<span class="badge" style="background:#e65100;">Revisión</span>';
     }
 
+    // Años de Palazuelos junto al ID; en rojo el que no coincide con Godes.
+    function _palazYears(e) {
+        const y = (pz, gd) => !pz ? '?' : (gd && String(pz) !== String(gd))
+            ? `<span style="color:#d32f2f;font-weight:700;" title="Godes: ${esc(gd)}">${esc(pz)}</span>` : esc(pz);
+        if (!e.palaz_birth_year && !e.palaz_death_year) return '<small style="color:#9e9b94;">· —</small>';
+        return `<small style="color:#727971;">· ${y(e.palaz_birth_year, e.birth_year)}–${y(e.palaz_death_year, e.death_year)}</small>`;
+    }
+
     function _renderRow(e) {
         const rowBg = e.match_type === 'rejected' ? '#f5f5f5' :
                       !e.palaz_id ? '#fff8f6' :
@@ -2877,7 +2885,7 @@ const Palazuelos = (() => {
         return `<tr style="background:${rowBg};" data-godes-id="${esc(e.godes_id)}">
             <td><strong>${esc(e.godes_name)}</strong><br><small style="color:#9e9b94;">${esc(e.godes_id)}</small></td>
             <td style="font-size:.8rem;color:#727971;">${esc(years)}</td>
-            <td>${e.palaz_id ? `<strong>${esc(e.palaz_name)}</strong><br><small style="color:#9e9b94;">${esc(e.palaz_id)}</small>` : '<span style="color:#bbb;">—</span>'}</td>
+            <td>${e.palaz_id ? `<strong>${esc(e.palaz_name)}</strong><br><small style="color:#9e9b94;">${esc(e.palaz_id)}</small> ${_palazYears(e)}` : '<span style="color:#bbb;">—</span>'}</td>
             <td style="font-weight:700;color:${e.confidence >= 80 ? '#2d4b33' : e.confidence >= 50 ? '#e65100' : '#d32f2f'};">${e.confidence || 0}</td>
             <td>${_statusBadge(e)}</td>
             <td>
