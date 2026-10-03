@@ -2900,7 +2900,7 @@ const Palazuelos = (() => {
                     <input type="text" class="palaz-typeahead-input" placeholder="Buscar en Palazuelos…"
                            style="width:100%;font-size:.75rem;padding:.25rem .4rem;border:1px solid #c2c8bf;border-radius:4px;"
                            data-godes-id="${esc(e.godes_id)}"
-                           value="${cat === 'nomatch' ? esc((e.godes_surname || '').replace(/\s+/g, ' ').trim()) : ''}"
+                           value="${(cat === 'nomatch' || cat === 'rejected') ? esc((e.godes_surname || '').replace(/\s+/g, ' ').trim()) : ''}"
                            onfocus="Palazuelos.onTypeahead(this)"
                            oninput="Palazuelos.onTypeahead(this)"
                            onblur="Palazuelos.hideDropdown(this)"/>
