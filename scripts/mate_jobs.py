@@ -52,7 +52,20 @@ def main():
         nm = (p["given"] + " " + p["surname"]).strip()
         return nm or "Desconocido"
 
+    # Parejas ya unidas en Godes: las del godes.ged + las formadas en esta sesión.
+    couples = {tuple(sorted(c)) for c in prog.get("couples", [])}
+    for f in godes["fams"].values():
+        if f["husb"] and f["wife"]:
+            couples.add(tuple(sorted((mh(f["husb"]), mh(f["wife"])))))
     jobs = []
+    # 1) Conexiones: parejas de Maté con los dos miembros ya en Godes pero sin unir.
+    for f in mate["fams"].values():
+        h, w = f.get("husb"), f.get("wife")
+        if h in m2g and w in m2g and tuple(sorted((mh(m2g[h]), mh(m2g[w])))) not in couples:
+            if m2g[h] == "@I107@" or m2g[w] == "@I107@":
+                pass  # Esther: se puede conectar (solo vínculos), sus datos no se tocan
+            jobs.append({"type": "link", "a": mh(m2g[w]), "a_name": card_name(w), "b": mh(m2g[h]),
+                         "b_name": card_name(h), "rel": "Divorced" if any(x["tag"] == "DIV" for x in f["facts"]) else "Married"})
     for p in plan["new_people"]:
         mid = p["mate_id"]
         if mid in prog["new"]:
@@ -84,7 +97,9 @@ def main():
                 job.update(anchor=mh(m2g[o]), anchor_name=card_name(o), menu="pareja")
                 marr = next((x for x in f["facts"] if x["tag"] == "MARR"), None)
                 div = next((x for x in f["facts"] if x["tag"] == "DIV"), None)
-                job["rel"] = "Divorced" if div else ("Married" if marr else "Unknown")
+                # Sin registro de matrimonio → casados igualmente (decisión del usuario 4-oct-2026:
+                # "en esa época estaban todos casados").
+                job["rel"] = "Divorced" if div else "Married"
                 if marr:
                     d = simple_date(marr["date"])
                     if d is None:
