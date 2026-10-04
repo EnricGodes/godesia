@@ -593,6 +593,24 @@ def main():
         if ch:
             updates.append({"mate_id": mid, "godes_id": v["godes_id"], "name": mate["people"][mid]["name"],
                             "changes": ch})
+    # Decisiones del usuario (data/mate_transfer/decisions.json): cambios que NO se aplican.
+    dec_path = WORK / "decisions.json"
+    keep = json.loads(dec_path.read_text())["keep_godes"] if dec_path.exists() else []
+
+    def kept(gid, c):
+        for k in keep:
+            if k["godes_id"] != gid:
+                continue
+            if "field" in k and c.get("field") == k["field"]:
+                return True
+            f = c.get("fact") or {}
+            if "tag" in k and f.get("tag") == k["tag"] and f.get("date", "").upper() == k.get("date", "").upper():
+                return True
+        return False
+
+    for u in updates:
+        u["changes"] = [c for c in u["changes"] if not kept(u["godes_id"], c)]
+    updates = [u for u in updates if u["changes"]]
     links = missing_links(mate, godes, matched)
     # El matrimonio de Esther es un dato de su ficha: tampoco se toca.
     marriages = [c for c in marriage_changes(mate, godes, matched)
