@@ -234,6 +234,21 @@ def match_people(mate, godes):
                              "why": "varios candidatos" if len(cands) > 1 else "nombre o año no exacto",
                              "candidates": [{"godes_id": g["id"], "name": g["name"], "by": g["by"], "dy": g["dy"]}
                                             for _, g in cands]})
+    # Hermanos anónimos idénticos (p. ej. 6 "Ramos Pinillos" sin nombre de pila,
+    # mismos padres, sin datos): son intercambiables → se emparejan en orden.
+    groups = defaultdict(list)
+    for d in doubtful:
+        ids = tuple(sorted(c["godes_id"] for c in d.get("candidates", [])))
+        groups[ids].append(d)
+    for ids, ds in groups.items():
+        ms = [mate["people"][d["mate_id"]] for d in ds]
+        if (ids and len(ids) == len(ds)
+                and len({godes["people"][g]["name"] for g in ids} | {m["name"] for m in ms}) == 1
+                and all(not m["facts"] and not m["photos"] for m in ms)
+                and not any(g in [v["godes_id"] for v in matched.values()] for g in ids)):
+            for d, gid in zip(sorted(ds, key=lambda d: d["mate_id"]), ids):
+                matched[d["mate_id"]] = {"godes_id": gid, "how": "anónimo idéntico (intercambiable)"}
+                doubtful.remove(d)
     # Una persona Godes solo puede recibir a una persona Maté.
     used = defaultdict(list)
     for mid, v in matched.items():
