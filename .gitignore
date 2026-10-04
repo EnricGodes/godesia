@@ -18,3 +18,7 @@ data/*.db-wal
 **/.DS_Store
 node_modules/
 data/cemetery_photos/
+
+# Traspaso Maté → Godes (GEDCOM y fotos: datos personales, repo público)
+data/mate_transfer/
+docs/mate.ged
