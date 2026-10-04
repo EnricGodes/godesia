@@ -256,6 +256,8 @@ REL = {  # (relación de la persona NUEVA respecto al ancla, sexo) → texto
     ("child", "M"): "hijo", ("child", "F"): "hija",
     ("spouse", "M"): "esposo", ("spouse", "F"): "esposa",
     ("sibling", "M"): "hermano", ("sibling", "F"): "hermana",
+    ("parent", "U"): "padre/madre", ("child", "U"): "hijo/a",
+    ("spouse", "U"): "cónyuge", ("sibling", "U"): "hermano/a",
 }
 
 
@@ -301,7 +303,7 @@ def plan_new_people(mate, matched, doubtful_ids):
                 "sex": p["sex"], "by": p["by"], "dy": p["dy"],
                 "anchor": {"kind": placed[anchor][0], "id": placed[anchor][1],
                            "name": mate["people"][anchor]["name"]},
-                "relation": REL.get((rel, p["sex"]), rel),
+                "relation": REL.get((rel, p["sex"] if p["sex"] in ("M", "F") else "U"), rel),
                 "facts": p["facts"], "photos": [ph["file"] for ph in p["photos"]],
             })
             queue.append(nb)
