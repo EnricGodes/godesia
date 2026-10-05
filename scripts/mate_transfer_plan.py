@@ -595,6 +595,20 @@ def main():
     godes_path = latest_godes_ged()
     mate, godes = load_tree(MATE_GED), load_tree(godes_path)
     matched, doubtful = match_people(mate, godes)
+    # Las altas hechas en MyHeritage (progress.json) son correspondencias seguras:
+    # mandan sobre el emparejamiento por nombre (imprescindible para los sin nombre).
+    prog_path = WORK / "progress.json"
+    if prog_path.exists():
+        prog = json.loads(prog_path.read_text())
+        for mid, v in prog.get("new", {}).items():
+            gid = v.get("godes_id")
+            if gid in godes["people"] and mid in mate["people"]:
+                matched[mid] = {"godes_id": gid, "how": "creado en el traspaso"}
+        used = {v["godes_id"]: k for k, v in matched.items()}
+        doubtful = [d for d in doubtful if d["mate_id"] not in matched]
+        for mid in [k for k, v in matched.items() if v["how"] != "creado en el traspaso"
+                    and used.get(v["godes_id"]) != k]:
+            matched.pop(mid)
     doubtful_ids = {d["mate_id"] for d in doubtful}
 
     esther_mate = next((mid for mid, v in matched.items() if v["godes_id"] == ESTHER_GODES), None)
