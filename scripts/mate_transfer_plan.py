@@ -54,8 +54,14 @@ def parse_ged(path: Path) -> dict:
     with path.open(encoding="utf-8-sig", errors="replace") as fh:
         for raw in fh:
             line = raw.rstrip("\r\n")
-            m = re.match(r"^(\d+) (?:(@[^@]+@) )?(\S+)(?: (.*))?$", line)
+            m = re.match(r"^(\d{1,2}) (?:(@[^@]+@) )?([A-Z_][A-Z0-9_]*)(?: (.*))?$", line)
+            if m and int(m[1]) > len(stack):
+                m = None
             if not m:
+                # MyHeritage mete saltos de línea crudos dentro de las notas
+                # HTML: la línea sin nivel continúa el valor anterior.
+                if stack:
+                    stack[-1]["value"] += "\n" + line
                 continue
             lvl, xref, tag, val = int(m[1]), m[2], m[3], m[4] or ""
             if tag in ("CONC", "CONT") and lvl > 0 and len(stack) >= lvl:
