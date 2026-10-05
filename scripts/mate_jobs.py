@@ -74,7 +74,14 @@ def main():
         fam = mate["fams"].get(mp["famc"]) or {}
         pars = [x for x in (fam.get("husb"), fam.get("wife")) if x]
         if any(x not in m2g for x in pars):
-            continue
+            # Si ninguno de sus padres está aún en Godes pero tiene pareja que sí,
+            # entra como pareja (sus padres se añadirán luego colgados de ella).
+            # Si alguno de los padres ya está, hay que esperar al otro.
+            has_sp = any(((mate["fams"].get(fs) or {}).get("wife") if (mate["fams"].get(fs) or {}).get("husb") == mid
+                          else (mate["fams"].get(fs) or {}).get("husb")) in m2g for fs in mp["fams"])
+            if any(x in m2g for x in pars) or not has_sp:
+                continue
+            pars = []
         sex = mp["sex"] if mp["sex"] in ("M", "F") else "U"
         job = {"mate_id": mid, "name": p["name"], "fn": mp["given"], "ln": mp["surname"], "sex": sex,
                "dead": any(f["tag"] == "DEAT" for f in mp["facts"]), "editor": []}
