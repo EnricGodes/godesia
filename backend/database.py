@@ -492,6 +492,19 @@ CREATE TABLE IF NOT EXISTS dec.niche_records (
     created_at TEXT DEFAULT (datetime('now'))
 );
 
+-- Huellas de fotos (Godes y Palazuelos) para el comparador de «Crecer el árbol».
+-- Clave = nombre de fichero MyHeritage (único en el sitio). phashes = dHash
+-- 64 bits de la imagen girada 0°,90°,180°,270° (separados por comas).
+CREATE TABLE IF NOT EXISTS dec.photo_hash_cache (
+    filename TEXT PRIMARY KEY,
+    sha256 TEXT,
+    phashes TEXT,
+    width INTEGER,
+    height INTEGER,
+    error TEXT,
+    computed_at TEXT DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS dec.idx_niches_cemetery ON niches(cemetery_id);
 CREATE INDEX IF NOT EXISTS dec.idx_niche_people_person ON niche_people(person_id);
 CREATE INDEX IF NOT EXISTS dec.idx_niche_photos_niche ON niche_photos(niche_id);

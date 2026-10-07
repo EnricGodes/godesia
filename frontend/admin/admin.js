@@ -1600,6 +1600,8 @@ const Expansion = (() => {
     let data = null;
     let filter = 'pending';
     let searchTimer = null;
+    const photoRes = {};      // godes_id → resultado de /photo-compare (caché de la sesión)
+    let photoRunning = false;
 
     function init() { load(); }
 
@@ -1654,6 +1656,7 @@ const Expansion = (() => {
         if (filter === 'gaps') return p.in_godes && p.gaps.length;
         if (filter === 'actionable') return p.in_godes && p.gaps.some(g => g.status === 'palaz');
         if (filter === 'everything') return true;
+        if (filter === 'photos') return p.in_godes && _photoIssues(photoRes[p.godes_id]) > 0;
         // 'pending' (por defecto): las fichas ya completas no aportan trabajo.
         return !p.in_godes || p.gaps.length > 0;
     }
@@ -1672,7 +1675,7 @@ const Expansion = (() => {
         el.innerHTML = note + `<table class="admin-table">
             <thead><tr>
                 <th>Persona (Palazuelos)</th><th style="width:70px;">Años</th><th style="width:150px;">Vínculo</th>
-                <th style="width:110px;">Estado</th><th>Datos básicos que faltan</th><th style="width:150px;"></th>
+                <th style="width:110px;">Estado</th><th>Datos básicos que faltan</th><th style="width:120px;">Fotos</th><th style="width:150px;"></th>
             </tr></thead>
             <tbody>${rows.map((p, i) => {
                 const years = [p.birth_year, p.death_year].filter(Boolean).join('–') || '—';
@@ -1692,12 +1695,14 @@ const Expansion = (() => {
                         ? '<span class="badge" style="background:#2d4b33;">En Godes</span>'
                         : '<span class="badge" style="background:#d32f2f;">Falta</span>'}</td>
                     <td style="font-size:.8rem;">${gaps}</td>
+                    <td>${p.in_godes ? `<button class="btn btn-secondary btn-sm" id="exp-phb-${esc(p.godes_id)}" title="Comparar las fotos con las de Palazuelos"
+                            onclick="Expansion.togglePhotos('${esc(p.godes_id)}')">${_photoBadge(photoRes[p.godes_id])}</button>` : ''}</td>
                     <td style="white-space:nowrap;text-align:right;">
                         ${p.in_godes
                             ? `<button class="btn btn-secondary btn-sm" title="Cabina de traspaso (campos lado a lado)" onclick="Transfer.open('${esc(p.godes_id)}')">⇄</button>`
                             : `<button class="btn btn-secondary btn-sm" title="Abrir Palazuelos y el pariente ancla en Godes" onclick="Expansion.openAdd(${i})">＋ Añadir</button>`}
                     </td>
-                </tr>`;
+                </tr>${p.in_godes ? `<tr id="exp-ph-${esc(p.godes_id)}" style="display:none;"><td colspan="7" style="background:#faf8f3;"></td></tr>` : ''}`;
             }).join('')}</tbody>
         </table>`;
         _rows = rows;
@@ -1715,6 +1720,110 @@ const Expansion = (() => {
         window.open(p.mh_palaz_url, 'mh_palaz', feat(0));
         if (p.anchor) window.open(p.anchor.mh_godes_url, 'mh_godes', feat(W));
         window.focus();
+    }
+
+    // ── Comparar fotos Godes ↔ Palazuelos ──────────────────────────────────
+    // same = mismo fichero etiquetado en los dos árboles (correcto)
+    // dup / maybe = misma imagen subida dos veces (ficheros distintos)
+    function _photoIssues(r) {
+        if (!r) return 0;
+        const s = r.summary;
+        return s.dup + s.maybe + s.dup_godes + s.dup_palaz + s.only_palaz + s.other;
+    }
+
+    function _photoBadge(r) {
+        if (!r) return '📷';
+        if (r.error) return '⚠ error';
+        const s = r.summary, out = [];
+        if (s.dup + s.dup_godes + s.dup_palaz) out.push(`<span style="color:#d32f2f;" title="Duplicadas (subidas dos veces)">⧉${s.dup + s.dup_godes + s.dup_palaz}</span>`);
+        if (s.maybe) out.push(`<span style="color:#e65100;" title="Posibles duplicadas">?${s.maybe}</span>`);
+        if (s.only_palaz + s.other) out.push(`<span style="color:#1565c0;" title="Solo en Palazuelos / en Godes en otra persona">＋${s.only_palaz + s.other}</span>`);
+        if (!out.length) out.push(`<span style="color:#2d4b33;" title="Sin duplicados ni fotos que traer">✓${s.same ? ' ' + s.same + '=' : ''}</span>`);
+        return out.join(' ');
+    }
+
+    async function _fetchPhotos(gid) {
+        try {
+            photoRes[gid] = await apiFetch(`/api/admin/palazuelos/photo-compare/${encodeURIComponent(gid)}`);
+        } catch (e) {
+            photoRes[gid] = { error: e.message };
+        }
+        const b = document.getElementById(`exp-phb-${gid}`);
+        if (b) b.innerHTML = _photoBadge(photoRes[gid]);
+        return photoRes[gid];
+    }
+
+    function _thumb(x, side, extra) {
+        if (!x) return '';
+        // Al pulsar: la foto a tamaño completo (Godes: fichero local; Palazuelos: CDN vía proxy si aún vale)
+        const href = side === 'godes' ? `/photos/${encodeURIComponent(x.filename)}`
+            : (x.url ? `/api/admin/palazuelos/thumb?url=${encodeURIComponent(x.url)}` : x.src);
+        return `<a href="${esc(href)}" target="_blank" title="${esc((x.title || x.filename) + (extra ? ' · ' + extra : ''))}"
+                   style="display:inline-block;text-align:center;font-size:.65rem;color:#727971;width:118px;vertical-align:top;margin:2px;">
+                    <img src="${esc(x.src)}" loading="lazy" style="max-width:110px;max-height:110px;border:2px solid ${side === 'godes' ? '#2d4b33' : '#78583e'};border-radius:4px;"><br>
+                    ${side === 'godes' ? 'Godes' : 'Palazuelos'}${x.title ? ': ' + esc(x.title.slice(0, 28)) : ''}${extra ? `<br><span style="color:#1565c0;">${esc(extra.slice(0, 60))}</span>` : ''}</a>`;
+    }
+
+    function _pairs(list, la, lb, sa, sb, note) {
+        return list.map(it => `<div style="display:inline-flex;align-items:flex-start;border:1px solid #e5e1d6;border-radius:6px;padding:4px;margin:3px;background:#fff;">
+            ${_thumb(it[la], sa)}${_thumb(it[lb], sb)}
+            ${it.dist !== undefined ? `<small style="align-self:center;color:#727971;padding:0 4px;">${note || 'dist.'} ${it.dist}</small>` : ''}</div>`).join('');
+    }
+
+    function _renderPhotos(gid) {
+        const r = photoRes[gid];
+        const cell = document.querySelector(`#exp-ph-${CSS.escape(gid)} td`);
+        if (!cell || !r) return;
+        if (r.error) { cell.innerHTML = `<div style="color:#d32f2f;padding:.5rem;">${esc(r.error)}</div>`; return; }
+        const g = r.groups, sec = (title, color, body, n, open = true) => n ? `
+            <details ${open ? 'open' : ''} style="margin:.4rem 0;">
+                <summary style="cursor:pointer;font-weight:600;font-size:.8rem;color:${color};">${title} (${n})</summary>
+                <div style="margin-top:.3rem;">${body}</div>
+            </details>` : '';
+        cell.innerHTML = `<div style="padding:.4rem .2rem;font-size:.78rem;">
+            <div style="color:#727971;margin-bottom:.3rem;">Fotos originales (sin recortes): ${r.counts.godes} en Godes · ${r.counts.palaz} en Palazuelos</div>
+            ${sec('⧉ Duplicadas: la misma imagen subida dos veces', '#d32f2f', _pairs(g.dup, 'godes', 'palaz', 'godes', 'palaz'), g.dup.length)}
+            ${sec('⧉ Duplicadas dentro de Godes', '#d32f2f', _pairs(g.dup_godes, 'a', 'b', 'godes', 'godes'), g.dup_godes.length)}
+            ${sec('⧉ Duplicadas dentro de Palazuelos', '#d32f2f', _pairs(g.dup_palaz, 'a', 'b', 'palaz', 'palaz'), g.dup_palaz.length)}
+            ${sec('? Posibles duplicadas (revisar a ojo)', '#e65100', _pairs(g.maybe, 'godes', 'palaz', 'godes', 'palaz'), g.maybe.length)}
+            ${sec('＋ Solo en Palazuelos', '#1565c0', g.only_palaz.map(it => _thumb(it.palaz, 'palaz')).join(''), g.only_palaz.length)}
+            ${sec('＋ En Godes, pero etiquetada en otra persona', '#1565c0', g.other.map(it => _thumb(it.palaz, 'palaz', 'en Godes: ' + it.who)).join(''), g.other.length)}
+            ${sec('= Misma foto en los dos árboles (doble etiquetado, correcto)', '#2d4b33', g.same.map(it => _thumb(it.godes, 'godes')).join(''), g.same.length, false)}
+            ${sec('Solo en Godes', '#727971', g.only_godes.map(it => _thumb(it.godes, 'godes')).join(''), g.only_godes.length, false)}
+            ${r.errors.length ? `<div style="color:#d32f2f;margin-top:.3rem;">No se pudieron leer ${r.errors.length} foto(s) de Palazuelos: ${esc(r.errors.slice(0, 3).join(' · '))}</div>` : ''}
+        </div>`;
+    }
+
+    async function togglePhotos(gid) {
+        const row = document.getElementById(`exp-ph-${gid}`);
+        if (!row) return;
+        if (row.style.display !== 'none' && photoRes[gid]) { row.style.display = 'none'; return; }
+        row.style.display = '';
+        if (!photoRes[gid]) {
+            row.querySelector('td').innerHTML = '<div style="padding:.5rem;color:#727971;">Comparando fotos… (la primera vez descarga las de Palazuelos)</div>';
+            await _fetchPhotos(gid);
+        }
+        _renderPhotos(gid);
+    }
+
+    // Recorre el anillo entero, una persona tras otra (sin paralelismo: el CDN
+    // de MyHeritage no tiene por qué recibir ráfagas).
+    async function comparePhotosRing() {
+        if (photoRunning) { photoRunning = false; return; }
+        if (!data) return;
+        photoRunning = true;
+        const btn = document.getElementById('exp-photos-run');
+        const todo = data.people.filter(p => p.in_godes && !photoRes[p.godes_id]);
+        let n = 0;
+        for (const p of todo) {
+            if (!photoRunning) break;
+            n++;
+            if (btn) btn.textContent = `⏸ Comparando fotos ${n}/${todo.length}…`;
+            await _fetchPhotos(p.godes_id);
+        }
+        photoRunning = false;
+        if (btn) btn.textContent = '📷 Comparar fotos del anillo';
+        if (filter === 'photos') renderList();
     }
 
     function setDistance(d) { distance = d; load(); }
@@ -1752,7 +1861,8 @@ const Expansion = (() => {
 
     function onActivate() { if (!data) load(); }
 
-    return { init, load, setDistance, setFilter, onTypeahead, select, hideDropdown, openAdd, onActivate };
+    return { init, load, setDistance, setFilter, onTypeahead, select, hideDropdown, openAdd, onActivate,
+             togglePhotos, comparePhotosRing };
 })();
 
 // ---------------------------------------------------------------------------

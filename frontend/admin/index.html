@@ -727,6 +727,10 @@
                 <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('gaps')">Con huecos</button>
                 <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('actionable')">Huecos que Palazuelos rellena</button>
                 <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('everything')">Todos (incl. completos)</button>
+                <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('photos')" title="Personas con fotos duplicadas o que solo están en Palazuelos (tras comparar)">Fotos a revisar</button>
+                <span style="flex:1;"></span>
+                <button class="btn btn-secondary btn-sm" id="exp-photos-run" onclick="Expansion.comparePhotosRing()"
+                        title="Compara, una a una, las fotos de todas las personas del anillo que ya están en Godes con las de Palazuelos">📷 Comparar fotos del anillo</button>
             </div>
 
             <div id="exp-list" style="margin-top:.75rem;"></div>
@@ -1117,6 +1121,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="admin_cemeteries.js?v=20260612.2"></script>
-<script src="admin.js?v=20260612.2"></script>
+<script src="admin.js?v=20261007.1"></script>
 </body>
 </html>

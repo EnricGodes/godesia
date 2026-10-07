@@ -7,6 +7,7 @@ import threading
 import time
 import urllib.request
 import urllib.error
+import urllib.parse
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -1330,6 +1331,274 @@ async def expansion(person_id: str = "@I4@", distance: int = 1):
                    "palaz_name": (data["individuals"].get(start) or {}).get("name") or start},
         "distance": distance, "rings": rings, "people": people,
     }
+
+
+# ---------------------------------------------------------------------------
+# Comparar fotos Godes ↔ Palazuelos (Crecer el árbol)
+# ---------------------------------------------------------------------------
+# Los dos árboles viven en el mismo sitio MyHeritage: la MISMA foto etiquetada en
+# los dos árboles aparece con el mismo fichero (número + hash) en los dos GEDCOM
+# (doble etiquetado, correcto). Una foto SUBIDA DOS VECES tiene ficheros distintos
+# y solo se reconoce por el contenido: sha256 igual o dHash cercano (probando los
+# 4 giros, porque hay fotos que se subieron giradas). Los recortes que crea
+# MyHeritage al etiquetar (_CUTOUT) se sustituyen por su foto original.
+
+PH_SAME = 3    # dHash ≤ 3: la misma imagen (recomprimida o redimensionada)
+PH_MAYBE = 8   # 4–8: posible duplicado, revisar a ojo
+
+_palaz_photos_cache = {"mtime": None, "data": None, "by_rin": None}
+
+
+def _palaz_photos() -> tuple:
+    """({palaz_id: [foto…]}, {photo_rin: foto}) del palazuelos.ged, cacheado por mtime."""
+    ged_path = _default_ged_path()
+    mtime = ged_path.stat().st_mtime
+    if _palaz_photos_cache["data"] is None or _palaz_photos_cache["mtime"] != mtime:
+        data = _parse_palaz_photos(str(ged_path))
+        by_rin = {}
+        for photos in data.values():
+            for ph in photos:
+                if ph.get("photo_rin") and not ph.get("is_cutout"):
+                    by_rin.setdefault(ph["photo_rin"], ph)
+        _palaz_photos_cache.update(mtime=mtime, data=data, by_rin=by_rin)
+    return _palaz_photos_cache["data"], _palaz_photos_cache["by_rin"]
+
+
+def _thumbs_dir() -> Path:
+    d = _base_dir / "data" / "photos" / "_contrib" / "palaz_thumbs"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _hash_image_bytes(data: bytes) -> dict:
+    import hashlib
+    import io
+    from PIL import Image, ImageOps
+    import imagehash
+    out = {"sha256": hashlib.sha256(data).hexdigest()}
+    with Image.open(io.BytesIO(data)) as img:
+        img = ImageOps.exif_transpose(img).convert("RGB")
+        out["width"], out["height"] = img.size
+        out["phashes"] = ",".join(str(imagehash.dhash(img.rotate(a, expand=True), hash_size=8))
+                                  for a in (0, 90, 180, 270))
+        thumb = img.copy()
+        thumb.thumbnail((320, 320))
+        buf = io.BytesIO()
+        thumb.save(buf, "JPEG", quality=80)
+        out["thumb"] = buf.getvalue()
+    return out
+
+
+def _cached_hash(db, filename: str) -> Optional[dict]:
+    row = db.execute("SELECT sha256, phashes, width, height, error FROM photo_hash_cache WHERE filename=?",
+                     (filename,)).fetchone()
+    return dict(row) if row else None
+
+
+def _compute_hash(filename: str, url: Optional[str]) -> dict:
+    """Huella de una foto SIN tocar la BD (se ejecuta en un hilo aparte). Godes:
+    fichero del volumen. Palazuelos: se descarga del CDN y se guarda una miniatura."""
+    if filename.lower().endswith(".pdf"):
+        return {"error": "pdf"}
+    data, err = None, None
+    local = _base_dir / "data" / "photos" / filename
+    try:
+        if local.exists():
+            data = local.read_bytes()
+        elif url:
+            req = urllib.request.Request(url, headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+                "Referer": "https://www.myheritage.es/"})
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                data = resp.read()
+            time.sleep(0.3)   # sin prisas con el CDN de MyHeritage
+        else:
+            err = "sin fichero ni URL"
+    except urllib.error.HTTPError as e:
+        err = f"CDN {e.code}" + (" (enlace caducado: sube un palazuelos.ged nuevo)" if e.code in (403, 410) else "")
+    except Exception as e:
+        err = f"red: {e}"[:200]
+    h = {}
+    if data:
+        try:
+            h = _hash_image_bytes(data)
+            (_thumbs_dir() / filename).write_bytes(h.pop("thumb"))
+        except Exception as e:
+            err = f"imagen ilegible: {e}"[:200]
+    return {**{k: h.get(k) for k in ("sha256", "phashes", "width", "height")}, "error": err}
+
+
+def _store_hash(db, filename: str, h: dict):
+    # Un fallo de red o del CDN no se cachea (se reintenta); uno de imagen sí.
+    err = h.get("error") or ""
+    if h.get("phashes") or h.get("sha256") or (err and not err.startswith(("CDN", "red:"))):
+        db.execute("""INSERT OR REPLACE INTO photo_hash_cache (filename, sha256, phashes, width, height, error)
+                      VALUES (?,?,?,?,?,?)""",
+                   (filename, h.get("sha256"), h.get("phashes"), h.get("width"), h.get("height"), h.get("error")))
+
+
+def _ph_dist(a: dict, b: dict) -> int:
+    """Distancia mínima entre las huellas de a (0°) y los 4 giros de b."""
+    if a.get("sha256") and a.get("sha256") == b.get("sha256"):
+        return 0
+    pa = (a.get("phashes") or "").split(",")[0]
+    pb = [x for x in (b.get("phashes") or "").split(",") if x]
+    if not pa or not pb:
+        return 999
+    return min(bin(int(pa, 16) ^ int(x, 16)).count("1") for x in pb)
+
+
+def _godes_originals(db, godes_id: str) -> list:
+    rows = db.execute("""
+        SELECT p.id, p.filename, p.title, p.is_cutout, p.parent_photo_id
+        FROM photos p JOIN photo_tags pt ON pt.photo_id = p.id
+        WHERE pt.person_id = ?""", (godes_id,)).fetchall()
+    out, seen = [], set()
+    for r in rows:
+        r = dict(r)
+        if r["is_cutout"] and r["parent_photo_id"]:
+            par = db.execute("SELECT id, filename, title FROM photos WHERE id=?", (r["parent_photo_id"],)).fetchone()
+            if par:
+                r = dict(par)
+        if r["filename"] in seen:
+            continue
+        seen.add(r["filename"])
+        out.append({"filename": r["filename"], "title": r.get("title") or "",
+                    "src": f"/photos/{r['filename']}", "fid": _extract_hash(r["filename"])})
+    return out
+
+
+def _palaz_originals(palaz_id: str) -> list:
+    by_indi, by_rin = _palaz_photos()
+    out, seen = [], set()
+    for ph in by_indi.get(palaz_id, []):
+        if ph.get("is_cutout") and ph.get("parent_rin") in by_rin:
+            ph = by_rin[ph["parent_rin"]]
+        fn = ph.get("filename")
+        if not fn or fn in seen:
+            continue
+        seen.add(fn)
+        out.append({"filename": fn, "title": ph.get("title") or "", "url": ph.get("url") or "",
+                    "src": f"/api/admin/palazuelos/photo-compare/thumb/{fn}", "fid": _extract_hash(fn)})
+    return out
+
+
+async def _compare_pair(godes_id: str, palaz_id: str) -> dict:
+    from starlette.concurrency import run_in_threadpool
+    db = _db()
+    G = _godes_originals(db, godes_id)
+    P = _palaz_originals(palaz_id)
+    g_fids = {g["fid"] for g in G}
+    # Las fotos que ya son la misma (mismo fichero en los dos árboles) no hace
+    # falta descargarlas. El resto: huella cacheada o se calcula en otro hilo.
+    todo = [g for g in G] + [p for p in P if p["fid"] not in g_fids]
+    need = []
+    for x in todo:
+        c = _cached_hash(db, x["filename"])
+        if c and (c.get("phashes") or c.get("sha256") or c.get("error")):
+            x["h"] = c
+        else:
+            need.append(x)
+    if need:
+        res = await run_in_threadpool(lambda: [_compute_hash(x["filename"], x.get("url")) for x in need])
+        for x, h in zip(need, res):
+            x["h"] = h
+            _store_hash(db, x["filename"], h)
+        db.commit()
+    g_hash = {g["fid"]: g.get("h") or {} for g in G}
+    errors = []
+    for p in P:
+        if "h" not in p:
+            p["h"] = g_hash.get(p["fid"], {})   # mismo fichero que en Godes: misma huella
+        e = p["h"].get("error")
+        if e and e != "pdf":
+            errors.append(f"{p['filename']}: {e}")
+        # Miniatura: la cacheada; si no, el fichero local; si no, el proxy del CDN
+        if (_thumbs_dir() / p["filename"]).exists():
+            pass
+        elif (_base_dir / "data" / "photos" / p["filename"]).exists():
+            p["src"] = f"/photos/{p['filename']}"
+        else:
+            p["src"] = f"/api/admin/palazuelos/thumb?url={urllib.parse.quote(p['url'], safe='')}"
+    for g in G:
+        g.setdefault("h", {})
+        if (_thumbs_dir() / g["filename"]).exists():
+            g["src"] = f"/api/admin/palazuelos/photo-compare/thumb/{g['filename']}"
+
+    # Fotos de Godes (cualquier persona) por hash de fichero → «en Godes, otra persona»
+    godes_fids = {}
+    for r in db.execute("""SELECT p.filename, GROUP_CONCAT(pe.name, ' · ') AS who
+                           FROM photos p JOIN photo_tags pt ON pt.photo_id = p.id
+                           JOIN people pe ON pe.id = pt.person_id GROUP BY p.id"""):
+        f = _extract_hash(r["filename"] or "")
+        if f:
+            godes_fids[f] = r["who"]
+
+    strip = lambda x: {k: v for k, v in x.items() if k != "h"}
+    groups = {k: [] for k in ("same", "dup", "maybe", "other", "only_palaz", "only_godes",
+                              "dup_godes", "dup_palaz")}
+    used_g = set()
+    for p in P:
+        g_same = next((g for g in G if g["fid"] and g["fid"] == p["fid"]), None)
+        if g_same:
+            p["src"] = g_same["src"]
+            groups["same"].append({"godes": strip(g_same), "palaz": strip(p)})
+            used_g.add(g_same["filename"])
+            continue
+        best, bd = None, 999
+        for g in G:
+            d = _ph_dist(g["h"], p["h"])
+            if d < bd:
+                best, bd = g, d
+        if best and bd <= PH_SAME:
+            groups["dup"].append({"godes": strip(best), "palaz": strip(p), "dist": bd})
+            used_g.add(best["filename"])
+        elif best and bd <= PH_MAYBE:
+            groups["maybe"].append({"godes": strip(best), "palaz": strip(p), "dist": bd})
+            used_g.add(best["filename"])
+        elif p["fid"] in godes_fids:
+            groups["other"].append({"palaz": strip(p), "who": godes_fids[p["fid"]]})
+        else:
+            groups["only_palaz"].append({"palaz": strip(p)})
+    groups["only_godes"] = [{"godes": strip(g)} for g in G if g["filename"] not in used_g]
+
+    for side, items in (("dup_godes", G), ("dup_palaz", P)):
+        for i in range(len(items)):
+            for j in range(i + 1, len(items)):
+                a, b = items[i], items[j]
+                if a["fid"] != b["fid"] and a.get("h") and b.get("h"):
+                    d = _ph_dist(a["h"], b["h"])
+                    if d <= PH_SAME:
+                        groups[side].append({"a": strip(a), "b": strip(b), "dist": d})
+
+    return {"godes_id": godes_id, "palaz_id": palaz_id, "groups": groups,
+            "summary": {k: len(v) for k, v in groups.items()},
+            "counts": {"godes": len(G), "palaz": len(P)}, "errors": errors}
+
+
+@router.get("/photo-compare/thumb/{filename}")
+async def photo_compare_thumb(filename: str):
+    """Miniatura cacheada de una foto de Palazuelos (sigue sirviendo cuando el
+    enlace del CDN ya ha caducado)."""
+    from fastapi.responses import FileResponse
+    if "/" in filename or ".." in filename:
+        raise HTTPException(400, "nombre no válido")
+    f = _thumbs_dir() / filename
+    if not f.exists():
+        raise HTTPException(404, "sin miniatura")
+    return FileResponse(f, media_type="image/jpeg")
+
+
+@router.get("/photo-compare/{godes_id}")
+async def photo_compare(godes_id: str):
+    """Compara las fotos de una persona Godes con las de su pareja en Palazuelos."""
+    db = _db()
+    gid = "@" + godes_id.strip("@") + "@"
+    pm = db.execute("SELECT palaz_id FROM palazuelos_map WHERE godes_id=? AND match_type != 'rejected'",
+                    (gid,)).fetchone()
+    if not pm or not pm["palaz_id"]:
+        raise HTTPException(404, "Esta persona no tiene pareja en Palazuelos")
+    return await _compare_pair(gid, pm["palaz_id"])
 
 
 @router.get("/thumb")
