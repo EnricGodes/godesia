@@ -1370,17 +1370,27 @@ def _thumbs_dir() -> Path:
     return d
 
 
+def _dhash(img, size: int = 8) -> str:
+    """dHash de 64 bits, mismo algoritmo y formato hex que imagehash.dhash
+    (gris, LANCZOS a 9×8, cada píxel > su vecino de la izquierda). Solo Pillow:
+    imagehash arrastra numpy/scipy al despliegue."""
+    from PIL import Image
+    g = img.convert("L").resize((size + 1, size), Image.LANCZOS)
+    px = list(g.getdata())
+    bits = "".join("1" if px[r * (size + 1) + c + 1] > px[r * (size + 1) + c] else "0"
+                   for r in range(size) for c in range(size))
+    return "{:0>{w}x}".format(int(bits, 2), w=size * size // 4)
+
+
 def _hash_image_bytes(data: bytes) -> dict:
     import hashlib
     import io
     from PIL import Image, ImageOps
-    import imagehash
     out = {"sha256": hashlib.sha256(data).hexdigest()}
     with Image.open(io.BytesIO(data)) as img:
         img = ImageOps.exif_transpose(img).convert("RGB")
         out["width"], out["height"] = img.size
-        out["phashes"] = ",".join(str(imagehash.dhash(img.rotate(a, expand=True), hash_size=8))
-                                  for a in (0, 90, 180, 270))
+        out["phashes"] = ",".join(_dhash(img.rotate(a, expand=True)) for a in (0, 90, 180, 270))
         thumb = img.copy()
         thumb.thumbnail((320, 320))
         buf = io.BytesIO()
@@ -1392,7 +1402,9 @@ def _hash_image_bytes(data: bytes) -> dict:
 def _cached_hash(db, filename: str) -> Optional[dict]:
     row = db.execute("SELECT sha256, phashes, width, height, error FROM photo_hash_cache WHERE filename=?",
                      (filename,)).fetchone()
-    return dict(row) if row else None
+    if not row or "No module named" in (row["error"] or ""):
+        return None          # error de despliegue, no de la foto: recalcular
+    return dict(row)
 
 
 def _compute_hash(filename: str, url: Optional[str]) -> dict:
@@ -1431,7 +1443,8 @@ def _compute_hash(filename: str, url: Optional[str]) -> dict:
 def _store_hash(db, filename: str, h: dict):
     # Un fallo de red o del CDN no se cachea (se reintenta); uno de imagen sí.
     err = h.get("error") or ""
-    if h.get("phashes") or h.get("sha256") or (err and not err.startswith(("CDN", "red:"))):
+    if h.get("phashes") or h.get("sha256") or (err and not err.startswith(("CDN", "red:"))
+                                                 and "No module named" not in err):
         db.execute("""INSERT OR REPLACE INTO photo_hash_cache (filename, sha256, phashes, width, height, error)
                       VALUES (?,?,?,?,?,?)""",
                    (filename, h.get("sha256"), h.get("phashes"), h.get("width"), h.get("height"), h.get("error")))
