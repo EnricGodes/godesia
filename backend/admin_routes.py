@@ -2605,6 +2605,42 @@ async def dedup_apply_groups(body: DedupGroupsBody):
             "dropped": sum(len(i["drop"]) for i in out), "decisions": out}
 
 
+class DeleteOrphansBody(BaseModel):
+    filenames: list
+    dry_run: bool = True
+
+
+@router.post("/photos/delete-orphans")
+async def photos_delete_orphans(body: DeleteOrphansBody):
+    """Borra del volumen ficheros sueltos que ya no usa ninguna foto (versiones
+    viejas tras girar/borrar en MyHeritage). Solo borra si el fichero NO está en
+    `photos` ni es la foto de perfil de nadie; nunca toca carpetas ni `_*`."""
+    db = _db()
+    used = {r[0] for r in db.execute("SELECT filename FROM photos")}
+    used |= {r[0] for r in db.execute("SELECT photo_file FROM people WHERE photo_file IS NOT NULL")}
+    photos_dir = _base_dir / "data" / "photos"
+    deleted, skipped, freed = [], [], 0
+    for fn in body.filenames:
+        p = photos_dir / str(fn)
+        if "/" in str(fn) or str(fn).startswith("_") or not p.is_file():
+            skipped.append([fn, "no existe o no permitido"])
+            continue
+        if fn in used:
+            skipped.append([fn, "en uso"])
+            continue
+        size = p.stat().st_size
+        if not body.dry_run:
+            p.unlink()
+            try:
+                (photos_dir / "_contrib" / "palaz_thumbs" / fn).unlink(missing_ok=True)
+            except Exception:
+                pass
+        deleted.append(fn)
+        freed += size
+    return {"dry_run": body.dry_run, "deleted": len(deleted), "freed_mb": round(freed / 1e6, 1),
+            "skipped": skipped}
+
+
 @router.get("/dedup/stats")
 async def dedup_stats():
     """Summary counts for the admin UI."""
