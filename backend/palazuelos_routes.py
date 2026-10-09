@@ -1481,7 +1481,9 @@ def _godes_originals(db, godes_id: str) -> list:
     return out
 
 
-def _palaz_originals(palaz_id: str) -> list:
+def _palaz_originals(palaz_id: Optional[str]) -> list:
+    if not palaz_id:
+        return []
     by_indi, by_rin = _palaz_photos()
     out, seen = [], set()
     for ph in by_indi.get(palaz_id, []):
@@ -1496,7 +1498,7 @@ def _palaz_originals(palaz_id: str) -> list:
     return out
 
 
-async def _compare_pair(godes_id: str, palaz_id: str) -> dict:
+async def _compare_pair(godes_id: str, palaz_id: Optional[str]) -> dict:
     from starlette.concurrency import run_in_threadpool
     db = _db()
     G = _godes_originals(db, godes_id)
@@ -1609,9 +1611,10 @@ async def photo_compare(godes_id: str):
     gid = "@" + godes_id.strip("@") + "@"
     pm = db.execute("SELECT palaz_id FROM palazuelos_map WHERE godes_id=? AND match_type != 'rejected'",
                     (gid,)).fetchone()
-    if not pm or not pm["palaz_id"]:
-        raise HTTPException(404, "Esta persona no tiene pareja en Palazuelos")
-    return await _compare_pair(gid, pm["palaz_id"])
+    if not db.execute("SELECT 1 FROM people WHERE id=?", (gid,)).fetchone():
+        raise HTTPException(404, "Persona no encontrada en Godes")
+    # Sin pareja en Palazuelos: igualmente se buscan duplicados dentro de Godes.
+    return await _compare_pair(gid, pm["palaz_id"] if pm and pm["palaz_id"] else None)
 
 
 @router.get("/thumb")
