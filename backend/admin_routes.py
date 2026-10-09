@@ -2525,8 +2525,9 @@ class DedupGroupsBody(BaseModel):
 async def dedup_apply_groups(body: DedupGroupsBody):
     """Deja una sola copia por grupo de fotos idénticas. Se conserva, por orden:
     la que está en el árbol Godes (no solo en Palazuelos) → la subida desde Maté
-    (recuadros exactos, título, fecha, lugar, bien girada) → más metadatos y
-    etiquetas → más píxeles → fichero más grande. Las perdedoras pasan sus
+    (recuadros exactos, título, fecha, lugar, bien girada) → más etiquetas → más
+    metadatos → más píxeles → fichero más grande; pero si otra copia tiene ≥4× los
+    píxeles, gana esa (calidad). Las perdedoras pasan sus
     etiquetas a la ganadora (posición escalada; sin recuadro si está girada),
     se borran de la BD y del disco y quedan en la blocklist para que la próxima
     importación no las vuelva a añadir ni descargar."""
@@ -2550,12 +2551,18 @@ async def dedup_apply_groups(body: DedupGroupsBody):
             title = (r["title"] or "").strip()
             meta = (bool(title) and not title.startswith(r["filename"][:6])) + bool(r["date"]) + bool(r["place"])
             r.update(ntags=ntags, w=w, h=h, godes=bool(g.get("godes_tree")), mate=bool(g.get("mate")),
-                     key=(bool(g.get("godes_tree")), bool(g.get("mate")), not r["is_cutout"], meta, ntags,
+                     key=(bool(g.get("godes_tree")), bool(g.get("mate")), not r["is_cutout"], ntags, meta,
                           (w or 0) * (h or 0), r["filesize"] or 0))
             cands.append(r)
         if len(cands) < 2:
             continue
         cands.sort(key=lambda x: x["key"], reverse=True)
+        # Calidad manda: si otra copia tiene ≥4× los píxeles (p. ej. la del árbol
+        # es una miniatura), se conserva la grande.
+        big = max(cands, key=lambda x: x["key"][5])
+        if big is not cands[0] and big["key"][5] >= 4 * max(cands[0]["key"][5], 1):
+            cands.remove(big)
+            cands.insert(0, big)
         win, losers = cands[0], cands[1:]
         item = {"keep": win["filename"], "drop": [l["filename"] for l in losers],
                 "why": {c["filename"]: {"arbol_godes": c["godes"], "mate": c["mate"], "meta": c["key"][3],
