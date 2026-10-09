@@ -2515,6 +2515,89 @@ async def dedup_decide(body: DedupDecideBody):
     raise HTTPException(status_code=400, detail="invalid action")
 
 
+class DedupGroupsBody(BaseModel):
+    # Cada grupo = la misma imagen varias veces: [{filename, godes_tree, mate}, ...]
+    groups: list
+    dry_run: bool = True
+
+
+@router.post("/dedup/apply-groups")
+async def dedup_apply_groups(body: DedupGroupsBody):
+    """Deja una sola copia por grupo de fotos idénticas. Se conserva, por orden:
+    la que está en el árbol Godes (no solo en Palazuelos) → la subida desde Maté
+    (recuadros exactos, título, fecha, lugar, bien girada) → más metadatos y
+    etiquetas → más píxeles → fichero más grande. Las perdedoras pasan sus
+    etiquetas a la ganadora (posición escalada; sin recuadro si está girada),
+    se borran de la BD y del disco y quedan en la blocklist para que la próxima
+    importación no las vuelva a añadir ni descargar."""
+    db = _db()
+
+    def dims(fn):
+        r = db.execute("SELECT width, height FROM photo_hash_cache WHERE filename=?", (fn,)).fetchone()
+        return (r["width"], r["height"]) if r and r["width"] else (None, None)
+
+    out = []
+    for grp in body.groups:
+        cands = []
+        for g in grp:
+            r = db.execute("SELECT id, filename, title, date, place, filesize, is_cutout FROM photos WHERE filename=?",
+                           (g["filename"],)).fetchone()
+            if not r:
+                continue
+            r = dict(r)
+            ntags = db.execute("SELECT COUNT(*) FROM photo_tags WHERE photo_id=?", (r["id"],)).fetchone()[0]
+            w, h = dims(r["filename"])
+            title = (r["title"] or "").strip()
+            meta = (bool(title) and not title.startswith(r["filename"][:6])) + bool(r["date"]) + bool(r["place"])
+            r.update(ntags=ntags, w=w, h=h, godes=bool(g.get("godes_tree")), mate=bool(g.get("mate")),
+                     key=(bool(g.get("godes_tree")), bool(g.get("mate")), not r["is_cutout"], meta, ntags,
+                          (w or 0) * (h or 0), r["filesize"] or 0))
+            cands.append(r)
+        if len(cands) < 2:
+            continue
+        cands.sort(key=lambda x: x["key"], reverse=True)
+        win, losers = cands[0], cands[1:]
+        item = {"keep": win["filename"], "drop": [l["filename"] for l in losers],
+                "why": {c["filename"]: {"arbol_godes": c["godes"], "mate": c["mate"], "meta": c["key"][3],
+                                        "etiquetas": c["ntags"], "px": c["key"][5], "bytes": c["key"][6]}
+                        for c in cands}}
+        if not body.dry_run:
+            for l in losers:
+                # etiquetas de la perdedora → ganadora, con la posición adaptada
+                same_orient = (win["w"] and l["w"] and (win["w"] >= win["h"]) == (l["w"] >= l["h"]))
+                scale = (win["w"] / l["w"]) if same_orient else None
+                for t in db.execute("SELECT person_id, is_primary, is_prim_cutout, position, source FROM photo_tags WHERE photo_id=?",
+                                    (l["id"],)).fetchall():
+                    pos = t["position"]
+                    if pos and scale:
+                        try:
+                            pos = " ".join(str(round(int(v) * scale)) for v in pos.split())
+                        except ValueError:
+                            pos = None
+                    elif pos and not scale:
+                        pos = None
+                    db.execute("""INSERT OR IGNORE INTO photo_tags (photo_id, person_id, is_primary, is_prim_cutout, position, source)
+                                  VALUES (?,?,?,?,?,?)""",
+                               (win["id"], t["person_id"], t["is_primary"], t["is_prim_cutout"], pos, t["source"]))
+                person = (db.execute("SELECT person_id FROM photo_tags WHERE photo_id=? LIMIT 1", (l["id"],)).fetchone() or [""])[0]
+                _delete_photo_record(db, l["id"], win["filename"], person, "dedup_groups", kept_photo_id=win["id"])
+                try:
+                    (_base_dir / "data" / "photos" / "_contrib" / "palaz_thumbs" / l["filename"]).unlink(missing_ok=True)
+                except Exception:
+                    pass
+            db.commit()
+            item["applied"] = True
+        out.append(item)
+    if not body.dry_run:
+        try:
+            from database import update_all_photo_files  # noqa: PLC0415
+            update_all_photo_files(db)
+        except Exception:
+            pass
+    return {"dry_run": body.dry_run, "groups": len(out),
+            "dropped": sum(len(i["drop"]) for i in out), "decisions": out}
+
+
 @router.get("/dedup/stats")
 async def dedup_stats():
     """Summary counts for the admin UI."""
