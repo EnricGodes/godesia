@@ -2615,6 +2615,22 @@ async def dedup_apply_groups(body: DedupGroupsBody):
             "dropped": sum(len(i["drop"]) for i in out), "decisions": out}
 
 
+@router.get("/photos/info")
+async def photo_info(filename: str):
+    """Diagnóstico de solo lectura: fila de `photos`, etiquetas y entradas de la
+    blocklist de duplicados (como perdedora o como ganadora) de un fichero."""
+    db = _db()
+    row = db.execute("SELECT * FROM photos WHERE filename = ?", (filename,)).fetchone()
+    tags = []
+    if row:
+        tags = [dict(r) for r in db.execute(
+            "SELECT person_id, position, is_primary FROM photo_tags WHERE photo_id = ?", (row["id"],))]
+    blocked = [dict(r) for r in db.execute(
+        "SELECT * FROM photo_dedup_blocklist WHERE filename = ? OR kept_filename = ?", (filename, filename))]
+    on_disk = bool(_base_dir) and (_base_dir / "data" / "photos" / filename).exists()
+    return {"photo": dict(row) if row else None, "tags": tags, "blocklist": blocked, "on_disk": on_disk}
+
+
 class DeleteOrphansBody(BaseModel):
     filenames: list
     dry_run: bool = True
