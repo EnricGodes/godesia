@@ -938,12 +938,30 @@ def main():
                     _photo.album_id = _ns_album(_photo.album_id)
             print(f"  Álbumes Palazuelos renombrados por colisión: {sorted(_collide)}")
 
-        def _merge_tags_into_winner(loser_photo, loser_fname):
-            """Transfer tagged_people from a blocklisted loser to its kept winner.
+        # La blocklist encadena decisiones viejas (A→B, luego B→C…) y la copia
+        # ganadora puede haber desaparecido de MyHeritage después. Solo se descarta
+        # una foto si alguna copia POSTERIOR de su cadena sigue en esta importación;
+        # la ganadora es la última presente. Si no queda ninguna, la foto se conserva
+        # (era la superviviente): antes se descartaba igual y sus etiquetas se perdían.
+        present = set(photos) | set(extra_photos)
 
-            The winner can live in either `photos` (Godes main) or `extra_photos`
-            (Palazuelos). Returns True if any tags were transferred."""
-            kept = blocked_map.get(loser_fname)
+        def _winner(fname):
+            win, cur, seen = None, fname, {fname}
+            while cur in blocked_map:
+                cur = blocked_map[cur]
+                if cur in seen:
+                    break
+                seen.add(cur)
+                if cur in present:
+                    win = cur
+            return win
+
+        winners = {fn: w for fn in present if fn in blocked for w in [_winner(fn)] if w}
+
+        def _merge_tags_into_winner(loser_photo, loser_fname):
+            """Pasa las etiquetas de una copia descartada a su ganadora, que puede
+            estar en `photos` (Godes) o en `extra_photos` (Palazuelos)."""
+            kept = winners.get(loser_fname)
             if not kept or not loser_photo.tagged_people:
                 return 0
             winner = photos.get(kept) or extra_photos.get(kept)
@@ -956,14 +974,19 @@ def main():
                     transferred += 1
             return transferred
 
+        # Primero se fusionan las etiquetas (así una ganadora de Palazuelos que solo
+        # recibe personas Godes por la fusión también entra), después se filtra.
+        recovered_tags = 0
+        for fname in winners:
+            recovered_tags += _merge_tags_into_winner(photos.get(fname) or extra_photos[fname], fname)
+        kept_orphans = sum(1 for fn in present if fn in blocked and fn not in winners)
+
         added = 0
         skipped_blocked = 0
         skipped_no_godes = 0
-        recovered_tags = 0
         for fname, photo in extra_photos.items():
-            if fname in blocked:
+            if fname in winners:
                 skipped_blocked += 1
-                recovered_tags += _merge_tags_into_winner(photo, fname)
                 continue
             if not photo.tagged_people:
                 skipped_no_godes += 1
@@ -979,8 +1002,7 @@ def main():
         # marked as duplicates (some Godes photos may lose to Palazuelos copies).
         main_dropped = 0
         for fname in list(photos.keys()):
-            if fname in blocked:
-                recovered_tags += _merge_tags_into_winner(photos[fname], fname)
+            if fname in winners:
                 del photos[fname]
                 main_dropped += 1
 
@@ -989,6 +1011,7 @@ def main():
         print(f"  Fotos extra (Palazuelos): {added}")
         print(f"  Saltadas por blocklist dedup: {skipped_blocked} (Palazuelos) + {main_dropped} (Godes)")
         print(f"  Etiquetas recuperadas de fotos blocklistadas: {recovered_tags}")
+        print(f"  Conservadas aunque estaban en la blocklist (su ganadora ya no existe): {kept_orphans}")
         print(f"  Total tras merge: {len(photos)}")
     else:
         print("  (palazuelos.ged no encontrado, se omite)")
@@ -1058,7 +1081,7 @@ def main():
                     for chunk in iter(lambda: fh.read(65536), b""):
                         h.update(chunk)
                 sha = h.hexdigest()
-                if sha in existing and existing[sha] != filename:
+                if sha in existing and existing[sha] != filename and existing[sha] in photos:
                     # Identical bytes already on disk → block this copy
                     db_chk.execute(
                         """INSERT OR IGNORE INTO photo_dedup_blocklist
