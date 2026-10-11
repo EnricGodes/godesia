@@ -2615,6 +2615,13 @@ async def dedup_apply_groups(body: DedupGroupsBody):
             "dropped": sum(len(i["drop"]) for i in out), "decisions": out}
 
 
+@router.get("/dedup/blocklist")
+async def dedup_blocklist():
+    """Lista completa de la blocklist de duplicados (solo lectura)."""
+    return {"rows": [dict(r) for r in _db().execute(
+        "SELECT filename, kept_filename, person_id, reason, decided_at FROM photo_dedup_blocklist")]}
+
+
 @router.get("/photos/info")
 async def photo_info(filename: str):
     """Diagnóstico de solo lectura: fila de `photos`, etiquetas y entradas de la
