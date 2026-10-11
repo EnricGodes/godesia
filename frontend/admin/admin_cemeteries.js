@@ -595,7 +595,7 @@ const Cemeteries = {
             if (q.length < 2) { results.style.display = 'none'; return; }
             timer = setTimeout(async () => {
                 try {
-                    const d = await apiFetch(`/api/search?q=${encodeURIComponent(q)}&limit=8`);
+                    const d = await apiFetch(`/api/admin/search?q=${encodeURIComponent(q)}&limit=8`);
                     if (!d.results.length) { results.style.display = 'none'; return; }
                     results.innerHTML = d.results.map(p => `
                         <div onclick="Cemeteries.assignPerson('${p.id}')"

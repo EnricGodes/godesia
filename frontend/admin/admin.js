@@ -592,7 +592,7 @@ const Users = {
         if (q.length < 2) { dd.style.display = 'none'; return; }
         this._personTimer = setTimeout(async () => {
             try {
-                const r = await apiFetch(`/api/search?q=${encodeURIComponent(q)}&limit=8`);
+                const r = await apiFetch(`/api/admin/search?q=${encodeURIComponent(q)}&limit=8`);
                 dd.innerHTML = (r.results || []).map(p => `
                     <div style="padding:.4rem .6rem;cursor:pointer;font-size:.8rem;border-bottom:1px solid #f1eee5;"
                          onmousedown="Users.setPerson(${id}, '${esc(p.id)}')">
@@ -1844,7 +1844,7 @@ const Expansion = (() => {
         if (q.length < 2) { hideDropdown(); return; }
         searchTimer = setTimeout(async () => {
             try {
-                const r = await apiFetch(`/api/search?q=${encodeURIComponent(q)}&limit=8`);
+                const r = await apiFetch(`/api/admin/search?q=${encodeURIComponent(q)}&limit=8`);
                 const dd = document.getElementById('exp-dropdown');
                 dd.innerHTML = (r.results || []).map(p => `
                     <div style="padding:.4rem .6rem;cursor:pointer;font-size:.8rem;border-bottom:1px solid #f1eee5;"
@@ -2067,7 +2067,7 @@ const Config = (() => {
 
         // Show current person name
         try {
-            const sr     = await apiFetch(`/api/search?q=${encodeURIComponent(currentId)}&limit=5`);
+            const sr     = await apiFetch(`/api/admin/search?q=${encodeURIComponent(currentId)}&limit=5`);
             const person = sr.results?.find(p => p.id.replace(/@/g, '') === currentId);
             document.getElementById('config-current').textContent =
                 `Persona actual: ${person ? person.name : currentId} (${currentId})`;
@@ -2084,7 +2084,7 @@ const Config = (() => {
             const q = input.value.trim();
             if (q.length < 2) { results.style.display = 'none'; return; }
             searchTimer = setTimeout(async () => {
-                const data = await apiFetch(`/api/search?q=${encodeURIComponent(q)}&limit=10`);
+                const data = await apiFetch(`/api/admin/search?q=${encodeURIComponent(q)}&limit=10`);
                 results.innerHTML = (data.results || []).map(r => {
                     const cid   = r.id.replace(/@/g, '');
                     const years = `${r.birth_year || '?'} – ${r.death_year || (r.is_alive ? 'vivo/a' : '?')}`;

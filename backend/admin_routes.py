@@ -477,6 +477,16 @@ def _person_links(db, pid: str) -> dict:
     }
 
 
+@router.get("/search")
+async def admin_search(q: str = "", limit: int = 20):
+    """Buscador de personas para el admin. /api/search es pública y exige sesión
+    de usuario aprobado; /admin no la tiene (queda sin proteger a propósito)."""
+    from database import search_people
+    if len(q.strip()) < 2:
+        return {"results": []}
+    return {"results": [dict(r) for r in search_people(_db(), q, limit=min(max(limit, 1), 100))]}
+
+
 @router.get("/people/not-in-gedcom")
 async def people_not_in_gedcom():
     """Personas de la BD que ya no están en el último godes.ged importado (el
