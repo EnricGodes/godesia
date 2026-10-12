@@ -1548,7 +1548,7 @@ async def _compare_pair(godes_id: str, palaz_id: Optional[str]) -> dict:
         if "h" not in p:
             p["h"] = g_hash.get(p["fid"], {})   # mismo fichero que en Godes: misma huella
         e = p["h"].get("error")
-        if e and e != "pdf":
+        if e and e != "pdf" and p["fid"] not in g_fids:   # si casa por fichero, no hace falta leerla
             errors.append(f"{p['filename']}: {e}")
         # Miniatura: la cacheada; si no, el fichero local; si no, el proxy del CDN
         if (_thumbs_dir() / p["filename"]).exists():
