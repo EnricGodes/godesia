@@ -1489,7 +1489,7 @@ def _godes_originals(db, godes_id: str) -> list:
             par = db.execute("SELECT id, filename, title FROM photos WHERE id=?", (r["parent_photo_id"],)).fetchone()
             if par:
                 r = dict(par)
-        if r["is_cutout"] and not par and r["filename"] in cut_parent:
+        if not par and r.get("is_cutout") and r["filename"] in cut_parent:
             # Recorte importado de Palazuelos cuyo original solo está allí: se
             # compara el original (si no, nunca casa con la foto de Palazuelos).
             ph = cut_parent[r["filename"]]
