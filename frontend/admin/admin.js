@@ -1738,6 +1738,7 @@ const Expansion = (() => {
         if (s.dup + s.dup_godes + s.dup_palaz) out.push(`<span style="color:#d32f2f;" title="Duplicadas (subidas dos veces)">⧉${s.dup + s.dup_godes + s.dup_palaz}</span>`);
         if (s.maybe) out.push(`<span style="color:#e65100;" title="Posibles duplicadas">?${s.maybe}</span>`);
         if (s.only_palaz + s.other) out.push(`<span style="color:#1565c0;" title="Solo en Palazuelos / en Godes en otra persona">＋${s.only_palaz + s.other}</span>`);
+        if (s.unverified) out.push(`<span style="color:#727971;" title="Sin verificar: no se pudo leer la foto de Palazuelos">…${s.unverified}</span>`);
         if (!out.length) out.push(`<span style="color:#2d4b33;" title="Sin duplicados ni fotos que traer">✓${s.same ? ' ' + s.same + '=' : ''}</span>`);
         return out.join(' ');
     }
@@ -1787,6 +1788,7 @@ const Expansion = (() => {
             ${sec('⧉ Duplicadas dentro de Palazuelos', '#d32f2f', _pairs(g.dup_palaz, 'a', 'b', 'palaz', 'palaz'), g.dup_palaz.length)}
             ${sec('? Posibles duplicadas (revisar a ojo)', '#e65100', _pairs(g.maybe, 'godes', 'palaz', 'godes', 'palaz'), g.maybe.length)}
             ${sec('＋ Solo en Palazuelos', '#1565c0', g.only_palaz.map(it => _thumb(it.palaz, 'palaz')).join(''), g.only_palaz.length)}
+            ${sec('… Sin verificar: no se pudo leer la foto de Palazuelos (sube un palazuelos.ged nuevo)', '#727971', (g.unverified || []).map(it => _thumb(it.palaz, 'palaz', it.error)).join(''), (g.unverified || []).length)}
             ${sec('＋ En Godes, pero etiquetada en otra persona', '#1565c0', g.other.map(it => _thumb(it.palaz, 'palaz', 'en Godes: ' + it.who)).join(''), g.other.length)}
             ${sec('= Misma foto en los dos árboles (doble etiquetado, correcto)', '#2d4b33', g.same.map(it => _thumb(it.godes, 'godes')).join(''), g.same.length, false)}
             ${sec('Solo en Godes', '#727971', g.only_godes.map(it => _thumb(it.godes, 'godes')).join(''), g.only_godes.length, false)}

@@ -1360,7 +1360,11 @@ def _palaz_photos() -> tuple:
             for ph in photos:
                 if ph.get("photo_rin") and not ph.get("is_cutout"):
                     by_rin.setdefault(ph["photo_rin"], ph)
-        _palaz_photos_cache.update(mtime=mtime, data=data, by_rin=by_rin)
+        # Recorte de Palazuelos (por fichero) → su foto original
+        cut_parent = {ph["filename"]: by_rin[ph["parent_rin"]]
+                      for photos in data.values() for ph in photos
+                      if ph.get("is_cutout") and ph.get("filename") and ph.get("parent_rin") in by_rin}
+        _palaz_photos_cache.update(mtime=mtime, data=data, by_rin=by_rin, cut_parent=cut_parent)
     return _palaz_photos_cache["data"], _palaz_photos_cache["by_rin"]
 
 
@@ -1450,6 +1454,11 @@ def _store_hash(db, filename: str, h: dict):
                    (filename, h.get("sha256"), h.get("phashes"), h.get("width"), h.get("height"), h.get("error")))
 
 
+def _ph_unknown(h: dict) -> bool:
+    """Sin huella por un fallo (no por ser PDF): no se puede comparar."""
+    return not (h.get("phashes") or h.get("sha256")) and h.get("error") != "pdf"
+
+
 def _ph_dist(a: dict, b: dict) -> int:
     """Distancia mínima entre las huellas de a (0°) y los 4 giros de b."""
     if a.get("sha256") and a.get("sha256") == b.get("sha256"):
@@ -1466,17 +1475,30 @@ def _godes_originals(db, godes_id: str) -> list:
         SELECT p.id, p.filename, p.title, p.is_cutout, p.parent_photo_id
         FROM photos p JOIN photo_tags pt ON pt.photo_id = p.id
         WHERE pt.person_id = ?""", (godes_id,)).fetchall()
+    try:
+        _palaz_photos()
+        cut_parent = _palaz_photos_cache.get("cut_parent") or {}
+    except Exception:
+        cut_parent = {}
     out, seen = [], set()
     for r in rows:
         r = dict(r)
+        url = ""
+        par = None
         if r["is_cutout"] and r["parent_photo_id"]:
             par = db.execute("SELECT id, filename, title FROM photos WHERE id=?", (r["parent_photo_id"],)).fetchone()
             if par:
                 r = dict(par)
+        if r["is_cutout"] and not par and r["filename"] in cut_parent:
+            # Recorte importado de Palazuelos cuyo original solo está allí: se
+            # compara el original (si no, nunca casa con la foto de Palazuelos).
+            ph = cut_parent[r["filename"]]
+            r = {"filename": ph["filename"], "title": ph.get("title") or r.get("title")}
+            url = ph.get("url") or ""
         if r["filename"] in seen:
             continue
         seen.add(r["filename"])
-        out.append({"filename": r["filename"], "title": r.get("title") or "",
+        out.append({"filename": r["filename"], "title": r.get("title") or "", "url": url,
                     "src": f"/photos/{r['filename']}", "fid": _extract_hash(r["filename"])})
     return out
 
@@ -1539,6 +1561,8 @@ async def _compare_pair(godes_id: str, palaz_id: Optional[str]) -> dict:
         g.setdefault("h", {})
         if (_thumbs_dir() / g["filename"]).exists():
             g["src"] = f"/api/admin/palazuelos/photo-compare/thumb/{g['filename']}"
+        elif g.get("url") and not (_base_dir / "data" / "photos" / g["filename"]).exists():
+            g["src"] = f"/api/admin/palazuelos/thumb?url={urllib.parse.quote(g['url'], safe='')}"
 
     # Fotos de Godes (cualquier persona) por hash de fichero → «en Godes, otra persona»
     godes_fids = {}
@@ -1550,8 +1574,8 @@ async def _compare_pair(godes_id: str, palaz_id: Optional[str]) -> dict:
             godes_fids[f] = r["who"]
 
     strip = lambda x: {k: v for k, v in x.items() if k != "h"}
-    groups = {k: [] for k in ("same", "dup", "maybe", "other", "only_palaz", "only_godes",
-                              "dup_godes", "dup_palaz")}
+    groups = {k: [] for k in ("same", "dup", "maybe", "other", "only_palaz", "unverified",
+                              "only_godes", "dup_godes", "dup_palaz")}
     used_g = set()
     for p in P:
         g_same = next((g for g in G if g["fid"] and g["fid"] == p["fid"]), None)
@@ -1573,6 +1597,10 @@ async def _compare_pair(godes_id: str, palaz_id: Optional[str]) -> dict:
             used_g.add(best["filename"])
         elif p["fid"] in godes_fids:
             groups["other"].append({"palaz": strip(p), "who": godes_fids[p["fid"]]})
+        elif _ph_unknown(p["h"]) or any(_ph_unknown(g["h"]) for g in G):
+            # Sin huella (enlace del CDN caducado, fichero ilegible…) no se puede
+            # afirmar que falte en Godes: queda «sin verificar».
+            groups["unverified"].append({"palaz": strip(p), "error": p["h"].get("error") or ""})
         else:
             groups["only_palaz"].append({"palaz": strip(p)})
     groups["only_godes"] = [{"godes": strip(g)} for g in G if g["filename"] not in used_g]
