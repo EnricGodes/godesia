@@ -138,7 +138,30 @@ async def admin_status():
         # Región del contenedor: hace falta para la política de privacidad
         # (dónde se alojan los datos) y para saber si es una región de la UE.
         "region": os.environ.get("RAILWAY_REPLICA_REGION") or os.environ.get("RAILWAY_REGION") or "local",
+        "memory": _memory_info(),
     }
+
+
+def _memory_info() -> dict:
+    """RAM del proceso (Railway la cobra por GB·hora) y qué cachés grandes hay cargadas."""
+    out = {}
+    try:
+        for line in Path("/proc/self/status").read_text().splitlines():
+            if line.startswith(("VmRSS:", "VmHWM:")):
+                out[line.split(":")[0]] = line.split(":")[1].strip()
+    except OSError:
+        try:
+            import resource
+            out["max_rss"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        except Exception:
+            pass
+    try:
+        import palazuelos_routes as pr
+        out["cache_palazuelos_ged"] = pr._palaz_cache.get("data") is not None
+        out["cache_palazuelos_fotos"] = pr._palaz_photos_cache.get("data") is not None
+    except Exception:
+        pass
+    return out
 
 
 @router.get("/logs")

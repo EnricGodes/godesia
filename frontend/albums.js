@@ -180,7 +180,7 @@ function renderAlbumCards() {
              onclick="selectAlbum('${album.id}')">
             <div class="aspect-[4/3] overflow-hidden bg-surface-container-highest">
                 ${album.cover
-                    ? `<img src="/photos/${album.cover}" alt="${album.title}"
+                    ? `<img src="${photoThumb(album.cover, 480)}" alt="${album.title}"
                             class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" loading="lazy"/>`
                     : `<div class="w-full h-full flex items-center justify-center">
                            <span class="material-symbols-outlined text-5xl text-outline-variant">photo_library</span>
@@ -243,7 +243,7 @@ function renderBentoGrid(container, photos, startIndex, append) {
         el.setAttribute('tabindex', '0');
         el.onkeydown = e => { if (e.key === 'Enter') openPhotoFromAlbum(idx); };
         el.innerHTML = `
-            <img src="/photos/${photo.filename}" alt="${photo.title || ''}"
+            <img src="${photoThumb(photo.filename, 480)}" alt="${photo.title || ''}"
                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                  loading="lazy"/>
             <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3
@@ -271,7 +271,7 @@ function renderUniformGrid(container, photos, startIndex, append) {
         el.setAttribute('tabindex', '0');
         el.onkeydown = e => { if (e.key === 'Enter') openPhotoFromAlbum(idx); };
         el.innerHTML = `
-            <img src="/photos/${photo.filename}" alt="${photo.title || ''}"
+            <img src="${photoThumb(photo.filename, 480)}" alt="${photo.title || ''}"
                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                  loading="lazy"/>
             <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2
@@ -358,7 +358,7 @@ function renderSidebarPeople(people) {
              data-person-id="${p.id}"
              onclick="selectPersonFilter('${p.id}')">
             ${p.photo_file
-                ? `<img src="/photos/${p.photo_file}" class="w-6 h-6 rounded-full object-cover shrink-0" loading="lazy"/>`
+                ? `<img src="${photoThumb(p.photo_file, 160)}" class="w-6 h-6 rounded-full object-cover shrink-0" loading="lazy"/>`
                 : `<div class="w-6 h-6 rounded-full bg-primary-container text-primary text-[10px] font-bold flex items-center justify-center shrink-0">${initials}</div>`
             }
             <span class="truncate flex-1">${displayName}</span>
@@ -395,7 +395,7 @@ function selectPersonFilter(personId) {
         document.getElementById('chip-name').textContent = person ? (person.given_name || person.name) : personId;
         const avatar = document.getElementById('chip-avatar');
         if (person?.photo_file) {
-            avatar.src = `/photos/${person.photo_file}`;
+            avatar.src = photoThumb(person.photo_file, 160);
             avatar.classList.remove('hidden');
         } else {
             avatar.classList.add('hidden');

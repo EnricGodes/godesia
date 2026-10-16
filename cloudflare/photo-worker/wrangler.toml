@@ -1,0 +1,16 @@
+# Worker de fotos de godes.org (ver src/index.js y la guía de migración).
+# Despliegue: npx wrangler login  →  npx wrangler deploy   (desde esta carpeta)
+# Después, en el panel de Cloudflare, poner cada ruta en «Fail open (proceed)».
+name = "godes-photos"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+routes = [
+  { pattern = "godes.org/photos/*", zone_name = "godes.org" },
+  { pattern = "godes.org/thumbs/*", zone_name = "godes.org" },
+  { pattern = "godes.org/cemetery_photos/*", zone_name = "godes.org" },
+  { pattern = "www.godes.org/photos/*", zone_name = "godes.org" },
+  { pattern = "www.godes.org/thumbs/*", zone_name = "godes.org" },
+  { pattern = "www.godes.org/cemetery_photos/*", zone_name = "godes.org" },
+]

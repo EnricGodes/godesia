@@ -114,7 +114,7 @@ const Cementerios = {
                 const pid = (p.id || '').replace(/@/g, '');
                 return `
                 <a class="sidebar-link flex items-center gap-2" onclick="Cementerios.locatePerson('${pid}')">
-                    <img src="${p.photo_file ? '/photos/' + p.photo_file : `/api/default-photo?sex=${p.sex || ''}&birth_year=${p.birth_year || ''}`}"
+                    <img src="${p.photo_file ? photoThumb(p.photo_file, 160) : `/api/default-photo?sex=${p.sex || ''}&birth_year=${p.birth_year || ''}`}"
                          class="w-6 h-6 rounded-full object-cover border border-outline-variant/40 shrink-0"
                          onerror="this.style.visibility='hidden'"/>
                     <span class="truncate">${esc(p.name)}</span>
@@ -297,7 +297,7 @@ const Cementerios = {
         document.getElementById('np-photos').innerHTML = photos.map(p => `
             <figure class="cursor-pointer"
                     onclick="openPhotoModalUrl('/cemetery_photos/${p.filename}', { title: '${escAttr(this._nicheLabel(n))}', place: '${escAttr(this.current.name)}', note: '${escAttr(kindLabel[p.kind] || '')}' })">
-                <img src="/cemetery_photos/${p.filename}" alt="${kindLabel[p.kind] || 'Foto'}"
+                <img src="${photoThumb(p.filename, 480)}" alt="${kindLabel[p.kind] || 'Foto'}"
                      class="w-full aspect-square object-cover rounded-lg border border-outline-variant/30 hover:opacity-90"/>
                 <figcaption class="text-[10px] uppercase tracking-wider text-outline mt-1">${kindLabel[p.kind] || ''}</figcaption>
             </figure>`).join('');
@@ -316,7 +316,7 @@ const Cementerios = {
             peopleEl.innerHTML = n.people.map(p => {
                 const pid = (p.id || '').replace(/@/g, '');
                 const img = p.photo_file
-                    ? `/photos/${p.photo_file}`
+                    ? photoThumb(p.photo_file, 160)
                     : `/api/default-photo?sex=${p.sex || ''}&birth_year=${p.birth_year || ''}`;
                 const note = recordNotes[p.id];
                 return `

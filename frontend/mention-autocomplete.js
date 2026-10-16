@@ -147,7 +147,7 @@ class MentionAutocomplete {
         }
         return `
           <div class="mention-item" data-mention-item data-name="${person.name}">
-            ${person.photo_file ? `<img src="/photos/${person.photo_file}" alt="${person.name}" class="mention-photo">` : `<div class="mention-photo-placeholder">${person.name.charAt(0)}</div>`}
+            ${person.photo_file ? `<img src="${photoThumb(person.photo_file, 160)}" alt="${person.name}" class="mention-photo">` : `<div class="mention-photo-placeholder">${person.name.charAt(0)}</div>`}
             <span class="mention-name">${this.highlightQuery(person.name)}</span>
             ${yearText ? `<span class="mention-years">${yearText}</span>` : ''}
           </div>

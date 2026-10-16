@@ -205,7 +205,7 @@ function renderBentoGrid(container, photos, startIndex, append) {
                    <span class="material-symbols-outlined text-4xl text-outline">picture_as_pdf</span>
                    <p class="text-[11px] text-outline text-center line-clamp-3">${photo.title || photo.filename}</p>
                </div>`
-            : `<img src="/photos/${photo.filename}" alt="${photo.title || ''}"
+            : `<img src="${photoThumb(photo.filename, 480)}" alt="${photo.title || ''}"
                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                  loading="lazy"/>
                ${typeLabel}
@@ -245,7 +245,7 @@ function renderUniformGrid(container, photos, startIndex, append) {
                    <span class="material-symbols-outlined text-4xl text-outline">picture_as_pdf</span>
                    <p class="text-[11px] text-outline text-center line-clamp-3">${photo.title || photo.filename}</p>
                </div>`
-            : `<img src="/photos/${photo.filename}" alt="${photo.title || ''}"
+            : `<img src="${photoThumb(photo.filename, 480)}" alt="${photo.title || ''}"
                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                  loading="lazy"/>
                ${typeLabel}
@@ -348,7 +348,7 @@ function renderSidebarPeople(people) {
              data-person-id="${p.id}"
              onclick="selectPersonFilter('${p.id}')">
             ${p.photo_file
-                ? `<img src="/photos/${p.photo_file}" class="w-6 h-6 rounded-full object-cover shrink-0" loading="lazy"/>`
+                ? `<img src="${photoThumb(p.photo_file, 160)}" class="w-6 h-6 rounded-full object-cover shrink-0" loading="lazy"/>`
                 : `<div class="w-6 h-6 rounded-full bg-primary-container text-primary text-[10px] font-bold flex items-center justify-center shrink-0">${initials}</div>`
             }
             <span class="truncate flex-1">${displayName}</span>
@@ -385,7 +385,7 @@ function selectPersonFilter(personId) {
         document.getElementById('chip-name').textContent = person ? (person.given_name || person.name) : personId;
         const avatar = document.getElementById('chip-avatar');
         if (person?.photo_file) {
-            avatar.src = `/photos/${person.photo_file}`;
+            avatar.src = photoThumb(person.photo_file, 160);
             avatar.classList.remove('hidden');
         } else {
             avatar.classList.add('hidden');

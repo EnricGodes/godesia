@@ -145,7 +145,7 @@ function renderBirthdays(birthdays) {
             </div>
             ${mailIcon}
             ${b.photo
-                ? `<a href="${_lhref('/dossier.html?id=' + pid)}"><img class="anniversary-photo" src="/photos/${b.photo}" alt="${displayName}"></a>`
+                ? `<a href="${_lhref('/dossier.html?id=' + pid)}"><img class="anniversary-photo" src="${photoThumb(b.photo, 480)}" alt="${displayName}"></a>`
                 : `<a href="${_lhref('/dossier.html?id=' + pid)}" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:var(--surface-container-high);border:1px solid var(--outline-variant);flex-shrink:0;">${personSvg(b.sex, b.birth_year, b.death_year, 22)}</a>`
             }
         </div>`;
@@ -164,7 +164,7 @@ function renderPhotos(photos) {
         const place = p.place || '';
         return `
         <div class="photo-card-full" onclick="openPhotoModal(${p.photo_id})" style="cursor: pointer;">
-            <img src="/photos/${p.photo}" alt="${title}" loading="lazy">
+            <img src="${photoThumb(p.photo, 480)}" alt="${title}" loading="lazy">
             <div class="photo-card-info">
                 <h4 class="line-clamp-2">${title}</h4>
                 <p class="photo-meta">${[year, place].filter(Boolean).join(' • ')}</p>
@@ -191,7 +191,7 @@ function renderRecentlyUpdated(people) {
         return `
         <a href="${_lhref('/dossier.html?id=' + pid)}" class="featured-member" style="text-decoration:none;">
             ${p.photo_file
-                ? `<img src="/photos/${p.photo_file}" alt="${displayName}"
+                ? `<img src="${photoThumb(p.photo_file, 480)}" alt="${displayName}"
                         style="width:56px;height:56px;border-radius:8px;object-fit:cover;flex-shrink:0;">`
                 : `<div class="featured-no-photo" style="width:56px;height:56px;border-radius:8px;flex-shrink:0;">${personSvg(p.sex, p.birth_year, p.death_year, 30)}</div>`
             }
@@ -221,7 +221,7 @@ function renderFeatured(featured) {
         return `
         <a href="${_lhref('/dossier.html?id=' + pid)}" class="featured-member">
             ${p.photo_file
-                ? `<img class="featured-photo" src="/photos/${p.photo_file}" alt="${displayName}">`
+                ? `<img class="featured-photo" src="${photoThumb(p.photo_file, 480)}" alt="${displayName}">`
                 : `<div class="featured-no-photo">${personSvg(p.sex, p.birth_year, p.death_year, 30)}</div>`
             }
             <div class="featured-info">
@@ -279,7 +279,7 @@ function renderInMemoriam(people) {
         const displayName = formatNameWithNickname(p.name, p.nickname, p.given_name, p.surname);
         const deathInfo = [p.death_date, p.death_place ? p.death_place.split(',')[0].trim() : null].filter(Boolean).join(' · ');
         const photoEl = p.photo_file
-            ? `<img src="/photos/${p.photo_file}" alt="${displayName}"
+            ? `<img src="${photoThumb(p.photo_file, 480)}" alt="${displayName}"
                     class="shrink-0 object-cover"
                     style="width:48px;height:64px;border-radius:6px;filter:grayscale(15%);">`
             : `<div class="featured-no-photo shrink-0" style="border-radius:6px;width:48px;height:64px;">${personSvg(p.sex, p.birth_year, p.death_year, 28)}</div>`;
@@ -344,7 +344,7 @@ function renderDocuments(documents) {
     container.innerHTML = `
         <div class="document-single" onclick="openPhotoModal(${d.id})" style="cursor:pointer;">
             <div class="document-image-half">
-                <img src="/photos/${d.filename}" alt="${caption}" loading="lazy">
+                <img src="${photoThumb(d.filename, 480)}" alt="${caption}" loading="lazy">
             </div>
             <div class="document-content-full">
                 <h4 class="document-title">${caption}</h4>

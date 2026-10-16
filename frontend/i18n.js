@@ -144,6 +144,9 @@
   }
 
   window.t = t;
+  // Miniatura de una foto (backend/thumbs.py): 160 avatares, 480 galerías, 1200 grande.
+  // El visor y la descarga siguen usando el original (/photos/…).
+  window.photoThumb = function (file, w) { return file ? '/thumbs/' + (w || 480) + '/' + file : ''; };
   window.I18N = {
     t: t,
     lang: lang,

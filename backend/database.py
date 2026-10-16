@@ -1720,9 +1720,15 @@ def get_person_dossier(conn, person_id):
         ORDER BY ph.date DESC
     """, (person_id,)).fetchall()
     photos_list = []
+    from thumbs import original_size
+    _photos_dir = Path(__file__).resolve().parent.parent / "data" / "photos"
     for p in photos:
         p_dict = dict(p)
         p_dict['date'] = convert_date_to_spanish(p_dict.get('date'))
+        if p_dict.get('position'):
+            # La galería muestra una miniatura: el recuadro de cara se escala con el ancho original
+            size = original_size(_photos_dir / p_dict['filename'])
+            p_dict['ow'] = size[0] if size else None
         photos_list.append(p_dict)
 
     return {

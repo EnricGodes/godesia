@@ -440,7 +440,7 @@ function renderPhotoModal() {
                       onmouseout="if(!window.matchMedia('(max-width:767px)').matches){this.style.backgroundColor='transparent'; highlightFaceBox('${person.person_id}', false)}"
                       onclick="onTagPersonClick(this, '${person.person_id}')">
                    ${person.photo_file
-                     ? `<img src="/photos/${person.photo_file}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(114, 121, 113, 0.3); flex-shrink: 0;">`
+                     ? `<img src="${photoThumb(person.photo_file, 160)}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(114, 121, 113, 0.3); flex-shrink: 0;">`
                      : `<div style="width: 32px; height: 32px; border-radius: 50%; background-color: #f1eee5; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">${personSvg(person.sex, person.birth_year, person.death_year, 20)}</div>`}
                    <span style="font-size: 13px; color: #1c1c17; flex: 1;">${displayName}</span>
                  </div>

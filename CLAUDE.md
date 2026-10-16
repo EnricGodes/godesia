@@ -199,6 +199,17 @@ Toda la web es privada: cada página, foto y API de datos requiere una sesión d
 
 **Avisos por email al admin:** `backend/notifications.py` manda un email (vía [[mailer]] / Resend, en 2º plano, best-effort) cuando alguien **se registra** (`auth.register`) o **envía una aportación** (`app.submit_suggestion`). El destinatario es el setting **`notify_email`** (tabla `settings`, en decisions.db desde el 28/09/2026, editable en admin → Configuración → "Avisos por email"; defecto `egodes@vasava.es` en código, vacío = desactivado). Los settings (también `tree_default_person`/`active_languages`) sobreviven al deploy sin commitear nada; se cambian en godes.org.
 
+## Fotos: miniaturas, caché y Cloudflare delante de Railway
+
+Para abaratar Railway (cobra por uso: RAM/CPU, tráfico de salida y volumen) sin migrar de servidor:
+
+- **Miniaturas** (`backend/thumbs.py`): `GET /thumbs/{160|480|1200}/{fichero}` genera con Pillow una versión reducida la primera vez y la guarda en `PHOTOS_DIR/_thumbs/` (volumen; `/photos/_*` → 403). Pide sesión como todo. En el frontend, `photoThumb(file, w)` (definido en `i18n.js`, inyectado en todas las páginas): avatares 160, galerías/tarjetas 480. El **visor y la descarga siguen usando el original** (`/photos/…`, zoom x4). PDF → 302 al original.
+- **Recuadros de cara sobre miniaturas**: `/api/dossier` añade `ow` (ancho original, `thumbs.original_size`, solo lee la cabecera con el giro EXIF aplicado) a las fotos con `position`; `applyFaceBox` escala las coordenadas por `naturalWidth/ow` (`data-ow` en el `<img>`).
+- **Caché de navegador**: `/photos`, `/cemetery_photos` y `/thumbs` envían `Cache-Control: private, max-age=2592000, immutable` (los nombres de MyHeritage llevan hash: si la foto cambia, cambia el nombre).
+- **IP real**: `auth.client_ip()` usa `CF-Connecting-IP` / `X-Forwarded-For` para el límite de intentos de login y recuperación (detrás de un proxy, `request.client.host` es el mismo para todos).
+- **Worker de Cloudflare** (`cloudflare/photo-worker/`, `npx wrangler deploy`): en `godes.org/{photos,thumbs,cemetery_photos}/*` comprueba la sesión contra `/api/auth/me` (solo usuarios aprobados; recuerda la sesión 10 min) y sirve la foto desde la Cache API de Cloudflare, que solo ve el Worker. No usar «Cache Rules» por cookie para las fotos: filtrarían fotos privadas a quien invente la cookie. Rutas en modo *fail open*.
+- `GET /api/admin/status` incluye `memory` (RSS del proceso y si están cargadas las cachés del palazuelos.ged) para vigilar la RAM que cobra Railway.
+
 ## Git Workflow
 
 This project uses GitHub (EnricGodes/godesia) for version control. As work is completed, commit changes with clean, descriptive commit messages and push to GitHub.

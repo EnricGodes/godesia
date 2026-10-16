@@ -134,7 +134,7 @@ function renderDossier(data) {
 
     // 1. HEADER
     if (person.photo_file && person.photo_file.trim()) {
-        document.querySelector('#hero-photo img').src = `/photos/${person.photo_file}`;
+        document.querySelector('#hero-photo img').src = photoThumb(person.photo_file, 480);
     } else {
         let url = `/api/default-photo?sex=${person.sex || ''}`;
         if (person.birth_year) url += `&birth_year=${person.birth_year}`;
@@ -485,7 +485,7 @@ function renderFamilyTree(data) {
                 <a href="${_lhref('/dossier.html?id=' + dossierId(p.id))}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${p.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${p.photo_file}" alt="${pDisplayName}">` : personSvg(p.sex, p.birth_year, p.death_year, 32)}
+                            ${p.photo_file ? `<img class="w-full h-full object-cover" src="${photoThumb(p.photo_file, 160)}" alt="${pDisplayName}">` : personSvg(p.sex, p.birth_year, p.death_year, 32)}
                         </div>
                         <h4 class="text-[11px] font-bold text-center leading-tight">${pDisplayName}</h4>
                         <span class="text-[10px] opacity-60">${formatYears(p.birth_year, p.death_year, p.is_alive)}</span>
@@ -510,7 +510,7 @@ function renderFamilyTree(data) {
                 <a href="${_lhref('/dossier.html?id=' + dossierId(s.id))}" class="cursor-pointer hover:opacity-90 transition-opacity">
                     <div class="flex flex-col items-center node-card opacity-80 shrink-0">
                         <div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant/30 mb-1 bg-surface-container-high flex items-center justify-center">
-                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${sDisplayName}">` : personSvg(s.sex, s.birth_year, s.death_year, 26)}
+                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="${photoThumb(s.photo_file, 160)}" alt="${sDisplayName}">` : personSvg(s.sex, s.birth_year, s.death_year, 26)}
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${sDisplayName}</h4>
                         <span class="text-[10px] opacity-40">${formatYears(s.birth_year, s.death_year, s.is_alive)}</span>
@@ -553,7 +553,7 @@ function renderFamilyTree(data) {
     html += `
                 <div class="flex flex-col items-center main-node p-4 bg-primary/5 rounded-xl heritage-border border-primary/30 shadow-inner">
                     <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-primary mb-3 shadow-lg bg-surface-container-high flex items-center justify-center">
-                        ${person.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${person.photo_file}" alt="${personDisplayName}">` : personSvg(person.sex, person.birth_year, person.death_year, 44)}
+                        ${person.photo_file ? `<img class="w-full h-full object-cover" src="${photoThumb(person.photo_file, 160)}" alt="${personDisplayName}">` : personSvg(person.sex, person.birth_year, person.death_year, 44)}
                     </div>
                     <h3 class="font-headline font-bold text-primary text-center text-sm">${personDisplayName}</h3>
                     <span class="text-xs opacity-60 italic text-center">${formatYears(person.birth_year, person.death_year, person.is_alive)}</span>
@@ -572,7 +572,7 @@ function renderFamilyTree(data) {
                 <a href="${_lhref('/dossier.html?id=' + dossierId(s.id))}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-secondary/20 mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${s.photo_file}" alt="${spouseDisplayName}">` : personSvg(s.sex, s.birth_year, s.death_year, 36)}
+                            ${s.photo_file ? `<img class="w-full h-full object-cover" src="${photoThumb(s.photo_file, 160)}" alt="${spouseDisplayName}">` : personSvg(s.sex, s.birth_year, s.death_year, 36)}
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${spouseDisplayName}</h4>
                         <span class="text-[10px] opacity-60 text-center">${formatYears(s.birth_year, s.death_year, s.is_alive)}</span>
@@ -601,7 +601,7 @@ function renderFamilyTree(data) {
                 <a href="${_lhref('/dossier.html?id=' + dossierId(c.id))}" class="cursor-pointer hover:opacity-80 transition-opacity">
                     <div class="flex flex-col items-center node-card">
                         <div class="w-16 h-16 rounded-full overflow-hidden heritage-border mb-2 bg-surface-container-high flex items-center justify-center">
-                            ${c.photo_file ? `<img class="w-full h-full object-cover" src="/photos/${c.photo_file}" alt="${cDisplayName}">` : personSvg(c.sex, c.birth_year, c.death_year, 32)}
+                            ${c.photo_file ? `<img class="w-full h-full object-cover" src="${photoThumb(c.photo_file, 160)}" alt="${cDisplayName}">` : personSvg(c.sex, c.birth_year, c.death_year, 32)}
                         </div>
                         <h4 class="text-[11px] font-bold text-center">${cDisplayName}</h4>
                         <span class="text-[10px] opacity-50">${childYears}</span>
@@ -638,7 +638,7 @@ function renderBentoGrid(photos) {
                 const lineClamp = lineClamps[cls] || 'line-clamp-2';
                 return `
                     <div class="${cls} heritage-border bg-white overflow-hidden group relative cursor-pointer" onclick="openPhotoModal(${p.id})">
-                        <img src="/photos/${p.filename}" alt="${p.title || 'Foto'}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" ${p.position ? `onload="applyFaceBox(this, '${p.position}')"` : ''}>
+                        <img src="${photoThumb(p.filename, 480)}" data-ow="${p.ow || ''}" alt="${p.title || 'Foto'}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" ${p.position ? `onload="applyFaceBox(this, '${p.position}')"` : ''}>
                         ${p.position ? `<div class="face-box absolute border-2 pointer-events-none hidden" style="border-color: #2D4B33;"></div>` : ''}
                         ${p.title ? `
                             <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -660,7 +660,7 @@ function renderUniformGrid(photos) {
             ${photos.map((p) => {
                 return `
                     <div class="heritage-border bg-white overflow-hidden group relative aspect-square cursor-pointer" onclick="openPhotoModal(${p.id})">
-                        <img src="/photos/${p.filename}" alt="${p.title || 'Foto'}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" ${p.position ? `onload="applyFaceBox(this, '${p.position}')"` : ''}>
+                        <img src="${photoThumb(p.filename, 480)}" data-ow="${p.ow || ''}" alt="${p.title || 'Foto'}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" ${p.position ? `onload="applyFaceBox(this, '${p.position}')"` : ''}>
                         ${p.position ? `<div class="face-box absolute border-2 pointer-events-none hidden" style="border-color: #2D4B33;"></div>` : ''}
                         ${p.title ? `
                             <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -690,7 +690,10 @@ function renderPhotosGrid(photos) {
         const box = img.nextElementSibling;
         if (!box || box.className.indexOf('face-box') === -1) return;
         const container = img.parentElement;
-        const [x1, y1, x2, y2] = pos.split(' ').map(Number);
+        // Coordenadas en píxeles del ORIGINAL; la galería muestra una miniatura
+        // (data-ow = ancho original) → se llevan a la escala de la miniatura.
+        const k = Number(img.dataset.ow) > 0 ? img.naturalWidth / Number(img.dataset.ow) : 1;
+        const [x1, y1, x2, y2] = pos.split(' ').map(v => Number(v) * k);
         const cW = container.offsetWidth, cH = container.offsetHeight;
         const iW = img.naturalWidth, iH = img.naturalHeight;
         const scale = Math.max(cW / iW, cH / iH);
@@ -1543,7 +1546,7 @@ function renderGraphicMode(events) {
         let photosHtml = '';
         const thumbDiv = (photo, sex, by, dy, name, id) => {
             const img = photo
-                ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="/photos/${photo}" alt="${name}">`
+                ? `<img class="w-8 h-8 rounded-full object-cover border border-outline-variant/30" src="${photoThumb(photo, 160)}" alt="${name}">`
                 : `<div class="w-8 h-8 rounded-full border border-outline-variant/30 bg-surface-container-high flex items-center justify-center flex-shrink-0">${personSvg(sex, by, dy, 20)}</div>`;
             const inner = `${img}<span class="text-sm font-bold">${name}</span>`;
             // Si hay id (familiar del árbol), el chip es un enlace a su dossier.
@@ -1605,7 +1608,7 @@ function renderGraphicMode(events) {
                         <div class="flex gap-4 mt-3 flex-wrap">
                             ${e.eventPhotos.map(ph => `
                                 <div class="flex flex-col items-center gap-1" style="max-width:96px">
-                                    <img src="/photos/${ph.filename}" title="${(ph.title||'').replace(/"/g,'&quot;')}"
+                                    <img src="${photoThumb(ph.filename, 160)}" title="${(ph.title||'').replace(/"/g,'&quot;')}"
                                         class="h-16 w-16 object-cover rounded cursor-pointer border border-outline-variant/40 hover:opacity-80 transition-opacity"
                                         onclick="openPhotoModal(${ph.id})">
                                     ${ph.title ? `<div class="text-xs text-outline text-center leading-tight">${ph.title}</div>` : ''}
@@ -1656,7 +1659,7 @@ function renderListMode(events) {
                         const eventPhotosHtml = (e.eventPhotos && e.eventPhotos.length > 0)
                             ? `<div class="flex gap-3 mt-1 flex-wrap">${e.eventPhotos.map(ph =>
                                 `<div class="flex flex-col items-center gap-0.5" style="max-width:72px">
-                                  <img src="/photos/${ph.filename}" title="${(ph.title||'').replace(/"/g,'&quot;')}"
+                                  <img src="${photoThumb(ph.filename, 160)}" title="${(ph.title||'').replace(/"/g,'&quot;')}"
                                     class="h-10 w-10 object-cover rounded cursor-pointer border border-outline-variant/40"
                                     onclick="openPhotoModal(${ph.id})">
                                   ${ph.title ? `<div class="text-xs text-outline text-center leading-tight">${ph.title}</div>` : ''}
@@ -1908,7 +1911,7 @@ function renderBurialNiche(niche) {
         <div class="flex gap-3 mt-4 flex-wrap">
             ${photos.map(p => `
                 <figure class="cursor-pointer" onclick="openPhotoModalUrl('/cemetery_photos/${p.filename}', { title: '${modalTitle}', place: '${(niche.cemetery_name || '').replace(/'/g, "\\'")}', note: '${kindLabel[p.kind] || ''}' })">
-                    <img src="/cemetery_photos/${p.filename}" alt="${kindLabel[p.kind] || 'Foto'}"
+                    <img src="${photoThumb(p.filename, 480)}" alt="${kindLabel[p.kind] || 'Foto'}"
                          class="w-32 h-24 object-cover rounded-lg border border-outline-variant/30 hover:opacity-90"/>
                     <figcaption class="text-[10px] uppercase tracking-wider text-outline mt-1">${kindLabel[p.kind] || ''}</figcaption>
                 </figure>`).join('')}

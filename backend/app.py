@@ -997,14 +997,16 @@ async def emili_godes_redirect(rest: str = ""):
     return RedirectResponse(EMILI_GODES_URL, status_code=301)
 
 
-# Serve photos
+# Serve photos (con caché de navegador: los nombres llevan hash, ver thumbs.py)
+import thumbs
+thumbs.register(app, PHOTOS_DIR)
 if PHOTOS_DIR.exists():
-    app.mount("/photos", StaticFiles(directory=str(PHOTOS_DIR)), name="photos")
+    app.mount("/photos", thumbs.CachedStaticFiles(directory=str(PHOTOS_DIR)), name="photos")
 
 # Serve niche/registry photos. Conviven con las GEDCOM en data/photos/ (el volumen
 # persistente de Railway); la ruta /cemetery_photos/ se mantiene por compatibilidad.
 PHOTOS_DIR.mkdir(parents=True, exist_ok=True)
-app.mount("/cemetery_photos", StaticFiles(directory=str(PHOTOS_DIR)), name="cemetery_photos")
+app.mount("/cemetery_photos", thumbs.CachedStaticFiles(directory=str(PHOTOS_DIR)), name="cemetery_photos")
 
 # Serve frontend
 app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")

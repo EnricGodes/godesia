@@ -243,9 +243,18 @@ async def register(payload: dict = Body(...)):
     return {"ok": True, "status": "pending"}
 
 
+def client_ip(request) -> str:
+    """IP real del visitante. Detrás de Cloudflare y del proxy de Railway,
+    request.client.host es la IP del proxy (la misma para todos): el límite de
+    intentos por IP bloquearía a todo el mundo a la vez."""
+    h = request.headers
+    ip = h.get("cf-connecting-ip") or (h.get("x-forwarded-for") or "").split(",")[0].strip()
+    return ip or (request.client.host if request.client else "?")
+
+
 @auth_router.post("/login")
 async def login(request: Request, payload: dict = Body(...)):
-    ip = request.client.host if request.client else "?"
+    ip = client_ip(request)
     if _rate_limited("login", ip):
         raise HTTPException(429, "Demasiados intentos. Espera unos minutos.")
     email = (payload.get("email") or "").strip().lower()
@@ -449,7 +458,7 @@ def _send_reset_email(request, email, name, token, lang):
 async def forgot_password(request: Request, payload: dict = Body(...)):
     """Envía (si el email existe) un enlace para restablecer la contraseña.
     Responde SIEMPRE ok para no revelar qué emails están registrados."""
-    ip = request.client.host if request.client else "?"
+    ip = client_ip(request)
     if _rate_limited("forgot", ip, limit=5, window=600):
         raise HTTPException(429, "Demasiadas solicitudes. Espera unos minutos.")
     _record_attempt("forgot", ip)

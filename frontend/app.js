@@ -41,7 +41,7 @@ async function showPersonPanel(personId) {
     const d = await res.json();
     const p = d.person;
 
-    const photoSrc = p.photo_file ? `/photos/${p.photo_file}` : null;
+    const photoSrc = p.photo_file ? photoThumb(p.photo_file, 480) : null;
     const initials = (p.given_name || p.name || '?')[0].toUpperCase();
 
     let years = '';
