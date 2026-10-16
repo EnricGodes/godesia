@@ -3031,13 +3031,32 @@ const Palazuelos = (() => {
         </tr>`;
     }
 
-    function _renderMapRows(entries) {
+    // Pintar las ~2000 filas de golpe (~48k nodos, un <input> por fila) hacía que
+    // el navegador se quedara bloqueado varios segundos cada vez que se mostraba
+    // u ocultaba la sección. Se pintan por tandas con «Mostrar más».
+    const PAGE_ROWS = 200;
+    let _shownRows = PAGE_ROWS;
+    let _filtered = [];
+
+    function _renderMapRows(entries, keepCount = false) {
         const tbody = document.getElementById('palaz-map-body');
+        _filtered = entries;
+        if (!keepCount) _shownRows = PAGE_ROWS;
         if (!entries.length) {
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9e9b94;padding:2rem;">Sin entradas</td></tr>';
             return;
         }
-        tbody.innerHTML = entries.map(_renderRow).join('');
+        const rest = entries.length - _shownRows;
+        tbody.innerHTML = entries.slice(0, _shownRows).map(_renderRow).join('') + (rest > 0
+            ? `<tr class="palaz-more"><td colspan="7" style="text-align:center;padding:.8rem;">
+                   <button class="btn btn-secondary btn-sm" onclick="Palazuelos.showMore()">Mostrar ${Math.min(rest, PAGE_ROWS)} más (quedan ${rest})</button>
+               </td></tr>`
+            : '');
+    }
+
+    function showMore() {
+        _shownRows += PAGE_ROWS;
+        _renderMapRows(_filtered, true);
     }
 
     // Targeted single-row update (avoids full table re-render + page jump)
@@ -3389,7 +3408,7 @@ const Palazuelos = (() => {
              selectCandidate, confirmMatch, rejectMatch,
              loadPendingPhotos, updateSelCount, downloadSelected,
              dismissPersonPhotos, selectPersonPhotos, openPhotoByIdx, openExistingByIdx, openPhotoModal,
-             backfillTags, onActivate };
+             backfillTags, onActivate, showMore };
 })();
 
 // ---------------------------------------------------------------------------
