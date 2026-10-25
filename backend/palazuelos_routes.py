@@ -1243,6 +1243,73 @@ def _basic_gaps(db, godes_id: str, palaz_id: str, data: dict) -> list:
     return gaps
 
 
+def _mark_status(m: dict, row: dict) -> dict:
+    """Contrasta una marca «ya hecho» con los datos actuales (tras la última
+    importación). verified = la importación ya lo refleja; partial = parte;
+    pending = aún no ha llegado (falta exportar/importar los GEDCOM)."""
+    out = {"kind": m["kind"], "note": m.get("note") or "", "marked_at": m["marked_at"],
+           "keys": [], "resolved": []}
+    if m["kind"] == "add":
+        out["status"] = "verified" if row["in_godes"] else "pending"
+        return out
+    keys = [k for k in (m.get("gap_keys") or "").split(",") if k]
+    current = {g["key"] for g in row["gaps"]}
+    out["keys"] = keys
+    out["resolved"] = [k for k in keys if row["in_godes"] and k not in current]
+    if keys and len(out["resolved"]) == len(keys):
+        out["status"] = "verified"
+    elif out["resolved"]:
+        out["status"] = "partial"
+    else:
+        out["status"] = "pending"
+    return out
+
+
+class ExpansionMarkRequest(BaseModel):
+    kind: str                       # 'add' | 'gaps'
+    gap_keys: list = []
+    note: Optional[str] = None
+
+
+@router.post("/expansion/mark/{palaz_id}")
+async def expansion_mark(palaz_id: str, body: ExpansionMarkRequest):
+    if body.kind not in ("add", "gaps"):
+        raise HTTPException(400, "kind ha de ser 'add' o 'gaps'")
+    db = _db()
+    palaz_id = "@" + palaz_id.strip("@") + "@"
+    keys = ",".join(dict.fromkeys(k for k in body.gap_keys if k))
+    if body.kind == "gaps" and not keys:
+        db.execute("DELETE FROM expansion_marks WHERE palaz_id=?", (palaz_id,))
+    else:
+        db.execute("""INSERT INTO expansion_marks (palaz_id, kind, gap_keys, note)
+                      VALUES (?, ?, ?, ?)
+                      ON CONFLICT(palaz_id) DO UPDATE SET kind=excluded.kind,
+                          gap_keys=excluded.gap_keys, note=excluded.note,
+                          marked_at=datetime('now')""",
+                   (palaz_id, body.kind, keys or None, body.note))
+    db.commit()
+    return {"ok": True}
+
+
+@router.delete("/expansion/mark/{palaz_id}")
+async def expansion_unmark(palaz_id: str):
+    db = _db()
+    db.execute("DELETE FROM expansion_marks WHERE palaz_id=?", ("@" + palaz_id.strip("@") + "@",))
+    db.commit()
+    return {"ok": True}
+
+
+@router.post("/expansion/marks/clear-verified")
+async def expansion_clear_verified(person_id: str = "@I4@", distance: int = 1):
+    """Borra las marcas que la importación ya confirma en este anillo."""
+    res = await expansion(person_id, distance)
+    ids = [p["palaz_id"] for p in res["people"] if (p.get("mark") or {}).get("status") == "verified"]
+    db = _db()
+    db.executemany("DELETE FROM expansion_marks WHERE palaz_id=?", [(i,) for i in ids])
+    db.commit()
+    return {"ok": True, "cleared": len(ids)}
+
+
 @router.get("/expansion")
 async def expansion(person_id: str = "@I4@", distance: int = 1):
     db = _db()
@@ -1288,6 +1355,8 @@ async def expansion(person_id: str = "@I4@", distance: int = 1):
                       "in_godes": sum(1 for i in ids if i in pmap),
                       "missing": sum(1 for i in ids if i not in pmap)})
 
+    marks = {r["palaz_id"]: dict(r) for r in db.execute("SELECT * FROM expansion_marks").fetchall()}
+
     people = []
     for pid in sorted((k for k, v in dist.items() if v == distance),
                       key=lambda x: (data["individuals"].get(x) or {}).get("name") or ""):
@@ -1323,6 +1392,8 @@ async def expansion(person_id: str = "@I4@", distance: int = 1):
                     break
             row.update({"in_godes": False, "godes_id": None, "godes_name": None,
                         "gaps": [], "anchor": anchor})
+        if pid in marks:
+            row["mark"] = _mark_status(marks[pid], row)
         people.append(row)
 
     return {

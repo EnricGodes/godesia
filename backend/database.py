@@ -505,6 +505,18 @@ CREATE TABLE IF NOT EXISTS dec.photo_hash_cache (
     computed_at TEXT DEFAULT (datetime('now'))
 );
 
+-- «Crecer el árbol»: lo que el admin ya ha hecho en MyHeritage y aún no ha
+-- llegado por GEDCOM. Clave = xref de Palazuelos. kind 'add' = persona añadida a
+-- Godes; 'gaps' = datos copiados/buscados (gap_keys, separados por comas). Se
+-- comprueban solas al recargar: resueltas cuando la importación las refleja.
+CREATE TABLE IF NOT EXISTS dec.expansion_marks (
+    palaz_id  TEXT PRIMARY KEY,
+    kind      TEXT NOT NULL,
+    gap_keys  TEXT,
+    note      TEXT,
+    marked_at TEXT DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS dec.idx_niches_cemetery ON niches(cemetery_id);
 CREATE INDEX IF NOT EXISTS dec.idx_niche_people_person ON niche_people(person_id);
 CREATE INDEX IF NOT EXISTS dec.idx_niche_photos_niche ON niche_photos(niche_id);

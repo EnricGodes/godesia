@@ -1651,7 +1651,89 @@ const Expansion = (() => {
             </table>`;
     }
 
+    // ── Marcas «ya hecho» (persisten en decisions.db; se comprueban al importar) ──
+    // Lo que queda por hacer: si falta, no marcada como añadida; si tiene huecos,
+    // los que no están marcados.
+    function _openWork(p) {
+        const m = p.mark;
+        if (!p.in_godes) return !(m && m.kind === 'add');
+        const keys = (m && m.kind === 'gaps') ? m.keys : [];
+        return p.gaps.some(g => !keys.includes(g.key));
+    }
+
+    function _gapMarked(p, key) {
+        return !!(p.mark && p.mark.kind === 'gaps' && p.mark.keys.includes(key));
+    }
+
+    function _markBadge(m) {
+        if (!m) return '';
+        const when = (m.marked_at || '').slice(0, 10).split('-').reverse().join('/');
+        const what = m.kind === 'add' ? 'añadida' : 'datos';
+        if (m.status === 'verified')
+            return `<br><span class="badge" style="background:#558b2f;margin-top:3px;" title="Marcada el ${when}: la importación ya lo refleja">✓ comprobado</span>`;
+        if (m.status === 'partial')
+            return `<br><span class="badge" style="background:#e65100;margin-top:3px;" title="Marcada el ${when}: la importación refleja ${m.resolved.length} de ${m.keys.length}">◐ en parte</span>`;
+        return `<br><span class="badge" style="background:#1565c0;margin-top:3px;" title="Marcada el ${when} como hecha en MyHeritage. Se comprobará al exportar e importar los GEDCOM">⏳ ${what} · ${when}</span>`;
+    }
+
+    async function _saveMark(p, body) {
+        try {
+            if (body) await apiFetch(`/api/admin/palazuelos/expansion/mark/${encodeURIComponent(p.palaz_id)}`,
+                { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            else await apiFetch(`/api/admin/palazuelos/expansion/mark/${encodeURIComponent(p.palaz_id)}`, { method: 'DELETE' });
+        } catch (e) { _flash(e.message, true); return; }
+        await load();
+    }
+
+    function _flash(msg, isError) {
+        const el = document.getElementById('exp-center-info');
+        if (!el) return;
+        const s = document.createElement('div');
+        s.style.cssText = `margin-top:.3rem;color:${isError ? '#d32f2f' : '#558b2f'};`;
+        s.textContent = msg;
+        el.appendChild(s);
+        setTimeout(() => s.remove(), 5000);
+    }
+
+    // Persona que falta: «la he añadido» (toggle)
+    function toggleAdded(idx) {
+        const p = _rows[idx];
+        if (!p) return;
+        _saveMark(p, (p.mark && p.mark.kind === 'add') ? null : { kind: 'add' });
+    }
+
+    // Persona con huecos: marcar un dato concreto, o todos con «✓ Hecho»
+    function toggleGap(idx, key) {
+        const p = _rows[idx];
+        if (!p) return;
+        let keys = (p.mark && p.mark.kind === 'gaps') ? p.mark.keys.slice() : [];
+        // los ya comprobados ya no son huecos: no hace falta seguir guardándolos
+        keys = keys.filter(k => p.gaps.some(g => g.key === k));
+        keys = keys.includes(key) ? keys.filter(k => k !== key) : keys.concat(key);
+        _saveMark(p, keys.length ? { kind: 'gaps', gap_keys: keys } : null);
+    }
+
+    function toggleAllGaps(idx) {
+        const p = _rows[idx];
+        if (!p) return;
+        const all = p.gaps.map(g => g.key);
+        const allMarked = all.length && all.every(k => _gapMarked(p, k));
+        _saveMark(p, allMarked || !all.length ? null : { kind: 'gaps', gap_keys: all });
+    }
+
+    function unmark(idx) { const p = _rows[idx]; if (p) _saveMark(p, null); }
+
+    async function clearVerified() {
+        try {
+            const r = await apiFetch(`/api/admin/palazuelos/expansion/marks/clear-verified?person_id=${encodeURIComponent(personId)}&distance=${distance}`, { method: 'POST' });
+            await load();
+            _flash(`${r.cleared} marca${r.cleared === 1 ? '' : 's'} comprobada${r.cleared === 1 ? '' : 's'} quitada${r.cleared === 1 ? '' : 's'}`);
+        } catch (e) { _flash(e.message, true); }
+    }
+
     function _matches(p) {
+        if (filter === 'todo') return _openWork(p);
+        if (filter === 'marked') return !!p.mark && p.mark.status !== 'verified';
         if (filter === 'missing') return !p.in_godes;
         if (filter === 'gaps') return p.in_godes && p.gaps.length;
         if (filter === 'actionable') return p.in_godes && p.gaps.some(g => g.status === 'palaz');
@@ -1667,12 +1749,17 @@ const Expansion = (() => {
         const note = (filter !== 'everything' && done)
             ? `<div style="font-size:.78rem;color:#727971;margin-bottom:.5rem;">${done} ficha${done > 1 ? 's' : ''} completa${done > 1 ? 's' : ''} ocultada${done > 1 ? 's' : ''} · <a href="#" onclick="Expansion.setFilter('everything');return false;" style="color:#2d4b33;">ver todas</a></div>`
             : '';
+        const pendingMarks = data.people.filter(p => p.mark && p.mark.status !== 'verified').length;
+        const verifiedMarks = data.people.filter(p => p.mark && p.mark.status === 'verified').length;
+        const markNote = (pendingMarks || verifiedMarks)
+            ? `<div style="font-size:.78rem;color:#727971;margin-bottom:.5rem;">${pendingMarks ? `<span style="color:#1565c0;">⏳ ${pendingMarks} marcada${pendingMarks > 1 ? 's' : ''} como hecha${pendingMarks > 1 ? 's' : ''}, pendiente${pendingMarks > 1 ? 's' : ''} de importar</span>` : ''}${pendingMarks && verifiedMarks ? ' · ' : ''}${verifiedMarks ? `<span style="color:#558b2f;">✓ ${verifiedMarks} ya comprobada${verifiedMarks > 1 ? 's' : ''} por la importación</span>` : ''}</div>`
+            : '';
         const el = document.getElementById('exp-list');
         if (!rows.length) {
-            el.innerHTML = note + '<div class="empty-state"><div class="empty-icon">✓</div>Nada pendiente en este anillo.</div>';
+            el.innerHTML = note + markNote + '<div class="empty-state"><div class="empty-icon">✓</div>Nada pendiente en este anillo.</div>';
             return;
         }
-        el.innerHTML = note + `<table class="admin-table">
+        el.innerHTML = note + markNote + `<table class="admin-table">
             <thead><tr>
                 <th>Persona (Palazuelos)</th><th style="width:70px;">Años</th><th style="width:150px;">Vínculo</th>
                 <th style="width:110px;">Estado</th><th>Datos básicos que faltan</th><th style="width:120px;">Fotos</th><th style="width:150px;"></th>
@@ -1681,19 +1768,24 @@ const Expansion = (() => {
                 const years = [p.birth_year, p.death_year].filter(Boolean).join('–') || '—';
                 const gaps = p.in_godes
                     ? (p.gaps.length
-                        ? p.gaps.map(g => `<span class="badge" style="margin:1px 2px;font-size:.7rem;background:${g.status === 'palaz' ? '#e65100' : '#9e9b94'};"
-                             title="${g.status === 'palaz' ? 'Palazuelos tiene este dato: ' + esc(g.value) : 'Falta en los dos árboles'}">${esc(g.label)}</span>`).join('')
+                        ? p.gaps.map(g => _gapMarked(p, g.key)
+                            ? `<span class="badge" style="margin:1px 2px;font-size:.7rem;background:#1565c0;cursor:pointer;"
+                                 onclick="Expansion.toggleGap(${i}, '${g.key}')"
+                                 title="Marcado como hecho: pendiente de importar. Pulse para desmarcar">✓ ${esc(g.label)}</span>`
+                            : `<span class="badge" style="margin:1px 2px;font-size:.7rem;cursor:pointer;background:${g.status === 'palaz' ? '#e65100' : '#9e9b94'};"
+                                 onclick="Expansion.toggleGap(${i}, '${g.key}')"
+                                 title="${g.status === 'palaz' ? 'Palazuelos tiene este dato: ' + esc(g.value) : 'Falta en los dos árboles'} · Pulse para marcarlo como hecho">${esc(g.label)}</span>`).join('')
                         : '<span style="color:#2d4b33;">✓ completo</span>')
                     : (p.anchor
                         ? `<span style="color:#727971;">añadir como <strong>${esc(p.anchor.relation)}</strong> de ${esc(p.anchor.godes_name)}</span>`
                         : '<span style="color:#d32f2f;">sin pariente en Godes desde el que añadirla</span>');
-                return `<tr>
+                return `<tr style="${_openWork(p) ? '' : 'opacity:.55;'}">
                     <td><strong>${esc(p.palaz_name)}</strong><br><small style="color:#9e9b94;">${esc(p.palaz_id)}</small></td>
                     <td style="font-size:.8rem;color:#727971;">${esc(years)}</td>
                     <td style="font-size:.8rem;color:#727971;">${p.relation ? esc(p.relation) + (p.via_name ? ` de<br>${esc(p.via_name)}` : '') : '—'}</td>
                     <td>${p.in_godes
                         ? '<span class="badge" style="background:#2d4b33;">En Godes</span>'
-                        : '<span class="badge" style="background:#d32f2f;">Falta</span>'}</td>
+                        : '<span class="badge" style="background:#d32f2f;">Falta</span>'}${_markBadge(p.mark)}</td>
                     <td style="font-size:.8rem;">${gaps}</td>
                     <td>${p.in_godes ? `<button class="btn btn-secondary btn-sm" id="exp-phb-${esc(p.godes_id)}" title="Comparar las fotos con las de Palazuelos"
                             onclick="Expansion.togglePhotos('${esc(p.godes_id)}')">${_photoBadge(photoRes[p.godes_id])}</button>` : ''}</td>
@@ -1701,6 +1793,15 @@ const Expansion = (() => {
                         ${p.in_godes
                             ? `<button class="btn btn-secondary btn-sm" title="Cabina de traspaso (campos lado a lado)" onclick="Transfer.open('${esc(p.godes_id)}')">⇄</button>`
                             : `<button class="btn btn-secondary btn-sm" title="Abrir Palazuelos y el pariente ancla en Godes" onclick="Expansion.openAdd(${i})">＋ Añadir</button>`}
+                        ${!p.in_godes
+                            ? `<button class="btn btn-sm ${p.mark && p.mark.kind === 'add' ? '' : 'btn-secondary'}" style="${p.mark && p.mark.kind === 'add' ? 'background:#1565c0;color:#fff;' : ''}"
+                                 title="${p.mark && p.mark.kind === 'add' ? 'Marcada como añadida en MyHeritage. Pulse para desmarcar' : 'Ya la he añadido en MyHeritage (se comprobará al importar)'}"
+                                 onclick="Expansion.toggleAdded(${i})">✓</button>`
+                            : p.gaps.length
+                                ? `<button class="btn btn-sm ${p.gaps.every(g => _gapMarked(p, g.key)) ? '' : 'btn-secondary'}" style="${p.gaps.every(g => _gapMarked(p, g.key)) ? 'background:#1565c0;color:#fff;' : ''}"
+                                     title="Marcar todos sus datos como hechos en MyHeritage (o pulse cada dato por separado)"
+                                     onclick="Expansion.toggleAllGaps(${i})">✓</button>`
+                                : (p.mark ? `<button class="btn btn-secondary btn-sm" title="Quitar la marca (ya comprobada)" onclick="Expansion.unmark(${i})">✕</button>` : '')}
                     </td>
                 </tr>${p.in_godes ? `<tr id="exp-ph-${esc(p.godes_id)}" style="display:none;"><td colspan="7" style="background:#faf8f3;"></td></tr>` : ''}`;
             }).join('')}</tbody>
@@ -1864,7 +1965,7 @@ const Expansion = (() => {
     function onActivate() { if (!data) load(); }
 
     return { init, load, setDistance, setFilter, onTypeahead, select, hideDropdown, openAdd, onActivate,
-             togglePhotos, comparePhotosRing };
+             togglePhotos, comparePhotosRing, toggleAdded, toggleGap, toggleAllGaps, unmark, clearVerified };
 })();
 
 // ---------------------------------------------------------------------------

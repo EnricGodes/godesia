@@ -723,12 +723,16 @@
 
             <div class="toolbar" style="margin-top:1.25rem;">
                 <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('pending')">Pendientes</button>
+                <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('todo')" title="Pendientes, sin las que ya ha marcado como hechas">Sin hacer</button>
+                <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('marked')" title="Marcadas como hechas en MyHeritage: se comprueban solas al importar los GEDCOM">Marcadas</button>
                 <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('missing')">Faltan en Godes</button>
                 <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('gaps')">Con huecos</button>
                 <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('actionable')">Huecos que Palazuelos rellena</button>
                 <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('everything')">Todos (incl. completos)</button>
                 <button class="btn btn-secondary btn-sm" onclick="Expansion.setFilter('photos')" title="Personas con fotos duplicadas o que solo están en Palazuelos (tras comparar)">Fotos a revisar</button>
                 <span style="flex:1;"></span>
+                <button class="btn btn-secondary btn-sm" onclick="Expansion.clearVerified()"
+                        title="Quita las marcas que la importación ya confirma en este anillo">✓ Limpiar comprobadas</button>
                 <button class="btn btn-secondary btn-sm" id="exp-photos-run" onclick="Expansion.comparePhotosRing()"
                         title="Compara, una a una, las fotos de todas las personas del anillo que ya están en Godes con las de Palazuelos">📷 Comparar fotos del anillo</button>
             </div>
