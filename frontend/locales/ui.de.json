@@ -282,7 +282,7 @@
       "chip_spouse": "Ehepartner/in",
       "input_placeholder": "Schreibe deine Frage zur Familie Godes...",
       "llm_cancel": "Nein, abbrechen",
-      "llm_cancelled": "Anfrage abgebrochen. Es wurden keine Kosten erzeugt.",
+      "llm_cancelled": "Anfrage abgebrochen. Von Ihrem Kontingent wurde nichts abgezogen.",
       "llm_confirm": "Ja, abfragen",
       "llm_error": "Fehler bei der KI-Abfrage.",
       "matches_intro": "Ich habe {count} Personen gefunden, die mit \"<strong>{query}</strong>\" übereinstimmen. Klicke auf die gesuchte Person:",
@@ -302,7 +302,13 @@
       "view_dossier": "Vollständiges Dossier anzeigen",
       "view_tree": "Im Stammbaum anzeigen",
       "welcome": "Hallo! Ich bin Godesia, dein genealogischer Assistent der Familie Godes.",
-      "welcome_hint": "Frag mich auf Spanisch, Katalanisch, Englisch oder Französisch. Zum Beispiel: <em>\"Who was the father of Artur Godes?\"</em>, <em>\"When was Ernest Godes Hurtado born?\"</em>, <em>\"How many children did ... have?\"</em>, <em>\"Where did ... die?\"</em> oder schreibe einfach einen Namen, um danach zu suchen."
+      "welcome_hint": "Frag mich auf Spanisch, Katalanisch, Englisch oder Französisch. Zum Beispiel: <em>\"Who was the father of Artur Godes?\"</em>, <em>\"When was Ernest Godes Hurtado born?\"</em>, <em>\"How many children did ... have?\"</em>, <em>\"Where did ... die?\"</em> oder schreibe einfach einen Namen, um danach zu suchen.",
+      "llm_offer": "Mit den aktuellen Regeln konnte ich das nicht beantworten. Ich kann eine externe KI (Gemini) fragen: Das ist eine aufwendige Anfrage und kann bis zu einer Minute dauern. Sie haben diesen Monat noch etwa {n} KI-Anfragen (Erneuerung am {date}). Daten lebender Personen werden anonymisiert gesendet. Soll ich fragen?",
+      "llm_exhausted": "Sie haben Ihre KI-Anfragen für diesen Monat aufgebraucht. Sie werden am {date} erneuert.",
+      "llm_wait": "Die KI wird gefragt… das kann bis zu einer Minute dauern.",
+      "llm_busy": "Die kostenlose KI ist gerade ausgelastet. Bitte versuchen Sie es in ein paar Minuten erneut (von Ihrem Kontingent wurde nichts abgezogen).",
+      "llm_privacy": "Ich habe die Frage nicht gesendet: Nicht alle lebenden Personen konnten anonymisiert werden.",
+      "llm_left": "Sie haben diesen Monat noch etwa {n} KI-Anfragen."
     },
     "colaborar": {
       "meta_title": "Mitwirken | Godesia"

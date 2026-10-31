@@ -282,7 +282,7 @@
       "chip_spouse": "Cònjuge",
       "input_placeholder": "Escriu la teva pregunta sobre la família Godes...",
       "llm_cancel": "No, cancel·la",
-      "llm_cancelled": "Consulta cancel·lada. Sense cost generat.",
+      "llm_cancelled": "Consulta cancel·lada. No s'ha gastat res del teu cupó.",
       "llm_confirm": "Sí, consultar",
       "llm_error": "Error en consultar la IA.",
       "matches_intro": "He trobat {count} persones que coincideixen amb \"<strong>{query}</strong>\". Fes clic sobre la que busques:",
@@ -302,7 +302,13 @@
       "view_dossier": "Veure dossier complet",
       "view_tree": "Veure a l'arbre",
       "welcome": "Hola! Soc Godesia, el teu assistent genealògic de la família Godes.",
-      "welcome_hint": "Pregunta’m el que vulguis. Per exemple: <em>\"Qui era el pare d’Artur Godes?\"</em>, <em>\"Quan va néixer Ernest Godes Hurtado?\"</em>, <em>\"Quants fills va tenir...?\"</em>, <em>\"On va morir...?\"</em> o simplement escriu un nom per buscar-lo."
+      "welcome_hint": "Pregunta’m el que vulguis. Per exemple: <em>\"Qui era el pare d’Artur Godes?\"</em>, <em>\"Quan va néixer Ernest Godes Hurtado?\"</em>, <em>\"Quants fills va tenir...?\"</em>, <em>\"On va morir...?\"</em> o simplement escriu un nom per buscar-lo.",
+      "llm_offer": "No he sabut respondre amb les regles actuals. Puc preguntar-ho a una IA externa (Gemini): és una consulta costosa i pot trigar fins a un minut. Et queden unes {n} consultes a la IA aquest mes (es renoven el {date}). Les dades de les persones vives s'envien anonimitzades. La faig?",
+      "llm_exhausted": "Has esgotat les teves consultes a la IA d'aquest mes. Es renoven el {date}.",
+      "llm_wait": "Consultant la IA… pot trigar fins a un minut.",
+      "llm_busy": "La IA gratuïta està saturada ara mateix. Torna-ho a provar d'aquí a uns minuts (no s'ha descomptat res del teu cupó).",
+      "llm_privacy": "No he enviat la pregunta: no he pogut anonimitzar totes les persones vives.",
+      "llm_left": "Et queden unes {n} consultes a la IA aquest mes."
     },
     "colaborar": {
       "meta_title": "Col·laborar | Godesia"

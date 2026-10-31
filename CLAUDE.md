@@ -8,7 +8,7 @@ Godesia is a genealogical chatbot for the Godes family. It answers natural langu
 
 The app uses a two-tier query system:
 1. **QueryRouter** — regex-based pattern matching that resolves questions directly from SQLite (free, instant)
-2. **QueryEngine** — LLM fallback (Claude Haiku) for complex questions that can't be pattern-matched (requires ANTHROPIC_API_KEY, costs ~0.3 cents/query, needs user confirmation)
+2. **Respaldo IA (Gemini Flash Lite, tier gratuito)** — when the router can't answer, the user is offered an LLM query (needs confirmation, monthly per-user quota, living people anonymized). See «Respaldo IA con Gemini» below. The old Claude `QueryEngine` is no longer offered; `query_engine.py` now mainly provides the context builders.
 
 ## Project Structure
 
@@ -210,6 +210,17 @@ Para abaratar Railway (cobra por uso: RAM/CPU, tráfico de salida y volumen) sin
 - **IP real**: `auth.client_ip()` usa `CF-Connecting-IP` / `X-Forwarded-For` para el límite de intentos de login y recuperación (detrás de un proxy, `request.client.host` es el mismo para todos).
 - **Worker de Cloudflare** (`cloudflare/photo-worker/`, `npx wrangler deploy`): en `godes.org/{photos,thumbs,cemetery_photos}/*` comprueba la sesión contra `/api/auth/me` (solo usuarios aprobados; recuerda la sesión 10 min) y sirve la foto desde la Cache API de Cloudflare, que solo ve el Worker. No usar «Cache Rules» por cookie para las fotos: filtrarían fotos privadas a quien invente la cookie. Rutas en modo *fail open*.
 - `GET /api/admin/status` incluye `memory` (RSS del proceso y si están cargadas las cachés del palazuelos.ged) para vigilar la RAM que cobra Railway.
+
+## Respaldo IA con Gemini (cuando el router no sabe responder)
+
+Cuando el router devuelve `unresolved` (`route.1`), `/api/query` añade `requires_llm` + `llm.quota` si hay cupo, y el chat ofrece preguntarlo a **Gemini Flash Lite** (tier gratuito, modelo por defecto `gemini-flash-lite-latest`) avisando de que es costoso y lento. `POST /api/query/confirm` hace la llamada. Todo en solo stdlib (`urllib`).
+
+- **Clave:** env `GEMINI_API_KEY` (Railway) o `.env` en la raíz del repo (local, gitignored). Sin clave la IA simplemente no se ofrece.
+- **Privacidad (`backend/llm_anonymizer.py`)**: el tier gratuito permite a Google usar los datos, así que de los **vivos** (`is_alive`, o sin defunción y nacidos hace <105 años, o sin fechas pero con padre/cónyuge/hijo vivo) solo sale alias «Persona A» / `@X1@`, sexo, año y relaciones; sus nombres se sustituyen también en la pregunta, el historial y las notas de difuntos. Guardia final: si queda un nombre de vivo en el texto saliente, no se envía (`AnonymizationError`, 422). La respuesta se des-anonimiza, se escapa como HTML y se enlaza con `router._postprocess_answer`. Tests: `backend/tests/test_llm_anonymizer.py`.
+- **Contexto acotado:** máx. 60 personas / 16 000 caracteres (≈4-5k tokens por pregunta).
+- **Cupos (`backend/llm_quota.py`)**: tablas `llm_usage` y `llm_user_budget` en `PHOTOS_DIR/_contrib/contrib.db` (volumen). Mes natural en hora del Este de EE. UU.; se renueva el día 1. Se comprueba antes y se descuenta el uso real (`usageMetadata`) después; 429/errores de red no descuentan. Settings en `dec.settings`: `gemini_user_monthly_tokens` (40 000 ≈ 10 preguntas), `gemini_pool_monthly_tokens` (bolsa global), `gemini_model`, `gemini_enabled`.
+- **Admin → IA (Gemini)**: tokens gastados vs bolsa gratuita del mes, por usuario (gastado/cupo/quedan, cupo propio editable), últimas 50 consultas y ajustes. `GET /api/admin/llm/usage?month=`, `POST /api/admin/llm/user-budget`.
+- La llamada de red va en `asyncio.to_thread`, pero la BD se toca solo en el hilo del event loop (la conexión SQLite no se comparte entre hilos).
 
 ## Git Workflow
 

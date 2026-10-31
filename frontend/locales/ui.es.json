@@ -282,7 +282,7 @@
       "chip_spouse": "Cónyuge",
       "input_placeholder": "Escribe tu pregunta sobre la familia Godes...",
       "llm_cancel": "No, cancelar",
-      "llm_cancelled": "Consulta cancelada. Sin coste generado.",
+      "llm_cancelled": "Consulta cancelada. No se ha gastado nada de tu cupo.",
       "llm_confirm": "Sí, consultar",
       "llm_error": "Error al consultar la IA.",
       "matches_intro": "He encontrado {count} personas que coinciden con \"<strong>{query}</strong>\". Haz clic sobre la que buscas:",
@@ -302,7 +302,13 @@
       "view_dossier": "Ver dossier completo",
       "view_tree": "Ver en árbol",
       "welcome": "Hola! Soy Godesia, tu asistente genealógico de la familia Godes.",
-      "welcome_hint": "Pregúntame lo que quieras. Por ejemplo: <em>\"¿Quién era el padre de Artur Godes?\"</em>, <em>\"¿Cuándo nació Ernest Godes Hurtado?\"</em>, <em>\"¿Cuántos hijos tuvo...?\"</em>, <em>\"¿Dónde murió...?\"</em> o simplemente escribe un nombre para buscarlo."
+      "welcome_hint": "Pregúntame lo que quieras. Por ejemplo: <em>\"¿Quién era el padre de Artur Godes?\"</em>, <em>\"¿Cuándo nació Ernest Godes Hurtado?\"</em>, <em>\"¿Cuántos hijos tuvo...?\"</em>, <em>\"¿Dónde murió...?\"</em> o simplemente escribe un nombre para buscarlo.",
+      "llm_offer": "No he sabido responder con las reglas actuales. Puedo preguntárselo a una IA externa (Gemini): es una consulta costosa y puede tardar hasta un minuto. Te quedan unas {n} consultas a la IA este mes (se renuevan el {date}). Los datos de las personas vivas se envían anonimizados. ¿La hago?",
+      "llm_exhausted": "Has agotado tus consultas a la IA de este mes. Se renuevan el {date}.",
+      "llm_wait": "Consultando a la IA… puede tardar hasta un minuto.",
+      "llm_busy": "La IA gratuita está saturada ahora mismo. Inténtalo de nuevo en unos minutos (no se ha descontado nada de tu cupo).",
+      "llm_privacy": "No he enviado la pregunta: no he podido anonimizar a todas las personas vivas.",
+      "llm_left": "Te quedan unas {n} consultas a la IA este mes."
     },
     "colaborar": {
       "meta_title": "Colaborar | Godesia"

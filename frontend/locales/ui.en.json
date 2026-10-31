@@ -282,7 +282,7 @@
       "chip_spouse": "Spouse",
       "input_placeholder": "Type your question about the Godes family...",
       "llm_cancel": "No, cancel",
-      "llm_cancelled": "Query cancelled. No cost generated.",
+      "llm_cancelled": "Query cancelled. Nothing was deducted from your quota.",
       "llm_confirm": "Yes, query",
       "llm_error": "Error querying the AI.",
       "matches_intro": "I found {count} people matching \"<strong>{query}</strong>\". Click the one you are looking for:",
@@ -302,7 +302,13 @@
       "view_dossier": "View full dossier",
       "view_tree": "View in tree",
       "welcome": "Hello! I am Godesia, your genealogy assistant for the Godes family.",
-      "welcome_hint": "Ask me anything. For example: <em>\"Who was the father of Artur Godes?\"</em>, <em>\"When was Ernest Godes Hurtado born?\"</em>, <em>\"How many children did ... have?\"</em>, <em>\"Where did ... die?\"</em> or simply type a name to search for it."
+      "welcome_hint": "Ask me anything. For example: <em>\"Who was the father of Artur Godes?\"</em>, <em>\"When was Ernest Godes Hurtado born?\"</em>, <em>\"How many children did ... have?\"</em>, <em>\"Where did ... die?\"</em> or simply type a name to search for it.",
+      "llm_offer": "I couldn't answer that with the current rules. I can ask an external AI (Gemini): it's a costly query and may take up to a minute. You have about {n} AI queries left this month (they renew on {date}). Data about living people is sent anonymized. Shall I go ahead?",
+      "llm_exhausted": "You've used up your AI queries for this month. They renew on {date}.",
+      "llm_wait": "Asking the AI… this may take up to a minute.",
+      "llm_busy": "The free AI is busy right now. Please try again in a few minutes (nothing was deducted from your quota).",
+      "llm_privacy": "I didn't send the question: I couldn't anonymize every living person.",
+      "llm_left": "You have about {n} AI queries left this month."
     },
     "colaborar": {
       "meta_title": "Contribute | Godesia"

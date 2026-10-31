@@ -165,6 +165,23 @@ function submitFollowUp(question) {
   form.dispatchEvent(new Event('submit'));
 }
 
+function _fmtResetDate(iso) {
+  try {
+    return new Date(iso + 'T12:00:00').toLocaleDateString(_lang, { day: 'numeric', month: 'long' });
+  } catch (e) { return iso; }
+}
+
+function llmOfferMessage(q) {
+  const n = Math.max(1, q.remaining_questions_est || 0);
+  return _i18nT('pages.chat.llm_offer', { n: n, date: _fmtResetDate(q.resets_on) },
+    'No he sabido responder con las reglas actuales. Puedo preguntárselo a una IA externa: es una consulta costosa y puede tardar hasta un minuto. Te quedan unas ' + n + ' consultas a la IA este mes. Los datos de personas vivas se envían anonimizados. ¿La hago?');
+}
+
+function llmExhaustedMessage(q) {
+  return _i18nT('pages.chat.llm_exhausted', { date: _fmtResetDate(q.resets_on) },
+    'Has agotado tus consultas a la IA de este mes. Se renuevan el ' + _fmtResetDate(q.resets_on) + '.');
+}
+
 function addLLMConfirmation(message, question, history) {
   const div = document.createElement("div");
   div.className = "message assistant";
@@ -185,7 +202,8 @@ async function confirmLLM(btn, encodedQuestion) {
   const question = decodeURIComponent(atob(encodedQuestion));
   const container = btn.closest(".llm-confirm");
   container.querySelector(".confirm-buttons").remove();
-  container.innerHTML += '<div class="loading"><span></span><span></span><span></span></div>';
+  container.innerHTML += '<div class="loading"><span></span><span></span><span></span></div>'
+    + `<p class="hint llm-wait">${_i18nT('pages.chat.llm_wait', null, 'Consultando a la IA… puede tardar hasta un minuto.')}</p>`;
 
   try {
     const res = await fetch("/api/query/confirm", {
@@ -195,17 +213,31 @@ async function confirmLLM(btn, encodedQuestion) {
     });
 
     container.querySelector(".loading").remove();
+    const waitEl = container.querySelector(".llm-wait");
+    if (waitEl) waitEl.remove();
 
     if (!res.ok) {
-      container.innerHTML += `<p>${_i18nT('pages.chat.llm_error', null, 'Error al consultar la IA.')}</p>`;
+      let err = {};
+      try { err = await res.json(); } catch (e) {}
+      let msg = _i18nT('pages.chat.llm_error', null, 'Error al consultar la IA.');
+      if (err.error === 'quota_exhausted' && err.quota) msg = llmExhaustedMessage(err.quota);
+      else if (err.error === 'rate_limited') msg = _i18nT('pages.chat.llm_busy', null, 'La IA gratuita está saturada ahora mismo. Inténtalo de nuevo en unos minutos (no se ha descontado nada de tu cupo).');
+      else if (err.error === 'anonymization') msg = _i18nT('pages.chat.llm_privacy', null, 'No he enviado la pregunta: no he podido anonimizar a todas las personas vivas.');
+      container.innerHTML += `<p>${msg}</p>`;
       sendBtn.disabled = false;
       return;
     }
 
     const data = await res.json();
     const peopleLlm = data.people_with_photos || [];
-    const sourceTag = '<span class="source-tag llm">IA</span>';
-    container.innerHTML = `${sourceTag}<p>${data.answer.replace(/\n/g, "<br>")}</p>`;
+    const sourceTag = '<span class="source-tag llm">IA · Gemini</span>';
+    let quotaNote = '';
+    if (data.quota) {
+      quotaNote = data.quota.can_ask
+        ? `<p class="hint">${_i18nT('pages.chat.llm_left', { n: data.quota.remaining_questions_est }, 'Te quedan unas ' + data.quota.remaining_questions_est + ' consultas a la IA este mes.')}</p>`
+        : `<p class="hint">${llmExhaustedMessage(data.quota)}</p>`;
+    }
+    container.innerHTML = `${sourceTag}<p>${data.answer.replace(/\n/g, "<br>")}</p>${quotaNote}`;
     if (window.I18N) I18N.localizeLinks(container);
     container.querySelectorAll('a[href*="/dossier.html"]').forEach(a => {
       const id = new URL(a.href, location.origin).searchParams.get('id');
@@ -283,9 +315,15 @@ form.addEventListener("submit", async (e) => {
 
     const data = await res.json();
 
-    // LLM confirmation required?
-    if (data.requires_llm) {
-      addLLMConfirmation(data.message, question, conversationHistory);
+    // El router no ha sabido responder: ofrecer la IA (Gemini) si hay cupo.
+    if (data.requires_llm && data.llm && data.llm.quota) {
+      addLLMConfirmation(llmOfferMessage(data.llm.quota), question, conversationHistory);
+      return;
+    }
+    if (data.unresolved && data.llm && data.llm.quota && !data.llm.available) {
+      addMessage(data.answer + '<br><span class="hint">' + llmExhaustedMessage(data.llm.quota) + '</span>', "assistant");
+      sendBtn.disabled = false;
+      input.focus();
       return;
     }
 

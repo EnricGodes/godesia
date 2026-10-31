@@ -56,7 +56,7 @@ document.addEventListener('keydown', e => {
 // Navigation
 // ---------------------------------------------------------------------------
 
-const sections = ['status', 'import', 'suggestions', 'users', 'queries', 'geocoder', 'anecdotes', 'minibios', 'tests', 'comparador', 'classifier', 'palazuelos', 'expansion', 'dedup', 'cemeteries', 'config'];
+const sections = ['status', 'import', 'suggestions', 'users', 'queries', 'llm', 'geocoder', 'anecdotes', 'minibios', 'tests', 'comparador', 'classifier', 'palazuelos', 'expansion', 'dedup', 'cemeteries', 'config'];
 const initialized = {};
 
 function showSection(name) {
@@ -70,7 +70,7 @@ function showSection(name) {
     if (!initialized[name]) {
         initialized[name] = true;
         const ctrl = { status: Status, import: Import, suggestions: Suggestions, users: Users,
-                       queries: Queries, geocoder: Geocoder, anecdotes: Anecdotes,
+                       queries: Queries, llm: Llm, geocoder: Geocoder, anecdotes: Anecdotes,
                        minibios: Minibios, tests: Tests,
                        config: Config, comparador: Comparador,
                        classifier: DocClassifier, palazuelos: Palazuelos,
@@ -3662,3 +3662,139 @@ const Dedup = (() => {
 
     return { init, loadStats, loadPending, run, setFilter, decide, onActivate };
 })();
+
+
+// ---------------------------------------------------------------------------
+// IA (Gemini): cupos y consumo de tokens
+// ---------------------------------------------------------------------------
+
+const Llm = {
+    data: null,
+    fmt(n) { return (n || 0).toLocaleString('es-ES'); },
+
+    init() { this.load(); },
+
+    async load() {
+        const sel = document.getElementById('llm-month');
+        const month = sel.value || '';
+        let d;
+        try {
+            d = await apiFetch('/api/admin/llm/usage' + (month ? '?month=' + encodeURIComponent(month) : ''));
+        } catch (e) {
+            document.getElementById('llm-users').innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
+            return;
+        }
+        this.data = d;
+        sel.innerHTML = d.months.map(m => `<option value="${m}" ${m === d.month ? 'selected' : ''}>${m}</option>`).join('');
+        document.getElementById('llm-configured').innerHTML = d.configured
+            ? '<span style="color:#2d4b33;">● GEMINI_API_KEY configurada</span>'
+            : '<span style="color:#a33;">● Falta GEMINI_API_KEY (la IA no se ofrece)</span>';
+        document.getElementById('llm-used').textContent = this.fmt(d.used_tokens);
+        document.getElementById('llm-pool').textContent = this.fmt(d.pool_tokens);
+        document.getElementById('llm-questions').textContent = `${d.ok} / ${d.failed}`;
+        document.getElementById('llm-perq').textContent = this.fmt(d.tokens_per_question_est);
+        const pct = d.pool_tokens ? Math.min(100, 100 * d.used_tokens / d.pool_tokens) : 100;
+        const bar = document.getElementById('llm-bar');
+        bar.style.width = pct.toFixed(1) + '%';
+        bar.style.background = pct >= 90 ? '#a33' : pct >= 70 ? '#b7791f' : '#2d4b33';
+        document.getElementById('llm-bar-label').textContent =
+            `${this.fmt(d.used_tokens)} de ${this.fmt(d.pool_tokens)} tokens gratuitos (${pct.toFixed(1)} %) · ` +
+            `entrada ${this.fmt(d.prompt_tokens)} · salida ${this.fmt(d.output_tokens)} · se renueva el ${d.resets_on}`;
+        document.getElementById('llm-today').textContent = `Peticiones hoy: ${d.requests_today}`;
+
+        const st = d.settings;
+        document.getElementById('llm-set-user').value = st.gemini_user_monthly_tokens;
+        document.getElementById('llm-set-pool').value = st.gemini_pool_monthly_tokens;
+        document.getElementById('llm-set-model').value = st.gemini_model;
+        document.getElementById('llm-set-enabled').checked = !['0', 'false', ''].includes(String(st.gemini_enabled));
+        this.updateHint();
+        document.getElementById('llm-set-user').oninput = () => this.updateHint();
+
+        this.renderUsers(d);
+        this.renderRecent(d);
+    },
+
+    updateHint() {
+        const per = this.data?.tokens_per_question_est || 3000;
+        const v = parseInt(document.getElementById('llm-set-user').value || '0', 10);
+        document.getElementById('llm-set-hint').textContent =
+            `Con la media actual (${this.fmt(per)} tokens/consulta) el cupo por usuario da para unas ${Math.floor(v / per)} consultas al mes.`;
+    },
+
+    renderUsers(d) {
+        const el = document.getElementById('llm-users');
+        if (!d.users.length) { el.innerHTML = '<div class="empty-state">Sin usuarios.</div>'; return; }
+        const per = d.tokens_per_question_est || 3000;
+        el.innerHTML = `<table class="admin-table">
+            <thead><tr><th>Usuario</th><th style="width:90px;">Consultas</th><th style="width:220px;">Gastado / cupo</th>
+                <th style="width:110px;">Quedan ≈</th><th style="width:150px;">Última</th><th style="width:230px;">Cupo propio (tokens)</th></tr></thead>
+            <tbody>${d.users.map(u => {
+                const left = Math.max(0, u.budget - u.used);
+                const pct = u.budget ? Math.min(100, 100 * u.used / u.budget) : 100;
+                const color = pct >= 100 ? '#a33' : pct >= 70 ? '#b7791f' : '#2d4b33';
+                return `<tr>
+                    <td>${esc(u.name || u.user_id)}${u.email ? `<div style="font-size:.75rem;color:#777;">${esc(u.email)}</div>` : ''}</td>
+                    <td>${u.questions}</td>
+                    <td><div style="font-size:.8rem;">${this.fmt(u.used)} / ${this.fmt(u.budget)}</div>
+                        <div style="height:6px;background:#ece8dd;border-radius:3px;overflow:hidden;margin-top:3px;">
+                        <div style="height:100%;width:${pct}%;background:${color};"></div></div></td>
+                    <td>${Math.floor(left / per)} consultas</td>
+                    <td style="font-size:.8rem;">${u.last_ts ? esc(u.last_ts.replace('T', ' ').slice(0, 16)) : '—'}</td>
+                    <td><input type="number" min="0" step="1000" value="${u.custom_budget ? u.budget : ''}"
+                            placeholder="${this.fmt(d.default_user_budget)} (defecto)" id="llm-b-${esc(u.user_id)}"
+                            style="width:120px;padding:4px 6px;border:1px solid #c2c8bf;border-radius:6px;">
+                        <button class="btn btn-secondary btn-sm" onclick="Llm.saveBudget('${esc(u.user_id)}')">✓</button></td>
+                </tr>`;
+            }).join('')}</tbody></table>`;
+    },
+
+    renderRecent(d) {
+        const el = document.getElementById('llm-recent');
+        if (!d.recent.length) { el.innerHTML = '<div class="empty-state">Sin consultas este mes.</div>'; return; }
+        const label = { ok: '✓', error: '✕ error', rate_limited: '⏳ saturado', blocked: '⛔ sin cupo', anon_blocked: '🔒 anonimización' };
+        el.innerHTML = `<table class="admin-table">
+            <thead><tr><th style="width:140px;">Fecha</th><th style="width:160px;">Usuario</th><th>Pregunta</th>
+                <th style="width:120px;">Tokens (ent/sal)</th><th style="width:70px;">Vivos anon.</th><th style="width:120px;">Estado</th></tr></thead>
+            <tbody>${d.recent.map(r => `<tr>
+                <td style="font-size:.8rem;">${esc((r.ts || '').replace('T', ' ').slice(0, 16))}</td>
+                <td style="font-size:.8rem;">${esc(r.user_name || '')}</td>
+                <td>${esc(r.question)}</td>
+                <td style="font-size:.8rem;">${this.fmt(r.total_tokens)} <span style="color:#777;">(${this.fmt(r.prompt_tokens)}/${this.fmt(r.output_tokens)})</span></td>
+                <td>${r.anonymized || 0}</td>
+                <td style="font-size:.8rem;" title="${esc(r.error || '')}">${label[r.status] || esc(r.status)}<div style="color:#777;">${esc(r.model || '')}</div></td>
+            </tr>`).join('')}</tbody></table>`;
+    },
+
+    async saveBudget(uid) {
+        const v = document.getElementById('llm-b-' + uid).value.trim();
+        try {
+            await apiFetch('/api/admin/llm/user-budget', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: uid, monthly_tokens: v === '' ? null : parseInt(v, 10) }),
+            });
+            this.load();
+        } catch (e) { console.error(e); }
+    },
+
+    async saveSettings() {
+        const msg = document.getElementById('llm-set-msg');
+        const pairs = [
+            ['gemini_user_monthly_tokens', document.getElementById('llm-set-user').value.trim()],
+            ['gemini_pool_monthly_tokens', document.getElementById('llm-set-pool').value.trim()],
+            ['gemini_model', document.getElementById('llm-set-model').value.trim()],
+            ['gemini_enabled', document.getElementById('llm-set-enabled').checked ? '1' : '0'],
+        ];
+        try {
+            for (const [key, value] of pairs) {
+                await apiFetch('/api/settings', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, value }),
+                });
+            }
+            msg.style.color = '#2d4b33'; msg.textContent = '✓ Guardado';
+            this.load();
+        } catch (e) {
+            msg.style.color = '#a33'; msg.textContent = 'Error: ' + e.message;
+        }
+    },
+};

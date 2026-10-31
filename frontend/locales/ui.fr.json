@@ -282,7 +282,7 @@
       "chip_spouse": "Conjoint",
       "input_placeholder": "Écrivez votre question sur la famille Godes...",
       "llm_cancel": "Non, annuler",
-      "llm_cancelled": "Requête annulée. Aucun coût généré.",
+      "llm_cancelled": "Requête annulée. Rien n'a été déduit de votre quota.",
       "llm_confirm": "Oui, consulter",
       "llm_error": "Erreur lors de la consultation de l’IA.",
       "matches_intro": "J’ai trouvé {count} personnes correspondant à \"<strong>{query}</strong>\". Cliquez sur celle que vous recherchez :",
@@ -302,7 +302,13 @@
       "view_dossier": "Voir le dossier complet",
       "view_tree": "Voir dans l’arbre",
       "welcome": "Bonjour ! Je suis Godesia, votre assistant généalogique de la famille Godes.",
-      "welcome_hint": "Posez-moi vos questions. Par exemple : <em>\"Qui était le père d’Artur Godes ?\"</em>, <em>\"Quand est né Ernest Godes Hurtado ?\"</em>, <em>\"Combien d’enfants a eu... ?\"</em>, <em>\"Où est mort... ?\"</em> ou écrivez simplement un nom pour le rechercher."
+      "welcome_hint": "Posez-moi vos questions. Par exemple : <em>\"Qui était le père d’Artur Godes ?\"</em>, <em>\"Quand est né Ernest Godes Hurtado ?\"</em>, <em>\"Combien d’enfants a eu... ?\"</em>, <em>\"Où est mort... ?\"</em> ou écrivez simplement un nom pour le rechercher.",
+      "llm_offer": "Je n'ai pas su répondre avec les règles actuelles. Je peux poser la question à une IA externe (Gemini) : c'est une requête coûteuse qui peut prendre jusqu'à une minute. Il vous reste environ {n} requêtes à l'IA ce mois-ci (renouvelées le {date}). Les données des personnes vivantes sont envoyées anonymisées. Je la lance ?",
+      "llm_exhausted": "Vous avez épuisé vos requêtes à l'IA ce mois-ci. Elles sont renouvelées le {date}.",
+      "llm_wait": "Interrogation de l'IA… cela peut prendre jusqu'à une minute.",
+      "llm_busy": "L'IA gratuite est saturée pour le moment. Réessayez dans quelques minutes (rien n'a été déduit de votre quota).",
+      "llm_privacy": "Je n'ai pas envoyé la question : je n'ai pas pu anonymiser toutes les personnes vivantes.",
+      "llm_left": "Il vous reste environ {n} requêtes à l'IA ce mois-ci."
     },
     "colaborar": {
       "meta_title": "Contribuer | Godesia"

@@ -37,6 +37,9 @@
                 <span class="nav-icon">?</span> Preguntas no resueltas
                 <span class="nav-badge alert" id="badge-queries"></span>
             </a>
+            <a data-section="llm">
+                <span class="nav-icon">✦</span> IA (Gemini)
+            </a>
             <a data-section="geocoder">
                 <span class="nav-icon">⊕</span> Geocodificación
                 <span class="nav-badge" id="badge-geo"></span>
@@ -456,6 +459,58 @@
 
             <div id="tests-autoqa" style="display:none;margin-bottom:1rem;"></div>
             <div id="tests-list"></div>
+        </section>
+
+        <!-- IA (GEMINI) -->
+        <section id="s-llm" class="admin-section">
+            <h1 class="section-title">IA (Gemini)</h1>
+            <p class="section-subtitle">Respaldo con Gemini Flash Lite (tier gratuito) cuando el router no sabe responder.
+                Las personas vivas se envían anonimizadas. Cupo mensual por usuario; se renueva el día 1 (hora del Este de EE. UU.).</p>
+
+            <div class="toolbar">
+                <select id="llm-month" class="btn btn-secondary btn-sm" onchange="Llm.load()"></select>
+                <button class="btn btn-secondary btn-sm" onclick="Llm.load()">↻ Actualizar</button>
+                <span id="llm-configured" style="font-size:.8rem;margin-left:8px;"></span>
+            </div>
+
+            <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1rem;">
+                <div class="stat-card"><div class="stat-value" id="llm-used">—</div><div class="stat-label">Tokens gastados</div></div>
+                <div class="stat-card"><div class="stat-value" id="llm-pool">—</div><div class="stat-label">Bolsa gratuita del mes</div></div>
+                <div class="stat-card"><div class="stat-value" id="llm-questions">—</div><div class="stat-label">Consultas (ok / fallidas)</div></div>
+                <div class="stat-card"><div class="stat-value" id="llm-perq">—</div><div class="stat-label">Tokens por consulta (media)</div></div>
+            </div>
+            <div class="card" style="margin-bottom:1.25rem;">
+                <div style="display:flex;justify-content:space-between;font-size:.8rem;color:#5a5a4e;margin-bottom:6px;">
+                    <span id="llm-bar-label"></span><span id="llm-today"></span>
+                </div>
+                <div style="height:12px;background:#ece8dd;border-radius:6px;overflow:hidden;">
+                    <div id="llm-bar" style="height:100%;width:0;background:#2d4b33;transition:width .3s;"></div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom:1.25rem;">
+                <h2 class="card-title">Ajustes</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:end;">
+                    <label style="font-size:.8rem;">Cupo por usuario y mes (tokens)
+                        <input type="number" id="llm-set-user" min="0" step="1000" style="width:100%;padding:7px 10px;border:1px solid #c2c8bf;border-radius:8px;"></label>
+                    <label style="font-size:.8rem;">Bolsa global gratuita por mes (tokens)
+                        <input type="number" id="llm-set-pool" min="0" step="10000" style="width:100%;padding:7px 10px;border:1px solid #c2c8bf;border-radius:8px;"></label>
+                    <label style="font-size:.8rem;">Modelo
+                        <input type="text" id="llm-set-model" style="width:100%;padding:7px 10px;border:1px solid #c2c8bf;border-radius:8px;"></label>
+                    <label style="font-size:.8rem;display:flex;gap:6px;align-items:center;">
+                        <input type="checkbox" id="llm-set-enabled"> Ofrecer la IA a los usuarios</label>
+                </div>
+                <div style="margin-top:10px;">
+                    <button class="btn btn-primary btn-sm" onclick="Llm.saveSettings()">Guardar ajustes</button>
+                    <span id="llm-set-msg" style="margin-left:10px;font-size:.8rem;color:#2d4b33;"></span>
+                </div>
+                <p class="card-subtitle" id="llm-set-hint" style="margin-top:8px;"></p>
+            </div>
+
+            <h2 class="card-title">Por usuario</h2>
+            <div id="llm-users" style="margin-bottom:1.5rem;"></div>
+            <h2 class="card-title">Últimas consultas</h2>
+            <div id="llm-recent"></div>
         </section>
 
         <!-- CONFIGURACIÓ -->
@@ -1125,6 +1180,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="admin_cemeteries.js?v=20261011.1"></script>
-<script src="admin.js?v=20261025.1"></script>
+<script src="admin.js?v=20261031.1"></script>
 </body>
 </html>

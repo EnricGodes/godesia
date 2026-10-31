@@ -4,8 +4,6 @@ import json
 import re
 import sqlite3
 
-import anthropic
-
 from database import (
     find_person_by_name, get_related_person_ids, get_people_by_ids,
 )
@@ -32,93 +30,133 @@ El campo "people_mentioned" debe contener los IDs (formato @Ixx@) de TODAS las p
 IMPORTANTE: Responde SOLO con el JSON, sin markdown ni texto adicional."""
 
 
+def extract_people_from_question(conn, question):
+    """Personas cuyo nombre aparece en la pregunta (por palabras con mayúscula)."""
+    cleaned = re.sub(
+        r"\b(qui|que|quin|quina|quien|cual|como|com|es|és|la|el|de|del|d\'|va|ser|"
+        r"explica|conta|cuéntame|parla|habla|tell|compara|compare|"
+        r"vida|history|historia|relació|relación|entre|and|y|i)\b",
+        " ", question.lower(), flags=re.IGNORECASE
+    ).strip()
+    capitalized = re.findall(r"[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+)*", question)
+    results = []
+    for name in capitalized:
+        matches = find_person_by_name(conn, name)
+        if matches:
+            results.extend(matches)
+    if not results and len(cleaned) > 3:
+        for fragment in cleaned.split():
+            if len(fragment) > 3:
+                results.extend(find_person_by_name(conn, fragment))
+    seen = set()
+    unique = []
+    for r in results:
+        if r["id"] not in seen:
+            seen.add(r["id"])
+            unique.append(r)
+    return unique
+
+
+def collect_context_ids(conn, question, max_people=None):
+    """IDs relevantes: personas nombradas + 2 generaciones de parientes."""
+    all_ids = set()
+    for person in extract_people_from_question(conn, question):
+        all_ids.update(get_related_person_ids(conn, person["id"], generations=2))
+        if max_people and len(all_ids) >= max_people:
+            break
+    if not all_ids:
+        for word in [w for w in question.split() if len(w) > 3]:
+            for m in find_person_by_name(conn, word)[:3]:
+                all_ids.update(get_related_person_ids(conn, m["id"], generations=1))
+    if max_people and len(all_ids) > max_people:
+        all_ids = set(sorted(all_ids)[:max_people])
+    return all_ids
+
+
+class _PlainRefs:
+    """Sin anonimizar: nombre e ID reales."""
+    def ref(self, pid, name):
+        return name, pid
+
+    def is_living(self, pid):
+        return False
+
+
+def build_context(conn, person_ids, refs=None):
+    """Contexto compacto (una línea por persona).
+
+    `refs` decide cómo se nombra a cada persona (ref(id, nombre) → (nombre, id))
+    y quién es vivo (is_living(id)); de los vivos solo salen sexo, año de
+    nacimiento y relaciones. Sin `refs` → datos completos sin anonimizar.
+    """
+    refs = refs or _PlainRefs()
+    people = get_people_by_ids(conn, person_ids)
+    lines = []
+    for p in people:
+        living = refs.is_living(p["id"])
+        name, pid = refs.ref(p["id"], p["name"])
+        parts = ["[%s] %s" % (pid, name)]
+        if p.get("sex"):
+            parts.append("(%s)" % p["sex"])
+        if living:
+            if p.get("birth_year"):
+                parts.append("n.%s" % p["birth_year"])
+            parts.append("vivo")
+        else:
+            if p.get("birth_date"):
+                parts.append("n.%s en %s" % (p["birth_date"], p.get("birth_place") or "?"))
+            if p.get("death_date"):
+                death_info = "m.%s en %s" % (p["death_date"], p.get("death_place") or "?")
+                if p.get("death_cause"):
+                    death_info += " (%s)" % p["death_cause"]
+                parts.append(death_info)
+        if p.get("father_id"):
+            parts.append("padre:%s(%s)" % refs.ref(p["father_id"], p.get("father_name") or "?"))
+        if p.get("mother_id"):
+            parts.append("madre:%s(%s)" % refs.ref(p["mother_id"], p.get("mother_name") or "?"))
+        for s in p.get("spouses_list") or []:
+            sp = s["person"]
+            sp_text = "cónyuge:%s(%s)" % refs.ref(sp["id"], sp["name"])
+            if s.get("marriage_date") and not living and not refs.is_living(sp["id"]):
+                sp_text += " casados:%s" % s["marriage_date"]
+            parts.append(sp_text)
+        if p.get("children_list"):
+            kids = ", ".join("%s(%s)" % refs.ref(c["id"], c["name"]) for c in p["children_list"])
+            parts.append("hijos:[%s]" % kids)
+        if not living:
+            occs = ", ".join(o["title"] for o in p.get("occupations") or [] if o.get("title"))
+            if occs:
+                parts.append("oficio:%s" % occs)
+            addrs = []
+            for r in p.get("residences") or []:
+                a, c = r.get("address") or "", r.get("city") or ""
+                if a or c:
+                    addrs.append(("%s %s" % (a, c)).strip())
+            if addrs:
+                parts.append("residencias:%s" % "; ".join(addrs))
+            for note in (p.get("notes") or [])[:2]:
+                note = re.sub(r"<[^>]+>|https?://\S+|&\w+;", " ", note or "")
+                note = re.sub(r"\s+", " ", note).strip()
+                if not note:
+                    continue
+                if len(note) > 150:
+                    note = note[:150] + "..."
+                parts.append("nota:%s" % note)
+        lines.append(" | ".join(parts))
+    return "\n".join(lines)
+
+
 class QueryEngine:
     def __init__(self, db_conn):
+        import anthropic  # perezoso: el respaldo Gemini no lo necesita
         self.client = anthropic.Anthropic(timeout=120.0)
         self.conn = db_conn
 
     def _extract_names_from_question(self, question):
-        """Try to extract person names mentioned in the question."""
-        # Remove common question words
-        cleaned = re.sub(
-            r"\b(qui|que|quin|quina|quien|cual|como|com|es|és|la|el|de|del|d\'|va|ser|"
-            r"explica|conta|cuéntame|parla|habla|tell|compara|compare|"
-            r"vida|history|historia|relació|relación|entre|and|y|i)\b",
-            " ", question.lower(), flags=re.IGNORECASE
-        ).strip()
-        # Find potential names (capitalized words in original question)
-        capitalized = re.findall(r"[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+)*", question)
-        results = []
-        for name in capitalized:
-            matches = find_person_by_name(self.conn, name)
-            if matches:
-                results.extend(matches)
-        # Fallback: try cleaned fragments
-        if not results and len(cleaned) > 3:
-            for fragment in cleaned.split():
-                if len(fragment) > 3:
-                    matches = find_person_by_name(self.conn, fragment)
-                    results.extend(matches)
-        # Deduplicate
-        seen = set()
-        unique = []
-        for r in results:
-            if r["id"] not in seen:
-                seen.add(r["id"])
-                unique.append(r)
-        return unique
+        return extract_people_from_question(self.conn, question)
 
     def _build_targeted_context(self, person_ids):
-        """Build compact text context for only the specified people."""
-        people = get_people_by_ids(self.conn, person_ids)
-        lines = []
-        for p in people:
-            parts = ["[%s] %s" % (p["id"], p["name"])]
-            if p.get("sex"):
-                parts.append("(%s)" % p["sex"])
-            if p.get("birth_date"):
-                parts.append("n.%s en %s" % (p["birth_date"], p.get("birth_place", "?")))
-            if p.get("death_date"):
-                death_info = "m.%s en %s" % (p["death_date"], p.get("death_place", "?"))
-                if p.get("death_cause"):
-                    death_info += " (%s)" % p["death_cause"]
-                parts.append(death_info)
-            if p.get("father_name"):
-                parts.append("padre:%s(%s)" % (p["father_name"], p.get("father_id", "")))
-            if p.get("mother_name"):
-                parts.append("madre:%s(%s)" % (p["mother_name"], p.get("mother_id", "")))
-            if p.get("spouses_list"):
-                for s in p["spouses_list"]:
-                    sp = s["person"]
-                    sp_text = "cónyuge:%s(%s)" % (sp["name"], sp["id"])
-                    if s.get("marriage_date"):
-                        sp_text += " casados:%s" % s["marriage_date"]
-                    parts.append(sp_text)
-            if p.get("children_list"):
-                kids = ", ".join("%s(%s)" % (c["name"], c["id"]) for c in p["children_list"])
-                parts.append("hijos:[%s]" % kids)
-            if p.get("occupations"):
-                occs = ", ".join(o["title"] for o in p["occupations"] if o.get("title"))
-                if occs:
-                    parts.append("oficio:%s" % occs)
-            if p.get("residences"):
-                addrs = []
-                for r in p["residences"]:
-                    a = r.get("address", "")
-                    c = r.get("city", "")
-                    if a or c:
-                        addrs.append("%s %s" % (a, c))
-                if addrs:
-                    parts.append("residencias:%s" % "; ".join(addrs))
-            if p.get("notes"):
-                for note in p["notes"][:2]:
-                    if len(note) > 150:
-                        note = note[:150] + "..."
-                    parts.append("nota:%s" % note)
-
-            lines.append(" | ".join(parts))
-
-        return "\n".join(lines)
+        return build_context(self.conn, person_ids)
 
     LANG_NAMES = {"es": "castellano", "ca": "catalán", "en": "inglés",
                   "fr": "francés", "de": "alemán"}

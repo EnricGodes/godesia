@@ -16,7 +16,7 @@ import shutil
 from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import PlainTextResponse, RedirectResponse, Response, StreamingResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -42,6 +42,9 @@ import auth
 from kinship import kinship_label
 import contributions
 import notifications
+import gemini_client
+import llm_anonymizer
+import llm_quota
 from geocode_utils import normalize_place, build_queries, geocode_with_cache
 
 BASE_DIR = Path(__file__).parent.parent
@@ -183,6 +186,7 @@ async def startup():
         print("Motor LLM inicializado")
     else:
         print("ANTHROPIC_API_KEY no configurada. Solo consultas directas disponibles.")
+    print(f"Respaldo IA (Gemini): {'configurado' if gemini_client.is_configured() else 'sin GEMINI_API_KEY'}")
 
 
 class QueryRequest(BaseModel):
@@ -218,22 +222,112 @@ async def query(req: QueryRequest, request: Request):
     # Check if router couldn't resolve the question (flag estructural,
     # independiente del idioma de la respuesta)
     if result and result.get("unresolved"):
-        log_unresolved_query(req.question, lang, getattr(request.state, "user", None))
+        user = getattr(request.state, "user", None)
+        log_unresolved_query(req.question, lang, user)
+        # Respaldo con IA (Gemini, tier gratuito): se OFRECE, el usuario confirma.
+        if _llm_available():
+            quota = llm_quota.status(db_conn, user)
+            result["llm"] = {"available": quota["can_ask"], "quota": quota}
+            if quota["can_ask"]:
+                result["requires_llm"] = True
 
     return result
+
+
+def _llm_available():
+    return bool(db_conn) and gemini_client.is_configured() and llm_quota.is_enabled(db_conn)
+
+
+@app.get("/api/query/quota")
+async def query_quota(request: Request):
+    """Cupo mensual de consultas a la IA del usuario actual."""
+    if not _llm_available():
+        return {"available": False}
+    return {"available": True, **llm_quota.status(db_conn, getattr(request.state, "user", None))}
 
 
 @app.post("/api/query/confirm")
-async def query_confirm(req: ConfirmRequest):
-    """Ejecuta consulta LLM tras confirmación del usuario."""
-    if not engine:
-        raise HTTPException(
-            status_code=503,
-            detail="Motor LLM no disponible. Configura ANTHROPIC_API_KEY."
-        )
-    result = engine.query(req.question, req.history, lang=_lang_param(req.lang))
-    result["source"] = "llm"
+async def query_confirm(req: ConfirmRequest, request: Request):
+    """Consulta a Gemini (vivos anonimizados) tras confirmación del usuario."""
+    if not _llm_available():
+        raise HTTPException(status_code=503, detail="llm_unavailable")
+    user = getattr(request.state, "user", None)
+    lang = _lang_param(req.lang)
+    question = (req.question or "").strip()[:1000]
+    if not question:
+        raise HTTPException(status_code=400, detail="empty")
+    quota = llm_quota.status(db_conn, user)
+    if not quota["can_ask"]:
+        llm_quota.record(db_conn, user, question, lang, None, None, "blocked")
+        return JSONResponse(status_code=402, content={"error": "quota_exhausted", "quota": quota})
+    model = llm_quota.setting(db_conn, "gemini_model") or gemini_client.DEFAULT_MODEL
+    import asyncio
+    try:
+        # BD en este hilo (la conexión no se comparte); solo la red va a otro
+        # hilo para no bloquear el servidor mientras Gemini piensa.
+        anon, system, contents = llm_anonymizer.build_request(db_conn, question, req.history, lang)
+        text, usage = await asyncio.to_thread(gemini_client.generate, system, contents, model)
+        result = llm_anonymizer.finish(db_conn, anon, text)
+    except llm_anonymizer.AnonymizationError as e:
+        llm_quota.record(db_conn, user, question, lang, model, None, "anon_blocked", str(e))
+        return JSONResponse(status_code=422, content={"error": "anonymization", "quota": quota})
+    except gemini_client.GeminiRateLimited as e:
+        llm_quota.record(db_conn, user, question, lang, model, None, "rate_limited", str(e))
+        return JSONResponse(status_code=429, content={"error": "rate_limited", "quota": quota})
+    except gemini_client.GeminiError as e:
+        # Si Google llegó a contar tokens (respuesta vacía/bloqueada), se descuentan.
+        usage = getattr(e, "usage", None)
+        llm_quota.record(db_conn, user, question, lang, model, usage, "error", str(e))
+        return JSONResponse(status_code=502, content={"error": "llm_error",
+                                                      "quota": llm_quota.status(db_conn, user)})
+    llm_quota.record(db_conn, user, question, lang, model, usage, "ok",
+                     anonymized=result.pop("anonymized_living", 0))
+    # Texto del modelo → HTML seguro + enlaces a las fichas como el router.
+    import html as _html
+    answer = _html.escape(result["answer"], quote=False)
+    if router:
+        try:
+            answer = router._postprocess_answer(answer, result["people_mentioned"])
+        except Exception:
+            pass
+    result["answer"] = answer
+    result["usage"] = {"total_tokens": usage.get("total", 0)}
+    result["quota"] = llm_quota.status(db_conn, user)
     return result
+
+
+@app.get("/api/admin/llm/usage")
+async def admin_llm_usage(month: str = ""):
+    if not db_conn:
+        raise HTTPException(status_code=503, detail="BD no inicializada")
+    if month and not re.fullmatch(r"\d{4}-\d{2}", month):
+        raise HTTPException(status_code=400, detail="month = YYYY-MM")
+    users = []
+    try:
+        conn = auth._connect()
+        try:
+            users = [dict(r) for r in conn.execute(
+                "SELECT id, name, email FROM users WHERE status = 'approved' ORDER BY name")]
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"[llm] no se pudo leer auth.db: {e}")
+    report = llm_quota.usage_report(db_conn, month or None, users)
+    report["configured"] = gemini_client.is_configured()
+    return report
+
+
+class LlmBudgetBody(BaseModel):
+    user_id: str
+    monthly_tokens: Optional[int] = None   # None → vuelve al cupo por defecto
+
+
+@app.post("/api/admin/llm/user-budget")
+async def admin_llm_user_budget(body: LlmBudgetBody):
+    if body.monthly_tokens is not None and body.monthly_tokens < 0:
+        raise HTTPException(status_code=400, detail="monthly_tokens >= 0")
+    llm_quota.set_user_budget(body.user_id, body.monthly_tokens)
+    return {"ok": True}
 
 
 @app.get("/api/birthdays")
@@ -930,6 +1024,7 @@ async def api_get_settings():
         "active_languages": i18n_pages.get_active_languages(),
         "notify_email": get_setting(db_conn, "notify_email", notifications.DEFAULT_NOTIFY_EMAIL),
         **{k: get_setting(db_conn, k, v) for k, v in palazuelos_routes.MH_DEFAULTS.items()},
+        **{k: get_setting(db_conn, k, v) for k, v in llm_quota.DEFAULTS.items()},
     }
 
 
@@ -942,7 +1037,13 @@ class SettingBody(BaseModel):
 async def api_post_settings(body: SettingBody):
     if not db_conn:
         raise HTTPException(status_code=503, detail="BD no inicialitzada")
-    allowed_keys = {"tree_default_person", "active_languages", "notify_email", *palazuelos_routes.MH_DEFAULTS}
+    allowed_keys = {"tree_default_person", "active_languages", "notify_email",
+                    *palazuelos_routes.MH_DEFAULTS, *llm_quota.DEFAULTS}
+    if body.key in ("gemini_user_monthly_tokens", "gemini_pool_monthly_tokens"):
+        if not re.fullmatch(r"\d{1,10}", (body.value or "").strip()):
+            raise HTTPException(status_code=400, detail="Debe ser un número entero de tokens")
+    if body.key == "gemini_model" and not re.fullmatch(r"[a-z0-9.\-]{3,80}", (body.value or "").strip()):
+        raise HTTPException(status_code=400, detail="Modelo no válido")
     if body.key not in allowed_keys:
         raise HTTPException(status_code=400, detail=f"Clau no permesa: {body.key}")
     if body.key == "notify_email":
