@@ -30,6 +30,23 @@ El campo "people_mentioned" debe contener los IDs (formato @Ixx@) de TODAS las p
 IMPORTANTE: Responde SOLO con el JSON, sin markdown ni texto adicional."""
 
 
+_NAME_STOPWORDS = {
+    "que", "qui", "quin", "quina", "quins", "quines", "quien", "quienes", "cual", "cuales",
+    "como", "com", "donde", "on", "cuando", "quan", "cuanto", "cuantos", "cuantas", "quant",
+    "quants", "quantes", "por", "per", "perque", "porque", "who", "what", "which", "where",
+    "when", "how", "why", "qui", "quoi", "comment", "wer", "was", "wie", "wo", "wann",
+    "la", "el", "els", "les", "los", "las", "familia", "family", "famille", "dime", "explica",
+    "cuentame", "parla", "habla", "tell", "the", "en", "a", "de", "del", "y", "i", "and",
+    "hay", "hi", "tenia", "tenía", "era", "es", "fue", "va",
+}
+
+
+def _fold_word(w):
+    import unicodedata
+    return "".join(ch for ch in unicodedata.normalize("NFD", w.lower())
+                   if unicodedata.category(ch) != "Mn")
+
+
 def extract_people_from_question(conn, question):
     """Personas cuyo nombre aparece en la pregunta (por palabras con mayúscula)."""
     cleaned = re.sub(
@@ -39,11 +56,24 @@ def extract_people_from_question(conn, question):
         " ", question.lower(), flags=re.IGNORECASE
     ).strip()
     capitalized = re.findall(r"[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+(?:\s+[A-ZÁÉÍÓÚÀÈÌÒÙÑÇ][a-záéíóúàèìòùñç]+)*", question)
-    results = []
+    # Fuera interrogativos y palabras comunes con mayúscula inicial («Qué»
+    # casaba con Marqués, Quemades… y llenaba el contexto). Los nombres de
+    # varias palabras van primero; si alguno casa, se ignoran las sueltas.
+    candidates = []
     for name in capitalized:
+        words = [w for w in name.split() if _fold_word(w) not in _NAME_STOPWORDS]
+        if words and (len(words) > 1 or len(words[0]) >= 4):
+            candidates.append(" ".join(words))
+    candidates.sort(key=lambda n: -len(n.split()))
+    results = []
+    multi_hit = False
+    for name in candidates:
+        if multi_hit and len(name.split()) == 1:
+            break
         matches = find_person_by_name(conn, name)
         if matches:
             results.extend(matches)
+            multi_hit = multi_hit or len(name.split()) > 1
     if not results and len(cleaned) > 3:
         for fragment in cleaned.split():
             if len(fragment) > 3:
@@ -96,6 +126,10 @@ def build_context(conn, person_ids, refs=None):
         living = refs.is_living(p["id"])
         name, pid = refs.ref(p["id"], p["name"])
         parts = ["[%s] %s" % (pid, name)]
+        if living and hasattr(refs, "extra"):
+            extra = refs.extra(p["id"])
+            if extra:
+                parts.append(extra)
         if p.get("sex"):
             parts.append("(%s)" % p["sex"])
         if living:

@@ -34,6 +34,7 @@ ANON_NOTE = (
     "NOTA DE PRIVACIDAD: las personas vivas aparecen anonimizadas como "
     "«Persona A», «Persona B»… con IDs @X1@, @X2@… Refiérete a ellas EXACTAMENTE "
     "con ese alias (sin inventar nombres) e incluye su ID en people_mentioned. "
+    "Si un vivo lleva «apellidos: X», es de la familia X por la que se pregunta. "
     "No escribas IDs (@I…@, @X…@) dentro del texto de answer: solo en people_mentioned."
 )
 
@@ -101,6 +102,8 @@ class Anonymizer:
         self._back = {}        # alias_id → real id
         self._names = {}       # real id → real name
         self._variants = []    # (folded variant, real id), más largas primero
+        self._surnames = {}    # real id → apellidos (para marcar los citados)
+        self._question_surnames = {}
         self._build_variants()
 
     def _build_variants(self):
@@ -117,6 +120,7 @@ class Anonymizer:
         variants = {}
         for r in rows:
             self._names[r["id"]] = _clean(r["name"])
+            self._surnames[r["id"]] = _clean(r["surname"])
             cands = {_clean(r["name"]), _clean("%s %s" % (r["given_name"] or "", r["surname"] or ""))}
             surname1 = (r["surname"] or "").split(" ")[0]
             short = _clean("%s %s" % (r["given_name"] or "", surname1))
@@ -129,6 +133,28 @@ class Anonymizer:
                 if len(c) >= 6 and " " in c:
                     variants[_fold(c)] = r["id"]
         self._variants = sorted(variants.items(), key=lambda kv: -len(kv[0]))
+
+    def note_question(self, text):
+        """Apellidos de vivos que la pregunta YA cita textualmente.
+
+        Se marcan junto al alias para que el modelo sepa a qué familia se
+        refiere la pregunta, sin enviar nada que no esté ya en ella.
+        """
+        folded = _fold(text or "")
+        self._question_surnames = {}
+        for pid, surname in self._surnames.items():
+            if len(surname) < 4:
+                continue
+            words = surname.split(" ")
+            # Apellidos completos («Mestre Campi») o el primero suelto si es largo.
+            for cand in (surname, words[0]):
+                if len(cand) >= 4 and re.search(r"(?<!\w)%s(?!\w)" % re.escape(_fold(cand)), folded):
+                    self._question_surnames[pid] = cand
+                    break
+
+    def extra(self, pid):
+        s = self._question_surnames.get(pid)
+        return "apellidos: %s" % s if s else ""
 
     # ── API usada por build_context ──
     def is_living(self, pid):
@@ -186,6 +212,7 @@ class Anonymizer:
 def build_request(conn, question, history=None, lang="es"):
     """Prepara (anonimizador, system, contents) listos para enviar a Gemini."""
     anon = Anonymizer(conn)
+    anon.note_question(question)
     ids = collect_context_ids(conn, question, max_people=MAX_CONTEXT_PEOPLE)
     if ids:
         context = anon.scrub(build_context(conn, ids, refs=anon))
