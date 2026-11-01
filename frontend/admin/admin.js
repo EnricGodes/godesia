@@ -2738,9 +2738,21 @@ const DocClassifier = {
             this._offset += d.items.length;
             document.getElementById('clf-load-more').style.display =
                 this._offset < this._total ? '' : 'none';
+            this._checkPhotoSession();
         } catch (e) {
             if (!append) el.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
         }
+    },
+
+    // /admin es público pero /photos exige sesión de usuario aprobado: sin ella
+    // todas las miniaturas dan 401 y la cola parece vacía.
+    async _checkPhotoSession() {
+        const el = document.getElementById('clf-no-session');
+        if (!el) return;
+        try {
+            const r = await fetch('/api/auth/me', { credentials: 'same-origin' });
+            el.style.display = r.ok ? 'none' : '';
+        } catch (e) { /* sin red: no decir nada */ }
     },
 
     _renderCard(item) {
