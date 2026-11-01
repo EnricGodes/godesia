@@ -2661,6 +2661,65 @@ async def photo_info(filename: str):
     return {"photo": dict(row) if row else None, "tags": tags, "blocklist": blocked, "on_disk": on_disk}
 
 
+def _missing_photo_rows(db, photos_dir: Path):
+    on_disk = {p.name for p in photos_dir.iterdir()} if photos_dir.exists() else set()
+    return [dict(r) for r in db.execute(
+        "SELECT filename, url FROM photos WHERE url IS NOT NULL AND url != '' ORDER BY id")
+        if r["filename"] not in on_disk]
+
+
+@router.get("/photos/missing")
+async def photos_missing():
+    """Fotos de la tabla `photos` cuyo fichero no está en el volumen (p. ej. tras
+    una importación Rápida o «sin descarga», que no bajan ficheros)."""
+    rows = _missing_photo_rows(_db(), _base_dir / "data" / "photos")
+    return {"count": len(rows), "files": [r["filename"] for r in rows[:200]]}
+
+
+@router.post("/photos/download-missing")
+async def photos_download_missing(limit: int = 300):
+    """Descarga desde el CDN de MyHeritage las fotos que faltan en el volumen,
+    sin reimportar el GEDCOM. Los enlaces del CDN caducan: si fallan, hay que
+    reimportar un godes.ged reciente."""
+    import asyncio  # noqa: PLC0415
+    import urllib.request  # noqa: PLC0415
+    from concurrent.futures import ThreadPoolExecutor  # noqa: PLC0415
+
+    photos_dir = _base_dir / "data" / "photos"
+    photos_dir.mkdir(parents=True, exist_ok=True)
+    rows = _missing_photo_rows(_db(), photos_dir)
+    todo = rows[:max(1, min(limit, 1000))]
+
+    def _fetch(row):
+        name = Path(row["filename"]).name  # nunca subdirectorios
+        if not name or name.startswith("_"):
+            return name, "nombre no válido"
+        try:
+            req = urllib.request.Request(row["url"], headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = resp.read()
+            if len(data) < 100:
+                return name, "respuesta vacía"
+            tmp = photos_dir / (name + ".part")
+            tmp.write_bytes(data)
+            tmp.replace(photos_dir / name)
+            return name, None
+        except Exception as e:  # noqa: BLE001
+            return name, str(e)[:200]
+
+    def _run():
+        with ThreadPoolExecutor(max_workers=6) as ex:
+            return list(ex.map(_fetch, todo))
+
+    results = await asyncio.to_thread(_run)
+    errors = [{"filename": n, "error": err} for n, err in results if err]
+    return {
+        "downloaded": len(results) - len(errors),
+        "errors": errors,
+        "remaining": len(rows) - len(results) + len(errors),
+    }
+
+
 class DeleteOrphansBody(BaseModel):
     filenames: list
     dry_run: bool = True

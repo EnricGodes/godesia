@@ -2739,6 +2739,7 @@ const DocClassifier = {
             document.getElementById('clf-load-more').style.display =
                 this._offset < this._total ? '' : 'none';
             this._checkPhotoSession();
+            this._checkMissing();
         } catch (e) {
             if (!append) el.innerHTML = `<div class="empty-state">Error: ${esc(e.message)}</div>`;
         }
@@ -2753,6 +2754,40 @@ const DocClassifier = {
             const r = await fetch('/api/auth/me', { credentials: 'same-origin' });
             el.style.display = r.ok ? 'none' : '';
         } catch (e) { /* sin red: no decir nada */ }
+    },
+
+    // Fotos en la BD sin fichero en el volumen (la importación Rápida y la
+    // «sin descarga» no bajan ficheros) → botón para bajarlas sin reimportar.
+    async _checkMissing() {
+        const btn = document.getElementById('clf-btn-missing');
+        if (!btn) return;
+        try {
+            const d = await apiFetch('/api/admin/photos/missing');
+            btn.textContent = `⬇ Descargar ${d.count} fotos que faltan`;
+            btn.style.display = d.count > 0 ? '' : 'none';
+        } catch (e) { btn.style.display = 'none'; }
+    },
+
+    async downloadMissing() {
+        const btn = document.getElementById('clf-btn-missing');
+        btn.disabled = true;
+        btn.textContent = 'Descargando…';
+        try {
+            const d = await apiFetch('/api/admin/photos/download-missing', { method: 'POST' });
+            let msg = `${d.downloaded} descargadas`;
+            if (d.errors.length) {
+                msg += `, ${d.errors.length} con error (¿enlace caducado? reimporta un godes.ged reciente)`;
+                console.warn('Fotos no descargadas', d.errors);
+            }
+            this._lastMissingMsg = msg;
+        } catch (e) {
+            this._lastMissingMsg = 'Error: ' + e.message;
+        } finally {
+            btn.disabled = false;
+            await this.loadPendingQueue();
+            const c = document.getElementById('clf-queue-count');
+            c.textContent += ' · ' + this._lastMissingMsg;
+        }
     },
 
     _renderCard(item) {

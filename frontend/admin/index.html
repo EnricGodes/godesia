@@ -743,6 +743,8 @@
             <div class="toolbar">
                 <span style="font-size:.82rem;color:#727971;" id="clf-queue-count">—</span>
                 <div class="toolbar-right">
+                    <button class="btn btn-secondary btn-sm" id="clf-btn-missing" style="display:none;"
+                            onclick="DocClassifier.downloadMissing()"></button>
                     <button class="btn btn-secondary btn-sm" onclick="DocClassifier.loadPendingQueue()">↻ Actualizar</button>
                 </div>
             </div>
@@ -1184,6 +1186,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="admin_cemeteries.js?v=20261011.1"></script>
-<script src="admin.js?v=20261101.1"></script>
+<script src="admin.js?v=20261101.2"></script>
 </body>
 </html>
