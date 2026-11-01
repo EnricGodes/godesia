@@ -2668,6 +2668,26 @@ def _missing_photo_rows(db, photos_dir: Path):
         if r["filename"] not in on_disk]
 
 
+def _fresh_urls_from_geds(wanted: set) -> dict:
+    """filename → URL de las líneas `FILE https://…/<filename>` de godes.ged y
+    palazuelos.ged del volumen (el más nuevo gana)."""
+    gdir = _base_dir / "data" / "photos" / "_gedcom"
+    geds = [p for p in (gdir / "palazuelos.ged", _base_dir / "docs" / "palazuelos.ged", gdir / "godes.ged")
+            if p.exists()]
+    geds.sort(key=lambda p: p.stat().st_mtime)  # el último en escribir gana
+    found = {}
+    for p in geds:
+        with p.open(encoding="utf-8", errors="replace") as fh:
+            for line in fh:
+                if " FILE http" not in line:
+                    continue
+                url = line.split(" FILE ", 1)[1].strip()
+                name = url.rsplit("/", 1)[-1]
+                if name in wanted:
+                    found[name] = url
+    return found
+
+
 @router.get("/photos/missing")
 async def photos_missing():
     """Fotos de la tabla `photos` cuyo fichero no está en el volumen (p. ej. tras
@@ -2687,8 +2707,22 @@ async def photos_download_missing(limit: int = 300):
 
     photos_dir = _base_dir / "data" / "photos"
     photos_dir.mkdir(parents=True, exist_ok=True)
-    rows = _missing_photo_rows(_db(), photos_dir)
+    db = _db()
+    rows = _missing_photo_rows(db, photos_dir)
     todo = rows[:max(1, min(limit, 1000))]
+
+    # Los enlaces del CDN caducan (~3 semanas). Si la BD guarda uno viejo (p. ej.
+    # se importó godes.ged antes de subir el palazuelos.ged nuevo), se usa el
+    # enlace vigente de los GEDCOM del volumen, y se guarda en la BD.
+    if todo:
+        wanted = {r["filename"] for r in todo}
+        fresh = await asyncio.to_thread(_fresh_urls_from_geds, wanted)
+        for r in todo:
+            u = fresh.get(r["filename"])
+            if u and u != r["url"]:
+                r["url"] = u
+                db.execute("UPDATE photos SET url = ? WHERE filename = ?", (u, r["filename"]))
+        db.commit()
 
     def _fetch(row):
         name = Path(row["filename"]).name  # nunca subdirectorios
